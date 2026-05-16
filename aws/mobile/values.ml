@@ -214,6 +214,7 @@ module Resource =
       let type_ =
         (Option.map ~f:ResourceType.of_xml) (Xml.child xml_arg0 "type") in
       make ?attributes ?feature ?arn ?name ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "attributes" Attributes.of_json in
       let feature = field_map json "feature" Feature.of_json in
@@ -462,6 +463,7 @@ module ProjectSummary =
       let name =
         (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "name") in
       make ?projectId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectId = field_map json "projectId" ProjectId.of_json in
       let name = field_map json "name" ProjectName.of_json in
@@ -521,6 +523,7 @@ module BundleDetails =
         (Option.map ~f:BundleId.of_xml) (Xml.child xml_arg0 "bundleId") in
       make ?availablePlatforms ?iconUrl ?description ?version ?title
         ?bundleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availablePlatforms =
         field_map json "availablePlatforms" Platforms.of_json in
@@ -547,6 +550,7 @@ module AccountActionRequiredException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -566,6 +570,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -585,6 +590,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -612,6 +618,7 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       make ?message ?retryAfterSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let retryAfterSeconds =
@@ -633,6 +640,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -702,6 +710,7 @@ module ProjectDetails =
         (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "name") in
       make ?resources ?consoleUrl ?lastUpdatedDate ?createdDate ?state
         ?region ?projectId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resources = field_map json "resources" Resources.of_json in
       let consoleUrl = field_map json "consoleUrl" ConsoleUrl.of_json in
@@ -736,6 +745,7 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       make ?message ?retryAfterSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let retryAfterSeconds =
@@ -765,6 +775,7 @@ module TooManyRequestsException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       make ?message ?retryAfterSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let retryAfterSeconds =
@@ -786,6 +797,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1048,6 +1060,7 @@ module UpdateProjectResult =
       let details =
         (Option.map ~f:ProjectDetails.of_xml) (Xml.child xml_arg0 "details") in
       make ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" ProjectDetails.of_json in
       make ?details ()
@@ -1064,6 +1077,13 @@ module UpdateProjectRequest =
       projectId: ProjectId.t [@ocaml.doc "Unique project identifier."]}
     let context_ = "UpdateProjectRequest"
     let make ?contents = fun ~projectId -> fun () -> { contents; projectId }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?contents:(Some pipe)
+            ~projectId:(ProjectId.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "projectId")) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("contents", (Option.map x.contents ~f:Contents.to_value));
@@ -1076,6 +1096,7 @@ module UpdateProjectRequest =
       let contents =
         (Option.map ~f:Contents.of_xml) (Xml.child xml_arg0 "contents") in
       make ~projectId ?contents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectId = field_map_exn json "projectId" ProjectId.of_json in
       let contents = field_map json "contents" Contents.of_json in
@@ -1167,6 +1188,7 @@ module ListProjectsResult =
         (Option.map ~f:ProjectSummaries.of_xml)
           (Xml.child xml_arg0 "projects") in
       make ?nextToken ?projects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let projects = field_map json "projects" ProjectSummaries.of_json in
@@ -1197,6 +1219,7 @@ module ListProjectsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -1290,6 +1313,7 @@ module ListBundlesResult =
       let bundleList =
         (Option.map ~f:BundleList.of_xml) (Xml.child xml_arg0 "bundleList") in
       make ?nextToken ?bundleList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let bundleList = field_map json "bundleList" BundleList.of_json in
@@ -1320,6 +1344,7 @@ module ListBundlesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -1430,6 +1455,7 @@ module ExportProjectResult =
       let downloadUrl =
         (Option.map ~f:DownloadUrl.of_xml) (Xml.child xml_arg0 "downloadUrl") in
       make ?snapshotId ?shareUrl ?downloadUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "snapshotId" SnapshotId.of_json in
       let shareUrl = field_map json "shareUrl" ShareUrl.of_json in
@@ -1454,6 +1480,7 @@ module ExportProjectRequest =
         ProjectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectId = field_map_exn json "projectId" ProjectId.of_json in
       make ~projectId ()
@@ -1550,6 +1577,7 @@ module ExportBundleResult =
       let downloadUrl =
         (Option.map ~f:DownloadUrl.of_xml) (Xml.child xml_arg0 "downloadUrl") in
       make ?downloadUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downloadUrl = field_map json "downloadUrl" DownloadUrl.of_json in
       make ?downloadUrl ()
@@ -1582,6 +1610,7 @@ module ExportBundleRequest =
       let bundleId =
         BundleId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bundleId") in
       make ?platform ?projectId ~bundleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platform = field_map json "platform" Platform.of_json in
       let projectId = field_map json "projectId" ProjectId.of_json in
@@ -1677,6 +1706,7 @@ module DescribeProjectResult =
       let details =
         (Option.map ~f:ProjectDetails.of_xml) (Xml.child xml_arg0 "details") in
       make ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" ProjectDetails.of_json in
       make ?details ()
@@ -1707,6 +1737,7 @@ module DescribeProjectRequest =
         ProjectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?syncFromResources ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let syncFromResources =
         field_map json "syncFromResources" Boolean.of_json in
@@ -1804,6 +1835,7 @@ module DescribeBundleResult =
       let details =
         (Option.map ~f:BundleDetails.of_xml) (Xml.child xml_arg0 "details") in
       make ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" BundleDetails.of_json in
       make ?details ()
@@ -1824,6 +1856,7 @@ module DescribeBundleRequest =
       let bundleId =
         BundleId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bundleId") in
       make ~bundleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bundleId = field_map_exn json "bundleId" BundleId.of_json in
       make ~bundleId ()
@@ -1922,6 +1955,7 @@ module DeleteProjectResult =
         (Option.map ~f:Resources.of_xml)
           (Xml.child xml_arg0 "deletedResources") in
       make ?orphanedResources ?deletedResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orphanedResources =
         field_map json "orphanedResources" Resources.of_json in
@@ -1947,6 +1981,7 @@ module DeleteProjectRequest =
         ProjectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectId = field_map_exn json "projectId" ProjectId.of_json in
       make ~projectId ()
@@ -2051,6 +2086,7 @@ module CreateProjectResult =
       let details =
         (Option.map ~f:ProjectDetails.of_xml) (Xml.child xml_arg0 "details") in
       make ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" ProjectDetails.of_json in
       make ?details ()
@@ -2075,6 +2111,20 @@ module CreateProjectRequest =
       fun ?region ->
         fun ?contents ->
           fun ?snapshotId -> fun () -> { name; region; contents; snapshotId }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ?name:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "name") ~f:ProjectName.of_string)
+            ?region:(Option.map
+                       ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                          "region") ~f:ProjectRegion.of_string)
+            ?contents:(Some pipe)
+            ?snapshotId:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "snapshotId") ~f:SnapshotId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:ProjectName.to_value));
@@ -2092,6 +2142,7 @@ module CreateProjectRequest =
       let name =
         (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "name") in
       make ?snapshotId ?contents ?region ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "snapshotId" SnapshotId.of_json in
       let contents = field_map json "contents" Contents.of_json in

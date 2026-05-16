@@ -54,6 +54,7 @@ module NetworkInterface =
         (Option.map ~f:NetworkInterfaceId.of_xml)
           (Xml.child xml_arg0 "NetworkInterfaceId") in
       make ?networkInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaceId =
         field_map json "NetworkInterfaceId" NetworkInterfaceId.of_json in
@@ -378,6 +379,7 @@ module Endpoint =
       make ?customerOwnedIpv4Pool ?accessType ?securityGroupId ?subnetId
         ?vpcId ?networkInterfaces ?creationTime ?status ?cidrBlock
         ?outpostsId ?endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerOwnedIpv4Pool =
         field_map json "CustomerOwnedIpv4Pool" CustomerOwnedIpv4Pool.of_json in
@@ -412,6 +414,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -454,6 +457,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -494,6 +498,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -512,6 +517,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -563,6 +569,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -646,6 +653,7 @@ module ListSharedEndpointsResult =
       let endpoints =
         (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "Endpoints") in
       make ?nextToken ?endpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let endpoints = field_map json "Endpoints" Endpoints.of_json in
@@ -684,6 +692,7 @@ module ListSharedEndpointsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~outpostId ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -769,6 +778,7 @@ module ListEndpointsResult =
       let endpoints =
         (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "Endpoints") in
       make ?nextToken ?endpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let endpoints = field_map json "Endpoints" Endpoints.of_json in
@@ -799,6 +809,7 @@ module ListEndpointsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -828,6 +839,7 @@ module DeleteEndpointRequest =
         EndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       make ~outpostId ~endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
       let endpointId = field_map_exn json "EndpointId" EndpointId.of_json in
@@ -913,6 +925,7 @@ module CreateEndpointResult =
       let endpointArn =
         (Option.map ~f:EndpointArn.of_xml) (Xml.child xml_arg0 "EndpointArn") in
       make ?endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointArn = field_map json "EndpointArn" EndpointArn.of_json in
       make ?endpointArn ()
@@ -978,6 +991,7 @@ module CreateEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ?customerOwnedIpv4Pool ?accessType ~securityGroupId ~subnetId
         ~outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerOwnedIpv4Pool =
         field_map json "CustomerOwnedIpv4Pool" CustomerOwnedIpv4Pool.of_json in

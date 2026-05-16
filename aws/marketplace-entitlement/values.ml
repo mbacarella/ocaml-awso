@@ -115,6 +115,7 @@ module EntitlementValue =
       let integerValue =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "IntegerValue") in
       make ?stringValue ?booleanValue ?doubleValue ?integerValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringValue = field_map json "StringValue" String_.of_json in
       let booleanValue = field_map json "BooleanValue" Boolean.of_json in
@@ -239,6 +240,7 @@ module Entitlement =
         (Option.map ~f:ProductCode.of_xml) (Xml.child xml_arg0 "ProductCode") in
       make ?expirationDate ?value ?customerIdentifier ?dimension ?productCode
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
       let value = field_map json "Value" EntitlementValue.of_json in
@@ -354,6 +356,7 @@ module InternalServiceErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -373,6 +376,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -391,6 +395,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -500,6 +505,7 @@ module GetEntitlementsResult =
         (Option.map ~f:EntitlementList.of_xml)
           (Xml.child xml_arg0 "Entitlements") in
       make ?nextToken ?entitlements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in
       let entitlements =
@@ -550,6 +556,7 @@ module GetEntitlementsRequest =
         ProductCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProductCode") in
       make ?maxResults ?nextToken ?filter ~productCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" Integer.of_json in
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in

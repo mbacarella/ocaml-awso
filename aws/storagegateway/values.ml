@@ -284,6 +284,7 @@ module AutomaticTapeCreationRule =
           (Xml.child_exn ~context:context_ xml_arg0 "TapeBarcodePrefix") in
       make ?worm ~minimumNumTapes ~tapeSizeInBytes ~poolId ~tapeBarcodePrefix
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let worm = field_map json "Worm" Boolean__lc1.of_json in
       let minimumNumTapes =
@@ -396,6 +397,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -524,6 +526,7 @@ module FileSystemAssociationStatusDetail =
         (Option.map ~f:FileSystemAssociationSyncErrorCode.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode =
         field_map json "ErrorCode" FileSystemAssociationSyncErrorCode.of_json in
@@ -1583,6 +1586,7 @@ module DeviceiSCSIAttributes =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "TargetARN") in
       make ?chapEnabled ?networkInterfacePort ?networkInterfaceId ?targetARN
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chapEnabled = field_map json "ChapEnabled" Boolean__lc1.of_json in
       let networkInterfacePort =
@@ -1863,6 +1867,7 @@ module VolumeiSCSIAttributes =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "TargetARN") in
       make ?chapEnabled ?lunNumber ?networkInterfacePort ?networkInterfaceId
         ?targetARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chapEnabled = field_map json "ChapEnabled" Boolean__lc1.of_json in
       let lunNumber = field_map json "LunNumber" PositiveIntObject.of_json in
@@ -1942,6 +1947,7 @@ module CacheAttributes =
         (Option.map ~f:CacheStaleTimeoutInSeconds.of_xml)
           (Xml.child xml_arg0 "CacheStaleTimeoutInSeconds") in
       make ?cacheStaleTimeoutInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cacheStaleTimeoutInSeconds =
         field_map json "CacheStaleTimeoutInSeconds"
@@ -2294,6 +2300,7 @@ module NFSFileShareDefaults =
       let fileMode =
         (Option.map ~f:PermissionMode.of_xml) (Xml.child xml_arg0 "FileMode") in
       make ?ownerId ?groupId ?directoryMode ?fileMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ownerId = field_map json "OwnerId" PermissionId.of_json in
       let groupId = field_map json "GroupId" PermissionId.of_json in
@@ -2342,6 +2349,7 @@ module EndpointNetworkConfiguration =
         (Option.map ~f:IpAddressList.of_xml)
           (Xml.child xml_arg0 "IpAddresses") in
       make ?ipAddresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddresses = field_map json "IpAddresses" IpAddressList.of_json in
       make ?ipAddresses ()
@@ -2455,6 +2463,7 @@ module StorageGatewayError =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?errorDetails ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorDetails = field_map json "errorDetails" ErrorDetails.of_json in
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
@@ -2546,6 +2555,7 @@ module BandwidthRateLimitInterval =
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ~daysOfWeek ~endMinuteOfHour
         ~endHourOfDay ~startMinuteOfHour ~startHourOfDay ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let averageDownloadRateLimitInBitsPerSec =
         field_map json "AverageDownloadRateLimitInBitsPerSec"
@@ -2656,6 +2666,7 @@ module VolumeInfo =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeAttachmentStatus ?volumeSizeInBytes ?volumeType ?gatewayId
         ?gatewayARN ?volumeId ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeAttachmentStatus =
         field_map json "VolumeAttachmentStatus"
@@ -2716,6 +2727,7 @@ module VolumeRecoveryPointInfo =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeRecoveryPointTime ?volumeUsageInBytes ?volumeSizeInBytes
         ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeRecoveryPointTime =
         field_map json "VolumeRecoveryPointTime" String_.of_json in
@@ -2820,6 +2832,7 @@ module TapeInfo =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?poolEntryDate ?retentionStartDate ?poolId ?gatewayARN ?tapeStatus
         ?tapeSizeInBytes ?tapeBarcode ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolEntryDate = field_map json "PoolEntryDate" Time.of_json in
       let retentionStartDate =
@@ -2902,6 +2915,7 @@ module PoolInfo =
         (Option.map ~f:PoolARN.of_xml) (Xml.child xml_arg0 "PoolARN") in
       make ?poolStatus ?retentionLockTimeInDays ?retentionLockType
         ?storageClass ?poolName ?poolARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolStatus = field_map json "PoolStatus" PoolStatus.of_json in
       let retentionLockTimeInDays =
@@ -2994,6 +3008,7 @@ module Disk =
         (Option.map ~f:DiskId.of_xml) (Xml.child xml_arg0 "DiskId") in
       make ?diskAttributeList ?diskAllocationResource ?diskAllocationType
         ?diskSizeInBytes ?diskStatus ?diskNode ?diskPath ?diskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let diskAttributeList =
         field_map json "DiskAttributeList" DiskAttributeList.of_json in
@@ -3104,6 +3119,7 @@ module GatewayInfo =
       make ?hostEnvironmentId ?hostEnvironment ?ec2InstanceRegion
         ?ec2InstanceId ?gatewayName ?gatewayOperationalState ?gatewayType
         ?gatewayARN ?gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostEnvironmentId =
         field_map json "HostEnvironmentId" HostEnvironmentId.of_json in
@@ -3176,6 +3192,7 @@ module FileSystemAssociationSummary =
           (Xml.child xml_arg0 "FileSystemAssociationId") in
       make ?gatewayARN ?fileSystemAssociationStatus ?fileSystemAssociationARN
         ?fileSystemAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       let fileSystemAssociationStatus =
@@ -3241,6 +3258,7 @@ module FileShareInfo =
           (Xml.child xml_arg0 "FileShareType") in
       make ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN
         ?fileShareType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       let fileShareStatus =
@@ -3277,6 +3295,7 @@ module AutomaticTapeCreationPolicyInfo =
         (Option.map ~f:AutomaticTapeCreationRules.of_xml)
           (Xml.child xml_arg0 "AutomaticTapeCreationRules") in
       make ?gatewayARN ?automaticTapeCreationRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       let automaticTapeCreationRules =
@@ -3372,6 +3391,7 @@ module VTLDevice =
           (Xml.child xml_arg0 "VTLDeviceARN") in
       make ?deviceiSCSIAttributes ?vTLDeviceProductIdentifier
         ?vTLDeviceVendor ?vTLDeviceType ?vTLDeviceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceiSCSIAttributes =
         field_map json "DeviceiSCSIAttributes" DeviceiSCSIAttributes.of_json in
@@ -3503,6 +3523,7 @@ module Tape =
       make ?poolEntryDate ?retentionStartDate ?worm ?poolId ?kMSKey
         ?tapeUsedInBytes ?progress ?vTLDevice ?tapeStatus ?tapeSizeInBytes
         ?tapeCreatedDate ?tapeBarcode ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolEntryDate = field_map json "PoolEntryDate" Time.of_json in
       let retentionStartDate =
@@ -3566,6 +3587,7 @@ module TapeRecoveryPointInfo =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeStatus ?tapeSizeInBytes ?tapeRecoveryPointTime ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeStatus =
         field_map json "TapeStatus" TapeRecoveryPointStatus.of_json in
@@ -3695,6 +3717,7 @@ module TapeArchive =
       make ?poolEntryDate ?retentionStartDate ?worm ?poolId ?kMSKey
         ?tapeUsedInBytes ?tapeStatus ?retrievedTo ?completionTime
         ?tapeSizeInBytes ?tapeCreatedDate ?tapeBarcode ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolEntryDate = field_map json "PoolEntryDate" Time.of_json in
       let retentionStartDate =
@@ -3866,6 +3889,7 @@ module StorediSCSIVolume =
         ?volumeDiskId ?volumeProgress ?volumeSizeInBytes
         ?volumeAttachmentStatus ?volumeStatus ?volumeType ?volumeId
         ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetName = field_map json "TargetName" TargetName.of_json in
       let kMSKey = field_map json "KMSKey" KMSKey.of_json in
@@ -4158,6 +4182,7 @@ module SMBFileShareInfo =
         ?guessMIMETypeEnabled ?readOnly ?objectACL ?defaultStorageClass
         ?locationARN ?role ?path ?kMSKey ?kMSEncrypted ?gatewayARN
         ?fileShareStatus ?fileShareId ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oplocksEnabled = field_map json "OplocksEnabled" Boolean.of_json in
       let bucketRegion = field_map json "BucketRegion" RegionId.of_json in
@@ -4416,6 +4441,7 @@ module NFSFileShareInfo =
         ?objectACL ?defaultStorageClass ?locationARN ?role ?path ?kMSKey
         ?kMSEncrypted ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN
         ?nFSFileShareDefaults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditDestinationARN =
         field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
@@ -4491,6 +4517,7 @@ module NetworkInterface =
       let ipv4Address =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Ipv4Address") in
       make ?ipv6Address ?macAddress ?ipv4Address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv6Address = field_map json "Ipv6Address" String_.of_json in
       let macAddress = field_map json "MacAddress" String_.of_json in
@@ -4627,6 +4654,7 @@ module FileSystemAssociationInfo =
         ?cacheAttributes ?tags ?gatewayARN ?auditDestinationARN
         ?fileSystemAssociationStatus ?locationARN ?fileSystemAssociationARN
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemAssociationStatusDetails =
         field_map json "FileSystemAssociationStatusDetails"
@@ -4703,6 +4731,7 @@ module ChapInfo =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "TargetARN") in
       make ?secretToAuthenticateTarget ?initiatorName
         ?secretToAuthenticateInitiator ?targetARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretToAuthenticateTarget =
         field_map json "SecretToAuthenticateTarget" ChapSecret.of_json in
@@ -4845,6 +4874,7 @@ module CachediSCSIVolume =
         ?volumeiSCSIAttributes ?sourceSnapshotId ?volumeProgress
         ?volumeSizeInBytes ?volumeAttachmentStatus ?volumeStatus ?volumeType
         ?volumeId ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetName = field_map json "TargetName" TargetName.of_json in
       let kMSKey = field_map json "KMSKey" KMSKey.of_json in
@@ -4894,6 +4924,7 @@ module InternalServerError =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?error ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "error" StorageGatewayError.of_json in
       let message = field_map json "message" String_.of_json in
@@ -4924,6 +4955,7 @@ module InvalidGatewayRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?error ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "error" StorageGatewayError.of_json in
       let message = field_map json "message" String_.of_json in
@@ -5030,6 +5062,7 @@ module SMBLocalGroups =
       let gatewayAdmins =
         (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "GatewayAdmins") in
       make ?gatewayAdmins ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayAdmins = field_map json "GatewayAdmins" UserList.of_json in
       make ?gatewayAdmins ()
@@ -6394,6 +6427,7 @@ module ServiceUnavailableError =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?error ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "error" StorageGatewayError.of_json in
       let message = field_map json "message" String_.of_json in
@@ -6529,6 +6563,7 @@ module UpdateVTLDeviceTypeOutput =
         (Option.map ~f:VTLDeviceARN.of_xml)
           (Xml.child xml_arg0 "VTLDeviceARN") in
       make ?vTLDeviceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vTLDeviceARN = field_map json "VTLDeviceARN" VTLDeviceARN.of_json in
       make ?vTLDeviceARN ()
@@ -6560,6 +6595,7 @@ module UpdateVTLDeviceTypeInput =
         VTLDeviceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VTLDeviceARN") in
       make ~deviceType ~vTLDeviceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceType = field_map_exn json "DeviceType" DeviceType.of_json in
       let vTLDeviceARN =
@@ -6622,6 +6658,7 @@ module UpdateSnapshotScheduleOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
@@ -6677,6 +6714,7 @@ module UpdateSnapshotScheduleInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?tags ?description ~recurrenceInHours ~startAt ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -6739,6 +6777,7 @@ module UpdateSMBSecurityStrategyOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -6771,6 +6810,7 @@ module UpdateSMBSecurityStrategyInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~sMBSecurityStrategy ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sMBSecurityStrategy =
         field_map_exn json "SMBSecurityStrategy" SMBSecurityStrategy.of_json in
@@ -6830,6 +6870,7 @@ module UpdateSMBLocalGroupsOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -6860,6 +6901,7 @@ module UpdateSMBLocalGroupsInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~sMBLocalGroups ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sMBLocalGroups =
         field_map_exn json "SMBLocalGroups" SMBLocalGroups.of_json in
@@ -6919,6 +6961,7 @@ module UpdateSMBFileShareVisibilityOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -6948,6 +6991,7 @@ module UpdateSMBFileShareVisibilityInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~fileSharesVisible ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSharesVisible =
         field_map_exn json "FileSharesVisible" Boolean.of_json in
@@ -7012,6 +7056,7 @@ module UpdateSMBFileShareOutput =
         (Option.map ~f:FileShareARN.of_xml)
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
@@ -7205,6 +7250,7 @@ module UpdateSMBFileShareInput =
         ?validUserList ?adminUserList ?accessBasedEnumeration ?sMBACLEnabled
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?objectACL
         ?defaultStorageClass ?kMSKey ?kMSEncrypted ~fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oplocksEnabled = field_map json "OplocksEnabled" Boolean.of_json in
       let notificationPolicy =
@@ -7297,6 +7343,7 @@ module UpdateNFSFileShareOutput =
         (Option.map ~f:FileShareARN.of_xml)
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
@@ -7454,6 +7501,7 @@ module UpdateNFSFileShareInput =
         ?fileShareName ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash
         ?clientList ?objectACL ?defaultStorageClass ?nFSFileShareDefaults
         ?kMSKey ?kMSEncrypted ~fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditDestinationARN =
         field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
@@ -7536,6 +7584,7 @@ module UpdateMaintenanceStartTimeOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -7591,6 +7640,7 @@ module UpdateMaintenanceStartTimeInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?dayOfMonth ?dayOfWeek ~minuteOfHour ~hourOfDay ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dayOfMonth = field_map json "DayOfMonth" DayOfMonth.of_json in
       let dayOfWeek = field_map json "DayOfWeek" DayOfWeek.of_json in
@@ -7653,6 +7703,7 @@ module UpdateGatewaySoftwareNowOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -7674,6 +7725,7 @@ module UpdateGatewaySoftwareNowInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -7738,6 +7790,7 @@ module UpdateGatewayInformationOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayName ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayName = field_map json "GatewayName" String_.of_json in
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
@@ -7801,6 +7854,7 @@ module UpdateGatewayInformationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?gatewayCapacity ?cloudWatchLogGroupARN ?gatewayTimezone
         ?gatewayName ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayCapacity =
         field_map json "GatewayCapacity" GatewayCapacity.of_json in
@@ -7872,6 +7926,7 @@ module UpdateFileSystemAssociationOutput =
         (Option.map ~f:FileSystemAssociationARN.of_xml)
           (Xml.child xml_arg0 "FileSystemAssociationARN") in
       make ?fileSystemAssociationARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemAssociationARN =
         field_map json "FileSystemAssociationARN"
@@ -7940,6 +7995,7 @@ module UpdateFileSystemAssociationInput =
              "FileSystemAssociationARN") in
       make ?cacheAttributes ?auditDestinationARN ?password ?userName
         ~fileSystemAssociationARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cacheAttributes =
         field_map json "CacheAttributes" CacheAttributes.of_json in
@@ -8016,6 +8072,7 @@ module UpdateChapCredentialsOutput =
       let targetARN =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "TargetARN") in
       make ?initiatorName ?targetARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initiatorName = field_map json "InitiatorName" IqnName.of_json in
       let targetARN = field_map json "TargetARN" TargetARN.of_json in
@@ -8074,6 +8131,7 @@ module UpdateChapCredentialsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetARN") in
       make ?secretToAuthenticateTarget ~initiatorName
         ~secretToAuthenticateInitiator ~targetARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretToAuthenticateTarget =
         field_map json "SecretToAuthenticateTarget" ChapSecret.of_json in
@@ -8137,6 +8195,7 @@ module UpdateBandwidthRateLimitScheduleOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8172,6 +8231,7 @@ module UpdateBandwidthRateLimitScheduleInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~bandwidthRateLimitIntervals ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bandwidthRateLimitIntervals =
         field_map_exn json "BandwidthRateLimitIntervals"
@@ -8232,6 +8292,7 @@ module UpdateBandwidthRateLimitOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8282,6 +8343,7 @@ module UpdateBandwidthRateLimitInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let averageDownloadRateLimitInBitsPerSec =
         field_map json "AverageDownloadRateLimitInBitsPerSec"
@@ -8346,6 +8408,7 @@ module UpdateAutomaticTapeCreationPolicyOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8380,6 +8443,7 @@ module UpdateAutomaticTapeCreationPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "AutomaticTapeCreationRules") in
       make ~gatewayARN ~automaticTapeCreationRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       let automaticTapeCreationRules =
@@ -8440,6 +8504,7 @@ module StartGatewayOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8461,6 +8526,7 @@ module StartGatewayInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -8518,6 +8584,7 @@ module StartAvailabilityMonitorTestOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8539,6 +8606,7 @@ module StartAvailabilityMonitorTestInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -8596,6 +8664,7 @@ module ShutdownGatewayOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8617,6 +8686,7 @@ module ShutdownGatewayInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -8674,6 +8744,7 @@ module SetSMBGuestPasswordOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8705,6 +8776,7 @@ module SetSMBGuestPasswordInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~password ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "Password" SMBGuestPassword.of_json in
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
@@ -8762,6 +8834,7 @@ module SetLocalConsolePasswordOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -8794,6 +8867,7 @@ module SetLocalConsolePasswordInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~localConsolePassword ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let localConsolePassword =
         field_map_exn json "LocalConsolePassword"
@@ -8856,6 +8930,7 @@ module RetrieveTapeRecoveryPointOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -8883,6 +8958,7 @@ module RetrieveTapeRecoveryPointInput =
       let tapeARN =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ~gatewayARN ~tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
@@ -8943,6 +9019,7 @@ module RetrieveTapeArchiveOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -8972,6 +9049,7 @@ module RetrieveTapeArchiveInput =
       let tapeARN =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ~gatewayARN ~tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
@@ -9029,6 +9107,7 @@ module ResetCacheOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -9050,6 +9129,7 @@ module ResetCacheInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -9110,6 +9190,7 @@ module RemoveTagsFromResourceOutput =
       let resourceARN =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
       make ?resourceARN ()
@@ -9140,6 +9221,7 @@ module RemoveTagsFromResourceInput =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
@@ -9207,6 +9289,7 @@ module RefreshCacheOutput =
         (Option.map ~f:FileShareARN.of_xml)
           (Xml.child xml_arg0 "FileShareARN") in
       make ?notificationId ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationId =
         field_map json "NotificationId" NotificationId.of_json in
@@ -9247,6 +9330,7 @@ module RefreshCacheInput =
         FileShareARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
       make ?recursive ?folderList ~fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recursive = field_map json "Recursive" Boolean.of_json in
       let folderList = field_map json "FolderList" FolderList.of_json in
@@ -9316,6 +9400,7 @@ module NotifyWhenUploadedOutput =
         (Option.map ~f:FileShareARN.of_xml)
           (Xml.child xml_arg0 "FileShareARN") in
       make ?notificationId ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationId =
         field_map json "NotificationId" NotificationId.of_json in
@@ -9339,6 +9424,7 @@ module NotifyWhenUploadedInput =
         FileShareARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
       make ~fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARN =
         field_map_exn json "FileShareARN" FileShareARN.of_json in
@@ -9412,6 +9498,7 @@ module ListVolumesOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?volumeInfos ?marker ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeInfos = field_map json "VolumeInfos" VolumeInfos.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -9447,6 +9534,7 @@ module ListVolumesInput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?limit ?marker ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -9517,6 +9605,7 @@ module ListVolumeRecoveryPointsOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?volumeRecoveryPointInfos ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeRecoveryPointInfos =
         field_map json "VolumeRecoveryPointInfos"
@@ -9541,6 +9630,7 @@ module ListVolumeRecoveryPointsInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -9601,6 +9691,7 @@ module ListVolumeInitiatorsOutput =
       let initiators =
         (Option.map ~f:Initiators.of_xml) (Xml.child xml_arg0 "Initiators") in
       make ?initiators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initiators = field_map json "Initiators" Initiators.of_json in
       make ?initiators ()
@@ -9624,6 +9715,7 @@ module ListVolumeInitiatorsInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
@@ -9687,6 +9779,7 @@ module ListTapesOutput =
       let tapeInfos =
         (Option.map ~f:TapeInfos.of_xml) (Xml.child xml_arg0 "TapeInfos") in
       make ?marker ?tapeInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let tapeInfos = field_map json "TapeInfos" TapeInfos.of_json in
@@ -9721,6 +9814,7 @@ module ListTapesInput =
       let tapeARNs =
         (Option.map ~f:TapeARNs.of_xml) (Xml.child xml_arg0 "TapeARNs") in
       make ?limit ?marker ?tapeARNs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -9789,6 +9883,7 @@ module ListTapePoolsOutput =
       let poolInfos =
         (Option.map ~f:PoolInfos.of_xml) (Xml.child xml_arg0 "PoolInfos") in
       make ?marker ?poolInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let poolInfos = field_map json "PoolInfos" PoolInfos.of_json in
@@ -9825,6 +9920,7 @@ module ListTapePoolsInput =
       let poolARNs =
         (Option.map ~f:PoolARNs.of_xml) (Xml.child xml_arg0 "PoolARNs") in
       make ?limit ?marker ?poolARNs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -9899,6 +9995,7 @@ module ListTagsForResourceOutput =
       let resourceARN =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?tags ?marker ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -9938,6 +10035,7 @@ module ListTagsForResourceInput =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?limit ?marker ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -10002,6 +10100,7 @@ module ListLocalDisksOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?disks ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disks = field_map json "Disks" Disks.of_json in
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
@@ -10024,6 +10123,7 @@ module ListLocalDisksInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -10089,6 +10189,7 @@ module ListGatewaysOutput =
       let gateways =
         (Option.map ~f:Gateways.of_xml) (Xml.child xml_arg0 "Gateways") in
       make ?marker ?gateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let gateways = field_map json "Gateways" Gateways.of_json in
@@ -10118,6 +10219,7 @@ module ListGatewaysInput =
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?limit ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -10198,6 +10300,7 @@ module ListFileSystemAssociationsOutput =
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?fileSystemAssociationSummaryList ?nextMarker ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemAssociationSummaryList =
         field_map json "FileSystemAssociationSummaryList"
@@ -10235,6 +10338,7 @@ module ListFileSystemAssociationsInput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?limit ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let limit = field_map json "Limit" PositiveIntObject.of_json in
@@ -10314,6 +10418,7 @@ module ListFileSharesOutput =
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?fileShareInfoList ?nextMarker ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareInfoList =
         field_map json "FileShareInfoList" FileShareInfoList.of_json in
@@ -10351,6 +10456,7 @@ module ListFileSharesInput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?limit ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let limit = field_map json "Limit" PositiveIntObject.of_json in
@@ -10417,6 +10523,7 @@ module ListAutomaticTapeCreationPoliciesOutput =
         (Option.map ~f:AutomaticTapeCreationPolicyInfos.of_xml)
           (Xml.child xml_arg0 "AutomaticTapeCreationPolicyInfos") in
       make ?automaticTapeCreationPolicyInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let automaticTapeCreationPolicyInfos =
         field_map json "AutomaticTapeCreationPolicyInfos"
@@ -10438,6 +10545,7 @@ module ListAutomaticTapeCreationPoliciesInput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -10509,6 +10617,7 @@ module JoinDomainOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?activeDirectoryStatus ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activeDirectoryStatus =
         field_map json "ActiveDirectoryStatus" ActiveDirectoryStatus.of_json in
@@ -10595,6 +10704,7 @@ module JoinDomainInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~password ~userName ?timeoutInSeconds ?domainControllers
         ?organizationalUnit ~domainName ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "Password" DomainUserPassword.of_json in
       let userName = field_map_exn json "UserName" DomainUserName.of_json in
@@ -10668,6 +10778,7 @@ module DisassociateFileSystemOutput =
         (Option.map ~f:FileSystemAssociationARN.of_xml)
           (Xml.child xml_arg0 "FileSystemAssociationARN") in
       make ?fileSystemAssociationARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemAssociationARN =
         field_map json "FileSystemAssociationARN"
@@ -10706,6 +10817,7 @@ module DisassociateFileSystemInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "FileSystemAssociationARN") in
       make ?forceDelete ~fileSystemAssociationARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "ForceDelete" Boolean__lc1.of_json in
       let fileSystemAssociationARN =
@@ -10769,6 +10881,7 @@ module DisableGatewayOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -10789,6 +10902,7 @@ module DisableGatewayInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -10848,6 +10962,7 @@ module DetachVolumeOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
@@ -10878,6 +10993,7 @@ module DetachVolumeInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?forceDetach ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDetach = field_map json "ForceDetach" Boolean.of_json in
       let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
@@ -10969,6 +11085,7 @@ module DescribeWorkingStorageOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?workingStorageAllocatedInBytes ?workingStorageUsedInBytes
         ?diskIds ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workingStorageAllocatedInBytes =
         field_map json "WorkingStorageAllocatedInBytes" Long.of_json in
@@ -10995,6 +11112,7 @@ module DescribeWorkingStorageInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -11067,6 +11185,7 @@ module DescribeVTLDevicesOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?vTLDevices ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let vTLDevices = field_map json "VTLDevices" VTLDevices.of_json in
@@ -11114,6 +11233,7 @@ module DescribeVTLDevicesInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?limit ?marker ?vTLDeviceARNs ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -11208,6 +11328,7 @@ module DescribeUploadBufferOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?uploadBufferAllocatedInBytes ?uploadBufferUsedInBytes ?diskIds
         ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadBufferAllocatedInBytes =
         field_map json "UploadBufferAllocatedInBytes" Long.of_json in
@@ -11235,6 +11356,7 @@ module DescribeUploadBufferInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -11299,6 +11421,7 @@ module DescribeTapesOutput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       let tapes = (Option.map ~f:Tapes.of_xml) (Xml.child xml_arg0 "Tapes") in
       make ?marker ?tapes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let tapes = field_map json "Tapes" Tapes.of_json in
@@ -11343,6 +11466,7 @@ module DescribeTapesInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?limit ?marker ?tapeARNs ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -11421,6 +11545,7 @@ module DescribeTapeRecoveryPointsOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?tapeRecoveryPointInfos ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let tapeRecoveryPointInfos =
@@ -11460,6 +11585,7 @@ module DescribeTapeRecoveryPointsInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?limit ?marker ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -11530,6 +11656,7 @@ module DescribeTapeArchivesOutput =
         (Option.map ~f:TapeArchives.of_xml)
           (Xml.child xml_arg0 "TapeArchives") in
       make ?marker ?tapeArchives ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" Marker.of_json in
       let tapeArchives = field_map json "TapeArchives" TapeArchives.of_json in
@@ -11565,6 +11692,7 @@ module DescribeTapeArchivesInput =
       let tapeARNs =
         (Option.map ~f:TapeARNs.of_xml) (Xml.child xml_arg0 "TapeARNs") in
       make ?limit ?marker ?tapeARNs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntObject.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -11628,6 +11756,7 @@ module DescribeStorediSCSIVolumesOutput =
         (Option.map ~f:StorediSCSIVolumes.of_xml)
           (Xml.child xml_arg0 "StorediSCSIVolumes") in
       make ?storediSCSIVolumes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storediSCSIVolumes =
         field_map json "StorediSCSIVolumes" StorediSCSIVolumes.of_json in
@@ -11653,6 +11782,7 @@ module DescribeStorediSCSIVolumesInput =
         VolumeARNs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARNs") in
       make ~volumeARNs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARNs = field_map_exn json "VolumeARNs" VolumeARNs.of_json in
       make ~volumeARNs ()
@@ -11757,6 +11887,7 @@ module DescribeSnapshotScheduleOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?tags ?timezone ?description ?recurrenceInHours ?startAt
         ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let timezone = field_map json "Timezone" GatewayTimezone.of_json in
@@ -11788,6 +11919,7 @@ module DescribeSnapshotScheduleInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
@@ -11910,6 +12042,7 @@ module DescribeSMBSettingsOutput =
       make ?sMBLocalGroups ?fileSharesVisible ?sMBSecurityStrategy
         ?sMBGuestPasswordSet ?activeDirectoryStatus ?domainName ?gatewayARN
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sMBLocalGroups =
         field_map json "SMBLocalGroups" SMBLocalGroups.of_json in
@@ -11944,6 +12077,7 @@ module DescribeSMBSettingsInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -12007,6 +12141,7 @@ module DescribeSMBFileSharesOutput =
         (Option.map ~f:SMBFileShareInfoList.of_xml)
           (Xml.child xml_arg0 "SMBFileShareInfoList") in
       make ?sMBFileShareInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sMBFileShareInfoList =
         field_map json "SMBFileShareInfoList" SMBFileShareInfoList.of_json in
@@ -12032,6 +12167,7 @@ module DescribeSMBFileSharesInput =
         FileShareARNList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARNList") in
       make ~fileShareARNList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARNList =
         field_map_exn json "FileShareARNList" FileShareARNList.of_json in
@@ -12095,6 +12231,7 @@ module DescribeNFSFileSharesOutput =
         (Option.map ~f:NFSFileShareInfoList.of_xml)
           (Xml.child xml_arg0 "NFSFileShareInfoList") in
       make ?nFSFileShareInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nFSFileShareInfoList =
         field_map json "NFSFileShareInfoList" NFSFileShareInfoList.of_json in
@@ -12120,6 +12257,7 @@ module DescribeNFSFileSharesInput =
         FileShareARNList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARNList") in
       make ~fileShareARNList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARNList =
         field_map_exn json "FileShareARNList" FileShareARNList.of_json in
@@ -12226,6 +12364,7 @@ module DescribeMaintenanceStartTimeOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?timezone ?dayOfMonth ?dayOfWeek ?minuteOfHour ?hourOfDay
         ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timezone = field_map json "Timezone" GatewayTimezone.of_json in
       let dayOfMonth = field_map json "DayOfMonth" DayOfMonth.of_json in
@@ -12253,6 +12392,7 @@ module DescribeMaintenanceStartTimeInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -12511,6 +12651,7 @@ module DescribeGatewayInformationOutput =
         ?ec2InstanceRegion ?ec2InstanceId ?lastSoftwareUpdate
         ?nextUpdateAvailabilityDate ?gatewayType ?gatewayNetworkInterfaces
         ?gatewayState ?gatewayTimezone ?gatewayName ?gatewayId ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostEnvironmentId =
         field_map json "HostEnvironmentId" HostEnvironmentId.of_json in
@@ -12573,6 +12714,7 @@ module DescribeGatewayInformationInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -12636,6 +12778,7 @@ module DescribeFileSystemAssociationsOutput =
         (Option.map ~f:FileSystemAssociationInfoList.of_xml)
           (Xml.child xml_arg0 "FileSystemAssociationInfoList") in
       make ?fileSystemAssociationInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemAssociationInfoList =
         field_map json "FileSystemAssociationInfoList"
@@ -12667,6 +12810,7 @@ module DescribeFileSystemAssociationsInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "FileSystemAssociationARNList") in
       make ~fileSystemAssociationARNList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemAssociationARNList =
         field_map_exn json "FileSystemAssociationARNList"
@@ -12731,6 +12875,7 @@ module DescribeChapCredentialsOutput =
         (Option.map ~f:ChapCredentials.of_xml)
           (Xml.child xml_arg0 "ChapCredentials") in
       make ?chapCredentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chapCredentials =
         field_map json "ChapCredentials" ChapCredentials.of_json in
@@ -12755,6 +12900,7 @@ module DescribeChapCredentialsInput =
         TargetARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetARN") in
       make ~targetARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetARN = field_map_exn json "TargetARN" TargetARN.of_json in
       make ~targetARN ()
@@ -12817,6 +12963,7 @@ module DescribeCachediSCSIVolumesOutput =
         (Option.map ~f:CachediSCSIVolumes.of_xml)
           (Xml.child xml_arg0 "CachediSCSIVolumes") in
       make ?cachediSCSIVolumes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachediSCSIVolumes =
         field_map json "CachediSCSIVolumes" CachediSCSIVolumes.of_json in
@@ -12841,6 +12988,7 @@ module DescribeCachediSCSIVolumesInput =
         VolumeARNs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARNs") in
       make ~volumeARNs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARNs = field_map_exn json "VolumeARNs" VolumeARNs.of_json in
       make ~volumeARNs ()
@@ -12961,6 +13109,7 @@ module DescribeCacheOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?cacheMissPercentage ?cacheHitPercentage ?cacheDirtyPercentage
         ?cacheUsedPercentage ?cacheAllocatedInBytes ?diskIds ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cacheMissPercentage =
         field_map json "CacheMissPercentage" Double.of_json in
@@ -12994,6 +13143,7 @@ module DescribeCacheInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -13063,6 +13213,7 @@ module DescribeBandwidthRateLimitScheduleOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?bandwidthRateLimitIntervals ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bandwidthRateLimitIntervals =
         field_map json "BandwidthRateLimitIntervals"
@@ -13087,6 +13238,7 @@ module DescribeBandwidthRateLimitScheduleInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -13173,6 +13325,7 @@ module DescribeBandwidthRateLimitOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let averageDownloadRateLimitInBitsPerSec =
         field_map json "AverageDownloadRateLimitInBitsPerSec"
@@ -13200,6 +13353,7 @@ module DescribeBandwidthRateLimitInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -13274,6 +13428,7 @@ module DescribeAvailabilityMonitorTestOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?startTime ?status ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" Time.of_json in
       let status =
@@ -13298,6 +13453,7 @@ module DescribeAvailabilityMonitorTestInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -13358,6 +13514,7 @@ module DeleteVolumeOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
@@ -13382,6 +13539,7 @@ module DeleteVolumeInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
@@ -13442,6 +13600,7 @@ module DeleteTapePoolOutput =
       let poolARN =
         (Option.map ~f:PoolARN.of_xml) (Xml.child xml_arg0 "PoolARN") in
       make ?poolARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolARN = field_map json "PoolARN" PoolARN.of_json in
       make ?poolARN ()
@@ -13464,6 +13623,7 @@ module DeleteTapePoolInput =
       let poolARN =
         PoolARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolARN") in
       make ~poolARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolARN = field_map_exn json "PoolARN" PoolARN.of_json in
       make ~poolARN ()
@@ -13524,6 +13684,7 @@ module DeleteTapeOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -13564,6 +13725,7 @@ module DeleteTapeInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?bypassGovernanceRetention ~tapeARN ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bypassGovernanceRetention =
         field_map json "BypassGovernanceRetention" Boolean__lc1.of_json in
@@ -13626,6 +13788,7 @@ module DeleteTapeArchiveOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -13657,6 +13820,7 @@ module DeleteTapeArchiveInput =
       let tapeARN =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ?bypassGovernanceRetention ~tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bypassGovernanceRetention =
         field_map json "BypassGovernanceRetention" Boolean__lc1.of_json in
@@ -13717,6 +13881,7 @@ module DeleteSnapshotScheduleOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
@@ -13740,6 +13905,7 @@ module DeleteSnapshotScheduleInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
@@ -13797,6 +13963,7 @@ module DeleteGatewayOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -13817,6 +13984,7 @@ module DeleteGatewayInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -13879,6 +14047,7 @@ module DeleteFileShareOutput =
         (Option.map ~f:FileShareARN.of_xml)
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
@@ -13910,6 +14079,7 @@ module DeleteFileShareInput =
         FileShareARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
       make ?forceDelete ~fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "ForceDelete" Boolean__lc1.of_json in
       let fileShareARN =
@@ -13976,6 +14146,7 @@ module DeleteChapCredentialsOutput =
       let targetARN =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "TargetARN") in
       make ?initiatorName ?targetARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initiatorName = field_map json "InitiatorName" IqnName.of_json in
       let targetARN = field_map json "TargetARN" TargetARN.of_json in
@@ -14007,6 +14178,7 @@ module DeleteChapCredentialsInput =
         TargetARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetARN") in
       make ~initiatorName ~targetARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initiatorName = field_map_exn json "InitiatorName" IqnName.of_json in
       let targetARN = field_map_exn json "TargetARN" TargetARN.of_json in
@@ -14065,6 +14237,7 @@ module DeleteBandwidthRateLimitOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -14095,6 +14268,7 @@ module DeleteBandwidthRateLimitInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~bandwidthType ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bandwidthType =
         field_map_exn json "BandwidthType" BandwidthType.of_json in
@@ -14154,6 +14328,7 @@ module DeleteAutomaticTapeCreationPolicyOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -14175,6 +14350,7 @@ module DeleteAutomaticTapeCreationPolicyInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
@@ -14235,6 +14411,7 @@ module CreateTapesOutput =
       let tapeARNs =
         (Option.map ~f:TapeARNs.of_xml) (Xml.child xml_arg0 "TapeARNs") in
       make ?tapeARNs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARNs = field_map json "TapeARNs" TapeARNs.of_json in
       make ?tapeARNs ()
@@ -14339,6 +14516,7 @@ module CreateTapesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?tags ?worm ?poolId ?kMSKey ?kMSEncrypted ~tapeBarcodePrefix
         ~numTapesToCreate ~clientToken ~tapeSizeInBytes ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let worm = field_map json "Worm" Boolean__lc1.of_json in
@@ -14411,6 +14589,7 @@ module CreateTapeWithBarcodeOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -14496,6 +14675,7 @@ module CreateTapeWithBarcodeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?tags ?worm ?poolId ?kMSKey ?kMSEncrypted ~tapeBarcode
         ~tapeSizeInBytes ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let worm = field_map json "Worm" Boolean__lc1.of_json in
@@ -14564,6 +14744,7 @@ module CreateTapePoolOutput =
       let poolARN =
         (Option.map ~f:PoolARN.of_xml) (Xml.child xml_arg0 "PoolARN") in
       make ?poolARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolARN = field_map json "PoolARN" PoolARN.of_json in
       make ?poolARN ()
@@ -14628,6 +14809,7 @@ module CreateTapePoolInput =
         PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
       make ?tags ?retentionLockTimeInDays ?retentionLockType ~storageClass
         ~poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let retentionLockTimeInDays =
@@ -14712,6 +14894,7 @@ module CreateStorediSCSIVolumeOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?targetARN ?volumeSizeInBytes ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetARN = field_map json "TargetARN" TargetARN.of_json in
       let volumeSizeInBytes = field_map json "VolumeSizeInBytes" Long.of_json in
@@ -14808,6 +14991,7 @@ module CreateStorediSCSIVolumeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?tags ?kMSKey ?kMSEncrypted ~networkInterfaceId ~targetName
         ~preserveExistingData ?snapshotId ~diskId ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let kMSKey = field_map json "KMSKey" KMSKey.of_json in
@@ -14895,6 +15079,7 @@ module CreateSnapshotOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?snapshotId ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
       let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
@@ -14935,6 +15120,7 @@ module CreateSnapshotInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?tags ~snapshotDescription ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let snapshotDescription =
@@ -15022,6 +15208,7 @@ module CreateSnapshotFromVolumeRecoveryPointOutput =
       let snapshotId =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?volumeRecoveryPointTime ?volumeARN ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeRecoveryPointTime =
         field_map json "VolumeRecoveryPointTime" String_.of_json in
@@ -15065,6 +15252,7 @@ module CreateSnapshotFromVolumeRecoveryPointInput =
         VolumeARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?tags ~snapshotDescription ~volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let snapshotDescription =
@@ -15130,6 +15318,7 @@ module CreateSMBFileShareOutput =
         (Option.map ~f:FileShareARN.of_xml)
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
@@ -15386,6 +15575,7 @@ module CreateSMBFileShareInput =
         ?accessBasedEnumeration ?sMBACLEnabled ?requesterPays
         ?guessMIMETypeEnabled ?readOnly ?objectACL ?defaultStorageClass
         ~locationARN ~role ?kMSKey ?kMSEncrypted ~gatewayARN ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oplocksEnabled = field_map json "OplocksEnabled" Boolean.of_json in
       let bucketRegion = field_map json "BucketRegion" RegionId.of_json in
@@ -15488,6 +15678,7 @@ module CreateNFSFileShareOutput =
         (Option.map ~f:FileShareARN.of_xml)
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
@@ -15697,6 +15888,7 @@ module CreateNFSFileShareInput =
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash ?clientList
         ?objectACL ?defaultStorageClass ~locationARN ~role ?kMSKey
         ?kMSEncrypted ~gatewayARN ?nFSFileShareDefaults ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditDestinationARN =
         field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
@@ -15796,6 +15988,7 @@ module CreateCachediSCSIVolumeOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?targetARN ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetARN = field_map json "TargetARN" TargetARN.of_json in
       let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
@@ -15902,6 +16095,7 @@ module CreateCachediSCSIVolumeInput =
       make ?tags ?kMSKey ?kMSEncrypted ~clientToken ~networkInterfaceId
         ?sourceVolumeARN ~targetName ?snapshotId ~volumeSizeInBytes
         ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let kMSKey = field_map json "KMSKey" KMSKey.of_json in
@@ -15976,6 +16170,7 @@ module CancelRetrievalOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -16003,6 +16198,7 @@ module CancelRetrievalInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~tapeARN ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
@@ -16063,6 +16259,7 @@ module CancelArchivalOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -16090,6 +16287,7 @@ module CancelArchivalInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~tapeARN ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
@@ -16157,6 +16355,7 @@ module AttachVolumeOutput =
       let volumeARN =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?targetARN ?volumeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetARN = field_map json "TargetARN" TargetARN.of_json in
       let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
@@ -16220,6 +16419,7 @@ module AttachVolumeInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?diskId ~networkInterfaceId ~volumeARN ?targetName ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let diskId = field_map json "DiskId" DiskId.of_json in
       let networkInterfaceId =
@@ -16287,6 +16487,7 @@ module AssociateFileSystemOutput =
         (Option.map ~f:FileSystemAssociationARN.of_xml)
           (Xml.child xml_arg0 "FileSystemAssociationARN") in
       make ?fileSystemAssociationARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemAssociationARN =
         field_map json "FileSystemAssociationARN"
@@ -16389,6 +16590,7 @@ module AssociateFileSystemInput =
       make ?endpointNetworkConfiguration ?cacheAttributes
         ?auditDestinationARN ?tags ~locationARN ~gatewayARN ~clientToken
         ~password ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointNetworkConfiguration =
         field_map json "EndpointNetworkConfiguration"
@@ -16464,6 +16666,7 @@ module AssignTapePoolOutput =
       let tapeARN =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tapeARN = field_map json "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
@@ -16504,6 +16707,7 @@ module AssignTapePoolInput =
       let tapeARN =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ?bypassGovernanceRetention ~poolId ~tapeARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bypassGovernanceRetention =
         field_map json "BypassGovernanceRetention" Boolean__lc1.of_json in
@@ -16564,6 +16768,7 @@ module AddWorkingStorageOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -16592,6 +16797,7 @@ module AddWorkingStorageInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~diskIds ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let diskIds = field_map_exn json "DiskIds" DiskIds.of_json in
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
@@ -16650,6 +16856,7 @@ module AddUploadBufferOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -16678,6 +16885,7 @@ module AddUploadBufferInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~diskIds ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let diskIds = field_map_exn json "DiskIds" DiskIds.of_json in
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
@@ -16739,6 +16947,7 @@ module AddTagsToResourceOutput =
       let resourceARN =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
       make ?resourceARN ()
@@ -16768,6 +16977,7 @@ module AddTagsToResourceInput =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
@@ -16825,6 +17035,7 @@ module AddCacheOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -16853,6 +17064,7 @@ module AddCacheInput =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~diskIds ~gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let diskIds = field_map_exn json "DiskIds" DiskIds.of_json in
       let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
@@ -16911,6 +17123,7 @@ module ActivateGatewayOutput =
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
@@ -17002,6 +17215,7 @@ module ActivateGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ActivationKey") in
       make ?tags ?mediumChangerType ?tapeDriveType ?gatewayType
         ~gatewayRegion ~gatewayTimezone ~gatewayName ~activationKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let mediumChangerType =

@@ -221,6 +221,7 @@ module User =
       let userName =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map_exn json "UserId" ResourceId.of_json in
       let userName = field_map_exn json "UserName" UserName.of_json in
@@ -255,6 +256,7 @@ module Filter =
         AttributePath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttributePath") in
       make ~attributeValue ~attributePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeValue =
         field_map_exn json "AttributeValue" SensitiveStringType.of_json in
@@ -289,6 +291,7 @@ module Group =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~displayName ~groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName =
         field_map_exn json "DisplayName" GroupDisplayName.of_json in
@@ -317,6 +320,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -344,6 +348,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -409,6 +414,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?requestId ?message ?resourceId ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -437,6 +443,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -487,6 +494,7 @@ module ValidationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -662,6 +670,7 @@ module ListUsersResponse =
       let users =
         Users.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Users") in
       make ?nextToken ~users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let users = field_map_exn json "Users" Users.of_json in
@@ -710,6 +719,7 @@ module ListUsersRequest =
         IdentityStoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
       make ?filters ?nextToken ?maxResults ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -805,6 +815,7 @@ module ListGroupsResponse =
       let groups =
         Groups.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Groups") in
       make ?nextToken ~groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let groups = field_map_exn json "Groups" Groups.of_json in
@@ -853,6 +864,7 @@ module ListGroupsRequest =
         IdentityStoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
       make ?filters ?nextToken ?maxResults ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -948,6 +960,7 @@ module DescribeUserResponse =
       let userName =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map_exn json "UserId" ResourceId.of_json in
       let userName = field_map_exn json "UserName" UserName.of_json in
@@ -980,6 +993,7 @@ module DescribeUserRequest =
         IdentityStoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
       make ~userId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map_exn json "UserId" ResourceId.of_json in
       let identityStoreId =
@@ -1076,6 +1090,7 @@ module DescribeGroupResponse =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~displayName ~groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName =
         field_map_exn json "DisplayName" GroupDisplayName.of_json in
@@ -1110,6 +1125,7 @@ module DescribeGroupRequest =
         IdentityStoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
       make ~groupId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupId = field_map_exn json "GroupId" ResourceId.of_json in
       let identityStoreId =

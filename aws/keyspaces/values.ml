@@ -179,6 +179,7 @@ module ClusteringKey =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~orderBy ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderBy = field_map_exn json "orderBy" SortOrder.of_json in
       let name = field_map_exn json "name" GenericString.of_json in
@@ -209,6 +210,7 @@ module ColumnDefinition =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" GenericString.of_json in
       let name = field_map_exn json "name" GenericString.of_json in
@@ -231,6 +233,7 @@ module PartitionKey =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" GenericString.of_json in
       make ~name ()
@@ -252,6 +255,7 @@ module StaticColumn =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" GenericString.of_json in
       make ~name ()
@@ -419,6 +423,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -457,6 +462,7 @@ module TableSummary =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~resourceArn ~tableName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       let tableName = field_map_exn json "tableName" TableName.of_json in
@@ -489,6 +495,7 @@ module KeyspaceSummary =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~resourceArn ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       let keyspaceName =
@@ -620,6 +627,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -639,6 +647,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -658,6 +667,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -685,6 +695,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceArn ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "resourceArn" ARN.of_json in
       let message = field_map json "message" String_.of_json in
@@ -705,6 +716,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -724,6 +736,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -768,6 +781,7 @@ module CapacitySpecification =
         ThroughputMode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "throughputMode") in
       make ?writeCapacityUnits ?readCapacityUnits ~throughputMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeCapacityUnits =
         field_map json "writeCapacityUnits" CapacityUnits.of_json in
@@ -825,6 +839,7 @@ module EncryptionSpecification =
         EncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?kmsKeyIdentifier ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyIdentifier =
         field_map json "kmsKeyIdentifier" KmsKeyARN.of_json in
@@ -851,6 +866,7 @@ module PointInTimeRecovery =
         PointInTimeRecoveryStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" PointInTimeRecoveryStatus.of_json in
@@ -876,6 +892,7 @@ module TimeToLive =
         TimeToLiveStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" TimeToLiveStatus.of_json in
       make ~status ()
@@ -1049,6 +1066,7 @@ module CapacitySpecificationSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "throughputMode") in
       make ?lastUpdateToPayPerRequestTimestamp ?writeCapacityUnits
         ?readCapacityUnits ~throughputMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateToPayPerRequestTimestamp =
         field_map json "lastUpdateToPayPerRequestTimestamp" Timestamp.of_json in
@@ -1077,6 +1095,7 @@ module Comment =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1109,6 +1128,7 @@ module PointInTimeRecoverySummary =
         PointInTimeRecoveryStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ?earliestRestorableTimestamp ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let earliestRestorableTimestamp =
         field_map json "earliestRestorableTimestamp" Timestamp.of_json in
@@ -1163,6 +1183,7 @@ module SchemaDefinition =
         ColumnDefinitionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "allColumns") in
       make ?staticColumns ?clusteringKeys ~partitionKeys ~allColumns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let staticColumns =
         field_map json "staticColumns" StaticColumnList.of_json in
@@ -1307,6 +1328,7 @@ module UpdateTableResponse =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -1403,6 +1425,7 @@ module UpdateTableRequest =
       make ?defaultTimeToLive ?ttl ?pointInTimeRecovery
         ?encryptionSpecification ?capacitySpecification ?addColumns
         ~tableName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultTimeToLive =
         field_map json "defaultTimeToLive" DefaultTimeToLive.of_json in
@@ -1507,6 +1530,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1534,6 +1558,7 @@ module UntagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -1614,6 +1639,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1641,6 +1667,7 @@ module TagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -1739,6 +1766,7 @@ module RestoreTableResponse =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "restoredTableARN") in
       make ~restoredTableARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restoredTableARN =
         field_map_exn json "restoredTableARN" ARN.of_json in
@@ -1846,6 +1874,7 @@ module RestoreTableRequest =
         ?encryptionSpecificationOverride ?capacitySpecificationOverride
         ?restoreTimestamp ~targetTableName ~targetKeyspaceName
         ~sourceTableName ~sourceKeyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsOverride = field_map json "tagsOverride" TagList.of_json in
       let pointInTimeRecoveryOverride =
@@ -1958,6 +1987,7 @@ module ListTagsForResourceResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?tags ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -1996,6 +2026,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -2089,6 +2120,7 @@ module ListTablesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?tables ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tables = field_map json "tables" TableSummaryList.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -2126,6 +2158,7 @@ module ListTablesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~keyspaceName ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyspaceName =
         field_map_exn json "keyspaceName" KeyspaceName.of_json in
@@ -2222,6 +2255,7 @@ module ListKeyspacesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~keyspaces ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyspaces =
         field_map_exn json "keyspaces" KeyspaceSummaryList.of_json in
@@ -2252,6 +2286,7 @@ module ListKeyspacesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -2442,6 +2477,7 @@ module GetTableResponse =
       make ?comment ?defaultTimeToLive ?ttl ?pointInTimeRecovery
         ?encryptionSpecification ?capacitySpecification ?schemaDefinition
         ?status ?creationTimestamp ~resourceArn ~tableName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "comment" Comment.of_json in
       let defaultTimeToLive =
@@ -2494,6 +2530,7 @@ module GetTableRequest =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~tableName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map_exn json "tableName" TableName.of_json in
       let keyspaceName =
@@ -2588,6 +2625,7 @@ module GetKeyspaceResponse =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~resourceArn ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       let keyspaceName =
@@ -2612,6 +2650,7 @@ module GetKeyspaceRequest =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyspaceName =
         field_map_exn json "keyspaceName" KeyspaceName.of_json in
@@ -2701,6 +2740,7 @@ module DeleteTableResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2729,6 +2769,7 @@ module DeleteTableRequest =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~tableName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map_exn json "tableName" TableName.of_json in
       let keyspaceName =
@@ -2819,6 +2860,7 @@ module DeleteKeyspaceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2840,6 +2882,7 @@ module DeleteKeyspaceRequest =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyspaceName =
         field_map_exn json "keyspaceName" KeyspaceName.of_json in
@@ -2938,6 +2981,7 @@ module CreateTableResponse =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -3049,6 +3093,7 @@ module CreateTableRequest =
       make ?tags ?defaultTimeToLive ?ttl ?pointInTimeRecovery
         ?encryptionSpecification ?capacitySpecification ?comment
         ~schemaDefinition ~tableName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let defaultTimeToLive =
@@ -3155,6 +3200,7 @@ module CreateKeyspaceResponse =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -3183,6 +3229,7 @@ module CreateKeyspaceRequest =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ?tags ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let keyspaceName =

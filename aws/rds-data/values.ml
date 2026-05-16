@@ -298,6 +298,7 @@ module rec
           (Xml.child xml_arg0 "arrayValues") in
       make ?stringValues ?longValues ?doubleValues ?booleanValues
         ?arrayValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringValues = field_map json "stringValues" StringArray.of_json in
       let longValues = field_map json "longValues" LongArray.of_json in
@@ -409,6 +410,7 @@ module rec
         (Option.map ~f:ArrayValueList.of_xml)
           (Xml.child xml_arg0 "attributes") in
       make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "attributes" ArrayValueList.of_json in
       make ?attributes ()
@@ -759,6 +761,13 @@ module rec
                                                                   ?bigIntValue
                                                                   ?arrayValues
                                                                   ()
+                                                              let of_string s
+                                                                =
+                                                                of_xml
+                                                                  (Awso.Xml.parse_response
+                                                                    s)
+                                                                [@@warning
+                                                                  "-32"]
                                                               let of_json
                                                                 json =
                                                                 let structValue
@@ -866,6 +875,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -999,6 +1009,7 @@ module Field =
         (Option.map ~f:ArrayValue.of_xml) (Xml.child xml_arg0 "arrayValue") in
       make ?stringValue ?longValue ?isNull ?doubleValue ?booleanValue
         ?blobValue ?arrayValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringValue = field_map json "stringValue" String_.of_json in
       let longValue = field_map json "longValue" BoxedLong.of_json in
@@ -1035,6 +1046,7 @@ module SqlParameter =
       let name =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?typeHint ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" Field.of_json in
       let typeHint = field_map json "typeHint" TypeHint.of_json in
@@ -1193,6 +1205,7 @@ module BatchExecuteStatementRequest =
         (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
       make ?transactionId ~sql ~secretArn ?schema ~resourceArn ?parameterSets
         ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transactionId = field_map json "transactionId" Id.of_json in
       let sql = field_map_exn json "sql" SqlStatement.of_json in
@@ -1247,6 +1260,7 @@ module UpdateResult =
         (Option.map ~f:FieldList.of_xml)
           (Xml.child xml_arg0 "generatedFields") in
       make ?generatedFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generatedFields =
         field_map json "generatedFields" FieldList.of_json in
@@ -1314,6 +1328,7 @@ module StatementTimeoutException =
       let dbConnectionId =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "dbConnectionId") in
       make ?message ?dbConnectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let dbConnectionId = field_map json "dbConnectionId" Long.of_json in
@@ -1328,6 +1343,7 @@ module ServiceUnavailableError =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1340,6 +1356,7 @@ module InternalServerErrorException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal error occurred."]
@@ -1359,6 +1376,7 @@ module ForbiddenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1446,6 +1464,7 @@ module BatchExecuteStatementResponse =
         (Option.map ~f:UpdateResults.of_xml)
           (Xml.child xml_arg0 "updateResults") in
       make ?updateResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateResults =
         field_map json "updateResults" UpdateResults.of_json in
@@ -1488,6 +1507,7 @@ module BeginTransactionRequest =
       let database =
         (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
       make ~secretArn ?schema ~resourceArn ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArn = field_map_exn json "secretArn" Arn.of_json in
       let schema = field_map json "schema" DbName.of_json in
@@ -1578,6 +1598,7 @@ module BeginTransactionResponse =
       let transactionId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "transactionId") in
       make ?transactionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transactionId = field_map json "transactionId" Id.of_json in
       make ?transactionId ()
@@ -1724,6 +1745,7 @@ module ColumnMetadata =
       make ?typeName ?type_ ?tableName ?schemaName ?scale ?precision
         ?nullable ?name ?label ?isSigned ?isCurrency ?isCaseSensitive
         ?isAutoIncrement ?arrayBaseColumnType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let typeName = field_map json "typeName" String_.of_json in
       let type_ = field_map json "type" Integer.of_json in
@@ -1776,6 +1798,7 @@ module CommitTransactionRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~transactionId ~secretArn ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transactionId = field_map_exn json "transactionId" Id.of_json in
       let secretArn = field_map_exn json "secretArn" Arn.of_json in
@@ -1818,6 +1841,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1915,6 +1939,7 @@ module CommitTransactionResponse =
         (Option.map ~f:TransactionStatus.of_xml)
           (Xml.child xml_arg0 "transactionStatus") in
       make ?transactionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transactionStatus =
         field_map json "transactionStatus" TransactionStatus.of_json in
@@ -2001,6 +2026,7 @@ module ExecuteSqlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "awsSecretStoreArn") in
       make ~sqlStatements ?schema ~dbClusterOrInstanceArn ?database
         ~awsSecretStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqlStatements =
         field_map_exn json "sqlStatements" SqlStatement.of_json in
@@ -2061,6 +2087,7 @@ module ResultSetMetadata =
       let columnCount =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "columnCount") in
       make ?columnMetadata ?columnCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let columnMetadata = field_map json "columnMetadata" Metadata.of_json in
       let columnCount = field_map json "columnCount" Long.of_json in
@@ -2103,6 +2130,7 @@ module Record =
     let of_xml xml_arg0 =
       let values = (Option.map ~f:Row.of_xml) (Xml.child xml_arg0 "values") in
       make ?values ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" Row.of_json in make ?values ()
     let to_json v = composed_to_json to_value v
@@ -2152,6 +2180,7 @@ module ResultFrame =
       let records =
         (Option.map ~f:Records.of_xml) (Xml.child xml_arg0 "records") in
       make ?resultSetMetadata ?records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resultSetMetadata =
         field_map json "resultSetMetadata" ResultSetMetadata.of_json in
@@ -2195,6 +2224,7 @@ module SqlStatementResult =
         (Option.map ~f:RecordsUpdated.of_xml)
           (Xml.child xml_arg0 "numberOfRecordsUpdated") in
       make ?resultFrame ?numberOfRecordsUpdated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resultFrame = field_map json "resultFrame" ResultFrame.of_json in
       let numberOfRecordsUpdated =
@@ -2301,6 +2331,7 @@ module ExecuteSqlResponse =
         (Option.map ~f:SqlStatementResults.of_xml)
           (Xml.child xml_arg0 "sqlStatementResults") in
       make ?sqlStatementResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqlStatementResults =
         field_map json "sqlStatementResults" SqlStatementResults.of_json in
@@ -2326,6 +2357,7 @@ module ResultSetOptions =
         (Option.map ~f:DecimalReturnType.of_xml)
           (Xml.child xml_arg0 "decimalReturnType") in
       make ?decimalReturnType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decimalReturnType =
         field_map json "decimalReturnType" DecimalReturnType.of_json in
@@ -2430,6 +2462,7 @@ module ExecuteStatementRequest =
       make ?transactionId ~sql ~secretArn ?schema ?resultSetOptions
         ~resourceArn ?parameters ?includeResultMetadata ?database
         ?continueAfterTimeout ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transactionId = field_map json "transactionId" Id.of_json in
       let sql = field_map_exn json "sql" SqlStatement.of_json in
@@ -2586,6 +2619,7 @@ module ExecuteStatementResponse =
         (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "columnMetadata") in
       make ?records ?numberOfRecordsUpdated ?generatedFields ?columnMetadata
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let records = field_map json "records" SqlRecords.of_json in
       let numberOfRecordsUpdated =
@@ -2629,6 +2663,7 @@ module RollbackTransactionRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~transactionId ~secretArn ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transactionId = field_map_exn json "transactionId" Id.of_json in
       let secretArn = field_map_exn json "secretArn" Arn.of_json in
@@ -2728,6 +2763,7 @@ module RollbackTransactionResponse =
         (Option.map ~f:TransactionStatus.of_xml)
           (Xml.child xml_arg0 "transactionStatus") in
       make ?transactionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transactionStatus =
         field_map json "transactionStatus" TransactionStatus.of_json in

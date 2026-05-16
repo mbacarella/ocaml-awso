@@ -40,6 +40,7 @@ module EnableVgwRoutePropagationRequest =
         VpnGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayId") in
       make ?dryRun ~routeTableId ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let routeTableId =
@@ -83,6 +84,7 @@ module EnableTransitGatewayRouteTablePropagationResult =
         (Option.map ~f:TransitGatewayPropagation.of_xml)
           (Xml.child xml_arg0 "propagation") in
       make ?propagation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propagation =
         field_map json "Propagation" TransitGatewayPropagation.of_json in
@@ -132,6 +134,7 @@ module EnableTransitGatewayRouteTablePropagationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayRouteTableId") in
       make ?dryRun ~transitGatewayAttachmentId ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -181,6 +184,7 @@ module EnableSerialConsoleAccessResult =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "serialConsoleAccessEnabled") in
       make ?serialConsoleAccessEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serialConsoleAccessEnabled =
         field_map json "SerialConsoleAccessEnabled" Boolean.of_json in
@@ -204,6 +208,7 @@ module EnableSerialConsoleAccessRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -242,6 +247,7 @@ module EnableIpamOrganizationAdminAccountResult =
       let success =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "success") in
       make ?success ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let success = field_map json "Success" Boolean.of_json in
       make ?success ()
@@ -275,6 +281,7 @@ module EnableIpamOrganizationAdminAccountRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~delegatedAdminAccountId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegatedAdminAccountId =
         field_map_exn json "DelegatedAdminAccountId" String_.of_json in
@@ -317,6 +324,7 @@ module EnableImageDeprecationResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -352,6 +360,7 @@ module EnableImageDeprecationRequest =
       let imageId =
         ImageId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImageId") in
       make ?dryRun ~deprecateAt ~imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let deprecateAt =
@@ -408,6 +417,7 @@ module EnableFastSnapshotRestoresResult =
         (Option.map ~f:EnableFastSnapshotRestoreSuccessSet.of_xml)
           (Xml.child xml_arg0 "successful") in
       make ?unsuccessful ?successful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful"
@@ -455,6 +465,7 @@ module EnableFastSnapshotRestoresRequest =
         AvailabilityZoneStringList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AvailabilityZone") in
       make ?dryRun ~sourceSnapshotIds ~availabilityZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let sourceSnapshotIds =
@@ -585,6 +596,7 @@ module EnableFastLaunchResult =
       make ?stateTransitionTime ?stateTransitionReason ?state ?ownerId
         ?maxParallelLaunches ?launchTemplate ?snapshotConfiguration
         ?resourceType ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateTransitionTime =
         field_map json "StateTransitionTime" MillisecondDateTime.of_json in
@@ -679,6 +691,7 @@ module EnableFastLaunchRequest =
         ImageId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImageId") in
       make ?dryRun ?maxParallelLaunches ?launchTemplate
         ?snapshotConfiguration ?resourceType ~imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let maxParallelLaunches =
@@ -731,6 +744,7 @@ module EnableEbsEncryptionByDefaultResult =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "ebsEncryptionByDefault") in
       make ?ebsEncryptionByDefault ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ebsEncryptionByDefault =
         field_map json "EbsEncryptionByDefault" Boolean.of_json in
@@ -754,6 +768,7 @@ module EnableEbsEncryptionByDefaultRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -809,6 +824,7 @@ module DisassociateVpcCidrBlockResult =
         (Option.map ~f:VpcIpv6CidrBlockAssociation.of_xml)
           (Xml.child xml_arg0 "ipv6CidrBlockAssociation") in
       make ?vpcId ?cidrBlockAssociation ?ipv6CidrBlockAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" String_.of_json in
       let cidrBlockAssociation =
@@ -838,6 +854,7 @@ module DisassociateVpcCidrBlockRequest =
         VpcCidrAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "associationId") in
       make ~associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationId =
         field_map_exn json "AssociationId" VpcCidrAssociationId.of_json in
@@ -885,6 +902,7 @@ module DisassociateTrunkInterfaceResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?clientToken ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let return = field_map json "Return" Boolean.of_json in
@@ -925,6 +943,7 @@ module DisassociateTrunkInterfaceRequest =
         TrunkInterfaceAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
       make ?dryRun ?clientToken ~associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let clientToken = field_map json "ClientToken" String_.of_json in
@@ -970,6 +989,7 @@ module DisassociateTransitGatewayRouteTableResult =
         (Option.map ~f:TransitGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "association") in
       make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let association =
         field_map json "Association" TransitGatewayAssociation.of_json in
@@ -1019,6 +1039,7 @@ module DisassociateTransitGatewayRouteTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayRouteTableId") in
       make ?dryRun ~transitGatewayAttachmentId ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -1067,6 +1088,7 @@ module DisassociateTransitGatewayMulticastDomainResult =
         (Option.map ~f:TransitGatewayMulticastDomainAssociations.of_xml)
           (Xml.child xml_arg0 "associations") in
       make ?associations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associations =
         field_map json "Associations"
@@ -1126,6 +1148,7 @@ module DisassociateTransitGatewayMulticastDomainRequest =
           (Xml.child xml_arg0 "TransitGatewayMulticastDomainId") in
       make ?dryRun ?subnetIds ?transitGatewayAttachmentId
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let subnetIds =
@@ -1182,6 +1205,7 @@ module DisassociateSubnetCidrBlockResult =
         (Option.map ~f:SubnetIpv6CidrBlockAssociation.of_xml)
           (Xml.child xml_arg0 "ipv6CidrBlockAssociation") in
       make ?subnetId ?ipv6CidrBlockAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetId = field_map json "SubnetId" String_.of_json in
       let ipv6CidrBlockAssociation =
@@ -1209,6 +1233,7 @@ module DisassociateSubnetCidrBlockRequest =
         SubnetCidrAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "associationId") in
       make ~associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationId =
         field_map_exn json "AssociationId" SubnetCidrAssociationId.of_json in
@@ -1242,6 +1267,7 @@ module DisassociateRouteTableRequest =
         RouteTableAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "associationId") in
       make ?dryRun ~associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let associationId =
@@ -1285,6 +1311,7 @@ module DisassociateInstanceEventWindowResult =
         (Option.map ~f:InstanceEventWindow.of_xml)
           (Xml.child xml_arg0 "instanceEventWindow") in
       make ?instanceEventWindow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceEventWindow =
         field_map json "InstanceEventWindow" InstanceEventWindow.of_json in
@@ -1329,6 +1356,7 @@ module DisassociateInstanceEventWindowRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~associationTarget ~instanceEventWindowId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationTarget =
         field_map_exn json "AssociationTarget"
@@ -1379,6 +1407,7 @@ module DisassociateIamInstanceProfileResult =
         (Option.map ~f:IamInstanceProfileAssociation.of_xml)
           (Xml.child xml_arg0 "iamInstanceProfileAssociation") in
       make ?iamInstanceProfileAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamInstanceProfileAssociation =
         field_map json "IamInstanceProfileAssociation"
@@ -1405,6 +1434,7 @@ module DisassociateIamInstanceProfileRequest =
         IamInstanceProfileAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
       make ~associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationId =
         field_map_exn json "AssociationId"
@@ -1447,6 +1477,7 @@ module DisassociateEnclaveCertificateIamRoleResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -1483,6 +1514,7 @@ module DisassociateEnclaveCertificateIamRoleRequest =
         (Option.map ~f:ResourceArn.of_xml)
           (Xml.child xml_arg0 "CertificateArn") in
       make ?dryRun ?roleArn ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let roleArn = field_map json "RoleArn" ResourceArn.of_json in
@@ -1532,6 +1564,7 @@ module DisassociateClientVpnTargetNetworkResult =
       let associationId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationId") in
       make ?status ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" AssociationStatus.of_json in
       let associationId = field_map json "AssociationId" String_.of_json in
@@ -1574,6 +1607,7 @@ module DisassociateClientVpnTargetNetworkRequest =
         ClientVpnEndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ~associationId ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let associationId =
@@ -1616,6 +1650,7 @@ module DisassociateAddressRequest =
         (Option.map ~f:ElasticIpAssociationId.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
       make ?dryRun ?publicIp ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let publicIp = field_map json "PublicIp" String_.of_json in
@@ -1659,6 +1694,7 @@ module DisableVpcClassicLinkResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -1685,6 +1721,7 @@ module DisableVpcClassicLinkRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~vpcId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -1726,6 +1763,7 @@ module DisableVpcClassicLinkDnsSupportResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -1742,6 +1780,7 @@ module DisableVpcClassicLinkDnsSupportRequest =
     let of_xml xml_arg0 =
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       make ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in make ?vpcId ()
     let to_json v = composed_to_json to_value v
@@ -1777,6 +1816,7 @@ module DisableVgwRoutePropagationRequest =
         VpnGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayId") in
       make ?dryRun ~routeTableId ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let routeTableId =
@@ -1820,6 +1860,7 @@ module DisableTransitGatewayRouteTablePropagationResult =
         (Option.map ~f:TransitGatewayPropagation.of_xml)
           (Xml.child xml_arg0 "propagation") in
       make ?propagation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propagation =
         field_map json "Propagation" TransitGatewayPropagation.of_json in
@@ -1869,6 +1910,7 @@ module DisableTransitGatewayRouteTablePropagationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayRouteTableId") in
       make ?dryRun ~transitGatewayAttachmentId ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -1918,6 +1960,7 @@ module DisableSerialConsoleAccessResult =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "serialConsoleAccessEnabled") in
       make ?serialConsoleAccessEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serialConsoleAccessEnabled =
         field_map json "SerialConsoleAccessEnabled" Boolean.of_json in
@@ -1941,6 +1984,7 @@ module DisableSerialConsoleAccessRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -1979,6 +2023,7 @@ module DisableIpamOrganizationAdminAccountResult =
       let success =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "success") in
       make ?success ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let success = field_map json "Success" Boolean.of_json in
       make ?success ()
@@ -2012,6 +2057,7 @@ module DisableIpamOrganizationAdminAccountRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~delegatedAdminAccountId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegatedAdminAccountId =
         field_map_exn json "DelegatedAdminAccountId" String_.of_json in
@@ -2054,6 +2100,7 @@ module DisableImageDeprecationResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -2080,6 +2127,7 @@ module DisableImageDeprecationRequest =
       let imageId =
         ImageId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImageId") in
       make ?dryRun ~imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let imageId = field_map_exn json "ImageId" ImageId.of_json in
@@ -2134,6 +2182,7 @@ module DisableFastSnapshotRestoresResult =
         (Option.map ~f:DisableFastSnapshotRestoreSuccessSet.of_xml)
           (Xml.child xml_arg0 "successful") in
       make ?unsuccessful ?successful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful"
@@ -2181,6 +2230,7 @@ module DisableFastSnapshotRestoresRequest =
         AvailabilityZoneStringList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AvailabilityZone") in
       make ?dryRun ~sourceSnapshotIds ~availabilityZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let sourceSnapshotIds =
@@ -2311,6 +2361,7 @@ module DisableFastLaunchResult =
       make ?stateTransitionTime ?stateTransitionReason ?state ?ownerId
         ?maxParallelLaunches ?launchTemplate ?snapshotConfiguration
         ?resourceType ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateTransitionTime =
         field_map json "StateTransitionTime" MillisecondDateTime.of_json in
@@ -2364,6 +2415,7 @@ module DisableFastLaunchRequest =
       let imageId =
         ImageId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImageId") in
       make ?dryRun ?force ~imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let force = field_map json "Force" Boolean.of_json in
@@ -2407,6 +2459,7 @@ module DisableEbsEncryptionByDefaultResult =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "ebsEncryptionByDefault") in
       make ?ebsEncryptionByDefault ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ebsEncryptionByDefault =
         field_map json "EbsEncryptionByDefault" Boolean.of_json in
@@ -2430,6 +2483,7 @@ module DisableEbsEncryptionByDefaultRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -2464,6 +2518,7 @@ module DetachVpnGatewayRequest =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ?dryRun ~vpnGatewayId ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpnGatewayId =
@@ -2513,6 +2568,7 @@ module DetachVolumeRequest =
       let device =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Device") in
       make ?dryRun ~volumeId ?instanceId ?force ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
@@ -2554,6 +2610,7 @@ module DetachNetworkInterfaceRequest =
         NetworkInterfaceAttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ?force ?dryRun ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let force = field_map json "Force" Boolean.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -2593,6 +2650,7 @@ module DetachInternetGatewayRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~vpcId ~internetGatewayId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
       let internetGatewayId =
@@ -2636,6 +2694,7 @@ module DetachClassicLinkVpcResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -2671,6 +2730,7 @@ module DetachClassicLinkVpcRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~vpcId ~instanceId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -2715,6 +2775,7 @@ module DescribeVpnGatewaysResult =
         (Option.map ~f:VpnGatewayList.of_xml)
           (Xml.child xml_arg0 "vpnGatewaySet") in
       make ?vpnGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnGateways = field_map json "VpnGateways" VpnGatewayList.of_json in
       make ?vpnGateways ()
@@ -2752,6 +2813,7 @@ module DescribeVpnGatewaysRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?vpnGatewayIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpnGatewayIds =
@@ -2795,6 +2857,7 @@ module DescribeVpnConnectionsResult =
         (Option.map ~f:VpnConnectionList.of_xml)
           (Xml.child xml_arg0 "vpnConnectionSet") in
       make ?vpnConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnConnections =
         field_map json "VpnConnections" VpnConnectionList.of_json in
@@ -2834,6 +2897,7 @@ module DescribeVpnConnectionsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?vpnConnectionIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpnConnectionIds =
@@ -2880,6 +2944,7 @@ module DescribeVpcsResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let vpcs = (Option.map ~f:VpcList.of_xml) (Xml.child xml_arg0 "vpcSet") in
       make ?nextToken ?vpcs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let vpcs = field_map json "Vpcs" VpcList.of_json in
@@ -2931,6 +2996,7 @@ module DescribeVpcsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?dryRun ?vpcIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeVpcsMaxResults.of_json in
@@ -2984,6 +3050,7 @@ module DescribeVpcPeeringConnectionsResult =
         (Option.map ~f:VpcPeeringConnectionList.of_xml)
           (Xml.child xml_arg0 "vpcPeeringConnectionSet") in
       make ?nextToken ?vpcPeeringConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let vpcPeeringConnections =
@@ -3050,6 +3117,7 @@ module DescribeVpcPeeringConnectionsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?vpcPeeringConnectionIds ?dryRun ?filters
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -3106,6 +3174,7 @@ module DescribeVpcEndpointsResult =
         (Option.map ~f:VpcEndpointSet.of_xml)
           (Xml.child xml_arg0 "vpcEndpointSet") in
       make ?nextToken ?vpcEndpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let vpcEndpoints = field_map json "VpcEndpoints" VpcEndpointSet.of_json in
@@ -3159,6 +3228,7 @@ module DescribeVpcEndpointsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?vpcEndpointIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -3220,6 +3290,7 @@ module DescribeVpcEndpointServicesResult =
         (Option.map ~f:ValueStringList.of_xml)
           (Xml.child xml_arg0 "serviceNameSet") in
       make ?nextToken ?serviceDetails ?serviceNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let serviceDetails =
@@ -3276,6 +3347,7 @@ module DescribeVpcEndpointServicesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?serviceNames ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -3328,6 +3400,7 @@ module DescribeVpcEndpointServicePermissionsResult =
         (Option.map ~f:AllowedPrincipalSet.of_xml)
           (Xml.child xml_arg0 "allowedPrincipals") in
       make ?nextToken ?allowedPrincipals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let allowedPrincipals =
@@ -3380,6 +3453,7 @@ module DescribeVpcEndpointServicePermissionsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ~serviceId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -3434,6 +3508,7 @@ module DescribeVpcEndpointServiceConfigurationsResult =
         (Option.map ~f:ServiceConfigurationSet.of_xml)
           (Xml.child xml_arg0 "serviceConfigurationSet") in
       make ?nextToken ?serviceConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let serviceConfigurations =
@@ -3489,6 +3564,7 @@ module DescribeVpcEndpointServiceConfigurationsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?serviceIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -3544,6 +3620,7 @@ module DescribeVpcEndpointConnectionsResult =
         (Option.map ~f:VpcEndpointConnectionSet.of_xml)
           (Xml.child xml_arg0 "vpcEndpointConnectionSet") in
       make ?nextToken ?vpcEndpointConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let vpcEndpointConnections =
@@ -3590,6 +3667,7 @@ module DescribeVpcEndpointConnectionsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -3642,6 +3720,7 @@ module DescribeVpcEndpointConnectionNotificationsResult =
         (Option.map ~f:ConnectionNotificationSet.of_xml)
           (Xml.child xml_arg0 "connectionNotificationSet") in
       make ?nextToken ?connectionNotificationSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let connectionNotificationSet =
@@ -3705,6 +3784,7 @@ module DescribeVpcEndpointConnectionNotificationsRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?connectionNotificationId ?dryRun
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -3752,6 +3832,7 @@ module DescribeVpcClassicLinkResult =
         (Option.map ~f:VpcClassicLinkList.of_xml)
           (Xml.child xml_arg0 "vpcSet") in
       make ?vpcs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcs = field_map json "Vpcs" VpcClassicLinkList.of_json in
       make ?vpcs ()
@@ -3787,6 +3868,7 @@ module DescribeVpcClassicLinkRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?vpcIds ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcIds = field_map json "VpcIds" VpcClassicLinkIdList.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -3838,6 +3920,7 @@ module DescribeVpcClassicLinkDnsSupportResult =
         (Option.map ~f:DescribeVpcClassicLinkDnsSupportNextToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?vpcs ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcs = field_map json "Vpcs" ClassicLinkDnsSupportList.of_json in
       let nextToken =
@@ -3882,6 +3965,7 @@ module DescribeVpcClassicLinkDnsSupportRequest =
         (Option.map ~f:DescribeVpcClassicLinkDnsSupportMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?vpcIds ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcIds = field_map json "VpcIds" VpcClassicLinkIdList.of_json in
       let nextToken =
@@ -3944,6 +4028,7 @@ module DescribeVpcAttributeResult =
           (Xml.child xml_arg0 "enableDnsHostnames") in
       let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
       make ?enableDnsSupport ?enableDnsHostnames ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableDnsSupport =
         field_map json "EnableDnsSupport" AttributeBooleanValue.of_json in
@@ -3981,6 +4066,7 @@ module DescribeVpcAttributeRequest =
         VpcAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
       make ?dryRun ~vpcId ~attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
@@ -4028,6 +4114,7 @@ module DescribeVolumesResult =
       let volumes =
         (Option.map ~f:VolumeList.of_xml) (Xml.child xml_arg0 "volumeSet") in
       make ?nextToken ?volumes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let volumes = field_map json "Volumes" VolumeList.of_json in
@@ -4079,6 +4166,7 @@ module DescribeVolumesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?nextToken ?maxResults ?dryRun ?volumeIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -4132,6 +4220,7 @@ module DescribeVolumesModificationsResult =
         (Option.map ~f:VolumeModificationList.of_xml)
           (Xml.child xml_arg0 "volumeModificationSet") in
       make ?nextToken ?volumesModifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let volumesModifications =
@@ -4185,6 +4274,7 @@ module DescribeVolumesModificationsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?maxResults ?nextToken ?filters ?volumeIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" Integer.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4237,6 +4327,7 @@ module DescribeVolumeStatusResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?volumeStatuses ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeStatuses =
         field_map json "VolumeStatuses" VolumeStatusList.of_json in
@@ -4291,6 +4382,7 @@ module DescribeVolumeStatusRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?volumeIds ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let volumeIds = field_map json "VolumeIds" VolumeIdStringList.of_json in
@@ -4349,6 +4441,7 @@ module DescribeVolumeAttributeResult =
         (Option.map ~f:AttributeBooleanValue.of_xml)
           (Xml.child xml_arg0 "autoEnableIO") in
       make ?volumeId ?productCodes ?autoEnableIO ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeId = field_map json "VolumeId" String_.of_json in
       let productCodes =
@@ -4389,6 +4482,7 @@ module DescribeVolumeAttributeRequest =
         VolumeAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
       make ?dryRun ~volumeId ~attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
@@ -4441,6 +4535,7 @@ module DescribeTrunkInterfaceAssociationsResult =
         (Option.map ~f:TrunkInterfaceAssociationList.of_xml)
           (Xml.child xml_arg0 "interfaceAssociationSet") in
       make ?nextToken ?interfaceAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let interfaceAssociations =
@@ -4500,6 +4595,7 @@ module DescribeTrunkInterfaceAssociationsRequest =
         (Option.map ~f:TrunkInterfaceAssociationIdList.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
       make ?maxResults ?nextToken ?filters ?dryRun ?associationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -4556,6 +4652,7 @@ module DescribeTransitGatewaysResult =
         (Option.map ~f:TransitGatewayList.of_xml)
           (Xml.child xml_arg0 "transitGatewaySet") in
       make ?nextToken ?transitGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGateways =
@@ -4613,6 +4710,7 @@ module DescribeTransitGatewaysRequest =
         (Option.map ~f:TransitGatewayIdStringList.of_xml)
           (Xml.child xml_arg0 "TransitGatewayIds") in
       make ?dryRun ?nextToken ?maxResults ?filters ?transitGatewayIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4668,6 +4766,7 @@ module DescribeTransitGatewayVpcAttachmentsResult =
         (Option.map ~f:TransitGatewayVpcAttachmentList.of_xml)
           (Xml.child xml_arg0 "transitGatewayVpcAttachments") in
       make ?nextToken ?transitGatewayVpcAttachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGatewayVpcAttachments =
@@ -4734,6 +4833,7 @@ module DescribeTransitGatewayVpcAttachmentsRequest =
           (Xml.child xml_arg0 "TransitGatewayAttachmentIds") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?transitGatewayAttachmentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4791,6 +4891,7 @@ module DescribeTransitGatewayRouteTablesResult =
         (Option.map ~f:TransitGatewayRouteTableList.of_xml)
           (Xml.child xml_arg0 "transitGatewayRouteTables") in
       make ?nextToken ?transitGatewayRouteTables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGatewayRouteTables =
@@ -4857,6 +4958,7 @@ module DescribeTransitGatewayRouteTablesRequest =
           (Xml.child xml_arg0 "TransitGatewayRouteTableIds") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?transitGatewayRouteTableIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4916,6 +5018,7 @@ module DescribeTransitGatewayPeeringAttachmentsResult =
         (Option.map ~f:TransitGatewayPeeringAttachmentList.of_xml)
           (Xml.child xml_arg0 "transitGatewayPeeringAttachments") in
       make ?nextToken ?transitGatewayPeeringAttachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGatewayPeeringAttachments =
@@ -4982,6 +5085,7 @@ module DescribeTransitGatewayPeeringAttachmentsRequest =
           (Xml.child xml_arg0 "TransitGatewayAttachmentIds") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?transitGatewayAttachmentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5041,6 +5145,7 @@ module DescribeTransitGatewayMulticastDomainsResult =
         (Option.map ~f:TransitGatewayMulticastDomainList.of_xml)
           (Xml.child xml_arg0 "transitGatewayMulticastDomains") in
       make ?nextToken ?transitGatewayMulticastDomains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGatewayMulticastDomains =
@@ -5106,6 +5211,7 @@ module DescribeTransitGatewayMulticastDomainsRequest =
           (Xml.child xml_arg0 "TransitGatewayMulticastDomainIds") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?transitGatewayMulticastDomainIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5162,6 +5268,7 @@ module DescribeTransitGatewayConnectsResult =
         (Option.map ~f:TransitGatewayConnectList.of_xml)
           (Xml.child xml_arg0 "transitGatewayConnectSet") in
       make ?nextToken ?transitGatewayConnects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGatewayConnects =
@@ -5227,6 +5334,7 @@ module DescribeTransitGatewayConnectsRequest =
           (Xml.child xml_arg0 "TransitGatewayAttachmentIds") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?transitGatewayAttachmentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5283,6 +5391,7 @@ module DescribeTransitGatewayConnectPeersResult =
         (Option.map ~f:TransitGatewayConnectPeerList.of_xml)
           (Xml.child xml_arg0 "transitGatewayConnectPeerSet") in
       make ?nextToken ?transitGatewayConnectPeers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGatewayConnectPeers =
@@ -5348,6 +5457,7 @@ module DescribeTransitGatewayConnectPeersRequest =
           (Xml.child xml_arg0 "TransitGatewayConnectPeerIds") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?transitGatewayConnectPeerIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5404,6 +5514,7 @@ module DescribeTransitGatewayAttachmentsResult =
         (Option.map ~f:TransitGatewayAttachmentList.of_xml)
           (Xml.child xml_arg0 "transitGatewayAttachments") in
       make ?nextToken ?transitGatewayAttachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let transitGatewayAttachments =
@@ -5470,6 +5581,7 @@ module DescribeTransitGatewayAttachmentsRequest =
           (Xml.child xml_arg0 "TransitGatewayAttachmentIds") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?transitGatewayAttachmentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5527,6 +5639,7 @@ module DescribeTrafficMirrorTargetsResult =
         (Option.map ~f:TrafficMirrorTargetSet.of_xml)
           (Xml.child xml_arg0 "trafficMirrorTargetSet") in
       make ?nextToken ?trafficMirrorTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let trafficMirrorTargets =
@@ -5589,6 +5702,7 @@ module DescribeTrafficMirrorTargetsRequest =
         (Option.map ~f:TrafficMirrorTargetIdList.of_xml)
           (Xml.child xml_arg0 "TrafficMirrorTargetId") in
       make ?nextToken ?maxResults ?filters ?dryRun ?trafficMirrorTargetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -5645,6 +5759,7 @@ module DescribeTrafficMirrorSessionsResult =
         (Option.map ~f:TrafficMirrorSessionSet.of_xml)
           (Xml.child xml_arg0 "trafficMirrorSessionSet") in
       make ?nextToken ?trafficMirrorSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let trafficMirrorSessions =
@@ -5710,6 +5825,7 @@ module DescribeTrafficMirrorSessionsRequest =
           (Xml.child xml_arg0 "TrafficMirrorSessionId") in
       make ?nextToken ?maxResults ?filters ?dryRun ?trafficMirrorSessionIds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -5767,6 +5883,7 @@ module DescribeTrafficMirrorFiltersResult =
         (Option.map ~f:TrafficMirrorFilterSet.of_xml)
           (Xml.child xml_arg0 "trafficMirrorFilterSet") in
       make ?nextToken ?trafficMirrorFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let trafficMirrorFilters =
@@ -5829,6 +5946,7 @@ module DescribeTrafficMirrorFiltersRequest =
         (Option.map ~f:TrafficMirrorFilterIdList.of_xml)
           (Xml.child xml_arg0 "TrafficMirrorFilterId") in
       make ?nextToken ?maxResults ?filters ?dryRun ?trafficMirrorFilterIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -5880,6 +5998,7 @@ module DescribeTagsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?tags ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagDescriptionList.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5924,6 +6043,7 @@ module DescribeTagsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?nextToken ?maxResults ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -5972,6 +6092,7 @@ module DescribeSubnetsResult =
       let subnets =
         (Option.map ~f:SubnetList.of_xml) (Xml.child xml_arg0 "subnetSet") in
       make ?nextToken ?subnets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let subnets = field_map json "Subnets" SubnetList.of_json in
@@ -6026,6 +6147,7 @@ module DescribeSubnetsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?dryRun ?subnetIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeSubnetsMaxResults.of_json in
@@ -6080,6 +6202,7 @@ module DescribeStoreImageTasksResult =
         (Option.map ~f:StoreImageTaskResultSet.of_xml)
           (Xml.child xml_arg0 "storeImageTaskResultSet") in
       make ?nextToken ?storeImageTaskResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let storeImageTaskResults =
@@ -6136,6 +6259,7 @@ module DescribeStoreImageTasksRequest =
       let imageIds =
         (Option.map ~f:ImageIdList.of_xml) (Xml.child xml_arg0 "ImageId") in
       make ?maxResults ?nextToken ?filters ?dryRun ?imageIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -6192,6 +6316,7 @@ module DescribeStaleSecurityGroupsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?staleSecurityGroupSet ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let staleSecurityGroupSet =
         field_map json "StaleSecurityGroupSet" StaleSecurityGroupSet.of_json in
@@ -6242,6 +6367,7 @@ module DescribeStaleSecurityGroupsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~vpcId ?nextToken ?maxResults ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
       let nextToken =
@@ -6297,6 +6423,7 @@ module DescribeSpotPriceHistoryResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?spotPriceHistory ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotPriceHistory =
         field_map json "SpotPriceHistory" SpotPriceHistoryList.of_json in
@@ -6394,6 +6521,7 @@ module DescribeSpotPriceHistoryRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?startTime ?productDescriptions ?nextToken ?maxResults
         ?instanceTypes ?endTime ?dryRun ?availabilityZone ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" DateTime.of_json in
       let productDescriptions =
@@ -6454,6 +6582,7 @@ module DescribeSpotInstanceRequestsResult =
         (Option.map ~f:SpotInstanceRequestList.of_xml)
           (Xml.child xml_arg0 "spotInstanceRequestSet") in
       make ?nextToken ?spotInstanceRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let spotInstanceRequests =
@@ -6515,6 +6644,7 @@ module DescribeSpotInstanceRequestsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?spotInstanceRequestIds ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" Integer.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6572,6 +6702,7 @@ module DescribeSpotFleetRequestsResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?spotFleetRequestConfigs ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotFleetRequestConfigs =
         field_map json "SpotFleetRequestConfigs"
@@ -6619,6 +6750,7 @@ module DescribeSpotFleetRequestsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?spotFleetRequestIds ?nextToken ?maxResults ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotFleetRequestIds =
         field_map json "SpotFleetRequestIds" SpotFleetRequestIdList.of_json in
@@ -6704,6 +6836,7 @@ module DescribeSpotFleetRequestHistoryResponse =
           (Xml.child xml_arg0 "historyRecordSet") in
       make ?startTime ?spotFleetRequestId ?nextToken ?lastEvaluatedTime
         ?historyRecords ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" DateTime.of_json in
       let spotFleetRequestId =
@@ -6783,6 +6916,7 @@ module DescribeSpotFleetRequestHistoryRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~startTime ~spotFleetRequestId ?nextToken ?maxResults ?eventType
         ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map_exn json "StartTime" DateTime.of_json in
       let spotFleetRequestId =
@@ -6850,6 +6984,7 @@ module DescribeSpotFleetInstancesResponse =
         (Option.map ~f:ActiveInstanceSet.of_xml)
           (Xml.child xml_arg0 "activeInstanceSet") in
       make ?spotFleetRequestId ?nextToken ?activeInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotFleetRequestId =
         field_map json "SpotFleetRequestId" String_.of_json in
@@ -6901,6 +7036,7 @@ module DescribeSpotFleetInstancesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~spotFleetRequestId ?nextToken ?maxResults ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotFleetRequestId =
         field_map_exn json "SpotFleetRequestId" SpotFleetRequestId.of_json in
@@ -6949,6 +7085,7 @@ module DescribeSpotDatafeedSubscriptionResult =
         (Option.map ~f:SpotDatafeedSubscription.of_xml)
           (Xml.child xml_arg0 "spotDatafeedSubscription") in
       make ?spotDatafeedSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotDatafeedSubscription =
         field_map json "SpotDatafeedSubscription"
@@ -6972,6 +7109,7 @@ module DescribeSpotDatafeedSubscriptionRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -7018,6 +7156,7 @@ module DescribeSnapshotsResult =
         (Option.map ~f:SnapshotList.of_xml)
           (Xml.child xml_arg0 "snapshotSet") in
       make ?nextToken ?snapshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let snapshots = field_map json "Snapshots" SnapshotList.of_json in
@@ -7099,6 +7238,7 @@ module DescribeSnapshotsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?snapshotIds ?restorableByUserIds ?ownerIds ?nextToken
         ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let snapshotIds =
@@ -7157,6 +7297,7 @@ module DescribeSnapshotTierStatusResult =
         (Option.map ~f:SnapshotTierStatusSet.of_xml)
           (Xml.child xml_arg0 "snapshotTierStatusSet") in
       make ?nextToken ?snapshotTierStatuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let snapshotTierStatuses =
@@ -7205,6 +7346,7 @@ module DescribeSnapshotTierStatusRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -7267,6 +7409,7 @@ module DescribeSnapshotAttributeResult =
         (Option.map ~f:CreateVolumePermissionList.of_xml)
           (Xml.child xml_arg0 "createVolumePermission") in
       make ?snapshotId ?productCodes ?createVolumePermissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "SnapshotId" String_.of_json in
       let productCodes =
@@ -7308,6 +7451,7 @@ module DescribeSnapshotAttributeRequest =
         SnapshotAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
       make ?dryRun ~snapshotId ~attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
@@ -7359,6 +7503,7 @@ module DescribeSecurityGroupsResult =
         (Option.map ~f:SecurityGroupList.of_xml)
           (Xml.child xml_arg0 "securityGroupInfo") in
       make ?nextToken ?securityGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let securityGroups =
@@ -7432,6 +7577,7 @@ module DescribeSecurityGroupsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?dryRun ?groupNames ?groupIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeSecurityGroupsMaxResults.of_json in
@@ -7487,6 +7633,7 @@ module DescribeSecurityGroupRulesResult =
         (Option.map ~f:SecurityGroupRuleList.of_xml)
           (Xml.child xml_arg0 "securityGroupRuleSet") in
       make ?nextToken ?securityGroupRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let securityGroupRules =
@@ -7550,6 +7697,7 @@ module DescribeSecurityGroupRulesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?dryRun ?securityGroupRuleIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -7600,6 +7748,7 @@ module DescribeSecurityGroupReferencesResult =
         (Option.map ~f:SecurityGroupReferences.of_xml)
           (Xml.child xml_arg0 "securityGroupReferenceSet") in
       make ?securityGroupReferenceSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupReferenceSet =
         field_map json "SecurityGroupReferenceSet"
@@ -7630,6 +7779,7 @@ module DescribeSecurityGroupReferencesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~groupId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupId = field_map_exn json "GroupId" GroupIds.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -7680,6 +7830,7 @@ module DescribeScheduledInstancesResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?scheduledInstanceSet ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledInstanceSet =
         field_map json "ScheduledInstanceSet" ScheduledInstanceSet.of_json in
@@ -7751,6 +7902,7 @@ module DescribeScheduledInstancesRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?slotStartTimeRange ?scheduledInstanceIds ?nextToken ?maxResults
         ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let slotStartTimeRange =
         field_map json "SlotStartTimeRange" SlotStartTimeRangeRequest.of_json in
@@ -7810,6 +7962,7 @@ module DescribeScheduledInstanceAvailabilityResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?scheduledInstanceAvailabilitySet ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledInstanceAvailabilitySet =
         field_map json "ScheduledInstanceAvailabilitySet"
@@ -7906,6 +8059,7 @@ module DescribeScheduledInstanceAvailabilityRequest =
       make ~recurrence ?nextToken ?minSlotDurationInHours
         ?maxSlotDurationInHours ?maxResults ~firstSlotStartTimeRange ?filters
         ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recurrence =
         field_map_exn json "Recurrence"
@@ -7971,6 +8125,7 @@ module DescribeRouteTablesResult =
         (Option.map ~f:RouteTableList.of_xml)
           (Xml.child xml_arg0 "routeTableSet") in
       make ?nextToken ?routeTables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let routeTables = field_map json "RouteTables" RouteTableList.of_json in
@@ -8026,6 +8181,7 @@ module DescribeRouteTablesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?routeTableIds ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeRouteTablesMaxResults.of_json in
@@ -8073,6 +8229,7 @@ module DescribeReservedInstancesResult =
         (Option.map ~f:ReservedInstancesList.of_xml)
           (Xml.child xml_arg0 "reservedInstancesSet") in
       make ?reservedInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstances =
         field_map json "ReservedInstances" ReservedInstancesList.of_json in
@@ -8139,6 +8296,7 @@ module DescribeReservedInstancesRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?offeringType ?dryRun ?reservedInstancesIds ?offeringClass
         ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringType =
         field_map json "OfferingType" OfferingTypeValues.of_json in
@@ -8196,6 +8354,7 @@ module DescribeReservedInstancesOfferingsResult =
         (Option.map ~f:ReservedInstancesOfferingList.of_xml)
           (Xml.child xml_arg0 "reservedInstancesOfferingsSet") in
       make ?nextToken ?reservedInstancesOfferings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let reservedInstancesOfferings =
@@ -8357,6 +8516,7 @@ module DescribeReservedInstancesOfferingsRequest =
         ?reservedInstancesOfferingIds ?productDescription ?offeringClass
         ?minDuration ?maxInstanceCount ?maxDuration ?instanceType
         ?includeMarketplace ?filters ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringType =
         field_map json "OfferingType" OfferingTypeValues.of_json in
@@ -8433,6 +8593,7 @@ module DescribeReservedInstancesModificationsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reservedInstancesModifications ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesModifications =
         field_map json "ReservedInstancesModifications"
@@ -8475,6 +8636,7 @@ module DescribeReservedInstancesModificationsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?nextToken ?reservedInstancesModificationIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let reservedInstancesModificationIds =
@@ -8522,6 +8684,7 @@ module DescribeReservedInstancesListingsResult =
         (Option.map ~f:ReservedInstancesListingList.of_xml)
           (Xml.child xml_arg0 "reservedInstancesListingsSet") in
       make ?reservedInstancesListings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesListings =
         field_map json "ReservedInstancesListings"
@@ -8565,6 +8728,7 @@ module DescribeReservedInstancesListingsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?reservedInstancesListingId ?reservedInstancesId ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesListingId =
         field_map json "ReservedInstancesListingId"
@@ -8619,6 +8783,7 @@ module DescribeReplaceRootVolumeTasksResult =
         (Option.map ~f:ReplaceRootVolumeTasks.of_xml)
           (Xml.child xml_arg0 "replaceRootVolumeTaskSet") in
       make ?nextToken ?replaceRootVolumeTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let replaceRootVolumeTasks =
@@ -8685,6 +8850,7 @@ module DescribeReplaceRootVolumeTasksRequest =
           (Xml.child xml_arg0 "ReplaceRootVolumeTaskId") in
       make ?dryRun ?nextToken ?maxResults ?filters ?replaceRootVolumeTaskIds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8733,6 +8899,7 @@ module DescribeRegionsResult =
       let regions =
         (Option.map ~f:RegionList.of_xml) (Xml.child xml_arg0 "regionInfo") in
       make ?regions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regions = field_map json "Regions" RegionList.of_json in
       make ?regions ()
@@ -8779,6 +8946,7 @@ module DescribeRegionsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?allRegions ?dryRun ?regionNames ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allRegions = field_map json "AllRegions" Boolean.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -8831,6 +8999,7 @@ module DescribePublicIpv4PoolsResult =
         (Option.map ~f:PublicIpv4PoolSet.of_xml)
           (Xml.child xml_arg0 "publicIpv4PoolSet") in
       make ?nextToken ?publicIpv4Pools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let publicIpv4Pools =
@@ -8877,6 +9046,7 @@ module DescribePublicIpv4PoolsRequest =
         (Option.map ~f:PublicIpv4PoolIdStringList.of_xml)
           (Xml.child xml_arg0 "PoolId") in
       make ?filters ?maxResults ?nextToken ?poolIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let maxResults = field_map json "MaxResults" PoolMaxResults.of_json in
@@ -8928,6 +9098,7 @@ module DescribePrincipalIdFormatResult =
         (Option.map ~f:PrincipalIdFormatList.of_xml)
           (Xml.child xml_arg0 "principalSet") in
       make ?nextToken ?principals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let principals =
@@ -8976,6 +9147,7 @@ module DescribePrincipalIdFormatRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?resources ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults =
@@ -9029,6 +9201,7 @@ module DescribePrefixListsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?prefixLists ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixLists = field_map json "PrefixLists" PrefixListSet.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -9083,6 +9256,7 @@ module DescribePrefixListsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?prefixListIds ?nextToken ?maxResults ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixListIds =
         field_map json "PrefixListIds" PrefixListResourceIdStringList.of_json in
@@ -9129,6 +9303,7 @@ module DescribePlacementGroupsResult =
         (Option.map ~f:PlacementGroupList.of_xml)
           (Xml.child xml_arg0 "placementGroupSet") in
       make ?placementGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementGroups =
         field_map json "PlacementGroups" PlacementGroupList.of_json in
@@ -9177,6 +9352,7 @@ module DescribePlacementGroupsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?groupIds ?groupNames ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupIds =
         field_map json "GroupIds" PlacementGroupIdStringList.of_json in
@@ -9230,6 +9406,7 @@ module DescribeNetworkInterfacesResult =
         (Option.map ~f:NetworkInterfaceList.of_xml)
           (Xml.child xml_arg0 "networkInterfaceSet") in
       make ?nextToken ?networkInterfaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let networkInterfaces =
@@ -9289,6 +9466,7 @@ module DescribeNetworkInterfacesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filter") in
       make ?maxResults ?nextToken ?networkInterfaceIds ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -9343,6 +9521,7 @@ module DescribeNetworkInterfacePermissionsResult =
         (Option.map ~f:NetworkInterfacePermissionList.of_xml)
           (Xml.child xml_arg0 "networkInterfacePermissions") in
       make ?nextToken ?networkInterfacePermissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let networkInterfacePermissions =
@@ -9397,6 +9576,7 @@ module DescribeNetworkInterfacePermissionsRequest =
         (Option.map ~f:NetworkInterfacePermissionIdList.of_xml)
           (Xml.child xml_arg0 "NetworkInterfacePermissionId") in
       make ?maxResults ?nextToken ?filters ?networkInterfacePermissionIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -9487,6 +9667,7 @@ module DescribeNetworkInterfaceAttributeResult =
           (Xml.child xml_arg0 "attachment") in
       make ?sourceDestCheck ?networkInterfaceId ?groups ?description
         ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceDestCheck =
         field_map json "SourceDestCheck" AttributeBooleanValue.of_json in
@@ -9536,6 +9717,7 @@ module DescribeNetworkInterfaceAttributeRequest =
         (Option.map ~f:NetworkInterfaceAttribute.of_xml)
           (Xml.child xml_arg0 "attribute") in
       make ~networkInterfaceId ?dryRun ?attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaceId =
         field_map_exn json "NetworkInterfaceId" NetworkInterfaceId.of_json in
@@ -9589,6 +9771,7 @@ module DescribeNetworkInsightsPathsResult =
         (Option.map ~f:NetworkInsightsPathList.of_xml)
           (Xml.child xml_arg0 "networkInsightsPathSet") in
       make ?nextToken ?networkInsightsPaths ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let networkInsightsPaths =
@@ -9651,6 +9834,7 @@ module DescribeNetworkInsightsPathsRequest =
         (Option.map ~f:NetworkInsightsPathIdList.of_xml)
           (Xml.child xml_arg0 "NetworkInsightsPathId") in
       make ?nextToken ?dryRun ?maxResults ?filters ?networkInsightsPathIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -9706,6 +9890,7 @@ module DescribeNetworkInsightsAnalysesResult =
         (Option.map ~f:NetworkInsightsAnalysisList.of_xml)
           (Xml.child xml_arg0 "networkInsightsAnalysisSet") in
       make ?nextToken ?networkInsightsAnalyses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let networkInsightsAnalyses =
@@ -9801,6 +9986,7 @@ module DescribeNetworkInsightsAnalysesRequest =
       make ?nextToken ?dryRun ?maxResults ?filters ?analysisEndTime
         ?analysisStartTime ?networkInsightsPathId ?networkInsightsAnalysisIds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -9864,6 +10050,7 @@ module DescribeNetworkInsightsAccessScopesResult =
         (Option.map ~f:NetworkInsightsAccessScopeList.of_xml)
           (Xml.child xml_arg0 "networkInsightsAccessScopeSet") in
       make ?nextToken ?networkInsightsAccessScopes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let networkInsightsAccessScopes =
@@ -9928,6 +10115,7 @@ module DescribeNetworkInsightsAccessScopesRequest =
           (Xml.child xml_arg0 "NetworkInsightsAccessScopeId") in
       make ?nextToken ?dryRun ?maxResults ?filters
         ?networkInsightsAccessScopeIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -9986,6 +10174,7 @@ module DescribeNetworkInsightsAccessScopeAnalysesResult =
         (Option.map ~f:NetworkInsightsAccessScopeAnalysisList.of_xml)
           (Xml.child xml_arg0 "networkInsightsAccessScopeAnalysisSet") in
       make ?nextToken ?networkInsightsAccessScopeAnalyses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let networkInsightsAccessScopeAnalyses =
@@ -10082,6 +10271,7 @@ module DescribeNetworkInsightsAccessScopeAnalysesRequest =
       make ?nextToken ?dryRun ?maxResults ?filters ?analysisStartTimeEnd
         ?analysisStartTimeBegin ?networkInsightsAccessScopeId
         ?networkInsightsAccessScopeAnalysisIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -10145,6 +10335,7 @@ module DescribeNetworkAclsResult =
         (Option.map ~f:NetworkAclList.of_xml)
           (Xml.child xml_arg0 "networkAclSet") in
       make ?nextToken ?networkAcls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let networkAcls = field_map json "NetworkAcls" NetworkAclList.of_json in
@@ -10201,6 +10392,7 @@ module DescribeNetworkAclsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?networkAclIds ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeNetworkAclsMaxResults.of_json in
@@ -10255,6 +10447,7 @@ module DescribeNatGatewaysResult =
         (Option.map ~f:NatGatewayList.of_xml)
           (Xml.child xml_arg0 "natGatewaySet") in
       make ?nextToken ?natGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let natGateways = field_map json "NatGateways" NatGatewayList.of_json in
@@ -10309,6 +10502,7 @@ module DescribeNatGatewaysRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?natGatewayIds ?maxResults ?filter ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let natGatewayIds =
@@ -10363,6 +10557,7 @@ module DescribeMovingAddressesResult =
         (Option.map ~f:MovingAddressStatusSet.of_xml)
           (Xml.child xml_arg0 "movingAddressStatusSet") in
       make ?nextToken ?movingAddressStatuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let movingAddressStatuses =
@@ -10418,6 +10613,7 @@ module DescribeMovingAddressesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filter") in
       make ?publicIps ?nextToken ?maxResults ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicIps = field_map json "PublicIps" ValueStringList.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -10471,6 +10667,7 @@ module DescribeManagedPrefixListsResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?prefixLists ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixLists =
         field_map json "PrefixLists" ManagedPrefixListSet.of_json in
@@ -10527,6 +10724,7 @@ module DescribeManagedPrefixListsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?prefixListIds ?nextToken ?maxResults ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixListIds =
         field_map json "PrefixListIds" ValueStringList.of_json in
@@ -10581,6 +10779,7 @@ module DescribeLocalGatewaysResult =
         (Option.map ~f:LocalGatewaySet.of_xml)
           (Xml.child xml_arg0 "localGatewaySet") in
       make ?nextToken ?localGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let localGateways =
@@ -10637,6 +10836,7 @@ module DescribeLocalGatewaysRequest =
         (Option.map ~f:LocalGatewayIdSet.of_xml)
           (Xml.child xml_arg0 "LocalGatewayId") in
       make ?dryRun ?nextToken ?maxResults ?filters ?localGatewayIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -10693,6 +10893,7 @@ module DescribeLocalGatewayVirtualInterfacesResult =
         (Option.map ~f:LocalGatewayVirtualInterfaceSet.of_xml)
           (Xml.child xml_arg0 "localGatewayVirtualInterfaceSet") in
       make ?nextToken ?localGatewayVirtualInterfaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let localGatewayVirtualInterfaces =
@@ -10759,6 +10960,7 @@ module DescribeLocalGatewayVirtualInterfacesRequest =
           (Xml.child xml_arg0 "LocalGatewayVirtualInterfaceId") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?localGatewayVirtualInterfaceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -10818,6 +11020,7 @@ module DescribeLocalGatewayVirtualInterfaceGroupsResult =
         (Option.map ~f:LocalGatewayVirtualInterfaceGroupSet.of_xml)
           (Xml.child xml_arg0 "localGatewayVirtualInterfaceGroupSet") in
       make ?nextToken ?localGatewayVirtualInterfaceGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let localGatewayVirtualInterfaceGroups =
@@ -10884,6 +11087,7 @@ module DescribeLocalGatewayVirtualInterfaceGroupsRequest =
           (Xml.child xml_arg0 "LocalGatewayVirtualInterfaceGroupId") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?localGatewayVirtualInterfaceGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -10941,6 +11145,7 @@ module DescribeLocalGatewayRouteTablesResult =
         (Option.map ~f:LocalGatewayRouteTableSet.of_xml)
           (Xml.child xml_arg0 "localGatewayRouteTableSet") in
       make ?nextToken ?localGatewayRouteTables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let localGatewayRouteTables =
@@ -11006,6 +11211,7 @@ module DescribeLocalGatewayRouteTablesRequest =
           (Xml.child xml_arg0 "LocalGatewayRouteTableId") in
       make ?dryRun ?nextToken ?maxResults ?filters ?localGatewayRouteTableIds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -11065,6 +11271,7 @@ module DescribeLocalGatewayRouteTableVpcAssociationsResult =
         (Option.map ~f:LocalGatewayRouteTableVpcAssociationSet.of_xml)
           (Xml.child xml_arg0 "localGatewayRouteTableVpcAssociationSet") in
       make ?nextToken ?localGatewayRouteTableVpcAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let localGatewayRouteTableVpcAssociations =
@@ -11131,6 +11338,7 @@ module DescribeLocalGatewayRouteTableVpcAssociationsRequest =
           (Xml.child xml_arg0 "LocalGatewayRouteTableVpcAssociationId") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?localGatewayRouteTableVpcAssociationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -11198,6 +11406,7 @@ module DescribeLocalGatewayRouteTableVirtualInterfaceGroupAssociationsResult =
              "localGatewayRouteTableVirtualInterfaceGroupAssociationSet") in
       make ?nextToken
         ?localGatewayRouteTableVirtualInterfaceGroupAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let localGatewayRouteTableVirtualInterfaceGroupAssociations =
@@ -11269,6 +11478,7 @@ module DescribeLocalGatewayRouteTableVirtualInterfaceGroupAssociationsRequest =
              "LocalGatewayRouteTableVirtualInterfaceGroupAssociationId") in
       make ?dryRun ?nextToken ?maxResults ?filters
         ?localGatewayRouteTableVirtualInterfaceGroupAssociationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -11326,6 +11536,7 @@ module DescribeLaunchTemplatesResult =
         (Option.map ~f:LaunchTemplateSet.of_xml)
           (Xml.child xml_arg0 "launchTemplates") in
       make ?nextToken ?launchTemplates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let launchTemplates =
@@ -11400,6 +11611,7 @@ module DescribeLaunchTemplatesRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?maxResults ?nextToken ?filters ?launchTemplateNames
         ?launchTemplateIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeLaunchTemplatesMaxResults.of_json in
@@ -11458,6 +11670,7 @@ module DescribeLaunchTemplateVersionsResult =
         (Option.map ~f:LaunchTemplateVersionSet.of_xml)
           (Xml.child xml_arg0 "launchTemplateVersionSet") in
       make ?nextToken ?launchTemplateVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let launchTemplateVersions =
@@ -11557,6 +11770,7 @@ module DescribeLaunchTemplateVersionsRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?filters ?maxResults ?nextToken ?maxVersion ?minVersion ?versions
         ?launchTemplateName ?launchTemplateId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -11607,6 +11821,7 @@ module DescribeKeyPairsResult =
       let keyPairs =
         (Option.map ~f:KeyPairList.of_xml) (Xml.child xml_arg0 "keySet") in
       make ?keyPairs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPairs = field_map json "KeyPairs" KeyPairList.of_json in
       make ?keyPairs ()
@@ -11652,6 +11867,7 @@ module DescribeKeyPairsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?keyPairIds ?keyNames ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let keyPairIds =
@@ -11702,6 +11918,7 @@ module DescribeIpv6PoolsResult =
       let ipv6Pools =
         (Option.map ~f:Ipv6PoolSet.of_xml) (Xml.child xml_arg0 "ipv6PoolSet") in
       make ?nextToken ?ipv6Pools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let ipv6Pools = field_map json "Ipv6Pools" Ipv6PoolSet.of_json in
@@ -11753,6 +11970,7 @@ module DescribeIpv6PoolsRequest =
       let poolIds =
         (Option.map ~f:Ipv6PoolIdList.of_xml) (Xml.child xml_arg0 "PoolId") in
       make ?filters ?dryRun ?maxResults ?nextToken ?poolIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -11800,6 +12018,7 @@ module DescribeIpamsResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?ipams ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipams = field_map json "Ipams" IpamSet.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11851,6 +12070,7 @@ module DescribeIpamsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?ipamIds ?nextToken ?maxResults ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamIds = field_map json "IpamIds" ValueStringList.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11902,6 +12122,7 @@ module DescribeIpamScopesResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?ipamScopes ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamScopes = field_map json "IpamScopes" IpamScopeSet.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11955,6 +12176,7 @@ module DescribeIpamScopesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?ipamScopeIds ?nextToken ?maxResults ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamScopeIds =
         field_map json "IpamScopeIds" ValueStringList.of_json in
@@ -12005,6 +12227,7 @@ module DescribeIpamPoolsResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?ipamPools ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamPools = field_map json "IpamPools" IpamPoolSet.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -12059,6 +12282,7 @@ module DescribeIpamPoolsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?ipamPoolIds ?nextToken ?maxResults ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamPoolIds = field_map json "IpamPoolIds" ValueStringList.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -12110,6 +12334,7 @@ module DescribeInternetGatewaysResult =
         (Option.map ~f:InternetGatewayList.of_xml)
           (Xml.child xml_arg0 "internetGatewaySet") in
       make ?nextToken ?internetGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let internetGateways =
@@ -12168,6 +12393,7 @@ module DescribeInternetGatewaysRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?internetGatewayIds ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -12222,6 +12448,7 @@ module DescribeInstancesResult =
         (Option.map ~f:ReservationList.of_xml)
           (Xml.child xml_arg0 "reservationSet") in
       make ?nextToken ?reservations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let reservations =
@@ -12277,6 +12504,7 @@ module DescribeInstancesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?nextToken ?maxResults ?dryRun ?instanceIds ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -12331,6 +12559,7 @@ module DescribeInstanceTypesResult =
         (Option.map ~f:InstanceTypeInfoList.of_xml)
           (Xml.child xml_arg0 "instanceTypeSet") in
       make ?nextToken ?instanceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let instanceTypes =
@@ -12387,6 +12616,7 @@ module DescribeInstanceTypesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?instanceTypes ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" DITMaxResults.of_json in
@@ -12441,6 +12671,7 @@ module DescribeInstanceTypeOfferingsResult =
         (Option.map ~f:InstanceTypeOfferingsList.of_xml)
           (Xml.child xml_arg0 "instanceTypeOfferingSet") in
       make ?nextToken ?instanceTypeOfferings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let instanceTypeOfferings =
@@ -12496,6 +12727,7 @@ module DescribeInstanceTypeOfferingsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?locationType ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" DITOMaxResults.of_json in
@@ -12548,6 +12780,7 @@ module DescribeInstanceStatusResult =
         (Option.map ~f:InstanceStatusList.of_xml)
           (Xml.child xml_arg0 "instanceStatusSet") in
       make ?nextToken ?instanceStatuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let instanceStatuses =
@@ -12620,6 +12853,7 @@ module DescribeInstanceStatusRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?includeAllInstances ?dryRun ?nextToken ?maxResults ?instanceIds
         ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeAllInstances =
         field_map json "IncludeAllInstances" Boolean.of_json in
@@ -12677,6 +12911,7 @@ module DescribeInstanceEventWindowsResult =
         (Option.map ~f:InstanceEventWindowSet.of_xml)
           (Xml.child xml_arg0 "instanceEventWindowSet") in
       make ?nextToken ?instanceEventWindows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let instanceEventWindows =
@@ -12738,6 +12973,7 @@ module DescribeInstanceEventWindowsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?filters ?instanceEventWindowIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" ResultRange.of_json in
@@ -12785,6 +13021,7 @@ module DescribeInstanceEventNotificationAttributesResult =
         (Option.map ~f:InstanceTagNotificationAttribute.of_xml)
           (Xml.child xml_arg0 "instanceTagAttribute") in
       make ?instanceTagAttribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceTagAttribute =
         field_map json "InstanceTagAttribute"
@@ -12809,6 +13046,7 @@ module DescribeInstanceEventNotificationAttributesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -12858,6 +13096,7 @@ module DescribeInstanceCreditSpecificationsResult =
         (Option.map ~f:InstanceCreditSpecificationList.of_xml)
           (Xml.child xml_arg0 "instanceCreditSpecificationSet") in
       make ?nextToken ?instanceCreditSpecifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let instanceCreditSpecifications =
@@ -12916,6 +13155,7 @@ module DescribeInstanceCreditSpecificationsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?instanceIds ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults =
@@ -12960,6 +13200,7 @@ module DescribeInstanceAttributeRequest =
         InstanceAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attribute") in
       make ~instanceId ?dryRun ~attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -13013,6 +13254,7 @@ module DescribeImportSnapshotTasksResult =
         (Option.map ~f:ImportSnapshotTaskList.of_xml)
           (Xml.child xml_arg0 "importSnapshotTaskSet") in
       make ?nextToken ?importSnapshotTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let importSnapshotTasks =
@@ -13064,6 +13306,7 @@ module DescribeImportSnapshotTasksRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?importTaskIds ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -13117,6 +13360,7 @@ module DescribeImportImageTasksResult =
         (Option.map ~f:ImportImageTaskList.of_xml)
           (Xml.child xml_arg0 "importImageTaskSet") in
       make ?nextToken ?importImageTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let importImageTasks =
@@ -13171,6 +13415,7 @@ module DescribeImportImageTasksRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?importTaskIds ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -13214,6 +13459,7 @@ module DescribeImagesResult =
       let images =
         (Option.map ~f:ImageList.of_xml) (Xml.child xml_arg0 "imagesSet") in
       make ?images ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let images = field_map json "Images" ImageList.of_json in
       make ?images ()
@@ -13286,6 +13532,7 @@ module DescribeImagesRequest =
           (Xml.child xml_arg0 "ExecutableBy") in
       make ?dryRun ?includeDeprecated ?owners ?imageIds ?filters
         ?executableUsers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let includeDeprecated =
@@ -13330,6 +13577,7 @@ module DescribeImageAttributeRequest =
         ImageAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
       make ?dryRun ~imageId ~attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let imageId = field_map_exn json "ImageId" ImageId.of_json in
@@ -13371,6 +13619,7 @@ module DescribeIdentityIdFormatResult =
       let statuses =
         (Option.map ~f:IdFormatList.of_xml) (Xml.child xml_arg0 "statusSet") in
       make ?statuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statuses = field_map json "Statuses" IdFormatList.of_json in
       make ?statuses ()
@@ -13402,6 +13651,7 @@ module DescribeIdentityIdFormatRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
       make ?resource ~principalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map json "Resource" String_.of_json in
       let principalArn = field_map_exn json "PrincipalArn" String_.of_json in
@@ -13442,6 +13692,7 @@ module DescribeIdFormatResult =
       let statuses =
         (Option.map ~f:IdFormatList.of_xml) (Xml.child xml_arg0 "statusSet") in
       make ?statuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statuses = field_map json "Statuses" IdFormatList.of_json in
       make ?statuses ()
@@ -13464,6 +13715,7 @@ module DescribeIdFormatRequest =
       let resource =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Resource") in
       make ?resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map json "Resource" String_.of_json in
       make ?resource ()
@@ -13516,6 +13768,7 @@ module DescribeIamInstanceProfileAssociationsResult =
         (Option.map ~f:IamInstanceProfileAssociationSet.of_xml)
           (Xml.child xml_arg0 "iamInstanceProfileAssociationSet") in
       make ?nextToken ?iamInstanceProfileAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let iamInstanceProfileAssociations =
@@ -13566,6 +13819,7 @@ module DescribeIamInstanceProfileAssociationsRequest =
         (Option.map ~f:AssociationIdList.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
       make ?nextToken ?maxResults ?filters ?associationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -13616,6 +13870,7 @@ module DescribeHostsResult =
       let hosts =
         (Option.map ~f:HostList.of_xml) (Xml.child xml_arg0 "hostSet") in
       make ?nextToken ?hosts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let hosts = field_map json "Hosts" HostList.of_json in
@@ -13661,6 +13916,7 @@ module DescribeHostsRequest =
       let filter =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filter") in
       make ?nextToken ?maxResults ?hostIds ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -13712,6 +13968,7 @@ module DescribeHostReservationsResult =
         (Option.map ~f:HostReservationSet.of_xml)
           (Xml.child xml_arg0 "hostReservationSet") in
       make ?nextToken ?hostReservationSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let hostReservationSet =
@@ -13758,6 +14015,7 @@ module DescribeHostReservationsRequest =
       let filter =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?nextToken ?maxResults ?hostReservationIdSet ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -13810,6 +14068,7 @@ module DescribeHostReservationOfferingsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?offeringSet ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringSet = field_map json "OfferingSet" HostOfferingSet.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -13879,6 +14138,7 @@ module DescribeHostReservationOfferingsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?offeringId ?nextToken ?minDuration ?maxResults ?maxDuration
         ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringId = field_map json "OfferingId" OfferingId.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -13935,6 +14195,7 @@ module DescribeFpgaImagesResult =
         (Option.map ~f:FpgaImageList.of_xml)
           (Xml.child xml_arg0 "fpgaImageSet") in
       make ?nextToken ?fpgaImages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let fpgaImages = field_map json "FpgaImages" FpgaImageList.of_json in
@@ -14003,6 +14264,7 @@ module DescribeFpgaImagesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?maxResults ?nextToken ?filters ?owners ?fpgaImageIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeFpgaImagesMaxResults.of_json in
@@ -14051,6 +14313,7 @@ module DescribeFpgaImageAttributeResult =
         (Option.map ~f:FpgaImageAttribute.of_xml)
           (Xml.child xml_arg0 "fpgaImageAttribute") in
       make ?fpgaImageAttribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fpgaImageAttribute =
         field_map json "FpgaImageAttribute" FpgaImageAttribute.of_json in
@@ -14087,6 +14350,7 @@ module DescribeFpgaImageAttributeRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~attribute ~fpgaImageId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attribute =
         field_map_exn json "Attribute" FpgaImageAttributeName.of_json in
@@ -14135,6 +14399,7 @@ module DescribeFlowLogsResult =
       let flowLogs =
         (Option.map ~f:FlowLogSet.of_xml) (Xml.child xml_arg0 "flowLogSet") in
       make ?nextToken ?flowLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let flowLogs = field_map json "FlowLogs" FlowLogSet.of_json in
@@ -14186,6 +14451,7 @@ module DescribeFlowLogsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?flowLogIds ?filter ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -14234,6 +14500,7 @@ module DescribeFleetsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?fleets ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleets = field_map json "Fleets" FleetSet.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -14285,6 +14552,7 @@ module DescribeFleetsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?filters ?fleetIds ?nextToken ?maxResults ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let fleetIds = field_map json "FleetIds" FleetIdSet.of_json in
@@ -14342,6 +14610,7 @@ module DescribeFleetInstancesResult =
         (Option.map ~f:ActiveInstanceSet.of_xml)
           (Xml.child xml_arg0 "activeInstanceSet") in
       make ?fleetId ?nextToken ?activeInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetId = field_map json "FleetId" FleetId.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -14393,6 +14662,7 @@ module DescribeFleetInstancesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?filters ~fleetId ?nextToken ?maxResults ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let fleetId = field_map_exn json "FleetId" FleetId.of_json in
@@ -14475,6 +14745,7 @@ module DescribeFleetHistoryResult =
           (Xml.child xml_arg0 "historyRecordSet") in
       make ?startTime ?fleetId ?nextToken ?lastEvaluatedTime ?historyRecords
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" DateTime.of_json in
       let fleetId = field_map json "FleetId" FleetId.of_json in
@@ -14548,6 +14819,7 @@ module DescribeFleetHistoryRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~startTime ~fleetId ?nextToken ?maxResults ?eventType ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map_exn json "StartTime" DateTime.of_json in
       let fleetId = field_map_exn json "FleetId" FleetId.of_json in
@@ -14602,6 +14874,7 @@ module DescribeFastSnapshotRestoresResult =
         (Option.map ~f:DescribeFastSnapshotRestoreSuccessSet.of_xml)
           (Xml.child xml_arg0 "fastSnapshotRestoreSet") in
       make ?nextToken ?fastSnapshotRestores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let fastSnapshotRestores =
@@ -14650,6 +14923,7 @@ module DescribeFastSnapshotRestoresRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14705,6 +14979,7 @@ module DescribeFastLaunchImagesResult =
         (Option.map ~f:DescribeFastLaunchImagesSuccessSet.of_xml)
           (Xml.child xml_arg0 "fastLaunchImageSet") in
       make ?nextToken ?fastLaunchImages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let fastLaunchImages =
@@ -14762,6 +15037,7 @@ module DescribeFastLaunchImagesRequest =
         (Option.map ~f:FastLaunchImageIdList.of_xml)
           (Xml.child xml_arg0 "ImageId") in
       make ?dryRun ?nextToken ?maxResults ?filters ?imageIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14809,6 +15085,7 @@ module DescribeExportTasksResult =
         (Option.map ~f:ExportTaskList.of_xml)
           (Xml.child xml_arg0 "exportTaskSet") in
       make ?exportTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportTasks = field_map json "ExportTasks" ExportTaskList.of_json in
       make ?exportTasks ()
@@ -14838,6 +15115,7 @@ module DescribeExportTasksRequest =
         (Option.map ~f:ExportTaskIdStringList.of_xml)
           (Xml.child xml_arg0 "exportTaskId") in
       make ?filters ?exportTaskIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let exportTaskIds =
@@ -14888,6 +15166,7 @@ module DescribeExportImageTasksResult =
         (Option.map ~f:ExportImageTaskList.of_xml)
           (Xml.child xml_arg0 "exportImageTaskSet") in
       make ?nextToken ?exportImageTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let exportImageTasks =
@@ -14946,6 +15225,7 @@ module DescribeExportImageTasksRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ?maxResults ?exportImageTaskIds ?filters ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -15008,6 +15288,7 @@ module DescribeElasticGpusResult =
         (Option.map ~f:ElasticGpuSet.of_xml)
           (Xml.child xml_arg0 "elasticGpuSet") in
       make ?nextToken ?maxResults ?elasticGpuSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -15065,6 +15346,7 @@ module DescribeElasticGpusRequest =
         (Option.map ~f:ElasticGpuIdSet.of_xml)
           (Xml.child xml_arg0 "ElasticGpuId") in
       make ?nextToken ?maxResults ?filters ?dryRun ?elasticGpuIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults =
@@ -15120,6 +15402,7 @@ module DescribeEgressOnlyInternetGatewaysResult =
         (Option.map ~f:EgressOnlyInternetGatewayList.of_xml)
           (Xml.child xml_arg0 "egressOnlyInternetGatewaySet") in
       make ?nextToken ?egressOnlyInternetGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let egressOnlyInternetGateways =
@@ -15186,6 +15469,7 @@ module DescribeEgressOnlyInternetGatewaysRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?filters ?nextToken ?maxResults ?egressOnlyInternetGatewayIds
         ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -15243,6 +15527,7 @@ module DescribeDhcpOptionsResult =
         (Option.map ~f:DhcpOptionsList.of_xml)
           (Xml.child xml_arg0 "dhcpOptionsSet") in
       make ?nextToken ?dhcpOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let dhcpOptions = field_map json "DhcpOptions" DhcpOptionsList.of_json in
@@ -15299,6 +15584,7 @@ module DescribeDhcpOptionsRequest =
         (Option.map ~f:DhcpOptionsIdStringList.of_xml)
           (Xml.child xml_arg0 "DhcpOptionsId") in
       make ?maxResults ?nextToken ?dryRun ?filters ?dhcpOptionsIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeDhcpOptionsMaxResults.of_json in
@@ -15346,6 +15632,7 @@ module DescribeCustomerGatewaysResult =
         (Option.map ~f:CustomerGatewayList.of_xml)
           (Xml.child xml_arg0 "customerGatewaySet") in
       make ?customerGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerGateways =
         field_map json "CustomerGateways" CustomerGatewayList.of_json in
@@ -15385,6 +15672,7 @@ module DescribeCustomerGatewaysRequest =
         (Option.map ~f:CustomerGatewayIdStringList.of_xml)
           (Xml.child xml_arg0 "CustomerGatewayId") in
       make ?dryRun ?filters ?customerGatewayIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -15430,6 +15718,7 @@ module DescribeConversionTasksResult =
         (Option.map ~f:DescribeConversionTaskList.of_xml)
           (Xml.child xml_arg0 "conversionTasks") in
       make ?conversionTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conversionTasks =
         field_map json "ConversionTasks" DescribeConversionTaskList.of_json in
@@ -15461,6 +15750,7 @@ module DescribeConversionTasksRequest =
         (Option.map ~f:ConversionIdStringList.of_xml)
           (Xml.child xml_arg0 "conversionTaskId") in
       make ?dryRun ?conversionTaskIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let conversionTaskIds =
@@ -15509,6 +15799,7 @@ module DescribeCoipPoolsResult =
       let coipPools =
         (Option.map ~f:CoipPoolSet.of_xml) (Xml.child xml_arg0 "coipPoolSet") in
       make ?nextToken ?coipPools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let coipPools = field_map json "CoipPools" CoipPoolSet.of_json in
@@ -15561,6 +15852,7 @@ module DescribeCoipPoolsRequest =
       let poolIds =
         (Option.map ~f:CoipPoolIdSet.of_xml) (Xml.child xml_arg0 "PoolId") in
       make ?dryRun ?nextToken ?maxResults ?filters ?poolIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -15613,6 +15905,7 @@ module DescribeClientVpnTargetNetworksResult =
         (Option.map ~f:TargetNetworkSet.of_xml)
           (Xml.child xml_arg0 "clientVpnTargetNetworks") in
       make ?nextToken ?clientVpnTargetNetworks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let clientVpnTargetNetworks =
@@ -15687,6 +15980,7 @@ module DescribeClientVpnTargetNetworksRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ?filters ?nextToken ?maxResults ?associationIds
         ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -15743,6 +16037,7 @@ module DescribeClientVpnRoutesResult =
         (Option.map ~f:ClientVpnRouteSet.of_xml)
           (Xml.child xml_arg0 "routes") in
       make ?nextToken ?routes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let routes = field_map json "Routes" ClientVpnRouteSet.of_json in
@@ -15801,6 +16096,7 @@ module DescribeClientVpnRoutesRequest =
         ClientVpnEndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ?nextToken ?maxResults ?filters ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15855,6 +16151,7 @@ module DescribeClientVpnEndpointsResult =
         (Option.map ~f:EndpointSet.of_xml)
           (Xml.child xml_arg0 "clientVpnEndpoint") in
       make ?nextToken ?clientVpnEndpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let clientVpnEndpoints =
@@ -15919,6 +16216,7 @@ module DescribeClientVpnEndpointsRequest =
         (Option.map ~f:ClientVpnEndpointIdList.of_xml)
           (Xml.child xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ?filters ?nextToken ?maxResults ?clientVpnEndpointIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -15975,6 +16273,7 @@ module DescribeClientVpnConnectionsResult =
         (Option.map ~f:ClientVpnConnectionSet.of_xml)
           (Xml.child xml_arg0 "connections") in
       make ?nextToken ?connections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let connections =
@@ -16034,6 +16333,7 @@ module DescribeClientVpnConnectionsRequest =
         ClientVpnEndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ?maxResults ?nextToken ?filters ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let maxResults =
@@ -16089,6 +16389,7 @@ module DescribeClientVpnAuthorizationRulesResult =
         (Option.map ~f:AuthorizationRuleSet.of_xml)
           (Xml.child xml_arg0 "authorizationRule") in
       make ?nextToken ?authorizationRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let authorizationRules =
@@ -16148,6 +16449,7 @@ module DescribeClientVpnAuthorizationRulesRequest =
         ClientVpnEndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?maxResults ?filters ?nextToken ?dryRun ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -16204,6 +16506,7 @@ module DescribeClassicLinkInstancesResult =
         (Option.map ~f:ClassicLinkInstanceList.of_xml)
           (Xml.child xml_arg0 "instancesSet") in
       make ?nextToken ?instances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let instances =
@@ -16262,6 +16565,7 @@ module DescribeClassicLinkInstancesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?nextToken ?maxResults ?instanceIds ?dryRun ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults =
@@ -16317,6 +16621,7 @@ module DescribeCarrierGatewaysResult =
         (Option.map ~f:CarrierGatewaySet.of_xml)
           (Xml.child xml_arg0 "carrierGatewaySet") in
       make ?nextToken ?carrierGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let carrierGateways =
@@ -16372,6 +16677,7 @@ module DescribeCarrierGatewaysRequest =
         (Option.map ~f:CarrierGatewayIdSet.of_xml)
           (Xml.child xml_arg0 "CarrierGatewayId") in
       make ?dryRun ?nextToken ?maxResults ?filters ?carrierGatewayIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -16427,6 +16733,7 @@ module DescribeCapacityReservationsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?capacityReservations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capacityReservations =
         field_map json "CapacityReservations" CapacityReservationSet.of_json in
@@ -16491,6 +16798,7 @@ module DescribeCapacityReservationsRequest =
         (Option.map ~f:CapacityReservationIdSet.of_xml)
           (Xml.child xml_arg0 "CapacityReservationId") in
       make ?dryRun ?filters ?maxResults ?nextToken ?capacityReservationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -16548,6 +16856,7 @@ module DescribeCapacityReservationFleetsResult =
         (Option.map ~f:CapacityReservationFleetSet.of_xml)
           (Xml.child xml_arg0 "capacityReservationFleetSet") in
       make ?nextToken ?capacityReservationFleets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let capacityReservationFleets =
@@ -16614,6 +16923,7 @@ module DescribeCapacityReservationFleetsRequest =
           (Xml.child xml_arg0 "CapacityReservationFleetId") in
       make ?dryRun ?filters ?maxResults ?nextToken
         ?capacityReservationFleetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -16669,6 +16979,7 @@ module DescribeByoipCidrsResult =
         (Option.map ~f:ByoipCidrSet.of_xml)
           (Xml.child xml_arg0 "byoipCidrSet") in
       make ?nextToken ?byoipCidrs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let byoipCidrs = field_map json "ByoipCidrs" ByoipCidrSet.of_json in
@@ -16708,6 +17019,7 @@ module DescribeByoipCidrsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?nextToken ~maxResults ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -16752,6 +17064,7 @@ module DescribeBundleTasksResult =
         (Option.map ~f:BundleTaskList.of_xml)
           (Xml.child xml_arg0 "bundleInstanceTasksSet") in
       make ?bundleTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bundleTasks = field_map json "BundleTasks" BundleTaskList.of_json in
       make ?bundleTasks ()
@@ -16789,6 +17102,7 @@ module DescribeBundleTasksRequest =
         (Option.map ~f:BundleIdStringList.of_xml)
           (Xml.child xml_arg0 "BundleId") in
       make ?dryRun ?filters ?bundleIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -16833,6 +17147,7 @@ module DescribeAvailabilityZonesResult =
         (Option.map ~f:AvailabilityZoneList.of_xml)
           (Xml.child xml_arg0 "availabilityZoneInfo") in
       make ?availabilityZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availabilityZones =
         field_map json "AvailabilityZones" AvailabilityZoneList.of_json in
@@ -16889,6 +17204,7 @@ module DescribeAvailabilityZonesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?allAvailabilityZones ?zoneIds ?zoneNames ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let allAvailabilityZones =
@@ -16942,6 +17258,7 @@ module DescribeAggregateIdFormatResult =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "useLongIdsAggregated") in
       make ?statuses ?useLongIdsAggregated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statuses = field_map json "Statuses" IdFormatList.of_json in
       let useLongIdsAggregated =
@@ -16966,6 +17283,7 @@ module DescribeAggregateIdFormatRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -17005,6 +17323,7 @@ module DescribeAddressesResult =
         (Option.map ~f:AddressList.of_xml)
           (Xml.child xml_arg0 "addressesSet") in
       make ?addresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addresses = field_map json "Addresses" AddressList.of_json in
       make ?addresses ()
@@ -17051,6 +17370,7 @@ module DescribeAddressesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?dryRun ?allocationIds ?publicIps ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let allocationIds =
@@ -17101,6 +17421,7 @@ module DescribeAddressesAttributeResult =
       let addresses =
         (Option.map ~f:AddressSet.of_xml) (Xml.child xml_arg0 "addressSet") in
       make ?nextToken ?addresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let addresses = field_map json "Addresses" AddressSet.of_json in
@@ -17157,6 +17478,7 @@ module DescribeAddressesAttributeRequest =
         (Option.map ~f:AllocationIds.of_xml)
           (Xml.child xml_arg0 "AllocationId") in
       make ?dryRun ?maxResults ?nextToken ?attribute ?allocationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let maxResults = field_map json "MaxResults" AddressMaxResults.of_json in
@@ -17203,6 +17525,7 @@ module DescribeAccountAttributesResult =
         (Option.map ~f:AccountAttributeList.of_xml)
           (Xml.child xml_arg0 "accountAttributeSet") in
       make ?accountAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAttributes =
         field_map json "AccountAttributes" AccountAttributeList.of_json in
@@ -17235,6 +17558,7 @@ module DescribeAccountAttributesRequest =
         (Option.map ~f:AccountAttributeNameStringList.of_xml)
           (Xml.child xml_arg0 "attributeName") in
       make ?dryRun ?attributeNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let attributeNames =
@@ -17282,6 +17606,7 @@ module DeregisterTransitGatewayMulticastGroupSourcesResult =
         (Option.map ~f:TransitGatewayMulticastDeregisteredGroupSources.of_xml)
           (Xml.child xml_arg0 "deregisteredMulticastGroupSources") in
       make ?deregisteredMulticastGroupSources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deregisteredMulticastGroupSources =
         field_map json "DeregisteredMulticastGroupSources"
@@ -17340,6 +17665,7 @@ module DeregisterTransitGatewayMulticastGroupSourcesRequest =
           (Xml.child xml_arg0 "TransitGatewayMulticastDomainId") in
       make ?dryRun ?networkInterfaceIds ?groupIpAddress
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let networkInterfaceIds =
@@ -17392,6 +17718,7 @@ module DeregisterTransitGatewayMulticastGroupMembersResult =
         (Option.map ~f:TransitGatewayMulticastDeregisteredGroupMembers.of_xml)
           (Xml.child xml_arg0 "deregisteredMulticastGroupMembers") in
       make ?deregisteredMulticastGroupMembers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deregisteredMulticastGroupMembers =
         field_map json "DeregisteredMulticastGroupMembers"
@@ -17450,6 +17777,7 @@ module DeregisterTransitGatewayMulticastGroupMembersRequest =
           (Xml.child xml_arg0 "TransitGatewayMulticastDomainId") in
       make ?dryRun ?networkInterfaceIds ?groupIpAddress
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let networkInterfaceIds =
@@ -17500,6 +17828,7 @@ module DeregisterInstanceEventNotificationAttributesResult =
         (Option.map ~f:InstanceTagNotificationAttribute.of_xml)
           (Xml.child xml_arg0 "instanceTagAttribute") in
       make ?instanceTagAttribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceTagAttribute =
         field_map json "InstanceTagAttribute"
@@ -17533,6 +17862,7 @@ module DeregisterInstanceEventNotificationAttributesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?instanceTagAttribute ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceTagAttribute =
         field_map json "InstanceTagAttribute"
@@ -17563,6 +17893,7 @@ module DeregisterImageRequest =
       let imageId =
         ImageId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImageId") in
       make ?dryRun ~imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let imageId = field_map_exn json "ImageId" ImageId.of_json in
@@ -17613,6 +17944,7 @@ module DeprovisionPublicIpv4PoolCidrResult =
       let poolId =
         (Option.map ~f:Ipv4PoolEc2Id.of_xml) (Xml.child xml_arg0 "poolId") in
       make ?deprovisionedAddresses ?poolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deprovisionedAddresses =
         field_map json "DeprovisionedAddresses"
@@ -17651,6 +17983,7 @@ module DeprovisionPublicIpv4PoolCidrRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~cidr ~poolId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map_exn json "Cidr" String_.of_json in
       let poolId = field_map_exn json "PoolId" Ipv4PoolEc2Id.of_json in
@@ -17693,6 +18026,7 @@ module DeprovisionIpamPoolCidrResult =
         (Option.map ~f:IpamPoolCidr.of_xml)
           (Xml.child xml_arg0 "ipamPoolCidr") in
       make ?ipamPoolCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamPoolCidr = field_map json "IpamPoolCidr" IpamPoolCidr.of_json in
       make ?ipamPoolCidr ()

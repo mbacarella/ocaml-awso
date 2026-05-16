@@ -370,6 +370,7 @@ module VpcConfiguration =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ?tlsCertificate ~securityGroupIds ~subnetIds ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tlsCertificate =
         field_map json "TlsCertificate" TlsCertificate.of_json in
@@ -503,6 +504,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -579,6 +581,7 @@ module Host =
       let name = (Option.map ~f:HostName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?statusMessage ?status ?vpcConfiguration ?providerEndpoint
         ?providerType ?hostArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "StatusMessage" HostStatusMessage.of_json in
@@ -664,6 +667,7 @@ module Connection =
           (Xml.child xml_arg0 "ConnectionName") in
       make ?hostArn ?connectionStatus ?ownerAccountId ?providerType
         ?connectionArn ?connectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostArn = field_map json "HostArn" HostArn.of_json in
       let connectionStatus =
@@ -692,6 +696,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -711,6 +716,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -730,6 +736,7 @@ module ResourceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -749,6 +756,7 @@ module UnsupportedOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -818,6 +826,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1002,6 +1011,7 @@ module UpdateHostOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1039,6 +1049,7 @@ module UpdateHostInput =
       let hostArn =
         HostArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostArn") in
       make ?vpcConfiguration ?providerEndpoint ~hostArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfiguration =
         field_map json "VpcConfiguration" VpcConfiguration.of_json in
@@ -1083,6 +1094,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from an AWS resource."]
@@ -1112,6 +1124,7 @@ module UntagResourceInput =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -1163,6 +1176,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1190,6 +1204,7 @@ module TagResourceInput =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -1239,6 +1254,7 @@ module ListTagsForResourceOutput =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1262,6 +1278,7 @@ module ListTagsForResourceInput =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" AmazonResourceName.of_json in
@@ -1309,6 +1326,7 @@ module ListHostsOutput =
       let hosts =
         (Option.map ~f:HostList.of_xml) (Xml.child xml_arg0 "Hosts") in
       make ?nextToken ?hosts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let hosts = field_map json "Hosts" HostList.of_json in
@@ -1338,6 +1356,7 @@ module ListHostsInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1387,6 +1406,7 @@ module ListConnectionsOutput =
         (Option.map ~f:ConnectionList.of_xml)
           (Xml.child xml_arg0 "Connections") in
       make ?nextToken ?connections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let connections = field_map json "Connections" ConnectionList.of_json in
@@ -1434,6 +1454,7 @@ module ListConnectionsInput =
         (Option.map ~f:ProviderType.of_xml)
           (Xml.child xml_arg0 "ProviderTypeFilter") in
       make ?nextToken ?maxResults ?hostArnFilter ?providerTypeFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1532,6 +1553,7 @@ module GetHostOutput =
         (Option.map ~f:HostStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let name = (Option.map ~f:HostName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?vpcConfiguration ?providerEndpoint ?providerType ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfiguration =
         field_map json "VpcConfiguration" VpcConfiguration.of_json in
@@ -1558,6 +1580,7 @@ module GetHostInput =
       let hostArn =
         HostArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostArn") in
       make ~hostArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostArn = field_map_exn json "HostArn" HostArn.of_json in
       make ~hostArn ()
@@ -1618,6 +1641,7 @@ module GetConnectionOutput =
       let connection =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map json "Connection" Connection.of_json in
       make ?connection ()
@@ -1641,6 +1665,7 @@ module GetConnectionInput =
         ConnectionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
       make ~connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionArn =
         field_map_exn json "ConnectionArn" ConnectionArn.of_json in
@@ -1694,6 +1719,7 @@ module DeleteHostOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1714,6 +1740,7 @@ module DeleteHostInput =
       let hostArn =
         HostArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostArn") in
       make ~hostArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostArn = field_map_exn json "HostArn" HostArn.of_json in
       make ~hostArn ()
@@ -1755,6 +1782,7 @@ module DeleteConnectionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connection to be deleted."]
@@ -1776,6 +1804,7 @@ module DeleteConnectionInput =
         ConnectionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
       make ~connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionArn =
         field_map_exn json "ConnectionArn" ConnectionArn.of_json in
@@ -1828,6 +1857,7 @@ module CreateHostOutput =
       let hostArn =
         (Option.map ~f:HostArn.of_xml) (Xml.child xml_arg0 "HostArn") in
       make ?tags ?hostArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let hostArn = field_map json "HostArn" HostArn.of_json in
@@ -1889,6 +1919,7 @@ module CreateHostInput =
       let name =
         HostName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?vpcConfiguration ~providerEndpoint ~providerType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let vpcConfiguration =
@@ -1971,6 +2002,7 @@ module CreateConnectionOutput =
         ConnectionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
       make ?tags ~connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let connectionArn =
@@ -2019,6 +2051,7 @@ module CreateConnectionInput =
         (Option.map ~f:ProviderType.of_xml)
           (Xml.child xml_arg0 "ProviderType") in
       make ?hostArn ?tags ~connectionName ?providerType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostArn = field_map json "HostArn" HostArn.of_json in
       let tags = field_map json "Tags" TagList.of_json in

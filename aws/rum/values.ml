@@ -386,6 +386,7 @@ module CwLog =
       let cwLogEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CwLogEnabled") in
       make ?cwLogGroup ?cwLogEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cwLogGroup = field_map json "CwLogGroup" String_.of_json in
       let cwLogEnabled = field_map json "CwLogEnabled" Boolean.of_json in
@@ -525,6 +526,7 @@ module RumEvent =
       let details =
         JsonValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "details") in
       make ~type_ ~timestamp ?metadata ~id ~details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" String_.of_json in
       let timestamp = field_map_exn json "timestamp" Timestamp.of_json in
@@ -578,6 +580,7 @@ module AppMonitorSummary =
         (Option.map ~f:ISOTimestampString.of_xml)
           (Xml.child xml_arg0 "Created") in
       make ?state ?name ?lastModified ?id ?created ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" StateEnum.of_json in
       let name = field_map json "Name" AppMonitorName.of_json in
@@ -681,6 +684,7 @@ module AppMonitorConfiguration =
       make ?telemetries ?sessionSampleRate ?includedPages ?identityPoolId
         ?guestRoleArn ?favoritePages ?excludedPages ?enableXRay ?allowCookies
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let telemetries = field_map json "Telemetries" Telemetries.of_json in
       let sessionSampleRate =
@@ -736,6 +740,7 @@ module DataStorage =
     let of_xml xml_arg0 =
       let cwLog = (Option.map ~f:CwLog.of_xml) (Xml.child xml_arg0 "CwLog") in
       make ?cwLog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cwLog = field_map json "CwLog" CwLog.of_json in make ?cwLog ()
     let to_json v = composed_to_json to_value v
@@ -805,6 +810,7 @@ module QueryFilter =
       let name =
         (Option.map ~f:QueryFilterKey.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" QueryFilterValueList.of_json in
       let name = field_map json "Name" QueryFilterKey.of_json in
@@ -838,6 +844,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -875,6 +882,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?resourceType ~resourceName ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" String_.of_json in
       let resourceName = field_map_exn json "resourceName" String_.of_json in
@@ -905,6 +913,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" Integer.of_json in
@@ -943,6 +952,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?resourceType ~resourceName ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" String_.of_json in
       let resourceName = field_map_exn json "resourceName" String_.of_json in
@@ -986,6 +996,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "serviceCode" String_.of_json in
       let retryAfterSeconds =
@@ -1008,6 +1019,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1062,6 +1074,7 @@ module AppMonitorDetails =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?version ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" String_.of_json in
       let name = field_map json "name" String_.of_json in
@@ -1115,6 +1128,7 @@ module UserDetails =
       let sessionId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sessionId") in
       make ?userId ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "userId" String_.of_json in
       let sessionId = field_map json "sessionId" String_.of_json in
@@ -1232,6 +1246,7 @@ module AppMonitor =
           (Xml.child xml_arg0 "AppMonitorConfiguration") in
       make ?tags ?state ?name ?lastModified ?id ?domain ?dataStorage ?created
         ?appMonitorConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" StateEnum.of_json in
@@ -1353,6 +1368,7 @@ module TimeRange =
         QueryTimestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "After") in
       make ?before ~after ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let before = field_map json "Before" QueryTimestamp.of_json in
       let after = field_map_exn json "After" QueryTimestamp.of_json in
@@ -1373,6 +1389,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1458,6 +1475,7 @@ module UpdateAppMonitorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1504,6 +1522,7 @@ module UpdateAppMonitorRequest =
         (Option.map ~f:AppMonitorConfiguration.of_xml)
           (Xml.child xml_arg0 "AppMonitorConfiguration") in
       make ~name ?domain ?cwLogEnabled ?appMonitorConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" AppMonitorName.of_json in
       let domain = field_map json "Domain" AppMonitorDomain.of_json in
@@ -1568,6 +1587,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified resource."]
@@ -1595,6 +1615,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -1654,6 +1675,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1681,6 +1703,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -1759,6 +1782,7 @@ module PutRumEventsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1812,6 +1836,7 @@ module PutRumEventsRequest =
         AppMonitorDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorDetails") in
       make ~userDetails ~rumEvents ~id ~batchId ~appMonitorDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userDetails = field_map_exn json "UserDetails" UserDetails.of_json in
       let rumEvents = field_map_exn json "RumEvents" RumEventList.of_json in
@@ -1890,6 +1915,7 @@ module ListTagsForResourceResponse =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -1914,6 +1940,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -2000,6 +2027,7 @@ module ListAppMonitorsResponse =
         (Option.map ~f:AppMonitorSummaryList.of_xml)
           (Xml.child xml_arg0 "AppMonitorSummaries") in
       make ?nextToken ?appMonitorSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let appMonitorSummaries =
@@ -2031,6 +2059,7 @@ module ListAppMonitorsRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -2117,6 +2146,7 @@ module GetAppMonitorResponse =
       let appMonitor =
         (Option.map ~f:AppMonitor.of_xml) (Xml.child xml_arg0 "AppMonitor") in
       make ?appMonitor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appMonitor = field_map json "AppMonitor" AppMonitor.of_json in
       make ?appMonitor ()
@@ -2139,6 +2169,7 @@ module GetAppMonitorRequest =
         AppMonitorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" AppMonitorName.of_json in
       make ~name ()
@@ -2229,6 +2260,7 @@ module GetAppMonitorDataResponse =
       let events =
         (Option.map ~f:EventDataList.of_xml) (Xml.child xml_arg0 "Events") in
       make ?nextToken ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let events = field_map json "Events" EventDataList.of_json in
@@ -2285,6 +2317,7 @@ module GetAppMonitorDataRequest =
       let filters =
         (Option.map ~f:QueryFilters.of_xml) (Xml.child xml_arg0 "Filters") in
       make ~timeRange ?nextToken ~name ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeRange = field_map_exn json "TimeRange" TimeRange.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -2375,6 +2408,7 @@ module DeleteAppMonitorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2395,6 +2429,7 @@ module DeleteAppMonitorRequest =
         AppMonitorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" AppMonitorName.of_json in
       make ~name ()
@@ -2488,6 +2523,7 @@ module CreateAppMonitorResponse =
     let of_xml xml_arg0 =
       let id = (Option.map ~f:AppMonitorId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" AppMonitorId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -2542,6 +2578,7 @@ module CreateAppMonitorRequest =
         (Option.map ~f:AppMonitorConfiguration.of_xml)
           (Xml.child xml_arg0 "AppMonitorConfiguration") in
       make ?tags ~name ~domain ?cwLogEnabled ?appMonitorConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let name = field_map_exn json "Name" AppMonitorName.of_json in

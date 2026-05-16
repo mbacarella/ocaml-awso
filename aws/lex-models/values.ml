@@ -237,6 +237,7 @@ module Message =
         ContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentType") in
       make ?groupNumber ~content ~contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupNumber = field_map json "groupNumber" GroupNumber.of_json in
       let content = field_map_exn json "content" ContentString.of_json in
@@ -264,6 +265,7 @@ module SlotDefaultValue =
         SlotDefaultValueString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "defaultValue") in
       make ~defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValue =
         field_map_exn json "defaultValue" SlotDefaultValueString.of_json in
@@ -365,6 +367,7 @@ module LogSettingsResponse =
       let logType =
         (Option.map ~f:LogType.of_xml) (Xml.child xml_arg0 "logType") in
       make ?resourcePrefix ?resourceArn ?kmsKeyArn ?destination ?logType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcePrefix =
         field_map json "resourcePrefix" ResourcePrefix.of_json in
@@ -577,6 +580,7 @@ module UtteranceData =
           (Xml.child xml_arg0 "utteranceString") in
       make ?lastUtteredDate ?firstUtteredDate ?distinctUsers ?count
         ?utteranceString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUtteredDate =
         field_map json "lastUtteredDate" Timestamp.of_json in
@@ -813,6 +817,7 @@ module SlotTypeRegexConfiguration =
         RegexPattern.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pattern") in
       make ~pattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pattern = field_map_exn json "pattern" RegexPattern.of_json in
       make ~pattern ()
@@ -1054,6 +1059,7 @@ module Prompt =
         MessageList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "messages") in
       make ?responseCard ~maxAttempts ~messages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseCard = field_map json "responseCard" ResponseCard.of_json in
       let maxAttempts =
@@ -1107,6 +1113,7 @@ module SlotDefaultValueSpec =
         SlotDefaultValueList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "defaultValueList") in
       make ~defaultValueList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValueList =
         field_map_exn json "defaultValueList" SlotDefaultValueList.of_json in
@@ -1243,6 +1250,7 @@ module LogSettingsRequest =
       let logType =
         LogType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "logType") in
       make ~resourceArn ?kmsKeyArn ~destination ~logType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       let kmsKeyArn = field_map json "kmsKeyArn" KmsKeyArn.of_json in
@@ -1734,6 +1742,7 @@ module ConversationLogsResponse =
         (Option.map ~f:LogSettingsResponseList.of_xml)
           (Xml.child xml_arg0 "logSettings") in
       make ?iamRoleArn ?logSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamRoleArn = field_map json "iamRoleArn" IamRoleArn.of_json in
       let logSettings =
@@ -1764,6 +1773,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -1811,6 +1821,7 @@ module EnumerationValue =
       let value =
         Value.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
       make ?synonyms ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let synonyms = field_map json "synonyms" SynonymList.of_json in
       let value = field_map_exn json "value" Value.of_json in
@@ -1837,6 +1848,7 @@ module SlotTypeConfiguration =
         (Option.map ~f:SlotTypeRegexConfiguration.of_xml)
           (Xml.child xml_arg0 "regexConfiguration") in
       make ?regexConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexConfiguration =
         field_map json "regexConfiguration"
@@ -1869,6 +1881,7 @@ module Statement =
         MessageList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "messages") in
       make ?responseCard ~messages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseCard = field_map json "responseCard" ResponseCard.of_json in
       let messages = field_map_exn json "messages" MessageList.of_json in
@@ -1899,6 +1912,7 @@ module CodeHook =
       let uri =
         LambdaARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uri") in
       make ~messageVersion ~uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageVersion =
         field_map_exn json "messageVersion" MessageVersion.of_json in
@@ -1950,6 +1964,7 @@ module InputContext =
         InputContextName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" InputContextName.of_json in
       make ~name ()
@@ -2048,6 +2063,7 @@ module OutputContext =
         OutputContextName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~turnsToLive ~timeToLiveInSeconds ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let turnsToLive =
         field_map_exn json "turnsToLive" ContextTurnsToLive.of_json in
@@ -2171,6 +2187,7 @@ module Slot =
       make ?defaultValueSpec ?obfuscationSetting ?responseCard
         ?sampleUtterances ?priority ?valueElicitationPrompt ?slotTypeVersion
         ?slotType ~slotConstraint ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValueSpec =
         field_map json "defaultValueSpec" SlotDefaultValueSpec.of_json in
@@ -2216,6 +2233,7 @@ module Intent =
         IntentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "intentName") in
       make ~intentVersion ~intentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intentVersion = field_map_exn json "intentVersion" Version.of_json in
       let intentName = field_map_exn json "intentName" IntentName.of_json in
@@ -2270,6 +2288,7 @@ module UtteranceList =
       let botVersion =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "botVersion") in
       make ?utterances ?botVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let utterances = field_map json "utterances" ListOfUtterance.of_json in
       let botVersion = field_map json "botVersion" Version.of_json in
@@ -2319,6 +2338,7 @@ module SlotTypeMetadata =
       let name =
         (Option.map ~f:SlotTypeName.of_xml) (Xml.child xml_arg0 "name") in
       make ?version ?createdDate ?lastUpdatedDate ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" Version.of_json in
       let createdDate = field_map json "createdDate" Timestamp.of_json in
@@ -2418,6 +2438,7 @@ module MigrationSummary =
         (Option.map ~f:MigrationId.of_xml) (Xml.child xml_arg0 "migrationId") in
       make ?migrationTimestamp ?migrationStrategy ?migrationStatus ?v2BotRole
         ?v2BotId ?v1BotLocale ?v1BotVersion ?v1BotName ?migrationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationTimestamp =
         field_map json "migrationTimestamp" Timestamp.of_json in
@@ -2476,6 +2497,7 @@ module MigrationAlert =
       let type_ =
         (Option.map ~f:MigrationAlertType.of_xml) (Xml.child xml_arg0 "type") in
       make ?referenceURLs ?details ?message ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let referenceURLs =
         field_map json "referenceURLs" MigrationAlertReferenceURLs.of_json in
@@ -2528,6 +2550,7 @@ module IntentMetadata =
       let name =
         (Option.map ~f:IntentName.of_xml) (Xml.child xml_arg0 "name") in
       make ?version ?createdDate ?lastUpdatedDate ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" Version.of_json in
       let createdDate = field_map json "createdDate" Timestamp.of_json in
@@ -2564,6 +2587,7 @@ module BuiltinSlotTypeMetadata =
         (Option.map ~f:BuiltinSlotTypeSignature.of_xml)
           (Xml.child xml_arg0 "signature") in
       make ?supportedLocales ?signature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedLocales =
         field_map json "supportedLocales" LocaleList.of_json in
@@ -2599,6 +2623,7 @@ module BuiltinIntentMetadata =
         (Option.map ~f:BuiltinIntentSignature.of_xml)
           (Xml.child xml_arg0 "signature") in
       make ?supportedLocales ?signature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedLocales =
         field_map json "supportedLocales" LocaleList.of_json in
@@ -2620,6 +2645,7 @@ module BuiltinIntentSlot =
     let of_xml xml_arg0 =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
@@ -2681,6 +2707,7 @@ module BotMetadata =
       let name = (Option.map ~f:BotName.of_xml) (Xml.child xml_arg0 "name") in
       make ?version ?createdDate ?lastUpdatedDate ?status ?description ?name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" Version.of_json in
       let createdDate = field_map json "createdDate" Timestamp.of_json in
@@ -2780,6 +2807,7 @@ module BotChannelAssociation =
         (Option.map ~f:BotChannelName.of_xml) (Xml.child xml_arg0 "name") in
       make ?failureReason ?status ?botConfiguration ?type_ ?createdDate
         ?botName ?botAlias ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason = field_map json "failureReason" String_.of_json in
       let status = field_map json "status" ChannelStatus.of_json in
@@ -2869,6 +2897,7 @@ module BotAliasMetadata =
       let name = (Option.map ~f:AliasName.of_xml) (Xml.child xml_arg0 "name") in
       make ?conversationLogs ?checksum ?createdDate ?lastUpdatedDate ?botName
         ?botVersion ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conversationLogs =
         field_map json "conversationLogs" ConversationLogsResponse.of_json in
@@ -2897,6 +2926,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2916,6 +2946,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2935,6 +2966,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2961,6 +2993,7 @@ module LimitExceededException =
       let retryAfterSeconds =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Retry-After") in
       make ?message ?retryAfterSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let retryAfterSeconds =
@@ -2981,6 +3014,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3074,6 +3108,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3245,6 +3280,7 @@ module ResourceReference =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "version") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" Version.of_json in
       let name = field_map json "name" Name.of_json in make ?version ?name ()
@@ -3307,6 +3343,7 @@ module PreconditionFailedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3395,6 +3432,7 @@ module FollowUpPrompt =
       let prompt =
         Prompt.of_xml (Xml.child_exn ~context:context_ xml_arg0 "prompt") in
       make ~rejectionStatement ~prompt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rejectionStatement =
         field_map_exn json "rejectionStatement" Statement.of_json in
@@ -3427,6 +3465,7 @@ module FulfillmentActivity =
         FulfillmentActivityType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?codeHook ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeHook = field_map json "codeHook" CodeHook.of_json in
       let type_ = field_map_exn json "type" FulfillmentActivityType.of_json in
@@ -3525,6 +3564,7 @@ module KendraConfiguration =
         KendraIndexArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "kendraIndex") in
       make ~role ?queryFilterString ~kendraIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let role = field_map_exn json "role" RoleArn.of_json in
       let queryFilterString =
@@ -3697,6 +3737,7 @@ module ConversationLogsRequest =
         LogSettingsRequestList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logSettings") in
       make ~iamRoleArn ~logSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamRoleArn = field_map_exn json "iamRoleArn" IamRoleArn.of_json in
       let logSettings =
@@ -4321,6 +4362,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a bot, bot alias or bot channel."]
@@ -4350,6 +4392,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -4428,6 +4471,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4456,6 +4500,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn =
@@ -4603,6 +4648,7 @@ module StartMigrationResponse =
         (Option.map ~f:BotName.of_xml) (Xml.child xml_arg0 "v1BotName") in
       make ?migrationTimestamp ?migrationStrategy ?migrationId ?v2BotRole
         ?v2BotId ?v1BotLocale ?v1BotVersion ?v1BotName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationTimestamp =
         field_map json "migrationTimestamp" Timestamp.of_json in
@@ -4678,6 +4724,7 @@ module StartMigrationRequest =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "v1BotName") in
       make ~migrationStrategy ~v2BotRole ~v2BotName ~v1BotVersion ~v1BotName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationStrategy =
         field_map_exn json "migrationStrategy" MigrationStrategy.of_json in
@@ -4802,6 +4849,7 @@ module StartImportResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?createdDate ?tags ?importStatus ?importId ?mergeStrategy
         ?resourceType ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map json "createdDate" Timestamp.of_json in
       let tags = field_map json "tags" TagList.of_json in
@@ -4855,6 +4903,7 @@ module StartImportRequest =
       let payload =
         Blob.of_xml (Xml.child_exn ~context:context_ xml_arg0 "payload") in
       make ?tags ~mergeStrategy ~resourceType ~payload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let mergeStrategy =
@@ -4888,6 +4937,7 @@ module ResourceInUseException =
         (Option.map ~f:ReferenceType.of_xml)
           (Xml.child xml_arg0 "referenceType") in
       make ?exampleReference ?referenceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exampleReference =
         field_map json "exampleReference" ResourceReference.of_json in
@@ -5072,6 +5122,7 @@ module PutSlotTypeResponse =
       make ?slotTypeConfigurations ?parentSlotTypeSignature ?createVersion
         ?valueSelectionStrategy ?checksum ?version ?createdDate
         ?lastUpdatedDate ?enumerationValues ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let slotTypeConfigurations =
         field_map json "slotTypeConfigurations"
@@ -5187,6 +5238,7 @@ module PutSlotTypeRequest =
       make ?slotTypeConfigurations ?parentSlotTypeSignature ?createVersion
         ?valueSelectionStrategy ?checksum ?enumerationValues ?description
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let slotTypeConfigurations =
         field_map json "slotTypeConfigurations"
@@ -5462,6 +5514,7 @@ module PutIntentResponse =
         ?parentIntentSignature ?fulfillmentActivity ?dialogCodeHook
         ?conclusionStatement ?followUpPrompt ?rejectionStatement
         ?confirmationPrompt ?sampleUtterances ?slots ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputContexts =
         field_map json "outputContexts" OutputContextList.of_json in
@@ -5666,6 +5719,7 @@ module PutIntentRequest =
         ?checksum ?parentIntentSignature ?fulfillmentActivity ?dialogCodeHook
         ?conclusionStatement ?followUpPrompt ?rejectionStatement
         ?confirmationPrompt ?sampleUtterances ?slots ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputContexts =
         field_map json "outputContexts" OutputContextList.of_json in
@@ -5945,6 +5999,7 @@ module PutBotResponse =
         ?lastUpdatedDate ?failureReason ?status ?abortStatement
         ?clarificationPrompt ?nluIntentConfidenceThreshold
         ?enableModelImprovements ?intents ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let detectSentiment = field_map json "detectSentiment" Boolean.of_json in
@@ -6136,6 +6191,7 @@ module PutBotRequest =
         ?processBehavior ?checksum ?voiceId ?idleSessionTTLInSeconds
         ?abortStatement ?clarificationPrompt ?nluIntentConfidenceThreshold
         ?enableModelImprovements ?intents ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let createVersion = field_map json "createVersion" Boolean.of_json in
@@ -6310,6 +6366,7 @@ module PutBotAliasResponse =
       let name = (Option.map ~f:AliasName.of_xml) (Xml.child xml_arg0 "name") in
       make ?tags ?conversationLogs ?checksum ?createdDate ?lastUpdatedDate
         ?botName ?botVersion ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let conversationLogs =
@@ -6392,6 +6449,7 @@ module PutBotAliasRequest =
         AliasName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?conversationLogs ?checksum ~botName ~botVersion
         ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let conversationLogs =
@@ -6473,6 +6531,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -6496,6 +6555,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" AmazonResourceName.of_json in
@@ -6572,6 +6632,7 @@ module GetUtterancesViewResponse =
       let botName =
         (Option.map ~f:BotName.of_xml) (Xml.child xml_arg0 "botName") in
       make ?utterances ?botName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let utterances = field_map json "utterances" ListsOfUtterances.of_json in
       let botName = field_map json "botName" BotName.of_json in
@@ -6612,6 +6673,7 @@ module GetUtterancesViewRequest =
       let botName =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "botname") in
       make ~statusType ~botVersions ~botName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusType = field_map_exn json "statusType" StatusType.of_json in
       let botVersions = field_map_exn json "botVersions" BotVersions.of_json in
@@ -6699,6 +6761,7 @@ module GetSlotTypesResponse =
         (Option.map ~f:SlotTypeMetadataList.of_xml)
           (Xml.child xml_arg0 "slotTypes") in
       make ?nextToken ?slotTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let slotTypes = field_map json "slotTypes" SlotTypeMetadataList.of_json in
@@ -6739,6 +6802,7 @@ module GetSlotTypesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nameContains ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains = field_map json "nameContains" SlotTypeName.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -6826,6 +6890,7 @@ module GetSlotTypeVersionsResponse =
         (Option.map ~f:SlotTypeMetadataList.of_xml)
           (Xml.child xml_arg0 "slotTypes") in
       make ?nextToken ?slotTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let slotTypes = field_map json "slotTypes" SlotTypeMetadataList.of_json in
@@ -6864,6 +6929,7 @@ module GetSlotTypeVersionsRequest =
       let name =
         SlotTypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?maxResults ?nextToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -7026,6 +7092,7 @@ module GetSlotTypeResponse =
       make ?slotTypeConfigurations ?parentSlotTypeSignature
         ?valueSelectionStrategy ?checksum ?version ?createdDate
         ?lastUpdatedDate ?enumerationValues ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let slotTypeConfigurations =
         field_map json "slotTypeConfigurations"
@@ -7071,6 +7138,7 @@ module GetSlotTypeRequest =
       let name =
         SlotTypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let name = field_map_exn json "name" SlotTypeName.of_json in
@@ -7148,6 +7216,7 @@ module GetMigrationsResponse =
         (Option.map ~f:MigrationSummaryList.of_xml)
           (Xml.child xml_arg0 "migrationSummaries") in
       make ?nextToken ?migrationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let migrationSummaries =
@@ -7222,6 +7291,7 @@ module GetMigrationsRequest =
           (Xml.child xml_arg0 "sortByAttribute") in
       make ?nextToken ?maxResults ?migrationStatusEquals ?v1BotNameContains
         ?sortByOrder ?sortByAttribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7390,6 +7460,7 @@ module GetMigrationResponse =
       make ?alerts ?migrationTimestamp ?migrationStrategy ?migrationStatus
         ?v2BotRole ?v2BotId ?v1BotLocale ?v1BotVersion ?v1BotName
         ?migrationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alerts = field_map json "alerts" MigrationAlerts.of_json in
       let migrationTimestamp =
@@ -7428,6 +7499,7 @@ module GetMigrationRequest =
         MigrationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "migrationId") in
       make ~migrationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationId = field_map_exn json "migrationId" MigrationId.of_json in
       make ~migrationId ()
@@ -7511,6 +7583,7 @@ module GetIntentsResponse =
         (Option.map ~f:IntentMetadataList.of_xml)
           (Xml.child xml_arg0 "intents") in
       make ?nextToken ?intents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let intents = field_map json "intents" IntentMetadataList.of_json in
@@ -7549,6 +7622,7 @@ module GetIntentsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nameContains ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains = field_map json "nameContains" IntentName.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7634,6 +7708,7 @@ module GetIntentVersionsResponse =
         (Option.map ~f:IntentMetadataList.of_xml)
           (Xml.child xml_arg0 "intents") in
       make ?nextToken ?intents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let intents = field_map json "intents" IntentMetadataList.of_json in
@@ -7672,6 +7747,7 @@ module GetIntentVersionsRequest =
       let name =
         IntentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?maxResults ?nextToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -7908,6 +7984,7 @@ module GetIntentResponse =
         ?fulfillmentActivity ?dialogCodeHook ?conclusionStatement
         ?followUpPrompt ?rejectionStatement ?confirmationPrompt
         ?sampleUtterances ?slots ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputContexts =
         field_map json "outputContexts" OutputContextList.of_json in
@@ -7966,6 +8043,7 @@ module GetIntentRequest =
       let name =
         IntentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let name = field_map_exn json "name" IntentName.of_json in
@@ -8099,6 +8177,7 @@ module GetImportResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?createdDate ?failureReason ?importStatus ?importId ?mergeStrategy
         ?resourceType ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map json "createdDate" Timestamp.of_json in
       let failureReason = field_map json "failureReason" StringList.of_json in
@@ -8129,6 +8208,7 @@ module GetImportRequest =
       let importId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "importId") in
       make ~importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let importId = field_map_exn json "importId" String_.of_json in
       make ~importId ()
@@ -8256,6 +8336,7 @@ module GetExportResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?url ?failureReason ?exportStatus ?exportType ?resourceType
         ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" String_.of_json in
       let failureReason = field_map json "failureReason" String_.of_json in
@@ -8306,6 +8387,7 @@ module GetExportRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~exportType ~resourceType ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportType = field_map_exn json "exportType" ExportType.of_json in
       let resourceType =
@@ -8386,6 +8468,7 @@ module GetBuiltinSlotTypesResponse =
         (Option.map ~f:BuiltinSlotTypeMetadataList.of_xml)
           (Xml.child xml_arg0 "slotTypes") in
       make ?nextToken ?slotTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let slotTypes =
@@ -8433,6 +8516,7 @@ module GetBuiltinSlotTypesRequest =
       let locale =
         (Option.map ~f:Locale.of_xml) (Xml.child xml_arg0 "locale") in
       make ?maxResults ?nextToken ?signatureContains ?locale ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8512,6 +8596,7 @@ module GetBuiltinIntentsResponse =
         (Option.map ~f:BuiltinIntentMetadataList.of_xml)
           (Xml.child xml_arg0 "intents") in
       make ?nextToken ?intents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let intents =
@@ -8559,6 +8644,7 @@ module GetBuiltinIntentsRequest =
       let locale =
         (Option.map ~f:Locale.of_xml) (Xml.child xml_arg0 "locale") in
       make ?maxResults ?nextToken ?signatureContains ?locale ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8656,6 +8742,7 @@ module GetBuiltinIntentResponse =
         (Option.map ~f:BuiltinIntentSignature.of_xml)
           (Xml.child xml_arg0 "signature") in
       make ?slots ?supportedLocales ?signature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let slots = field_map json "slots" BuiltinIntentSlotList.of_json in
       let supportedLocales =
@@ -8684,6 +8771,7 @@ module GetBuiltinIntentRequest =
         BuiltinIntentSignature.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "signature") in
       make ~signature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signature =
         field_map_exn json "signature" BuiltinIntentSignature.of_json in
@@ -8767,6 +8855,7 @@ module GetBotsResponse =
       let bots =
         (Option.map ~f:BotMetadataList.of_xml) (Xml.child xml_arg0 "bots") in
       make ?nextToken ?bots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let bots = field_map json "bots" BotMetadataList.of_json in
@@ -8805,6 +8894,7 @@ module GetBotsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nameContains ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains = field_map json "nameContains" BotName.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8889,6 +8979,7 @@ module GetBotVersionsResponse =
       let bots =
         (Option.map ~f:BotMetadataList.of_xml) (Xml.child xml_arg0 "bots") in
       make ?nextToken ?bots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let bots = field_map json "bots" BotMetadataList.of_json in
@@ -8927,6 +9018,7 @@ module GetBotVersionsRequest =
       let name =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?maxResults ?nextToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -9156,6 +9248,7 @@ module GetBotResponse =
         ?failureReason ?status ?abortStatement ?clarificationPrompt
         ?nluIntentConfidenceThreshold ?enableModelImprovements ?intents
         ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectSentiment = field_map json "detectSentiment" Boolean.of_json in
       let childDirected = field_map json "childDirected" Boolean.of_json in
@@ -9212,6 +9305,7 @@ module GetBotRequest =
       let name =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~versionOrAlias ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionOrAlias =
         field_map_exn json "versionOrAlias" String_.of_json in
@@ -9291,6 +9385,7 @@ module GetBotChannelAssociationsResponse =
         (Option.map ~f:BotChannelAssociationList.of_xml)
           (Xml.child xml_arg0 "botChannelAssociations") in
       make ?nextToken ?botChannelAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let botChannelAssociations =
@@ -9349,6 +9444,7 @@ module GetBotChannelAssociationsRequest =
       let botName =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "botName") in
       make ?nameContains ?maxResults ?nextToken ~botAlias ~botName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains = field_map json "nameContains" BotChannelName.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -9498,6 +9594,7 @@ module GetBotChannelAssociationResponse =
         (Option.map ~f:BotChannelName.of_xml) (Xml.child xml_arg0 "name") in
       make ?failureReason ?status ?botConfiguration ?type_ ?createdDate
         ?botName ?botAlias ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason = field_map json "failureReason" String_.of_json in
       let status = field_map json "status" ChannelStatus.of_json in
@@ -9544,6 +9641,7 @@ module GetBotChannelAssociationRequest =
         BotChannelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~botAlias ~botName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let botAlias = field_map_exn json "botAlias" AliasName.of_json in
       let botName = field_map_exn json "botName" BotName.of_json in
@@ -9622,6 +9720,7 @@ module GetBotAliasesResponse =
         (Option.map ~f:BotAliasMetadataList.of_xml)
           (Xml.child xml_arg0 "BotAliases") in
       make ?nextToken ?botAliases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let botAliases =
@@ -9667,6 +9766,7 @@ module GetBotAliasesRequest =
       let botName =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "botName") in
       make ?nameContains ?maxResults ?nextToken ~botName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains = field_map json "nameContains" AliasName.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -9802,6 +9902,7 @@ module GetBotAliasResponse =
       let name = (Option.map ~f:AliasName.of_xml) (Xml.child xml_arg0 "name") in
       make ?conversationLogs ?checksum ?createdDate ?lastUpdatedDate ?botName
         ?botVersion ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conversationLogs =
         field_map json "conversationLogs" ConversationLogsResponse.of_json in
@@ -9838,6 +9939,7 @@ module GetBotAliasRequest =
       let name =
         AliasName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~botName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let botName = field_map_exn json "botName" BotName.of_json in
       let name = field_map_exn json "name" AliasName.of_json in
@@ -9867,6 +9969,7 @@ module DeleteUtterancesRequest =
       let botName =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "botName") in
       make ~userId ~botName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map_exn json "userId" UserId.of_json in
       let botName = field_map_exn json "botName" BotName.of_json in
@@ -9896,6 +9999,7 @@ module DeleteSlotTypeVersionRequest =
       let name =
         SlotTypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" NumericalVersion.of_json in
       let name = field_map_exn json "name" SlotTypeName.of_json in
@@ -9918,6 +10022,7 @@ module DeleteSlotTypeRequest =
       let name =
         SlotTypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" SlotTypeName.of_json in
       make ~name ()
@@ -9946,6 +10051,7 @@ module DeleteIntentVersionRequest =
       let name =
         IntentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" NumericalVersion.of_json in
       let name = field_map_exn json "name" IntentName.of_json in
@@ -9968,6 +10074,7 @@ module DeleteIntentRequest =
       let name =
         IntentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" IntentName.of_json in
       make ~name ()
@@ -9996,6 +10103,7 @@ module DeleteBotVersionRequest =
       let name =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" NumericalVersion.of_json in
       let name = field_map_exn json "name" BotName.of_json in
@@ -10018,6 +10126,7 @@ module DeleteBotRequest =
       let name =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" BotName.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -10053,6 +10162,7 @@ module DeleteBotChannelAssociationRequest =
         BotChannelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~botAlias ~botName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let botAlias = field_map_exn json "botAlias" AliasName.of_json in
       let botName = field_map_exn json "botName" BotName.of_json in
@@ -10083,6 +10193,7 @@ module DeleteBotAliasRequest =
       let name =
         AliasName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~botName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let botName = field_map_exn json "botName" BotName.of_json in
       let name = field_map_exn json "name" AliasName.of_json in
@@ -10265,6 +10376,7 @@ module CreateSlotTypeVersionResponse =
       make ?slotTypeConfigurations ?parentSlotTypeSignature
         ?valueSelectionStrategy ?checksum ?version ?createdDate
         ?lastUpdatedDate ?enumerationValues ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let slotTypeConfigurations =
         field_map json "slotTypeConfigurations"
@@ -10313,6 +10425,7 @@ module CreateSlotTypeVersionRequest =
       let name =
         SlotTypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?checksum ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksum = field_map json "checksum" String_.of_json in
       let name = field_map_exn json "name" SlotTypeName.of_json in
@@ -10570,6 +10683,7 @@ module CreateIntentVersionResponse =
         ?fulfillmentActivity ?dialogCodeHook ?conclusionStatement
         ?followUpPrompt ?rejectionStatement ?confirmationPrompt
         ?sampleUtterances ?slots ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputContexts =
         field_map json "outputContexts" OutputContextList.of_json in
@@ -10631,6 +10745,7 @@ module CreateIntentVersionRequest =
       let name =
         IntentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?checksum ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksum = field_map json "checksum" String_.of_json in
       let name = field_map_exn json "name" IntentName.of_json in
@@ -10866,6 +10981,7 @@ module CreateBotVersionResponse =
         ?version ?checksum ?voiceId ?idleSessionTTLInSeconds ?createdDate
         ?lastUpdatedDate ?failureReason ?status ?abortStatement
         ?clarificationPrompt ?intents ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectSentiment = field_map json "detectSentiment" Boolean.of_json in
       let enableModelImprovements =
@@ -10918,6 +11034,7 @@ module CreateBotVersionRequest =
       let name =
         BotName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?checksum ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksum = field_map json "checksum" String_.of_json in
       let name = field_map_exn json "name" BotName.of_json in

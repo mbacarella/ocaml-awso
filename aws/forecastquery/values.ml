@@ -68,6 +68,7 @@ module DataPoint =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?value ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Double.of_json in
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
@@ -204,6 +205,7 @@ module Forecast =
       let predictions =
         (Option.map ~f:Predictions.of_xml) (Xml.child xml_arg0 "Predictions") in
       make ?predictions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictions = field_map json "Predictions" Predictions.of_json in
       make ?predictions ()
@@ -223,6 +225,7 @@ module InvalidInputException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -241,6 +244,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -259,6 +263,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -278,6 +283,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -296,6 +302,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -462,6 +469,7 @@ module QueryForecastResponse =
       let forecast =
         (Option.map ~f:Forecast.of_xml) (Xml.child xml_arg0 "Forecast") in
       make ?forecast ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecast = field_map json "Forecast" Forecast.of_json in
       make ?forecast ()
@@ -515,6 +523,7 @@ module QueryForecastRequest =
       let forecastArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastArn") in
       make ?nextToken ~filters ?endDate ?startDate ~forecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let filters = field_map_exn json "Filters" Filters.of_json in

@@ -174,6 +174,7 @@ module AdvancedFieldSelector =
           (Xml.child_exn ~context:context_ xml_arg0 "Field") in
       make ?notEndsWith ?notStartsWith ?notEquals ?endsWith ?startsWith
         ?equals ~field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notEndsWith = field_map json "NotEndsWith" Operator.of_json in
       let notStartsWith = field_map json "NotStartsWith" Operator.of_json in
@@ -316,6 +317,7 @@ module DataResource =
           (Xml.child xml_arg0 "Values") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
       make ?values ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" DataResourceValues.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -346,6 +348,7 @@ module Resource =
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       make ?resourceName ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" String_.of_json in
       let resourceType = field_map json "ResourceType" String_.of_json in
@@ -376,6 +379,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -409,6 +413,7 @@ module AdvancedEventSelector =
       let name =
         (Option.map ~f:SelectorName.of_xml) (Xml.child xml_arg0 "Name") in
       make ~fieldSelectors ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldSelectors =
         field_map_exn json "FieldSelectors" AdvancedFieldSelectors.of_json in
@@ -902,6 +907,7 @@ module InsightSelector =
       let insightType =
         (Option.map ~f:InsightType.of_xml) (Xml.child xml_arg0 "InsightType") in
       make ?insightType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let insightType = field_map json "InsightType" InsightType.of_json in
       make ?insightType ()
@@ -962,6 +968,7 @@ module EventSelector =
           (Xml.child xml_arg0 "ReadWriteType") in
       make ?excludeManagementEventSources ?dataResources
         ?includeManagementEvents ?readWriteType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let excludeManagementEventSources =
         field_map json "ExcludeManagementEventSources"
@@ -1059,6 +1066,7 @@ module Event =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EventId") in
       make ?cloudTrailEvent ?resources ?username ?eventSource ?eventTime
         ?accessKeyId ?readOnly ?eventName ?eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudTrailEvent = field_map json "CloudTrailEvent" String_.of_json in
       let resources = field_map json "Resources" ResourceList.of_json in
@@ -1100,6 +1108,7 @@ module LookupAttribute =
         LookupAttributeKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeKey") in
       make ~attributeValue ~attributeKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeValue =
         field_map_exn json "AttributeValue" String_.of_json in
@@ -1134,6 +1143,7 @@ module TrailInfo =
       let trailARN =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?homeRegion ?name ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let homeRegion = field_map json "HomeRegion" String_.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -1162,6 +1172,7 @@ module ResourceTag =
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?tagsList ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsList = field_map json "TagsList" TagsList.of_json in
       let resourceId = field_map json "ResourceId" String_.of_json in
@@ -1195,6 +1206,7 @@ module Query =
       let queryId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
       make ?creationTime ?queryStatus ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Date.of_json in
       let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
@@ -1239,6 +1251,7 @@ module PublicKey =
       let value =
         (Option.map ~f:ByteBuffer.of_xml) (Xml.child xml_arg0 "Value") in
       make ?fingerprint ?validityEndTime ?validityStartTime ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fingerprint = field_map json "Fingerprint" String_.of_json in
       let validityEndTime = field_map json "ValidityEndTime" Date.of_json in
@@ -1354,6 +1367,7 @@ module EventDataStore =
       make ?updatedTimestamp ?createdTimestamp ?retentionPeriod
         ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
         ?status ?terminationProtectionEnabled ?name ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
       let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
@@ -1584,6 +1598,7 @@ module Trail =
         ?logFileValidationEnabled ?trailARN ?homeRegion ?isMultiRegionTrail
         ?includeGlobalServiceEvents ?snsTopicARN ?snsTopicName ?s3KeyPrefix
         ?s3BucketName ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isOrganizationTrail =
         field_map json "IsOrganizationTrail" Boolean.of_json in
@@ -1624,6 +1639,7 @@ module CloudTrailAccessNotEnabledException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1636,6 +1652,7 @@ module CloudTrailInvalidClientTokenIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1648,6 +1665,7 @@ module CloudWatchLogsDeliveryUnavailableException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cannot set a CloudWatch Logs delivery for this region."]
@@ -1659,6 +1677,7 @@ module InsufficientDependencyServiceAccessPermissionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1671,6 +1690,7 @@ module InsufficientEncryptionPolicyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1683,6 +1703,7 @@ module InsufficientS3BucketPolicyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1695,6 +1716,7 @@ module InsufficientSnsTopicPolicyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1707,6 +1729,7 @@ module InvalidCloudWatchLogsLogGroupArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1719,6 +1742,7 @@ module InvalidCloudWatchLogsRoleArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1731,6 +1755,7 @@ module InvalidEventSelectorsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1743,6 +1768,7 @@ module InvalidHomeRegionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1755,6 +1781,7 @@ module InvalidKmsKeyIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1767,6 +1794,7 @@ module InvalidParameterCombinationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1779,6 +1807,7 @@ module InvalidS3BucketNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1791,6 +1820,7 @@ module InvalidS3PrefixException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1803,6 +1833,7 @@ module InvalidSnsTopicNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1815,6 +1846,7 @@ module InvalidTrailNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1827,6 +1859,7 @@ module KmsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1839,6 +1872,7 @@ module KmsKeyDisabledException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This exception is no longer in use."]
@@ -1850,6 +1884,7 @@ module KmsKeyNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1862,6 +1897,7 @@ module NotOrganizationMasterAccountException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1874,6 +1910,7 @@ module OperationNotPermittedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1886,6 +1923,7 @@ module OrganizationNotInAllFeaturesModeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1898,6 +1936,7 @@ module OrganizationsNotInUseException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1910,6 +1949,7 @@ module S3BucketDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1922,6 +1962,7 @@ module TrailNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1934,6 +1975,7 @@ module TrailNotProvidedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This exception is no longer in use."]
@@ -1945,6 +1987,7 @@ module UnsupportedOperationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1957,6 +2000,7 @@ module EventDataStoreARNInvalidException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1969,6 +2013,7 @@ module EventDataStoreNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified event data store was not found."]
@@ -1980,6 +2025,7 @@ module InactiveEventDataStoreException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1992,6 +2038,7 @@ module InvalidParameterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request includes a parameter that is not valid."]
@@ -2003,6 +2050,7 @@ module InvalidQueryStatementException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2015,6 +2063,7 @@ module MaxConcurrentQueriesException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2047,6 +2096,7 @@ module EventDataStoreMaxLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2059,6 +2109,7 @@ module InvalidEventDataStoreStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2071,6 +2122,7 @@ module CloudTrailARNInvalidException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2083,6 +2135,7 @@ module InvalidTagParameterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2095,6 +2148,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2107,6 +2161,7 @@ module ResourceTypeNotSupportedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2144,6 +2199,7 @@ module InvalidInsightSelectorsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2203,6 +2259,7 @@ module InvalidEventCategoryException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2215,6 +2272,7 @@ module InvalidLookupAttributesException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2227,6 +2285,7 @@ module InvalidMaxResultsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2239,6 +2298,7 @@ module InvalidNextTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2251,6 +2311,7 @@ module InvalidTimeRangeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2358,6 +2419,7 @@ module InvalidTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Reserved for future use."]
@@ -2417,6 +2479,7 @@ module InvalidDateRangeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2429,6 +2492,7 @@ module InvalidQueryStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The query status is not valid for the operation."]
@@ -2589,6 +2653,7 @@ module QueryIdNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The query ID does not exist or does not map to a query."]
@@ -2647,6 +2712,7 @@ module QueryStatistics =
       let resultsCount =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "ResultsCount") in
       make ?bytesScanned ?totalResultsCount ?resultsCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bytesScanned = field_map json "BytesScanned" Long.of_json in
       let totalResultsCount =
@@ -2681,6 +2747,7 @@ module InsightNotEnabledException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2784,6 +2851,7 @@ module QueryStatisticsForDescribeQuery =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "EventsMatched") in
       make ?creationTime ?executionTimeInMillis ?bytesScanned ?eventsScanned
         ?eventsMatched ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Date.of_json in
       let executionTimeInMillis =
@@ -2804,6 +2872,7 @@ module ConflictException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2816,6 +2885,7 @@ module EventDataStoreTerminationProtectedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2828,6 +2898,7 @@ module MaximumNumberOfTrailsExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2840,6 +2911,7 @@ module TrailAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2852,6 +2924,7 @@ module EventDataStoreAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An event data store with that name already exists."]
@@ -2863,6 +2936,7 @@ module InactiveQueryException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2875,6 +2949,7 @@ module TagsLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3336,6 +3411,7 @@ module UpdateTrailResponse =
         ?cloudWatchLogsLogGroupArn ?logFileValidationEnabled ?trailARN
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicARN
         ?snsTopicName ?s3KeyPrefix ?s3BucketName ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isOrganizationTrail =
         field_map json "IsOrganizationTrail" Boolean.of_json in
@@ -3479,6 +3555,7 @@ module UpdateTrailRequest =
         ?cloudWatchLogsLogGroupArn ?enableLogFileValidation
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicName
         ?s3KeyPrefix ?s3BucketName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isOrganizationTrail =
         field_map json "IsOrganizationTrail" Boolean.of_json in
@@ -3761,6 +3838,7 @@ module UpdateEventDataStoreResponse =
       make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
         ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
         ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
       let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
@@ -3869,6 +3947,7 @@ module UpdateEventDataStoreRequest =
       make ?terminationProtectionEnabled ?retentionPeriod
         ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
         ?name ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminationProtectionEnabled =
         field_map json "TerminationProtectionEnabled"
@@ -3998,6 +4077,7 @@ module StopLoggingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4018,6 +4098,7 @@ module StopLoggingRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -4143,6 +4224,7 @@ module StartQueryResponse =
       let queryId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
       make ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryId = field_map json "QueryId" UUID.of_json in make ?queryId ()
     let to_json v = composed_to_json to_value v
@@ -4166,6 +4248,7 @@ module StartQueryRequest =
         QueryStatement.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryStatement") in
       make ~queryStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStatement =
         field_map_exn json "QueryStatement" QueryStatement.of_json in
@@ -4280,6 +4363,7 @@ module StartLoggingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4300,6 +4384,7 @@ module StartLoggingRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -4574,6 +4659,7 @@ module RestoreEventDataStoreResponse =
       make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
         ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
         ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
       let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
@@ -4618,6 +4704,7 @@ module RestoreEventDataStoreRequest =
         EventDataStoreArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDataStore =
         field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
@@ -4759,6 +4846,7 @@ module RemoveTagsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4787,6 +4875,7 @@ module RemoveTagsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagsList ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsList = field_map_exn json "TagsList" TagsList.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
@@ -4953,6 +5042,7 @@ module PutInsightSelectorsResponse =
       let trailARN =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?insightSelectors ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let insightSelectors =
         field_map json "InsightSelectors" InsightSelectors.of_json in
@@ -4987,6 +5077,7 @@ module PutInsightSelectorsRequest =
       let trailName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
       make ~insightSelectors ~trailName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let insightSelectors =
         field_map_exn json "InsightSelectors" InsightSelectors.of_json in
@@ -5141,6 +5232,7 @@ module PutEventSelectorsResponse =
       let trailARN =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?advancedEventSelectors ?eventSelectors ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedEventSelectors =
         field_map json "AdvancedEventSelectors"
@@ -5189,6 +5281,7 @@ module PutEventSelectorsRequest =
       let trailName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
       make ?advancedEventSelectors ?eventSelectors ~trailName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedEventSelectors =
         field_map json "AdvancedEventSelectors"
@@ -5313,6 +5406,7 @@ module LookupEventsResponse =
       let events =
         (Option.map ~f:EventsList.of_xml) (Xml.child xml_arg0 "Events") in
       make ?nextToken ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let events = field_map json "Events" EventsList.of_json in
@@ -5384,6 +5478,7 @@ module LookupEventsRequest =
           (Xml.child xml_arg0 "LookupAttributes") in
       make ?nextToken ?maxResults ?eventCategory ?endTime ?startTime
         ?lookupAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5459,6 +5554,7 @@ module ListTrailsResponse =
       let trails =
         (Option.map ~f:Trails.of_xml) (Xml.child xml_arg0 "Trails") in
       make ?nextToken ?trails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let trails = field_map json "Trails" Trails.of_json in
@@ -5481,6 +5577,7 @@ module ListTrailsRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       make ?nextToken ()
@@ -5620,6 +5717,7 @@ module ListTagsResponse =
         (Option.map ~f:ResourceTagList.of_xml)
           (Xml.child xml_arg0 "ResourceTagList") in
       make ?nextToken ?resourceTagList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let resourceTagList =
@@ -5652,6 +5750,7 @@ module ListTagsRequest =
         ResourceIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdList") in
       make ?nextToken ~resourceIdList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let resourceIdList =
@@ -5804,6 +5903,7 @@ module ListQueriesResponse =
       let queries =
         (Option.map ~f:Queries.of_xml) (Xml.child xml_arg0 "Queries") in
       make ?nextToken ?queries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let queries = field_map json "Queries" Queries.of_json in
@@ -5876,6 +5976,7 @@ module ListQueriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ?queryStatus ?endTime ?startTime ?maxResults ?nextToken
         ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
       let endTime = field_map json "EndTime" Date.of_json in
@@ -5971,6 +6072,7 @@ module ListPublicKeysResponse =
         (Option.map ~f:PublicKeyList.of_xml)
           (Xml.child xml_arg0 "PublicKeyList") in
       make ?nextToken ?publicKeyList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let publicKeyList =
@@ -6007,6 +6109,7 @@ module ListPublicKeysRequest =
       let startTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?nextToken ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let endTime = field_map json "EndTime" Date.of_json in
@@ -6098,6 +6201,7 @@ module ListEventDataStoresResponse =
         (Option.map ~f:EventDataStores.of_xml)
           (Xml.child xml_arg0 "EventDataStores") in
       make ?nextToken ?eventDataStores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let eventDataStores =
@@ -6133,6 +6237,7 @@ module ListEventDataStoresRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -6378,6 +6483,7 @@ module GetTrailStatusResponse =
         ?stopLoggingTime ?startLoggingTime ?latestNotificationTime
         ?latestDeliveryTime ?latestNotificationError ?latestDeliveryError
         ?isLogging ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeLoggingStopped =
         field_map json "TimeLoggingStopped" String_.of_json in
@@ -6437,6 +6543,7 @@ module GetTrailStatusRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -6511,6 +6618,7 @@ module GetTrailResponse =
     let of_xml xml_arg0 =
       let trail = (Option.map ~f:Trail.of_xml) (Xml.child xml_arg0 "Trail") in
       make ?trail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trail = field_map json "Trail" Trail.of_json in make ?trail ()
     let to_json v = composed_to_json to_value v
@@ -6531,6 +6639,7 @@ module GetTrailRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -6704,6 +6813,7 @@ module GetQueryResultsResponse =
         (Option.map ~f:QueryStatus.of_xml) (Xml.child xml_arg0 "QueryStatus") in
       make ?errorMessage ?nextToken ?queryResultRows ?queryStatistics
         ?queryStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -6760,6 +6870,7 @@ module GetQueryResultsRequest =
         EventDataStoreArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ?maxQueryResults ?nextToken ~queryId ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxQueryResults =
         field_map json "MaxQueryResults" MaxQueryResults.of_json in
@@ -6864,6 +6975,7 @@ module GetInsightSelectorsResponse =
       let trailARN =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?insightSelectors ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let insightSelectors =
         field_map json "InsightSelectors" InsightSelectors.of_json in
@@ -6889,6 +7001,7 @@ module GetInsightSelectorsRequest =
       let trailName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
       make ~trailName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trailName = field_map_exn json "TrailName" String_.of_json in
       make ~trailName ()
@@ -6987,6 +7100,7 @@ module GetEventSelectorsResponse =
       let trailARN =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TrailARN") in
       make ?advancedEventSelectors ?eventSelectors ?trailARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedEventSelectors =
         field_map json "AdvancedEventSelectors"
@@ -7015,6 +7129,7 @@ module GetEventSelectorsRequest =
       let trailName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrailName") in
       make ~trailName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trailName = field_map_exn json "TrailName" String_.of_json in
       make ~trailName ()
@@ -7200,6 +7315,7 @@ module GetEventDataStoreResponse =
       make ?updatedTimestamp ?createdTimestamp ?terminationProtectionEnabled
         ?retentionPeriod ?organizationEnabled ?multiRegionEnabled
         ?advancedEventSelectors ?status ?name ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
       let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
@@ -7244,6 +7360,7 @@ module GetEventDataStoreRequest =
         EventDataStoreArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDataStore =
         field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
@@ -7316,6 +7433,7 @@ module DescribeTrailsResponse =
       let trailList =
         (Option.map ~f:TrailList.of_xml) (Xml.child xml_arg0 "trailList") in
       make ?trailList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trailList = field_map json "trailList" TrailList.of_json in
       make ?trailList ()
@@ -7350,6 +7468,7 @@ module DescribeTrailsRequest =
         (Option.map ~f:TrailNameList.of_xml)
           (Xml.child xml_arg0 "trailNameList") in
       make ?includeShadowTrails ?trailNameList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeShadowTrails =
         field_map json "includeShadowTrails" Boolean.of_json in
@@ -7507,6 +7626,7 @@ module DescribeQueryResponse =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "QueryId") in
       make ?errorMessage ?queryStatistics ?queryStatus ?queryString ?queryId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let queryStatistics =
@@ -7544,6 +7664,7 @@ module DescribeQueryRequest =
         EventDataStoreArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~queryId ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryId = field_map_exn json "QueryId" UUID.of_json in
       let eventDataStore =
@@ -7667,6 +7788,7 @@ module DeleteTrailResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7687,6 +7809,7 @@ module DeleteTrailRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -7817,6 +7940,7 @@ module DeleteEventDataStoreResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7840,6 +7964,7 @@ module DeleteEventDataStoreRequest =
         EventDataStoreArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDataStore =
         field_map_exn json "EventDataStore" EventDataStoreArn.of_json in
@@ -8316,6 +8441,7 @@ module CreateTrailResponse =
         ?cloudWatchLogsLogGroupArn ?logFileValidationEnabled ?trailARN
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicARN
         ?snsTopicName ?s3KeyPrefix ?s3BucketName ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isOrganizationTrail =
         field_map json "IsOrganizationTrail" Boolean.of_json in
@@ -8466,6 +8592,7 @@ module CreateTrailRequest =
         ?cloudWatchLogsLogGroupArn ?enableLogFileValidation
         ?isMultiRegionTrail ?includeGlobalServiceEvents ?snsTopicName
         ?s3KeyPrefix ~s3BucketName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsList = field_map json "TagsList" TagsList.of_json in
       let isOrganizationTrail =
@@ -8765,6 +8892,7 @@ module CreateEventDataStoreResponse =
         ?terminationProtectionEnabled ?retentionPeriod ?organizationEnabled
         ?multiRegionEnabled ?advancedEventSelectors ?status ?name
         ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedTimestamp = field_map json "UpdatedTimestamp" Date.of_json in
       let createdTimestamp = field_map json "CreatedTimestamp" Date.of_json in
@@ -8872,6 +9000,7 @@ module CreateEventDataStoreRequest =
       make ?tagsList ?terminationProtectionEnabled ?retentionPeriod
         ?organizationEnabled ?multiRegionEnabled ?advancedEventSelectors
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsList = field_map json "TagsList" TagsList.of_json in
       let terminationProtectionEnabled =
@@ -9025,6 +9154,7 @@ module CancelQueryResponse =
       let queryId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       make ~queryStatus ~queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStatus = field_map_exn json "QueryStatus" QueryStatus.of_json in
       let queryId = field_map_exn json "QueryId" UUID.of_json in
@@ -9058,6 +9188,7 @@ module CancelQueryRequest =
         EventDataStoreArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventDataStore") in
       make ~queryId ~eventDataStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryId = field_map_exn json "QueryId" UUID.of_json in
       let eventDataStore =
@@ -9219,6 +9350,7 @@ module AddTagsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9247,6 +9379,7 @@ module AddTagsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagsList ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsList = field_map_exn json "TagsList" TagsList.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in

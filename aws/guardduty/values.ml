@@ -79,6 +79,7 @@ module VolumeMount =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "mountPath") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?mountPath ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountPath = field_map json "MountPath" String_.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -137,6 +138,7 @@ module BlockPublicAccess =
           (Xml.child xml_arg0 "ignorePublicAcls") in
       make ?blockPublicPolicy ?blockPublicAcls ?restrictPublicBuckets
         ?ignorePublicAcls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blockPublicPolicy =
         field_map json "BlockPublicPolicy" Boolean.of_json in
@@ -178,6 +180,7 @@ module AccessControlList =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "allowsPublicReadAccess") in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowsPublicWriteAccess =
         field_map json "AllowsPublicWriteAccess" Boolean.of_json in
@@ -215,6 +218,7 @@ module BucketPolicy =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "allowsPublicReadAccess") in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowsPublicWriteAccess =
         field_map json "AllowsPublicWriteAccess" Boolean.of_json in
@@ -252,6 +256,7 @@ module City =
       let cityName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cityName") in
       make ?cityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cityName = field_map json "CityName" String_.of_json in
       make ?cityName ()
@@ -279,6 +284,7 @@ module Country =
       let countryCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "countryCode") in
       make ?countryName ?countryCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let countryName = field_map json "CountryName" String_.of_json in
       let countryCode = field_map json "CountryCode" String_.of_json in
@@ -304,6 +310,7 @@ module GeoLocation =
       let lon = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "lon") in
       let lat = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "lat") in
       make ?lon ?lat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lon = field_map json "Lon" Double.of_json in
       let lat = field_map json "Lat" Double.of_json in make ?lon ?lat ()
@@ -339,6 +346,7 @@ module Organization =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "asnOrg") in
       let asn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "asn") in
       make ?org ?isp ?asnOrg ?asn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let org = field_map json "Org" String_.of_json in
       let isp = field_map json "Isp" String_.of_json in
@@ -372,6 +380,7 @@ module PrivateIpAddressDetails =
       let privateDnsName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "privateDnsName") in
       make ?privateIpAddress ?privateDnsName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateIpAddress =
         field_map json "PrivateIpAddress" String_.of_json in
@@ -400,6 +409,7 @@ module SecurityGroup =
       let groupId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupId") in
       make ?groupName ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupName = field_map json "GroupName" String_.of_json in
       let groupId = field_map json "GroupId" String_.of_json in
@@ -422,6 +432,7 @@ module SecurityContext =
       let privileged =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "privileged") in
       make ?privileged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privileged = field_map json "Privileged" Boolean.of_json in
       make ?privileged ()
@@ -465,6 +476,7 @@ module HostPath =
     let of_xml xml_arg0 =
       let path = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "path") in
       make ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "Path" String_.of_json in make ?path ()
     let to_json v = composed_to_json to_value v
@@ -488,6 +500,7 @@ module AccountLevelPermissions =
         (Option.map ~f:BlockPublicAccess.of_xml)
           (Xml.child xml_arg0 "blockPublicAccess") in
       make ?blockPublicAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blockPublicAccess =
         field_map json "BlockPublicAccess" BlockPublicAccess.of_json in
@@ -532,6 +545,7 @@ module BucketLevelPermissions =
         (Option.map ~f:AccessControlList.of_xml)
           (Xml.child xml_arg0 "accessControlList") in
       make ?blockPublicAccess ?bucketPolicy ?accessControlList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blockPublicAccess =
         field_map json "BlockPublicAccess" BlockPublicAccess.of_json in
@@ -557,6 +571,7 @@ module LocalIpDetails =
       let ipAddressV4 =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipAddressV4") in
       make ?ipAddressV4 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddressV4 = field_map json "IpAddressV4" String_.of_json in
       make ?ipAddressV4 ()
@@ -582,6 +597,7 @@ module LocalPortDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "portName") in
       let port = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "port") in
       make ?portName ?port ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portName = field_map json "PortName" String_.of_json in
       let port = field_map json "Port" Integer.of_json in
@@ -632,6 +648,7 @@ module RemoteIpDetails =
         (Option.map ~f:Country.of_xml) (Xml.child xml_arg0 "country") in
       let city = (Option.map ~f:City.of_xml) (Xml.child xml_arg0 "city") in
       make ?organization ?ipAddressV4 ?geoLocation ?country ?city ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organization = field_map json "Organization" Organization.of_json in
       let ipAddressV4 = field_map json "IpAddressV4" String_.of_json in
@@ -780,6 +797,7 @@ module Container =
           (Xml.child xml_arg0 "containerRuntime") in
       make ?securityContext ?volumeMounts ?imagePrefix ?image ?name ?id
         ?containerRuntime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityContext =
         field_map json "SecurityContext" SecurityContext.of_json in
@@ -813,6 +831,7 @@ module Volume =
         (Option.map ~f:HostPath.of_xml) (Xml.child xml_arg0 "hostPath") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?hostPath ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostPath = field_map json "HostPath" HostPath.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -849,6 +868,7 @@ module PermissionConfiguration =
         (Option.map ~f:BucketLevelPermissions.of_xml)
           (Xml.child xml_arg0 "bucketLevelPermissions") in
       make ?accountLevelPermissions ?bucketLevelPermissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountLevelPermissions =
         field_map json "AccountLevelPermissions"
@@ -876,6 +896,7 @@ module Tag =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let key = field_map json "Key" String_.of_json in make ?value ?key ()
@@ -916,6 +937,7 @@ module PortProbeDetail =
         (Option.map ~f:LocalPortDetails.of_xml)
           (Xml.child xml_arg0 "localPortDetails") in
       make ?remoteIpDetails ?localIpDetails ?localPortDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteIpDetails =
         field_map json "RemoteIpDetails" RemoteIpDetails.of_json in
@@ -1068,6 +1090,7 @@ module NetworkInterface =
       make ?vpcId ?subnetId ?securityGroups ?publicIp ?publicDnsName
         ?privateIpAddresses ?privateIpAddress ?privateDnsName
         ?networkInterfaceId ?ipv6Addresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" String_.of_json in
       let subnetId = field_map json "SubnetId" String_.of_json in
@@ -1107,6 +1130,7 @@ module ProductCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "productType") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?productType ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productType = field_map json "ProductType" String_.of_json in
       let code = field_map json "Code" String_.of_json in
@@ -1209,6 +1233,7 @@ module DefaultServerSideEncryption =
       let encryptionType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "encryptionType") in
       make ?kmsMasterKeyArn ?encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsMasterKeyArn = field_map json "KmsMasterKeyArn" String_.of_json in
       let encryptionType = field_map json "EncryptionType" String_.of_json in
@@ -1230,6 +1255,7 @@ module Owner =
     let of_xml xml_arg0 =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" String_.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -1263,6 +1289,7 @@ module PublicAccess =
         (Option.map ~f:PermissionConfiguration.of_xml)
           (Xml.child xml_arg0 "permissionConfiguration") in
       make ?effectivePermission ?permissionConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectivePermission =
         field_map json "EffectivePermission" String_.of_json in
@@ -1324,6 +1351,7 @@ module DomainDetails =
       let domain =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "Domain" String_.of_json in make ?domain ()
     let to_json v = composed_to_json to_value v
@@ -1351,6 +1379,7 @@ module RemoteAccountDetails =
       let accountId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?affiliated ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let affiliated = field_map json "Affiliated" Boolean.of_json in
       let accountId = field_map json "AccountId" String_.of_json in
@@ -1400,6 +1429,7 @@ module RemotePortDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "portName") in
       let port = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "port") in
       make ?portName ?port ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portName = field_map json "PortName" String_.of_json in
       let port = field_map json "Port" Integer.of_json in
@@ -1455,6 +1485,7 @@ module ThreatIntelligenceDetail =
       let threatListName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "threatListName") in
       make ?threatNames ?threatListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let threatNames = field_map json "ThreatNames" ThreatNames.of_json in
       let threatListName = field_map json "ThreatListName" String_.of_json in
@@ -1480,6 +1511,7 @@ module KubernetesAuditLogsConfigurationResult =
         DataSourceStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" DataSourceStatus.of_json in
       make ~status ()
@@ -1503,6 +1535,7 @@ module IamInstanceProfile =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" String_.of_json in
       let arn = field_map json "Arn" String_.of_json in make ?id ?arn ()
@@ -1584,6 +1617,7 @@ module KubernetesUserDetails =
       let username =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "username") in
       make ?groups ?uid ?username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groups = field_map json "Groups" Groups.of_json in
       let uid = field_map json "Uid" String_.of_json in
@@ -1649,6 +1683,7 @@ module KubernetesWorkloadDetails =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?volumes ?containers ?hostNetwork ?namespace ?uid ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumes = field_map json "Volumes" Volumes.of_json in
       let containers = field_map json "Containers" Containers.of_json in
@@ -1730,6 +1765,7 @@ module S3BucketDetail =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       make ?publicAccess ?defaultServerSideEncryption ?tags ?owner ?createdAt
         ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicAccess = field_map json "PublicAccess" PublicAccess.of_json in
       let defaultServerSideEncryption =
@@ -1822,6 +1858,7 @@ module AwsApiCallAction =
       let api = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "api") in
       make ?remoteAccountDetails ?serviceName ?remoteIpDetails ?userAgent
         ?errorCode ?domainDetails ?callerType ?api ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccountDetails =
         field_map json "RemoteAccountDetails" RemoteAccountDetails.of_json in
@@ -1853,6 +1890,7 @@ module DnsRequestAction =
       let domain =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "Domain" String_.of_json in make ?domain ()
     let to_json v = composed_to_json to_value v
@@ -1922,6 +1960,7 @@ module KubernetesApiCallAction =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "requestUri") in
       make ?parameters ?statusCode ?remoteIpDetails ?userAgent ?sourceIps
         ?verb ?requestUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "Parameters" String_.of_json in
       let statusCode = field_map json "StatusCode" Integer.of_json in
@@ -2009,6 +2048,7 @@ module NetworkConnectionAction =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "blocked") in
       make ?remotePortDetails ?remoteIpDetails ?localIpDetails ?protocol
         ?localPortDetails ?connectionDirection ?blocked ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remotePortDetails =
         field_map json "RemotePortDetails" RemotePortDetails.of_json in
@@ -2051,6 +2091,7 @@ module PortProbeAction =
       let blocked =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "blocked") in
       make ?portProbeDetails ?blocked ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portProbeDetails =
         field_map json "PortProbeDetails" PortProbeDetails.of_json in
@@ -2226,6 +2267,7 @@ module Total =
       let amount =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "amount") in
       make ?unit ?amount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" String_.of_json in
       let amount = field_map json "Amount" String_.of_json in
@@ -2285,6 +2327,7 @@ module CloudTrailConfigurationResult =
         DataSourceStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" DataSourceStatus.of_json in
       make ~status ()
@@ -2308,6 +2351,7 @@ module DNSLogsConfigurationResult =
         DataSourceStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" DataSourceStatus.of_json in
       make ~status ()
@@ -2332,6 +2376,7 @@ module FlowLogsConfigurationResult =
         DataSourceStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" DataSourceStatus.of_json in
       make ~status ()
@@ -2358,6 +2403,7 @@ module KubernetesConfigurationResult =
         KubernetesAuditLogsConfigurationResult.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "auditLogs") in
       make ~auditLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogs =
         field_map_exn json "AuditLogs"
@@ -2384,6 +2430,7 @@ module S3LogsConfigurationResult =
         DataSourceStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" DataSourceStatus.of_json in
       make ~status ()
@@ -2422,6 +2469,7 @@ module AccessKeyDetails =
       let accessKeyId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessKeyId") in
       make ?userType ?userName ?principalId ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userType = field_map json "UserType" String_.of_json in
       let userName = field_map json "UserName" String_.of_json in
@@ -2468,6 +2516,7 @@ module EksClusterDetails =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?createdAt ?tags ?status ?vpcId ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -2593,6 +2642,7 @@ module InstanceDetails =
       make ?tags ?productCodes ?platform ?networkInterfaces ?launchTime
         ?outpostArn ?instanceType ?instanceState ?instanceId ?imageId
         ?imageDescription ?iamInstanceProfile ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let productCodes = field_map json "ProductCodes" ProductCodes.of_json in
@@ -2646,6 +2696,7 @@ module KubernetesDetails =
         (Option.map ~f:KubernetesUserDetails.of_xml)
           (Xml.child xml_arg0 "kubernetesUserDetails") in
       make ?kubernetesWorkloadDetails ?kubernetesUserDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kubernetesWorkloadDetails =
         field_map json "KubernetesWorkloadDetails"
@@ -2752,6 +2803,7 @@ module Action =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "actionType") in
       make ?kubernetesApiCallAction ?portProbeAction ?networkConnectionAction
         ?dnsRequestAction ?awsApiCallAction ?actionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kubernetesApiCallAction =
         field_map json "KubernetesApiCallAction"
@@ -2808,6 +2860,7 @@ module Evidence =
         (Option.map ~f:ThreatIntelligenceDetails.of_xml)
           (Xml.child xml_arg0 "threatIntelligenceDetails") in
       make ?threatIntelligenceDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let threatIntelligenceDetails =
         field_map json "ThreatIntelligenceDetails"
@@ -2834,6 +2887,7 @@ module OrganizationKubernetesAuditLogsConfiguration =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "autoEnable") in
       make ~autoEnable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoEnable = field_map_exn json "AutoEnable" Boolean.of_json in
       make ~autoEnable ()
@@ -2854,6 +2908,7 @@ module KubernetesAuditLogsConfiguration =
       let enable =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "enable") in
       make ~enable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enable = field_map_exn json "Enable" Boolean.of_json in
       make ~enable ()
@@ -2964,6 +3019,7 @@ module Condition =
       let eq = (Option.map ~f:Eq.of_xml) (Xml.child xml_arg0 "eq") in
       make ?lessThanOrEqual ?lessThan ?greaterThanOrEqual ?greaterThan
         ?notEquals ?equals ?lte ?lt ?gte ?gt ?neq ?eq ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lessThanOrEqual = field_map json "LessThanOrEqual" Long.of_json in
       let lessThan = field_map json "LessThan" Long.of_json in
@@ -3093,6 +3149,7 @@ module UsageAccountResult =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?total ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total = field_map json "Total" Total.of_json in
       let accountId = field_map json "AccountId" AccountId.of_json in
@@ -3120,6 +3177,7 @@ module UsageDataSourceResult =
       let dataSource =
         (Option.map ~f:DataSource.of_xml) (Xml.child xml_arg0 "dataSource") in
       make ?total ?dataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total = field_map json "Total" Total.of_json in
       let dataSource = field_map json "DataSource" DataSource.of_json in
@@ -3147,6 +3205,7 @@ module UsageResourceResult =
       let resource =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
       make ?total ?resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total = field_map json "Total" Total.of_json in
       let resource = field_map json "Resource" String_.of_json in
@@ -3208,6 +3267,7 @@ module DataSourceConfigurationsResult =
         CloudTrailConfigurationResult.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cloudTrail") in
       make ?kubernetes ~s3Logs ~flowLogs ~dNSLogs ~cloudTrail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kubernetes =
         field_map json "Kubernetes" KubernetesConfigurationResult.of_json in
@@ -3310,6 +3370,7 @@ module Resource =
           (Xml.child xml_arg0 "accessKeyDetails") in
       make ?resourceType ?kubernetesDetails ?eksClusterDetails
         ?instanceDetails ?s3BucketDetails ?accessKeyDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let kubernetesDetails =
@@ -3414,6 +3475,7 @@ module Service =
         (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "action") in
       make ?userFeedback ?serviceName ?resourceRole ?eventLastSeen
         ?eventFirstSeen ?detectorId ?count ?archived ?evidence ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userFeedback = field_map json "UserFeedback" String_.of_json in
       let serviceName = field_map json "ServiceName" String_.of_json in
@@ -3448,6 +3510,7 @@ module OrganizationKubernetesAuditLogsConfigurationResult =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "autoEnable") in
       make ~autoEnable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoEnable = field_map_exn json "AutoEnable" Boolean.of_json in
       make ~autoEnable ()
@@ -3475,6 +3538,7 @@ module OrganizationKubernetesConfiguration =
         OrganizationKubernetesAuditLogsConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "auditLogs") in
       make ~auditLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogs =
         field_map_exn json "AuditLogs"
@@ -3501,6 +3565,7 @@ module OrganizationS3LogsConfiguration =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "autoEnable") in
       make ~autoEnable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoEnable = field_map_exn json "AutoEnable" Boolean.of_json in
       make ~autoEnable ()
@@ -3529,6 +3594,7 @@ module UnprocessedAccount =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~result ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map_exn json "Result" String_.of_json in
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
@@ -3554,6 +3620,7 @@ module KubernetesConfiguration =
         KubernetesAuditLogsConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "auditLogs") in
       make ~auditLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogs =
         field_map_exn json "AuditLogs"
@@ -3577,6 +3644,7 @@ module S3LogsConfiguration =
       let enable =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "enable") in
       make ~enable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enable = field_map_exn json "Enable" Boolean.of_json in
       make ~enable ()
@@ -3699,6 +3767,7 @@ module Destination =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "destinationId") in
       make ~status ~destinationType ~destinationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" PublishingStatus.of_json in
       let destinationType =
@@ -3731,6 +3800,7 @@ module AdminAccount =
       let adminAccountId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "adminAccountId") in
       make ?adminStatus ?adminAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adminStatus = field_map json "AdminStatus" AdminStatus.of_json in
       let adminAccountId = field_map json "AdminAccountId" String_.of_json in
@@ -3802,6 +3872,7 @@ module Member =
           (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~updatedAt ?invitedAt ~relationshipStatus ~email ~masterId
         ?detectorId ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "UpdatedAt" String_.of_json in
       let invitedAt = field_map json "InvitedAt" String_.of_json in
@@ -3855,6 +3926,7 @@ module Invitation =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invitedAt = field_map json "InvitedAt" String_.of_json in
       let relationshipStatus =
@@ -4081,6 +4153,7 @@ module MemberDataSourceConfiguration =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~dataSources ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSources =
         field_map_exn json "DataSources"
@@ -4254,6 +4327,7 @@ module Finding =
       make ~updatedAt ~type_ ?title ~severity ?service ~schemaVersion
         ~resource ~region ?partition ~id ?description ~createdAt ?confidence
         ~arn ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "UpdatedAt" String_.of_json in
       let type_ = field_map_exn json "Type" FindingType.of_json in
@@ -4297,6 +4371,7 @@ module OrganizationKubernetesConfigurationResult =
         OrganizationKubernetesAuditLogsConfigurationResult.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "auditLogs") in
       make ~auditLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogs =
         field_map_exn json "AuditLogs"
@@ -4323,6 +4398,7 @@ module OrganizationS3LogsConfigurationResult =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "autoEnable") in
       make ~autoEnable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoEnable = field_map_exn json "AutoEnable" Boolean.of_json in
       make ~autoEnable ()
@@ -4349,6 +4425,7 @@ module AccountDetail =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~email ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let email = field_map_exn json "Email" Email.of_json in
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
@@ -4373,6 +4450,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?type_ ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -4397,6 +4475,7 @@ module InternalServerErrorException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?type_ ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -4462,6 +4541,7 @@ module DestinationProperties =
       let destinationArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "destinationArn") in
       make ?kmsKeyArn ?destinationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" String_.of_json in
       let destinationArn = field_map json "DestinationArn" String_.of_json in
@@ -4496,6 +4576,7 @@ module OrganizationDataSourceConfigurations =
         (Option.map ~f:OrganizationS3LogsConfiguration.of_xml)
           (Xml.child xml_arg0 "s3Logs") in
       make ?kubernetes ?s3Logs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kubernetes =
         field_map json "Kubernetes"
@@ -4560,6 +4641,7 @@ module DataSourceConfigurations =
         (Option.map ~f:S3LogsConfiguration.of_xml)
           (Xml.child xml_arg0 "s3Logs") in
       make ?kubernetes ?s3Logs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kubernetes =
         field_map json "Kubernetes" KubernetesConfiguration.of_json in
@@ -4692,6 +4774,7 @@ module FindingCriteria =
       let criterion =
         (Option.map ~f:Criterion.of_xml) (Xml.child xml_arg0 "criterion") in
       make ?criterion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let criterion = field_map json "Criterion" Criterion.of_json in
       make ?criterion ()
@@ -5011,6 +5094,7 @@ module SortCriteria =
       let attributeName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderBy = field_map json "OrderBy" OrderBy.of_json in
       let attributeName = field_map json "AttributeName" String_.of_json in
@@ -5118,6 +5202,7 @@ module UsageStatistics =
         (Option.map ~f:UsageAccountResultList.of_xml)
           (Xml.child xml_arg0 "sumByAccount") in
       make ?topResources ?sumByResource ?sumByDataSource ?sumByAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topResources =
         field_map json "TopResources" UsageResourceResultList.of_json in
@@ -5161,6 +5246,7 @@ module UsageCriteria =
       let accountIds =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?resources ~dataSources ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resources = field_map json "Resources" ResourceList.of_json in
       let dataSources =
@@ -5351,6 +5437,7 @@ module Master =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invitedAt = field_map json "InvitedAt" String_.of_json in
       let relationshipStatus =
@@ -5456,6 +5543,7 @@ module FindingStatistics =
         (Option.map ~f:CountBySeverity.of_xml)
           (Xml.child xml_arg0 "countBySeverity") in
       make ?countBySeverity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let countBySeverity =
         field_map json "CountBySeverity" CountBySeverity.of_json in
@@ -5572,6 +5660,7 @@ module OrganizationDataSourceConfigurationsResult =
         OrganizationS3LogsConfigurationResult.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "s3Logs") in
       make ?kubernetes ~s3Logs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kubernetes =
         field_map json "Kubernetes"
@@ -5703,6 +5792,7 @@ module UpdateThreatIntelSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5755,6 +5845,7 @@ module UpdateThreatIntelSetRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?activate ?location ?name ~threatIntelSetId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activate = field_map json "Activate" Boolean.of_json in
       let location = field_map json "Location" Location.of_json in
@@ -5812,6 +5903,7 @@ module UpdatePublishingDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5852,6 +5944,7 @@ module UpdatePublishingDestinationRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?destinationProperties ~destinationId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationProperties =
         field_map json "DestinationProperties" DestinationProperties.of_json in
@@ -5907,6 +6000,7 @@ module UpdateOrganizationConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5946,6 +6040,7 @@ module UpdateOrganizationConfigurationRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?dataSources ~autoEnable ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSources =
         field_map json "DataSources"
@@ -6013,6 +6108,7 @@ module UpdateMemberDetectorsResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -6051,6 +6147,7 @@ module UpdateMemberDetectorsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?dataSources ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSources =
         field_map json "DataSources" DataSourceConfigurations.of_json in
@@ -6105,6 +6202,7 @@ module UpdateIPSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the IPSet specified by the IPSet ID."]
@@ -6153,6 +6251,7 @@ module UpdateIPSetRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?activate ?location ?name ~ipSetId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activate = field_map json "Activate" Boolean.of_json in
       let location = field_map json "Location" Location.of_json in
@@ -6208,6 +6307,7 @@ module UpdateFindingsFeedbackResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6250,6 +6350,7 @@ module UpdateFindingsFeedbackRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?comments ~feedback ~findingIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comments = field_map json "Comments" String_.of_json in
       let feedback = field_map_exn json "Feedback" Feedback.of_json in
@@ -6311,6 +6412,7 @@ module UpdateFilterResponse =
       let name =
         FilterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" FilterName.of_json in
       make ~name ()
@@ -6381,6 +6483,7 @@ module UpdateFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?findingCriteria ?rank ?action ?description ~filterName
         ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingCriteria =
         field_map json "FindingCriteria" FindingCriteria.of_json in
@@ -6440,6 +6543,7 @@ module UpdateDetectorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6488,6 +6592,7 @@ module UpdateDetectorRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?dataSources ?findingPublishingFrequency ?enable ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSources =
         field_map json "DataSources" DataSourceConfigurations.of_json in
@@ -6546,6 +6651,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a resource."]
@@ -6574,6 +6680,7 @@ module UntagResourceRequest =
         GuardDutyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" GuardDutyArn.of_json in
@@ -6626,6 +6733,7 @@ module UnarchiveFindingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6655,6 +6763,7 @@ module UnarchiveFindingsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~findingIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingIds = field_map_exn json "FindingIds" FindingIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -6708,6 +6817,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds tags to a resource."]
@@ -6733,6 +6843,7 @@ module TagResourceRequest =
         GuardDutyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" GuardDutyArn.of_json in
@@ -6796,6 +6907,7 @@ module StopMonitoringMembersResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -6829,6 +6941,7 @@ module StopMonitoringMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -6893,6 +7006,7 @@ module StartMonitoringMembersResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -6926,6 +7040,7 @@ module StartMonitoringMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -6996,6 +7111,7 @@ module ListThreatIntelSetsResponse =
         ThreatIntelSetIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "threatIntelSetIds") in
       make ?nextToken ~threatIntelSetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let threatIntelSetIds =
@@ -7036,6 +7152,7 @@ module ListThreatIntelSetsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?nextToken ?maxResults ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7095,6 +7212,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -7118,6 +7236,7 @@ module ListTagsForResourceRequest =
         GuardDutyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" GuardDutyArn.of_json in
       make ~resourceArn ()
@@ -7187,6 +7306,7 @@ module ListPublishingDestinationsResponse =
         Destinations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "destinations") in
       make ?nextToken ~destinations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let destinations =
@@ -7227,6 +7347,7 @@ module ListPublishingDestinationsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?nextToken ?maxResults ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7298,6 +7419,7 @@ module ListOrganizationAdminAccountsResponse =
         (Option.map ~f:AdminAccounts.of_xml)
           (Xml.child xml_arg0 "adminAccounts") in
       make ?nextToken ?adminAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let adminAccounts =
@@ -7329,6 +7451,7 @@ module ListOrganizationAdminAccountsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7394,6 +7517,7 @@ module ListMembersResponse =
       let members =
         (Option.map ~f:Members.of_xml) (Xml.child xml_arg0 "members") in
       make ?nextToken ?members ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let members = field_map json "Members" Members.of_json in
@@ -7441,6 +7565,7 @@ module ListMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?onlyAssociated ?nextToken ?maxResults ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onlyAssociated = field_map json "OnlyAssociated" String_.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7510,6 +7635,7 @@ module ListInvitationsResponse =
       let invitations =
         (Option.map ~f:Invitations.of_xml) (Xml.child xml_arg0 "invitations") in
       make ?nextToken ?invitations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let invitations = field_map json "Invitations" Invitations.of_json in
@@ -7540,6 +7666,7 @@ module ListInvitationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7606,6 +7733,7 @@ module ListIPSetsResponse =
       let ipSetIds =
         IpSetIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ipSetIds") in
       make ?nextToken ~ipSetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let ipSetIds = field_map_exn json "IpSetIds" IpSetIds.of_json in
@@ -7645,6 +7773,7 @@ module ListIPSetsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?nextToken ?maxResults ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7715,6 +7844,7 @@ module ListFindingsResponse =
         FindingIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findingIds") in
       make ?nextToken ~findingIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let findingIds = field_map_exn json "FindingIds" FindingIds.of_json in
@@ -7780,6 +7910,7 @@ module ListFindingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?nextToken ?maxResults ?sortCriteria ?findingCriteria ~detectorId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7853,6 +7984,7 @@ module ListFiltersResponse =
         FilterNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filterNames") in
       make ?nextToken ~filterNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let filterNames = field_map_exn json "FilterNames" FilterNames.of_json in
@@ -7891,6 +8023,7 @@ module ListFiltersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?nextToken ?maxResults ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7959,6 +8092,7 @@ module ListDetectorsResponse =
         DetectorIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorIds") in
       make ?nextToken ~detectorIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let detectorIds = field_map_exn json "DetectorIds" DetectorIds.of_json in
@@ -7989,6 +8123,7 @@ module ListDetectorsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -8053,6 +8188,7 @@ module InviteMembersResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -8104,6 +8240,7 @@ module InviteMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?message ?disableEmailNotification ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let disableEmailNotification =
@@ -8177,6 +8314,7 @@ module GetUsageStatisticsResponse =
         (Option.map ~f:UsageStatistics.of_xml)
           (Xml.child xml_arg0 "usageStatistics") in
       make ?nextToken ?usageStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let usageStatistics =
@@ -8248,6 +8386,7 @@ module GetUsageStatisticsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?nextToken ?maxResults ?unit ~usageCriteria ~usageStatisticType
         ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -8342,6 +8481,7 @@ module GetThreatIntelSetResponse =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~status ~location ~format ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let status = field_map_exn json "Status" ThreatIntelSetStatus.of_json in
@@ -8378,6 +8518,7 @@ module GetThreatIntelSetRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~threatIntelSetId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let threatIntelSetId =
         field_map_exn json "ThreatIntelSetId" String_.of_json in
@@ -8448,6 +8589,7 @@ module GetMembersResponse =
       let members =
         Members.of_xml (Xml.child_exn ~context:context_ xml_arg0 "members") in
       make ~unprocessedAccounts ~members ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -8482,6 +8624,7 @@ module GetMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -8558,6 +8701,7 @@ module GetMemberDetectorsResponse =
         MemberDataSourceConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "members") in
       make ~unprocessedAccounts ~memberDataSourceConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -8592,6 +8736,7 @@ module GetMemberDetectorsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -8651,6 +8796,7 @@ module GetMasterAccountResponse =
       let master =
         Master.of_xml (Xml.child_exn ~context:context_ xml_arg0 "master") in
       make ~master ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let master = field_map_exn json "Master" Master.of_json in
       make ~master ()
@@ -8675,6 +8821,7 @@ module GetMasterAccountRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
       make ~detectorId ()
@@ -8736,6 +8883,7 @@ module GetInvitationsCountResponse =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "invitationsCount") in
       make ?invitationsCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invitationsCount =
         field_map json "InvitationsCount" Integer.of_json in
@@ -8751,6 +8899,7 @@ module GetInvitationsCountRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8832,6 +8981,7 @@ module GetIPSetResponse =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~status ~location ~format ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let status = field_map_exn json "Status" IpSetStatus.of_json in
@@ -8864,6 +9014,7 @@ module GetIPSetRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~ipSetId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipSetId = field_map_exn json "IpSetId" String_.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -8926,6 +9077,7 @@ module GetFindingsStatisticsResponse =
         FindingStatistics.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findingStatistics") in
       make ~findingStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingStatistics =
         field_map_exn json "FindingStatistics" FindingStatistics.of_json in
@@ -8969,6 +9121,7 @@ module GetFindingsStatisticsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?findingCriteria ~findingStatisticTypes ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingCriteria =
         field_map json "FindingCriteria" FindingCriteria.of_json in
@@ -9032,6 +9185,7 @@ module GetFindingsResponse =
       let findings =
         Findings.of_xml (Xml.child_exn ~context:context_ xml_arg0 "findings") in
       make ~findings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findings = field_map_exn json "Findings" Findings.of_json in
       make ~findings ()
@@ -9071,6 +9225,7 @@ module GetFindingsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?sortCriteria ~findingIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortCriteria = field_map json "SortCriteria" SortCriteria.of_json in
       let findingIds = field_map_exn json "FindingIds" FindingIds.of_json in
@@ -9170,6 +9325,7 @@ module GetFilterResponse =
       let name =
         FilterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~findingCriteria ?rank ~action ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let findingCriteria =
@@ -9208,6 +9364,7 @@ module GetFilterRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~filterName ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterName = field_map_exn json "FilterName" String_.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -9321,6 +9478,7 @@ module GetDetectorResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "createdAt") in
       make ?tags ?dataSources ?updatedAt ~status ~serviceRole
         ?findingPublishingFrequency ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let dataSources =
@@ -9354,6 +9512,7 @@ module GetDetectorRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
       make ~detectorId ()
@@ -9406,6 +9565,7 @@ module EnableOrganizationAdminAccountResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9428,6 +9588,7 @@ module EnableOrganizationAdminAccountRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "adminAccountId") in
       make ~adminAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adminAccountId =
         field_map_exn json "AdminAccountId" String_.of_json in
@@ -9492,6 +9653,7 @@ module DisassociateMembersResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -9525,6 +9687,7 @@ module DisassociateMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -9578,6 +9741,7 @@ module DisassociateFromMasterAccountResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9600,6 +9764,7 @@ module DisassociateFromMasterAccountRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
       make ~detectorId ()
@@ -9652,6 +9817,7 @@ module DisableOrganizationAdminAccountResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9674,6 +9840,7 @@ module DisableOrganizationAdminAccountRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "adminAccountId") in
       make ~adminAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adminAccountId =
         field_map_exn json "AdminAccountId" String_.of_json in
@@ -9780,6 +9947,7 @@ module DescribePublishingDestinationResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "destinationId") in
       make ~destinationProperties ~publishingFailureStartTimestamp ~status
         ~destinationType ~destinationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationProperties =
         field_map_exn json "DestinationProperties"
@@ -9820,6 +9988,7 @@ module DescribePublishingDestinationRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~destinationId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationId = field_map_exn json "DestinationId" String_.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -9904,6 +10073,7 @@ module DescribeOrganizationConfigurationResponse =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "autoEnable") in
       make ?dataSources ~memberAccountLimitReached ~autoEnable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSources =
         field_map json "DataSources"
@@ -9933,6 +10103,7 @@ module DescribeOrganizationConfigurationRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
       make ~detectorId ()
@@ -9985,6 +10156,7 @@ module DeleteThreatIntelSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10015,6 +10187,7 @@ module DeleteThreatIntelSetRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~threatIntelSetId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let threatIntelSetId =
         field_map_exn json "ThreatIntelSetId" String_.of_json in
@@ -10069,6 +10242,7 @@ module DeletePublishingDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10098,6 +10272,7 @@ module DeletePublishingDestinationRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~destinationId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationId = field_map_exn json "DestinationId" String_.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -10161,6 +10336,7 @@ module DeleteMembersResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -10194,6 +10370,7 @@ module DeleteMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~accountIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -10258,6 +10435,7 @@ module DeleteInvitationsResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -10283,6 +10461,7 @@ module DeleteInvitationsRequest =
         AccountIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accountIds") in
       make ~accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       make ~accountIds ()
@@ -10335,6 +10514,7 @@ module DeleteIPSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10361,6 +10541,7 @@ module DeleteIPSetRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~ipSetId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipSetId = field_map_exn json "IpSetId" String_.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -10414,6 +10595,7 @@ module DeleteFilterResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the filter specified by the filter name."]
@@ -10442,6 +10624,7 @@ module DeleteFilterRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~filterName ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterName = field_map_exn json "FilterName" String_.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -10494,6 +10677,7 @@ module DeleteDetectorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10515,6 +10699,7 @@ module DeleteDetectorRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
       make ~detectorId ()
@@ -10578,6 +10763,7 @@ module DeclineInvitationsResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -10603,6 +10789,7 @@ module DeclineInvitationsRequest =
         AccountIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accountIds") in
       make ~accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIds.of_json in
       make ~accountIds ()
@@ -10664,6 +10851,7 @@ module CreateThreatIntelSetResponse =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "threatIntelSetId") in
       make ~threatIntelSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let threatIntelSetId =
         field_map_exn json "ThreatIntelSetId" String_.of_json in
@@ -10739,6 +10927,7 @@ module CreateThreatIntelSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?tags ?clientToken ~activate ~location ~format ~name ~detectorId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
@@ -10798,6 +10987,7 @@ module CreateSampleFindingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10827,6 +11017,7 @@ module CreateSampleFindingsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?findingTypes ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingTypes = field_map json "FindingTypes" FindingTypes.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -10889,6 +11080,7 @@ module CreatePublishingDestinationResponse =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "destinationId") in
       make ~destinationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationId = field_map_exn json "DestinationId" String_.of_json in
       make ~destinationId ()
@@ -10945,6 +11137,7 @@ module CreatePublishingDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?clientToken ~destinationProperties ~destinationType ~detectorId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let destinationProperties =
@@ -11015,6 +11208,7 @@ module CreateMembersResponse =
         UnprocessedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unprocessedAccounts") in
       make ~unprocessedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map_exn json "UnprocessedAccounts" UnprocessedAccounts.of_json in
@@ -11048,6 +11242,7 @@ module CreateMembersRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~accountDetails ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountDetails =
         field_map_exn json "AccountDetails" AccountDetails.of_json in
@@ -11108,6 +11303,7 @@ module CreateIPSetResponse =
       let ipSetId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ipSetId") in
       make ~ipSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipSetId = field_map_exn json "IpSetId" String_.of_json in
       make ~ipSetId ()
@@ -11181,6 +11377,7 @@ module CreateIPSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?tags ?clientToken ~activate ~location ~format ~name ~detectorId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
@@ -11247,6 +11444,7 @@ module CreateFilterResponse =
       let name =
         FilterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" FilterName.of_json in
       make ~name ()
@@ -11331,6 +11529,7 @@ module CreateFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ?tags ?clientToken ~findingCriteria ?rank ?action ?description
         ~name ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
@@ -11399,6 +11598,7 @@ module CreateDetectorResponse =
       let detectorId =
         (Option.map ~f:DetectorId.of_xml) (Xml.child xml_arg0 "detectorId") in
       make ?detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorId = field_map json "DetectorId" DetectorId.of_json in
       make ?detectorId ()
@@ -11461,6 +11661,7 @@ module CreateDetectorRequest =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "enable") in
       make ?tags ?dataSources ?findingPublishingFrequency ?clientToken
         ~enable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let dataSources =
@@ -11521,6 +11722,7 @@ module ArchiveFindingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11550,6 +11752,7 @@ module ArchiveFindingsRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~findingIds ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingIds = field_map_exn json "FindingIds" FindingIds.of_json in
       let detectorId = field_map_exn json "DetectorId" DetectorId.of_json in
@@ -11603,6 +11806,7 @@ module AcceptInvitationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11640,6 +11844,7 @@ module AcceptInvitationRequest =
         DetectorId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorId") in
       make ~invitationId ~masterId ~detectorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invitationId = field_map_exn json "InvitationId" String_.of_json in
       let masterId = field_map_exn json "MasterId" String_.of_json in

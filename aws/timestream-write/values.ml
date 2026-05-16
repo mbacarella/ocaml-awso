@@ -236,6 +236,7 @@ module S3Configuration =
       let bucketName =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "BucketName") in
       make ?kmsKeyId ?encryptionOption ?objectKeyPrefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "KmsKeyId" StringValue2048.of_json in
       let encryptionOption =
@@ -317,6 +318,7 @@ module Dimension =
       let name =
         SchemaName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?dimensionValueType ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionValueType =
         field_map json "DimensionValueType" DimensionValueType.of_json in
@@ -356,6 +358,7 @@ module MeasureValue =
       let name =
         SchemaName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~type_ ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" MeasureValueType.of_json in
       let value = field_map_exn json "Value" StringValue2048.of_json in
@@ -395,6 +398,7 @@ module MagneticStoreRejectedDataLocation =
         (Option.map ~f:S3Configuration.of_xml)
           (Xml.child xml_arg0 "S3Configuration") in
       make ?s3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Configuration =
         field_map json "S3Configuration" S3Configuration.of_json in
@@ -471,6 +475,7 @@ module RejectedRecord =
       let recordIndex =
         (Option.map ~f:RecordIndex.of_xml) (Xml.child xml_arg0 "RecordIndex") in
       make ?existingVersion ?reason ?recordIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let existingVersion =
         field_map json "ExistingVersion" RecordVersion.of_json in
@@ -658,6 +663,7 @@ module MagneticStoreWriteProperties =
           (Xml.child_exn ~context:context_ xml_arg0
              "EnableMagneticStoreWrites") in
       make ?magneticStoreRejectedDataLocation ~enableMagneticStoreWrites ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let magneticStoreRejectedDataLocation =
         field_map json "MagneticStoreRejectedDataLocation"
@@ -722,6 +728,7 @@ module RetentionProperties =
              "MemoryStoreRetentionPeriodInHours") in
       make ~magneticStoreRetentionPeriodInDays
         ~memoryStoreRetentionPeriodInHours ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let magneticStoreRetentionPeriodInDays =
         field_map_exn json "MagneticStoreRetentionPeriodInDays"
@@ -905,6 +912,7 @@ module Record =
         (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
       make ?measureValues ?version ?timeUnit ?time ?measureValueType
         ?measureValue ?measureName ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let measureValues =
         field_map json "MeasureValues" MeasureValues.of_json in
@@ -944,6 +952,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1031,6 +1040,7 @@ module Table =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?magneticStoreWriteProperties ?lastUpdatedTime ?creationTime
         ?retentionProperties ?tableStatus ?databaseName ?tableName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let magneticStoreWriteProperties =
         field_map json "MagneticStoreWriteProperties"
@@ -1109,6 +1119,7 @@ module Database =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?lastUpdatedTime ?creationTime ?kmsKeyId ?tableCount ?databaseName
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTime = field_map json "LastUpdatedTime" Date.of_json in
       let creationTime = field_map json "CreationTime" Date.of_json in
@@ -1145,6 +1156,7 @@ module Endpoint =
       let address =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Address") in
       make ~cachePeriodInMinutes ~address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachePeriodInMinutes =
         field_map_exn json "CachePeriodInMinutes" Long.of_json in
@@ -1168,6 +1180,7 @@ module AccessDeniedException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ErrorMessage.of_json in
       make ~message ()
@@ -1188,6 +1201,7 @@ module InternalServerException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ErrorMessage.of_json in
       make ~message ()
@@ -1207,6 +1221,7 @@ module InvalidEndpointException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1238,6 +1253,7 @@ module RecordsIngested =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MemoryStore") in
       let total = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Total") in
       make ?magneticStore ?memoryStore ?total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let magneticStore = field_map json "MagneticStore" Integer.of_json in
       let memoryStore = field_map json "MemoryStore" Integer.of_json in
@@ -1266,6 +1282,7 @@ module RejectedRecordsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?rejectedRecords ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rejectedRecords =
         field_map json "RejectedRecords" RejectedRecords.of_json in
@@ -1287,6 +1304,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1308,6 +1326,7 @@ module ThrottlingException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ErrorMessage.of_json in
       make ~message ()
@@ -1329,6 +1348,7 @@ module ValidationException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ErrorMessage.of_json in
       make ~message ()
@@ -1375,6 +1395,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1558,6 +1579,7 @@ module ConflictException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ErrorMessage.of_json in
       make ~message ()
@@ -1677,6 +1699,7 @@ module WriteRecordsResponse =
         (Option.map ~f:RecordsIngested.of_xml)
           (Xml.child xml_arg0 "RecordsIngested") in
       make ?recordsIngested ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordsIngested =
         field_map json "RecordsIngested" RecordsIngested.of_json in
@@ -1724,6 +1747,7 @@ module WriteRecordsRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~records ?commonAttributes ~tableName ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let records = field_map_exn json "Records" Records.of_json in
       let commonAttributes = field_map json "CommonAttributes" Record.of_json in
@@ -1818,6 +1842,7 @@ module UpdateTableResponse =
     let of_xml xml_arg0 =
       let table = (Option.map ~f:Table.of_xml) (Xml.child xml_arg0 "Table") in
       make ?table ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let table = field_map json "Table" Table.of_json in make ?table ()
     let to_json v = composed_to_json to_value v
@@ -1874,6 +1899,7 @@ module UpdateTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ?magneticStoreWriteProperties ?retentionProperties ~tableName
         ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let magneticStoreWriteProperties =
         field_map json "MagneticStoreWriteProperties"
@@ -1984,6 +2010,7 @@ module UpdateDatabaseResponse =
       let database =
         (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
       make ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let database = field_map json "Database" Database.of_json in
       make ?database ()
@@ -2014,6 +2041,7 @@ module UpdateDatabaseRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~kmsKeyId ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map_exn json "KmsKeyId" StringValue2048.of_json in
       let databaseName =
@@ -2095,6 +2123,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2125,6 +2154,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -2206,6 +2236,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2233,6 +2264,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN =
@@ -2309,6 +2341,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2331,6 +2364,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" AmazonResourceName.of_json in
@@ -2429,6 +2463,7 @@ module ListTablesResponse =
       let tables =
         (Option.map ~f:TableList.of_xml) (Xml.child xml_arg0 "Tables") in
       make ?nextToken ?tables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let tables = field_map json "Tables" TableList.of_json in
@@ -2468,6 +2503,7 @@ module ListTablesRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "DatabaseName") in
       make ?maxResults ?nextToken ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" PaginationLimit.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -2561,6 +2597,7 @@ module ListDatabasesResponse =
       let databases =
         (Option.map ~f:DatabaseList.of_xml) (Xml.child xml_arg0 "Databases") in
       make ?nextToken ?databases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let databases = field_map json "Databases" DatabaseList.of_json in
@@ -2592,6 +2629,7 @@ module ListDatabasesRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" PaginationLimit.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -2683,6 +2721,7 @@ module DescribeTableResponse =
     let of_xml xml_arg0 =
       let table = (Option.map ~f:Table.of_xml) (Xml.child xml_arg0 "Table") in
       make ?table ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let table = field_map json "Table" Table.of_json in make ?table ()
     let to_json v = composed_to_json to_value v
@@ -2712,6 +2751,7 @@ module DescribeTableRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~tableName ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map_exn json "TableName" ResourceName.of_json in
       let databaseName =
@@ -2783,6 +2823,7 @@ module DescribeEndpointsResponse =
         Endpoints.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Endpoints") in
       make ~endpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoints = field_map_exn json "Endpoints" Endpoints.of_json in
       make ~endpoints ()
@@ -2797,6 +2838,7 @@ module DescribeEndpointsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2888,6 +2930,7 @@ module DescribeDatabaseResponse =
       let database =
         (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
       make ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let database = field_map json "Database" Database.of_json in
       make ?database ()
@@ -2911,6 +2954,7 @@ module DescribeDatabaseRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let databaseName =
         field_map_exn json "DatabaseName" ResourceName.of_json in
@@ -2943,6 +2987,7 @@ module DeleteTableRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~tableName ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map_exn json "TableName" ResourceName.of_json in
       let databaseName =
@@ -2968,6 +3013,7 @@ module DeleteDatabaseRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let databaseName =
         field_map_exn json "DatabaseName" ResourceName.of_json in
@@ -3080,6 +3126,7 @@ module CreateTableResponse =
     let of_xml xml_arg0 =
       let table = (Option.map ~f:Table.of_xml) (Xml.child xml_arg0 "Table") in
       make ?table ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let table = field_map json "Table" Table.of_json in make ?table ()
     let to_json v = composed_to_json to_value v
@@ -3143,6 +3190,7 @@ module CreateTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ?magneticStoreWriteProperties ?tags ?retentionProperties
         ~tableName ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let magneticStoreWriteProperties =
         field_map json "MagneticStoreWriteProperties"
@@ -3257,6 +3305,7 @@ module CreateDatabaseResponse =
       let database =
         (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
       make ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let database = field_map json "Database" Database.of_json in
       make ?database ()
@@ -3294,6 +3343,7 @@ module CreateDatabaseRequest =
         ResourceCreateAPIName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ?tags ?kmsKeyId ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let kmsKeyId = field_map json "KmsKeyId" StringValue2048.of_json in

@@ -443,6 +443,7 @@ module S3Location =
       let s3Bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ~s3Key ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Key = field_map_exn json "S3Key" S3Key.of_json in
       let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
@@ -651,6 +652,7 @@ module LastReportGenerationExecutionError =
         (Option.map ~f:UsageReportExecutionErrorCode.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" String_.of_json in
       let errorCode =
@@ -684,6 +686,7 @@ module AccessEndpoint =
         AccessEndpointType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointType") in
       make ?vpceId ~endpointType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceId = field_map json "VpceId" String_.of_json in
       let endpointType =
@@ -748,6 +751,7 @@ module StackError =
         (Option.map ~f:StackErrorCode.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" String_.of_json in
       let errorCode = field_map json "ErrorCode" StackErrorCode.of_json in
@@ -787,6 +791,7 @@ module StorageConnector =
         StorageConnectorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectorType") in
       make ?domains ?resourceIdentifier ~connectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domains = field_map json "Domains" DomainList.of_json in
       let resourceIdentifier =
@@ -818,6 +823,7 @@ module UserSetting =
       let action =
         Action.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~permission ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permission = field_map_exn json "Permission" Permission.of_json in
       let action = field_map_exn json "Action" Action.of_json in
@@ -953,6 +959,7 @@ module Application =
       make ?createdTime ?instanceFamilies ?platforms ?iconS3Location
         ?appBlockArn ?arn ?description ?workingDirectory ?metadata ?enabled
         ?launchParameters ?launchPath ?iconURL ?displayName ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime = field_map json "CreatedTime" Timestamp.of_json in
       let instanceFamilies =
@@ -1050,6 +1057,7 @@ module ResourceError =
         (Option.map ~f:FleetErrorCode.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorTimestamp ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorTimestamp = field_map json "ErrorTimestamp" Timestamp.of_json in
       let errorMessage = field_map json "ErrorMessage" String_.of_json in
@@ -1195,6 +1203,7 @@ module FleetError =
         (Option.map ~f:FleetErrorCode.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" String_.of_json in
       let errorCode = field_map json "ErrorCode" FleetErrorCode.of_json in
@@ -1246,6 +1255,7 @@ module EntitlementAttribute =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -1460,6 +1470,7 @@ module ApplicationSettingsResponse =
       let enabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?s3BucketName ?settingsGroup ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3BucketName = field_map json "S3BucketName" String_.of_json in
       let settingsGroup =
@@ -1624,6 +1635,7 @@ module NetworkAccessConfiguration =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "EniPrivateIpAddress") in
       make ?eniId ?eniPrivateIpAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eniId = field_map json "EniId" String_.of_json in
       let eniPrivateIpAddress =
@@ -1772,6 +1784,7 @@ module ImagePermissions =
         (Option.map ~f:BooleanObject.of_xml)
           (Xml.child xml_arg0 "allowFleet") in
       make ?allowImageBuilder ?allowFleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowImageBuilder =
         field_map json "allowImageBuilder" BooleanObject.of_json in
@@ -1840,6 +1853,7 @@ module ImageStateChangeReason =
         (Option.map ~f:ImageStateChangeReasonCode.of_xml)
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ImageStateChangeReasonCode.of_json in
@@ -1944,6 +1958,7 @@ module DomainJoinInfo =
         (Option.map ~f:DirectoryName.of_xml)
           (Xml.child xml_arg0 "DirectoryName") in
       make ?organizationalUnitDistinguishedName ?directoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnitDistinguishedName =
         field_map json "OrganizationalUnitDistinguishedName"
@@ -2029,6 +2044,7 @@ module ImageBuilderStateChangeReason =
         (Option.map ~f:ImageBuilderStateChangeReasonCode.of_xml)
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code =
@@ -2062,6 +2078,7 @@ module VpcConfig =
       let subnetIds =
         (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       make ?securityGroupIds ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "SecurityGroupIds" SecurityGroupIdList.of_json in
@@ -2105,6 +2122,7 @@ module ComputeCapacityStatus =
       let desired =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Desired") in
       make ?available ?inUse ?running ~desired ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let available = field_map json "Available" Integer.of_json in
       let inUse = field_map json "InUse" Integer.of_json in
@@ -2377,6 +2395,7 @@ module ServiceAccountCredentials =
         AccountName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountName") in
       make ~accountPassword ~accountName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountPassword =
         field_map_exn json "AccountPassword" AccountPassword.of_json in
@@ -2433,6 +2452,7 @@ module ScriptDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "ScriptS3Location") in
       make ~timeoutInSeconds ?executableParameters ~executablePath
         ~scriptS3Location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeoutInSeconds =
         field_map_exn json "TimeoutInSeconds" Integer.of_json in
@@ -2494,6 +2514,7 @@ module UserStackAssociation =
       let stackName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       make ?sendEmailNotification ~authenticationType ~userName ~stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendEmailNotification =
         field_map json "SendEmailNotification" Boolean.of_json in
@@ -2728,6 +2749,7 @@ module EntitledApplication =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationIdentifier =
         field_map_exn json "ApplicationIdentifier" String_.of_json in
@@ -2812,6 +2834,7 @@ module User =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ~authenticationType ?createdTime ?lastName ?firstName ?status
         ?enabled ?userName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map_exn json "AuthenticationType" AuthenticationType.of_json in
@@ -2875,6 +2898,7 @@ module UsageReportSubscription =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3BucketName") in
       make ?subscriptionErrors ?lastGeneratedReportDate ?schedule
         ?s3BucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionErrors =
         field_map json "SubscriptionErrors"
@@ -3008,6 +3032,7 @@ module Stack =
         ?userSettings ?stackErrors ?feedbackURL ?redirectURL
         ?storageConnectors ?createdTime ?displayName ?description ~name ?arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let embedHostDomains =
         field_map json "EmbedHostDomains" EmbedHostDomains.of_json in
@@ -3132,6 +3157,7 @@ module Session =
       make ?networkAccessConfiguration ?authenticationType ?maxExpirationTime
         ?startTime ?connectionState ~state ~fleetName ~stackName ~userId ~id
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkAccessConfiguration =
         field_map json "NetworkAccessConfiguration"
@@ -3311,6 +3337,7 @@ module Image =
         ?stateChangeReason ?description ?platform ?imageBuilderName
         ?imageBuilderSupported ?visibility ?state ?displayName ?baseImageArn
         ?arn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageErrors = field_map json "ImageErrors" ResourceErrors.of_json in
       let imagePermissions =
@@ -3370,6 +3397,7 @@ module SharedImagePermissions =
         AwsAccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sharedAccountId") in
       make ~imagePermissions ~sharedAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePermissions =
         field_map_exn json "imagePermissions" ImagePermissions.of_json in
@@ -3542,6 +3570,7 @@ module ImageBuilder =
         ?enableDefaultInternetAccess ?createdTime ?stateChangeReason ?state
         ?iamRoleArn ?platform ?instanceType ?vpcConfig ?displayName
         ?description ?imageArn ?arn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessEndpoints =
         field_map json "AccessEndpoints" AccessEndpointList.of_json in
@@ -3781,6 +3810,7 @@ module Fleet =
         ?maxUserDurationInSeconds ~computeCapacityStatus ?fleetType
         ~instanceType ?imageArn ?imageName ?description ?displayName ~name
         ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usbDeviceFilterStrings =
         field_map json "UsbDeviceFilterStrings"
@@ -3892,6 +3922,7 @@ module Entitlement =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?lastModifiedTime ?createdTime ~attributes ~appVisibility
         ?description ~stackName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" Timestamp.of_json in
@@ -3961,6 +3992,7 @@ module DirectoryConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryName") in
       make ?createdTime ?serviceAccountCredentials
         ?organizationalUnitDistinguishedNames ~directoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime = field_map json "CreatedTime" Timestamp.of_json in
       let serviceAccountCredentials =
@@ -3999,6 +4031,7 @@ module ApplicationFleetAssociation =
       let fleetName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetName") in
       make ~applicationArn ~fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationArn = field_map_exn json "ApplicationArn" Arn.of_json in
       let fleetName = field_map_exn json "FleetName" String_.of_json in
@@ -4069,6 +4102,7 @@ module AppBlock =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?createdTime ~setupScriptDetails ?sourceS3Location ?displayName
         ?description ~arn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime = field_map json "CreatedTime" Timestamp.of_json in
       let setupScriptDetails =
@@ -4119,6 +4153,7 @@ module UserStackAssociationError =
         (Option.map ~f:UserStackAssociation.of_xml)
           (Xml.child xml_arg0 "UserStackAssociation") in
       make ?errorMessage ?errorCode ?userStackAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" String_.of_json in
       let errorCode =
@@ -4142,6 +4177,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4160,6 +4196,7 @@ module IncompatibleImageException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4179,6 +4216,7 @@ module InvalidAccountStatusException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4198,6 +4236,7 @@ module InvalidParameterCombinationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4217,6 +4256,7 @@ module InvalidRoleException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4235,6 +4275,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4254,6 +4295,7 @@ module OperationNotPermittedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4272,6 +4314,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4290,6 +4333,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4321,6 +4365,7 @@ module ApplicationSettings =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?settingsGroup ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let settingsGroup =
         field_map json "SettingsGroup" SettingsGroup.of_json in
@@ -4380,6 +4425,7 @@ module ResourceNotAvailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4399,6 +4445,7 @@ module RequestLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4422,6 +4469,7 @@ module ComputeCapacity =
         Integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DesiredInstances") in
       make ~desiredInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredInstances =
         field_map_exn json "DesiredInstances" Integer.of_json in
@@ -4465,6 +4513,7 @@ module EntitlementNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5032,6 +5081,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5108,6 +5158,7 @@ module EntitlementAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5279,6 +5330,7 @@ module UpdateStackResult =
     let of_xml xml_arg0 =
       let stack = (Option.map ~f:Stack.of_xml) (Xml.child xml_arg0 "Stack") in
       make ?stack ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stack = field_map json "Stack" Stack.of_json in make ?stack ()
     let to_json v = composed_to_json to_value v
@@ -5403,6 +5455,7 @@ module UpdateStackRequest =
         ?userSettings ?attributesToDelete ?feedbackURL ?redirectURL
         ?deleteStorageConnectors ?storageConnectors ~name ?description
         ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let embedHostDomains =
         field_map json "EmbedHostDomains" EmbedHostDomains.of_json in
@@ -5484,6 +5537,7 @@ module UpdateImagePermissionsResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5520,6 +5574,7 @@ module UpdateImagePermissionsRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~imagePermissions ~sharedAccountId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePermissions =
         field_map_exn json "ImagePermissions" ImagePermissions.of_json in
@@ -5674,6 +5729,7 @@ module UpdateFleetResult =
     let of_xml xml_arg0 =
       let fleet = (Option.map ~f:Fleet.of_xml) (Xml.child xml_arg0 "Fleet") in
       make ?fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleet = field_map json "Fleet" Fleet.of_json in make ?fleet ()
     let to_json v = composed_to_json to_value v
@@ -5868,6 +5924,7 @@ module UpdateFleetRequest =
         ?deleteVpcConfig ?disconnectTimeoutInSeconds
         ?maxUserDurationInSeconds ?vpcConfig ?computeCapacity ?instanceType
         ?name ?imageArn ?imageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usbDeviceFilterStrings =
         field_map json "UsbDeviceFilterStrings"
@@ -5984,6 +6041,7 @@ module UpdateEntitlementResult =
       let entitlement =
         (Option.map ~f:Entitlement.of_xml) (Xml.child xml_arg0 "Entitlement") in
       make ?entitlement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entitlement = field_map json "Entitlement" Entitlement.of_json in
       make ?entitlement ()
@@ -6036,6 +6094,7 @@ module UpdateEntitlementRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?attributes ?appVisibility ?description ~stackName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map json "Attributes" EntitlementAttributeList.of_json in
@@ -6132,6 +6191,7 @@ module UpdateDirectoryConfigResult =
         (Option.map ~f:DirectoryConfig.of_xml)
           (Xml.child xml_arg0 "DirectoryConfig") in
       make ?directoryConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryConfig =
         field_map json "DirectoryConfig" DirectoryConfig.of_json in
@@ -6184,6 +6244,7 @@ module UpdateDirectoryConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryName") in
       make ?serviceAccountCredentials ?organizationalUnitDistinguishedNames
         ~directoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceAccountCredentials =
         field_map json "ServiceAccountCredentials"
@@ -6261,6 +6322,7 @@ module UpdateApplicationResult =
       let application =
         (Option.map ~f:Application.of_xml) (Xml.child xml_arg0 "Application") in
       make ?application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application = field_map json "Application" Application.of_json in
       make ?application ()
@@ -6353,6 +6415,7 @@ module UpdateApplicationRequest =
       make ?attributesToDelete ?appBlockArn ?launchParameters
         ?workingDirectory ?launchPath ?iconS3Location ?description
         ?displayName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributesToDelete =
         field_map json "AttributesToDelete" ApplicationAttributes.of_json in
@@ -6406,6 +6469,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6433,6 +6497,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -6495,6 +6560,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6521,6 +6587,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -6595,6 +6662,7 @@ module StopImageBuilderResult =
         (Option.map ~f:ImageBuilder.of_xml)
           (Xml.child xml_arg0 "ImageBuilder") in
       make ?imageBuilder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuilder = field_map json "ImageBuilder" ImageBuilder.of_json in
       make ?imageBuilder ()
@@ -6614,6 +6682,7 @@ module StopImageBuilderRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -6665,6 +6734,7 @@ module StopFleetResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the specified fleet."]
@@ -6681,6 +6751,7 @@ module StopFleetRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -6773,6 +6844,7 @@ module StartImageBuilderResult =
         (Option.map ~f:ImageBuilder.of_xml)
           (Xml.child xml_arg0 "ImageBuilder") in
       make ?imageBuilder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuilder = field_map json "ImageBuilder" ImageBuilder.of_json in
       make ?imageBuilder ()
@@ -6803,6 +6875,7 @@ module StartImageBuilderRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?appstreamAgentVersion ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appstreamAgentVersion =
         field_map json "AppstreamAgentVersion" AppstreamAgentVersion.of_json in
@@ -6919,6 +6992,7 @@ module StartFleetResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts the specified fleet."]
@@ -6935,6 +7009,7 @@ module StartFleetRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -6978,6 +7053,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -6999,6 +7075,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -7079,6 +7156,7 @@ module ListEntitledApplicationsResult =
         (Option.map ~f:EntitledApplicationList.of_xml)
           (Xml.child xml_arg0 "EntitledApplications") in
       make ?nextToken ?entitledApplications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let entitledApplications =
@@ -7123,6 +7201,7 @@ module ListEntitledApplicationsRequest =
       let stackName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       make ?maxResults ?nextToken ~entitlementName ~stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" Integer.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7169,6 +7248,7 @@ module ListAssociatedStacksResult =
       let names =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Names") in
       make ?nextToken ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let names = field_map json "Names" StringList.of_json in
@@ -7198,6 +7278,7 @@ module ListAssociatedStacksRequest =
       let fleetName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetName") in
       make ?nextToken ~fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let fleetName = field_map_exn json "FleetName" String_.of_json in
@@ -7243,6 +7324,7 @@ module ListAssociatedFleetsResult =
       let names =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Names") in
       make ?nextToken ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let names = field_map json "Names" StringList.of_json in
@@ -7272,6 +7354,7 @@ module ListAssociatedFleetsRequest =
       let stackName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       make ?nextToken ~stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let stackName = field_map_exn json "StackName" String_.of_json in
@@ -7305,6 +7388,7 @@ module ExpireSessionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Immediately stops the specified streaming session."]
@@ -7324,6 +7408,7 @@ module ExpireSessionRequest =
       let sessionId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
       make ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionId = field_map_exn json "SessionId" String_.of_json in
       make ~sessionId ()
@@ -7375,6 +7460,7 @@ module EnableUserResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7405,6 +7491,7 @@ module EnableUserRequest =
       let userName =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~authenticationType ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map_exn json "AuthenticationType" AuthenticationType.of_json in
@@ -7480,6 +7567,7 @@ module DisassociateFleetResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7504,6 +7592,7 @@ module DisassociateFleetRequest =
       let fleetName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetName") in
       make ~stackName ~fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackName = field_map_exn json "StackName" String_.of_json in
       let fleetName = field_map_exn json "FleetName" String_.of_json in
@@ -7568,6 +7657,7 @@ module DisassociateApplicationFromEntitlementResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7605,6 +7695,7 @@ module DisassociateApplicationFromEntitlementRequest =
       let stackName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       make ~applicationIdentifier ~entitlementName ~stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationIdentifier =
         field_map_exn json "ApplicationIdentifier" String_.of_json in
@@ -7675,6 +7766,7 @@ module DisassociateApplicationFleetResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates the specified application from the fleet."]
@@ -7699,6 +7791,7 @@ module DisassociateApplicationFleetRequest =
       let fleetName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetName") in
       make ~applicationArn ~fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationArn = field_map_exn json "ApplicationArn" Arn.of_json in
       let fleetName = field_map_exn json "FleetName" Name.of_json in
@@ -7740,6 +7833,7 @@ module DisableUserResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7770,6 +7864,7 @@ module DisableUserRequest =
       let userName =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~authenticationType ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map_exn json "AuthenticationType" AuthenticationType.of_json in
@@ -7850,6 +7945,7 @@ module DescribeUsersResult =
       let users =
         (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "Users") in
       make ?nextToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let users = field_map json "Users" UserList.of_json in
@@ -7890,6 +7986,7 @@ module DescribeUsersRequest =
         AuthenticationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AuthenticationType") in
       make ?nextToken ?maxResults ~authenticationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -7966,6 +8063,7 @@ module DescribeUserStackAssociationsResult =
         (Option.map ~f:UserStackAssociationList.of_xml)
           (Xml.child xml_arg0 "UserStackAssociations") in
       make ?nextToken ?userStackAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let userStackAssociations =
@@ -8028,6 +8126,7 @@ module DescribeUserStackAssociationsRequest =
       let stackName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StackName") in
       make ?nextToken ?maxResults ?authenticationType ?userName ?stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -8102,6 +8201,7 @@ module DescribeUsageReportSubscriptionsResult =
         (Option.map ~f:UsageReportSubscriptionList.of_xml)
           (Xml.child xml_arg0 "UsageReportSubscriptions") in
       make ?nextToken ?usageReportSubscriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let usageReportSubscriptions =
@@ -8133,6 +8233,7 @@ module DescribeUsageReportSubscriptionsRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -8187,6 +8288,7 @@ module DescribeStacksResult =
       let stacks =
         (Option.map ~f:StackList.of_xml) (Xml.child xml_arg0 "Stacks") in
       make ?nextToken ?stacks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let stacks = field_map json "Stacks" StackList.of_json in
@@ -8215,6 +8317,7 @@ module DescribeStacksRequest =
       let names =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Names") in
       make ?nextToken ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let names = field_map json "Names" StringList.of_json in
@@ -8274,6 +8377,7 @@ module DescribeSessionsResult =
       let sessions =
         (Option.map ~f:SessionList.of_xml) (Xml.child xml_arg0 "Sessions") in
       make ?nextToken ?sessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let sessions = field_map json "Sessions" SessionList.of_json in
@@ -8342,6 +8446,7 @@ module DescribeSessionsRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       make ?authenticationType ?limit ?nextToken ?userId ~fleetName
         ~stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map json "AuthenticationType" AuthenticationType.of_json in
@@ -8415,6 +8520,7 @@ module DescribeImagesResult =
       let images =
         (Option.map ~f:ImageList.of_xml) (Xml.child xml_arg0 "Images") in
       make ?nextToken ?images ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let images = field_map json "Images" ImageList.of_json in
@@ -8466,6 +8572,7 @@ module DescribeImagesRequest =
       let names =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Names") in
       make ?maxResults ?nextToken ?type_ ?arns ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeImagesMaxResults.of_json in
@@ -8534,6 +8641,7 @@ module DescribeImagePermissionsResult =
           (Xml.child xml_arg0 "SharedImagePermissionsList") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?nextToken ?sharedImagePermissionsList ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let sharedImagePermissionsList =
@@ -8584,6 +8692,7 @@ module DescribeImagePermissionsRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?nextToken ?sharedAwsAccountIds ?maxResults ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let sharedAwsAccountIds =
@@ -8645,6 +8754,7 @@ module DescribeImageBuildersResult =
         (Option.map ~f:ImageBuilderList.of_xml)
           (Xml.child xml_arg0 "ImageBuilders") in
       make ?nextToken ?imageBuilders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let imageBuilders =
@@ -8681,6 +8791,7 @@ module DescribeImageBuildersRequest =
       let names =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Names") in
       make ?nextToken ?maxResults ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -8736,6 +8847,7 @@ module DescribeFleetsResult =
       let fleets =
         (Option.map ~f:FleetList.of_xml) (Xml.child xml_arg0 "Fleets") in
       make ?nextToken ?fleets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let fleets = field_map json "Fleets" FleetList.of_json in
@@ -8764,6 +8876,7 @@ module DescribeFleetsRequest =
       let names =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Names") in
       make ?nextToken ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let names = field_map json "Names" StringList.of_json in
@@ -8843,6 +8956,7 @@ module DescribeEntitlementsResult =
         (Option.map ~f:EntitlementList.of_xml)
           (Xml.child xml_arg0 "Entitlements") in
       make ?nextToken ?entitlements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let entitlements =
@@ -8886,6 +9000,7 @@ module DescribeEntitlementsRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?maxResults ?nextToken ~stackName ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" Integer.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -8947,6 +9062,7 @@ module DescribeDirectoryConfigsResult =
         (Option.map ~f:DirectoryConfigList.of_xml)
           (Xml.child xml_arg0 "DirectoryConfigs") in
       make ?nextToken ?directoryConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let directoryConfigs =
@@ -8985,6 +9101,7 @@ module DescribeDirectoryConfigsRequest =
         (Option.map ~f:DirectoryNameList.of_xml)
           (Xml.child xml_arg0 "DirectoryNames") in
       make ?nextToken ?maxResults ?directoryNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -9056,6 +9173,7 @@ module DescribeApplicationsResult =
         (Option.map ~f:Applications.of_xml)
           (Xml.child xml_arg0 "Applications") in
       make ?nextToken ?applications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let applications = field_map json "Applications" Applications.of_json in
@@ -9089,6 +9207,7 @@ module DescribeApplicationsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let arns = (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "Arns") in
       make ?maxResults ?nextToken ?arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" Integer.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -9164,6 +9283,7 @@ module DescribeApplicationFleetAssociationsResult =
         (Option.map ~f:ApplicationFleetAssociationList.of_xml)
           (Xml.child xml_arg0 "ApplicationFleetAssociations") in
       make ?nextToken ?applicationFleetAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let applicationFleetAssociations =
@@ -9206,6 +9326,7 @@ module DescribeApplicationFleetAssociationsRequest =
       let fleetName =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "FleetName") in
       make ?nextToken ?maxResults ?applicationArn ?fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" Integer.of_json in
@@ -9275,6 +9396,7 @@ module DescribeAppBlocksResult =
       let appBlocks =
         (Option.map ~f:AppBlocks.of_xml) (Xml.child xml_arg0 "AppBlocks") in
       make ?nextToken ?appBlocks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let appBlocks = field_map json "AppBlocks" AppBlocks.of_json in
@@ -9307,6 +9429,7 @@ module DescribeAppBlocksRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let arns = (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "Arns") in
       make ?maxResults ?nextToken ?arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" Integer.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -9349,6 +9472,7 @@ module DeleteUserResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a user from the user pool."]
@@ -9378,6 +9502,7 @@ module DeleteUserRequest =
       let userName =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~authenticationType ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map_exn json "AuthenticationType" AuthenticationType.of_json in
@@ -9431,6 +9556,7 @@ module DeleteUsageReportSubscriptionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disables usage report generation."]
@@ -9442,6 +9568,7 @@ module DeleteUsageReportSubscriptionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disables usage report generation."]
@@ -9512,6 +9639,7 @@ module DeleteStackResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9529,6 +9657,7 @@ module DeleteStackRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -9605,6 +9734,7 @@ module DeleteImageResult =
     let of_xml xml_arg0 =
       let image = (Option.map ~f:Image.of_xml) (Xml.child xml_arg0 "Image") in
       make ?image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let image = field_map json "Image" Image.of_json in make ?image ()
     let to_json v = composed_to_json to_value v
@@ -9623,6 +9753,7 @@ module DeleteImageRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -9674,6 +9805,7 @@ module DeleteImagePermissionsResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9701,6 +9833,7 @@ module DeleteImagePermissionsRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~sharedAccountId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedAccountId =
         field_map_exn json "SharedAccountId" AwsAccountId.of_json in
@@ -9776,6 +9909,7 @@ module DeleteImageBuilderResult =
         (Option.map ~f:ImageBuilder.of_xml)
           (Xml.child xml_arg0 "ImageBuilder") in
       make ?imageBuilder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuilder = field_map json "ImageBuilder" ImageBuilder.of_json in
       make ?imageBuilder ()
@@ -9796,6 +9930,7 @@ module DeleteImageBuilderRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -9857,6 +9992,7 @@ module DeleteFleetResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified fleet."]
@@ -9873,6 +10009,7 @@ module DeleteFleetRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -9946,6 +10083,7 @@ module DeleteEntitlementResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified entitlement."]
@@ -9970,6 +10108,7 @@ module DeleteEntitlementRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~stackName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackName = field_map_exn json "StackName" Name.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -10020,6 +10159,7 @@ module DeleteDirectoryConfigResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10041,6 +10181,7 @@ module DeleteDirectoryConfigRequest =
         DirectoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryName") in
       make ~directoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryName =
         field_map_exn json "DirectoryName" DirectoryName.of_json in
@@ -10115,6 +10256,7 @@ module DeleteApplicationResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an application."]
@@ -10132,6 +10274,7 @@ module DeleteApplicationRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -10192,6 +10335,7 @@ module DeleteAppBlockResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an app block."]
@@ -10208,6 +10352,7 @@ module DeleteAppBlockRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -10292,6 +10437,7 @@ module CreateUserResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new user in the user pool."]
@@ -10354,6 +10500,7 @@ module CreateUserRequest =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~authenticationType ?lastName ?firstName ?messageAction ~userName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map_exn json "AuthenticationType" AuthenticationType.of_json in
@@ -10436,6 +10583,7 @@ module CreateUsageReportSubscriptionResult =
       let s3BucketName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3BucketName") in
       make ?schedule ?s3BucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schedule = field_map json "Schedule" UsageReportSchedule.of_json in
       let s3BucketName = field_map json "S3BucketName" String_.of_json in
@@ -10451,6 +10599,7 @@ module CreateUsageReportSubscriptionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10565,6 +10714,7 @@ module CreateUpdatedImageResult =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "canUpdateImage") in
       let image = (Option.map ~f:Image.of_xml) (Xml.child xml_arg0 "image") in
       make ?canUpdateImage ?image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canUpdateImage = field_map json "canUpdateImage" Boolean.of_json in
       let image = field_map json "image" Image.of_json in
@@ -10636,6 +10786,7 @@ module CreateUpdatedImageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "existingImageName") in
       make ?dryRun ?newImageTags ?newImageDisplayName ?newImageDescription
         ~newImageName ~existingImageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "dryRun" Boolean.of_json in
       let newImageTags = field_map json "newImageTags" Tags.of_json in
@@ -10735,6 +10886,7 @@ module CreateStreamingURLResult =
       let streamingURL =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StreamingURL") in
       make ?expires ?streamingURL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expires = field_map json "Expires" Timestamp.of_json in
       let streamingURL = field_map json "StreamingURL" String_.of_json in
@@ -10799,6 +10951,7 @@ module CreateStreamingURLRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       make ?sessionContext ?validity ?applicationId ~userId ~fleetName
         ~stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionContext = field_map json "SessionContext" String_.of_json in
       let validity = field_map json "Validity" Long.of_json in
@@ -10914,6 +11067,7 @@ module CreateStackResult =
     let of_xml xml_arg0 =
       let stack = (Option.map ~f:Stack.of_xml) (Xml.child xml_arg0 "Stack") in
       make ?stack ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stack = field_map json "Stack" Stack.of_json in make ?stack ()
     let to_json v = composed_to_json to_value v
@@ -11026,6 +11180,7 @@ module CreateStackRequest =
       make ?embedHostDomains ?accessEndpoints ?tags ?applicationSettings
         ?userSettings ?feedbackURL ?redirectURL ?storageConnectors
         ?displayName ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let embedHostDomains =
         field_map json "EmbedHostDomains" EmbedHostDomains.of_json in
@@ -11109,6 +11264,7 @@ module CreateImageBuilderStreamingURLResult =
       let streamingURL =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StreamingURL") in
       make ?expires ?streamingURL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expires = field_map json "Expires" Timestamp.of_json in
       let streamingURL = field_map json "StreamingURL" String_.of_json in
@@ -11137,6 +11293,7 @@ module CreateImageBuilderStreamingURLRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?validity ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validity = field_map json "Validity" Long.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -11295,6 +11452,7 @@ module CreateImageBuilderResult =
         (Option.map ~f:ImageBuilder.of_xml)
           (Xml.child xml_arg0 "ImageBuilder") in
       make ?imageBuilder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuilder = field_map json "ImageBuilder" ImageBuilder.of_json in
       make ?imageBuilder ()
@@ -11425,6 +11583,7 @@ module CreateImageBuilderRequest =
       make ?accessEndpoints ?tags ?appstreamAgentVersion ?domainJoinInfo
         ?enableDefaultInternetAccess ?iamRoleArn ?vpcConfig ?displayName
         ?description ~instanceType ?imageArn ?imageName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessEndpoints =
         field_map json "AccessEndpoints" AccessEndpointList.of_json in
@@ -11595,6 +11754,7 @@ module CreateFleetResult =
     let of_xml xml_arg0 =
       let fleet = (Option.map ~f:Fleet.of_xml) (Xml.child xml_arg0 "Fleet") in
       make ?fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleet = field_map json "Fleet" Fleet.of_json in make ?fleet ()
     let to_json v = composed_to_json to_value v
@@ -11790,6 +11950,7 @@ module CreateFleetRequest =
         ?description ?disconnectTimeoutInSeconds ?maxUserDurationInSeconds
         ?vpcConfig ?computeCapacity ?fleetType ~instanceType ?imageArn
         ?imageName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usbDeviceFilterStrings =
         field_map json "UsbDeviceFilterStrings"
@@ -11903,6 +12064,7 @@ module CreateEntitlementResult =
       let entitlement =
         (Option.map ~f:Entitlement.of_xml) (Xml.child xml_arg0 "Entitlement") in
       make ?entitlement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entitlement = field_map json "Entitlement" Entitlement.of_json in
       make ?entitlement ()
@@ -11954,6 +12116,7 @@ module CreateEntitlementRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~attributes ~appVisibility ?description ~stackName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map_exn json "Attributes" EntitlementAttributeList.of_json in
@@ -12061,6 +12224,7 @@ module CreateDirectoryConfigResult =
         (Option.map ~f:DirectoryConfig.of_xml)
           (Xml.child xml_arg0 "DirectoryConfig") in
       make ?directoryConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryConfig =
         field_map json "DirectoryConfig" DirectoryConfig.of_json in
@@ -12116,6 +12280,7 @@ module CreateDirectoryConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryName") in
       make ?serviceAccountCredentials ~organizationalUnitDistinguishedNames
         ~directoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceAccountCredentials =
         field_map json "ServiceAccountCredentials"
@@ -12213,6 +12378,7 @@ module CreateApplicationResult =
       let application =
         (Option.map ~f:Application.of_xml) (Xml.child xml_arg0 "Application") in
       make ?application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application = field_map json "Application" Application.of_json in
       make ?application ()
@@ -12323,6 +12489,7 @@ module CreateApplicationRequest =
       make ?tags ~appBlockArn ~instanceFamilies ~platforms ?launchParameters
         ?workingDirectory ~launchPath ~iconS3Location ?description
         ?displayName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let appBlockArn = field_map_exn json "AppBlockArn" Arn.of_json in
@@ -12420,6 +12587,7 @@ module CreateAppBlockResult =
       let appBlock =
         (Option.map ~f:AppBlock.of_xml) (Xml.child xml_arg0 "AppBlock") in
       make ?appBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appBlock = field_map json "AppBlock" AppBlock.of_json in
       make ?appBlock ()
@@ -12483,6 +12651,7 @@ module CreateAppBlockRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~setupScriptDetails ~sourceS3Location ?displayName
         ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let setupScriptDetails =
@@ -12593,6 +12762,7 @@ module CopyImageResponse =
         (Option.map ~f:Name.of_xml)
           (Xml.child xml_arg0 "DestinationImageName") in
       make ?destinationImageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationImageName =
         field_map json "DestinationImageName" Name.of_json in
@@ -12651,6 +12821,7 @@ module CopyImageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceImageName") in
       make ?destinationImageDescription ~destinationRegion
         ~destinationImageName ~sourceImageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationImageDescription =
         field_map json "DestinationImageDescription" Description.of_json in
@@ -12723,6 +12894,7 @@ module BatchDisassociateUserStackResult =
         (Option.map ~f:UserStackAssociationErrorList.of_xml)
           (Xml.child xml_arg0 "errors") in
       make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map json "errors" UserStackAssociationErrorList.of_json in
@@ -12748,6 +12920,7 @@ module BatchDisassociateUserStackRequest =
         UserStackAssociationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserStackAssociations") in
       make ~userStackAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userStackAssociations =
         field_map_exn json "UserStackAssociations"
@@ -12815,6 +12988,7 @@ module BatchAssociateUserStackResult =
         (Option.map ~f:UserStackAssociationErrorList.of_xml)
           (Xml.child xml_arg0 "errors") in
       make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map json "errors" UserStackAssociationErrorList.of_json in
@@ -12840,6 +13014,7 @@ module BatchAssociateUserStackRequest =
         UserStackAssociationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserStackAssociations") in
       make ~userStackAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userStackAssociations =
         field_map_exn json "UserStackAssociations"
@@ -12936,6 +13111,7 @@ module AssociateFleetResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates the specified fleet with the specified stack."]
@@ -12959,6 +13135,7 @@ module AssociateFleetRequest =
       let fleetName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetName") in
       make ~stackName ~fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackName = field_map_exn json "StackName" String_.of_json in
       let fleetName = field_map_exn json "FleetName" String_.of_json in
@@ -13031,6 +13208,7 @@ module AssociateApplicationToEntitlementResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates an application to entitle."]
@@ -13064,6 +13242,7 @@ module AssociateApplicationToEntitlementRequest =
       let stackName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackName") in
       make ~applicationIdentifier ~entitlementName ~stackName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationIdentifier =
         field_map_exn json "ApplicationIdentifier" String_.of_json in
@@ -13163,6 +13342,7 @@ module AssociateApplicationFleetResult =
         (Option.map ~f:ApplicationFleetAssociation.of_xml)
           (Xml.child xml_arg0 "ApplicationFleetAssociation") in
       make ?applicationFleetAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationFleetAssociation =
         field_map json "ApplicationFleetAssociation"
@@ -13192,6 +13372,7 @@ module AssociateApplicationFleetRequest =
       let fleetName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetName") in
       make ~applicationArn ~fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationArn = field_map_exn json "ApplicationArn" Arn.of_json in
       let fleetName = field_map_exn json "FleetName" Name.of_json in

@@ -257,6 +257,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -352,6 +353,7 @@ module TunnelSummary =
         (Option.map ~f:TunnelId.of_xml) (Xml.child xml_arg0 "tunnelId") in
       make ?lastUpdatedAt ?createdAt ?description ?status ?tunnelArn
         ?tunnelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedAt = field_map json "lastUpdatedAt" DateType.of_json in
       let createdAt = field_map json "createdAt" DateType.of_json in
@@ -385,6 +387,7 @@ module ConnectionState =
       let status =
         (Option.map ~f:ConnectionStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?lastUpdatedAt ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedAt = field_map json "lastUpdatedAt" DateType.of_json in
       let status = field_map json "status" ConnectionStatus.of_json in
@@ -415,6 +418,7 @@ module DestinationConfig =
       let thingName =
         (Option.map ~f:ThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ~services ?thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let services = field_map_exn json "services" ServiceList.of_json in
       let thingName = field_map json "thingName" ThingName.of_json in
@@ -468,6 +472,7 @@ module TimeoutConfig =
         (Option.map ~f:TimeoutInMin.of_xml)
           (Xml.child xml_arg0 "maxLifetimeTimeoutMinutes") in
       make ?maxLifetimeTimeoutMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxLifetimeTimeoutMinutes =
         field_map json "maxLifetimeTimeoutMinutes" TimeoutInMin.of_json in
@@ -487,6 +492,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -565,6 +571,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -730,6 +737,7 @@ module Tunnel =
       make ?lastUpdatedAt ?createdAt ?tags ?timeoutConfig ?destinationConfig
         ?description ?destinationConnectionState ?sourceConnectionState
         ?status ?tunnelArn ?tunnelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedAt = field_map json "lastUpdatedAt" DateType.of_json in
       let createdAt = field_map json "createdAt" DateType.of_json in
@@ -800,6 +808,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -825,6 +834,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -867,6 +877,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource tag."]
@@ -891,6 +902,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn =
@@ -972,6 +984,7 @@ module OpenTunnelResponse =
       let tunnelId =
         (Option.map ~f:TunnelId.of_xml) (Xml.child xml_arg0 "tunnelId") in
       make ?destinationAccessToken ?sourceAccessToken ?tunnelArn ?tunnelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationAccessToken =
         field_map json "destinationAccessToken" ClientAccessToken.of_json in
@@ -1020,6 +1033,7 @@ module OpenTunnelRequest =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ?timeoutConfig ?destinationConfig ?tags ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeoutConfig =
         field_map json "timeoutConfig" TimeoutConfig.of_json in
@@ -1072,6 +1086,7 @@ module ListTunnelsResponse =
         (Option.map ~f:TunnelSummaryList.of_xml)
           (Xml.child xml_arg0 "tunnelSummaries") in
       make ?nextToken ?tunnelSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let tunnelSummaries =
@@ -1108,6 +1123,7 @@ module ListTunnelsRequest =
       let thingName =
         (Option.map ~f:ThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ?nextToken ?maxResults ?thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -1156,6 +1172,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1176,6 +1193,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" AmazonResourceName.of_json in
@@ -1223,6 +1241,7 @@ module DescribeTunnelResponse =
       let tunnel =
         (Option.map ~f:Tunnel.of_xml) (Xml.child xml_arg0 "tunnel") in
       make ?tunnel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tunnel = field_map json "tunnel" Tunnel.of_json in make ?tunnel ()
     let to_json v = composed_to_json to_value v
@@ -1243,6 +1262,7 @@ module DescribeTunnelRequest =
       let tunnelId =
         TunnelId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tunnelId") in
       make ~tunnelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tunnelId = field_map_exn json "tunnelId" TunnelId.of_json in
       make ~tunnelId ()
@@ -1284,6 +1304,7 @@ module CloseTunnelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1309,6 +1330,7 @@ module CloseTunnelRequest =
       let tunnelId =
         TunnelId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tunnelId") in
       make ?delete ~tunnelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delete = field_map json "delete" DeleteFlag.of_json in
       let tunnelId = field_map_exn json "tunnelId" TunnelId.of_json in

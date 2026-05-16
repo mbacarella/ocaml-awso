@@ -140,6 +140,7 @@ module ClientLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -159,6 +160,7 @@ module ConnectionLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -198,6 +200,7 @@ module InvalidArgumentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -216,6 +219,7 @@ module InvalidEndpointException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -235,6 +239,7 @@ module NotAuthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -266,6 +271,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -348,6 +354,7 @@ module StartSelector =
           (Xml.child_exn ~context:context_ xml_arg0 "StartSelectorType") in
       make ?continuationToken ?startTimestamp ?afterFragmentNumber
         ~startSelectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let continuationToken =
         field_map json "ContinuationToken" ContinuationToken.of_json in
@@ -489,6 +496,7 @@ module GetMediaOutput =
         (Option.map ~f:ContentType.of_xml)
           (Xml.child xml_arg0 "Content-Type") in
       make ?payload ?contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "Payload" Payload.of_json in
       let contentType = field_map json "ContentType" ContentType.of_json in
@@ -529,6 +537,7 @@ module GetMediaInput =
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ~startSelector ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startSelector =
         field_map_exn json "StartSelector" StartSelector.of_json in

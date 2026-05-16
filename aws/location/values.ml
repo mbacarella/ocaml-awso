@@ -225,6 +225,7 @@ module PlaceGeometry =
       let point =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "Point") in
       make ?point ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let point = field_map json "Point" Position.of_json in make ?point ()
     let to_json v = composed_to_json to_value v
@@ -252,6 +253,7 @@ module TimeZone =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?offset ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offset = field_map json "Offset" Integer.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -424,6 +426,7 @@ module Step =
           (Xml.child_exn ~context:context_ xml_arg0 "Distance") in
       make ~startPosition ?geometryOffset ~endPosition ~durationSeconds
         ~distance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startPosition = field_map_exn json "StartPosition" Position.of_json in
       let geometryOffset =
@@ -490,6 +493,7 @@ module RouteMatrixEntryError =
         RouteMatrixErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Code") in
       make ?message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map_exn json "Code" RouteMatrixErrorCode.of_json in
@@ -557,6 +561,7 @@ module ValidationExceptionField =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~name ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" String_.of_json in
       let message = field_map_exn json "Message" String_.of_json in
@@ -673,6 +678,7 @@ module Place =
       make ?timeZone ?subRegion ?street ?region ?postalCode ?neighborhood
         ?municipality ?label ?interpolated ~geometry ?country ?addressNumber
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeZone = field_map json "TimeZone" TimeZone.of_json in
       let subRegion = field_map json "SubRegion" String_.of_json in
@@ -847,6 +853,7 @@ module GeofenceGeometry =
       let polygon =
         (Option.map ~f:LinearRings.of_xml) (Xml.child xml_arg0 "Polygon") in
       make ?polygon ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let polygon = field_map json "Polygon" LinearRings.of_json in
       make ?polygon ()
@@ -892,6 +899,7 @@ module PositionalAccuracy =
         PositionalAccuracyHorizontalDouble.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Horizontal") in
       make ~horizontal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let horizontal =
         field_map_exn json "Horizontal"
@@ -977,6 +985,7 @@ module LegGeometry =
       let lineString =
         (Option.map ~f:LineString.of_xml) (Xml.child xml_arg0 "LineString") in
       make ?lineString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lineString = field_map json "LineString" LineString.of_json in
       make ?lineString ()
@@ -1141,6 +1150,7 @@ module RouteMatrixEntry =
         (Option.map ~f:RouteMatrixEntryDistanceDouble.of_xml)
           (Xml.child xml_arg0 "Distance") in
       make ?error ?durationSeconds ?distance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" RouteMatrixEntryError.of_json in
       let durationSeconds =
@@ -1173,6 +1183,7 @@ module BatchItemError =
       let code =
         (Option.map ~f:BatchItemErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" BatchItemErrorCode.of_json in
@@ -1345,6 +1356,7 @@ module SearchForTextResult =
         (Option.map ~f:SearchForTextResultDistanceDouble.of_xml)
           (Xml.child xml_arg0 "Distance") in
       make ?relevance ~place ?distance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relevance =
         field_map json "Relevance" SearchForTextResultRelevanceDouble.of_json in
@@ -1479,6 +1491,7 @@ module SearchForSuggestionsResult =
       let text =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text = field_map_exn json "Text" String_.of_json in make ~text ()
     let to_json v = composed_to_json to_value v
@@ -1524,6 +1537,7 @@ module SearchForPositionResult =
         SearchForPositionResultDistanceDouble.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Distance") in
       make ~place ~distance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let place = field_map_exn json "Place" Place.of_json in
       let distance =
@@ -1597,6 +1611,7 @@ module ListTrackersResponseEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ~trackerName ?pricingPlanDataSource ?pricingPlan
         ~description ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
@@ -1697,6 +1712,7 @@ module ListRouteCalculatorsResponseEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       make ~updateTime ?pricingPlan ~description ~dataSource ~createTime
         ~calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
@@ -1774,6 +1790,7 @@ module ListPlaceIndexesResponseEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ?pricingPlan ~indexName ~description ~dataSource
         ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
@@ -1850,6 +1867,7 @@ module ListMapsResponseEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ?pricingPlan ~mapName ~description ~dataSource
         ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
@@ -1911,6 +1929,7 @@ module ListGeofenceResponseEntry =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ~status ~geometry ~geofenceId ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let status = field_map_exn json "Status" String_.of_json in
@@ -1985,6 +2004,7 @@ module ListGeofenceCollectionsResponseEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~updateTime ?pricingPlanDataSource ?pricingPlan ~description
         ~createTime ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let pricingPlanDataSource =
@@ -2052,6 +2072,7 @@ module ListDevicePositionsResponseEntry =
         (Option.map ~f:PositionalAccuracy.of_xml)
           (Xml.child xml_arg0 "Accuracy") in
       make ~sampleTime ?positionProperties ~position ~deviceId ?accuracy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
       let positionProperties =
@@ -2124,6 +2145,7 @@ module DevicePosition =
           (Xml.child xml_arg0 "Accuracy") in
       make ~sampleTime ~receivedTime ?positionProperties ~position ?deviceId
         ?accuracy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
       let receivedTime = field_map_exn json "ReceivedTime" Timestamp.of_json in
@@ -2276,6 +2298,7 @@ module Leg =
           (Xml.child_exn ~context:context_ xml_arg0 "Distance") in
       make ~steps ~startPosition ?geometry ~endPosition ~durationSeconds
         ~distance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let steps = field_map_exn json "Steps" StepList.of_json in
       let startPosition = field_map_exn json "StartPosition" Position.of_json in
@@ -2328,6 +2351,7 @@ module TruckDimensions =
         (Option.map ~f:TruckDimensionsHeightDouble.of_xml)
           (Xml.child xml_arg0 "Height") in
       make ?width ?unit ?length ?height ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let width = field_map json "Width" TruckDimensionsWidthDouble.of_json in
       let unit = field_map json "Unit" DimensionUnit.of_json in
@@ -2361,6 +2385,7 @@ module TruckWeight =
         (Option.map ~f:TruckWeightTotalDouble.of_xml)
           (Xml.child xml_arg0 "Total") in
       make ?unit ?total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" VehicleWeightUnit.of_json in
       let total = field_map json "Total" TruckWeightTotalDouble.of_json in
@@ -2466,6 +2491,7 @@ module BatchUpdateDevicePositionError =
       let deviceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       make ~sampleTime ~error ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
       let error = field_map_exn json "Error" BatchItemError.of_json in
@@ -2529,6 +2555,7 @@ module DevicePositionUpdate =
         (Option.map ~f:PositionalAccuracy.of_xml)
           (Xml.child xml_arg0 "Accuracy") in
       make ~sampleTime ?positionProperties ~position ~deviceId ?accuracy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
       let positionProperties =
@@ -2561,6 +2588,7 @@ module BatchPutGeofenceError =
         BatchItemError.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Error") in
       make ~geofenceId ~error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
       let error = field_map_exn json "Error" BatchItemError.of_json in
@@ -2601,6 +2629,7 @@ module BatchPutGeofenceSuccess =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ~geofenceId ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
@@ -2634,6 +2663,7 @@ module BatchPutGeofenceRequestEntry =
       let geofenceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
       make ~geometry ~geofenceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geometry = field_map_exn json "Geometry" GeofenceGeometry.of_json in
       let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
@@ -2662,6 +2692,7 @@ module BatchGetDevicePositionError =
       let deviceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       make ~error ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map_exn json "Error" BatchItemError.of_json in
       let deviceId = field_map_exn json "DeviceId" Id.of_json in
@@ -2701,6 +2732,7 @@ module BatchEvaluateGeofencesError =
       let deviceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       make ~sampleTime ~error ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
       let error = field_map_exn json "Error" BatchItemError.of_json in
@@ -2731,6 +2763,7 @@ module BatchDeleteGeofenceError =
         BatchItemError.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Error") in
       make ~geofenceId ~error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
       let error = field_map_exn json "Error" BatchItemError.of_json in
@@ -2758,6 +2791,7 @@ module BatchDeleteDevicePositionHistoryError =
       let deviceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       make ~error ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map_exn json "Error" BatchItemError.of_json in
       let deviceId = field_map_exn json "DeviceId" Id.of_json in
@@ -2777,6 +2811,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2796,6 +2831,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2815,6 +2851,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2834,6 +2871,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2869,6 +2907,7 @@ module ValidationException =
         ValidationExceptionFieldList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "fieldList") in
       make ~reason ~message ~fieldList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map_exn json "Reason" ValidationExceptionReason.of_json in
@@ -2924,6 +2963,7 @@ module DataSourceConfiguration =
       let intendedUse =
         (Option.map ~f:IntendedUse.of_xml) (Xml.child xml_arg0 "IntendedUse") in
       make ?intendedUse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intendedUse = field_map json "IntendedUse" IntendedUse.of_json in
       make ?intendedUse ()
@@ -3100,6 +3140,7 @@ module SearchPlaceIndexForTextSummary =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
       make ~text ?resultBBox ?maxResults ?language ?filterCountries
         ?filterBBox ~dataSource ?biasPosition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text =
         field_map_exn json "Text"
@@ -3240,6 +3281,7 @@ module SearchPlaceIndexForSuggestionsSummary =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
       make ~text ?maxResults ?language ?filterCountries ?filterBBox
         ~dataSource ?biasPosition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text =
         field_map_exn json "Text"
@@ -3363,6 +3405,7 @@ module SearchPlaceIndexForPositionSummary =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
       make ~position ?maxResults ?language ~dataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let position = field_map_exn json "Position" Position.of_json in
       let maxResults =
@@ -3386,6 +3429,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -3923,6 +3967,7 @@ module MapConfiguration =
       let style =
         MapStyle.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Style") in
       make ~style ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let style = field_map_exn json "Style" MapStyle.of_json in
       make ~style ()
@@ -3990,6 +4035,7 @@ module CalculateRouteSummary =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
       make ~routeBBox ~durationSeconds ~distanceUnit ~distance ~dataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeBBox = field_map_exn json "RouteBBox" BoundingBox.of_json in
       let durationSeconds =
@@ -4050,6 +4096,7 @@ module CalculateRouteCarModeOptions =
       let avoidFerries =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AvoidFerries") in
       make ?avoidTolls ?avoidFerries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let avoidTolls = field_map json "AvoidTolls" Boolean.of_json in
       let avoidFerries = field_map json "AvoidFerries" Boolean.of_json in
@@ -4125,6 +4172,7 @@ module CalculateRouteTruckModeOptions =
       let avoidFerries =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AvoidFerries") in
       make ?weight ?dimensions ?avoidTolls ?avoidFerries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weight = field_map json "Weight" TruckWeight.of_json in
       let dimensions = field_map json "Dimensions" TruckDimensions.of_json in
@@ -4272,6 +4320,7 @@ module CalculateRouteMatrixSummary =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
       make ~routeCount ~errorCount ~distanceUnit ~dataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeCount =
         field_map_exn json "RouteCount"
@@ -4765,6 +4814,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -4866,6 +4916,7 @@ module UpdateTrackerResponse =
       let trackerArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrackerArn") in
       make ~updateTime ~trackerName ~trackerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
@@ -4932,6 +4983,7 @@ module UpdateTrackerRequest =
           (Xml.child xml_arg0 "Description") in
       make ~trackerName ?pricingPlanDataSource ?pricingPlan
         ?positionFiltering ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let pricingPlanDataSource =
@@ -5042,6 +5094,7 @@ module UpdateRouteCalculatorResponse =
       let calculatorArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CalculatorArn") in
       make ~updateTime ~calculatorName ~calculatorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let calculatorName =
@@ -5085,6 +5138,7 @@ module UpdateRouteCalculatorRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       make ?pricingPlan ?description ~calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
       let description =
@@ -5190,6 +5244,7 @@ module UpdatePlaceIndexResponse =
       let indexArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexArn") in
       make ~updateTime ~indexName ~indexArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let indexName = field_map_exn json "IndexName" ResourceName.of_json in
@@ -5243,6 +5298,7 @@ module UpdatePlaceIndexRequest =
         (Option.map ~f:DataSourceConfiguration.of_xml)
           (Xml.child xml_arg0 "DataSourceConfiguration") in
       make ?pricingPlan ~indexName ?description ?dataSourceConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
       let indexName = field_map_exn json "IndexName" ResourceName.of_json in
@@ -5350,6 +5406,7 @@ module UpdateMapResponse =
       let mapArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MapArn") in
       make ~updateTime ~mapName ~mapArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
@@ -5390,6 +5447,7 @@ module UpdateMapRequest =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ?pricingPlan ~mapName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
@@ -5495,6 +5553,7 @@ module UpdateGeofenceCollectionResponse =
       let collectionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CollectionArn") in
       make ~updateTime ~collectionName ~collectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let collectionName =
@@ -5552,6 +5611,7 @@ module UpdateGeofenceCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ?pricingPlanDataSource ?pricingPlan ?description ~collectionName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingPlanDataSource =
         field_map json "PricingPlanDataSource" String_.of_json in
@@ -5636,6 +5696,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5664,6 +5725,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -5742,6 +5804,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5769,6 +5832,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -5865,6 +5929,7 @@ module SearchPlaceIndexForTextResponse =
         SearchForTextResultList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Results") in
       make ~summary ~results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary =
         field_map_exn json "Summary" SearchPlaceIndexForTextSummary.of_json in
@@ -5952,6 +6017,7 @@ module SearchPlaceIndexForTextRequest =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
       make ~text ?maxResults ?language ~indexName ?filterCountries
         ?filterBBox ?biasPosition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text =
         field_map_exn json "Text"
@@ -6059,6 +6125,7 @@ module SearchPlaceIndexForSuggestionsResponse =
         SearchForSuggestionsResultList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Results") in
       make ~summary ~results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary =
         field_map_exn json "Summary"
@@ -6151,6 +6218,7 @@ module SearchPlaceIndexForSuggestionsRequest =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
       make ~text ?maxResults ?language ~indexName ?filterCountries
         ?filterBBox ?biasPosition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text =
         field_map_exn json "Text"
@@ -6258,6 +6326,7 @@ module SearchPlaceIndexForPositionResponse =
         SearchForPositionResultList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Results") in
       make ~summary ~results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary =
         field_map_exn json "Summary"
@@ -6310,6 +6379,7 @@ module SearchPlaceIndexForPositionRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       make ~position ?maxResults ?language ~indexName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let position = field_map_exn json "Position" Position.of_json in
       let maxResults =
@@ -6424,6 +6494,7 @@ module PutGeofenceResponse =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ~geofenceId ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
@@ -6464,6 +6535,7 @@ module PutGeofenceRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~geometry ~geofenceId ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geometry = field_map_exn json "Geometry" GeofenceGeometry.of_json in
       let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
@@ -6552,6 +6624,7 @@ module ListTrackersResponse =
         ListTrackersResponseEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?nextToken ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let entries =
@@ -6585,6 +6658,7 @@ module ListTrackersRequest =
         (Option.map ~f:ListTrackersRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -6681,6 +6755,7 @@ module ListTrackerConsumersResponse =
         ArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArns") in
       make ?nextToken ~consumerArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let consumerArns = field_map_exn json "ConsumerArns" ArnList.of_json in
@@ -6723,6 +6798,7 @@ module ListTrackerConsumersRequest =
         (Option.map ~f:ListTrackerConsumersRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ~trackerName ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -6810,6 +6886,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -6832,6 +6909,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -6917,6 +6995,7 @@ module ListRouteCalculatorsResponse =
         ListRouteCalculatorsResponseEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?nextToken ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let entries =
@@ -6951,6 +7030,7 @@ module ListRouteCalculatorsRequest =
         (Option.map ~f:ListRouteCalculatorsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -7038,6 +7118,7 @@ module ListPlaceIndexesResponse =
         ListPlaceIndexesResponseEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?nextToken ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let entries =
@@ -7072,6 +7153,7 @@ module ListPlaceIndexesRequest =
         (Option.map ~f:ListPlaceIndexesRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -7157,6 +7239,7 @@ module ListMapsResponse =
         ListMapsResponseEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?nextToken ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let entries =
@@ -7190,6 +7273,7 @@ module ListMapsRequest =
         (Option.map ~f:ListMapsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -7285,6 +7369,7 @@ module ListGeofencesResponse =
         ListGeofenceResponseEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?nextToken ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let entries =
@@ -7317,6 +7402,7 @@ module ListGeofencesRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ?nextToken ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let collectionName =
@@ -7404,6 +7490,7 @@ module ListGeofenceCollectionsResponse =
         ListGeofenceCollectionsResponseEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?nextToken ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let entries =
@@ -7438,6 +7525,7 @@ module ListGeofenceCollectionsRequest =
         (Option.map ~f:ListGeofenceCollectionsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -7525,6 +7613,7 @@ module ListDevicePositionsResponse =
         ListDevicePositionsResponseEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?nextToken ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let entries =
@@ -7567,6 +7656,7 @@ module ListDevicePositionsRequest =
         (Option.map ~f:ListDevicePositionsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ~trackerName ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -7666,6 +7756,7 @@ module GetMapTileResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
       make ?contentType ?blob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map json "ContentType" String_.of_json in
       let blob = field_map json "Blob" Blob.of_json in
@@ -7709,6 +7800,7 @@ module GetMapTileRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       make ~z ~y ~x ~mapName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let z = field_map_exn json "Z" GetMapTileRequestZString.of_json in
       let y = field_map_exn json "Y" GetMapTileRequestYString.of_json in
@@ -7808,6 +7900,7 @@ module GetMapStyleDescriptorResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
       make ?contentType ?blob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map json "ContentType" String_.of_json in
       let blob = field_map json "Blob" Blob.of_json in
@@ -7833,6 +7926,7 @@ module GetMapStyleDescriptorRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       make ~mapName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
       make ~mapName ()
@@ -7930,6 +8024,7 @@ module GetMapSpritesResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
       make ?contentType ?blob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map json "ContentType" String_.of_json in
       let blob = field_map json "Blob" Blob.of_json in
@@ -7963,6 +8058,7 @@ module GetMapSpritesRequest =
         GetMapSpritesRequestFileNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileName") in
       make ~mapName ~fileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
       let fileName =
@@ -8061,6 +8157,7 @@ module GetMapGlyphsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
       make ?contentType ?blob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map json "ContentType" String_.of_json in
       let blob = field_map json "Blob" Blob.of_json in
@@ -8103,6 +8200,7 @@ module GetMapGlyphsRequest =
       let fontStack =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FontStack") in
       make ~mapName ~fontUnicodeRange ~fontStack ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
       let fontUnicodeRange =
@@ -8223,6 +8321,7 @@ module GetGeofenceResponse =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ~status ~geometry ~geofenceId ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let status = field_map_exn json "Status" String_.of_json in
@@ -8256,6 +8355,7 @@ module GetGeofenceRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~geofenceId ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
       let collectionName =
@@ -8389,6 +8489,7 @@ module GetDevicePositionResponse =
           (Xml.child xml_arg0 "Accuracy") in
       make ~sampleTime ~receivedTime ?positionProperties ~position ?deviceId
         ?accuracy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
       let receivedTime = field_map_exn json "ReceivedTime" Timestamp.of_json in
@@ -8425,6 +8526,7 @@ module GetDevicePositionRequest =
       let deviceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       make ~trackerName ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let deviceId = field_map_exn json "DeviceId" Id.of_json in
@@ -8521,6 +8623,7 @@ module GetDevicePositionHistoryResponse =
         DevicePositionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DevicePositions") in
       make ?nextToken ~devicePositions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let devicePositions =
@@ -8600,6 +8703,7 @@ module GetDevicePositionHistoryRequest =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       make ~trackerName ?startTimeInclusive ?nextToken ?maxResults
         ?endTimeExclusive ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let startTimeInclusive =
@@ -8687,6 +8791,7 @@ module DisassociateTrackerConsumerResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8716,6 +8821,7 @@ module DisassociateTrackerConsumerRequest =
       let consumerArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArn") in
       make ~trackerName ~consumerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let consumerArn = field_map_exn json "ConsumerArn" Arn.of_json in
@@ -8881,6 +8987,7 @@ module DescribeTrackerResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ~trackerName ~trackerArn ?tags ?pricingPlanDataSource
         ?pricingPlan ?positionFiltering ?kmsKeyId ~description ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
@@ -8916,6 +9023,7 @@ module DescribeTrackerRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       make ~trackerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       make ~trackerName ()
@@ -9064,6 +9172,7 @@ module DescribeRouteCalculatorResponse =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CalculatorArn") in
       make ~updateTime ?tags ?pricingPlan ~description ~dataSource
         ~createTime ~calculatorName ~calculatorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -9096,6 +9205,7 @@ module DescribeRouteCalculatorRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       make ~calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let calculatorName =
         field_map_exn json "CalculatorName" ResourceName.of_json in
@@ -9253,6 +9363,7 @@ module DescribePlaceIndexResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~updateTime ?tags ?pricingPlan ~indexName ~indexArn ~description
         ~dataSourceConfiguration ~dataSource ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -9287,6 +9398,7 @@ module DescribePlaceIndexRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       make ~indexName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexName = field_map_exn json "IndexName" ResourceName.of_json in
       make ~indexName ()
@@ -9443,6 +9555,7 @@ module DescribeMapResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "Configuration") in
       make ~updateTime ?tags ?pricingPlan ~mapName ~mapArn ~description
         ~dataSource ~createTime ~configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -9475,6 +9588,7 @@ module DescribeMapRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       make ~mapName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
       make ~mapName ()
@@ -9630,6 +9744,7 @@ module DescribeGeofenceCollectionResponse =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CollectionArn") in
       make ~updateTime ?tags ?pricingPlanDataSource ?pricingPlan ?kmsKeyId
         ~description ~createTime ~collectionName ~collectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -9664,6 +9779,7 @@ module DescribeGeofenceCollectionRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let collectionName =
         field_map_exn json "CollectionName" ResourceName.of_json in
@@ -9741,6 +9857,7 @@ module DeleteTrackerResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9762,6 +9879,7 @@ module DeleteTrackerRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       make ~trackerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       make ~trackerName ()
@@ -9839,6 +9957,7 @@ module DeleteRouteCalculatorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9861,6 +9980,7 @@ module DeleteRouteCalculatorRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       make ~calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let calculatorName =
         field_map_exn json "CalculatorName" ResourceName.of_json in
@@ -9939,6 +10059,7 @@ module DeletePlaceIndexResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9960,6 +10081,7 @@ module DeletePlaceIndexRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       make ~indexName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexName = field_map_exn json "IndexName" ResourceName.of_json in
       make ~indexName ()
@@ -10037,6 +10159,7 @@ module DeleteMapResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10058,6 +10181,7 @@ module DeleteMapRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       make ~mapName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
       make ~mapName ()
@@ -10135,6 +10259,7 @@ module DeleteGeofenceCollectionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10156,6 +10281,7 @@ module DeleteGeofenceCollectionRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let collectionName =
         field_map_exn json "CollectionName" ResourceName.of_json in
@@ -10258,6 +10384,7 @@ module CreateTrackerResponse =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~trackerName ~trackerArn ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let trackerArn = field_map_exn json "TrackerArn" Arn.of_json in
@@ -10340,6 +10467,7 @@ module CreateTrackerRequest =
           (Xml.child xml_arg0 "Description") in
       make ~trackerName ?tags ?pricingPlanDataSource ?pricingPlan
         ?positionFiltering ?kmsKeyId ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -10453,6 +10581,7 @@ module CreateRouteCalculatorResponse =
       let calculatorArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CalculatorArn") in
       make ~createTime ~calculatorName ~calculatorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
       let calculatorName =
@@ -10513,6 +10642,7 @@ module CreateRouteCalculatorRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       make ?tags ?pricingPlan ?description ~dataSource ~calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
@@ -10620,6 +10750,7 @@ module CreatePlaceIndexResponse =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~indexName ~indexArn ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexName = field_map_exn json "IndexName" ResourceName.of_json in
       let indexArn = field_map_exn json "IndexArn" Arn.of_json in
@@ -10694,6 +10825,7 @@ module CreatePlaceIndexRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
       make ?tags ?pricingPlan ~indexName ?description
         ?dataSourceConfiguration ~dataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
@@ -10803,6 +10935,7 @@ module CreateMapResponse =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       make ~mapName ~mapArn ~createTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mapName = field_map_exn json "MapName" ResourceName.of_json in
       let mapArn = field_map_exn json "MapArn" Arn.of_json in
@@ -10861,6 +10994,7 @@ module CreateMapRequest =
         MapConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Configuration") in
       make ?tags ?pricingPlan ~mapName ?description ~configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
@@ -10969,6 +11103,7 @@ module CreateGeofenceCollectionResponse =
       let collectionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CollectionArn") in
       make ~createTime ~collectionName ~collectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
       let collectionName =
@@ -11042,6 +11177,7 @@ module CreateGeofenceCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ?tags ?pricingPlanDataSource ?pricingPlan ?kmsKeyId ?description
         ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let pricingPlanDataSource =
@@ -11144,6 +11280,7 @@ module CalculateRouteResponse =
       let legs =
         LegList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Legs") in
       make ~summary ~legs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary =
         field_map_exn json "Summary" CalculateRouteSummary.of_json in
@@ -11272,6 +11409,7 @@ module CalculateRouteRequest =
       make ?waypointPositions ?truckModeOptions ?travelMode
         ?includeLegGeometry ?distanceUnit ~destinationPosition ?departureTime
         ~departurePosition ?departNow ?carModeOptions ~calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waypointPositions =
         field_map json "WaypointPositions"
@@ -11420,6 +11558,7 @@ module CalculateRouteMatrixResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "RouteMatrix") in
       make ~summary ?snappedDestinationPositions ?snappedDeparturePositions
         ~routeMatrix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary =
         field_map_exn json "Summary" CalculateRouteMatrixSummary.of_json in
@@ -11539,6 +11678,7 @@ module CalculateRouteMatrixRequest =
       make ?truckModeOptions ?travelMode ?distanceUnit ~destinationPositions
         ?departureTime ~departurePositions ?departNow ?carModeOptions
         ~calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truckModeOptions =
         field_map json "TruckModeOptions"
@@ -11645,6 +11785,7 @@ module BatchUpdateDevicePositionResponse =
         BatchUpdateDevicePositionErrorList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
       make ~errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "Errors"
@@ -11679,6 +11820,7 @@ module BatchUpdateDevicePositionRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       make ~updates ~trackerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates =
         field_map_exn json "Updates"
@@ -11777,6 +11919,7 @@ module BatchPutGeofenceResponse =
         BatchPutGeofenceErrorList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
       make ~successes ~errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let successes =
         field_map_exn json "Successes" BatchPutGeofenceSuccessList.of_json in
@@ -11812,6 +11955,7 @@ module BatchPutGeofenceRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~entries ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entries =
         field_map_exn json "Entries"
@@ -11913,6 +12057,7 @@ module BatchGetDevicePositionResponse =
         DevicePositionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DevicePositions") in
       make ~errors ~devicePositions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "Errors" BatchGetDevicePositionErrorList.of_json in
@@ -11952,6 +12097,7 @@ module BatchGetDevicePositionRequest =
         BatchGetDevicePositionRequestDeviceIdsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceIds") in
       make ~trackerName ~deviceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName =
         field_map_exn json "TrackerName"
@@ -12044,6 +12190,7 @@ module BatchEvaluateGeofencesResponse =
         BatchEvaluateGeofencesErrorList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
       make ~errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "Errors" BatchEvaluateGeofencesErrorList.of_json in
@@ -12082,6 +12229,7 @@ module BatchEvaluateGeofencesRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~devicePositionUpdates ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let devicePositionUpdates =
         field_map_exn json "DevicePositionUpdates"
@@ -12173,6 +12321,7 @@ module BatchDeleteGeofenceResponse =
         BatchDeleteGeofenceErrorList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
       make ~errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "Errors" BatchDeleteGeofenceErrorList.of_json in
@@ -12208,6 +12357,7 @@ module BatchDeleteGeofenceRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~geofenceIds ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geofenceIds =
         field_map_exn json "GeofenceIds"
@@ -12301,6 +12451,7 @@ module BatchDeleteDevicePositionHistoryResponse =
         BatchDeleteDevicePositionHistoryErrorList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
       make ~errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "Errors"
@@ -12338,6 +12489,7 @@ module BatchDeleteDevicePositionHistoryRequest =
         BatchDeleteDevicePositionHistoryRequestDeviceIdsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceIds") in
       make ~trackerName ~deviceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let deviceIds =
@@ -12438,6 +12590,7 @@ module AssociateTrackerConsumerResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12467,6 +12620,7 @@ module AssociateTrackerConsumerRequest =
       let consumerArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArn") in
       make ~trackerName ~consumerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let consumerArn = field_map_exn json "ConsumerArn" Arn.of_json in

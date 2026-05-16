@@ -237,6 +237,7 @@ module OutputChannelMapping =
         (Option.map ~f:Zz__listOf__integerMinNegative60Max6.of_xml)
           (Xml.child xml_arg0 "inputChannels") in
       make ?inputChannelsFineTune ?inputChannels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputChannelsFineTune =
         field_map json "InputChannelsFineTune"
@@ -953,6 +954,7 @@ module InsertableImage =
           (Xml.child xml_arg0 "duration") in
       make ?width ?startTime ?opacity ?layer ?imageY ?imageX
         ?imageInserterInput ?height ?fadeOut ?fadeIn ?duration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let width = field_map json "Width" Zz__integerMin0Max2147483647.of_json in
       let startTime =
@@ -4405,6 +4407,7 @@ module Av1QvbrSettings =
         (Option.map ~f:Zz__integerMin1Max10.of_xml)
           (Xml.child xml_arg0 "qvbrQualityLevel") in
       make ?qvbrQualityLevelFineTune ?qvbrQualityLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qvbrQualityLevelFineTune =
         field_map json "QvbrQualityLevelFineTune" Zz__doubleMin0Max1.of_json in
@@ -4725,6 +4728,7 @@ module AvcIntraUhdSettings =
         (Option.map ~f:AvcIntraUhdQualityTuningLevel.of_xml)
           (Xml.child xml_arg0 "qualityTuningLevel") in
       make ?qualityTuningLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualityTuningLevel =
         field_map json "QualityTuningLevel"
@@ -5283,6 +5287,7 @@ module H264QvbrSettings =
         (Option.map ~f:Zz__integerMin1000Max1152000000.of_xml)
           (Xml.child xml_arg0 "maxAverageBitrate") in
       make ?qvbrQualityLevelFineTune ?qvbrQualityLevel ?maxAverageBitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qvbrQualityLevelFineTune =
         field_map json "QvbrQualityLevelFineTune" Zz__doubleMin0Max1.of_json in
@@ -6092,6 +6097,7 @@ module H265QvbrSettings =
         (Option.map ~f:Zz__integerMin1000Max1466400000.of_xml)
           (Xml.child xml_arg0 "maxAverageBitrate") in
       make ?qvbrQualityLevelFineTune ?qvbrQualityLevel ?maxAverageBitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qvbrQualityLevelFineTune =
         field_map json "QvbrQualityLevelFineTune" Zz__doubleMin0Max1.of_json in
@@ -7764,6 +7770,7 @@ module Xavc4kIntraCbgProfileSettings =
         (Option.map ~f:Xavc4kIntraCbgProfileClass.of_xml)
           (Xml.child xml_arg0 "xavcClass") in
       make ?xavcClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xavcClass =
         field_map json "XavcClass" Xavc4kIntraCbgProfileClass.of_json in
@@ -7789,6 +7796,7 @@ module Xavc4kIntraVbrProfileSettings =
         (Option.map ~f:Xavc4kIntraVbrProfileClass.of_xml)
           (Xml.child xml_arg0 "xavcClass") in
       make ?xavcClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xavcClass =
         field_map json "XavcClass" Xavc4kIntraVbrProfileClass.of_json in
@@ -7893,6 +7901,7 @@ module Xavc4kProfileSettings =
       make ?slices ?qualityTuningLevel ?hrdBufferSize ?gopClosedCadence
         ?gopBReference ?flickerAdaptiveQuantization ?codecProfile
         ?bitrateClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let slices = field_map json "Slices" Zz__integerMin8Max12.of_json in
       let qualityTuningLevel =
@@ -8064,6 +8073,7 @@ module XavcHdIntraCbgProfileSettings =
         (Option.map ~f:XavcHdIntraCbgProfileClass.of_xml)
           (Xml.child xml_arg0 "xavcClass") in
       make ?xavcClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xavcClass =
         field_map json "XavcClass" XavcHdIntraCbgProfileClass.of_json in
@@ -8178,6 +8188,7 @@ module XavcHdProfileSettings =
       make ?telecine ?slices ?qualityTuningLevel ?interlaceMode
         ?hrdBufferSize ?gopClosedCadence ?gopBReference
         ?flickerAdaptiveQuantization ?bitrateClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let telecine = field_map json "Telecine" XavcHdProfileTelecine.of_json in
       let slices = field_map json "Slices" Zz__integerMin4Max12.of_json in
@@ -8490,6 +8501,7 @@ module Hdr10Metadata =
       make ?whitePointY ?whitePointX ?redPrimaryY ?redPrimaryX ?minLuminance
         ?maxLuminance ?maxFrameAverageLightLevel ?maxContentLightLevel
         ?greenPrimaryY ?greenPrimaryX ?bluePrimaryY ?bluePrimaryX ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let whitePointY =
         field_map json "WhitePointY" Zz__integerMin0Max50000.of_json in
@@ -8681,6 +8693,7 @@ module DolbyVisionLevel6Metadata =
         (Option.map ~f:Zz__integerMin0Max65535.of_xml)
           (Xml.child xml_arg0 "maxCll") in
       make ?maxFall ?maxCll ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxFall = field_map json "MaxFall" Zz__integerMin0Max65535.of_json in
       let maxCll = field_map json "MaxCll" Zz__integerMin0Max65535.of_json in
@@ -8842,6 +8855,7 @@ module NoiseReducerFilterSettings =
         (Option.map ~f:Zz__integerMin0Max3.of_xml)
           (Xml.child xml_arg0 "strength") in
       make ?strength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strength = field_map json "Strength" Zz__integerMin0Max3.of_json in
       make ?strength ()
@@ -8885,6 +8899,7 @@ module NoiseReducerSpatialFilterSettings =
         (Option.map ~f:Zz__integerMin0Max3.of_xml)
           (Xml.child xml_arg0 "postFilterSharpenStrength") in
       make ?strength ?speed ?postFilterSharpenStrength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strength = field_map json "Strength" Zz__integerMin0Max16.of_json in
       let speed = field_map json "Speed" Zz__integerMinNegative2Max3.of_json in
@@ -8960,6 +8975,7 @@ module NoiseReducerTemporalFilterSettings =
           (Xml.child xml_arg0 "aggressiveMode") in
       make ?strength ?speed ?postTemporalSharpeningStrength
         ?postTemporalSharpening ?aggressiveMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strength = field_map json "Strength" Zz__integerMin0Max16.of_json in
       let speed = field_map json "Speed" Zz__integerMinNegative1Max3.of_json in
@@ -9019,6 +9035,7 @@ module NexGuardFileMarkerSettings =
         (Option.map ~f:Zz__stringMin1Max100000.of_xml)
           (Xml.child xml_arg0 "license") in
       make ?strength ?preset ?payload ?license ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strength = field_map json "Strength" WatermarkingStrength.of_json in
       let preset = field_map json "Preset" Zz__stringMin1Max256.of_json in
@@ -9272,6 +9289,7 @@ module AacSettings =
           (Xml.child xml_arg0 "audioDescriptionBroadcasterMix") in
       make ?vbrQuality ?specification ?sampleRate ?rawFormat ?rateControlMode
         ?codingMode ?codecProfile ?bitrate ?audioDescriptionBroadcasterMix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vbrQuality = field_map json "VbrQuality" AacVbrQuality.of_json in
       let specification =
@@ -9409,6 +9427,7 @@ module Ac3Settings =
       make ?sampleRate ?metadataControl ?lfeFilter ?dynamicRangeCompressionRf
         ?dynamicRangeCompressionProfile ?dynamicRangeCompressionLine
         ?dialnorm ?codingMode ?bitstreamMode ?bitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleRate =
         field_map json "SampleRate" Zz__integerMin48000Max48000.of_json in
@@ -9471,6 +9490,7 @@ module AiffSettings =
         (Option.map ~f:Zz__integerMin16Max24.of_xml)
           (Xml.child xml_arg0 "bitDepth") in
       make ?sampleRate ?channels ?bitDepth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleRate =
         field_map json "SampleRate" Zz__integerMin8000Max192000.of_json in
@@ -9727,6 +9747,7 @@ module Eac3AtmosSettings =
         ?dynamicRangeCompressionRf ?dynamicRangeCompressionLine
         ?downmixControl ?dialogueIntelligence ?codingMode ?bitstreamMode
         ?bitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let surroundExMode =
         field_map json "SurroundExMode" Eac3AtmosSurroundExMode.of_json in
@@ -10006,6 +10027,7 @@ module Eac3Settings =
         ?loRoCenterMixLevel ?lfeFilter ?lfeControl ?dynamicRangeCompressionRf
         ?dynamicRangeCompressionLine ?dialnorm ?dcFilter ?codingMode
         ?bitstreamMode ?bitrate ?attenuationControl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let surroundMode =
         field_map json "SurroundMode" Eac3SurroundMode.of_json in
@@ -10092,6 +10114,7 @@ module Mp2Settings =
         (Option.map ~f:Zz__integerMin32000Max384000.of_xml)
           (Xml.child xml_arg0 "bitrate") in
       make ?sampleRate ?channels ?bitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleRate =
         field_map json "SampleRate" Zz__integerMin32000Max48000.of_json in
@@ -10156,6 +10179,7 @@ module Mp3Settings =
         (Option.map ~f:Zz__integerMin16000Max320000.of_xml)
           (Xml.child xml_arg0 "bitrate") in
       make ?vbrQuality ?sampleRate ?rateControlMode ?channels ?bitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vbrQuality =
         field_map json "VbrQuality" Zz__integerMin0Max9.of_json in
@@ -10205,6 +10229,7 @@ module OpusSettings =
         (Option.map ~f:Zz__integerMin32000Max192000.of_xml)
           (Xml.child xml_arg0 "bitrate") in
       make ?sampleRate ?channels ?bitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleRate =
         field_map json "SampleRate" Zz__integerMin16000Max48000.of_json in
@@ -10251,6 +10276,7 @@ module VorbisSettings =
         (Option.map ~f:Zz__integerMin1Max2.of_xml)
           (Xml.child xml_arg0 "channels") in
       make ?vbrQuality ?sampleRate ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vbrQuality =
         field_map json "VbrQuality" Zz__integerMinNegative1Max10.of_json in
@@ -10304,6 +10330,7 @@ module WavSettings =
         (Option.map ~f:Zz__integerMin16Max24.of_xml)
           (Xml.child xml_arg0 "bitDepth") in
       make ?sampleRate ?format ?channels ?bitDepth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleRate =
         field_map json "SampleRate" Zz__integerMin8000Max192000.of_json in
@@ -10478,6 +10505,7 @@ module ChannelMapping =
         (Option.map ~f:Zz__listOfOutputChannelMapping.of_xml)
           (Xml.child xml_arg0 "outputChannels") in
       make ?outputChannels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputChannels =
         field_map json "OutputChannels"
@@ -10717,6 +10745,7 @@ module BurninDestinationSettings =
         ?outlineSize ?outlineColor ?hexFontColor ?fontSize ?fontScript
         ?fontResolution ?fontOpacity ?fontColor ?fallbackFont
         ?backgroundOpacity ?backgroundColor ?applyFontColor ?alignment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let yPosition =
         field_map json "YPosition" Zz__integerMin0Max2147483647.of_json in
@@ -11122,6 +11151,7 @@ module DvbSubDestinationSettings =
         ?fontSize ?fontScript ?fontResolution ?fontOpacity ?fontColor
         ?fallbackFont ?ddsYCoordinate ?ddsXCoordinate ?ddsHandling
         ?backgroundOpacity ?backgroundColor ?applyFontColor ?alignment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let yPosition =
         field_map json "YPosition" Zz__integerMin0Max2147483647.of_json in
@@ -11214,6 +11244,7 @@ module EmbeddedDestinationSettings =
         (Option.map ~f:Zz__integerMin1Max4.of_xml)
           (Xml.child xml_arg0 "destination608ChannelNumber") in
       make ?destination708ServiceNumber ?destination608ChannelNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination708ServiceNumber =
         field_map json "Destination708ServiceNumber"
@@ -11252,6 +11283,7 @@ module ImscDestinationSettings =
         (Option.map ~f:ImscAccessibilitySubs.of_xml)
           (Xml.child xml_arg0 "accessibility") in
       make ?stylePassthrough ?accessibility ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stylePassthrough =
         field_map json "StylePassthrough" ImscStylePassthrough.of_json in
@@ -11279,6 +11311,7 @@ module SccDestinationSettings =
         (Option.map ~f:SccDestinationFramerate.of_xml)
           (Xml.child xml_arg0 "framerate") in
       make ?framerate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let framerate =
         field_map json "Framerate" SccDestinationFramerate.of_json in
@@ -11304,6 +11337,7 @@ module SrtDestinationSettings =
         (Option.map ~f:SrtStylePassthrough.of_xml)
           (Xml.child xml_arg0 "stylePassthrough") in
       make ?stylePassthrough ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stylePassthrough =
         field_map json "StylePassthrough" SrtStylePassthrough.of_json in
@@ -11339,6 +11373,7 @@ module TeletextDestinationSettings =
         (Option.map ~f:Zz__stringMin3Max3Pattern1809aFAF09aEAE.of_xml)
           (Xml.child xml_arg0 "pageNumber") in
       make ?pageTypes ?pageNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageTypes =
         field_map json "PageTypes" Zz__listOfTeletextPageType.of_json in
@@ -11367,6 +11402,7 @@ module TtmlDestinationSettings =
         (Option.map ~f:TtmlStylePassthrough.of_xml)
           (Xml.child xml_arg0 "stylePassthrough") in
       make ?stylePassthrough ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stylePassthrough =
         field_map json "StylePassthrough" TtmlStylePassthrough.of_json in
@@ -11401,6 +11437,7 @@ module WebvttDestinationSettings =
         (Option.map ~f:WebvttAccessibilitySubs.of_xml)
           (Xml.child xml_arg0 "accessibility") in
       make ?stylePassthrough ?accessibility ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stylePassthrough =
         field_map json "StylePassthrough" WebvttStylePassthrough.of_json in
@@ -11567,6 +11604,7 @@ module CaptionSourceFramerate =
         (Option.map ~f:Zz__integerMin1Max1001.of_xml)
           (Xml.child xml_arg0 "framerateDenominator") in
       make ?framerateNumerator ?framerateDenominator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let framerateNumerator =
         field_map json "FramerateNumerator" Zz__integerMin1Max60000.of_json in
@@ -12407,6 +12445,7 @@ module S3DestinationAccessControl =
         (Option.map ~f:S3ObjectCannedAcl.of_xml)
           (Xml.child xml_arg0 "cannedAcl") in
       make ?cannedAcl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cannedAcl = field_map json "CannedAcl" S3ObjectCannedAcl.of_json in
       make ?cannedAcl ()
@@ -12456,6 +12495,7 @@ module S3EncryptionSettings =
         (Option.map ~f:S3ServerSideEncryptionType.of_xml)
           (Xml.child xml_arg0 "encryptionType") in
       make ?kmsKeyArn ?kmsEncryptionContext ?encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn =
         field_map json "KmsKeyArn"
@@ -12814,6 +12854,7 @@ module DvbNitSettings =
         (Option.map ~f:Zz__integerMin0Max65535.of_xml)
           (Xml.child xml_arg0 "networkId") in
       make ?nitInterval ?networkName ?networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nitInterval =
         field_map json "NitInterval" Zz__integerMin25Max10000.of_json in
@@ -12870,6 +12911,7 @@ module DvbSdtSettings =
       let outputSdt =
         (Option.map ~f:OutputSdt.of_xml) (Xml.child xml_arg0 "outputSdt") in
       make ?serviceProviderName ?serviceName ?sdtInterval ?outputSdt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceProviderName =
         field_map json "ServiceProviderName" Zz__stringMin1Max256.of_json in
@@ -12900,6 +12942,7 @@ module DvbTdtSettings =
         (Option.map ~f:Zz__integerMin1000Max30000.of_xml)
           (Xml.child xml_arg0 "tdtInterval") in
       make ?tdtInterval ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tdtInterval =
         field_map json "TdtInterval" Zz__integerMin1000Max30000.of_json in
@@ -13213,6 +13256,7 @@ module M2tsScte35Esam =
         (Option.map ~f:Zz__integerMin32Max8182.of_xml)
           (Xml.child xml_arg0 "scte35EsamPid") in
       make ?scte35EsamPid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scte35EsamPid =
         field_map json "Scte35EsamPid" Zz__integerMin32Max8182.of_json in
@@ -14005,6 +14049,7 @@ module MxfXavcProfileSettings =
         (Option.map ~f:MxfXavcDurationMode.of_xml)
           (Xml.child xml_arg0 "durationMode") in
       make ?maxAncDataSize ?durationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxAncDataSize =
         field_map json "MaxAncDataSize" Zz__integerMin0Max2147483647.of_json in
@@ -14298,6 +14343,7 @@ module Av1Settings =
         ?gopSize ?framerateNumerator ?framerateDenominator
         ?framerateConversionAlgorithm ?framerateControl ?bitDepth
         ?adaptiveQuantization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spatialAdaptiveQuantization =
         field_map json "SpatialAdaptiveQuantization"
@@ -14452,6 +14498,7 @@ module AvcIntraSettings =
         ?framerateNumerator ?framerateDenominator
         ?framerateConversionAlgorithm ?framerateControl ?avcIntraUhdSettings
         ?avcIntraClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let telecine = field_map json "Telecine" AvcIntraTelecine.of_json in
       let slowPal = field_map json "SlowPal" AvcIntraSlowPal.of_json in
@@ -14531,6 +14578,7 @@ module FrameCaptureSettings =
         (Option.map ~f:Zz__integerMin1Max2147483647.of_xml)
           (Xml.child xml_arg0 "framerateDenominator") in
       make ?quality ?maxCaptures ?framerateNumerator ?framerateDenominator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quality = field_map json "Quality" Zz__integerMin1Max100.of_json in
       let maxCaptures =
@@ -14998,6 +15046,7 @@ module H264Settings =
         ?flickerAdaptiveQuantization ?fieldEncoding ?entropyEncoding
         ?dynamicSubGop ?codecProfile ?codecLevel ?bitrate
         ?adaptiveQuantization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unregisteredSeiTimecode =
         field_map json "UnregisteredSeiTimecode"
@@ -15555,6 +15604,7 @@ module H265Settings =
         ?framerateConversionAlgorithm ?framerateControl
         ?flickerAdaptiveQuantization ?dynamicSubGop ?codecProfile ?codecLevel
         ?bitrate ?alternateTransferFunctionSei ?adaptiveQuantization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeMp4PackagingType =
         field_map json "WriteMp4PackagingType"
@@ -16013,6 +16063,7 @@ module Mpeg2Settings =
         ?gopClosedCadence ?framerateNumerator ?framerateDenominator
         ?framerateConversionAlgorithm ?framerateControl ?dynamicSubGop
         ?codecProfile ?codecLevel ?bitrate ?adaptiveQuantization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let temporalAdaptiveQuantization =
         field_map json "TemporalAdaptiveQuantization"
@@ -16239,6 +16290,7 @@ module ProresSettings =
         ?parDenominator ?parControl ?interlaceMode ?framerateNumerator
         ?framerateDenominator ?framerateConversionAlgorithm ?framerateControl
         ?codecProfile ?chromaSampling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let telecine = field_map json "Telecine" ProresTelecine.of_json in
       let slowPal = field_map json "SlowPal" ProresSlowPal.of_json in
@@ -16376,6 +16428,7 @@ module Vc3Settings =
       make ?vc3Class ?telecine ?slowPal ?scanTypeConversionMode
         ?interlaceMode ?framerateNumerator ?framerateDenominator
         ?framerateConversionAlgorithm ?framerateControl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vc3Class = field_map json "Vc3Class" Vc3Class.of_json in
       let telecine = field_map json "Telecine" Vc3Telecine.of_json in
@@ -16599,6 +16652,7 @@ module Vp8Settings =
         ?parControl ?maxBitrate ?hrdBufferSize ?gopSize ?framerateNumerator
         ?framerateDenominator ?framerateConversionAlgorithm ?framerateControl
         ?bitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rateControlMode =
         field_map json "RateControlMode" Vp8RateControlMode.of_json in
@@ -16780,6 +16834,7 @@ module Vp9Settings =
         ?parControl ?maxBitrate ?hrdBufferSize ?gopSize ?framerateNumerator
         ?framerateDenominator ?framerateConversionAlgorithm ?framerateControl
         ?bitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rateControlMode =
         field_map json "RateControlMode" Vp9RateControlMode.of_json in
@@ -17000,6 +17055,7 @@ module XavcSettings =
         ?framerateNumerator ?framerateDenominator
         ?framerateConversionAlgorithm ?framerateControl ?entropyEncoding
         ?adaptiveQuantization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xavcHdProfileSettings =
         field_map json "XavcHdProfileSettings" XavcHdProfileSettings.of_json in
@@ -17126,6 +17182,7 @@ module ColorCorrector =
           (Xml.child xml_arg0 "brightness") in
       make ?saturation ?sampleRangeConversion ?hue ?hdr10Metadata ?contrast
         ?colorSpaceConversion ?brightness ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let saturation =
         field_map json "Saturation" Zz__integerMin1Max100.of_json in
@@ -17175,6 +17232,7 @@ module Deinterlacer =
         (Option.map ~f:DeinterlaceAlgorithm.of_xml)
           (Xml.child xml_arg0 "algorithm") in
       make ?mode ?control ?algorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mode = field_map json "Mode" DeinterlacerMode.of_json in
       let control = field_map json "Control" DeinterlacerControl.of_json in
@@ -17216,6 +17274,7 @@ module DolbyVision =
         (Option.map ~f:DolbyVisionLevel6Metadata.of_xml)
           (Xml.child xml_arg0 "l6Metadata") in
       make ?profile ?l6Mode ?l6Metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profile = field_map json "Profile" DolbyVisionProfile.of_json in
       let l6Mode = field_map json "L6Mode" DolbyVisionLevel6Mode.of_json in
@@ -17254,6 +17313,7 @@ module Hdr10Plus =
         (Option.map ~f:Zz__integerMin0Max4000.of_xml)
           (Xml.child xml_arg0 "masteringMonitorNits") in
       make ?targetMonitorNits ?masteringMonitorNits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetMonitorNits =
         field_map json "TargetMonitorNits" Zz__integerMin0Max4000.of_json in
@@ -17281,6 +17341,7 @@ module ImageInserter =
         (Option.map ~f:Zz__listOfInsertableImage.of_xml)
           (Xml.child xml_arg0 "insertableImages") in
       make ?insertableImages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let insertableImages =
         field_map json "InsertableImages" Zz__listOfInsertableImage.of_json in
@@ -17339,6 +17400,7 @@ module NoiseReducer =
           (Xml.child xml_arg0 "filter") in
       make ?temporalFilterSettings ?spatialFilterSettings ?filterSettings
         ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let temporalFilterSettings =
         field_map json "TemporalFilterSettings"
@@ -17374,6 +17436,7 @@ module PartnerWatermarking =
         (Option.map ~f:NexGuardFileMarkerSettings.of_xml)
           (Xml.child xml_arg0 "nexguardFileMarkerSettings") in
       make ?nexguardFileMarkerSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nexguardFileMarkerSettings =
         field_map json "NexguardFileMarkerSettings"
@@ -17417,6 +17480,7 @@ module TimecodeBurnin =
         (Option.map ~f:Zz__integerMin10Max48.of_xml)
           (Xml.child xml_arg0 "fontSize") in
       make ?prefix ?position ?fontSize ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" Zz__stringPattern.of_json in
       let position = field_map json "Position" TimecodeBurninPosition.of_json in
@@ -17443,6 +17507,7 @@ module AudioChannelTaggingSettings =
         (Option.map ~f:AudioChannelTag.of_xml)
           (Xml.child xml_arg0 "channelTag") in
       make ?channelTag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelTag = field_map json "ChannelTag" AudioChannelTag.of_json in
       make ?channelTag ()
@@ -17561,6 +17626,7 @@ module AudioCodecSettings =
       make ?wavSettings ?vorbisSettings ?opusSettings ?mp3Settings
         ?mp2Settings ?eac3Settings ?eac3AtmosSettings ?codec ?aiffSettings
         ?ac3Settings ?aacSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wavSettings = field_map json "WavSettings" WavSettings.of_json in
       let vorbisSettings =
@@ -17685,6 +17751,7 @@ module AudioNormalizationSettings =
           (Xml.child xml_arg0 "algorithm") in
       make ?targetLkfs ?peakCalculation ?loudnessLogging ?correctionGateLevel
         ?algorithmControl ?algorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetLkfs =
         field_map json "TargetLkfs" Zz__doubleMinNegative59Max0.of_json in
@@ -17769,6 +17836,7 @@ module RemixSettings =
         (Option.map ~f:ChannelMapping.of_xml)
           (Xml.child xml_arg0 "channelMapping") in
       make ?channelsOut ?channelsIn ?channelMapping ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelsOut =
         field_map json "ChannelsOut" Zz__integerMin1Max64.of_json in
@@ -17937,6 +18005,7 @@ module CaptionDestinationSettings =
         ?sccDestinationSettings ?imscDestinationSettings
         ?embeddedDestinationSettings ?dvbSubDestinationSettings
         ?destinationType ?burninDestinationSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webvttDestinationSettings =
         field_map json "WebvttDestinationSettings"
@@ -18020,6 +18089,7 @@ module AncillarySourceSettings =
           (Xml.child xml_arg0 "convert608To708") in
       make ?terminateCaptions ?sourceAncillaryChannelNumber ?convert608To708
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminateCaptions =
         field_map json "TerminateCaptions" AncillaryTerminateCaptions.of_json in
@@ -18111,6 +18181,7 @@ module DvbSubSourceSettings =
         (Option.map ~f:Zz__integerMin1Max2147483647.of_xml)
           (Xml.child xml_arg0 "pid") in
       make ?pid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pid = field_map json "Pid" Zz__integerMin1Max2147483647.of_json in
       make ?pid ()
@@ -18171,6 +18242,7 @@ module EmbeddedSourceSettings =
           (Xml.child xml_arg0 "convert608To708") in
       make ?terminateCaptions ?source608TrackNumber ?source608ChannelNumber
         ?convert608To708 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminateCaptions =
         field_map json "TerminateCaptions" EmbeddedTerminateCaptions.of_json in
@@ -18253,6 +18325,7 @@ module FileSourceSettings =
           (Xml.child xml_arg0 "convert608To708") in
       make ?timeDeltaUnits ?timeDelta ?sourceFile ?framerate ?convert608To708
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeDeltaUnits =
         field_map json "TimeDeltaUnits" FileSourceTimeDeltaUnits.of_json in
@@ -18290,6 +18363,7 @@ module TeletextSourceSettings =
         (Option.map ~f:Zz__stringMin3Max3Pattern1809aFAF09aEAE.of_xml)
           (Xml.child xml_arg0 "pageNumber") in
       make ?pageNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageNumber =
         field_map json "PageNumber"
@@ -18316,6 +18390,7 @@ module TrackSourceSettings =
         (Option.map ~f:Zz__integerMin1Max2147483647.of_xml)
           (Xml.child xml_arg0 "trackNumber") in
       make ?trackNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackNumber =
         field_map json "TrackNumber" Zz__integerMin1Max2147483647.of_json in
@@ -18359,6 +18434,7 @@ module WebvttHlsSourceSettings =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "renditionGroupId") in
       make ?renditionName ?renditionLanguageCode ?renditionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let renditionName = field_map json "RenditionName" Zz__string.of_json in
       let renditionLanguageCode =
@@ -18520,6 +18596,7 @@ module SpekeKeyProviderCmaf =
           (Xml.child xml_arg0 "certificateArn") in
       make ?url ?resourceId ?hlsSignaledSystemIds ?dashSignaledSystemIds
         ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" Zz__stringPatternHttps.of_json in
       let resourceId = field_map json "ResourceId" Zz__stringPatternW.of_json in
@@ -18581,6 +18658,7 @@ module StaticKeyProvider =
         (Option.map ~f:Zz__stringPatternIdentityAZaZ26AZaZ09163.of_xml)
           (Xml.child xml_arg0 "keyFormat") in
       make ?url ?staticKeyValue ?keyFormatVersions ?keyFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" Zz__string.of_json in
       let staticKeyValue =
@@ -18753,6 +18831,7 @@ module S3DestinationSettings =
         (Option.map ~f:S3DestinationAccessControl.of_xml)
           (Xml.child xml_arg0 "accessControl") in
       make ?encryption ?accessControl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryption =
         field_map json "Encryption" S3EncryptionSettings.of_json in
@@ -18789,6 +18868,7 @@ module CmafAdditionalManifest =
         (Option.map ~f:Zz__stringMin1.of_xml)
           (Xml.child xml_arg0 "manifestNameModifier") in
       make ?selectedOutputs ?manifestNameModifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectedOutputs =
         field_map json "SelectedOutputs" Zz__listOf__stringMin1.of_json in
@@ -18874,6 +18954,7 @@ module SpekeKeyProvider =
         (Option.map ~f:Zz__stringPatternArnAwsUsGovAcm.of_xml)
           (Xml.child xml_arg0 "certificateArn") in
       make ?url ?systemIds ?resourceId ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" Zz__stringPatternHttps.of_json in
       let systemIds =
@@ -18960,6 +19041,7 @@ module DashAdditionalManifest =
         (Option.map ~f:Zz__stringMin1.of_xml)
           (Xml.child xml_arg0 "manifestNameModifier") in
       make ?selectedOutputs ?manifestNameModifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectedOutputs =
         field_map json "SelectedOutputs" Zz__listOf__stringMin1.of_json in
@@ -19154,6 +19236,7 @@ module HlsAdditionalManifest =
         (Option.map ~f:Zz__stringMin1.of_xml)
           (Xml.child xml_arg0 "manifestNameModifier") in
       make ?selectedOutputs ?manifestNameModifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectedOutputs =
         field_map json "SelectedOutputs" Zz__listOf__stringMin1.of_json in
@@ -19216,6 +19299,7 @@ module HlsCaptionLanguageMapping =
           (Xml.child xml_arg0 "captionChannel") in
       make ?languageDescription ?languageCode ?customLanguageCode
         ?captionChannel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageDescription =
         field_map json "LanguageDescription" Zz__string.of_json in
@@ -19258,6 +19342,7 @@ module MsSmoothAdditionalManifest =
         (Option.map ~f:Zz__stringMin1.of_xml)
           (Xml.child xml_arg0 "manifestNameModifier") in
       make ?selectedOutputs ?manifestNameModifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectedOutputs =
         field_map json "SelectedOutputs" Zz__listOf__stringMin1.of_json in
@@ -19379,6 +19464,7 @@ module CmfcSettings =
       make ?timedMetadata ?scte35Source ?scte35Esam ?klvMetadata
         ?iFrameOnlyManifest ?descriptiveVideoServiceFlag ?audioTrackType
         ?audioRenditionSets ?audioGroupId ?audioDuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timedMetadata =
         field_map json "TimedMetadata" CmfcTimedMetadata.of_json in
@@ -19474,6 +19560,7 @@ module F4vSettings =
         (Option.map ~f:F4vMoovPlacement.of_xml)
           (Xml.child xml_arg0 "moovPlacement") in
       make ?moovPlacement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let moovPlacement =
         field_map json "MoovPlacement" F4vMoovPlacement.of_json in
@@ -19911,6 +19998,7 @@ module M2tsSettings =
         ?ebpAudioInterval ?dvbTeletextPid ?dvbTdtSettings ?dvbSubPids
         ?dvbSdtSettings ?dvbNitSettings ?dataPTSControl ?bufferModel ?bitrate
         ?audioPids ?audioFramesPerPes ?audioDuration ?audioBufferModel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoPid =
         field_map json "VideoPid" Zz__integerMin32Max8182.of_json in
@@ -20198,6 +20286,7 @@ module M3u8Settings =
         ?pmtInterval ?pcrPid ?pcrControl ?patInterval ?nielsenId3
         ?maxPcrInterval ?dataPTSControl ?audioPids ?audioFramesPerPes
         ?audioDuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoPid =
         field_map json "VideoPid" Zz__integerMin32Max8182.of_json in
@@ -20299,6 +20388,7 @@ module MovSettings =
         (Option.map ~f:MovClapAtom.of_xml) (Xml.child xml_arg0 "clapAtom") in
       make ?reference ?paddingControl ?mpeg2FourCCControl ?cslgAtom ?clapAtom
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reference = field_map json "Reference" MovReference.of_json in
       let paddingControl =
@@ -20383,6 +20473,7 @@ module Mp4Settings =
           (Xml.child xml_arg0 "audioDuration") in
       make ?mp4MajorBrand ?moovPlacement ?freeSpaceBox ?cttsVersion ?cslgAtom
         ?audioDuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mp4MajorBrand = field_map json "Mp4MajorBrand" Zz__string.of_json in
       let moovPlacement =
@@ -20483,6 +20574,7 @@ module MpdSettings =
           (Xml.child xml_arg0 "accessibilityCaptionHints") in
       make ?timedMetadata ?scte35Source ?scte35Esam ?klvMetadata
         ?captionContainerType ?audioDuration ?accessibilityCaptionHints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timedMetadata =
         field_map json "TimedMetadata" MpdTimedMetadata.of_json in
@@ -20538,6 +20630,7 @@ module MxfSettings =
         (Option.map ~f:MxfAfdSignaling.of_xml)
           (Xml.child xml_arg0 "afdSignaling") in
       make ?xavcProfileSettings ?profile ?afdSignaling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xavcProfileSettings =
         field_map json "XavcProfileSettings" MxfXavcProfileSettings.of_json in
@@ -20630,6 +20723,7 @@ module HlsSettings =
       make ?segmentModifier ?iFrameOnlyManifest ?descriptiveVideoServiceFlag
         ?audioTrackType ?audioRenditionSets ?audioOnlyContainer ?audioGroupId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let segmentModifier =
         field_map json "SegmentModifier" Zz__string.of_json in
@@ -20795,6 +20889,7 @@ module Rectangle =
         (Option.map ~f:Zz__integerMin2Max2147483647.of_xml)
           (Xml.child xml_arg0 "height") in
       make ?y ?x ?width ?height ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let y = field_map json "Y" Zz__integerMin0Max2147483647.of_json in
       let x = field_map json "X" Zz__integerMin0Max2147483647.of_json in
@@ -20981,6 +21076,7 @@ module VideoCodecSettings =
       make ?xavcSettings ?vp9Settings ?vp8Settings ?vc3Settings
         ?proresSettings ?mpeg2Settings ?h265Settings ?h264Settings
         ?frameCaptureSettings ?codec ?avcIntraSettings ?av1Settings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xavcSettings = field_map json "XavcSettings" XavcSettings.of_json in
       let vp9Settings = field_map json "Vp9Settings" Vp9Settings.of_json in
@@ -21093,6 +21189,7 @@ module VideoPreprocessor =
           (Xml.child xml_arg0 "colorCorrector") in
       make ?timecodeBurnin ?partnerWatermarking ?noiseReducer ?imageInserter
         ?hdr10Plus ?dolbyVision ?deinterlacer ?colorCorrector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timecodeBurnin =
         field_map json "TimecodeBurnin" TimecodeBurnin.of_json in
@@ -21285,6 +21382,7 @@ module AudioDescription =
         ?customLanguageCode ?codecSettings ?audioTypeControl ?audioType
         ?audioSourceName ?audioNormalizationSettings
         ?audioChannelTaggingSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamName =
         field_map json "StreamName" Zz__stringPatternWS.of_json in
@@ -21382,6 +21480,7 @@ module CaptionDescription =
           (Xml.child xml_arg0 "captionSelectorName") in
       make ?languageDescription ?languageCode ?destinationSettings
         ?customLanguageCode ?captionSelectorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageDescription =
         field_map json "LanguageDescription" Zz__string.of_json in
@@ -21513,6 +21612,7 @@ module HlsRenditionGroupSettings =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "renditionGroupId") in
       make ?renditionName ?renditionLanguageCode ?renditionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let renditionName = field_map json "RenditionName" Zz__string.of_json in
       let renditionLanguageCode =
@@ -21685,6 +21785,7 @@ module CaptionSourceSettings =
         ?teletextSourceSettings ?sourceType ?fileSourceSettings
         ?embeddedSourceSettings ?dvbSubSourceSettings
         ?ancillarySourceSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webvttHlsSourceSettings =
         field_map json "WebvttHlsSourceSettings"
@@ -21879,6 +21980,7 @@ module CmafEncryptionSettings =
       make ?type_ ?staticKeyProvider ?spekeKeyProvider
         ?initializationVectorInManifest ?encryptionMethod
         ?constantInitializationVector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" CmafKeyProviderType.of_json in
       let staticKeyProvider =
@@ -22005,6 +22107,7 @@ module CmafImageBasedTrickPlaySettings =
           (Xml.child xml_arg0 "intervalCadence") in
       make ?tileWidth ?tileHeight ?thumbnailWidth ?thumbnailInterval
         ?thumbnailHeight ?intervalCadence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tileWidth =
         field_map json "TileWidth" Zz__integerMin1Max512.of_json in
@@ -22335,6 +22438,7 @@ module DestinationSettings =
         (Option.map ~f:S3DestinationSettings.of_xml)
           (Xml.child xml_arg0 "s3Settings") in
       make ?s3Settings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Settings =
         field_map json "S3Settings" S3DestinationSettings.of_json in
@@ -22413,6 +22517,7 @@ module DashIsoEncryptionSettings =
         (Option.map ~f:DashIsoPlaybackDeviceCompatibility.of_xml)
           (Xml.child xml_arg0 "playbackDeviceCompatibility") in
       make ?spekeKeyProvider ?playbackDeviceCompatibility ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spekeKeyProvider =
         field_map json "SpekeKeyProvider" SpekeKeyProvider.of_json in
@@ -22587,6 +22692,7 @@ module DashIsoImageBasedTrickPlaySettings =
           (Xml.child xml_arg0 "intervalCadence") in
       make ?tileWidth ?tileHeight ?thumbnailWidth ?thumbnailInterval
         ?thumbnailHeight ?intervalCadence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tileWidth =
         field_map json "TileWidth" Zz__integerMin1Max512.of_json in
@@ -23020,6 +23126,7 @@ module HlsEncryptionSettings =
       make ?type_ ?staticKeyProvider ?spekeKeyProvider ?offlineEncrypted
         ?initializationVectorInManifest ?encryptionMethod
         ?constantInitializationVector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" HlsKeyProviderType.of_json in
       let staticKeyProvider =
@@ -23148,6 +23255,7 @@ module HlsImageBasedTrickPlaySettings =
           (Xml.child xml_arg0 "intervalCadence") in
       make ?tileWidth ?tileHeight ?thumbnailWidth ?thumbnailInterval
         ?thumbnailHeight ?intervalCadence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tileWidth =
         field_map json "TileWidth" Zz__integerMin1Max512.of_json in
@@ -23546,6 +23654,7 @@ module MsSmoothEncryptionSettings =
         (Option.map ~f:SpekeKeyProvider.of_xml)
           (Xml.child xml_arg0 "spekeKeyProvider") in
       make ?spekeKeyProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spekeKeyProvider =
         field_map json "SpekeKeyProvider" SpekeKeyProvider.of_json in
@@ -23717,6 +23826,7 @@ module ContainerSettings =
           (Xml.child xml_arg0 "cmfcSettings") in
       make ?mxfSettings ?mpdSettings ?mp4Settings ?movSettings ?m3u8Settings
         ?m2tsSettings ?f4vSettings ?container ?cmfcSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mxfSettings = field_map json "MxfSettings" MxfSettings.of_json in
       let mpdSettings = field_map json "MpdSettings" MpdSettings.of_json in
@@ -23746,6 +23856,7 @@ module OutputSettings =
       let hlsSettings =
         (Option.map ~f:HlsSettings.of_xml) (Xml.child xml_arg0 "hlsSettings") in
       make ?hlsSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hlsSettings = field_map json "HlsSettings" HlsSettings.of_json in
       make ?hlsSettings ()
@@ -23907,6 +24018,7 @@ module VideoDescription =
         ?scalingBehavior ?respondToAfd ?position ?height ?fixedAfd
         ?dropFrameTimecode ?crop ?colorMetadata ?codecSettings ?antiAlias
         ?afdSignaling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let width = field_map json "Width" Zz__integerMin32Max8192.of_json in
       let videoPreprocessors =
@@ -24315,6 +24427,7 @@ module InputClipping =
         (Option.map ~f:Zz__stringPattern010920405090509092.of_xml)
           (Xml.child xml_arg0 "endTimecode") in
       make ?startTimecode ?endTimecode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTimecode =
         field_map json "StartTimecode"
@@ -24473,6 +24586,7 @@ module AudioSelector =
       make ?tracks ?selectorType ?remixSettings ?programSelection ?pids
         ?offset ?languageCode ?hlsRenditionGroupSettings
         ?externalAudioFileInput ?defaultSelection ?customLanguageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tracks =
         field_map json "Tracks" Zz__listOf__integerMin1Max2147483647.of_json in
@@ -24524,6 +24638,7 @@ module AudioSelectorGroup =
         (Option.map ~f:Zz__listOf__stringMin1.of_xml)
           (Xml.child xml_arg0 "audioSelectorNames") in
       make ?audioSelectorNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let audioSelectorNames =
         field_map json "AudioSelectorNames" Zz__listOf__stringMin1.of_json in
@@ -24569,6 +24684,7 @@ module CaptionSelector =
         (Option.map ~f:Zz__stringMin3Max3PatternAZaZ3.of_xml)
           (Xml.child xml_arg0 "customLanguageCode") in
       make ?sourceSettings ?languageCode ?customLanguageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceSettings =
         field_map json "SourceSettings" CaptionSourceSettings.of_json in
@@ -24619,6 +24735,7 @@ module AutomatedAbrSettings =
         (Option.map ~f:Zz__integerMin100000Max100000000.of_xml)
           (Xml.child xml_arg0 "maxAbrBitrate") in
       make ?minAbrBitrate ?maxRenditions ?maxAbrBitrate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minAbrBitrate =
         field_map json "MinAbrBitrate"
@@ -24907,6 +25024,7 @@ module CmafGroupSettings =
         ?imageBasedTrickPlay ?fragmentLength ?encryption ?destinationSettings
         ?destination ?codecSpecification ?clientCache ?baseUrl
         ?additionalManifests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeSegmentTimelineInRepresentation =
         field_map json "WriteSegmentTimelineInRepresentation"
@@ -25183,6 +25301,7 @@ module DashIsoGroupSettings =
         ?imageBasedTrickPlaySettings ?imageBasedTrickPlay ?hbbtvCompliance
         ?fragmentLength ?encryption ?destinationSettings ?destination
         ?baseUrl ?audioChannelConfigSchemeIdUri ?additionalManifests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeSegmentTimelineInRepresentation =
         field_map json "WriteSegmentTimelineInRepresentation"
@@ -25263,6 +25382,7 @@ module FileGroupSettings =
         (Option.map ~f:Zz__stringPatternS3.of_xml)
           (Xml.child xml_arg0 "destination") in
       make ?destinationSettings ?destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationSettings =
         field_map json "DestinationSettings" DestinationSettings.of_json in
@@ -25633,6 +25753,7 @@ module HlsGroupSettings =
         ?codecSpecification ?clientCache ?captionSegmentLengthControl
         ?captionLanguageSetting ?captionLanguageMappings ?baseUrl
         ?audioOnlyHeader ?additionalManifests ?adMarkers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestampDeltaMilliseconds =
         field_map json "TimestampDeltaMilliseconds"
@@ -25819,6 +25940,7 @@ module MsSmoothGroupSettings =
       make ?manifestEncoding ?fragmentLengthControl ?fragmentLength
         ?encryption ?destinationSettings ?destination ?audioDeduplication
         ?additionalManifests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let manifestEncoding =
         field_map json "ManifestEncoding" MsSmoothManifestEncoding.of_json in
@@ -25968,6 +26090,7 @@ module Output =
           (Xml.child xml_arg0 "audioDescriptions") in
       make ?videoDescription ?preset ?outputSettings ?nameModifier ?extension
         ?containerSettings ?captionDescriptions ?audioDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoDescription =
         field_map json "VideoDescription" VideoDescription.of_json in
@@ -26009,6 +26132,7 @@ module VideoDetail =
       let heightInPx =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "heightInPx") in
       make ?widthInPx ?heightInPx ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let widthInPx = field_map json "WidthInPx" Zz__integer.of_json in
       let heightInPx = field_map json "HeightInPx" Zz__integer.of_json in
@@ -26121,6 +26245,7 @@ module Id3Insertion =
         (Option.map ~f:Zz__stringPatternAZaZ0902.of_xml)
           (Xml.child xml_arg0 "id3") in
       make ?timecode ?id3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timecode =
         field_map json "Timecode" Zz__stringPattern010920405090509092.of_json in
@@ -26215,6 +26340,7 @@ module InputDecryptionSettings =
           (Xml.child xml_arg0 "decryptionMode") in
       make ?kmsKeyRegion ?initializationVector ?encryptedDecryptionKey
         ?decryptionMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyRegion =
         field_map json "KmsKeyRegion"
@@ -26461,6 +26587,7 @@ module VideoSelector =
       make ?sampleRange ?rotate ?programNumber ?pid ?hdr10Metadata
         ?embeddedTimecodeOverride ?colorSpaceUsage ?colorSpace ?alphaBehavior
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleRange = field_map json "SampleRange" InputSampleRange.of_json in
       let rotate = field_map json "Rotate" InputRotate.of_json in
@@ -26730,6 +26857,7 @@ module AutomatedEncodingSettings =
         (Option.map ~f:AutomatedAbrSettings.of_xml)
           (Xml.child xml_arg0 "abrSettings") in
       make ?abrSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let abrSettings =
         field_map json "AbrSettings" AutomatedAbrSettings.of_json in
@@ -26809,6 +26937,7 @@ module OutputGroupSettings =
           (Xml.child xml_arg0 "cmafGroupSettings") in
       make ?type_ ?msSmoothGroupSettings ?hlsGroupSettings ?fileGroupSettings
         ?dashIsoGroupSettings ?cmafGroupSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" OutputGroupType.of_json in
       let msSmoothGroupSettings =
@@ -26873,6 +27002,7 @@ module OutputDetail =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "durationInMs") in
       make ?videoDetails ?durationInMs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoDetails = field_map json "VideoDetails" VideoDetail.of_json in
       let durationInMs = field_map json "DurationInMs" Zz__integer.of_json in
@@ -26934,6 +27064,7 @@ module CaptionDescriptionPreset =
           (Xml.child xml_arg0 "customLanguageCode") in
       make ?languageDescription ?languageCode ?destinationSettings
         ?customLanguageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageDescription =
         field_map json "LanguageDescription" Zz__string.of_json in
@@ -26991,6 +27122,7 @@ module EsamManifestConfirmConditionNotification =
            ~f:Zz__stringPatternSNManifestConfirmConditionNotificationNS.of_xml)
           (Xml.child xml_arg0 "mccXml") in
       make ?mccXml ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mccXml =
         field_map json "MccXml"
@@ -27019,6 +27151,7 @@ module EsamSignalProcessingNotification =
            ~f:Zz__stringPatternSNSignalProcessingNotificationNS.of_xml)
           (Xml.child xml_arg0 "sccXml") in
       make ?sccXml ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sccXml =
         field_map json "SccXml"
@@ -27223,6 +27356,7 @@ module MotionImageInsertionFramerate =
         (Option.map ~f:Zz__integerMin1Max17895697.of_xml)
           (Xml.child xml_arg0 "framerateDenominator") in
       make ?framerateNumerator ?framerateDenominator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let framerateNumerator =
         field_map json "FramerateNumerator"
@@ -27281,6 +27415,7 @@ module MotionImageInsertionOffset =
         (Option.map ~f:Zz__integerMin0Max2147483647.of_xml)
           (Xml.child xml_arg0 "imageX") in
       make ?imageY ?imageX ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageY =
         field_map json "ImageY" Zz__integerMin0Max2147483647.of_json in
@@ -27778,6 +27913,7 @@ module Input =
         ?dolbyVisionMetadataXml ?denoiseFilter ?decryptionSettings
         ?deblockFilter ?crop ?captionSelectors ?audioSelectors
         ?audioSelectorGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoSelector =
         field_map json "VideoSelector" VideoSelector.of_json in
@@ -27888,6 +28024,7 @@ module OutputGroup =
           (Xml.child xml_arg0 "automatedEncodingSettings") in
       make ?outputs ?outputGroupSettings ?name ?customName
         ?automatedEncodingSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputs = field_map json "Outputs" Zz__listOfOutput.of_json in
       let outputGroupSettings =
@@ -28154,6 +28291,7 @@ module InputTemplate =
         ?imageInserter ?filterStrength ?filterEnable ?dolbyVisionMetadataXml
         ?denoiseFilter ?deblockFilter ?crop ?captionSelectors ?audioSelectors
         ?audioSelectorGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoSelector =
         field_map json "VideoSelector" VideoSelector.of_json in
@@ -28365,6 +28503,7 @@ module AvailBlanking =
            ~f:Zz__stringMin14PatternS3BmpBMPPngPNGHttpsBmpBMPPngPNG.of_xml)
           (Xml.child xml_arg0 "availBlankingImage") in
       make ?availBlankingImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availBlankingImage =
         field_map json "AvailBlankingImage"
@@ -28420,6 +28559,7 @@ module EsamSettings =
           (Xml.child xml_arg0 "manifestConfirmConditionNotification") in
       make ?signalProcessingNotification ?responseSignalPreroll
         ?manifestConfirmConditionNotification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signalProcessingNotification =
         field_map json "SignalProcessingNotification"
@@ -28461,6 +28601,7 @@ module ExtendedDataServices =
         (Option.map ~f:CopyProtectionAction.of_xml)
           (Xml.child xml_arg0 "copyProtectionAction") in
       make ?vchipAction ?copyProtectionAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vchipAction = field_map json "VchipAction" VchipAction.of_json in
       let copyProtectionAction =
@@ -28616,6 +28757,7 @@ module KantarWatermarkSettings =
       make ?metadata8 ?metadata7 ?metadata6 ?metadata5 ?metadata4 ?metadata3
         ?logDestination ?kantarServerUrl ?kantarLicenseId ?fileOffset
         ?credentialsSecretName ?contentReference ?channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata8 = field_map json "Metadata8" Zz__stringMin1Max50.of_json in
       let metadata7 = field_map json "Metadata7" Zz__stringMin1Max50.of_json in
@@ -28718,6 +28860,7 @@ module MotionImageInserter =
         (Option.map ~f:MotionImageInsertionFramerate.of_xml)
           (Xml.child xml_arg0 "framerate") in
       make ?startTime ?playback ?offset ?insertionMode ?input ?framerate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime =
         field_map json "StartTime"
@@ -28762,6 +28905,7 @@ module NielsenConfiguration =
         (Option.map ~f:Zz__integerMin0Max0.of_xml)
           (Xml.child xml_arg0 "breakoutCode") in
       make ?distributorId ?breakoutCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributorId = field_map json "DistributorId" Zz__string.of_json in
       let breakoutCode =
@@ -28897,6 +29041,7 @@ module NielsenNonLinearWatermarkSettings =
       make ?uniqueTicPerAudioTrack ?ticServerUrl ?sourceWatermarkStatus
         ?sourceId ?metadataDestination ?episodeId ?cbetSourceId ?assetName
         ?assetId ?adiFilename ?activeWatermarkProcess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uniqueTicPerAudioTrack =
         field_map json "UniqueTicPerAudioTrack"
@@ -28973,6 +29118,7 @@ module TimecodeConfig =
         (Option.map ~f:Zz__stringPattern010920405090509092.of_xml)
           (Xml.child xml_arg0 "anchor") in
       make ?timestampOffset ?start ?source ?anchor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestampOffset =
         field_map json "TimestampOffset"
@@ -29004,6 +29150,7 @@ module TimedMetadataInsertion =
         (Option.map ~f:Zz__listOfId3Insertion.of_xml)
           (Xml.child xml_arg0 "id3Insertions") in
       make ?id3Insertions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id3Insertions =
         field_map json "Id3Insertions" Zz__listOfId3Insertion.of_json in
@@ -29111,6 +29258,7 @@ module HopDestination =
         (Option.map ~f:Zz__integerMinNegative50Max50.of_xml)
           (Xml.child xml_arg0 "priority") in
       make ?waitMinutes ?queue ?priority ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitMinutes = field_map json "WaitMinutes" Zz__integer.of_json in
       let queue = field_map json "Queue" Zz__string.of_json in
@@ -29137,6 +29285,7 @@ module OutputGroupDetail =
         (Option.map ~f:Zz__listOfOutputDetail.of_xml)
           (Xml.child xml_arg0 "outputDetails") in
       make ?outputDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDetails =
         field_map json "OutputDetails" Zz__listOfOutputDetail.of_json in
@@ -29176,6 +29325,7 @@ module QueueTransition =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "destinationQueue") in
       make ?timestamp ?sourceQueue ?destinationQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" Zz__timestampUnix.of_json in
       let sourceQueue = field_map json "SourceQueue" Zz__string.of_json in
@@ -29327,6 +29477,7 @@ module ReservationPlan =
         (Option.map ~f:Commitment.of_xml) (Xml.child xml_arg0 "commitment") in
       make ?status ?reservedSlots ?renewalType ?purchasedAt ?expiresAt
         ?commitment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ReservationPlanStatus.of_json in
       let reservedSlots = field_map json "ReservedSlots" Zz__integer.of_json in
@@ -29419,6 +29570,7 @@ module PresetSettings =
           (Xml.child xml_arg0 "audioDescriptions") in
       make ?videoDescription ?containerSettings ?captionDescriptions
         ?audioDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoDescription =
         field_map json "VideoDescription" VideoDescription.of_json in
@@ -29451,6 +29603,7 @@ module AccelerationSettings =
         AccelerationMode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mode") in
       make ~mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mode = field_map_exn json "Mode" AccelerationMode.of_json in
       make ~mode ()
@@ -29544,6 +29697,7 @@ module JobMessages =
       let info =
         (Option.map ~f:Zz__listOf__string.of_xml) (Xml.child xml_arg0 "info") in
       make ?warning ?info ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warning = field_map json "Warning" Zz__listOf__string.of_json in
       let info = field_map json "Info" Zz__listOf__string.of_json in
@@ -29713,6 +29867,7 @@ module JobSettings =
         ?nielsenNonLinearWatermark ?nielsenConfiguration ?motionImageInserter
         ?kantarWatermark ?inputs ?extendedDataServices ?esam ?availBlanking
         ?adAvailOffset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timedMetadataInsertion =
         field_map json "TimedMetadataInsertion"
@@ -29907,6 +30062,7 @@ module Timing =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "finishTime") in
       make ?submitTime ?startTime ?finishTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submitTime = field_map json "SubmitTime" Zz__timestampUnix.of_json in
       let startTime = field_map json "StartTime" Zz__timestampUnix.of_json in
@@ -30153,6 +30309,7 @@ module JobTemplateSettings =
         ?nielsenNonLinearWatermark ?nielsenConfiguration ?motionImageInserter
         ?kantarWatermark ?inputs ?extendedDataServices ?esam ?availBlanking
         ?adAvailOffset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timedMetadataInsertion =
         field_map json "TimedMetadataInsertion"
@@ -30320,6 +30477,7 @@ module Queue =
       make ?type_ ?submittedJobsCount ?status ?reservationPlan
         ?progressingJobsCount ?pricingPlan ~name ?lastUpdated ?description
         ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" Type.of_json in
       let submittedJobsCount =
@@ -30418,6 +30576,7 @@ module Preset =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?type_ ~settings ~name ?lastUpdated ?description ?createdAt
         ?category ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" Type.of_json in
       let settings = field_map_exn json "Settings" PresetSettings.of_json in
@@ -30668,6 +30827,7 @@ module Job =
         ?jobPercentComplete ?id ?hopDestinations ?errorMessage ?errorCode
         ?currentPhase ?createdAt ?billingTagsSource ?arn ?accelerationStatus
         ?accelerationSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userMetadata =
         field_map json "UserMetadata" Zz__mapOf__string.of_json in
@@ -30843,6 +31003,7 @@ module JobTemplate =
       make ?type_ ?statusUpdateInterval ~settings ?queue ?priority ~name
         ?lastUpdated ?hopDestinations ?description ?createdAt ?category ?arn
         ?accelerationSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" Type.of_json in
       let statusUpdateInterval =
@@ -30880,6 +31041,7 @@ module Endpoint =
     let of_xml xml_arg0 =
       let url = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "url") in
       make ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" Zz__string.of_json in make ?url ()
     let to_json v = composed_to_json to_value v
@@ -30897,6 +31059,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -30916,6 +31079,7 @@ module ConflictException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -30935,6 +31099,7 @@ module ForbiddenException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -30954,6 +31119,7 @@ module InternalServerErrorException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -30973,6 +31139,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -30991,6 +31158,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -31032,6 +31200,7 @@ module ReservationPlanSettings =
         Commitment.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "commitment") in
       make ~reservedSlots ~renewalType ~commitment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedSlots =
         field_map_exn json "ReservedSlots" Zz__integer.of_json in
@@ -31068,6 +31237,7 @@ module Policy =
       let httpInputs =
         (Option.map ~f:InputPolicy.of_xml) (Xml.child xml_arg0 "httpInputs") in
       make ?s3Inputs ?httpsInputs ?httpInputs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Inputs = field_map json "S3Inputs" InputPolicy.of_json in
       let httpsInputs = field_map json "HttpsInputs" InputPolicy.of_json in
@@ -31095,6 +31265,7 @@ module ResourceTags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let arn = field_map json "Arn" Zz__string.of_json in make ?tags ?arn ()
@@ -31498,6 +31669,7 @@ module UpdateQueueResponse =
     let of_xml xml_arg0 =
       let queue = (Option.map ~f:Queue.of_xml) (Xml.child xml_arg0 "queue") in
       make ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queue = field_map json "Queue" Queue.of_json in make ?queue ()
     let to_json v = composed_to_json to_value v
@@ -31543,6 +31715,7 @@ module UpdateQueueRequest =
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       make ?status ?reservationPlanSettings ~name ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" QueueStatus.of_json in
       let reservationPlanSettings =
@@ -31643,6 +31816,7 @@ module UpdatePresetResponse =
       let preset =
         (Option.map ~f:Preset.of_xml) (Xml.child xml_arg0 "preset") in
       make ?preset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preset = field_map json "Preset" Preset.of_json in make ?preset ()
     let to_json v = composed_to_json to_value v
@@ -31682,6 +31856,7 @@ module UpdatePresetRequest =
       let category =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "category") in
       make ?settings ~name ?description ?category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let settings = field_map json "Settings" PresetSettings.of_json in
       let name = field_map_exn json "Name" Zz__string.of_json in
@@ -31780,6 +31955,7 @@ module UpdateJobTemplateResponse =
       let jobTemplate =
         (Option.map ~f:JobTemplate.of_xml) (Xml.child xml_arg0 "jobTemplate") in
       make ?jobTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTemplate = field_map json "JobTemplate" JobTemplate.of_json in
       make ?jobTemplate ()
@@ -31879,6 +32055,7 @@ module UpdateJobTemplateRequest =
           (Xml.child xml_arg0 "accelerationSettings") in
       make ?statusUpdateInterval ?settings ?queue ?priority ~name
         ?hopDestinations ?description ?category ?accelerationSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusUpdateInterval =
         field_map json "StatusUpdateInterval" StatusUpdateInterval.of_json in
@@ -31979,6 +32156,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -32007,6 +32185,7 @@ module UntagResourceRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tagKeys ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map json "TagKeys" Zz__listOf__string.of_json in
       let arn = field_map_exn json "Arn" Zz__string.of_json in
@@ -32096,6 +32275,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -32124,6 +32304,7 @@ module TagResourceRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~tags ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
       let arn = field_map_exn json "Arn" Zz__string.of_json in
@@ -32221,6 +32402,7 @@ module PutPolicyResponse =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -32242,6 +32424,7 @@ module PutPolicyRequest =
       let policy =
         Policy.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" Policy.of_json in
       make ~policy ()
@@ -32340,6 +32523,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:ResourceTags.of_xml)
           (Xml.child xml_arg0 "resourceTags") in
       make ?resourceTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
       make ?resourceTags ()
@@ -32361,6 +32545,7 @@ module ListTagsForResourceRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Zz__string.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -32458,6 +32643,7 @@ module ListQueuesResponse =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?queues ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queues = field_map json "Queues" Zz__listOfQueue.of_json in
       let nextToken = field_map json "NextToken" Zz__string.of_json in
@@ -32503,6 +32689,7 @@ module ListQueuesRequest =
       let listBy =
         (Option.map ~f:QueueListBy.of_xml) (Xml.child xml_arg0 "listBy") in
       make ?order ?nextToken ?maxResults ?listBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let order = field_map json "Order" Order.of_json in
       let nextToken = field_map json "NextToken" Zz__string.of_json in
@@ -32607,6 +32794,7 @@ module ListPresetsResponse =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?presets ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let presets = field_map json "Presets" Zz__listOfPreset.of_json in
       let nextToken = field_map json "NextToken" Zz__string.of_json in
@@ -32660,6 +32848,7 @@ module ListPresetsRequest =
       let category =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "category") in
       make ?order ?nextToken ?maxResults ?listBy ?category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let order = field_map json "Order" Order.of_json in
       let nextToken = field_map json "NextToken" Zz__string.of_json in
@@ -32764,6 +32953,7 @@ module ListJobsResponse =
       let jobs =
         (Option.map ~f:Zz__listOfJob.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?nextToken ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let jobs = field_map json "Jobs" Zz__listOfJob.of_json in
@@ -32817,6 +33007,7 @@ module ListJobsRequest =
         (Option.map ~f:Zz__integerMin1Max20.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?status ?queue ?order ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" JobStatus.of_json in
       let queue = field_map json "Queue" Zz__string.of_json in
@@ -32926,6 +33117,7 @@ module ListJobTemplatesResponse =
         (Option.map ~f:Zz__listOfJobTemplate.of_xml)
           (Xml.child xml_arg0 "jobTemplates") in
       make ?nextToken ?jobTemplates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let jobTemplates =
@@ -32981,6 +33173,7 @@ module ListJobTemplatesRequest =
       let category =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "category") in
       make ?order ?nextToken ?maxResults ?listBy ?category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let order = field_map json "Order" Order.of_json in
       let nextToken = field_map json "NextToken" Zz__string.of_json in
@@ -33080,6 +33273,7 @@ module GetQueueResponse =
     let of_xml xml_arg0 =
       let queue = (Option.map ~f:Queue.of_xml) (Xml.child xml_arg0 "queue") in
       make ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queue = field_map json "Queue" Queue.of_json in make ?queue ()
     let to_json v = composed_to_json to_value v
@@ -33099,6 +33293,7 @@ module GetQueueRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -33194,6 +33389,7 @@ module GetPresetResponse =
       let preset =
         (Option.map ~f:Preset.of_xml) (Xml.child xml_arg0 "preset") in
       make ?preset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preset = field_map json "Preset" Preset.of_json in make ?preset ()
     let to_json v = composed_to_json to_value v
@@ -33212,6 +33408,7 @@ module GetPresetRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -33307,6 +33504,7 @@ module GetPolicyResponse =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -33319,6 +33517,7 @@ module GetPolicyRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieve the JSON for your policy."]
@@ -33412,6 +33611,7 @@ module GetJobTemplateResponse =
       let jobTemplate =
         (Option.map ~f:JobTemplate.of_xml) (Xml.child xml_arg0 "jobTemplate") in
       make ?jobTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTemplate = field_map json "JobTemplate" JobTemplate.of_json in
       make ?jobTemplate ()
@@ -33431,6 +33631,7 @@ module GetJobTemplateRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -33524,6 +33725,7 @@ module GetJobResponse =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -33542,6 +33744,7 @@ module GetJobRequest =
       let id =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -33560,6 +33763,7 @@ module ExceptionBody =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -33647,6 +33851,7 @@ module DisassociateCertificateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -33667,6 +33872,7 @@ module DisassociateCertificateRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Zz__string.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -33769,6 +33975,7 @@ module DescribeEndpointsResponse =
         (Option.map ~f:Zz__listOfEndpoint.of_xml)
           (Xml.child xml_arg0 "endpoints") in
       make ?nextToken ?endpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let endpoints = field_map json "Endpoints" Zz__listOfEndpoint.of_json in
@@ -33807,6 +34014,7 @@ module DescribeEndpointsRequest =
       let maxResults =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?mode ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let mode = field_map json "Mode" DescribeEndpointsMode.of_json in
@@ -33896,6 +34104,7 @@ module DeleteQueueResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently delete a queue you have created."]
@@ -33914,6 +34123,7 @@ module DeleteQueueRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -34001,6 +34211,7 @@ module DeletePresetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently delete a preset you have created."]
@@ -34018,6 +34229,7 @@ module DeletePresetRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -34105,6 +34317,7 @@ module DeletePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently delete a policy that you created."]
@@ -34116,6 +34329,7 @@ module DeletePolicyRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently delete a policy that you created."]
@@ -34201,6 +34415,7 @@ module DeleteJobTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently delete a job template you have created."]
@@ -34219,6 +34434,7 @@ module DeleteJobTemplateRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -34312,6 +34528,7 @@ module CreateQueueResponse =
     let of_xml xml_arg0 =
       let queue = (Option.map ~f:Queue.of_xml) (Xml.child xml_arg0 "queue") in
       make ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queue = field_map json "Queue" Queue.of_json in make ?queue ()
     let to_json v = composed_to_json to_value v
@@ -34381,6 +34598,7 @@ module CreateQueueRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       make ?tags ?status ?reservationPlanSettings ?pricingPlan ~name
         ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let status = field_map json "Status" QueueStatus.of_json in
@@ -34485,6 +34703,7 @@ module CreatePresetResponse =
       let preset =
         (Option.map ~f:Preset.of_xml) (Xml.child xml_arg0 "preset") in
       make ?preset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preset = field_map json "Preset" Preset.of_json in make ?preset ()
     let to_json v = composed_to_json to_value v
@@ -34533,6 +34752,7 @@ module CreatePresetRequest =
       let category =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "category") in
       make ?tags ~settings ~name ?description ?category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let settings = field_map_exn json "Settings" PresetSettings.of_json in
@@ -34633,6 +34853,7 @@ module CreateJobTemplateResponse =
       let jobTemplate =
         (Option.map ~f:JobTemplate.of_xml) (Xml.child xml_arg0 "jobTemplate") in
       make ?jobTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTemplate = field_map json "JobTemplate" JobTemplate.of_json in
       make ?jobTemplate ()
@@ -34742,6 +34963,7 @@ module CreateJobTemplateRequest =
           (Xml.child xml_arg0 "accelerationSettings") in
       make ?tags ?statusUpdateInterval ~settings ?queue ?priority ~name
         ?hopDestinations ?description ?category ?accelerationSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let statusUpdateInterval =
@@ -34851,6 +35073,7 @@ module CreateJobResponse =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -34993,6 +35216,7 @@ module CreateJobRequest =
       make ?userMetadata ?tags ?statusUpdateInterval ?simulateReservedQueue
         ~settings ~role ?queue ?priority ?jobTemplate ?hopDestinations
         ?clientRequestToken ?billingTagsSource ?accelerationSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userMetadata =
         field_map json "UserMetadata" Zz__mapOf__string.of_json in
@@ -35103,6 +35327,7 @@ module CancelJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -35121,6 +35346,7 @@ module CancelJobRequest =
       let id =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -35208,6 +35434,7 @@ module AssociateCertificateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -35228,6 +35455,7 @@ module AssociateCertificateRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Zz__string.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v

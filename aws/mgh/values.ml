@@ -369,6 +369,7 @@ module ResourceAttribute =
         ResourceAttributeType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" ResourceAttributeValue.of_json in
       let type_ = field_map_exn json "Type" ResourceAttributeType.of_json in
@@ -423,6 +424,7 @@ module ProgressUpdateStreamSummary =
         (Option.map ~f:ProgressUpdateStream.of_xml)
           (Xml.child xml_arg0 "ProgressUpdateStreamName") in
       make ?progressUpdateStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let progressUpdateStreamName =
         field_map json "ProgressUpdateStreamName"
@@ -499,6 +501,7 @@ module MigrationTaskSummary =
           (Xml.child xml_arg0 "ProgressUpdateStream") in
       make ?updateDateTime ?statusDetail ?progressPercent ?status
         ?migrationTaskName ?progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateDateTime =
         field_map json "UpdateDateTime" UpdateDateTime.of_json in
@@ -543,6 +546,7 @@ module DiscoveredResource =
         ConfigurationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationId") in
       make ?description ~configurationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" DiscoveredResourceDescription.of_json in
@@ -578,6 +582,7 @@ module CreatedArtifact =
         CreatedArtifactName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" CreatedArtifactDescription.of_json in
@@ -622,6 +627,7 @@ module ApplicationState =
         (Option.map ~f:ApplicationId.of_xml)
           (Xml.child xml_arg0 "ApplicationId") in
       make ?lastUpdatedTime ?applicationStatus ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTime =
         field_map json "LastUpdatedTime" UpdateDateTime.of_json in
@@ -697,6 +703,7 @@ module Task =
       let status =
         Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?progressPercent ?statusDetail ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let progressPercent =
         field_map json "ProgressPercent" ProgressPercent.of_json in
@@ -718,6 +725,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -737,6 +745,7 @@ module DryRunOperation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -756,6 +765,7 @@ module HomeRegionNotSetException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -775,6 +785,7 @@ module InternalServerError =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -794,6 +805,7 @@ module InvalidInputException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -813,6 +825,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -832,6 +845,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -865,6 +879,7 @@ module ThrottlingException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -885,6 +900,7 @@ module UnauthorizedOperation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -962,6 +978,7 @@ module PolicyErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1286,6 +1303,7 @@ module MigrationTask =
           (Xml.child xml_arg0 "ProgressUpdateStream") in
       make ?resourceAttributeList ?updateDateTime ?task ?migrationTaskName
         ?progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceAttributeList =
         field_map json "ResourceAttributeList"
@@ -1408,6 +1426,7 @@ module PutResourceAttributesResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1463,6 +1482,7 @@ module PutResourceAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~resourceAttributeList ~migrationTaskName
         ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let resourceAttributeList =
@@ -1585,6 +1605,7 @@ module NotifyMigrationTaskStateResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1655,6 +1676,7 @@ module NotifyMigrationTaskStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~nextUpdateSeconds ~updateDateTime ~task
         ~migrationTaskName ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let nextUpdateSeconds =
@@ -1788,6 +1810,7 @@ module NotifyApplicationStateResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1834,6 +1857,7 @@ module NotifyApplicationStateRequest =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationId") in
       make ?dryRun ?updateDateTime ~status ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let updateDateTime =
@@ -1947,6 +1971,7 @@ module ListProgressUpdateStreamsResult =
         (Option.map ~f:ProgressUpdateStreamSummaryList.of_xml)
           (Xml.child xml_arg0 "ProgressUpdateStreamSummaryList") in
       make ?nextToken ?progressUpdateStreamSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let progressUpdateStreamSummaryList =
@@ -1979,6 +2004,7 @@ module ListProgressUpdateStreamsRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -2105,6 +2131,7 @@ module ListMigrationTasksResult =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?migrationTaskSummaryList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationTaskSummaryList =
         field_map json "MigrationTaskSummaryList"
@@ -2146,6 +2173,7 @@ module ListMigrationTasksRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resourceName ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" ResourceName.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2264,6 +2292,7 @@ module ListDiscoveredResourcesResult =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?discoveredResourceList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let discoveredResourceList =
         field_map json "DiscoveredResourceList"
@@ -2322,6 +2351,7 @@ module ListDiscoveredResourcesRequest =
         ProgressUpdateStream.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" MaxResultsResources.of_json in
@@ -2444,6 +2474,7 @@ module ListCreatedArtifactsResult =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?createdArtifactList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdArtifactList =
         field_map json "CreatedArtifactList" CreatedArtifactList.of_json in
@@ -2501,6 +2532,7 @@ module ListCreatedArtifactsRequest =
         ProgressUpdateStream.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" MaxResultsCreatedArtifacts.of_json in
@@ -2614,6 +2646,7 @@ module ListApplicationStatesResult =
         (Option.map ~f:ApplicationStateList.of_xml)
           (Xml.child xml_arg0 "ApplicationStateList") in
       make ?nextToken ?applicationStateList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let applicationStateList =
@@ -2654,6 +2687,7 @@ module ListApplicationStatesRequest =
         (Option.map ~f:ApplicationIds.of_xml)
           (Xml.child xml_arg0 "ApplicationIds") in
       make ?maxResults ?nextToken ?applicationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -2770,6 +2804,7 @@ module ImportMigrationTaskResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2809,6 +2844,7 @@ module ImportMigrationTaskRequest =
         ProgressUpdateStream.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~migrationTaskName ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let migrationTaskName =
@@ -2927,6 +2963,7 @@ module DisassociateDiscoveredResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2982,6 +3019,7 @@ module DisassociateDiscoveredResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~configurationId ~migrationTaskName ~progressUpdateStream
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let configurationId =
@@ -3103,6 +3141,7 @@ module DisassociateCreatedArtifactResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3158,6 +3197,7 @@ module DisassociateCreatedArtifactRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~createdArtifactName ~migrationTaskName
         ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let createdArtifactName =
@@ -3273,6 +3313,7 @@ module DescribeMigrationTaskResult =
         (Option.map ~f:MigrationTask.of_xml)
           (Xml.child xml_arg0 "MigrationTask") in
       make ?migrationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationTask =
         field_map json "MigrationTask" MigrationTask.of_json in
@@ -3308,6 +3349,7 @@ module DescribeMigrationTaskRequest =
         ProgressUpdateStream.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ~migrationTaskName ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationTaskName =
         field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
@@ -3438,6 +3480,7 @@ module DescribeApplicationStateResult =
         (Option.map ~f:ApplicationStatus.of_xml)
           (Xml.child xml_arg0 "ApplicationStatus") in
       make ?lastUpdatedTime ?applicationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTime =
         field_map json "LastUpdatedTime" UpdateDateTime.of_json in
@@ -3464,6 +3507,7 @@ module DescribeApplicationStateRequest =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationId") in
       make ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationId =
         field_map_exn json "ApplicationId" ApplicationId.of_json in
@@ -3577,6 +3621,7 @@ module DeleteProgressUpdateStreamResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3609,6 +3654,7 @@ module DeleteProgressUpdateStreamRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ProgressUpdateStreamName") in
       make ?dryRun ~progressUpdateStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let progressUpdateStreamName =
@@ -3716,6 +3762,7 @@ module CreateProgressUpdateStreamResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3748,6 +3795,7 @@ module CreateProgressUpdateStreamRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ProgressUpdateStreamName") in
       make ?dryRun ~progressUpdateStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let progressUpdateStreamName =
@@ -3873,6 +3921,7 @@ module AssociateDiscoveredResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3927,6 +3976,7 @@ module AssociateDiscoveredResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~discoveredResource ~migrationTaskName
         ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let discoveredResource =
@@ -4048,6 +4098,7 @@ module AssociateCreatedArtifactResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4103,6 +4154,7 @@ module AssociateCreatedArtifactRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~createdArtifact ~migrationTaskName ~progressUpdateStream
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let createdArtifact =

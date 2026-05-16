@@ -196,6 +196,7 @@ module EnrollmentJobFraudDetectionConfig =
         (Option.map ~f:FraudDetectionAction.of_xml)
           (Xml.child xml_arg0 "FraudDetectionAction") in
       make ?riskThreshold ?fraudDetectionAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskThreshold = field_map json "RiskThreshold" Score.of_json in
       let fraudDetectionAction =
@@ -407,6 +408,7 @@ module FailureDetails =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?statusCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusCode = field_map json "StatusCode" Integer.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -471,6 +473,7 @@ module JobProgress =
       let percentComplete =
         (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "PercentComplete") in
       make ?percentComplete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let percentComplete = field_map json "PercentComplete" Score.of_json in
       make ?percentComplete ()
@@ -656,6 +659,7 @@ module ServerSideEncryptionConfiguration =
       let kmsKeyId =
         KmsKeyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KmsKeyId") in
       make ~kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map_exn json "KmsKeyId" KmsKeyId.of_json in
       make ~kmsKeyId ()
@@ -708,6 +712,7 @@ module KnownFraudsterRisk =
         (Option.map ~f:GeneratedFraudsterId.of_xml)
           (Xml.child xml_arg0 "GeneratedFraudsterId") in
       make ~riskScore ?generatedFraudsterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskScore = field_map_exn json "RiskScore" Score.of_json in
       let generatedFraudsterId =
@@ -818,6 +823,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -854,6 +860,7 @@ module EnrollmentConfig =
         (Option.map ~f:ExistingEnrollmentAction.of_xml)
           (Xml.child xml_arg0 "ExistingEnrollmentAction") in
       make ?fraudDetectionConfig ?existingEnrollmentAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fraudDetectionConfig =
         field_map json "FraudDetectionConfig"
@@ -903,6 +910,7 @@ module InputDataConfig =
       let s3Uri =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in make ~s3Uri ()
     let to_json v = composed_to_json to_value v
@@ -931,6 +939,7 @@ module OutputDataConfig =
       let kmsKeyId =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       make ~s3Uri ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
       let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
@@ -968,6 +977,7 @@ module RegistrationConfig =
         (Option.map ~f:DuplicateRegistrationAction.of_xml)
           (Xml.child xml_arg0 "DuplicateRegistrationAction") in
       make ?fraudsterSimilarityThreshold ?duplicateRegistrationAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fraudsterSimilarityThreshold =
         field_map json "FraudsterSimilarityThreshold" Score.of_json in
@@ -1038,6 +1048,7 @@ module SpeakerSummary =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?updatedAt ?status ?generatedSpeakerId ?domainId
         ?customerSpeakerId ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let status = field_map json "Status" SpeakerStatus.of_json in
@@ -1130,6 +1141,7 @@ module SpeakerEnrollmentJobSummary =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?jobStatus ?jobProgress ?jobName ?jobId ?failureDetails ?endedAt
         ?domainId ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobStatus =
         field_map json "JobStatus" SpeakerEnrollmentJobStatus.of_json in
@@ -1225,6 +1237,7 @@ module FraudsterRegistrationJobSummary =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?jobStatus ?jobProgress ?jobName ?jobId ?failureDetails ?endedAt
         ?domainId ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobStatus =
         field_map json "JobStatus" FraudsterRegistrationJobStatus.of_json in
@@ -1316,6 +1329,7 @@ module DomainSummary =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?updatedAt ?serverSideEncryptionConfiguration ?name ?domainStatus
         ?domainId ?description ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let serverSideEncryptionConfiguration =
@@ -1350,6 +1364,7 @@ module AuthenticationConfiguration =
         Score.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceptanceThreshold") in
       make ~acceptanceThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptanceThreshold =
         field_map_exn json "AcceptanceThreshold" Score.of_json in
@@ -1434,6 +1449,7 @@ module FraudDetectionConfiguration =
         Score.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RiskThreshold") in
       make ~riskThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskThreshold = field_map_exn json "RiskThreshold" Score.of_json in
       make ~riskThreshold ()
@@ -1519,6 +1535,7 @@ module FraudRiskDetails =
         KnownFraudsterRisk.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "KnownFraudsterRisk") in
       make ~knownFraudsterRisk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knownFraudsterRisk =
         field_map_exn json "KnownFraudsterRisk" KnownFraudsterRisk.of_json in
@@ -1539,6 +1556,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1568,6 +1586,7 @@ module ConflictException =
         (Option.map ~f:ConflictType.of_xml)
           (Xml.child xml_arg0 "ConflictType") in
       make ?message ?conflictType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let conflictType = field_map json "ConflictType" ConflictType.of_json in
@@ -1650,6 +1669,7 @@ module Domain =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?updatedAt ?serverSideEncryptionConfiguration ?name ?domainStatus
         ?domainId ?description ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let serverSideEncryptionConfiguration =
@@ -1678,6 +1698,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1707,6 +1728,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1727,6 +1749,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1746,6 +1769,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1843,6 +1867,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1969,6 +1994,7 @@ module SpeakerEnrollmentJob =
       make ?outputDataConfig ?jobStatus ?jobProgress ?jobName ?jobId
         ?inputDataConfig ?failureDetails ?enrollmentConfig ?endedAt ?domainId
         ?dataAccessRoleArn ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDataConfig =
         field_map json "OutputDataConfig" OutputDataConfig.of_json in
@@ -2134,6 +2160,7 @@ module FraudsterRegistrationJob =
       make ?registrationConfig ?outputDataConfig ?jobStatus ?jobProgress
         ?jobName ?jobId ?inputDataConfig ?failureDetails ?endedAt ?domainId
         ?dataAccessRoleArn ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registrationConfig =
         field_map json "RegistrationConfig" RegistrationConfig.of_json in
@@ -2219,6 +2246,7 @@ module Speaker =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?updatedAt ?status ?generatedSpeakerId ?domainId
         ?customerSpeakerId ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let status = field_map json "Status" SpeakerStatus.of_json in
@@ -2502,6 +2530,7 @@ module AuthenticationResult =
       make ?score ?generatedSpeakerId ?decision ?customerSpeakerId
         ?configuration ?authenticationResultId ?audioAggregationStartedAt
         ?audioAggregationEndedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Score.of_json in
       let generatedSpeakerId =
@@ -2604,6 +2633,7 @@ module FraudDetectionResult =
           (Xml.child xml_arg0 "AudioAggregationEndedAt") in
       make ?riskDetails ?reasons ?fraudDetectionResultId ?decision
         ?configuration ?audioAggregationStartedAt ?audioAggregationEndedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskDetails = field_map json "RiskDetails" FraudRiskDetails.of_json in
       let reasons = field_map json "Reasons" FraudDetectionReasons.of_json in
@@ -2743,6 +2773,7 @@ module Fraudster =
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?generatedFraudsterId ?domainId ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generatedFraudsterId =
         field_map json "GeneratedFraudsterId" GeneratedFraudsterId.of_json in
@@ -2857,6 +2888,7 @@ module UpdateDomainResponse =
       let domain =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "Domain" Domain.of_json in make ?domain ()
     let to_json v = composed_to_json to_value v
@@ -2908,6 +2940,7 @@ module UpdateDomainRequest =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       make ~serverSideEncryptionConfiguration ~name ~domainId ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverSideEncryptionConfiguration =
         field_map_exn json "ServerSideEncryptionConfiguration"
@@ -2999,6 +3032,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3029,6 +3063,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -3117,6 +3152,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3144,6 +3180,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -3251,6 +3288,7 @@ module StartSpeakerEnrollmentJobResponse =
         (Option.map ~f:SpeakerEnrollmentJob.of_xml)
           (Xml.child xml_arg0 "Job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" SpeakerEnrollmentJob.of_json in
       make ?job ()
@@ -3336,6 +3374,7 @@ module StartSpeakerEnrollmentJobRequest =
           (Xml.child xml_arg0 "ClientToken") in
       make ~outputDataConfig ?jobName ~inputDataConfig ?enrollmentConfig
         ~domainId ~dataAccessRoleArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDataConfig =
         field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
@@ -3453,6 +3492,7 @@ module StartFraudsterRegistrationJobResponse =
         (Option.map ~f:FraudsterRegistrationJob.of_xml)
           (Xml.child xml_arg0 "Job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" FraudsterRegistrationJob.of_json in
       make ?job ()
@@ -3538,6 +3578,7 @@ module StartFraudsterRegistrationJobRequest =
           (Xml.child xml_arg0 "ClientToken") in
       make ?registrationConfig ~outputDataConfig ?jobName ~inputDataConfig
         ~domainId ~dataAccessRoleArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registrationConfig =
         field_map json "RegistrationConfig" RegistrationConfig.of_json in
@@ -3643,6 +3684,7 @@ module OptOutSpeakerResponse =
       let speaker =
         (Option.map ~f:Speaker.of_xml) (Xml.child xml_arg0 "Speaker") in
       make ?speaker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let speaker = field_map json "Speaker" Speaker.of_json in
       make ?speaker ()
@@ -3671,6 +3713,7 @@ module OptOutSpeakerRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~speakerId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let speakerId = field_map_exn json "SpeakerId" SpeakerId.of_json in
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
@@ -3755,6 +3798,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3778,6 +3822,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" AmazonResourceName.of_json in
@@ -3873,6 +3918,7 @@ module ListSpeakersResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?speakerSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let speakerSummaries =
         field_map json "SpeakerSummaries" SpeakerSummaries.of_json in
@@ -3911,6 +3957,7 @@ module ListSpeakersRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ?nextToken ?maxResults ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResultsForList.of_json in
@@ -4007,6 +4054,7 @@ module ListSpeakerEnrollmentJobsResponse =
         (Option.map ~f:SpeakerEnrollmentJobSummaries.of_xml)
           (Xml.child xml_arg0 "JobSummaries") in
       make ?nextToken ?jobSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let jobSummaries =
@@ -4057,6 +4105,7 @@ module ListSpeakerEnrollmentJobsRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ?nextToken ?maxResults ?jobStatus ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResultsForList.of_json in
@@ -4156,6 +4205,7 @@ module ListFraudsterRegistrationJobsResponse =
         (Option.map ~f:FraudsterRegistrationJobSummaries.of_xml)
           (Xml.child xml_arg0 "JobSummaries") in
       make ?nextToken ?jobSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let jobSummaries =
@@ -4208,6 +4258,7 @@ module ListFraudsterRegistrationJobsRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ?nextToken ?maxResults ?jobStatus ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResultsForList.of_json in
@@ -4297,6 +4348,7 @@ module ListDomainsResponse =
         (Option.map ~f:DomainSummaries.of_xml)
           (Xml.child xml_arg0 "DomainSummaries") in
       make ?nextToken ?domainSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let domainSummaries =
@@ -4330,6 +4382,7 @@ module ListDomainsRequest =
         (Option.map ~f:MaxResultsForListDomainFe.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -4466,6 +4519,7 @@ module EvaluateSessionResponse =
           (Xml.child xml_arg0 "AuthenticationResult") in
       make ?streamingStatus ?sessionName ?sessionId ?fraudDetectionResult
         ?domainId ?authenticationResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingStatus =
         field_map json "StreamingStatus" StreamingStatus.of_json in
@@ -4507,6 +4561,7 @@ module EvaluateSessionRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~sessionNameOrId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionNameOrId =
         field_map_exn json "SessionNameOrId" SessionNameOrId.of_json in
@@ -4593,6 +4648,7 @@ module DescribeSpeakerResponse =
       let speaker =
         (Option.map ~f:Speaker.of_xml) (Xml.child xml_arg0 "Speaker") in
       make ?speaker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let speaker = field_map json "Speaker" Speaker.of_json in
       make ?speaker ()
@@ -4621,6 +4677,7 @@ module DescribeSpeakerRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~speakerId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let speakerId = field_map_exn json "SpeakerId" SpeakerId.of_json in
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
@@ -4707,6 +4764,7 @@ module DescribeSpeakerEnrollmentJobResponse =
         (Option.map ~f:SpeakerEnrollmentJob.of_xml)
           (Xml.child xml_arg0 "Job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" SpeakerEnrollmentJob.of_json in
       make ?job ()
@@ -4735,6 +4793,7 @@ module DescribeSpeakerEnrollmentJobRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~jobId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
@@ -4819,6 +4878,7 @@ module DescribeFraudsterResponse =
       let fraudster =
         (Option.map ~f:Fraudster.of_xml) (Xml.child xml_arg0 "Fraudster") in
       make ?fraudster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fraudster = field_map json "Fraudster" Fraudster.of_json in
       make ?fraudster ()
@@ -4847,6 +4907,7 @@ module DescribeFraudsterRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~fraudsterId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fraudsterId = field_map_exn json "FraudsterId" FraudsterId.of_json in
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
@@ -4933,6 +4994,7 @@ module DescribeFraudsterRegistrationJobResponse =
         (Option.map ~f:FraudsterRegistrationJob.of_xml)
           (Xml.child xml_arg0 "Job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" FraudsterRegistrationJob.of_json in
       make ?job ()
@@ -4961,6 +5023,7 @@ module DescribeFraudsterRegistrationJobRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~jobId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
@@ -5045,6 +5108,7 @@ module DescribeDomainResponse =
       let domain =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "Domain" Domain.of_json in make ?domain ()
     let to_json v = composed_to_json to_value v
@@ -5065,6 +5129,7 @@ module DescribeDomainRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
       make ~domainId ()
@@ -5092,6 +5157,7 @@ module DeleteSpeakerRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~speakerId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let speakerId = field_map_exn json "SpeakerId" SpeakerId.of_json in
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
@@ -5122,6 +5188,7 @@ module DeleteFraudsterRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~fraudsterId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fraudsterId = field_map_exn json "FraudsterId" FraudsterId.of_json in
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
@@ -5145,6 +5212,7 @@ module DeleteDomainRequest =
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainId = field_map_exn json "DomainId" DomainId.of_json in
       make ~domainId ()
@@ -5249,6 +5317,7 @@ module CreateDomainResponse =
       let domain =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "Domain" Domain.of_json in make ?domain ()
     let to_json v = composed_to_json to_value v
@@ -5310,6 +5379,7 @@ module CreateDomainRequest =
           (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~serverSideEncryptionConfiguration ~name ?description
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let serverSideEncryptionConfiguration =

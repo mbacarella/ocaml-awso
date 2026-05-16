@@ -144,6 +144,7 @@ module AttachmentItem =
       let contentType =
         (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
       make ?status ?attachmentName ?attachmentId ?contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ArtifactStatus.of_json in
       let attachmentName =
@@ -576,6 +577,7 @@ module Item =
         (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "AbsoluteTime") in
       make ?attachments ?participantRole ?displayName ?participantId ?type_
         ?id ?contentType ?content ?absoluteTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachments = field_map json "Attachments" Attachments.of_json in
       let participantRole =
@@ -684,6 +686,7 @@ module AccessDeniedException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -703,6 +706,7 @@ module InternalServerException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -722,6 +726,7 @@ module ServiceQuotaExceededException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -740,6 +745,7 @@ module ThrottlingException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -780,6 +786,7 @@ module UploadMetadata =
       let url =
         (Option.map ~f:UploadMetadataUrl.of_xml) (Xml.child xml_arg0 "Url") in
       make ?headersToInclude ?urlExpiry ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headersToInclude =
         field_map json "HeadersToInclude" UploadMetadataSignedHeaders.of_json in
@@ -801,6 +808,7 @@ module ValidationException =
       let message =
         Reason.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Reason.of_json in
       make ~message ()
@@ -1008,6 +1016,7 @@ module StartPosition =
         (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "AbsoluteTime") in
       let id = (Option.map ~f:ChatItemId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?mostRecent ?absoluteTime ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mostRecent = field_map json "MostRecent" MostRecent.of_json in
       let absoluteTime = field_map json "AbsoluteTime" Instant.of_json in
@@ -1058,6 +1067,7 @@ module ConnectionCredentials =
         (Option.map ~f:ParticipantToken.of_xml)
           (Xml.child xml_arg0 "ConnectionToken") in
       make ?expiry ?connectionToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiry = field_map json "Expiry" ISO8601Datetime.of_json in
       let connectionToken =
@@ -1090,6 +1100,7 @@ module Websocket =
         (Option.map ~f:PreSignedConnectionUrl.of_xml)
           (Xml.child xml_arg0 "Url") in
       make ?connectionExpiry ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionExpiry =
         field_map json "ConnectionExpiry" ISO8601Datetime.of_json in
@@ -1149,6 +1160,7 @@ module ConflictException =
       let message =
         Reason.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Reason.of_json in
       make ~message ()
@@ -1271,6 +1283,7 @@ module StartAttachmentUploadResponse =
       let attachmentId =
         (Option.map ~f:ArtifactId.of_xml) (Xml.child xml_arg0 "AttachmentId") in
       make ?uploadMetadata ?attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadMetadata =
         field_map json "UploadMetadata" UploadMetadata.of_json in
@@ -1339,6 +1352,7 @@ module StartAttachmentUploadRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
       make ~connectionToken ~clientToken ~attachmentName
         ~attachmentSizeInBytes ~contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionToken =
         field_map_exn json "ConnectionToken" ParticipantToken.of_json in
@@ -1428,6 +1442,7 @@ module SendMessageResponse =
         (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "AbsoluteTime") in
       let id = (Option.map ~f:ChatItemId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?absoluteTime ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let absoluteTime = field_map json "AbsoluteTime" Instant.of_json in
       let id = field_map json "Id" ChatItemId.of_json in
@@ -1476,6 +1491,7 @@ module SendMessageRequest =
         ChatContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
       make ~connectionToken ?clientToken ~content ~contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionToken =
         field_map_exn json "ConnectionToken" ParticipantToken.of_json in
@@ -1560,6 +1576,7 @@ module SendEventResponse =
         (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "AbsoluteTime") in
       let id = (Option.map ~f:ChatItemId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?absoluteTime ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let absoluteTime = field_map json "AbsoluteTime" Instant.of_json in
       let id = field_map json "Id" ChatItemId.of_json in
@@ -1609,6 +1626,7 @@ module SendEventRequest =
         ChatContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
       make ~connectionToken ?clientToken ?content ~contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionToken =
         field_map_exn json "ConnectionToken" ParticipantToken.of_json in
@@ -1705,6 +1723,7 @@ module GetTranscriptResponse =
         (Option.map ~f:ContactId.of_xml)
           (Xml.child xml_arg0 "InitialContactId") in
       make ?nextToken ?transcript ?initialContactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let transcript = field_map json "Transcript" Transcript.of_json in
@@ -1788,6 +1807,7 @@ module GetTranscriptRequest =
         (Option.map ~f:ContactId.of_xml) (Xml.child xml_arg0 "ContactId") in
       make ~connectionToken ?startPosition ?sortOrder ?scanDirection
         ?nextToken ?maxResults ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionToken =
         field_map_exn json "ConnectionToken" ParticipantToken.of_json in
@@ -1882,6 +1902,7 @@ module GetAttachmentResponse =
         (Option.map ~f:PreSignedAttachmentUrl.of_xml)
           (Xml.child xml_arg0 "Url") in
       make ?urlExpiry ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let urlExpiry = field_map json "UrlExpiry" ISO8601Datetime.of_json in
       let url = field_map json "Url" PreSignedAttachmentUrl.of_json in
@@ -1915,6 +1936,7 @@ module GetAttachmentRequest =
         ArtifactId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttachmentId") in
       make ~connectionToken ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionToken =
         field_map_exn json "ConnectionToken" ParticipantToken.of_json in
@@ -1985,6 +2007,7 @@ module DisconnectParticipantResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2015,6 +2038,7 @@ module DisconnectParticipantRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ~connectionToken ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionToken =
         field_map_exn json "ConnectionToken" ParticipantToken.of_json in
@@ -2103,6 +2127,7 @@ module CreateParticipantConnectionResponse =
       let websocket =
         (Option.map ~f:Websocket.of_xml) (Xml.child xml_arg0 "Websocket") in
       make ?connectionCredentials ?websocket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionCredentials =
         field_map json "ConnectionCredentials" ConnectionCredentials.of_json in
@@ -2146,6 +2171,7 @@ module CreateParticipantConnectionRequest =
         ConnectionTypeList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?connectParticipant ~participantToken ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectParticipant =
         field_map json "ConnectParticipant" Bool.of_json in
@@ -2238,6 +2264,7 @@ module CompleteAttachmentUploadResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2278,6 +2305,7 @@ module CompleteAttachmentUploadRequest =
         AttachmentIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttachmentIds") in
       make ~connectionToken ~clientToken ~attachmentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionToken =
         field_map_exn json "ConnectionToken" ParticipantToken.of_json in

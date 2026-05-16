@@ -89,6 +89,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -167,6 +168,7 @@ module UsageAllocation =
         AllocatedUsageQuantity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AllocatedUsageQuantity") in
       make ?tags ~allocatedUsageQuantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let allocatedUsageQuantity =
@@ -350,6 +352,7 @@ module UsageRecord =
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
       make ?usageAllocations ?quantity ~dimension ~customerIdentifier
         ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usageAllocations =
         field_map json "UsageAllocations" UsageAllocations.of_json in
@@ -439,6 +442,7 @@ module UsageRecordResult =
       let usageRecord =
         (Option.map ~f:UsageRecord.of_xml) (Xml.child xml_arg0 "UsageRecord") in
       make ?status ?meteringRecordId ?usageRecord ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" UsageRecordResultStatus.of_json in
       let meteringRecordId =
@@ -481,6 +485,7 @@ module DisabledApiException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -499,6 +504,7 @@ module ExpiredTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -518,6 +524,7 @@ module InternalServiceErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -537,6 +544,7 @@ module InvalidTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -575,6 +583,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -608,6 +617,7 @@ module CustomerNotEntitledException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -627,6 +637,7 @@ module InvalidProductCodeException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -646,6 +657,7 @@ module InvalidPublicKeyVersionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -664,6 +676,7 @@ module InvalidRegionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -683,6 +696,7 @@ module PlatformNotSupportedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -735,6 +749,7 @@ module DuplicateRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -754,6 +769,7 @@ module InvalidEndpointRegionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -773,6 +789,7 @@ module InvalidTagException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -792,6 +809,7 @@ module InvalidUsageAllocationsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -811,6 +829,7 @@ module InvalidUsageDimensionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -830,6 +849,7 @@ module TimestampOutOfBoundsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -862,6 +882,7 @@ module InvalidCustomerIdentifierException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1021,6 +1042,7 @@ module ResolveCustomerResult =
         (Option.map ~f:CustomerIdentifier.of_xml)
           (Xml.child xml_arg0 "CustomerIdentifier") in
       make ?customerAWSAccountId ?productCode ?customerIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerAWSAccountId =
         field_map json "CustomerAWSAccountId" CustomerAWSAccountId.of_json in
@@ -1050,6 +1072,7 @@ module ResolveCustomerRequest =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegistrationToken") in
       make ~registrationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registrationToken =
         field_map_exn json "RegistrationToken" NonEmptyString.of_json in
@@ -1181,6 +1204,7 @@ module RegisterUsageResult =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "PublicKeyRotationTimestamp") in
       make ?signature ?publicKeyRotationTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signature = field_map json "Signature" NonEmptyString.of_json in
       let publicKeyRotationTimestamp =
@@ -1222,6 +1246,7 @@ module RegisterUsageRequest =
         ProductCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProductCode") in
       make ?nonce ~publicKeyVersion ~productCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nonce = field_map json "Nonce" Nonce.of_json in
       let publicKeyVersion =
@@ -1370,6 +1395,7 @@ module MeterUsageResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "MeteringRecordId") in
       make ?meteringRecordId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meteringRecordId =
         field_map json "MeteringRecordId" String_.of_json in
@@ -1446,6 +1472,7 @@ module MeterUsageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProductCode") in
       make ?usageAllocations ?dryRun ?usageQuantity ~usageDimension
         ~timestamp ~productCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usageAllocations =
         field_map json "UsageAllocations" UsageAllocations.of_json in
@@ -1601,6 +1628,7 @@ module BatchMeterUsageResult =
         (Option.map ~f:UsageRecordResultList.of_xml)
           (Xml.child xml_arg0 "Results") in
       make ?unprocessedRecords ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedRecords =
         field_map json "UnprocessedRecords" UsageRecordList.of_json in
@@ -1635,6 +1663,7 @@ module BatchMeterUsageRequest =
         UsageRecordList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UsageRecords") in
       make ~productCode ~usageRecords ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productCode = field_map_exn json "ProductCode" ProductCode.of_json in
       let usageRecords =

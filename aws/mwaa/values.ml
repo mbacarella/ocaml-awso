@@ -57,6 +57,7 @@ module Dimension =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -291,6 +292,7 @@ module StatisticSet =
       let maximum =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Maximum") in
       make ?sum ?sampleCount ?minimum ?maximum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sum = field_map json "Sum" Double.of_json in
       let sampleCount = field_map json "SampleCount" Integer.of_json in
@@ -490,6 +492,7 @@ module UpdateError =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -579,6 +582,7 @@ module ModuleLoggingConfiguration =
         (Option.map ~f:CloudWatchLogGroupArn.of_xml)
           (Xml.child xml_arg0 "CloudWatchLogGroupArn") in
       make ?logLevel ?enabled ?cloudWatchLogGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map json "LogLevel" LoggingLevel.of_json in
       let enabled = field_map json "Enabled" LoggingEnabled.of_json in
@@ -714,6 +718,7 @@ module ModuleLoggingConfigurationInput =
         LoggingEnabled.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~logLevel ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map_exn json "LogLevel" LoggingLevel.of_json in
       let enabled = field_map_exn json "Enabled" LoggingEnabled.of_json in
@@ -780,6 +785,7 @@ module MetricDatum =
         (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
       make ?value ?unit ~timestamp ?statisticValues ~metricName ?dimensions
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Double.of_json in
       let unit = field_map json "Unit" Unit.of_json in
@@ -1039,6 +1045,7 @@ module LastUpdate =
         (Option.map ~f:UpdateCreatedAt.of_xml)
           (Xml.child xml_arg0 "CreatedAt") in
       make ?status ?source ?error ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" UpdateStatus.of_json in
       let source = field_map json "Source" UpdateSource.of_json in
@@ -1112,6 +1119,7 @@ module LoggingConfiguration =
           (Xml.child xml_arg0 "DagProcessingLogs") in
       make ?workerLogs ?webserverLogs ?taskLogs ?schedulerLogs
         ?dagProcessingLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerLogs =
         field_map json "WorkerLogs" ModuleLoggingConfiguration.of_json in
@@ -1183,6 +1191,7 @@ module NetworkConfiguration =
         (Option.map ~f:SecurityGroupList.of_xml)
           (Xml.child xml_arg0 "SecurityGroupIds") in
       make ?subnetIds ?securityGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetIds = field_map json "SubnetIds" SubnetList.of_json in
       let securityGroupIds =
@@ -1379,6 +1388,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1397,6 +1407,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1416,6 +1427,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1484,6 +1496,7 @@ module LoggingConfigurationInput =
           (Xml.child xml_arg0 "DagProcessingLogs") in
       make ?workerLogs ?webserverLogs ?taskLogs ?schedulerLogs
         ?dagProcessingLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerLogs =
         field_map json "WorkerLogs" ModuleLoggingConfigurationInput.of_json in
@@ -1550,6 +1563,7 @@ module UpdateNetworkConfigurationInput =
         SecurityGroupList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
       make ~securityGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map_exn json "SecurityGroupIds" SecurityGroupList.of_json in
@@ -1928,6 +1942,7 @@ module Environment =
         ?maxWorkers ?loggingConfiguration ?lastUpdate ?kmsKey
         ?executionRoleArn ?environmentClass ?dagS3Path ?createdAt ?arn
         ?airflowVersion ?airflowConfigurationOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weeklyMaintenanceWindowStart =
         field_map json "WeeklyMaintenanceWindowStart"
@@ -1992,6 +2007,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2137,6 +2153,7 @@ module UpdateEnvironmentOutput =
       let arn =
         (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" EnvironmentArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -2338,6 +2355,7 @@ module UpdateEnvironmentInput =
         ?networkConfiguration ~name ?minWorkers ?maxWorkers
         ?loggingConfiguration ?executionRoleArn ?environmentClass ?dagS3Path
         ?airflowVersion ?airflowConfigurationOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weeklyMaintenanceWindowStart =
         field_map json "WeeklyMaintenanceWindowStart"
@@ -2435,6 +2453,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2465,6 +2484,7 @@ module UntagResourceInput =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -2526,6 +2546,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2554,6 +2575,7 @@ module TagResourceInput =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn =
@@ -2606,6 +2628,7 @@ module PublishMetricsOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2636,6 +2659,7 @@ module PublishMetricsInput =
         EnvironmentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentName") in
       make ~metricData ~environmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricData = field_map_exn json "MetricData" MetricData.of_json in
       let environmentName =
@@ -2703,6 +2727,7 @@ module ListTagsForResourceOutput =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2726,6 +2751,7 @@ module ListTagsForResourceInput =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" EnvironmentArn.of_json in
@@ -2792,6 +2818,7 @@ module ListEnvironmentsOutput =
         EnvironmentList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Environments") in
       make ?nextToken ~environments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let environments =
@@ -2825,6 +2852,7 @@ module ListEnvironmentsInput =
         (Option.map ~f:ListEnvironmentsInputMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -2895,6 +2923,7 @@ module GetEnvironmentOutput =
       let environment =
         (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "Environment") in
       make ?environment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "Environment" Environment.of_json in
       make ?environment ()
@@ -2918,6 +2947,7 @@ module GetEnvironmentInput =
         EnvironmentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" EnvironmentName.of_json in
       make ~name ()
@@ -2977,6 +3007,7 @@ module DeleteEnvironmentOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2998,6 +3029,7 @@ module DeleteEnvironmentInput =
         EnvironmentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" EnvironmentName.of_json in
       make ~name ()
@@ -3084,6 +3116,7 @@ module CreateWebLoginTokenResponse =
         (Option.map ~f:Hostname.of_xml)
           (Xml.child xml_arg0 "WebServerHostname") in
       make ?webToken ?webServerHostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webToken =
         field_map json "WebToken"
@@ -3111,6 +3144,7 @@ module CreateWebLoginTokenRequest =
         EnvironmentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" EnvironmentName.of_json in
       make ~name ()
@@ -3169,6 +3203,7 @@ module CreateEnvironmentOutput =
       let arn =
         (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" EnvironmentArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -3383,6 +3418,7 @@ module CreateEnvironmentInput =
         ~networkConfiguration ~name ?minWorkers ?maxWorkers
         ?loggingConfiguration ?kmsKey ~executionRoleArn ?environmentClass
         ~dagS3Path ?airflowVersion ?airflowConfigurationOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weeklyMaintenanceWindowStart =
         field_map json "WeeklyMaintenanceWindowStart"
@@ -3482,6 +3518,7 @@ module CreateCliTokenResponse =
         (Option.map ~f:SyntheticCreateCliTokenResponseToken.of_xml)
           (Xml.child xml_arg0 "CliToken") in
       make ?webServerHostname ?cliToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webServerHostname =
         field_map json "WebServerHostname" Hostname.of_json in
@@ -3509,6 +3546,7 @@ module CreateCliTokenRequest =
         EnvironmentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" EnvironmentName.of_json in
       make ~name ()

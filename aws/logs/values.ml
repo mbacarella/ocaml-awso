@@ -388,6 +388,7 @@ module MetricTransformation =
           (Xml.child_exn ~context:context_ xml_arg0 "metricName") in
       make ?unit ?dimensions ?defaultValue ~metricValue ~metricNamespace
         ~metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "unit" StandardUnit.of_json in
       let dimensions = field_map json "dimensions" Dimensions.of_json in
@@ -555,6 +556,7 @@ module QueryCompileErrorLocation =
         (Option.map ~f:QueryCharOffset.of_xml)
           (Xml.child xml_arg0 "startCharOffset") in
       make ?endCharOffset ?startCharOffset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endCharOffset =
         field_map json "endCharOffset" QueryCharOffset.of_json in
@@ -579,6 +581,7 @@ module ResultField =
       let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
       let field = (Option.map ~f:Field.of_xml) (Xml.child xml_arg0 "field") in
       make ?value ?field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" Value.of_json in
       let field = field_map json "field" Field.of_json in
@@ -1083,6 +1086,7 @@ module ExportTaskExecutionInfo =
       let creationTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       make ?completionTime ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let completionTime = field_map json "completionTime" Timestamp.of_json in
       let creationTime = field_map json "creationTime" Timestamp.of_json in
@@ -1148,6 +1152,7 @@ module ExportTaskStatus =
         (Option.map ~f:ExportTaskStatusCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExportTaskStatusMessage.of_json in
       let code = field_map json "code" ExportTaskStatusCode.of_json in
@@ -1255,6 +1260,7 @@ module MetricFilterMatchRecord =
       let eventNumber =
         (Option.map ~f:EventNumber.of_xml) (Xml.child xml_arg0 "eventNumber") in
       make ?extractedValues ?eventMessage ?eventNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extractedValues =
         field_map json "extractedValues" ExtractedValues.of_json in
@@ -1303,6 +1309,7 @@ module QueryCompileError =
         (Option.map ~f:QueryCompileErrorLocation.of_xml)
           (Xml.child xml_arg0 "location") in
       make ?message ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       let location =
@@ -1347,6 +1354,7 @@ module InputLogEvent =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
       make ~message ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" EventMessage.of_json in
       let timestamp = field_map_exn json "timestamp" Timestamp.of_json in
@@ -1410,6 +1418,7 @@ module LogGroupField =
         (Option.map ~f:Percentage.of_xml) (Xml.child xml_arg0 "percent") in
       let name = (Option.map ~f:Field.of_xml) (Xml.child xml_arg0 "name") in
       make ?percent ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let percent = field_map json "percent" Percentage.of_json in
       let name = field_map json "name" Field.of_json in
@@ -1446,6 +1455,7 @@ module OutputLogEvent =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "timestamp") in
       make ?ingestionTime ?message ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ingestionTime = field_map json "ingestionTime" Timestamp.of_json in
       let message = field_map json "message" EventMessage.of_json in
@@ -1498,6 +1508,7 @@ module FilteredLogEvent =
         (Option.map ~f:LogStreamName.of_xml)
           (Xml.child xml_arg0 "logStreamName") in
       make ?eventId ?ingestionTime ?message ?timestamp ?logStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventId = field_map json "eventId" EventId.of_json in
       let ingestionTime = field_map json "ingestionTime" Timestamp.of_json in
@@ -1536,6 +1547,7 @@ module SearchedLogStream =
         (Option.map ~f:LogStreamName.of_xml)
           (Xml.child xml_arg0 "logStreamName") in
       make ?searchedCompletely ?logStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let searchedCompletely =
         field_map json "searchedCompletely"
@@ -1613,6 +1625,7 @@ module SubscriptionFilter =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "filterName") in
       make ?creationTime ?distribution ?roleArn ?destinationArn
         ?filterPattern ?logGroupName ?filterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "creationTime" Timestamp.of_json in
       let distribution = field_map json "distribution" Distribution.of_json in
@@ -1660,6 +1673,7 @@ module ResourcePolicy =
       let policyName =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "policyName") in
       make ?lastUpdatedTime ?policyDocument ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTime =
         field_map json "lastUpdatedTime" Timestamp.of_json in
@@ -1728,6 +1742,7 @@ module QueryDefinition =
           (Xml.child xml_arg0 "queryDefinitionId") in
       make ?logGroupNames ?lastModified ?queryString ?name ?queryDefinitionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupNames =
         field_map json "logGroupNames" LogGroupNames.of_json in
@@ -1786,6 +1801,7 @@ module QueryInfo =
       let queryId =
         (Option.map ~f:QueryId.of_xml) (Xml.child xml_arg0 "queryId") in
       make ?logGroupName ?createTime ?status ?queryString ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName = field_map json "logGroupName" LogGroupName.of_json in
       let createTime = field_map json "createTime" Timestamp.of_json in
@@ -1851,6 +1867,7 @@ module MetricFilter =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "filterName") in
       make ?logGroupName ?creationTime ?metricTransformations ?filterPattern
         ?filterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName = field_map json "logGroupName" LogGroupName.of_json in
       let creationTime = field_map json "creationTime" Timestamp.of_json in
@@ -1948,6 +1965,7 @@ module LogStream =
       make ?storedBytes ?arn ?uploadSequenceToken ?lastIngestionTime
         ?lastEventTimestamp ?firstEventTimestamp ?creationTime ?logStreamName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storedBytes = field_map json "storedBytes" StoredBytes.of_json in
       let arn = field_map json "arn" Arn.of_json in
@@ -2034,6 +2052,7 @@ module LogGroup =
           (Xml.child xml_arg0 "logGroupName") in
       make ?kmsKeyId ?storedBytes ?arn ?metricFilterCount ?retentionInDays
         ?creationTime ?logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "kmsKeyId" KmsKeyId.of_json in
       let storedBytes = field_map json "storedBytes" StoredBytes.of_json in
@@ -2133,6 +2152,7 @@ module ExportTask =
         (Option.map ~f:ExportTaskId.of_xml) (Xml.child xml_arg0 "taskId") in
       make ?executionInfo ?status ?destinationPrefix ?destination ?to_ ?from
         ?logGroupName ?taskName ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionInfo =
         field_map json "executionInfo" ExportTaskExecutionInfo.of_json in
@@ -2211,6 +2231,7 @@ module Destination =
           (Xml.child xml_arg0 "destinationName") in
       make ?creationTime ?arn ?accessPolicy ?roleArn ?targetArn
         ?destinationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "creationTime" Timestamp.of_json in
       let arn = field_map json "arn" Arn.of_json in
@@ -2256,6 +2277,7 @@ module InvalidParameterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A parameter is specified incorrectly."]
@@ -2293,6 +2315,7 @@ module ServiceUnavailableException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service cannot complete the request."]
@@ -2364,6 +2387,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
@@ -2388,6 +2412,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2407,6 +2432,7 @@ module MalformedQueryException =
         (Option.map ~f:QueryCompileError.of_xml)
           (Xml.child xml_arg0 "queryCompileError") in
       make ?queryCompileError ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryCompileError =
         field_map json "queryCompileError" QueryCompileError.of_json in
@@ -2448,6 +2474,7 @@ module DataAlreadyAcceptedException =
         (Option.map ~f:SequenceToken.of_xml)
           (Xml.child xml_arg0 "expectedSequenceToken") in
       make ?expectedSequenceToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedSequenceToken =
         field_map json "expectedSequenceToken" SequenceToken.of_json in
@@ -2469,6 +2496,7 @@ module InvalidSequenceTokenException =
         (Option.map ~f:SequenceToken.of_xml)
           (Xml.child xml_arg0 "expectedSequenceToken") in
       make ?expectedSequenceToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedSequenceToken =
         field_map json "expectedSequenceToken" SequenceToken.of_json in
@@ -2516,6 +2544,7 @@ module RejectedLogEventsInfo =
           (Xml.child xml_arg0 "tooNewLogEventStartIndex") in
       make ?expiredLogEventEndIndex ?tooOldLogEventEndIndex
         ?tooNewLogEventStartIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiredLogEventEndIndex =
         field_map json "expiredLogEventEndIndex" LogEventIndex.of_json in
@@ -2535,6 +2564,7 @@ module UnrecognizedClientException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2576,6 +2606,7 @@ module OperationAbortedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2652,6 +2683,7 @@ module QueryStatistics =
         (Option.map ~f:StatsValue.of_xml)
           (Xml.child xml_arg0 "recordsMatched") in
       make ?bytesScanned ?recordsScanned ?recordsMatched ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bytesScanned = field_map json "bytesScanned" StatsValue.of_json in
       let recordsScanned = field_map json "recordsScanned" StatsValue.of_json in
@@ -3188,6 +3220,7 @@ module ResourceAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource already exists."]
@@ -3213,6 +3246,7 @@ module UntagLogGroupRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~tags ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let logGroupName =
@@ -3275,6 +3309,7 @@ module TestMetricFilterResponse =
         (Option.map ~f:MetricFilterMatches.of_xml)
           (Xml.child xml_arg0 "matches") in
       make ?matches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matches = field_map json "matches" MetricFilterMatches.of_json in
       make ?matches ()
@@ -3305,6 +3340,7 @@ module TestMetricFilterRequest =
         FilterPattern.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filterPattern") in
       make ~logEventMessages ~filterPattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logEventMessages =
         field_map_exn json "logEventMessages" TestEventMessages.of_json in
@@ -3334,6 +3370,7 @@ module TagLogGroupRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~tags ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" Tags.of_json in
       let logGroupName =
@@ -3405,6 +3442,7 @@ module StopQueryResponse =
       let success =
         (Option.map ~f:Success.of_xml) (Xml.child xml_arg0 "success") in
       make ?success ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let success = field_map json "success" Success.of_json in
       make ?success ()
@@ -3427,6 +3465,7 @@ module StopQueryRequest =
       let queryId =
         QueryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "queryId") in
       make ~queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryId = field_map_exn json "queryId" QueryId.of_json in
       make ~queryId ()
@@ -3512,6 +3551,7 @@ module StartQueryResponse =
       let queryId =
         (Option.map ~f:QueryId.of_xml) (Xml.child xml_arg0 "queryId") in
       make ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryId = field_map json "queryId" QueryId.of_json in
       make ?queryId ()
@@ -3586,6 +3626,7 @@ module StartQueryRequest =
           (Xml.child xml_arg0 "logGroupName") in
       make ?limit ~queryString ~endTime ~startTime ?logGroupNames
         ?logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" EventsLimit.of_json in
       let queryString = field_map_exn json "queryString" QueryString.of_json in
@@ -3665,6 +3706,7 @@ module PutSubscriptionFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?distribution ?roleArn ~destinationArn ~filterPattern ~filterName
         ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distribution = field_map json "distribution" Distribution.of_json in
       let roleArn = field_map json "roleArn" RoleArn.of_json in
@@ -3702,6 +3744,7 @@ module PutRetentionPolicyRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~retentionInDays ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retentionInDays = field_map_exn json "retentionInDays" Days.of_json in
       let logGroupName =
@@ -3773,6 +3816,7 @@ module PutResourcePolicyResponse =
         (Option.map ~f:ResourcePolicy.of_xml)
           (Xml.child xml_arg0 "resourcePolicy") in
       make ?resourcePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcePolicy =
         field_map json "resourcePolicy" ResourcePolicy.of_json in
@@ -3804,6 +3848,7 @@ module PutResourcePolicyRequest =
       let policyName =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "policyName") in
       make ?policyDocument ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map json "policyDocument" PolicyDocument.of_json in
@@ -3885,6 +3930,7 @@ module PutQueryDefinitionResponse =
         (Option.map ~f:QueryId.of_xml)
           (Xml.child xml_arg0 "queryDefinitionId") in
       make ?queryDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryDefinitionId =
         field_map json "queryDefinitionId" QueryId.of_json in
@@ -3938,6 +3984,7 @@ module PutQueryDefinitionRequest =
         QueryDefinitionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~queryString ?logGroupNames ?queryDefinitionId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryString =
         field_map_exn json "queryString" QueryDefinitionString.of_json in
@@ -3996,6 +4043,7 @@ module PutMetricFilterRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~metricTransformations ~filterPattern ~filterName ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricTransformations =
         field_map_exn json "metricTransformations"
@@ -4116,6 +4164,7 @@ module PutLogEventsResponse =
         (Option.map ~f:SequenceToken.of_xml)
           (Xml.child xml_arg0 "nextSequenceToken") in
       make ?rejectedLogEventsInfo ?nextSequenceToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rejectedLogEventsInfo =
         field_map json "rejectedLogEventsInfo" RejectedLogEventsInfo.of_json in
@@ -4165,6 +4214,7 @@ module PutLogEventsRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?sequenceToken ~logEvents ~logStreamName ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sequenceToken =
         field_map json "sequenceToken" SequenceToken.of_json in
@@ -4238,6 +4288,7 @@ module PutDestinationResponse =
       let destination =
         (Option.map ~f:Destination.of_xml) (Xml.child xml_arg0 "destination") in
       make ?destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination = field_map json "destination" Destination.of_json in
       make ?destination ()
@@ -4277,6 +4328,7 @@ module PutDestinationRequest =
         DestinationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "destinationName") in
       make ~roleArn ~targetArn ~destinationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
       let targetArn = field_map_exn json "targetArn" TargetArn.of_json in
@@ -4320,6 +4372,7 @@ module PutDestinationPolicyRequest =
         DestinationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "destinationName") in
       make ?forceUpdate ~accessPolicy ~destinationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceUpdate = field_map json "forceUpdate" ForceUpdate.of_json in
       let accessPolicy =
@@ -4380,6 +4433,7 @@ module ListTagsLogGroupResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4400,6 +4454,7 @@ module ListTagsLogGroupRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName =
         field_map_exn json "logGroupName" LogGroupName.of_json in
@@ -4414,6 +4469,7 @@ module InvalidOperationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation is not valid on the specified resource."]
@@ -4495,6 +4551,7 @@ module GetQueryResultsResponse =
       let results =
         (Option.map ~f:QueryResults.of_xml) (Xml.child xml_arg0 "results") in
       make ?status ?statistics ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" QueryStatus.of_json in
       let statistics = field_map json "statistics" QueryStatistics.of_json in
@@ -4517,6 +4574,7 @@ module GetQueryResultsRequest =
       let queryId =
         QueryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "queryId") in
       make ~queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryId = field_map_exn json "queryId" QueryId.of_json in
       make ~queryId ()
@@ -4594,6 +4652,7 @@ module GetLogRecordResponse =
       let logRecord =
         (Option.map ~f:LogRecord.of_xml) (Xml.child xml_arg0 "logRecord") in
       make ?logRecord ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logRecord = field_map json "logRecord" LogRecord.of_json in
       make ?logRecord ()
@@ -4619,6 +4678,7 @@ module GetLogRecordRequest =
         LogRecordPointer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logRecordPointer") in
       make ~logRecordPointer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logRecordPointer =
         field_map_exn json "logRecordPointer" LogRecordPointer.of_json in
@@ -4700,6 +4760,7 @@ module GetLogGroupFieldsResponse =
         (Option.map ~f:LogGroupFieldList.of_xml)
           (Xml.child xml_arg0 "logGroupFields") in
       make ?logGroupFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupFields =
         field_map json "logGroupFields" LogGroupFieldList.of_json in
@@ -4729,6 +4790,7 @@ module GetLogGroupFieldsRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?time ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let time = field_map json "time" Timestamp.of_json in
       let logGroupName =
@@ -4817,6 +4879,7 @@ module GetLogEventsResponse =
       let events =
         (Option.map ~f:OutputLogEvents.of_xml) (Xml.child xml_arg0 "events") in
       make ?nextBackwardToken ?nextForwardToken ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextBackwardToken =
         field_map json "nextBackwardToken" NextToken.of_json in
@@ -4898,6 +4961,7 @@ module GetLogEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?startFromHead ?limit ?nextToken ?endTime ?startTime
         ~logStreamName ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startFromHead =
         field_map json "startFromHead" StartFromHead.of_json in
@@ -4992,6 +5056,7 @@ module FilterLogEventsResponse =
         (Option.map ~f:FilteredLogEvents.of_xml)
           (Xml.child xml_arg0 "events") in
       make ?nextToken ?searchedLogStreams ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let searchedLogStreams =
@@ -5093,6 +5158,7 @@ module FilterLogEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?interleaved ?limit ?nextToken ?filterPattern ?endTime ?startTime
         ?logStreamNamePrefix ?logStreamNames ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interleaved = field_map json "interleaved" Interleaved.of_json in
       let limit = field_map json "limit" EventsLimit.of_json in
@@ -5128,6 +5194,7 @@ module DisassociateKmsKeyRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName =
         field_map_exn json "logGroupName" LogGroupName.of_json in
@@ -5204,6 +5271,7 @@ module DescribeSubscriptionFiltersResponse =
         (Option.map ~f:SubscriptionFilters.of_xml)
           (Xml.child xml_arg0 "subscriptionFilters") in
       make ?nextToken ?subscriptionFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let subscriptionFilters =
@@ -5252,6 +5320,7 @@ module DescribeSubscriptionFiltersRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?limit ?nextToken ?filterNamePrefix ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" DescribeLimit.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5323,6 +5392,7 @@ module DescribeResourcePoliciesResponse =
         (Option.map ~f:ResourcePolicies.of_xml)
           (Xml.child xml_arg0 "resourcePolicies") in
       make ?nextToken ?resourcePolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let resourcePolicies =
@@ -5350,6 +5420,7 @@ module DescribeResourcePoliciesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?limit ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" DescribeLimit.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5416,6 +5487,7 @@ module DescribeQueryDefinitionsResponse =
         (Option.map ~f:QueryDefinitionList.of_xml)
           (Xml.child xml_arg0 "queryDefinitions") in
       make ?nextToken ?queryDefinitions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let queryDefinitions =
@@ -5458,6 +5530,7 @@ module DescribeQueryDefinitionsRequest =
         (Option.map ~f:QueryDefinitionName.of_xml)
           (Xml.child xml_arg0 "queryDefinitionNamePrefix") in
       make ?nextToken ?maxResults ?queryDefinitionNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults =
@@ -5535,6 +5608,7 @@ module DescribeQueriesResponse =
       let queries =
         (Option.map ~f:QueryInfoList.of_xml) (Xml.child xml_arg0 "queries") in
       make ?nextToken ?queries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let queries = field_map json "queries" QueryInfoList.of_json in
@@ -5582,6 +5656,7 @@ module DescribeQueriesRequest =
         (Option.map ~f:LogGroupName.of_xml)
           (Xml.child xml_arg0 "logGroupName") in
       make ?nextToken ?maxResults ?status ?logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults =
@@ -5661,6 +5736,7 @@ module DescribeMetricFiltersResponse =
         (Option.map ~f:MetricFilters.of_xml)
           (Xml.child xml_arg0 "metricFilters") in
       make ?nextToken ?metricFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let metricFilters =
@@ -5735,6 +5811,7 @@ module DescribeMetricFiltersRequest =
           (Xml.child xml_arg0 "logGroupName") in
       make ?metricNamespace ?metricName ?limit ?nextToken ?filterNamePrefix
         ?logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricNamespace =
         field_map json "metricNamespace" MetricNamespace.of_json in
@@ -5815,6 +5892,7 @@ module DescribeLogStreamsResponse =
       let logStreams =
         (Option.map ~f:LogStreams.of_xml) (Xml.child xml_arg0 "logStreams") in
       make ?nextToken ?logStreams ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let logStreams = field_map json "logStreams" LogStreams.of_json in
@@ -5885,6 +5963,7 @@ module DescribeLogStreamsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?limit ?nextToken ?descending ?orderBy ?logStreamNamePrefix
         ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" DescribeLimit.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5958,6 +6037,7 @@ module DescribeLogGroupsResponse =
       let logGroups =
         (Option.map ~f:LogGroups.of_xml) (Xml.child xml_arg0 "logGroups") in
       make ?nextToken ?logGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let logGroups = field_map json "logGroups" LogGroups.of_json in
@@ -5996,6 +6076,7 @@ module DescribeLogGroupsRequest =
         (Option.map ~f:LogGroupName.of_xml)
           (Xml.child xml_arg0 "logGroupNamePrefix") in
       make ?limit ?nextToken ?logGroupNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" DescribeLimit.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6062,6 +6143,7 @@ module DescribeExportTasksResponse =
       let exportTasks =
         (Option.map ~f:ExportTasks.of_xml) (Xml.child xml_arg0 "exportTasks") in
       make ?nextToken ?exportTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let exportTasks = field_map json "exportTasks" ExportTasks.of_json in
@@ -6108,6 +6190,7 @@ module DescribeExportTasksRequest =
       let taskId =
         (Option.map ~f:ExportTaskId.of_xml) (Xml.child xml_arg0 "taskId") in
       make ?limit ?nextToken ?statusCode ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" DescribeLimit.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6177,6 +6260,7 @@ module DescribeDestinationsResponse =
         (Option.map ~f:Destinations.of_xml)
           (Xml.child xml_arg0 "destinations") in
       make ?nextToken ?destinations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let destinations = field_map json "destinations" Destinations.of_json in
@@ -6216,6 +6300,7 @@ module DescribeDestinationsRequest =
         (Option.map ~f:DestinationName.of_xml)
           (Xml.child xml_arg0 "DestinationNamePrefix") in
       make ?limit ?nextToken ?destinationNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" DescribeLimit.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6248,6 +6333,7 @@ module DeleteSubscriptionFilterRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~filterName ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterName = field_map_exn json "filterName" FilterName.of_json in
       let logGroupName =
@@ -6271,6 +6357,7 @@ module DeleteRetentionPolicyRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName =
         field_map_exn json "logGroupName" LogGroupName.of_json in
@@ -6294,6 +6381,7 @@ module DeleteResourcePolicyRequest =
       let policyName =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "policyName") in
       make ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map json "policyName" PolicyName.of_json in
       make ?policyName ()
@@ -6363,6 +6451,7 @@ module DeleteQueryDefinitionResponse =
       let success =
         (Option.map ~f:Success.of_xml) (Xml.child xml_arg0 "success") in
       make ?success ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let success = field_map json "success" Success.of_json in
       make ?success ()
@@ -6387,6 +6476,7 @@ module DeleteQueryDefinitionRequest =
         QueryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "queryDefinitionId") in
       make ~queryDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryDefinitionId =
         field_map_exn json "queryDefinitionId" QueryId.of_json in
@@ -6416,6 +6506,7 @@ module DeleteMetricFilterRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~filterName ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterName = field_map_exn json "filterName" FilterName.of_json in
       let logGroupName =
@@ -6446,6 +6537,7 @@ module DeleteLogStreamRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~logStreamName ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logStreamName =
         field_map_exn json "logStreamName" LogStreamName.of_json in
@@ -6471,6 +6563,7 @@ module DeleteLogGroupRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName =
         field_map_exn json "logGroupName" LogGroupName.of_json in
@@ -6496,6 +6589,7 @@ module DeleteDestinationRequest =
         DestinationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "destinationName") in
       make ~destinationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationName =
         field_map_exn json "destinationName" DestinationName.of_json in
@@ -6526,6 +6620,7 @@ module CreateLogStreamRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~logStreamName ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logStreamName =
         field_map_exn json "logStreamName" LogStreamName.of_json in
@@ -6564,6 +6659,7 @@ module CreateLogGroupRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?tags ?kmsKeyId ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let kmsKeyId = field_map json "kmsKeyId" KmsKeyId.of_json in
@@ -6663,6 +6759,7 @@ module CreateExportTaskResponse =
       let taskId =
         (Option.map ~f:ExportTaskId.of_xml) (Xml.child xml_arg0 "taskId") in
       make ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskId = field_map json "taskId" ExportTaskId.of_json in
       make ?taskId ()
@@ -6743,6 +6840,7 @@ module CreateExportTaskRequest =
         (Option.map ~f:ExportTaskName.of_xml) (Xml.child xml_arg0 "taskName") in
       make ?destinationPrefix ~destination ~to_ ~from ?logStreamNamePrefix
         ~logGroupName ?taskName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationPrefix =
         field_map json "destinationPrefix" ExportDestinationPrefix.of_json in
@@ -6776,6 +6874,7 @@ module CancelExportTaskRequest =
         ExportTaskId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
       make ~taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskId = field_map_exn json "taskId" ExportTaskId.of_json in
       make ~taskId ()
@@ -6805,6 +6904,7 @@ module AssociateKmsKeyRequest =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ~kmsKeyId ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map_exn json "kmsKeyId" KmsKeyId.of_json in
       let logGroupName =

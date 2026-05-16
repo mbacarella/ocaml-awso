@@ -178,6 +178,7 @@ module DataReplicationInitiationStep =
         (Option.map ~f:DataReplicationInitiationStepName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "status" DataReplicationInitiationStepStatus.of_json in
@@ -425,6 +426,7 @@ module DataReplicationInfoReplicatedDisk =
           (Xml.child xml_arg0 "backloggedStorageBytes") in
       make ?totalStorageBytes ?rescannedStorageBytes ?replicatedStorageBytes
         ?deviceName ?backloggedStorageBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalStorageBytes =
         field_map json "totalStorageBytes" PositiveInteger.of_json in
@@ -482,6 +484,7 @@ module LifeCycleLastCutoverFinalized =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "apiCallDateTime") in
       make ?apiCallDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiCallDateTime =
         field_map json "apiCallDateTime" ISO8601DatetimeString.of_json in
@@ -509,6 +512,7 @@ module LifeCycleLastCutoverInitiated =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "apiCallDateTime") in
       make ?jobID ?apiCallDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobID = field_map json "jobID" JobID.of_json in
       let apiCallDateTime =
@@ -533,6 +537,7 @@ module LifeCycleLastCutoverReverted =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "apiCallDateTime") in
       make ?apiCallDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiCallDateTime =
         field_map json "apiCallDateTime" ISO8601DatetimeString.of_json in
@@ -556,6 +561,7 @@ module LifeCycleLastTestFinalized =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "apiCallDateTime") in
       make ?apiCallDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiCallDateTime =
         field_map json "apiCallDateTime" ISO8601DatetimeString.of_json in
@@ -584,6 +590,7 @@ module LifeCycleLastTestInitiated =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "apiCallDateTime") in
       make ?jobID ?apiCallDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobID = field_map json "jobID" JobID.of_json in
       let apiCallDateTime =
@@ -608,6 +615,7 @@ module LifeCycleLastTestReverted =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "apiCallDateTime") in
       make ?apiCallDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiCallDateTime =
         field_map json "apiCallDateTime" ISO8601DatetimeString.of_json in
@@ -634,6 +642,7 @@ module CPU =
       let cores =
         (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "cores") in
       make ?modelName ?cores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelName = field_map json "modelName" BoundedString.of_json in
       let cores = field_map json "cores" PositiveInteger.of_json in
@@ -661,6 +670,7 @@ module Disk =
       let bytes =
         (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "bytes") in
       make ?deviceName ?bytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceName = field_map json "deviceName" BoundedString.of_json in
       let bytes = field_map json "bytes" PositiveInteger.of_json in
@@ -713,6 +723,7 @@ module NetworkInterface =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPrimary") in
       let ips = (Option.map ~f:IPsList.of_xml) (Xml.child xml_arg0 "ips") in
       make ?macAddress ?isPrimary ?ips ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let macAddress = field_map json "macAddress" BoundedString.of_json in
       let isPrimary = field_map json "isPrimary" Boolean.of_json in
@@ -741,6 +752,7 @@ module ValidationExceptionField =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?name ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" LargeBoundedString.of_json in
       let message = field_map json "message" LargeBoundedString.of_json in
@@ -860,6 +872,7 @@ module DataReplicationError =
         (Option.map ~f:DataReplicationErrorString.of_xml)
           (Xml.child xml_arg0 "error") in
       make ?rawError ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rawError = field_map json "rawError" LargeBoundedString.of_json in
       let error = field_map json "error" DataReplicationErrorString.of_json in
@@ -931,6 +944,7 @@ module DataReplicationInitiation =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "nextAttemptDateTime") in
       make ?steps ?startDateTime ?nextAttemptDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let steps =
         field_map json "steps" DataReplicationInitiationSteps.of_json in
@@ -1061,6 +1075,7 @@ module LifeCycleLastCutover =
         (Option.map ~f:LifeCycleLastCutoverFinalized.of_xml)
           (Xml.child xml_arg0 "finalized") in
       make ?reverted ?initiated ?finalized ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverted =
         field_map json "reverted" LifeCycleLastCutoverReverted.of_json in
@@ -1104,6 +1119,7 @@ module LifeCycleLastTest =
         (Option.map ~f:LifeCycleLastTestFinalized.of_xml)
           (Xml.child xml_arg0 "finalized") in
       make ?reverted ?initiated ?finalized ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverted =
         field_map json "reverted" LifeCycleLastTestReverted.of_json in
@@ -1277,6 +1293,7 @@ module IdentificationHints =
         (Option.map ~f:EC2InstanceID.of_xml)
           (Xml.child xml_arg0 "awsInstanceID") in
       make ?vmWareUuid ?vmPath ?hostname ?fqdn ?awsInstanceID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vmWareUuid = field_map json "vmWareUuid" BoundedString.of_json in
       let vmPath = field_map json "vmPath" BoundedString.of_json in
@@ -1331,6 +1348,7 @@ module OS =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "fullString") in
       make ?fullString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fullString = field_map json "fullString" BoundedString.of_json in
       make ?fullString ()
@@ -1440,6 +1458,7 @@ module ParticipatingServer =
         (Option.map ~f:LaunchStatus.of_xml)
           (Xml.child xml_arg0 "launchStatus") in
       make ?sourceServerID ?launchStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map json "sourceServerID" SourceServerID.of_json in
@@ -1600,6 +1619,7 @@ module ConflictException =
       let code =
         (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       make ?resourceType ?resourceId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map json "resourceType" LargeBoundedString.of_json in
@@ -1693,6 +1713,7 @@ module DataReplicationInfo =
       make ?replicatedDisks ?lastSnapshotDateTime ?lagDuration ?etaDateTime
         ?dataReplicationState ?dataReplicationInitiation
         ?dataReplicationError ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicatedDisks =
         field_map json "replicatedDisks"
@@ -1742,6 +1763,7 @@ module LaunchedInstance =
         (Option.map ~f:EC2InstanceID.of_xml)
           (Xml.child xml_arg0 "ec2InstanceID") in
       make ?jobID ?firstBoot ?ec2InstanceID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobID = field_map json "jobID" JobID.of_json in
       let firstBoot = field_map json "firstBoot" FirstBoot.of_json in
@@ -1826,6 +1848,7 @@ module LifeCycle =
       make ?state ?lastTest ?lastSeenByServiceDateTime ?lastCutover
         ?firstByteDateTime ?elapsedReplicationDuration
         ?addedToServiceDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "state" LifeCycleState.of_json in
       let lastTest = field_map json "lastTest" LifeCycleLastTest.of_json in
@@ -1908,6 +1931,7 @@ module ResourceNotFoundException =
       let code =
         (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       make ?resourceType ?resourceId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map json "resourceType" LargeBoundedString.of_json in
@@ -1979,6 +2003,7 @@ module ServiceQuotaExceededException =
         (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ?code
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode =
         field_map json "serviceCode" LargeBoundedString.of_json in
@@ -2065,6 +2090,7 @@ module SourceProperties =
       let cpus = (Option.map ~f:Cpus.of_xml) (Xml.child xml_arg0 "cpus") in
       make ?recommendedInstanceType ?ramBytes ?os ?networkInterfaces
         ?lastUpdatedDateTime ?identificationHints ?disks ?cpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendedInstanceType =
         field_map json "recommendedInstanceType" EC2InstanceType.of_json in
@@ -2101,6 +2127,7 @@ module UninitializedAccountException =
       let code =
         (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" LargeBoundedString.of_json in
       let code = field_map json "code" LargeBoundedString.of_json in
@@ -2143,6 +2170,7 @@ module ValidationException =
       let code =
         (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       make ?reason ?message ?fieldList ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ValidationExceptionReason.of_json in
       let message = field_map json "message" LargeBoundedString.of_json in
@@ -2171,6 +2199,7 @@ module AccessDeniedException =
       let code =
         (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" LargeBoundedString.of_json in
       let code = field_map json "code" LargeBoundedString.of_json in
@@ -2565,6 +2594,7 @@ module JobLogEventData =
         (Option.map ~f:EC2InstanceID.of_xml)
           (Xml.child xml_arg0 "conversionServerID") in
       make ?targetInstanceID ?sourceServerID ?rawError ?conversionServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetInstanceID =
         field_map json "targetInstanceID" EC2InstanceID.of_json in
@@ -2625,6 +2655,7 @@ module ReplicationConfigurationReplicatedDisk =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "deviceName") in
       make ?throughput ?stagingDiskType ?isBootDisk ?iops ?deviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let throughput = field_map json "throughput" PositiveInteger.of_json in
       let stagingDiskType =
@@ -2710,6 +2741,7 @@ module VcenterClient =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
       make ?vcenterUUID ?vcenterClientID ?tags ?sourceServerTags
         ?lastSeenDatetime ?hostname ?datacenterName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vcenterUUID = field_map json "vcenterUUID" BoundedString.of_json in
       let vcenterClientID =
@@ -2875,6 +2907,7 @@ module SourceServer =
       make ?vcenterClientID ?tags ?sourceServerID ?sourceProperties
         ?replicationType ?lifeCycle ?launchedInstance ?isArchived
         ?dataReplicationInfo ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vcenterClientID =
         field_map json "vcenterClientID" VcenterClientID.of_json in
@@ -3195,6 +3228,7 @@ module ReplicationConfigurationTemplate =
         ?ebsEncryptionKeyArn ?ebsEncryption ?defaultLargeStagingDiskType
         ?dataPlaneRouting ?createPublicIP ?bandwidthThrottling
         ?associateDefaultSecurityGroup ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDedicatedReplicationServer =
         field_map json "useDedicatedReplicationServer" Boolean.of_json in
@@ -3312,6 +3346,7 @@ module Job =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
       make ?type_ ?tags ?status ?participatingServers ~jobID ?initiatedBy
         ?endDateTime ?creationDateTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" JobType.of_json in
       let tags = field_map json "tags" TagsMap.of_json in
@@ -3387,6 +3422,7 @@ module JobLog =
       let event =
         (Option.map ~f:JobLogEvent.of_xml) (Xml.child xml_arg0 "event") in
       make ?logDateTime ?eventData ?event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logDateTime =
         field_map json "logDateTime" ISO8601DatetimeString.of_json in
@@ -3543,6 +3579,7 @@ module Licensing =
       let osByol =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "osByol") in
       make ?osByol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let osByol = field_map json "osByol" Boolean.of_json in make ?osByol ()
     let to_json v = composed_to_json to_value v
@@ -3708,6 +3745,7 @@ module InternalServerException =
         LargeBoundedString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" PositiveInteger.of_json in
@@ -3758,6 +3796,7 @@ module ThrottlingException =
         LargeBoundedString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode =
         field_map json "serviceCode" LargeBoundedString.of_json in
@@ -3900,6 +3939,7 @@ module DescribeSourceServersRequestFilters =
       let isArchived =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isArchived") in
       make ?sourceServerIDs ?replicationTypes ?lifeCycleStates ?isArchived ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerIDs =
         field_map json "sourceServerIDs"
@@ -4025,6 +4065,7 @@ module DescribeJobsRequestFilters =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "fromDate") in
       make ?toDate ?jobIDs ?fromDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let toDate = field_map json "toDate" ISO8601DatetimeString.of_json in
       let jobIDs =
@@ -4077,6 +4118,7 @@ module ChangeServerLifeCycleStateSourceServerLifecycle =
         ChangeServerLifeCycleStateSourceServerLifecycleState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map_exn json "state"
@@ -4111,6 +4153,7 @@ module UpdateSourceServerReplicationTypeRequest =
         ReplicationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "replicationType") in
       make ~sourceServerID ~replicationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -4282,6 +4325,7 @@ module UpdateReplicationConfigurationTemplateRequest =
         ?ebsEncryptionKeyArn ?ebsEncryption ?defaultLargeStagingDiskType
         ?dataPlaneRouting ?createPublicIP ?bandwidthThrottling
         ?associateDefaultSecurityGroup ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDedicatedReplicationServer =
         field_map json "useDedicatedReplicationServer" Boolean.of_json in
@@ -4492,6 +4536,7 @@ module UpdateReplicationConfigurationRequest =
         ?replicatedDisks ?name ?ebsEncryptionKeyArn ?ebsEncryption
         ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
         ?bandwidthThrottling ?associateDefaultSecurityGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDedicatedReplicationServer =
         field_map json "useDedicatedReplicationServer" Boolean.of_json in
@@ -4615,6 +4660,7 @@ module UpdateLaunchConfigurationRequest =
         (Option.map ~f:BootMode.of_xml) (Xml.child xml_arg0 "bootMode") in
       make ?targetInstanceTypeRightSizingMethod ~sourceServerID ?name
         ?licensing ?launchDisposition ?copyTags ?copyPrivateIp ?bootMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetInstanceTypeRightSizingMethod =
         field_map json "targetInstanceTypeRightSizingMethod"
@@ -4653,6 +4699,7 @@ module UntagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -4720,6 +4767,7 @@ module TerminateTargetInstancesResponse =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -4750,6 +4798,7 @@ module TerminateTargetInstancesRequest =
         TerminateTargetInstancesRequestSourceServerIDs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerIDs") in
       make ?tags ~sourceServerIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let sourceServerIDs =
@@ -4778,6 +4827,7 @@ module TagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagsMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -4844,6 +4894,7 @@ module StartTestResponse =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -4871,6 +4922,7 @@ module StartTestRequest =
         StartTestRequestSourceServerIDs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerIDs") in
       make ?tags ~sourceServerIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let sourceServerIDs =
@@ -4898,6 +4950,7 @@ module StartReplicationRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -4963,6 +5016,7 @@ module StartCutoverResponse =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -4991,6 +5045,7 @@ module StartCutoverRequest =
         StartCutoverRequestSourceServerIDs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerIDs") in
       make ?tags ~sourceServerIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let sourceServerIDs =
@@ -5018,6 +5073,7 @@ module RetryDataReplicationRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -5223,6 +5279,7 @@ module ReplicationConfiguration =
         ?replicatedDisks ?name ?ebsEncryptionKeyArn ?ebsEncryption
         ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
         ?bandwidthThrottling ?associateDefaultSecurityGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDedicatedReplicationServer =
         field_map json "useDedicatedReplicationServer" Boolean.of_json in
@@ -5284,6 +5341,7 @@ module MarkAsArchivedRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -5366,6 +5424,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5387,6 +5446,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -5519,6 +5579,7 @@ module LaunchConfiguration =
       make ?targetInstanceTypeRightSizingMethod ?sourceServerID ?name
         ?licensing ?launchDisposition ?ec2LaunchTemplateID ?copyTags
         ?copyPrivateIp ?bootMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetInstanceTypeRightSizingMethod =
         field_map json "targetInstanceTypeRightSizingMethod"
@@ -5584,6 +5645,7 @@ module InitializeServiceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Initialize Application Migration Service."]
@@ -5595,6 +5657,7 @@ module InitializeServiceRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Initialize Application Migration Service."]
@@ -5617,6 +5680,7 @@ module GetReplicationConfigurationRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -5643,6 +5707,7 @@ module GetLaunchConfigurationRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -5668,6 +5733,7 @@ module FinalizeCutoverRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -5694,6 +5760,7 @@ module DisconnectFromServiceRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -5770,6 +5837,7 @@ module DescribeVcenterClientsResponse =
       let items =
         (Option.map ~f:VcenterClientList.of_xml) (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let items = field_map json "items" VcenterClientList.of_json in
@@ -5802,6 +5870,7 @@ module DescribeVcenterClientsRequest =
         (Option.map ~f:StrictlyPositiveInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -5868,6 +5937,7 @@ module DescribeSourceServersResponse =
       let items =
         (Option.map ~f:SourceServersList.of_xml) (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let items = field_map json "items" SourceServersList.of_json in
@@ -5909,6 +5979,7 @@ module DescribeSourceServersRequest =
         DescribeSourceServersRequestFilters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ?nextToken ?maxResults ~filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -5992,6 +6063,7 @@ module DescribeReplicationConfigurationTemplatesResponse =
         (Option.map ~f:ReplicationConfigurationTemplates.of_xml)
           (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let items =
@@ -6042,6 +6114,7 @@ module DescribeReplicationConfigurationTemplatesRequest =
         (Option.map ~f:StrictlyPositiveInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ~replicationConfigurationTemplateIDs ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationConfigurationTemplateIDs =
         field_map_exn json "replicationConfigurationTemplateIDs"
@@ -6112,6 +6185,7 @@ module DescribeJobsResponse =
       let items =
         (Option.map ~f:JobsList.of_xml) (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let items = field_map json "items" JobsList.of_json in
@@ -6151,6 +6225,7 @@ module DescribeJobsRequest =
         DescribeJobsRequestFilters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ?nextToken ?maxResults ~filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -6219,6 +6294,7 @@ module DescribeJobLogItemsResponse =
           (Xml.child xml_arg0 "nextToken") in
       let items = (Option.map ~f:JobLogs.of_xml) (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let items = field_map json "items" JobLogs.of_json in
@@ -6255,6 +6331,7 @@ module DescribeJobLogItemsRequest =
       let jobID =
         JobID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobID") in
       make ?nextToken ?maxResults ~jobID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -6281,6 +6358,7 @@ module DeleteVcenterClientRequest =
         VcenterClientID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "vcenterClientID") in
       make ~vcenterClientID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vcenterClientID =
         field_map_exn json "vcenterClientID" VcenterClientID.of_json in
@@ -6342,6 +6420,7 @@ module DeleteSourceServerResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a single source server by ID."]
@@ -6364,6 +6443,7 @@ module DeleteSourceServerRequest =
         SourceServerID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in
@@ -6425,6 +6505,7 @@ module DeleteReplicationConfigurationTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6453,6 +6534,7 @@ module DeleteReplicationConfigurationTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "replicationConfigurationTemplateID") in
       make ~replicationConfigurationTemplateID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationConfigurationTemplateID =
         field_map_exn json "replicationConfigurationTemplateID"
@@ -6516,6 +6598,7 @@ module DeleteJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a single Job by ID."]
@@ -6534,6 +6617,7 @@ module DeleteJobRequest =
       let jobID =
         JobID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobID") in
       make ~jobID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobID = field_map_exn json "jobID" JobID.of_json in make ~jobID ()
     let to_json v = composed_to_json to_value v
@@ -6693,6 +6777,7 @@ module CreateReplicationConfigurationTemplateRequest =
         ~replicationServerInstanceType ?ebsEncryptionKeyArn ~ebsEncryption
         ~defaultLargeStagingDiskType ~dataPlaneRouting ~createPublicIP
         ~bandwidthThrottling ~associateDefaultSecurityGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDedicatedReplicationServer =
         field_map_exn json "useDedicatedReplicationServer" Boolean.of_json in
@@ -6760,6 +6845,7 @@ module ChangeServerLifeCycleStateRequest =
         ChangeServerLifeCycleStateSourceServerLifecycle.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "lifeCycle") in
       make ~sourceServerID ~lifeCycle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceServerID =
         field_map_exn json "sourceServerID" SourceServerID.of_json in

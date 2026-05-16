@@ -1512,7 +1512,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
              (Some GetProvisionedConcurrencyConfigResponse.error_of_json))
   | Invoke ->
       if is_success
-      then Ok (InvocationResponse.of_json (response_to_json resp))
+      then
+        let body = Blob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (InvocationResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some InvocationResponse.error_of_json))
   | InvokeAsync ->
       if is_success

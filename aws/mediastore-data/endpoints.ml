@@ -157,7 +157,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some DescribeObjectResponse.error_of_json))
   | GetObject ->
       if is_success
-      then Ok (GetObjectResponse.of_json (response_to_json resp))
+      then
+        let body = PayloadBlob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetObjectResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetObjectResponse.error_of_json))
   | ListItems ->
       if is_success

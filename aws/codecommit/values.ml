@@ -451,6 +451,7 @@ module MergeHunkDetail =
       let startLine =
         (Option.map ~f:LineNumber.of_xml) (Xml.child xml_arg0 "startLine") in
       make ?hunkContent ?endLine ?startLine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hunkContent = field_map json "hunkContent" HunkContent.of_json in
       let endLine = field_map json "endLine" LineNumber.of_json in
@@ -537,6 +538,7 @@ module OriginApprovalRuleTemplate =
         (Option.map ~f:ApprovalRuleTemplateId.of_xml)
           (Xml.child xml_arg0 "approvalRuleTemplateId") in
       make ?approvalRuleTemplateName ?approvalRuleTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplateName =
         field_map json "approvalRuleTemplateName"
@@ -599,6 +601,7 @@ module MergeMetadata =
       let isMerged =
         (Option.map ~f:IsMerged.of_xml) (Xml.child xml_arg0 "isMerged") in
       make ?mergeOption ?mergeCommitId ?mergedBy ?isMerged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeOption =
         field_map json "mergeOption" MergeOptionTypeEnum.of_json in
@@ -879,6 +882,7 @@ module Comment =
       make ?reactionCounts ?callerReactions ?clientRequestToken ?deleted
         ?authorArn ?lastModifiedDate ?creationDate ?inReplyTo ?content
         ?commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reactionCounts =
         field_map json "reactionCounts" ReactionCountsMap.of_json in
@@ -1140,6 +1144,7 @@ module FileModes =
       let source =
         (Option.map ~f:FileModeTypeEnum.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let base = field_map json "base" FileModeTypeEnum.of_json in
       let destination = field_map json "destination" FileModeTypeEnum.of_json in
@@ -1176,6 +1181,7 @@ module FileSizes =
       let source =
         (Option.map ~f:FileSize.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let base = field_map json "base" FileSize.of_json in
       let destination = field_map json "destination" FileSize.of_json in
@@ -1216,6 +1222,7 @@ module IsBinaryFile =
       let source =
         (Option.map ~f:CapitalBoolean.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let base = field_map json "base" CapitalBoolean.of_json in
       let destination = field_map json "destination" CapitalBoolean.of_json in
@@ -1287,6 +1294,7 @@ module MergeOperations =
       let source =
         (Option.map ~f:ChangeTypeEnum.of_xml) (Xml.child xml_arg0 "source") in
       make ?destination ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination = field_map json "destination" ChangeTypeEnum.of_json in
       let source = field_map json "source" ChangeTypeEnum.of_json in
@@ -1338,6 +1346,7 @@ module ObjectTypes =
       let source =
         (Option.map ~f:ObjectTypeEnum.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let base = field_map json "base" ObjectTypeEnum.of_json in
       let destination = field_map json "destination" ObjectTypeEnum.of_json in
@@ -1386,6 +1395,7 @@ module MergeHunk =
         (Option.map ~f:IsHunkConflict.of_xml)
           (Xml.child xml_arg0 "isConflict") in
       make ?base ?destination ?source ?isConflict ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let base = field_map json "base" MergeHunkDetail.of_json in
       let destination = field_map json "destination" MergeHunkDetail.of_json in
@@ -1484,6 +1494,7 @@ module ApprovalRule =
       make ?originApprovalRuleTemplate ?lastModifiedUser ?creationDate
         ?lastModifiedDate ?ruleContentSha256 ?approvalRuleContent
         ?approvalRuleName ?approvalRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originApprovalRuleTemplate =
         field_map json "originApprovalRuleTemplate"
@@ -1584,6 +1595,7 @@ module PullRequestTarget =
           (Xml.child xml_arg0 "repositoryName") in
       make ?mergeMetadata ?mergeBase ?sourceCommit ?destinationCommit
         ?destinationReference ?sourceReference ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeMetadata =
         field_map json "mergeMetadata" MergeMetadata.of_json in
@@ -1707,6 +1719,7 @@ module DeleteFileEntry =
       let filePath =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ~filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filePath = field_map_exn json "filePath" Path.of_json in
       make ~filePath ()
@@ -1751,6 +1764,7 @@ module ReplaceContentEntry =
       let filePath =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ?fileMode ?content ~replacementType ~filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
       let content = field_map json "content" FileContent.of_json in
@@ -1783,6 +1797,7 @@ module SetFileModeEntry =
       let filePath =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ~fileMode ~filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileMode = field_map_exn json "fileMode" FileModeTypeEnum.of_json in
       let filePath = field_map_exn json "filePath" Path.of_json in
@@ -1826,6 +1841,7 @@ module BlobMetadata =
       let blobId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       make ?mode ?path ?blobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mode = field_map json "mode" Mode.of_json in
       let path = field_map json "path" Path.of_json in
@@ -1890,6 +1906,7 @@ module Location =
       let filePath =
         (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "filePath") in
       make ?relativeFileVersion ?filePosition ?filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relativeFileVersion =
         field_map json "relativeFileVersion" RelativeFileVersionEnum.of_json in
@@ -1966,6 +1983,7 @@ module ReactionValueFormats =
       let emoji =
         (Option.map ~f:ReactionEmoji.of_xml) (Xml.child xml_arg0 "emoji") in
       make ?unicode ?shortCode ?emoji ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unicode = field_map json "unicode" ReactionUnicode.of_json in
       let shortCode = field_map json "shortCode" ReactionShortCode.of_json in
@@ -2008,6 +2026,7 @@ module ApprovalRuleEventMetadata =
         (Option.map ~f:ApprovalRuleName.of_xml)
           (Xml.child xml_arg0 "approvalRuleName") in
       make ?approvalRuleContent ?approvalRuleId ?approvalRuleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleContent =
         field_map json "approvalRuleContent" ApprovalRuleContent.of_json in
@@ -2042,6 +2061,7 @@ module ApprovalRuleOverriddenEventMetadata =
       let revisionId =
         (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?overrideStatus ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrideStatus =
         field_map json "overrideStatus" OverrideStatus.of_json in
@@ -2074,6 +2094,7 @@ module ApprovalStateChangedEventMetadata =
       let revisionId =
         (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?approvalStatus ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalStatus =
         field_map json "approvalStatus" ApprovalState.of_json in
@@ -2143,6 +2164,7 @@ module PullRequestCreatedEventMetadata =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?mergeBase ?destinationCommitId ?sourceCommitId ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeBase = field_map json "mergeBase" CommitId.of_json in
       let destinationCommitId =
@@ -2251,6 +2273,7 @@ module PullRequestMergedStateChangedEventMetadata =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?mergeMetadata ?destinationReference ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeMetadata =
         field_map json "mergeMetadata" MergeMetadata.of_json in
@@ -2304,6 +2327,7 @@ module PullRequestSourceReferenceUpdatedEventMetadata =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?mergeBase ?afterCommitId ?beforeCommitId ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeBase = field_map json "mergeBase" CommitId.of_json in
       let afterCommitId = field_map json "afterCommitId" CommitId.of_json in
@@ -2331,6 +2355,7 @@ module PullRequestStatusChangedEventMetadata =
         (Option.map ~f:PullRequestStatusEnum.of_xml)
           (Xml.child xml_arg0 "pullRequestStatus") in
       make ?pullRequestStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequestStatus =
         field_map json "pullRequestStatus" PullRequestStatusEnum.of_json in
@@ -2361,6 +2386,7 @@ module SourceFileSpecifier =
       let filePath =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ?isMove ~filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isMove = field_map json "isMove" IsMove.of_json in
       let filePath = field_map_exn json "filePath" Path.of_json in
@@ -2522,6 +2548,7 @@ module UserInfo =
       let email = (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "email") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?date ?email ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let date = field_map json "date" Date.of_json in
       let email = field_map json "email" Email.of_json in
@@ -2647,6 +2674,7 @@ module ConflictMetadata =
       make ?mergeOperations ?objectTypeConflict ?fileModeConflict
         ?contentConflict ?isBinaryFile ?numberOfConflicts ?objectTypes
         ?fileModes ?fileSizes ?filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeOperations =
         field_map json "mergeOperations" MergeOperations.of_json in
@@ -2851,6 +2879,7 @@ module RepositoryTriggerExecutionFailure =
         (Option.map ~f:RepositoryTriggerName.of_xml)
           (Xml.child xml_arg0 "trigger") in
       make ?failureMessage ?trigger ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureMessage =
         field_map json "failureMessage"
@@ -2909,6 +2938,7 @@ module RepositoryTrigger =
         RepositoryTriggerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~events ?branches ?customData ~destinationArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events =
         field_map_exn json "events" RepositoryTriggerEventList.of_json in
@@ -3039,6 +3069,7 @@ module RepositoryNameIdPair =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?repositoryId ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryId = field_map json "repositoryId" RepositoryId.of_json in
       let repositoryName =
@@ -3069,6 +3100,7 @@ module Approval =
           (Xml.child xml_arg0 "approvalState") in
       let userArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "userArn") in
       make ?approvalState ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalState =
         field_map json "approvalState" ApprovalState.of_json in
@@ -3115,6 +3147,7 @@ module File =
       let blobId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       make ?fileMode ?relativePath ?absolutePath ?blobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
       let relativePath = field_map json "relativePath" Path.of_json in
@@ -3153,6 +3186,7 @@ module Folder =
       let treeId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "treeId") in
       make ?relativePath ?absolutePath ?treeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relativePath = field_map json "relativePath" Path.of_json in
       let absolutePath = field_map json "absolutePath" Path.of_json in
@@ -3191,6 +3225,7 @@ module SubModule =
       let commitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?relativePath ?absolutePath ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relativePath = field_map json "relativePath" Path.of_json in
       let absolutePath = field_map json "absolutePath" Path.of_json in
@@ -3238,6 +3273,7 @@ module SymbolicLink =
       let blobId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       make ?fileMode ?relativePath ?absolutePath ?blobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
       let relativePath = field_map json "relativePath" Path.of_json in
@@ -3278,6 +3314,7 @@ module Difference =
       let beforeBlob =
         (Option.map ~f:BlobMetadata.of_xml) (Xml.child xml_arg0 "beforeBlob") in
       make ?changeType ?afterBlob ?beforeBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeType = field_map json "changeType" ChangeTypeEnum.of_json in
       let afterBlob = field_map json "afterBlob" BlobMetadata.of_json in
@@ -3367,6 +3404,7 @@ module CommentsForPullRequest =
           (Xml.child xml_arg0 "pullRequestId") in
       make ?comments ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ?pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comments = field_map json "comments" Comments.of_json in
       let location = field_map json "location" Location.of_json in
@@ -3454,6 +3492,7 @@ module CommentsForComparedCommit =
           (Xml.child xml_arg0 "repositoryName") in
       make ?comments ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comments = field_map json "comments" Comments.of_json in
       let location = field_map json "location" Location.of_json in
@@ -3505,6 +3544,7 @@ module ReactionForComment =
         (Option.map ~f:ReactionValueFormats.of_xml)
           (Xml.child xml_arg0 "reaction") in
       make ?reactionsFromDeletedUsersCount ?reactionUsers ?reaction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reactionsFromDeletedUsersCount =
         field_map json "reactionsFromDeletedUsersCount" Count.of_json in
@@ -3727,6 +3767,7 @@ module PullRequestEvent =
         ?pullRequestStatusChangedEventMetadata
         ?pullRequestCreatedEventMetadata ?actorArn ?pullRequestEventType
         ?eventDate ?pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleOverriddenEventMetadata =
         field_map json "approvalRuleOverriddenEventMetadata"
@@ -3802,6 +3843,7 @@ module Target =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?destinationReference ~sourceReference ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationReference =
         field_map json "destinationReference" ReferenceName.of_json in
@@ -3842,6 +3884,7 @@ module FileMetadata =
       let absolutePath =
         (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "absolutePath") in
       make ?fileMode ?blobId ?absolutePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
       let blobId = field_map json "blobId" ObjectId.of_json in
@@ -3892,6 +3935,7 @@ module PutFileEntry =
       let filePath =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ?sourceFile ?fileContent ?fileMode ~filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceFile =
         field_map json "sourceFile" SourceFileSpecifier.of_json in
@@ -4003,6 +4047,7 @@ module RepositoryMetadata =
       make ?arn ?cloneUrlSsh ?cloneUrlHttp ?creationDate ?lastModifiedDate
         ?defaultBranch ?repositoryDescription ?repositoryName ?repositoryId
         ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" Arn.of_json in
       let cloneUrlSsh = field_map json "cloneUrlSsh" CloneUrlSsh.of_json in
@@ -4054,6 +4099,7 @@ module BatchGetCommitsError =
       let commitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?errorMessage ?errorCode ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
@@ -4130,6 +4176,7 @@ module Commit =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?additionalData ?committer ?author ?message ?parents ?treeId
         ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalData =
         field_map json "additionalData" AdditionalData.of_json in
@@ -4178,6 +4225,7 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesError =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?errorMessage ?errorCode ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
@@ -4215,6 +4263,7 @@ module BatchDescribeMergeConflictsError =
       let filePath =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ~message ~exceptionName ~filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" Message.of_json in
       let exceptionName =
@@ -4248,6 +4297,7 @@ module Conflict =
         (Option.map ~f:ConflictMetadata.of_xml)
           (Xml.child xml_arg0 "conflictMetadata") in
       make ?mergeHunks ?conflictMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeHunks = field_map json "mergeHunks" MergeHunks.of_json in
       let conflictMetadata =
@@ -4290,6 +4340,7 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesError =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?errorMessage ?errorCode ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
@@ -4307,6 +4358,7 @@ module InvalidPullRequestIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4319,6 +4371,7 @@ module InvalidTitleException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4435,6 +4488,7 @@ module PullRequest =
       make ?approvalRules ?revisionId ?clientRequestToken ?pullRequestTargets
         ?authorArn ?pullRequestStatus ?creationDate ?lastActivityDate
         ?description ?title ?pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRules =
         field_map json "approvalRules" ApprovalRulesList.of_json in
@@ -4466,6 +4520,7 @@ module PullRequestAlreadyClosedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4478,6 +4533,7 @@ module PullRequestDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4490,6 +4546,7 @@ module PullRequestIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A pull request ID is required, but none was provided."]
@@ -4501,6 +4558,7 @@ module TitleRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4513,6 +4571,7 @@ module EncryptionIntegrityChecksFailedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An encryption integrity check failed."]
@@ -4524,6 +4583,7 @@ module EncryptionKeyAccessDeniedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An encryption key could not be accessed."]
@@ -4535,6 +4595,7 @@ module EncryptionKeyDisabledException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The encryption key is disabled."]
@@ -4546,6 +4607,7 @@ module EncryptionKeyNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No encryption key was found."]
@@ -4557,6 +4619,7 @@ module EncryptionKeyUnavailableException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The encryption key is not available."]
@@ -4568,6 +4631,7 @@ module InvalidPullRequestStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4580,6 +4644,7 @@ module InvalidPullRequestStatusUpdateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4592,6 +4657,7 @@ module PullRequestStatusRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4604,6 +4670,7 @@ module InvalidDescriptionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4616,6 +4683,7 @@ module ApprovalRuleContentRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4628,6 +4696,7 @@ module ApprovalRuleDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified approval rule does not exist."]
@@ -4639,6 +4708,7 @@ module ApprovalRuleNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4651,6 +4721,7 @@ module CannotModifyApprovalRuleFromTemplateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4663,6 +4734,7 @@ module InvalidApprovalRuleContentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The content for the approval rule is not valid."]
@@ -4674,6 +4746,7 @@ module InvalidApprovalRuleNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The name for the approval rule is not valid."]
@@ -4685,6 +4758,7 @@ module InvalidRuleContentSha256Exception =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4697,6 +4771,7 @@ module CommentContentRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4709,6 +4784,7 @@ module CommentContentSizeLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4721,6 +4797,7 @@ module CommentDeletedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4733,6 +4810,7 @@ module CommentDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4745,6 +4823,7 @@ module CommentIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4757,6 +4836,7 @@ module CommentNotCreatedByCallerException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4769,6 +4849,7 @@ module InvalidCommentIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4867,6 +4948,7 @@ module ApprovalRuleTemplate =
         ?ruleContentSha256 ?approvalRuleTemplateContent
         ?approvalRuleTemplateDescription ?approvalRuleTemplateName
         ?approvalRuleTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedUser = field_map json "lastModifiedUser" Arn.of_json in
       let creationDate = field_map json "creationDate" CreationDate.of_json in
@@ -4900,6 +4982,7 @@ module ApprovalRuleTemplateDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4912,6 +4995,7 @@ module ApprovalRuleTemplateNameAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4924,6 +5008,7 @@ module ApprovalRuleTemplateNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4936,6 +5021,7 @@ module InvalidApprovalRuleTemplateNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4948,6 +5034,7 @@ module InvalidApprovalRuleTemplateDescriptionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4960,6 +5047,7 @@ module ApprovalRuleTemplateContentRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4972,6 +5060,7 @@ module InvalidApprovalRuleTemplateContentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The content of the approval rule template is not valid."]
@@ -5020,6 +5109,7 @@ module InvalidRepositoryNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5032,6 +5122,7 @@ module InvalidRepositoryTriggerBranchNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5044,6 +5135,7 @@ module InvalidRepositoryTriggerCustomDataException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The custom data provided for the trigger is not valid."]
@@ -5055,6 +5147,7 @@ module InvalidRepositoryTriggerDestinationArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5067,6 +5160,7 @@ module InvalidRepositoryTriggerEventsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5079,6 +5173,7 @@ module InvalidRepositoryTriggerNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The name of the trigger is not valid."]
@@ -5090,6 +5185,7 @@ module InvalidRepositoryTriggerRegionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5102,6 +5198,7 @@ module MaximumBranchesExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The number of branches for the trigger was exceeded."]
@@ -5113,6 +5210,7 @@ module MaximumRepositoryTriggersExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5125,6 +5223,7 @@ module RepositoryDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified repository does not exist."]
@@ -5136,6 +5235,7 @@ module RepositoryNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A repository name is required, but was not specified."]
@@ -5147,6 +5247,7 @@ module RepositoryTriggerBranchNameListRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5159,6 +5260,7 @@ module RepositoryTriggerDestinationArnRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5171,6 +5273,7 @@ module RepositoryTriggerEventsListRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5236,6 +5339,7 @@ module RepositoryTriggerNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5248,6 +5352,7 @@ module RepositoryTriggersListRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5327,6 +5432,7 @@ module BranchDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified branch does not exist."]
@@ -5338,6 +5444,7 @@ module BranchNameIsTagNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5350,6 +5457,7 @@ module BranchNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A branch name is required, but was not specified."]
@@ -5361,6 +5469,7 @@ module CommitMessageLengthExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5373,6 +5482,7 @@ module DirectoryNameConflictsWithFileNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5385,6 +5495,7 @@ module FileContentRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5397,6 +5508,7 @@ module FileContentSizeLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5409,6 +5521,7 @@ module FileNameConflictsWithDirectoryNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5421,6 +5534,7 @@ module FilePathConflictsWithSubmodulePathException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5433,6 +5547,7 @@ module FolderContentSizeLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5445,6 +5560,7 @@ module InvalidBranchNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified reference name is not valid."]
@@ -5456,6 +5572,7 @@ module InvalidDeletionParameterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified deletion parameter is not valid."]
@@ -5467,6 +5584,7 @@ module InvalidEmailException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5479,6 +5597,7 @@ module InvalidFileModeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5491,6 +5610,7 @@ module InvalidParentCommitIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5503,6 +5623,7 @@ module InvalidPathException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified path is not valid."]
@@ -5514,6 +5635,7 @@ module NameLengthExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5526,6 +5648,7 @@ module ParentCommitDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5538,6 +5661,7 @@ module ParentCommitIdOutdatedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5550,6 +5674,7 @@ module ParentCommitIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5562,6 +5687,7 @@ module PathRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The folderPath for a location cannot be null."]
@@ -5573,6 +5699,7 @@ module SameFileContentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5585,6 +5712,7 @@ module ClientRequestTokenRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5597,6 +5725,7 @@ module IdempotencyParameterMismatchException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5609,6 +5738,7 @@ module InvalidClientRequestTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The client request token is not valid."]
@@ -5620,6 +5750,7 @@ module BeforeCommitIdAndAfterCommitIdAreSameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5632,6 +5763,7 @@ module CommitDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5644,6 +5776,7 @@ module CommitIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A commit ID was not specified."]
@@ -5655,6 +5788,7 @@ module InvalidCommitIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified commit ID is not valid."]
@@ -5666,6 +5800,7 @@ module InvalidFileLocationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5678,6 +5813,7 @@ module InvalidFilePositionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5690,6 +5826,7 @@ module InvalidRelativeFileVersionEnumException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5702,6 +5839,7 @@ module PathDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified path does not exist."]
@@ -5713,6 +5851,7 @@ module RepositoryNotAssociatedWithPullRequestException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5725,6 +5864,7 @@ module ConcurrentReferenceUpdateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5737,6 +5877,7 @@ module InvalidConflictDetailLevelException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified conflict detail level is not valid."]
@@ -5748,6 +5889,7 @@ module InvalidConflictResolutionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified conflict resolution list is not valid."]
@@ -5759,6 +5901,7 @@ module InvalidConflictResolutionStrategyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified conflict resolution strategy is not valid."]
@@ -5770,6 +5913,7 @@ module InvalidReplacementContentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5782,6 +5926,7 @@ module InvalidReplacementTypeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5794,6 +5939,7 @@ module ManualMergeRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5806,6 +5952,7 @@ module MaximumConflictResolutionEntriesExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5818,6 +5965,7 @@ module MaximumFileContentToLoadExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The number of files to load exceeds the allowed limit."]
@@ -5829,6 +5977,7 @@ module MaximumItemsToCompareExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5841,6 +5990,7 @@ module MultipleConflictResolutionEntriesException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5853,6 +6003,7 @@ module PullRequestApprovalRulesNotSatisfiedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5865,6 +6016,7 @@ module ReplacementContentRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5877,6 +6029,7 @@ module ReplacementTypeRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A replacement type is required."]
@@ -5888,6 +6041,7 @@ module TipOfSourceReferenceIsDifferentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5900,6 +6054,7 @@ module TipsDivergenceExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5969,6 +6124,7 @@ module ConflictResolution =
         (Option.map ~f:ReplaceContentEntries.of_xml)
           (Xml.child xml_arg0 "replaceContents") in
       make ?setFileModes ?deleteFiles ?replaceContents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let setFileModes =
         field_map json "setFileModes" SetFileModeEntries.of_json in
@@ -6035,6 +6191,7 @@ module ReferenceDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6047,6 +6204,7 @@ module CommitRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A commit was not specified."]
@@ -6058,6 +6216,7 @@ module FileModeRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6070,6 +6229,7 @@ module InvalidCommitException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified commit is not valid."]
@@ -6081,6 +6241,7 @@ module InvalidTargetBranchException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified target branch is not valid."]
@@ -6105,6 +6266,7 @@ module InvalidResourceArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6130,6 +6292,7 @@ module ResourceArnRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6142,6 +6305,7 @@ module InvalidContinuationTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified continuation token is not valid."]
@@ -6153,6 +6317,7 @@ module InvalidOrderException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified sort order is not valid."]
@@ -6164,6 +6329,7 @@ module InvalidSortByException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified sort by value is not valid."]
@@ -6251,6 +6417,7 @@ module InvalidMaxResultsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified number of maximum results is not valid."]
@@ -6301,6 +6468,7 @@ module AuthorDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6313,6 +6481,7 @@ module InvalidAuthorArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6375,6 +6544,7 @@ module InvalidRevisionIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6387,6 +6557,7 @@ module RevisionIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A revision ID is required, but was not provided."]
@@ -6473,6 +6644,7 @@ module InvalidDestinationCommitSpecifierException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6485,6 +6657,7 @@ module InvalidMaxConflictFilesException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6497,6 +6670,7 @@ module InvalidMergeOptionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6509,6 +6683,7 @@ module InvalidSourceCommitSpecifierException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6534,6 +6709,7 @@ module MergeOptionRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6569,6 +6745,7 @@ module FolderDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6652,6 +6829,7 @@ module FileDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6664,6 +6842,7 @@ module FileTooLargeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6726,6 +6905,7 @@ module CommitIdDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified commit ID does not exist."]
@@ -6789,6 +6969,7 @@ module InvalidReactionUserArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6838,6 +7019,7 @@ module BranchInfo =
       let branchName =
         (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "branchName") in
       make ?commitId ?branchName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commitId = field_map json "commitId" CommitId.of_json in
       let branchName = field_map json "branchName" BranchName.of_json in
@@ -6852,6 +7034,7 @@ module BlobIdDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified blob does not exist."]
@@ -6863,6 +7046,7 @@ module BlobIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A blob ID is required, but was not specified."]
@@ -6874,6 +7058,7 @@ module InvalidBlobIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified blob is not valid."]
@@ -6939,6 +7124,7 @@ module Evaluation =
         (Option.map ~f:Approved.of_xml) (Xml.child xml_arg0 "approved") in
       make ?approvalRulesNotSatisfied ?approvalRulesSatisfied ?overridden
         ?approved ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRulesNotSatisfied =
         field_map json "approvalRulesNotSatisfied"
@@ -6961,6 +7147,7 @@ module RevisionNotCurrentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6973,6 +7160,7 @@ module ActorDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6985,6 +7173,7 @@ module InvalidActorArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6997,6 +7186,7 @@ module InvalidPullRequestEventTypeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The pull request event type is not valid."]
@@ -7033,6 +7223,7 @@ module InvalidMaxMergeHunksException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7045,6 +7236,7 @@ module CannotDeleteApprovalRuleFromTemplateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7057,6 +7249,7 @@ module DefaultBranchCannotBeDeletedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7069,6 +7262,7 @@ module ApprovalRuleTemplateInUseException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7081,6 +7275,7 @@ module InvalidRepositoryDescriptionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified repository description is not valid."]
@@ -7092,6 +7287,7 @@ module InvalidSystemTagUsageException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7104,6 +7300,7 @@ module InvalidTagsMapException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The map of tags is not valid."]
@@ -7115,6 +7312,7 @@ module RepositoryLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A repository resource limit was exceeded."]
@@ -7126,6 +7324,7 @@ module RepositoryNameExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified repository name already exists."]
@@ -7137,6 +7336,7 @@ module TagPolicyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tag policy is not valid."]
@@ -7148,6 +7348,7 @@ module TooManyTagsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7160,6 +7361,7 @@ module InvalidReferenceNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7172,6 +7374,7 @@ module InvalidTargetException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7184,6 +7387,7 @@ module InvalidTargetsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7196,6 +7400,7 @@ module MaximumOpenPullRequestsExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7208,6 +7413,7 @@ module MultipleRepositoriesInPullRequestException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7220,6 +7426,7 @@ module ReferenceNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A reference name is required, but none was provided."]
@@ -7231,6 +7438,7 @@ module ReferenceTypeNotSupportedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified reference is not a supported type."]
@@ -7242,6 +7450,7 @@ module SourceAndDestinationAreSameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7254,6 +7463,7 @@ module TargetRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7266,6 +7476,7 @@ module TargetsRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7301,6 +7512,7 @@ module ApprovalRuleNameAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7313,6 +7525,7 @@ module NumberOfRulesExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7325,6 +7538,7 @@ module FileContentAndSourceFileSpecifiedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7337,6 +7551,7 @@ module FileEntryRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7373,6 +7588,7 @@ module MaximumFileEntriesExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7385,6 +7601,7 @@ module NoChangeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7397,6 +7614,7 @@ module PutFileEntryConflictException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7409,6 +7627,7 @@ module RestrictedSourceFileException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7421,6 +7640,7 @@ module SamePathRequestException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7433,6 +7653,7 @@ module SourceFileOrContentRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7469,6 +7690,7 @@ module NumberOfRuleTemplatesExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7481,6 +7703,7 @@ module MaximumRepositoryNamesExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7518,6 +7741,7 @@ module RepositoryNamesRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7581,6 +7805,7 @@ module CommitIdsLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7593,6 +7818,7 @@ module CommitIdsListRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7806,6 +8032,7 @@ module UpdateRepositoryNameInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "oldName") in
       make ~newName ~oldName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newName = field_map_exn json "newName" RepositoryName.of_json in
       let oldName = field_map_exn json "oldName" RepositoryName.of_json in
@@ -7843,6 +8070,7 @@ module UpdateRepositoryDescriptionInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?repositoryDescription ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryDescription =
         field_map json "repositoryDescription" RepositoryDescription.of_json in
@@ -7951,6 +8179,7 @@ module UpdatePullRequestTitleOutput =
         PullRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
       make ~pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
       make ~pullRequest ()
@@ -7981,6 +8210,7 @@ module UpdatePullRequestTitleInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~title ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map_exn json "title" Title.of_json in
       let pullRequestId =
@@ -8152,6 +8382,7 @@ module UpdatePullRequestStatusOutput =
         PullRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
       make ~pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
       make ~pullRequest ()
@@ -8185,6 +8416,7 @@ module UpdatePullRequestStatusInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~pullRequestStatus ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequestStatus =
         field_map_exn json "pullRequestStatus" PullRequestStatusEnum.of_json in
@@ -8285,6 +8517,7 @@ module UpdatePullRequestDescriptionOutput =
         PullRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
       make ~pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
       make ~pullRequest ()
@@ -8317,6 +8550,7 @@ module UpdatePullRequestDescriptionInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~description ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map_exn json "description" Description.of_json in
       let pullRequestId =
@@ -8358,6 +8592,7 @@ module UpdatePullRequestApprovalStateInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~approvalState ~revisionId ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalState =
         field_map_exn json "approvalState" ApprovalState.of_json in
@@ -8594,6 +8829,7 @@ module UpdatePullRequestApprovalRuleContentOutput =
         ApprovalRule.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRule") in
       make ~approvalRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRule =
         field_map_exn json "approvalRule" ApprovalRule.of_json in
@@ -8653,6 +8889,7 @@ module UpdatePullRequestApprovalRuleContentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~newRuleContent ?existingRuleContentSha256 ~approvalRuleName
         ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newRuleContent =
         field_map_exn json "newRuleContent" ApprovalRuleContent.of_json in
@@ -8695,6 +8932,7 @@ module UpdateDefaultBranchInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~defaultBranchName ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultBranchName =
         field_map_exn json "defaultBranchName" BranchName.of_json in
@@ -8812,6 +9050,7 @@ module UpdateCommentOutput =
       let comment =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "comment" Comment.of_json in
       make ?comment ()
@@ -8841,6 +9080,7 @@ module UpdateCommentInput =
         CommentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~content ~commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map_exn json "content" Content.of_json in
       let commentId = field_map_exn json "commentId" CommentId.of_json in
@@ -8937,6 +9177,7 @@ module UpdateApprovalRuleTemplateNameOutput =
         ApprovalRuleTemplate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
       make ~approvalRuleTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplate =
         field_map_exn json "approvalRuleTemplate"
@@ -8978,6 +9219,7 @@ module UpdateApprovalRuleTemplateNameInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "oldApprovalRuleTemplateName") in
       make ~newApprovalRuleTemplateName ~oldApprovalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newApprovalRuleTemplateName =
         field_map_exn json "newApprovalRuleTemplateName"
@@ -9078,6 +9320,7 @@ module UpdateApprovalRuleTemplateDescriptionOutput =
         ApprovalRuleTemplate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
       make ~approvalRuleTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplate =
         field_map_exn json "approvalRuleTemplate"
@@ -9120,6 +9363,7 @@ module UpdateApprovalRuleTemplateDescriptionInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ~approvalRuleTemplateDescription ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplateDescription =
         field_map_exn json "approvalRuleTemplateDescription"
@@ -9244,6 +9488,7 @@ module UpdateApprovalRuleTemplateContentOutput =
         ApprovalRuleTemplate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
       make ~approvalRuleTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplate =
         field_map_exn json "approvalRuleTemplate"
@@ -9299,6 +9544,7 @@ module UpdateApprovalRuleTemplateContentInput =
              "approvalRuleTemplateName") in
       make ?existingRuleContentSha256 ~newRuleContent
         ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let existingRuleContentSha256 =
         field_map json "existingRuleContentSha256" RuleContentSha256.of_json in
@@ -9339,6 +9585,7 @@ module UntagResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeysList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -9656,6 +9903,7 @@ module TestRepositoryTriggersOutput =
         (Option.map ~f:RepositoryTriggerNameList.of_xml)
           (Xml.child xml_arg0 "successfulExecutions") in
       make ?failedExecutions ?successfulExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedExecutions =
         field_map json "failedExecutions"
@@ -9693,6 +9941,7 @@ module TestRepositoryTriggersInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~triggers ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggers =
         field_map_exn json "triggers" RepositoryTriggersList.of_json in
@@ -9710,6 +9959,7 @@ module TagsMapRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A map of tags is required."]
@@ -9737,6 +9987,7 @@ module TagResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagsMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -9752,6 +10003,7 @@ module TagKeysListRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9764,6 +10016,7 @@ module ReactionValueRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A reaction value is required."]
@@ -9775,6 +10028,7 @@ module ReactionLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10078,6 +10332,7 @@ module PutRepositoryTriggersOutput =
         (Option.map ~f:RepositoryTriggersConfigurationId.of_xml)
           (Xml.child xml_arg0 "configurationId") in
       make ?configurationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationId =
         field_map json "configurationId"
@@ -10113,6 +10368,7 @@ module PutRepositoryTriggersInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~triggers ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggers =
         field_map_exn json "triggers" RepositoryTriggersList.of_json in
@@ -10505,6 +10761,7 @@ module PutFileOutput =
       let commitId =
         ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
       make ~treeId ~blobId ~commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let treeId = field_map_exn json "treeId" ObjectId.of_json in
       let blobId = field_map_exn json "blobId" ObjectId.of_json in
@@ -10602,6 +10859,7 @@ module PutFileInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?email ?name ?commitMessage ?parentCommitId ?fileMode ~filePath
         ~fileContent ~branchName ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let email = field_map json "email" Email.of_json in
       let name = field_map json "name" Name.of_json in
@@ -10644,6 +10902,7 @@ module PutCommentReactionInput =
         CommentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~reactionValue ~commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reactionValue =
         field_map_exn json "reactionValue" ReactionValue.of_json in
@@ -10660,6 +10919,7 @@ module PullRequestCannotBeApprovedByAuthorException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10787,6 +11047,7 @@ module PostCommentReplyOutput =
       let comment =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "comment" Comment.of_json in
       make ?comment ()
@@ -10826,6 +11087,7 @@ module PostCommentReplyInput =
         CommentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inReplyTo") in
       make ~content ?clientRequestToken ~inReplyTo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map_exn json "content" Content.of_json in
       let clientRequestToken =
@@ -11236,6 +11498,7 @@ module PostCommentForPullRequestOutput =
           (Xml.child xml_arg0 "repositoryName") in
       make ?comment ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?pullRequestId ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "comment" Comment.of_json in
       let location = field_map json "location" Location.of_json in
@@ -11326,6 +11589,7 @@ module PostCommentForPullRequestInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ?clientRequestToken ~content ?location ~afterCommitId
         ~beforeCommitId ~repositoryName ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -11686,6 +11950,7 @@ module PostCommentForComparedCommitOutput =
           (Xml.child xml_arg0 "repositoryName") in
       make ?comment ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "comment" Comment.of_json in
       let location = field_map json "location" Location.of_json in
@@ -11766,6 +12031,7 @@ module PostCommentForComparedCommitInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?clientRequestToken ~content ?location ~afterCommitId
         ?beforeCommitId ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -11787,6 +12053,7 @@ module OverrideStatusRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11826,6 +12093,7 @@ module OverridePullRequestApprovalRulesInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~overrideStatus ~revisionId ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrideStatus =
         field_map_exn json "overrideStatus" OverrideStatus.of_json in
@@ -11844,6 +12112,7 @@ module OverrideAlreadySetException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12321,6 +12590,7 @@ module MergePullRequestByThreeWayOutput =
       let pullRequest =
         (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
       make ?pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map json "pullRequest" PullRequest.of_json in
       make ?pullRequest ()
@@ -12434,6 +12704,7 @@ module MergePullRequestByThreeWayInput =
       make ?conflictResolution ?keepEmptyFolders ?email ?authorName
         ?commitMessage ?conflictResolutionStrategy ?conflictDetailLevel
         ?sourceCommitId ~repositoryName ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictResolution =
         field_map json "conflictResolution" ConflictResolution.of_json in
@@ -12932,6 +13203,7 @@ module MergePullRequestBySquashOutput =
       let pullRequest =
         (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
       make ?pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map json "pullRequest" PullRequest.of_json in
       make ?pullRequest ()
@@ -13045,6 +13317,7 @@ module MergePullRequestBySquashInput =
       make ?conflictResolution ?keepEmptyFolders ?email ?authorName
         ?commitMessage ?conflictResolutionStrategy ?conflictDetailLevel
         ?sourceCommitId ~repositoryName ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictResolution =
         field_map json "conflictResolution" ConflictResolution.of_json in
@@ -13325,6 +13598,7 @@ module MergePullRequestByFastForwardOutput =
       let pullRequest =
         (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
       make ?pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map json "pullRequest" PullRequest.of_json in
       make ?pullRequest ()
@@ -13366,6 +13640,7 @@ module MergePullRequestByFastForwardInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ?sourceCommitId ~repositoryName ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceCommitId = field_map json "sourceCommitId" ObjectId.of_json in
       let repositoryName =
@@ -13854,6 +14129,7 @@ module MergeBranchesByThreeWayOutput =
       let commitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let treeId = field_map json "treeId" ObjectId.of_json in
       let commitId = field_map json "commitId" ObjectId.of_json in
@@ -13980,6 +14256,7 @@ module MergeBranchesByThreeWayInput =
         ?authorName ?conflictResolutionStrategy ?conflictDetailLevel
         ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictResolution =
         field_map json "conflictResolution" ConflictResolution.of_json in
@@ -14486,6 +14763,7 @@ module MergeBranchesBySquashOutput =
       let commitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let treeId = field_map json "treeId" ObjectId.of_json in
       let commitId = field_map json "commitId" ObjectId.of_json in
@@ -14610,6 +14888,7 @@ module MergeBranchesBySquashInput =
         ?authorName ?conflictResolutionStrategy ?conflictDetailLevel
         ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictResolution =
         field_map json "conflictResolution" ConflictResolution.of_json in
@@ -14885,6 +15164,7 @@ module MergeBranchesByFastForwardOutput =
       let commitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let treeId = field_map json "treeId" ObjectId.of_json in
       let commitId = field_map json "commitId" ObjectId.of_json in
@@ -14944,6 +15224,7 @@ module MergeBranchesByFastForwardInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetBranch = field_map json "targetBranch" BranchName.of_json in
       let destinationCommitSpecifier =
@@ -14965,6 +15246,7 @@ module MaximumRuleTemplatesAssociatedWithRepositoryException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14977,6 +15259,7 @@ module MaximumNumberOfApprovalsExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15064,6 +15347,7 @@ module ListTagsForResourceOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let tags = field_map json "tags" TagsMap.of_json in
@@ -15096,6 +15380,7 @@ module ListTagsForResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -15177,6 +15462,7 @@ module ListRepositoriesOutput =
         (Option.map ~f:RepositoryNameIdPairList.of_xml)
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let repositories =
@@ -15213,6 +15499,7 @@ module ListRepositoriesInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?order ?sortBy ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let order = field_map json "order" OrderEnum.of_json in
       let sortBy = field_map json "sortBy" SortByEnum.of_json in
@@ -15382,6 +15669,7 @@ module ListRepositoriesForApprovalRuleTemplateOutput =
         (Option.map ~f:RepositoryNameList.of_xml)
           (Xml.child xml_arg0 "repositoryNames") in
       make ?nextToken ?repositoryNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let repositoryNames =
@@ -15426,6 +15714,7 @@ module ListRepositoriesForApprovalRuleTemplateInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ?maxResults ?nextToken ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -15624,6 +15913,7 @@ module ListPullRequestsOutput =
         PullRequestIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestIds") in
       make ?nextToken ~pullRequestIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let pullRequestIds =
@@ -15690,6 +15980,7 @@ module ListPullRequestsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?maxResults ?nextToken ?pullRequestStatus ?authorArn
         ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -15846,6 +16137,7 @@ module ListBranchesOutput =
       let branches =
         (Option.map ~f:BranchNameList.of_xml) (Xml.child xml_arg0 "branches") in
       make ?nextToken ?branches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let branches = field_map json "branches" BranchNameList.of_json in
@@ -15877,6 +16169,7 @@ module ListBranchesInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?nextToken ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let repositoryName =
@@ -16042,6 +16335,7 @@ module ListAssociatedApprovalRuleTemplatesForRepositoryOutput =
         (Option.map ~f:ApprovalRuleTemplateNameList.of_xml)
           (Xml.child xml_arg0 "approvalRuleTemplateNames") in
       make ?nextToken ?approvalRuleTemplateNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let approvalRuleTemplateNames =
@@ -16085,6 +16379,7 @@ module ListAssociatedApprovalRuleTemplatesForRepositoryInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?maxResults ?nextToken ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -16161,6 +16456,7 @@ module ListApprovalRuleTemplatesOutput =
         (Option.map ~f:ApprovalRuleTemplateNameList.of_xml)
           (Xml.child xml_arg0 "approvalRuleTemplateNames") in
       make ?nextToken ?approvalRuleTemplateNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let approvalRuleTemplateNames =
@@ -16193,6 +16489,7 @@ module ListApprovalRuleTemplatesInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -16208,6 +16505,7 @@ module InvalidTagKeysListException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The list of tags is not valid."]
@@ -16219,6 +16517,7 @@ module InvalidReactionValueException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16231,6 +16530,7 @@ module InvalidOverrideStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16243,6 +16543,7 @@ module InvalidApprovalStateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16384,6 +16685,7 @@ module GetRepositoryTriggersOutput =
         (Option.map ~f:RepositoryTriggersConfigurationId.of_xml)
           (Xml.child xml_arg0 "configurationId") in
       make ?triggers ?configurationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggers = field_map json "triggers" RepositoryTriggersList.of_json in
       let configurationId =
@@ -16412,6 +16714,7 @@ module GetRepositoryTriggersInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -16546,6 +16849,7 @@ module GetRepositoryOutput =
         (Option.map ~f:RepositoryMetadata.of_xml)
           (Xml.child xml_arg0 "repositoryMetadata") in
       make ?repositoryMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryMetadata =
         field_map json "repositoryMetadata" RepositoryMetadata.of_json in
@@ -16570,6 +16874,7 @@ module GetRepositoryInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -16731,6 +17036,7 @@ module GetPullRequestOverrideStateOutput =
       let overridden =
         (Option.map ~f:Overridden.of_xml) (Xml.child xml_arg0 "overridden") in
       make ?overrider ?overridden ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrider = field_map json "overrider" Arn.of_json in
       let overridden = field_map json "overridden" Overridden.of_json in
@@ -16764,6 +17070,7 @@ module GetPullRequestOverrideStateInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~revisionId ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
       let pullRequestId =
@@ -16900,6 +17207,7 @@ module GetPullRequestOutput =
         PullRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
       make ~pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
       make ~pullRequest ()
@@ -16924,6 +17232,7 @@ module GetPullRequestInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequestId =
         field_map_exn json "pullRequestId" PullRequestId.of_json in
@@ -17079,6 +17388,7 @@ module GetPullRequestApprovalStatesOutput =
       let approvals =
         (Option.map ~f:ApprovalList.of_xml) (Xml.child xml_arg0 "approvals") in
       make ?approvals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvals = field_map json "approvals" ApprovalList.of_json in
       make ?approvals ()
@@ -17109,6 +17419,7 @@ module GetPullRequestApprovalStatesInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~revisionId ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
       let pullRequestId =
@@ -17366,6 +17677,7 @@ module GetMergeOptionsOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "mergeOptions") in
       make ~baseCommitId ~destinationCommitId ~sourceCommitId ~mergeOptions
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let baseCommitId = field_map_exn json "baseCommitId" ObjectId.of_json in
       let destinationCommitId =
@@ -17446,6 +17758,7 @@ module GetMergeOptionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?conflictResolutionStrategy ?conflictDetailLevel
         ~destinationCommitSpecifier ~sourceCommitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictResolutionStrategy =
         field_map json "conflictResolutionStrategy"
@@ -17803,6 +18116,7 @@ module GetMergeConflictsOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "mergeable") in
       make ?nextToken ~conflictMetadataList ?baseCommitId ~sourceCommitId
         ~destinationCommitId ~mergeable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let conflictMetadataList =
@@ -17913,6 +18227,7 @@ module GetMergeConflictsInput =
       make ?nextToken ?conflictResolutionStrategy ?maxConflictFiles
         ?conflictDetailLevel ~mergeOption ~sourceCommitSpecifier
         ~destinationCommitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let conflictResolutionStrategy =
@@ -18149,6 +18464,7 @@ module GetMergeCommitOutput =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "sourceCommitId") in
       make ?mergedCommitId ?baseCommitId ?destinationCommitId ?sourceCommitId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergedCommitId = field_map json "mergedCommitId" ObjectId.of_json in
       let baseCommitId = field_map json "baseCommitId" ObjectId.of_json in
@@ -18226,6 +18542,7 @@ module GetMergeCommitInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?conflictResolutionStrategy ?conflictDetailLevel
         ~destinationCommitSpecifier ~sourceCommitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictResolutionStrategy =
         field_map json "conflictResolutionStrategy"
@@ -18473,6 +18790,7 @@ module GetFolderOutput =
         ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
       make ?subModules ?symbolicLinks ?files ?subFolders ?treeId ~folderPath
         ~commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subModules = field_map json "subModules" SubModuleList.of_json in
       let symbolicLinks =
@@ -18522,6 +18840,7 @@ module GetFolderInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~folderPath ?commitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let folderPath = field_map_exn json "folderPath" Path.of_json in
       let commitSpecifier =
@@ -18760,6 +19079,7 @@ module GetFileOutput =
       let commitId =
         ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
       make ~fileContent ~fileSize ~fileMode ~filePath ~blobId ~commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileContent = field_map_exn json "fileContent" FileContent.of_json in
       let fileSize = field_map_exn json "fileSize" ObjectSize.of_json in
@@ -18806,6 +19126,7 @@ module GetFileInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~filePath ?commitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filePath = field_map_exn json "filePath" Path.of_json in
       let commitSpecifier =
@@ -19028,6 +19349,7 @@ module GetDifferencesOutput =
         (Option.map ~f:DifferenceList.of_xml)
           (Xml.child xml_arg0 "differences") in
       make ?nextToken ?differences ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let differences = field_map json "differences" DifferenceList.of_json in
@@ -19111,6 +19433,7 @@ module GetDifferencesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?nextToken ?maxResults ?afterPath ?beforePath
         ~afterCommitSpecifier ?beforeCommitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" Limit.of_json in
@@ -19281,6 +19604,7 @@ module GetCommitOutput =
       let commit =
         Commit.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commit") in
       make ~commit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commit = field_map_exn json "commit" Commit.of_json in
       make ~commit ()
@@ -19312,6 +19636,7 @@ module GetCommitInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~commitId ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commitId = field_map_exn json "commitId" ObjectId.of_json in
       let repositoryName =
@@ -19552,6 +19877,7 @@ module GetCommentsForPullRequestOutput =
         (Option.map ~f:CommentsForPullRequestData.of_xml)
           (Xml.child xml_arg0 "commentsForPullRequestData") in
       make ?nextToken ?commentsForPullRequestData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let commentsForPullRequestData =
@@ -19627,6 +19953,7 @@ module GetCommentsForPullRequestInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ?maxResults ?nextToken ?afterCommitId ?beforeCommitId
         ?repositoryName ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -19827,6 +20154,7 @@ module GetCommentsForComparedCommitOutput =
         (Option.map ~f:CommentsForComparedCommitData.of_xml)
           (Xml.child xml_arg0 "commentsForComparedCommitData") in
       make ?nextToken ?commentsForComparedCommitData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let commentsForComparedCommitData =
@@ -19894,6 +20222,7 @@ module GetCommentsForComparedCommitInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?maxResults ?nextToken ~afterCommitId ?beforeCommitId
         ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -20022,6 +20351,7 @@ module GetCommentReactionsOutput =
         ReactionsForCommentList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reactionsForComment") in
       make ?nextToken ~reactionsForComment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let reactionsForComment =
@@ -20071,6 +20401,7 @@ module GetCommentReactionsInput =
         CommentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ?maxResults ?nextToken ?reactionUserArn ~commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -20209,6 +20540,7 @@ module GetCommentOutput =
       let comment =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "comment" Comment.of_json in
       make ?comment ()
@@ -20233,6 +20565,7 @@ module GetCommentInput =
         CommentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commentId = field_map_exn json "commentId" CommentId.of_json in
       make ~commentId ()
@@ -20394,6 +20727,7 @@ module GetBranchOutput =
       let branch =
         (Option.map ~f:BranchInfo.of_xml) (Xml.child xml_arg0 "branch") in
       make ?branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branch = field_map json "branch" BranchInfo.of_json in
       make ?branch ()
@@ -20424,6 +20758,7 @@ module GetBranchInput =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?branchName ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchName = field_map json "branchName" BranchName.of_json in
       let repositoryName =
@@ -20594,6 +20929,7 @@ module GetBlobOutput =
       let content =
         Blob.of_xml (Xml.child_exn ~context:context_ xml_arg0 "content") in
       make ~content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map_exn json "content" Blob.of_json in
       make ~content ()
@@ -20623,6 +20959,7 @@ module GetBlobInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~blobId ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blobId = field_map_exn json "blobId" ObjectId.of_json in
       let repositoryName =
@@ -20706,6 +21043,7 @@ module GetApprovalRuleTemplateOutput =
         ApprovalRuleTemplate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
       make ~approvalRuleTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplate =
         field_map_exn json "approvalRuleTemplate"
@@ -20736,6 +21074,7 @@ module GetApprovalRuleTemplateInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplateName =
         field_map_exn json "approvalRuleTemplateName"
@@ -20905,6 +21244,7 @@ module EvaluatePullRequestApprovalRulesOutput =
         Evaluation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "evaluation") in
       make ~evaluation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluation = field_map_exn json "evaluation" Evaluation.of_json in
       make ~evaluation ()
@@ -20937,6 +21277,7 @@ module EvaluatePullRequestApprovalRulesInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~revisionId ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
       let pullRequestId =
@@ -20975,6 +21316,7 @@ module DisassociateApprovalRuleTemplateFromRepositoryInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ~repositoryName ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -21173,6 +21515,7 @@ module DescribePullRequestEventsOutput =
         PullRequestEventList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestEvents") in
       make ?nextToken ~pullRequestEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let pullRequestEvents =
@@ -21238,6 +21581,7 @@ module DescribePullRequestEventsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ?maxResults ?nextToken ?actorArn ?pullRequestEventType
         ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -21590,6 +21934,7 @@ module DescribeMergeConflictsOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "conflictMetadata") in
       make ?baseCommitId ~sourceCommitId ~destinationCommitId ?nextToken
         ~mergeHunks ~conflictMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let baseCommitId = field_map json "baseCommitId" ObjectId.of_json in
       let sourceCommitId =
@@ -21708,6 +22053,7 @@ module DescribeMergeConflictsInput =
       make ?nextToken ?conflictResolutionStrategy ?conflictDetailLevel
         ~filePath ?maxMergeHunks ~mergeOption ~sourceCommitSpecifier
         ~destinationCommitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let conflictResolutionStrategy =
@@ -21848,6 +22194,7 @@ module DeleteRepositoryOutput =
         (Option.map ~f:RepositoryId.of_xml)
           (Xml.child xml_arg0 "repositoryId") in
       make ?repositoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryId = field_map json "repositoryId" RepositoryId.of_json in
       make ?repositoryId ()
@@ -21871,6 +22218,7 @@ module DeleteRepositoryInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -22057,6 +22405,7 @@ module DeletePullRequestApprovalRuleOutput =
         ApprovalRuleId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleId") in
       make ~approvalRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleId =
         field_map_exn json "approvalRuleId" ApprovalRuleId.of_json in
@@ -22090,6 +22439,7 @@ module DeletePullRequestApprovalRuleInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~approvalRuleName ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleName =
         field_map_exn json "approvalRuleName" ApprovalRuleName.of_json in
@@ -22393,6 +22743,7 @@ module DeleteFileOutput =
       let commitId =
         ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
       make ~filePath ~treeId ~blobId ~commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filePath = field_map_exn json "filePath" Path.of_json in
       let treeId = field_map_exn json "treeId" ObjectId.of_json in
@@ -22484,6 +22835,7 @@ module DeleteFileInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?email ?name ?commitMessage ?keepEmptyFolders ~parentCommitId
         ~filePath ~branchName ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let email = field_map json "email" Email.of_json in
       let name = field_map json "name" Name.of_json in
@@ -22573,6 +22925,7 @@ module DeleteCommentContentOutput =
       let comment =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "comment" Comment.of_json in
       make ?comment ()
@@ -22597,6 +22950,7 @@ module DeleteCommentContentInput =
         CommentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commentId = field_map_exn json "commentId" CommentId.of_json in
       make ~commentId ()
@@ -22763,6 +23117,7 @@ module DeleteBranchOutput =
         (Option.map ~f:BranchInfo.of_xml)
           (Xml.child xml_arg0 "deletedBranch") in
       make ?deletedBranch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletedBranch = field_map json "deletedBranch" BranchInfo.of_json in
       make ?deletedBranch ()
@@ -22794,6 +23149,7 @@ module DeleteBranchInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~branchName ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchName = field_map_exn json "branchName" BranchName.of_json in
       let repositoryName =
@@ -22876,6 +23232,7 @@ module DeleteApprovalRuleTemplateOutput =
         ApprovalRuleTemplateId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplateId") in
       make ~approvalRuleTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplateId =
         field_map_exn json "approvalRuleTemplateId"
@@ -22905,6 +23262,7 @@ module DeleteApprovalRuleTemplateInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplateName =
         field_map_exn json "approvalRuleTemplateName"
@@ -23359,6 +23717,7 @@ module CreateUnreferencedMergeCommitOutput =
       let commitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let treeId = field_map json "treeId" ObjectId.of_json in
       let commitId = field_map json "commitId" ObjectId.of_json in
@@ -23486,6 +23845,7 @@ module CreateUnreferencedMergeCommitInput =
         ?authorName ?conflictResolutionStrategy ?conflictDetailLevel
         ~mergeOption ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictResolution =
         field_map json "conflictResolution" ConflictResolution.of_json in
@@ -23704,6 +24064,7 @@ module CreateRepositoryOutput =
         (Option.map ~f:RepositoryMetadata.of_xml)
           (Xml.child xml_arg0 "repositoryMetadata") in
       make ?repositoryMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryMetadata =
         field_map json "repositoryMetadata" RepositoryMetadata.of_json in
@@ -23746,6 +24107,7 @@ module CreateRepositoryInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?tags ?repositoryDescription ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let repositoryDescription =
@@ -24066,6 +24428,7 @@ module CreatePullRequestOutput =
         PullRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
       make ~pullRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
       make ~pullRequest ()
@@ -24112,6 +24475,7 @@ module CreatePullRequestInput =
       let title =
         Title.of_xml (Xml.child_exn ~context:context_ xml_arg0 "title") in
       make ?clientRequestToken ~targets ?description ~title ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -24332,6 +24696,7 @@ module CreatePullRequestApprovalRuleOutput =
         ApprovalRule.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRule") in
       make ~approvalRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRule =
         field_map_exn json "approvalRule" ApprovalRule.of_json in
@@ -24374,6 +24739,7 @@ module CreatePullRequestApprovalRuleInput =
         PullRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~approvalRuleContent ~approvalRuleName ~pullRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleContent =
         field_map_exn json "approvalRuleContent" ApprovalRuleContent.of_json in
@@ -24874,6 +25240,7 @@ module CreateCommitOutput =
       let commitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?filesDeleted ?filesUpdated ?filesAdded ?treeId ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filesDeleted = field_map json "filesDeleted" FilesMetadata.of_json in
       let filesUpdated = field_map json "filesUpdated" FilesMetadata.of_json in
@@ -24985,6 +25352,7 @@ module CreateCommitInput =
       make ?setFileModes ?deleteFiles ?putFiles ?keepEmptyFolders
         ?commitMessage ?email ?authorName ?parentCommitId ~branchName
         ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let setFileModes =
         field_map json "setFileModes" SetFileModeEntries.of_json in
@@ -25038,6 +25406,7 @@ module CreateBranchInput =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~commitId ~branchName ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commitId = field_map_exn json "commitId" CommitId.of_json in
       let branchName = field_map_exn json "branchName" BranchName.of_json in
@@ -25177,6 +25546,7 @@ module CreateApprovalRuleTemplateOutput =
         ApprovalRuleTemplate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
       make ~approvalRuleTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplate =
         field_map_exn json "approvalRuleTemplate"
@@ -25236,6 +25606,7 @@ module CreateApprovalRuleTemplateInput =
              "approvalRuleTemplateName") in
       make ?approvalRuleTemplateDescription ~approvalRuleTemplateContent
         ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalRuleTemplateDescription =
         field_map json "approvalRuleTemplateDescription"
@@ -25259,6 +25630,7 @@ module BranchNameExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25404,6 +25776,7 @@ module BatchGetRepositoriesOutput =
         (Option.map ~f:RepositoryMetadataList.of_xml)
           (Xml.child xml_arg0 "repositories") in
       make ?repositoriesNotFound ?repositories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoriesNotFound =
         field_map json "repositoriesNotFound" RepositoryNotFoundList.of_json in
@@ -25432,6 +25805,7 @@ module BatchGetRepositoriesInput =
         RepositoryNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryNames") in
       make ~repositoryNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryNames =
         field_map_exn json "repositoryNames" RepositoryNameList.of_json in
@@ -25596,6 +25970,7 @@ module BatchGetCommitsOutput =
         (Option.map ~f:CommitObjectsList.of_xml)
           (Xml.child xml_arg0 "commits") in
       make ?errors ?commits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "errors" BatchGetCommitsErrorsList.of_json in
       let commits = field_map json "commits" CommitObjectsList.of_json in
@@ -25628,6 +26003,7 @@ module BatchGetCommitsInput =
         CommitIdsInputList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "commitIds") in
       make ~repositoryName ~commitIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -25809,6 +26185,7 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput =
           (Xml.child_exn ~context:context_ xml_arg0
              "disassociatedRepositoryNames") in
       make ~errors ~disassociatedRepositoryNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "errors"
@@ -25852,6 +26229,7 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ~repositoryNames ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryNames =
         field_map_exn json "repositoryNames" RepositoryNameList.of_json in
@@ -26186,6 +26564,7 @@ module BatchDescribeMergeConflictsOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "conflicts") in
       make ?baseCommitId ~sourceCommitId ~destinationCommitId ?errors
         ?nextToken ~conflicts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let baseCommitId = field_map json "baseCommitId" ObjectId.of_json in
       let sourceCommitId =
@@ -26313,6 +26692,7 @@ module BatchDescribeMergeConflictsInput =
       make ?nextToken ?conflictResolutionStrategy ?conflictDetailLevel
         ?filePaths ?maxConflictFiles ?maxMergeHunks ~mergeOption
         ~sourceCommitSpecifier ~destinationCommitSpecifier ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let conflictResolutionStrategy =
@@ -26509,6 +26889,7 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesOutput =
           (Xml.child_exn ~context:context_ xml_arg0
              "associatedRepositoryNames") in
       make ~errors ~associatedRepositoryNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "errors"
@@ -26551,6 +26932,7 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ~repositoryNames ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryNames =
         field_map_exn json "repositoryNames" RepositoryNameList.of_json in
@@ -26590,6 +26972,7 @@ module AssociateApprovalRuleTemplateWithRepositoryInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "approvalRuleTemplateName") in
       make ~repositoryName ~approvalRuleTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -26608,6 +26991,7 @@ module ApprovalStateRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An approval state is required, but was not specified."]

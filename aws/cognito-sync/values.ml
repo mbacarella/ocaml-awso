@@ -265,6 +265,7 @@ module Record =
       let key = (Option.map ~f:RecordKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?deviceLastModifiedDate ?lastModifiedBy ?lastModifiedDate
         ?syncCount ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceLastModifiedDate =
         field_map json "DeviceLastModifiedDate" Date.of_json in
@@ -320,6 +321,7 @@ module RecordPatch =
       let op =
         Operation.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Op") in
       make ?deviceLastModifiedDate ~syncCount ?value ~key ~op ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceLastModifiedDate =
         field_map json "DeviceLastModifiedDate" Date.of_json in
@@ -491,6 +493,7 @@ module IdentityPoolUsage =
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?lastModifiedDate ?dataStorage ?syncSessionsCount ?identityPoolId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
       let dataStorage = field_map json "DataStorage" Long.of_json in
@@ -566,6 +569,7 @@ module Dataset =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?numRecords ?dataStorage ?lastModifiedBy ?lastModifiedDate
         ?creationDate ?datasetName ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numRecords = field_map json "NumRecords" Long.of_json in
       let dataStorage = field_map json "DataStorage" Long.of_json in
@@ -609,6 +613,7 @@ module InternalErrorException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -632,6 +637,7 @@ module InvalidLambdaFunctionOutputException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -655,6 +661,7 @@ module InvalidParameterException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -679,6 +686,7 @@ module LambdaThrottledException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -702,6 +710,7 @@ module LimitExceededException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -725,6 +734,7 @@ module NotAuthorizedException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -771,6 +781,7 @@ module ResourceConflictException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -794,6 +805,7 @@ module ResourceNotFoundException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -816,6 +828,7 @@ module TooManyRequestsException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -906,6 +919,7 @@ module InvalidConfigurationException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -944,6 +958,7 @@ module CognitoStreams =
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?streamingStatus ?roleArn ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingStatus =
         field_map json "StreamingStatus" StreamingStatus.of_json in
@@ -968,6 +983,7 @@ module ConcurrentModificationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -999,6 +1015,7 @@ module PushSync =
         (Option.map ~f:ApplicationArnList.of_xml)
           (Xml.child xml_arg0 "ApplicationArns") in
       make ?roleArn ?applicationArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "RoleArn" AssumeRoleArn.of_json in
       let applicationArns =
@@ -1266,6 +1283,7 @@ module IdentityUsage =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?dataStorage ?datasetCount ?lastModifiedDate ?identityPoolId
         ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataStorage = field_map json "DataStorage" Long.of_json in
       let datasetCount = field_map json "DatasetCount" Integer.of_json in
@@ -1295,6 +1313,7 @@ module AlreadyStreamedException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -1319,6 +1338,7 @@ module DuplicateRequestException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -1442,6 +1462,7 @@ module UpdateRecordsResponse =
       let records =
         (Option.map ~f:RecordList.of_xml) (Xml.child xml_arg0 "Records") in
       make ?records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let records = field_map json "Records" RecordList.of_json in
       make ?records ()
@@ -1525,6 +1546,7 @@ module UpdateRecordsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?clientContext ~syncSessionToken ?recordPatches ?deviceId
         ~datasetName ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientContext =
         field_map json "ClientContext" ClientContext.of_json in
@@ -1624,6 +1646,7 @@ module UnsubscribeFromDatasetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response to an UnsubscribeFromDataset request."]
@@ -1666,6 +1689,7 @@ module UnsubscribeFromDatasetRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~deviceId ~datasetName ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
       let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
@@ -1757,6 +1781,7 @@ module SubscribeToDatasetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response to a SubscribeToDataset request."]
@@ -1799,6 +1824,7 @@ module SubscribeToDatasetRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~deviceId ~datasetName ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
       let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
@@ -1918,6 +1944,7 @@ module SetIdentityPoolConfigurationResponse =
         (Option.map ~f:IdentityPoolId.of_xml)
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?cognitoStreams ?pushSync ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cognitoStreams =
         field_map json "CognitoStreams" CognitoStreams.of_json in
@@ -1964,6 +1991,7 @@ module SetIdentityPoolConfigurationRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?cognitoStreams ?pushSync ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cognitoStreams =
         field_map json "CognitoStreams" CognitoStreams.of_json in
@@ -1998,6 +2026,7 @@ module SetCognitoEventsRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~events ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map_exn json "Events" Events.of_json in
       let identityPoolId =
@@ -2094,6 +2123,7 @@ module RegisterDeviceResponse =
       let deviceId =
         (Option.map ~f:DeviceId.of_xml) (Xml.child xml_arg0 "DeviceId") in
       make ?deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map json "DeviceId" DeviceId.of_json in
       make ?deviceId ()
@@ -2138,6 +2168,7 @@ module RegisterDeviceRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~token ~platform ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let token = field_map_exn json "Token" PushToken.of_json in
       let platform = field_map_exn json "Platform" Platform.of_json in
@@ -2287,6 +2318,7 @@ module ListRecordsResponse =
       make ?syncSessionToken ?datasetDeletedAfterRequestedSyncCount
         ?datasetExists ?mergedDatasetNames ?lastModifiedBy ?datasetSyncCount
         ?count ?nextToken ?records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let syncSessionToken =
         field_map json "SyncSessionToken" String_.of_json in
@@ -2381,6 +2413,7 @@ module ListRecordsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?syncSessionToken ?maxResults ?nextToken ?lastSyncCount
         ~datasetName ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let syncSessionToken =
         field_map json "SyncSessionToken" SyncSessionToken.of_json in
@@ -2485,6 +2518,7 @@ module ListIdentityPoolUsageResponse =
         (Option.map ~f:IdentityPoolUsageList.of_xml)
           (Xml.child xml_arg0 "IdentityPoolUsages") in
       make ?nextToken ?count ?maxResults ?identityPoolUsages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let count = field_map json "Count" Integer.of_json in
@@ -2517,6 +2551,7 @@ module ListIdentityPoolUsageRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" IntegerString.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -2602,6 +2637,7 @@ module ListDatasetsResponse =
       let datasets =
         (Option.map ~f:DatasetList.of_xml) (Xml.child xml_arg0 "Datasets") in
       make ?nextToken ?count ?datasets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let count = field_map json "Count" Integer.of_json in
@@ -2651,6 +2687,7 @@ module ListDatasetsRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?maxResults ?nextToken ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" IntegerString.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -2758,6 +2795,7 @@ module GetIdentityPoolConfigurationResponse =
         (Option.map ~f:IdentityPoolId.of_xml)
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?cognitoStreams ?pushSync ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cognitoStreams =
         field_map json "CognitoStreams" CognitoStreams.of_json in
@@ -2787,6 +2825,7 @@ module GetIdentityPoolConfigurationRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -2873,6 +2912,7 @@ module GetCognitoEventsResponse =
       let events =
         (Option.map ~f:Events.of_xml) (Xml.child xml_arg0 "Events") in
       make ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "Events" Events.of_json in make ?events ()
     let to_json v = composed_to_json to_value v
@@ -2895,6 +2935,7 @@ module GetCognitoEventsRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -3016,6 +3057,7 @@ module GetBulkPublishDetailsResponse =
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?failureMessage ?bulkPublishStatus ?bulkPublishCompleteTime
         ?bulkPublishStartTime ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureMessage = field_map json "FailureMessage" String_.of_json in
       let bulkPublishStatus =
@@ -3049,6 +3091,7 @@ module GetBulkPublishDetailsRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -3135,6 +3178,7 @@ module DescribeIdentityUsageResponse =
         (Option.map ~f:IdentityUsage.of_xml)
           (Xml.child xml_arg0 "IdentityUsage") in
       make ?identityUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityUsage =
         field_map json "IdentityUsage" IdentityUsage.of_json in
@@ -3169,6 +3213,7 @@ module DescribeIdentityUsageRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
       let identityPoolId =
@@ -3257,6 +3302,7 @@ module DescribeIdentityPoolUsageResponse =
         (Option.map ~f:IdentityPoolUsage.of_xml)
           (Xml.child xml_arg0 "IdentityPoolUsage") in
       make ?identityPoolUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolUsage =
         field_map json "IdentityPoolUsage" IdentityPoolUsage.of_json in
@@ -3283,6 +3329,7 @@ module DescribeIdentityPoolUsageRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -3368,6 +3415,7 @@ module DescribeDatasetResponse =
       let dataset =
         (Option.map ~f:Dataset.of_xml) (Xml.child xml_arg0 "Dataset") in
       make ?dataset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataset = field_map json "Dataset" Dataset.of_json in
       make ?dataset ()
@@ -3409,6 +3457,7 @@ module DescribeDatasetRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~datasetName ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
       let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
@@ -3506,6 +3555,7 @@ module DeleteDatasetResponse =
       let dataset =
         (Option.map ~f:Dataset.of_xml) (Xml.child xml_arg0 "Dataset") in
       make ?dataset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataset = field_map json "Dataset" Dataset.of_json in
       make ?dataset ()
@@ -3547,6 +3597,7 @@ module DeleteDatasetRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~datasetName ~identityId ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
       let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
@@ -3645,6 +3696,7 @@ module BulkPublishResponse =
         (Option.map ~f:IdentityPoolId.of_xml)
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map json "IdentityPoolId" IdentityPoolId.of_json in
@@ -3670,6 +3722,7 @@ module BulkPublishRequest =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in

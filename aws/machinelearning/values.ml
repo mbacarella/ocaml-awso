@@ -336,6 +336,7 @@ module RDSDatabase =
         RDSInstanceIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceIdentifier") in
       make ~databaseName ~instanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let databaseName =
         field_map_exn json "DatabaseName" RDSDatabaseName.of_json in
@@ -408,6 +409,7 @@ module RedshiftDatabase =
         RedshiftDatabaseName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~clusterIdentifier ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterIdentifier =
         field_map_exn json "ClusterIdentifier"
@@ -773,6 +775,7 @@ module RealtimeEndpointInfo =
         (Option.map ~f:IntegerType.of_xml)
           (Xml.child xml_arg0 "PeakRequestsPerSecond") in
       make ?endpointStatus ?endpointUrl ?createdAt ?peakRequestsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointStatus =
         field_map json "EndpointStatus" RealtimeEndpointStatus.of_json in
@@ -880,6 +883,7 @@ module PerformanceMetrics =
         (Option.map ~f:PerformanceMetricsProperties.of_xml)
           (Xml.child xml_arg0 "Properties") in
       make ?properties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map json "Properties" PerformanceMetricsProperties.of_json in
@@ -982,6 +986,7 @@ module RDSMetadata =
         (Option.map ~f:RDSDatabase.of_xml) (Xml.child xml_arg0 "Database") in
       make ?dataPipelineId ?serviceRole ?resourceRole ?selectSqlQuery
         ?databaseUserName ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataPipelineId =
         field_map json "DataPipelineId" EDPPipelineId.of_json in
@@ -1030,6 +1035,7 @@ module RedshiftMetadata =
         (Option.map ~f:RedshiftDatabase.of_xml)
           (Xml.child xml_arg0 "RedshiftDatabase") in
       make ?selectSqlQuery ?databaseUserName ?redshiftDatabase ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectSqlQuery =
         field_map json "SelectSqlQuery" RedshiftSelectSqlQuery.of_json in
@@ -1266,6 +1272,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -1441,6 +1448,7 @@ module MLModel =
         ?inputDataLocationS3 ?trainingParameters ?endpointInfo ?sizeInBytes
         ?status ?name ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?trainingDataSourceId ?mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedAt = field_map json "StartedAt" EpochTime.of_json in
       let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
@@ -1603,6 +1611,7 @@ module Evaluation =
         ?status ?name ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?inputDataLocationS3 ?evaluationDataSourceId ?mLModelId ?evaluationId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedAt = field_map json "StartedAt" EpochTime.of_json in
       let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
@@ -1784,6 +1793,7 @@ module DataSource =
         ?rDSMetadata ?redshiftMetadata ?message ?status ?name ?numberOfFiles
         ?dataSizeInBytes ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?dataRearrangement ?dataLocationS3 ?dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedAt = field_map json "StartedAt" EpochTime.of_json in
       let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
@@ -1959,6 +1969,7 @@ module BatchPrediction =
         ?computeTime ?message ?outputUri ?status ?name ?lastUpdatedAt
         ?createdAt ?createdByIamUser ?inputDataLocationS3
         ?batchPredictionDataSourceId ?mLModelId ?batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidRecordCount =
         field_map json "InvalidRecordCount" LongType.of_json in
@@ -2026,6 +2037,7 @@ module RedshiftDatabaseCredentials =
         RedshiftDatabaseUsername.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Username") in
       make ~password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password =
         field_map_exn json "Password" RedshiftDatabasePassword.of_json in
@@ -2099,6 +2111,7 @@ module RDSDatabaseCredentials =
         RDSDatabaseUsername.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Username") in
       make ~password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password =
         field_map_exn json "Password" RDSDatabasePassword.of_json in
@@ -2125,6 +2138,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2149,6 +2163,7 @@ module InvalidInputException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2173,6 +2188,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2196,6 +2212,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2241,6 +2258,7 @@ module Prediction =
       let predictedLabel =
         (Option.map ~f:Label.of_xml) (Xml.child xml_arg0 "predictedLabel") in
       make ?details ?predictedScores ?predictedValue ?predictedLabel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" DetailsMap.of_json in
       let predictedScores =
@@ -2264,6 +2282,7 @@ module PredictorNotMountedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2742,6 +2761,7 @@ module InvalidTagException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2788,6 +2808,7 @@ module IdempotentParameterMismatchException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2846,6 +2867,7 @@ module S3DataSpec =
           (Xml.child_exn ~context:context_ xml_arg0 "DataLocationS3") in
       make ?dataSchemaLocationS3 ?dataSchema ?dataRearrangement
         ~dataLocationS3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSchemaLocationS3 =
         field_map json "DataSchemaLocationS3" S3Url.of_json in
@@ -2936,6 +2958,7 @@ module RedshiftDataSpec =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseInformation") in
       make ?dataSchemaUri ?dataSchema ?dataRearrangement ~s3StagingLocation
         ~databaseCredentials ~selectSqlQuery ~databaseInformation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSchemaUri = field_map json "DataSchemaUri" S3Url.of_json in
       let dataSchema = field_map json "DataSchema" DataSchema.of_json in
@@ -3071,6 +3094,7 @@ module RDSDataSpec =
       make ~securityGroupIds ~subnetId ~serviceRole ~resourceRole
         ?dataSchemaUri ?dataSchema ?dataRearrangement ~s3StagingLocation
         ~databaseCredentials ~selectSqlQuery ~databaseInformation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map_exn json "SecurityGroupIds" EDPSecurityGroupIds.of_json in
@@ -3111,6 +3135,7 @@ module TagLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3177,6 +3202,7 @@ module UpdateMLModelOutput =
       let mLModelId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mLModelId = field_map json "MLModelId" EntityId.of_json in
       make ?mLModelId ()
@@ -3216,6 +3242,7 @@ module UpdateMLModelInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ?scoreThreshold ?mLModelName ~mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scoreThreshold =
         field_map json "ScoreThreshold" ScoreThreshold.of_json in
@@ -3286,6 +3313,7 @@ module UpdateEvaluationOutput =
       let evaluationId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EvaluationId") in
       make ?evaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationId = field_map json "EvaluationId" EntityId.of_json in
       make ?evaluationId ()
@@ -3317,6 +3345,7 @@ module UpdateEvaluationInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationId") in
       make ~evaluationName ~evaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationName =
         field_map_exn json "EvaluationName" EntityName.of_json in
@@ -3386,6 +3415,7 @@ module UpdateDataSourceOutput =
       let dataSourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
@@ -3417,6 +3447,7 @@ module UpdateDataSourceInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ~dataSourceName ~dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceName =
         field_map_exn json "DataSourceName" EntityName.of_json in
@@ -3488,6 +3519,7 @@ module UpdateBatchPredictionOutput =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "BatchPredictionId") in
       make ?batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchPredictionId =
         field_map json "BatchPredictionId" EntityId.of_json in
@@ -3524,6 +3556,7 @@ module UpdateBatchPredictionInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BatchPredictionId") in
       make ~batchPredictionName ~batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchPredictionName =
         field_map_exn json "BatchPredictionName" EntityName.of_json in
@@ -3611,6 +3644,7 @@ module PredictOutput =
       let prediction =
         (Option.map ~f:Prediction.of_xml) (Xml.child xml_arg0 "Prediction") in
       make ?prediction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prediction = field_map json "Prediction" Prediction.of_json in
       make ?prediction ()
@@ -3646,6 +3680,7 @@ module PredictInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~predictEndpoint ~record ~mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictEndpoint =
         field_map_exn json "PredictEndpoint" VipURL.of_json in
@@ -3893,6 +3928,7 @@ module GetMLModelOutput =
         ?inputDataLocationS3 ?trainingParameters ?endpointInfo ?sizeInBytes
         ?status ?name ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?trainingDataSourceId ?mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schema = field_map json "Schema" DataSchema.of_json in
       let recipe = field_map json "Recipe" Recipe.of_json in
@@ -3953,6 +3989,7 @@ module GetMLModelInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ?verbose ~mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let verbose = field_map json "Verbose" Verbose.of_json in
       let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
@@ -4146,6 +4183,7 @@ module GetEvaluationOutput =
         ?performanceMetrics ?status ?name ?lastUpdatedAt ?createdAt
         ?createdByIamUser ?inputDataLocationS3 ?evaluationDataSourceId
         ?mLModelId ?evaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedAt = field_map json "StartedAt" EpochTime.of_json in
       let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
@@ -4191,6 +4229,7 @@ module GetEvaluationInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationId") in
       make ~evaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationId = field_map_exn json "EvaluationId" EntityId.of_json in
       make ~evaluationId ()
@@ -4421,6 +4460,7 @@ module GetDataSourceOutput =
         ?logUri ?status ?name ?numberOfFiles ?dataSizeInBytes ?lastUpdatedAt
         ?createdAt ?createdByIamUser ?dataRearrangement ?dataLocationS3
         ?dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceSchema =
         field_map json "DataSourceSchema" DataSchema.of_json in
@@ -4479,6 +4519,7 @@ module GetDataSourceInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ?verbose ~dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let verbose = field_map json "Verbose" Verbose.of_json in
       let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
@@ -4694,6 +4735,7 @@ module GetBatchPredictionOutput =
         ?computeTime ?message ?logUri ?outputUri ?status ?name ?lastUpdatedAt
         ?createdAt ?createdByIamUser ?inputDataLocationS3
         ?batchPredictionDataSourceId ?mLModelId ?batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidRecordCount =
         field_map json "InvalidRecordCount" LongType.of_json in
@@ -4743,6 +4785,7 @@ module GetBatchPredictionInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BatchPredictionId") in
       make ~batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchPredictionId =
         field_map_exn json "BatchPredictionId" EntityId.of_json in
@@ -4823,6 +4866,7 @@ module DescribeTagsOutput =
       let resourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?tags ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let resourceType =
@@ -4856,6 +4900,7 @@ module DescribeTagsInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceType ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" TaggableResourceType.of_json in
@@ -4921,6 +4966,7 @@ module DescribeMLModelsOutput =
       let results =
         (Option.map ~f:MLModels.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" StringType.of_json in
       let results = field_map json "Results" MLModels.of_json in
@@ -5030,6 +5076,7 @@ module DescribeMLModelsInput =
           (Xml.child xml_arg0 "FilterVariable") in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PageLimit.of_json in
       let nextToken = field_map json "NextToken" StringType.of_json in
@@ -5105,6 +5152,7 @@ module DescribeEvaluationsOutput =
       let results =
         (Option.map ~f:Evaluations.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" StringType.of_json in
       let results = field_map json "Results" Evaluations.of_json in
@@ -5214,6 +5262,7 @@ module DescribeEvaluationsInput =
           (Xml.child xml_arg0 "FilterVariable") in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PageLimit.of_json in
       let nextToken = field_map json "NextToken" StringType.of_json in
@@ -5289,6 +5338,7 @@ module DescribeDataSourcesOutput =
       let results =
         (Option.map ~f:DataSources.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" StringType.of_json in
       let results = field_map json "Results" DataSources.of_json in
@@ -5398,6 +5448,7 @@ module DescribeDataSourcesInput =
           (Xml.child xml_arg0 "FilterVariable") in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PageLimit.of_json in
       let nextToken = field_map json "NextToken" StringType.of_json in
@@ -5475,6 +5526,7 @@ module DescribeBatchPredictionsOutput =
         (Option.map ~f:BatchPredictions.of_xml)
           (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" StringType.of_json in
       let results = field_map json "Results" BatchPredictions.of_json in
@@ -5585,6 +5637,7 @@ module DescribeBatchPredictionsInput =
           (Xml.child xml_arg0 "FilterVariable") in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PageLimit.of_json in
       let nextToken = field_map json "NextToken" StringType.of_json in
@@ -5681,6 +5734,7 @@ module DeleteTagsOutput =
       let resourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map json "ResourceType" TaggableResourceType.of_json in
@@ -5720,6 +5774,7 @@ module DeleteTagsInput =
         TagKeyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
       make ~resourceType ~resourceId ~tagKeys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" TaggableResourceType.of_json in
@@ -5799,6 +5854,7 @@ module DeleteRealtimeEndpointOutput =
       let mLModelId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?realtimeEndpointInfo ?mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeEndpointInfo =
         field_map json "RealtimeEndpointInfo" RealtimeEndpointInfo.of_json in
@@ -5824,6 +5880,7 @@ module DeleteRealtimeEndpointInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
       make ~mLModelId ()
@@ -5890,6 +5947,7 @@ module DeleteMLModelOutput =
       let mLModelId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mLModelId = field_map json "MLModelId" EntityId.of_json in
       make ?mLModelId ()
@@ -5914,6 +5972,7 @@ module DeleteMLModelInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
       make ~mLModelId ()
@@ -5981,6 +6040,7 @@ module DeleteEvaluationOutput =
       let evaluationId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EvaluationId") in
       make ?evaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationId = field_map json "EvaluationId" EntityId.of_json in
       make ?evaluationId ()
@@ -6005,6 +6065,7 @@ module DeleteEvaluationInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationId") in
       make ~evaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationId = field_map_exn json "EvaluationId" EntityId.of_json in
       make ~evaluationId ()
@@ -6072,6 +6133,7 @@ module DeleteDataSourceOutput =
       let dataSourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
@@ -6095,6 +6157,7 @@ module DeleteDataSourceInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ~dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
       make ~dataSourceId ()
@@ -6164,6 +6227,7 @@ module DeleteBatchPredictionOutput =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "BatchPredictionId") in
       make ?batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchPredictionId =
         field_map json "BatchPredictionId" EntityId.of_json in
@@ -6190,6 +6254,7 @@ module DeleteBatchPredictionInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BatchPredictionId") in
       make ~batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchPredictionId =
         field_map_exn json "BatchPredictionId" EntityId.of_json in
@@ -6267,6 +6332,7 @@ module CreateRealtimeEndpointOutput =
       let mLModelId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?realtimeEndpointInfo ?mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeEndpointInfo =
         field_map json "RealtimeEndpointInfo" RealtimeEndpointInfo.of_json in
@@ -6292,6 +6358,7 @@ module CreateRealtimeEndpointInput =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
       make ~mLModelId ()
@@ -6363,6 +6430,7 @@ module CreateMLModelOutput =
       let mLModelId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mLModelId = field_map json "MLModelId" EntityId.of_json in
       make ?mLModelId ()
@@ -6443,6 +6511,7 @@ module CreateMLModelInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ?recipeUri ?recipe ~trainingDataSourceId ?parameters ~mLModelType
         ?mLModelName ~mLModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recipeUri = field_map json "RecipeUri" S3Url.of_json in
       let recipe = field_map json "Recipe" Recipe.of_json in
@@ -6522,6 +6591,7 @@ module CreateEvaluationOutput =
       let evaluationId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EvaluationId") in
       make ?evaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationId = field_map json "EvaluationId" EntityId.of_json in
       make ?evaluationId ()
@@ -6579,6 +6649,7 @@ module CreateEvaluationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationId") in
       make ~evaluationDataSourceId ~mLModelId ?evaluationName ~evaluationId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationDataSourceId =
         field_map_exn json "EvaluationDataSourceId" EntityId.of_json in
@@ -6655,6 +6726,7 @@ module CreateDataSourceFromS3Output =
       let dataSourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
@@ -6706,6 +6778,7 @@ module CreateDataSourceFromS3Input =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ?computeStatistics ~dataSpec ?dataSourceName ~dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeStatistics =
         field_map json "ComputeStatistics" ComputeStatistics.of_json in
@@ -6781,6 +6854,7 @@ module CreateDataSourceFromRedshiftOutput =
       let dataSourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
@@ -6846,6 +6920,7 @@ module CreateDataSourceFromRedshiftInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ?computeStatistics ~roleARN ~dataSpec ?dataSourceName
         ~dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeStatistics =
         field_map json "ComputeStatistics" ComputeStatistics.of_json in
@@ -6923,6 +6998,7 @@ module CreateDataSourceFromRDSOutput =
       let dataSourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
@@ -6988,6 +7064,7 @@ module CreateDataSourceFromRDSInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ?computeStatistics ~roleARN ~rDSData ?dataSourceName ~dataSourceId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeStatistics =
         field_map json "ComputeStatistics" ComputeStatistics.of_json in
@@ -7067,6 +7144,7 @@ module CreateBatchPredictionOutput =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "BatchPredictionId") in
       make ?batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchPredictionId =
         field_map json "BatchPredictionId" EntityId.of_json in
@@ -7136,6 +7214,7 @@ module CreateBatchPredictionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BatchPredictionId") in
       make ~outputUri ~batchPredictionDataSourceId ~mLModelId
         ?batchPredictionName ~batchPredictionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputUri = field_map_exn json "OutputUri" S3Url.of_json in
       let batchPredictionDataSourceId =
@@ -7236,6 +7315,7 @@ module AddTagsOutput =
       let resourceId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map json "ResourceType" TaggableResourceType.of_json in
@@ -7276,6 +7356,7 @@ module AddTagsInput =
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~resourceType ~resourceId ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" TaggableResourceType.of_json in

@@ -638,111 +638,201 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   match endpoint with
   | CreateGatewayRoute ->
       if is_success
-      then Ok (CreateGatewayRouteOutput.of_json (response_to_json resp))
+      then
+        let body = GatewayRouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateGatewayRouteOutput.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateGatewayRouteOutput.error_of_json))
   | CreateMesh ->
       if is_success
-      then Ok (CreateMeshOutput.of_json (response_to_json resp))
+      then
+        let body = MeshData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateMeshOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CreateMeshOutput.error_of_json))
   | CreateRoute ->
       if is_success
-      then Ok (CreateRouteOutput.of_json (response_to_json resp))
+      then
+        let body = RouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateRouteOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CreateRouteOutput.error_of_json))
   | CreateVirtualGateway ->
       if is_success
-      then Ok (CreateVirtualGatewayOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualGatewayData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateVirtualGatewayOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some CreateVirtualGatewayOutput.error_of_json))
   | CreateVirtualNode ->
       if is_success
-      then Ok (CreateVirtualNodeOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualNodeData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateVirtualNodeOutput.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateVirtualNodeOutput.error_of_json))
   | CreateVirtualRouter ->
       if is_success
-      then Ok (CreateVirtualRouterOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualRouterData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateVirtualRouterOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some CreateVirtualRouterOutput.error_of_json))
   | CreateVirtualService ->
       if is_success
-      then Ok (CreateVirtualServiceOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualServiceData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateVirtualServiceOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some CreateVirtualServiceOutput.error_of_json))
   | DeleteGatewayRoute ->
       if is_success
-      then Ok (DeleteGatewayRouteOutput.of_json (response_to_json resp))
+      then
+        let body = GatewayRouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteGatewayRouteOutput.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some DeleteGatewayRouteOutput.error_of_json))
   | DeleteMesh ->
       if is_success
-      then Ok (DeleteMeshOutput.of_json (response_to_json resp))
+      then
+        let body = MeshData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteMeshOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some DeleteMeshOutput.error_of_json))
   | DeleteRoute ->
       if is_success
-      then Ok (DeleteRouteOutput.of_json (response_to_json resp))
+      then
+        let body = RouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteRouteOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some DeleteRouteOutput.error_of_json))
   | DeleteVirtualGateway ->
       if is_success
-      then Ok (DeleteVirtualGatewayOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualGatewayData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteVirtualGatewayOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DeleteVirtualGatewayOutput.error_of_json))
   | DeleteVirtualNode ->
       if is_success
-      then Ok (DeleteVirtualNodeOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualNodeData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteVirtualNodeOutput.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some DeleteVirtualNodeOutput.error_of_json))
   | DeleteVirtualRouter ->
       if is_success
-      then Ok (DeleteVirtualRouterOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualRouterData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteVirtualRouterOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DeleteVirtualRouterOutput.error_of_json))
   | DeleteVirtualService ->
       if is_success
-      then Ok (DeleteVirtualServiceOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualServiceData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteVirtualServiceOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DeleteVirtualServiceOutput.error_of_json))
   | DescribeGatewayRoute ->
       if is_success
-      then Ok (DescribeGatewayRouteOutput.of_json (response_to_json resp))
+      then
+        let body = GatewayRouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeGatewayRouteOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DescribeGatewayRouteOutput.error_of_json))
   | DescribeMesh ->
       if is_success
-      then Ok (DescribeMeshOutput.of_json (response_to_json resp))
+      then
+        let body = MeshData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeMeshOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some DescribeMeshOutput.error_of_json))
   | DescribeRoute ->
       if is_success
-      then Ok (DescribeRouteOutput.of_json (response_to_json resp))
+      then
+        let body = RouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeRouteOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some DescribeRouteOutput.error_of_json))
   | DescribeVirtualGateway ->
       if is_success
-      then Ok (DescribeVirtualGatewayOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualGatewayData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeVirtualGatewayOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DescribeVirtualGatewayOutput.error_of_json))
   | DescribeVirtualNode ->
       if is_success
-      then Ok (DescribeVirtualNodeOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualNodeData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeVirtualNodeOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DescribeVirtualNodeOutput.error_of_json))
   | DescribeVirtualRouter ->
       if is_success
-      then Ok (DescribeVirtualRouterOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualRouterData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeVirtualRouterOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DescribeVirtualRouterOutput.error_of_json))
   | DescribeVirtualService ->
       if is_success
-      then Ok (DescribeVirtualServiceOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualServiceData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeVirtualServiceOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some DescribeVirtualServiceOutput.error_of_json))
@@ -803,37 +893,67 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some UntagResourceOutput.error_of_json))
   | UpdateGatewayRoute ->
       if is_success
-      then Ok (UpdateGatewayRouteOutput.of_json (response_to_json resp))
+      then
+        let body = GatewayRouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateGatewayRouteOutput.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some UpdateGatewayRouteOutput.error_of_json))
   | UpdateMesh ->
       if is_success
-      then Ok (UpdateMeshOutput.of_json (response_to_json resp))
+      then
+        let body = MeshData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateMeshOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some UpdateMeshOutput.error_of_json))
   | UpdateRoute ->
       if is_success
-      then Ok (UpdateRouteOutput.of_json (response_to_json resp))
+      then
+        let body = RouteData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateRouteOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some UpdateRouteOutput.error_of_json))
   | UpdateVirtualGateway ->
       if is_success
-      then Ok (UpdateVirtualGatewayOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualGatewayData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateVirtualGatewayOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some UpdateVirtualGatewayOutput.error_of_json))
   | UpdateVirtualNode ->
       if is_success
-      then Ok (UpdateVirtualNodeOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualNodeData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateVirtualNodeOutput.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some UpdateVirtualNodeOutput.error_of_json))
   | UpdateVirtualRouter ->
       if is_success
-      then Ok (UpdateVirtualRouterOutput.of_json (response_to_json resp))
+      then
+        let body = VirtualRouterData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateVirtualRouterOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some UpdateVirtualRouterOutput.error_of_json))
   | UpdateVirtualService ->
       if is_success
-      then Ok (UpdateVirtualServiceOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VirtualServiceData.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateVirtualServiceOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some UpdateVirtualServiceOutput.error_of_json))

@@ -120,6 +120,7 @@ module AccessControlAttributeValue =
         AccessControlAttributeValueSourceList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Source") in
       make ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let source =
         field_map_exn json "Source"
@@ -153,6 +154,7 @@ module AccessControlAttribute =
         AccessControlAttributeKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value =
         field_map_exn json "Value" AccessControlAttributeValue.of_json in
@@ -557,6 +559,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -608,6 +611,7 @@ module PermissionSetProvisioningStatusMetadata =
       let status =
         (Option.map ~f:StatusValues.of_xml) (Xml.child xml_arg0 "Status") in
       make ?createdDate ?requestId ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map json "CreatedDate" Date.of_json in
       let requestId = field_map json "RequestId" UUId.of_json in
@@ -635,6 +639,7 @@ module AttachedManagedPolicy =
         (Option.map ~f:ManagedPolicyArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ManagedPolicyArn.of_json in
       let name = field_map json "Name" Name.of_json in make ?arn ?name ()
@@ -664,6 +669,7 @@ module InstanceMetadata =
       let instanceArn =
         (Option.map ~f:InstanceArn.of_xml) (Xml.child xml_arg0 "InstanceArn") in
       make ?identityStoreId ?instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityStoreId = field_map json "IdentityStoreId" Id.of_json in
       let instanceArn = field_map json "InstanceArn" InstanceArn.of_json in
@@ -712,6 +718,7 @@ module AccountAssignment =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?principalId ?principalType ?permissionSetArn ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalId = field_map json "PrincipalId" PrincipalId.of_json in
       let principalType =
@@ -751,6 +758,7 @@ module AccountAssignmentOperationStatusMetadata =
       let status =
         (Option.map ~f:StatusValues.of_xml) (Xml.child xml_arg0 "Status") in
       make ?createdDate ?requestId ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map json "CreatedDate" Date.of_json in
       let requestId = field_map json "RequestId" UUId.of_json in
@@ -893,6 +901,7 @@ module AccessDeniedException =
         (Option.map ~f:AccessDeniedExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "Message" AccessDeniedExceptionMessage.of_json in
@@ -915,6 +924,7 @@ module ConflictException =
         (Option.map ~f:ConflictExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ConflictExceptionMessage.of_json in
       make ?message ()
@@ -936,6 +946,7 @@ module InternalServerException =
         (Option.map ~f:InternalFailureMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" InternalFailureMessage.of_json in
       make ?message ()
@@ -957,6 +968,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ResourceNotFoundMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ResourceNotFoundMessage.of_json in
       make ?message ()
@@ -977,6 +989,7 @@ module ThrottlingException =
         (Option.map ~f:ThrottlingExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "Message" ThrottlingExceptionMessage.of_json in
@@ -999,6 +1012,7 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "Message" ValidationExceptionMessage.of_json in
@@ -1025,6 +1039,7 @@ module InstanceAccessControlAttributeConfiguration =
         AccessControlAttributeList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessControlAttributes") in
       make ~accessControlAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessControlAttributes =
         field_map_exn json "AccessControlAttributes"
@@ -1097,6 +1112,7 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ServiceQuotaExceededMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "Message" ServiceQuotaExceededMessage.of_json in
@@ -1214,6 +1230,7 @@ module PermissionSetProvisioningStatus =
         (Option.map ~f:StatusValues.of_xml) (Xml.child xml_arg0 "Status") in
       make ?createdDate ?failureReason ?permissionSetArn ?accountId
         ?requestId ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map json "CreatedDate" Date.of_json in
       let failureReason = field_map json "FailureReason" Reason.of_json in
@@ -1387,6 +1404,7 @@ module OperationStatusFilter =
       let status =
         (Option.map ~f:StatusValues.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" StatusValues.of_json in
       make ?status ()
@@ -1583,6 +1601,7 @@ module PermissionSet =
         (Option.map ~f:PermissionSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?relayState ?sessionDuration ?createdDate ?description
         ?permissionSetArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relayState = field_map json "RelayState" RelayState.of_json in
       let sessionDuration = field_map json "SessionDuration" Duration.of_json in
@@ -1732,6 +1751,7 @@ module AccountAssignmentOperationStatus =
         (Option.map ~f:StatusValues.of_xml) (Xml.child xml_arg0 "Status") in
       make ?createdDate ?principalId ?principalType ?permissionSetArn
         ?targetType ?targetId ?failureReason ?requestId ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map json "CreatedDate" Date.of_json in
       let principalId = field_map json "PrincipalId" PrincipalId.of_json in
@@ -1829,6 +1849,7 @@ module UpdatePermissionSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing permission set."]
@@ -1891,6 +1912,7 @@ module UpdatePermissionSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?relayState ?sessionDuration ?description ~permissionSetArn
         ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relayState = field_map json "RelayState" RelayState.of_json in
       let sessionDuration = field_map json "SessionDuration" Duration.of_json in
@@ -1983,6 +2005,7 @@ module UpdateInstanceAccessControlAttributeConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2019,6 +2042,7 @@ module UpdateInstanceAccessControlAttributeConfigurationRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~instanceAccessControlAttributeConfiguration ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceAccessControlAttributeConfiguration =
         field_map_exn json "InstanceAccessControlAttributeConfiguration"
@@ -2108,6 +2132,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a set of tags from a specified resource."]
@@ -2143,6 +2168,7 @@ module UntagResourceRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~tagKeys ~resourceArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" GeneralArn.of_json in
@@ -2241,6 +2267,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a set of tags with a specified resource."]
@@ -2276,6 +2303,7 @@ module TagResourceRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~tags ~resourceArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" GeneralArn.of_json in
@@ -2374,6 +2402,7 @@ module PutInlinePolicyToPermissionSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2413,6 +2442,7 @@ module PutInlinePolicyToPermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~inlinePolicy ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inlinePolicy =
         field_map_exn json "InlinePolicy" PermissionSetPolicyDocument.of_json in
@@ -2516,6 +2546,7 @@ module ProvisionPermissionSetResponse =
         (Option.map ~f:PermissionSetProvisioningStatus.of_xml)
           (Xml.child xml_arg0 "PermissionSetProvisioningStatus") in
       make ?permissionSetProvisioningStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSetProvisioningStatus =
         field_map json "PermissionSetProvisioningStatus"
@@ -2566,6 +2597,7 @@ module ProvisionPermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~targetType ?targetId ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetType =
         field_map_exn json "TargetType" ProvisionTargetType.of_json in
@@ -2661,6 +2693,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -2700,6 +2733,7 @@ module ListTagsForResourceRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?nextToken ~resourceArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let resourceArn = field_map_exn json "ResourceArn" GeneralArn.of_json in
@@ -2796,6 +2830,7 @@ module ListPermissionSetsResponse =
         (Option.map ~f:PermissionSetList.of_xml)
           (Xml.child xml_arg0 "PermissionSets") in
       make ?nextToken ?permissionSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let permissionSets =
@@ -2835,6 +2870,7 @@ module ListPermissionSetsRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?maxResults ?nextToken ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -2930,6 +2966,7 @@ module ListPermissionSetsProvisionedToAccountResponse =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?permissionSets ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSets =
         field_map json "PermissionSets" PermissionSetList.of_json in
@@ -2996,6 +3033,7 @@ module ListPermissionSetsProvisionedToAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?nextToken ?maxResults ?provisioningStatus ~accountId ~instanceArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3099,6 +3137,7 @@ module ListPermissionSetProvisioningStatusResponse =
         (Option.map ~f:PermissionSetProvisioningStatusList.of_xml)
           (Xml.child xml_arg0 "PermissionSetsProvisioningStatus") in
       make ?nextToken ?permissionSetsProvisioningStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let permissionSetsProvisioningStatus =
@@ -3148,6 +3187,7 @@ module ListPermissionSetProvisioningStatusRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?filter ?nextToken ?maxResults ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "Filter" OperationStatusFilter.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -3246,6 +3286,7 @@ module ListManagedPoliciesInPermissionSetResponse =
         (Option.map ~f:AttachedManagedPolicyList.of_xml)
           (Xml.child xml_arg0 "AttachedManagedPolicies") in
       make ?nextToken ?attachedManagedPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let attachedManagedPolicies =
@@ -3298,6 +3339,7 @@ module ListManagedPoliciesInPermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?nextToken ?maxResults ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3384,6 +3426,7 @@ module ListInstancesResponse =
       let instances =
         (Option.map ~f:InstanceList.of_xml) (Xml.child xml_arg0 "Instances") in
       make ?nextToken ?instances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let instances = field_map json "Instances" InstanceList.of_json in
@@ -3413,6 +3456,7 @@ module ListInstancesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3504,6 +3548,7 @@ module ListAccountsForProvisionedPermissionSetResponse =
       let accountIds =
         (Option.map ~f:AccountList.of_xml) (Xml.child xml_arg0 "AccountIds") in
       make ?nextToken ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let accountIds = field_map json "AccountIds" AccountList.of_json in
@@ -3570,6 +3615,7 @@ module ListAccountsForProvisionedPermissionSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?nextToken ?maxResults ?provisioningStatus ~permissionSetArn
         ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3671,6 +3717,7 @@ module ListAccountAssignmentsResponse =
         (Option.map ~f:AccountAssignmentList.of_xml)
           (Xml.child xml_arg0 "AccountAssignments") in
       make ?nextToken ?accountAssignments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let accountAssignments =
@@ -3737,6 +3784,7 @@ module ListAccountAssignmentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?nextToken ?maxResults ~permissionSetArn ~accountId ~instanceArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3840,6 +3888,7 @@ module ListAccountAssignmentDeletionStatusResponse =
         (Option.map ~f:AccountAssignmentOperationStatusList.of_xml)
           (Xml.child xml_arg0 "AccountAssignmentsDeletionStatus") in
       make ?nextToken ?accountAssignmentsDeletionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let accountAssignmentsDeletionStatus =
@@ -3889,6 +3938,7 @@ module ListAccountAssignmentDeletionStatusRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?filter ?nextToken ?maxResults ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "Filter" OperationStatusFilter.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -3989,6 +4039,7 @@ module ListAccountAssignmentCreationStatusResponse =
         (Option.map ~f:AccountAssignmentOperationStatusList.of_xml)
           (Xml.child xml_arg0 "AccountAssignmentsCreationStatus") in
       make ?nextToken ?accountAssignmentsCreationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let accountAssignmentsCreationStatus =
@@ -4038,6 +4089,7 @@ module ListAccountAssignmentCreationStatusRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ?filter ?nextToken ?maxResults ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "Filter" OperationStatusFilter.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -4128,6 +4180,7 @@ module GetInlinePolicyForPermissionSetResponse =
         (Option.map ~f:PermissionSetPolicyDocument.of_xml)
           (Xml.child xml_arg0 "InlinePolicy") in
       make ?inlinePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inlinePolicy =
         field_map json "InlinePolicy" PermissionSetPolicyDocument.of_json in
@@ -4161,6 +4214,7 @@ module GetInlinePolicyForPermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSetArn =
         field_map_exn json "PermissionSetArn" PermissionSetArn.of_json in
@@ -4249,6 +4303,7 @@ module DetachManagedPolicyFromPermissionSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4290,6 +4345,7 @@ module DetachManagedPolicyFromPermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~managedPolicyArn ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let managedPolicyArn =
         field_map_exn json "ManagedPolicyArn" ManagedPolicyArn.of_json in
@@ -4381,6 +4437,7 @@ module DescribePermissionSetResponse =
         (Option.map ~f:PermissionSet.of_xml)
           (Xml.child xml_arg0 "PermissionSet") in
       make ?permissionSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSet =
         field_map json "PermissionSet" PermissionSet.of_json in
@@ -4413,6 +4470,7 @@ module DescribePermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSetArn =
         field_map_exn json "PermissionSetArn" PermissionSetArn.of_json in
@@ -4504,6 +4562,7 @@ module DescribePermissionSetProvisioningStatusResponse =
         (Option.map ~f:PermissionSetProvisioningStatus.of_xml)
           (Xml.child xml_arg0 "PermissionSetProvisioningStatus") in
       make ?permissionSetProvisioningStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSetProvisioningStatus =
         field_map json "PermissionSetProvisioningStatus"
@@ -4541,6 +4600,7 @@ module DescribePermissionSetProvisioningStatusRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~provisionPermissionSetRequestId ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisionPermissionSetRequestId =
         field_map_exn json "ProvisionPermissionSetRequestId" UUId.of_json in
@@ -4661,6 +4721,7 @@ module DescribeInstanceAccessControlAttributeConfigurationResponse =
           (Xml.child xml_arg0 "Status") in
       make ?instanceAccessControlAttributeConfiguration ?statusReason ?status
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceAccessControlAttributeConfiguration =
         field_map json "InstanceAccessControlAttributeConfiguration"
@@ -4695,6 +4756,7 @@ module DescribeInstanceAccessControlAttributeConfigurationRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceArn = field_map_exn json "InstanceArn" InstanceArn.of_json in
       make ~instanceArn ()
@@ -4785,6 +4847,7 @@ module DescribeAccountAssignmentDeletionStatusResponse =
         (Option.map ~f:AccountAssignmentOperationStatus.of_xml)
           (Xml.child xml_arg0 "AccountAssignmentDeletionStatus") in
       make ?accountAssignmentDeletionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAssignmentDeletionStatus =
         field_map json "AccountAssignmentDeletionStatus"
@@ -4821,6 +4884,7 @@ module DescribeAccountAssignmentDeletionStatusRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~accountAssignmentDeletionRequestId ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAssignmentDeletionRequestId =
         field_map_exn json "AccountAssignmentDeletionRequestId" UUId.of_json in
@@ -4912,6 +4976,7 @@ module DescribeAccountAssignmentCreationStatusResponse =
         (Option.map ~f:AccountAssignmentOperationStatus.of_xml)
           (Xml.child xml_arg0 "AccountAssignmentCreationStatus") in
       make ?accountAssignmentCreationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAssignmentCreationStatus =
         field_map json "AccountAssignmentCreationStatus"
@@ -4948,6 +5013,7 @@ module DescribeAccountAssignmentCreationStatusRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~accountAssignmentCreationRequestId ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAssignmentCreationRequestId =
         field_map_exn json "AccountAssignmentCreationRequestId" UUId.of_json in
@@ -5035,6 +5101,7 @@ module DeletePermissionSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified permission set."]
@@ -5064,6 +5131,7 @@ module DeletePermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSetArn =
         field_map_exn json "PermissionSetArn" PermissionSetArn.of_json in
@@ -5151,6 +5219,7 @@ module DeleteInstanceAccessControlAttributeConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5173,6 +5242,7 @@ module DeleteInstanceAccessControlAttributeConfigurationRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceArn = field_map_exn json "InstanceArn" InstanceArn.of_json in
       make ~instanceArn ()
@@ -5259,6 +5329,7 @@ module DeleteInlinePolicyFromPermissionSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5290,6 +5361,7 @@ module DeleteInlinePolicyFromPermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSetArn =
         field_map_exn json "PermissionSetArn" PermissionSetArn.of_json in
@@ -5391,6 +5463,7 @@ module DeleteAccountAssignmentResponse =
         (Option.map ~f:AccountAssignmentOperationStatus.of_xml)
           (Xml.child xml_arg0 "AccountAssignmentDeletionStatus") in
       make ?accountAssignmentDeletionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAssignmentDeletionStatus =
         field_map json "AccountAssignmentDeletionStatus"
@@ -5467,6 +5540,7 @@ module DeleteAccountAssignmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~principalId ~principalType ~permissionSetArn ~targetType
         ~targetId ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalId = field_map_exn json "PrincipalId" PrincipalId.of_json in
       let principalType =
@@ -5582,6 +5656,7 @@ module CreatePermissionSetResponse =
         (Option.map ~f:PermissionSet.of_xml)
           (Xml.child xml_arg0 "PermissionSet") in
       make ?permissionSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionSet =
         field_map json "PermissionSet" PermissionSet.of_json in
@@ -5652,6 +5727,7 @@ module CreatePermissionSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?relayState ?sessionDuration ~instanceArn ?description ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let relayState = field_map json "RelayState" RelayState.of_json in
@@ -5745,6 +5821,7 @@ module CreateInstanceAccessControlAttributeConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5782,6 +5859,7 @@ module CreateInstanceAccessControlAttributeConfigurationRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~instanceAccessControlAttributeConfiguration ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceAccessControlAttributeConfiguration =
         field_map_exn json "InstanceAccessControlAttributeConfiguration"
@@ -5895,6 +5973,7 @@ module CreateAccountAssignmentResponse =
         (Option.map ~f:AccountAssignmentOperationStatus.of_xml)
           (Xml.child xml_arg0 "AccountAssignmentCreationStatus") in
       make ?accountAssignmentCreationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAssignmentCreationStatus =
         field_map json "AccountAssignmentCreationStatus"
@@ -5971,6 +6050,7 @@ module CreateAccountAssignmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~principalId ~principalType ~permissionSetArn ~targetType
         ~targetId ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalId = field_map_exn json "PrincipalId" PrincipalId.of_json in
       let principalType =
@@ -6076,6 +6156,7 @@ module AttachManagedPolicyToPermissionSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6117,6 +6198,7 @@ module AttachManagedPolicyToPermissionSetRequest =
         InstanceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
       make ~managedPolicyArn ~permissionSetArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let managedPolicyArn =
         field_map_exn json "ManagedPolicyArn" ManagedPolicyArn.of_json in

@@ -568,6 +568,7 @@ module NetworkInfo =
         InterfaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "interfaceName") in
       make ~netMask ~macAddress ~ipAddress ~interfaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let netMask = field_map_exn json "netMask" NetMask.of_json in
       let macAddress = field_map_exn json "macAddress" MacAddress.of_json in
@@ -843,6 +844,7 @@ module AntipatternSeveritySummary =
         (Option.map ~f:Severity.of_xml) (Xml.child xml_arg0 "severity") in
       let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "count") in
       make ?severity ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let severity = field_map json "severity" Severity.of_json in
       let count = field_map json "count" Integer.of_json in
@@ -869,6 +871,7 @@ module StrategySummary =
         (Option.map ~f:Strategy.of_xml) (Xml.child xml_arg0 "strategy") in
       let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "count") in
       make ?strategy ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strategy = field_map json "strategy" Strategy.of_json in
       let count = field_map json "count" Integer.of_json in
@@ -981,6 +984,7 @@ module TransformationTool =
         (Option.map ~f:TranformationToolDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       make ?tranformationToolInstallationLink ?name ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tranformationToolInstallationLink =
         field_map json "tranformationToolInstallationLink"
@@ -1077,6 +1081,7 @@ module OSInfo =
         (Option.map ~f:OSVersion.of_xml) (Xml.child xml_arg0 "version") in
       let type_ = (Option.map ~f:OSType.of_xml) (Xml.child xml_arg0 "type") in
       make ?version ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" OSVersion.of_json in
       let type_ = field_map json "type" OSType.of_json in
@@ -1112,6 +1117,7 @@ module SourceCodeRepository =
       let branch =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "branch") in
       make ?versionControlType ?repository ?branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionControlType =
         field_map json "versionControlType" String_.of_json in
@@ -1294,6 +1300,7 @@ module AwsManagedResources =
         AwsManagedTargetDestinations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetDestination") in
       make ~targetDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDestination =
         field_map_exn json "targetDestination"
@@ -1322,6 +1329,7 @@ module NoManagementPreference =
         NoPreferenceTargetDestinations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetDestination") in
       make ~targetDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDestination =
         field_map_exn json "targetDestination"
@@ -1348,6 +1356,7 @@ module SelfManageResources =
         SelfManageTargetDestinations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetDestination") in
       make ~targetDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDestination =
         field_map_exn json "targetDestination"
@@ -1376,6 +1385,7 @@ module Heterogeneous =
         HeterogeneousTargetDatabaseEngines.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetDatabaseEngine") in
       make ~targetDatabaseEngine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDatabaseEngine =
         field_map_exn json "targetDatabaseEngine"
@@ -1403,6 +1413,7 @@ module Homogeneous =
         (Option.map ~f:HomogeneousTargetDatabaseEngines.of_xml)
           (Xml.child xml_arg0 "targetDatabaseEngine") in
       make ?targetDatabaseEngine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDatabaseEngine =
         field_map json "targetDatabaseEngine"
@@ -1430,6 +1441,7 @@ module NoDatabaseMigrationPreference =
         TargetDatabaseEngines.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetDatabaseEngine") in
       make ~targetDatabaseEngine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDatabaseEngine =
         field_map_exn json "targetDatabaseEngine"
@@ -1568,6 +1580,7 @@ module RecommendationSet =
       let strategy =
         (Option.map ~f:Strategy.of_xml) (Xml.child xml_arg0 "strategy") in
       make ?transformationTool ?targetDestination ?strategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transformationTool =
         field_map json "transformationTool" TransformationTool.of_json in
@@ -1671,6 +1684,7 @@ module S3Object =
       let s3Bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       make ?s3key ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3key = field_map json "s3key" S3Key.of_json in
       let s3Bucket = field_map json "s3Bucket" S3Bucket.of_json in
@@ -1735,6 +1749,7 @@ module SystemInfo =
       let cpuArchitecture =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cpuArchitecture") in
       make ?osInfo ?networkInfoList ?fileSystemType ?cpuArchitecture ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let osInfo = field_map json "osInfo" OSInfo.of_json in
       let networkInfoList =
@@ -1897,6 +1912,7 @@ module DatabaseConfigDetail =
       let secretName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "secretName") in
       make ?secretName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretName = field_map json "secretName" String_.of_json in
       make ?secretName ()
@@ -2083,6 +2099,7 @@ module ApplicationComponentSummary =
       let appType =
         (Option.map ~f:AppType.of_xml) (Xml.child xml_arg0 "appType") in
       make ?count ?appType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map json "count" Integer.of_json in
       let appType = field_map json "appType" AppType.of_json in
@@ -2109,6 +2126,7 @@ module ServerSummary =
         (Option.map ~f:ServerOsType.of_xml)
           (Xml.child xml_arg0 "ServerOsType") in
       make ?count ?serverOsType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map json "count" Integer.of_json in
       let serverOsType = field_map json "ServerOsType" ServerOsType.of_json in
@@ -2161,6 +2179,7 @@ module SourceCode =
       let location =
         (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "location") in
       make ?versionControl ?sourceVersion ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionControl =
         field_map json "versionControl" VersionControl.of_json in
@@ -2189,6 +2208,7 @@ module Group =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       let name = (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" String_.of_json in
       let name = field_map json "name" GroupName.of_json in
@@ -2233,6 +2253,7 @@ module ManagementPreference =
         (Option.map ~f:AwsManagedResources.of_xml)
           (Xml.child xml_arg0 "awsManagedResources") in
       make ?selfManageResources ?noPreference ?awsManagedResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selfManageResources =
         field_map json "selfManageResources" SelfManageResources.of_json in
@@ -2310,6 +2331,7 @@ module DatabaseMigrationPreference =
         (Option.map ~f:Heterogeneous.of_xml)
           (Xml.child xml_arg0 "heterogeneous") in
       make ?noPreference ?homogeneous ?heterogeneous ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let noPreference =
         field_map json "noPreference" NoDatabaseMigrationPreference.of_json in
@@ -2377,6 +2399,7 @@ module BusinessGoals =
       make ?speedOfMigration ?reduceOperationalOverheadWithManagedServices
         ?modernizeInfrastructureWithCloudNativeTechnologies
         ?licenseCostReduction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let speedOfMigration =
         field_map json "speedOfMigration" BusinessGoalsInteger.of_json in
@@ -2522,6 +2545,7 @@ module ServerDetail =
         ?dataCollectionStatus ?applicationComponentStrategySummary
         ?antipatternReportStatusMessage ?antipatternReportStatus
         ?antipatternReportS3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let systemInfo = field_map json "systemInfo" SystemInfo.of_json in
       let statusMessage =
@@ -2659,6 +2683,7 @@ module ImportFileTaskInformation =
       make ?statusReportS3Key ?statusReportS3Bucket ?status ?startTime
         ?numberOfRecordsSuccess ?numberOfRecordsFailed ?inputS3Key
         ?inputS3Bucket ?importName ?id ?completionTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReportS3Key =
         field_map json "statusReportS3Key" ImportS3Key.of_json in
@@ -2752,6 +2777,7 @@ module Collector =
           (Xml.child xml_arg0 "collectorHealth") in
       make ?registeredTimeStamp ?lastActivityTimeStamp ?ipAddress ?hostName
         ?collectorVersion ?collectorId ?collectorHealth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registeredTimeStamp =
         field_map json "registeredTimeStamp" String_.of_json in
@@ -2959,6 +2985,7 @@ module ApplicationComponentDetail =
         ?associatedServerId ?appType ?antipatternReportStatusMessage
         ?antipatternReportStatus ?antipatternReportS3Object ?analysisStatus
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "statusMessage" StatusMessage.of_json in
@@ -3054,6 +3081,7 @@ module ServerStrategy =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPreferred") in
       make ?status ?recommendation ?numberOfApplicationComponents
         ?isPreferred ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" StrategyRecommendation.of_json in
       let recommendation =
@@ -3086,6 +3114,7 @@ module AssociatedApplication =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" String_.of_json in
       let id = field_map json "id" String_.of_json in make ?name ?id ()
@@ -3291,6 +3320,7 @@ module ApplicationComponentStrategy =
       let isPreferred =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPreferred") in
       make ?status ?recommendation ?isPreferred ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" StrategyRecommendation.of_json in
       let recommendation =
@@ -3313,6 +3343,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3331,6 +3362,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3349,6 +3381,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3367,6 +3400,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3414,6 +3448,7 @@ module StrategyOption =
       let isPreferred =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPreferred") in
       make ?toolName ?targetDestination ?strategy ?isPreferred ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let toolName = field_map json "toolName" TransformationToolName.of_json in
       let targetDestination =
@@ -3501,6 +3536,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -3540,6 +3576,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -3621,6 +3658,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -3764,6 +3802,7 @@ module ApplicationPreferences =
         (Option.map ~f:ManagementPreference.of_xml)
           (Xml.child xml_arg0 "managementPreference") in
       make ?managementPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let managementPreference =
         field_map json "managementPreference" ManagementPreference.of_json in
@@ -3800,6 +3839,7 @@ module DatabasePreferences =
         (Option.map ~f:DatabaseManagementPreference.of_xml)
           (Xml.child xml_arg0 "databaseManagementPreference") in
       make ?databaseMigrationPreference ?databaseManagementPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let databaseMigrationPreference =
         field_map json "databaseMigrationPreference"
@@ -3827,6 +3867,7 @@ module PrioritizeBusinessGoals =
         (Option.map ~f:BusinessGoals.of_xml)
           (Xml.child xml_arg0 "businessGoals") in
       make ?businessGoals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let businessGoals =
         field_map json "businessGoals" BusinessGoals.of_json in
@@ -4032,6 +4073,7 @@ module ServiceLinkedRoleLockClientException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4219,6 +4261,7 @@ module RecommendationReportDetails =
           (Xml.child xml_arg0 "completionTime") in
       make ?statusMessage ?status ?startTime ?s3Keys ?s3Bucket
         ?completionTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "statusMessage"
@@ -4341,6 +4384,7 @@ module AssessmentSummary =
         ?listAntipatternSeveritySummary ?lastAnalyzedTimestamp
         ?antipatternReportStatusMessage ?antipatternReportStatus
         ?antipatternReportS3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listServerSummary =
         field_map json "listServerSummary" ListServerSummary.of_json in
@@ -4438,6 +4482,7 @@ module DataCollectionDetails =
           (Xml.child xml_arg0 "completionTime") in
       make ?success ?status ?startTime ?servers ?inProgress ?failed
         ?completionTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let success = field_map json "success" Integer.of_json in
       let status = field_map json "status" AssessmentStatus.of_json in
@@ -4562,6 +4607,7 @@ module UpdateServerConfigResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the configuration of the specified server."]
@@ -4589,6 +4635,7 @@ module UpdateServerConfigRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "serverId") in
       make ?strategyOption ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strategyOption =
         field_map json "strategyOption" StrategyOption.of_json in
@@ -4658,6 +4705,7 @@ module UpdateApplicationComponentConfigResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the configuration of an application component."]
@@ -4724,6 +4772,7 @@ module UpdateApplicationComponentConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationComponentId") in
       make ?strategyOption ?sourceCodeList ?secretsManagerKey
         ?inclusionStatus ~applicationComponentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strategyOption =
         field_map json "strategyOption" StrategyOption.of_json in
@@ -4802,6 +4851,7 @@ module StopAssessmentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the assessment of an on-premises environment."]
@@ -4822,6 +4872,7 @@ module StopAssessmentRequest =
         AsyncTaskId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentId =
         field_map_exn json "assessmentId" AsyncTaskId.of_json in
@@ -4906,6 +4957,7 @@ module StartRecommendationReportGenerationResponse =
       let id =
         (Option.map ~f:RecommendationTaskId.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" RecommendationTaskId.of_json in
       make ?id ()
@@ -4936,6 +4988,7 @@ module StartRecommendationReportGenerationRequest =
       let groupIdFilter =
         (Option.map ~f:GroupIds.of_xml) (Xml.child xml_arg0 "groupIdFilter") in
       make ?outputFormat ?groupIdFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputFormat = field_map json "outputFormat" OutputFormat.of_json in
       let groupIdFilter = field_map json "groupIdFilter" GroupIds.of_json in
@@ -5021,6 +5074,7 @@ module StartImportFileTaskResponse =
     let of_xml xml_arg0 =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" String_.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -5095,6 +5149,7 @@ module StartImportFileTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ~s3key ?s3bucketForReportData ~name ?groupId ?dataSourceType
         ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3key = field_map_exn json "s3key" String_.of_json in
       let s3bucketForReportData =
@@ -5184,6 +5239,7 @@ module StartAssessmentResponse =
         (Option.map ~f:AsyncTaskId.of_xml)
           (Xml.child xml_arg0 "assessmentId") in
       make ?assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentId = field_map json "assessmentId" AsyncTaskId.of_json in
       make ?assessmentId ()
@@ -5223,6 +5279,7 @@ module StartAssessmentRequest =
            ~f:StartAssessmentRequestS3bucketForAnalysisDataString.of_xml)
           (Xml.child xml_arg0 "s3bucketForAnalysisData") in
       make ?s3bucketForReportData ?s3bucketForAnalysisData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3bucketForReportData =
         field_map json "s3bucketForReportData"
@@ -5304,6 +5361,7 @@ module PutPortfolioPreferencesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5352,6 +5410,7 @@ module PutPortfolioPreferencesRequest =
           (Xml.child xml_arg0 "applicationPreferences") in
       make ?prioritizeBusinessGoals ?databasePreferences
         ?applicationPreferences ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prioritizeBusinessGoals =
         field_map json "prioritizeBusinessGoals"
@@ -5444,6 +5503,7 @@ module ListServersResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?serverInfos ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverInfos = field_map json "serverInfos" ServerDetails.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5510,6 +5570,7 @@ module ListServersRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "filterValue") in
       make ?sort ?serverCriteria ?nextToken ?maxResults ?groupIdFilter
         ?filterValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sort = field_map json "sort" SortOrder.of_json in
       let serverCriteria =
@@ -5600,6 +5661,7 @@ module ListImportFileTaskResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?taskInfos ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskInfos =
         field_map json "taskInfos" ListImportFileTaskInformation.of_json in
@@ -5630,6 +5692,7 @@ module ListImportFileTaskRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -5712,6 +5775,7 @@ module ListCollectorsResponse =
       let collectors =
         (Option.map ~f:Collectors.of_xml) (Xml.child xml_arg0 "Collectors") in
       make ?nextToken ?collectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let collectors = field_map json "Collectors" Collectors.of_json in
@@ -5741,6 +5805,7 @@ module ListCollectorsRequest =
       let maxResults =
         (Option.map ~f:MaxResult.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResult.of_json in
@@ -5830,6 +5895,7 @@ module ListApplicationComponentsResponse =
         (Option.map ~f:ApplicationComponentDetails.of_xml)
           (Xml.child xml_arg0 "applicationComponentInfos") in
       make ?nextToken ?applicationComponentInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let applicationComponentInfos =
@@ -5905,6 +5971,7 @@ module ListApplicationComponentsRequest =
           (Xml.child xml_arg0 "applicationComponentCriteria") in
       make ?sort ?nextToken ?maxResults ?groupIdFilter ?filterValue
         ?applicationComponentCriteria ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sort = field_map json "sort" SortOrder.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6001,6 +6068,7 @@ module GetServerStrategiesResponse =
         (Option.map ~f:ServerStrategies.of_xml)
           (Xml.child xml_arg0 "serverStrategies") in
       make ?serverStrategies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverStrategies =
         field_map json "serverStrategies" ServerStrategies.of_json in
@@ -6023,6 +6091,7 @@ module GetServerStrategiesRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "serverId") in
       make ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "serverId" ServerId.of_json in
       make ~serverId ()
@@ -6127,6 +6196,7 @@ module GetServerDetailsResponse =
         (Option.map ~f:AssociatedApplications.of_xml)
           (Xml.child xml_arg0 "associatedApplications") in
       make ?serverDetail ?nextToken ?associatedApplications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverDetail = field_map json "serverDetail" ServerDetail.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -6165,6 +6235,7 @@ module GetServerDetailsRequest =
       let maxResults =
         (Option.map ~f:MaxResult.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~serverId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "serverId" ServerId.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6261,6 +6332,7 @@ module GetRecommendationReportDetailsResponse =
       let id =
         (Option.map ~f:RecommendationTaskId.of_xml) (Xml.child xml_arg0 "id") in
       make ?recommendationReportDetails ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationReportDetails =
         field_map json "recommendationReportDetails"
@@ -6288,6 +6360,7 @@ module GetRecommendationReportDetailsRequest =
         RecommendationTaskId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" RecommendationTaskId.of_json in
       make ~id ()
@@ -6357,6 +6430,7 @@ module GetPortfolioSummaryResponse =
         (Option.map ~f:AssessmentSummary.of_xml)
           (Xml.child xml_arg0 "assessmentSummary") in
       make ?assessmentSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentSummary =
         field_map json "assessmentSummary" AssessmentSummary.of_json in
@@ -6372,6 +6446,7 @@ module GetPortfolioSummaryRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6474,6 +6549,7 @@ module GetPortfolioPreferencesResponse =
           (Xml.child xml_arg0 "applicationPreferences") in
       make ?prioritizeBusinessGoals ?databasePreferences
         ?applicationPreferences ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prioritizeBusinessGoals =
         field_map json "prioritizeBusinessGoals"
@@ -6495,6 +6571,7 @@ module GetPortfolioPreferencesRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves your migration and modernization preferences."]
@@ -6667,6 +6744,7 @@ module GetImportFileTaskResponse =
       make ?statusReportS3Key ?statusReportS3Bucket ?status ?startTime
         ?numberOfRecordsSuccess ?numberOfRecordsFailed ?inputS3Key
         ?inputS3Bucket ?importName ?id ?completionTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReportS3Key =
         field_map json "statusReportS3Key" ImportS3Key.of_json in
@@ -6704,6 +6782,7 @@ module GetImportFileTaskRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -6785,6 +6864,7 @@ module GetAssessmentResponse =
         (Option.map ~f:DataCollectionDetails.of_xml)
           (Xml.child xml_arg0 "dataCollectionDetails") in
       make ?id ?dataCollectionDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" AsyncTaskId.of_json in
       let dataCollectionDetails =
@@ -6807,6 +6887,7 @@ module GetAssessmentRequest =
       let id =
         AsyncTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" AsyncTaskId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -6876,6 +6957,7 @@ module GetApplicationComponentStrategiesResponse =
         (Option.map ~f:ApplicationComponentStrategies.of_xml)
           (Xml.child xml_arg0 "applicationComponentStrategies") in
       make ?applicationComponentStrategies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationComponentStrategies =
         field_map json "applicationComponentStrategies"
@@ -6903,6 +6985,7 @@ module GetApplicationComponentStrategiesRequest =
         ApplicationComponentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationComponentId") in
       make ~applicationComponentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationComponentId =
         field_map_exn json "applicationComponentId"
@@ -7010,6 +7093,7 @@ module GetApplicationComponentDetailsResponse =
           (Xml.child xml_arg0 "applicationComponentDetail") in
       make ?moreApplicationResource ?associatedServerIds
         ?associatedApplications ?applicationComponentDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let moreApplicationResource =
         field_map json "moreApplicationResource" Boolean.of_json in
@@ -7044,6 +7128,7 @@ module GetApplicationComponentDetailsRequest =
         ApplicationComponentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationComponentId") in
       make ~applicationComponentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationComponentId =
         field_map_exn json "applicationComponentId"

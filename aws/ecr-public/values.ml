@@ -146,6 +146,7 @@ module RegistryAlias =
         RegistryAliasName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~defaultRegistryAlias ~primaryRegistryAlias ~status ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultRegistryAlias =
         field_map_exn json "defaultRegistryAlias"
@@ -494,6 +495,7 @@ module ReferencedImageDetail =
         (Option.map ~f:ImageDigest.of_xml) (Xml.child xml_arg0 "imageDigest") in
       make ?artifactMediaType ?imageManifestMediaType ?imagePushedAt
         ?imageSizeInBytes ?imageDigest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactMediaType =
         field_map json "artifactMediaType" MediaType.of_json in
@@ -582,6 +584,7 @@ module ImageIdentifier =
       let imageDigest =
         (Option.map ~f:ImageDigest.of_xml) (Xml.child xml_arg0 "imageDigest") in
       make ?imageTag ?imageDigest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageTag = field_map json "imageTag" ImageTag.of_json in
       let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
@@ -767,6 +770,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -1041,6 +1045,7 @@ module Repository =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "repositoryArn") in
       make ?createdAt ?repositoryUri ?repositoryName ?registryId
         ?repositoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" CreationTimestamp.of_json in
       let repositoryUri = field_map json "repositoryUri" Url.of_json in
@@ -1101,6 +1106,7 @@ module Registry =
         RegistryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "registryId") in
       make ~aliases ~verified ~registryUri ~registryArn ~registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliases = field_map_exn json "aliases" RegistryAliasList.of_json in
       let verified = field_map_exn json "verified" RegistryVerified.of_json in
@@ -1194,6 +1200,7 @@ module ImageDetail =
       make ?artifactMediaType ?imageManifestMediaType ?imagePushedAt
         ?imageSizeInBytes ?imageTags ?imageDigest ?repositoryName ?registryId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactMediaType =
         field_map json "artifactMediaType" MediaType.of_json in
@@ -1245,6 +1252,7 @@ module ImageTagDetail =
       let imageTag =
         (Option.map ~f:ImageTag.of_xml) (Xml.child xml_arg0 "imageTag") in
       make ?imageDetail ?createdAt ?imageTag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageDetail =
         field_map json "imageDetail" ReferencedImageDetail.of_json in
@@ -1286,6 +1294,7 @@ module ImageFailure =
       let imageId =
         (Option.map ~f:ImageIdentifier.of_xml) (Xml.child xml_arg0 "imageId") in
       make ?failureReason ?failureCode ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "failureReason" ImageFailureReason.of_json in
@@ -1328,6 +1337,7 @@ module LayerFailure =
         (Option.map ~f:BatchedOperationLayerDigest.of_xml)
           (Xml.child xml_arg0 "layerDigest") in
       make ?failureReason ?failureCode ?layerDigest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "failureReason" LayerFailureReason.of_json in
@@ -1377,6 +1387,7 @@ module Layer =
       let layerDigest =
         (Option.map ~f:LayerDigest.of_xml) (Xml.child xml_arg0 "layerDigest") in
       make ?mediaType ?layerSize ?layerAvailability ?layerDigest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mediaType = field_map json "mediaType" MediaType.of_json in
       let layerSize = field_map json "layerSize" LayerSizeInBytes.of_json in
@@ -1438,6 +1449,7 @@ module InvalidLayerPartException =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?message ?lastValidByteReceived ?uploadId ?repositoryName
         ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       let lastValidByteReceived =
@@ -1465,6 +1477,7 @@ module InvalidParameterException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1485,6 +1498,7 @@ module LimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1505,6 +1519,7 @@ module RegistryNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1524,6 +1539,7 @@ module RepositoryNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1544,6 +1560,7 @@ module ServerException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1563,6 +1580,7 @@ module UnsupportedCommandException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1582,6 +1600,7 @@ module UploadNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1614,6 +1633,7 @@ module InvalidTagParameterException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1634,6 +1654,7 @@ module TooManyTagsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1803,6 +1824,7 @@ module RepositoryCatalogData =
           (Xml.child xml_arg0 "description") in
       make ?marketplaceCertified ?usageText ?aboutText ?logoUrl
         ?operatingSystems ?architectures ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marketplaceCertified =
         field_map json "marketplaceCertified" MarketplaceCertified.of_json in
@@ -1889,6 +1911,7 @@ module RepositoryCatalogDataInput =
           (Xml.child xml_arg0 "description") in
       make ?usageText ?aboutText ?logoImageBlob ?operatingSystems
         ?architectures ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usageText = field_map json "usageText" UsageText.of_json in
       let aboutText = field_map json "aboutText" AboutText.of_json in
@@ -1923,6 +1946,7 @@ module RegistryCatalogData =
         (Option.map ~f:RegistryDisplayName.of_xml)
           (Xml.child xml_arg0 "displayName") in
       make ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName =
         field_map json "displayName" RegistryDisplayName.of_json in
@@ -1987,6 +2011,7 @@ module Image =
           (Xml.child xml_arg0 "registryId") in
       make ?imageManifestMediaType ?imageManifest ?imageId ?repositoryName
         ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageManifestMediaType =
         field_map json "imageManifestMediaType" MediaType.of_json in
@@ -2014,6 +2039,7 @@ module ImageAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2034,6 +2060,7 @@ module ImageDigestDoesNotMatchException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2054,6 +2081,7 @@ module ImageTagAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2074,6 +2102,7 @@ module LayersNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2094,6 +2123,7 @@ module ReferencedImagesNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2114,6 +2144,7 @@ module RepositoryPolicyNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2147,6 +2178,7 @@ module AuthorizationData =
         (Option.map ~f:Base64.of_xml)
           (Xml.child xml_arg0 "authorizationToken") in
       make ?expiresAt ?authorizationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiresAt = field_map json "expiresAt" ExpirationTimestamp.of_json in
       let authorizationToken =
@@ -2302,6 +2334,7 @@ module ImageNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2377,6 +2410,7 @@ module RepositoryNotEmptyException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2397,6 +2431,7 @@ module RepositoryAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2417,6 +2452,7 @@ module EmptyUploadException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2437,6 +2473,7 @@ module InvalidLayerException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2457,6 +2494,7 @@ module LayerAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2477,6 +2515,7 @@ module LayerPartTooSmallException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -2745,6 +2784,7 @@ module UploadLayerPartResponse =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?lastByteReceived ?uploadId ?repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastByteReceived =
         field_map json "lastByteReceived" PartSize.of_json in
@@ -2823,6 +2863,7 @@ module UploadLayerPartRequest =
           (Xml.child xml_arg0 "registryId") in
       make ~layerPartBlob ~partLastByte ~partFirstByte ~uploadId
         ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let layerPartBlob =
         field_map_exn json "layerPartBlob" LayerPartBlob.of_json in
@@ -2910,6 +2951,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes specified tags from a resource."]
@@ -2937,6 +2979,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -3016,6 +3059,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3043,6 +3087,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -3128,6 +3173,7 @@ module SetRepositoryPolicyResponse =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyText =
         field_map json "policyText" RepositoryPolicyText.of_json in
@@ -3178,6 +3224,7 @@ module SetRepositoryPolicyRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?force ~policyText ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let force = field_map json "force" ForceFlag.of_json in
       let policyText =
@@ -3251,6 +3298,7 @@ module PutRepositoryCatalogDataResponse =
         (Option.map ~f:RepositoryCatalogData.of_xml)
           (Xml.child xml_arg0 "catalogData") in
       make ?catalogData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let catalogData =
         field_map json "catalogData" RepositoryCatalogData.of_json in
@@ -3293,6 +3341,7 @@ module PutRepositoryCatalogDataRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~catalogData ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let catalogData =
         field_map_exn json "catalogData" RepositoryCatalogDataInput.of_json in
@@ -3366,6 +3415,7 @@ module PutRegistryCatalogDataResponse =
         RegistryCatalogData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "registryCatalogData") in
       make ~registryCatalogData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registryCatalogData =
         field_map_exn json "registryCatalogData" RegistryCatalogData.of_json in
@@ -3391,6 +3441,7 @@ module PutRegistryCatalogDataRequest =
         (Option.map ~f:RegistryDisplayName.of_xml)
           (Xml.child xml_arg0 "displayName") in
       make ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName =
         field_map json "displayName" RegistryDisplayName.of_json in
@@ -3539,6 +3590,7 @@ module PutImageResponse =
     let of_xml xml_arg0 =
       let image = (Option.map ~f:Image.of_xml) (Xml.child xml_arg0 "image") in
       make ?image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let image = field_map json "image" Image.of_json in make ?image ()
     let to_json v = composed_to_json to_value v
@@ -3611,6 +3663,7 @@ module PutImageRequest =
           (Xml.child xml_arg0 "registryId") in
       make ?imageDigest ?imageTag ?imageManifestMediaType ~imageManifest
         ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
       let imageTag = field_map json "imageTag" ImageTag.of_json in
@@ -3683,6 +3736,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3704,6 +3758,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -3796,6 +3851,7 @@ module InitiateLayerUploadResponse =
       let uploadId =
         (Option.map ~f:UploadId.of_xml) (Xml.child xml_arg0 "uploadId") in
       make ?partSize ?uploadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partSize = field_map json "partSize" PartSize.of_json in
       let uploadId = field_map json "uploadId" UploadId.of_json in
@@ -3830,6 +3886,7 @@ module InitiateLayerUploadRequest =
         (Option.map ~f:RegistryIdOrAlias.of_xml)
           (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -3928,6 +3985,7 @@ module GetRepositoryPolicyResponse =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyText =
         field_map json "policyText" RepositoryPolicyText.of_json in
@@ -3963,6 +4021,7 @@ module GetRepositoryPolicyRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -4033,6 +4092,7 @@ module GetRepositoryCatalogDataResponse =
         (Option.map ~f:RepositoryCatalogData.of_xml)
           (Xml.child xml_arg0 "catalogData") in
       make ?catalogData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let catalogData =
         field_map json "catalogData" RepositoryCatalogData.of_json in
@@ -4065,6 +4125,7 @@ module GetRepositoryCatalogDataRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -4127,6 +4188,7 @@ module GetRegistryCatalogDataResponse =
         RegistryCatalogData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "registryCatalogData") in
       make ~registryCatalogData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registryCatalogData =
         field_map_exn json "registryCatalogData" RegistryCatalogData.of_json in
@@ -4141,6 +4203,7 @@ module GetRegistryCatalogDataRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves catalog metadata for a public registry."]
@@ -4196,6 +4259,7 @@ module GetAuthorizationTokenResponse =
         (Option.map ~f:AuthorizationData.of_xml)
           (Xml.child xml_arg0 "authorizationData") in
       make ?authorizationData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authorizationData =
         field_map json "authorizationData" AuthorizationData.of_json in
@@ -4211,6 +4275,7 @@ module GetAuthorizationTokenRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4285,6 +4350,7 @@ module DescribeRepositoriesResponse =
         (Option.map ~f:RepositoryList.of_xml)
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let repositories = field_map json "repositories" RepositoryList.of_json in
@@ -4331,6 +4397,7 @@ module DescribeRepositoriesRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ?repositoryNames ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -4410,6 +4477,7 @@ module DescribeRegistriesResponse =
         RegistryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "registries") in
       make ?nextToken ~registries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let registries = field_map_exn json "registries" RegistryList.of_json in
@@ -4439,6 +4507,7 @@ module DescribeRegistriesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -4524,6 +4593,7 @@ module DescribeImagesResponse =
         (Option.map ~f:ImageDetailList.of_xml)
           (Xml.child xml_arg0 "imageDetails") in
       make ?nextToken ?imageDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let imageDetails =
@@ -4580,6 +4650,7 @@ module DescribeImagesRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ?imageIds ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -4661,6 +4732,7 @@ module DescribeImageTagsResponse =
         (Option.map ~f:ImageTagDetailList.of_xml)
           (Xml.child xml_arg0 "imageTagDetails") in
       make ?nextToken ?imageTagDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let imageTagDetails =
@@ -4709,6 +4781,7 @@ module DescribeImageTagsRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -4790,6 +4863,7 @@ module DeleteRepositoryResponse =
       let repository =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository = field_map json "repository" Repository.of_json in
       make ?repository ()
@@ -4827,6 +4901,7 @@ module DeleteRepositoryRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?force ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let force = field_map json "force" ForceFlag.of_json in
       let repositoryName =
@@ -4926,6 +5001,7 @@ module DeleteRepositoryPolicyResponse =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyText =
         field_map json "policyText" RepositoryPolicyText.of_json in
@@ -4961,6 +5037,7 @@ module DeleteRepositoryPolicyRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -5066,6 +5143,7 @@ module CreateRepositoryResponse =
       let repository =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?catalogData ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let catalogData =
         field_map json "catalogData" RepositoryCatalogData.of_json in
@@ -5109,6 +5187,7 @@ module CreateRepositoryRequest =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?tags ?catalogData ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let catalogData =
@@ -5268,6 +5347,7 @@ module CompleteLayerUploadResponse =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?layerDigest ?uploadId ?repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let layerDigest = field_map json "layerDigest" LayerDigest.of_json in
       let uploadId = field_map json "uploadId" UploadId.of_json in
@@ -5320,6 +5400,7 @@ module CompleteLayerUploadRequest =
         (Option.map ~f:RegistryIdOrAlias.of_xml)
           (Xml.child xml_arg0 "registryId") in
       make ~layerDigests ~uploadId ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let layerDigests =
         field_map_exn json "layerDigests" LayerDigestList.of_json in
@@ -5399,6 +5480,7 @@ module BatchDeleteImageResponse =
         (Option.map ~f:ImageIdentifierList.of_xml)
           (Xml.child xml_arg0 "imageIds") in
       make ?failures ?imageIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failures = field_map json "failures" ImageFailureList.of_json in
       let imageIds = field_map json "imageIds" ImageIdentifierList.of_json in
@@ -5439,6 +5521,7 @@ module BatchDeleteImageRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~imageIds ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageIds =
         field_map_exn json "imageIds" ImageIdentifierList.of_json in
@@ -5525,6 +5608,7 @@ module BatchCheckLayerAvailabilityResponse =
       let layers =
         (Option.map ~f:LayerList.of_xml) (Xml.child xml_arg0 "layers") in
       make ?failures ?layers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failures = field_map json "failures" LayerFailureList.of_json in
       let layers = field_map json "layers" LayerList.of_json in
@@ -5568,6 +5652,7 @@ module BatchCheckLayerAvailabilityRequest =
         (Option.map ~f:RegistryIdOrAlias.of_xml)
           (Xml.child xml_arg0 "registryId") in
       make ~layerDigests ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let layerDigests =
         field_map_exn json "layerDigests"

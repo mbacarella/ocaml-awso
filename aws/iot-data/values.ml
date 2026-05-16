@@ -129,6 +129,7 @@ module RetainedMessageSummary =
         (Option.map ~f:PayloadSize.of_xml) (Xml.child xml_arg0 "payloadSize") in
       let topic = (Option.map ~f:Topic.of_xml) (Xml.child xml_arg0 "topic") in
       make ?lastModifiedTime ?qos ?payloadSize ?topic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "lastModifiedTime" Timestamp.of_json in
@@ -173,6 +174,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -194,6 +196,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -214,6 +217,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -246,6 +250,7 @@ module MethodNotAllowedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -267,6 +272,7 @@ module RequestEntityTooLargeException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -287,6 +293,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -307,6 +314,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -327,6 +335,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -347,6 +356,7 @@ module UnsupportedDocumentEncodingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -493,6 +503,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -638,6 +649,7 @@ module UpdateThingShadowResponse =
       let payload =
         (Option.map ~f:JsonDocument.of_xml) (Xml.child xml_arg0 "payload") in
       make ?payload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" JsonDocument.of_json in
       make ?payload ()
@@ -655,6 +667,17 @@ module UpdateThingShadowRequest =
     let make ?shadowName =
       fun ~thingName ->
         fun ~payload -> fun () -> { shadowName; thingName; payload }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~thingName:(ThingName.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "thingName"))
+            ?shadowName:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "name") ~f:ShadowName.of_string) ~payload:pipe
+            ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("thingName", (Some (ThingName.to_value x.thingName)));
@@ -671,6 +694,7 @@ module UpdateThingShadowRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~payload ?shadowName ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map_exn json "payload" JsonDocument.of_json in
       let shadowName = field_map json "shadowName" ShadowName.of_json in
@@ -695,6 +719,20 @@ module PublishRequest =
       fun ?retain ->
         fun ?payload ->
           fun ~topic -> fun () -> { qos; retain; payload; topic }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~topic:(Topic.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "topic"))
+            ?qos:(Option.map
+                    ((List.Assoc.find ~equal:String.Caseless.equal) xs "qos")
+                    ~f:Qos.of_string)
+            ?retain:(Option.map
+                       ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                          "retain") ~f:Retain.of_string) ?payload:(Some pipe)
+            ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("topic", (Some (Topic.to_value x.topic)));
@@ -711,6 +749,7 @@ module PublishRequest =
       let topic =
         Topic.of_xml (Xml.child_exn ~context:context_ xml_arg0 "topic") in
       make ?payload ?retain ?qos ~topic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let retain = field_map json "retain" Retain.of_json in
@@ -818,6 +857,7 @@ module ListRetainedMessagesResponse =
         (Option.map ~f:RetainedMessageList.of_xml)
           (Xml.child xml_arg0 "retainedTopics") in
       make ?nextToken ?retainedTopics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let retainedTopics =
@@ -848,6 +888,7 @@ module ListRetainedMessagesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -967,6 +1008,7 @@ module ListNamedShadowsForThingResponse =
       let results =
         (Option.map ~f:NamedShadowList.of_xml) (Xml.child xml_arg0 "results") in
       make ?timestamp ?nextToken ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "timestamp" Timestamp.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -1002,6 +1044,7 @@ module ListNamedShadowsForThingRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?pageSize ?nextToken ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "pageSize" PageSize.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -1122,6 +1165,7 @@ module GetThingShadowResponse =
       let payload =
         (Option.map ~f:JsonDocument.of_xml) (Xml.child xml_arg0 "payload") in
       make ?payload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" JsonDocument.of_json in
       make ?payload ()
@@ -1148,6 +1192,7 @@ module GetThingShadowRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?shadowName ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shadowName = field_map json "shadowName" ShadowName.of_json in
       let thingName = field_map_exn json "thingName" ThingName.of_json in
@@ -1275,6 +1320,7 @@ module GetRetainedMessageResponse =
         (Option.map ~f:Payload.of_xml) (Xml.child xml_arg0 "payload") in
       let topic = (Option.map ~f:Topic.of_xml) (Xml.child xml_arg0 "topic") in
       make ?lastModifiedTime ?qos ?payload ?topic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "lastModifiedTime" Timestamp.of_json in
@@ -1299,6 +1345,7 @@ module GetRetainedMessageRequest =
       let topic =
         Topic.of_xml (Xml.child_exn ~context:context_ xml_arg0 "topic") in
       make ~topic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topic = field_map_exn json "topic" Topic.of_json in make ~topic ()
     let to_json v = composed_to_json to_value v
@@ -1417,6 +1464,7 @@ module DeleteThingShadowResponse =
         JsonDocument.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "payload") in
       make ~payload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map_exn json "payload" JsonDocument.of_json in
       make ~payload ()
@@ -1443,6 +1491,7 @@ module DeleteThingShadowRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?shadowName ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shadowName = field_map json "shadowName" ShadowName.of_json in
       let thingName = field_map_exn json "thingName" ThingName.of_json in

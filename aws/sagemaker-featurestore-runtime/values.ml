@@ -89,6 +89,7 @@ module FeatureValue =
         FeatureName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureName") in
       make ~valueAsString ~featureName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valueAsString =
         field_map_exn json "ValueAsString" ValueAsString.of_json in
@@ -263,6 +264,7 @@ module BatchGetRecordError =
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
       make ~errorMessage ~errorCode ~recordIdentifierValueAsString
         ~featureGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map_exn json "ErrorMessage" Message.of_json in
       let errorCode = field_map_exn json "ErrorCode" ValueAsString.of_json in
@@ -311,6 +313,7 @@ module BatchGetRecordResultDetail =
         ValueAsString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
       make ~record ~recordIdentifierValueAsString ~featureGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let record = field_map_exn json "Record" Record.of_json in
       let recordIdentifierValueAsString =
@@ -363,6 +366,7 @@ module BatchGetRecordIdentifier =
         FeatureGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
       make ?featureNames ~recordIdentifiersValueAsString ~featureGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureNames = field_map json "FeatureNames" FeatureNames.of_json in
       let recordIdentifiersValueAsString =
@@ -387,6 +391,7 @@ module AccessForbidden =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -405,6 +410,7 @@ module InternalFailure =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -424,6 +430,7 @@ module ResourceNotFound =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -443,6 +450,7 @@ module ServiceUnavailable =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -461,6 +469,7 @@ module ValidationError =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -603,6 +612,7 @@ module PutRecordRequest =
         FeatureGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
       make ~record ~featureGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let record = field_map_exn json "Record" Record.of_json in
       let featureGroupName =
@@ -682,6 +692,7 @@ module GetRecordResponse =
       let record =
         (Option.map ~f:Record.of_xml) (Xml.child xml_arg0 "Record") in
       make ?record ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let record = field_map json "Record" Record.of_json in make ?record ()
     let to_json v = composed_to_json to_value v
@@ -726,6 +737,7 @@ module GetRecordRequest =
         FeatureGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
       make ?featureNames ~recordIdentifierValueAsString ~featureGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureNames = field_map json "FeatureNames" FeatureNames.of_json in
       let recordIdentifierValueAsString =
@@ -776,6 +788,7 @@ module DeleteRecordRequest =
         FeatureGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
       make ~eventTime ~recordIdentifierValueAsString ~featureGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventTime = field_map_exn json "EventTime" ValueAsString.of_json in
       let recordIdentifierValueAsString =
@@ -871,6 +884,7 @@ module BatchGetRecordResponse =
         BatchGetRecordResultDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Records") in
       make ~unprocessedIdentifiers ~errors ~records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedIdentifiers =
         field_map_exn json "UnprocessedIdentifiers"
@@ -900,6 +914,7 @@ module BatchGetRecordRequest =
         BatchGetRecordIdentifiers.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifiers") in
       make ~identifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifiers =
         field_map_exn json "Identifiers" BatchGetRecordIdentifiers.of_json in

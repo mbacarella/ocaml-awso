@@ -80,6 +80,7 @@ module DimensionValueContribution =
         (Option.map ~f:DimensionValue.of_xml)
           (Xml.child xml_arg0 "DimensionValue") in
       make ?contributionScore ?dimensionValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contributionScore =
         field_map json "ContributionScore" Score.of_json in
@@ -164,6 +165,7 @@ module DimensionContribution =
         (Option.map ~f:ColumnName.of_xml)
           (Xml.child xml_arg0 "DimensionName") in
       make ?dimensionValueContributionList ?dimensionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionValueContributionList =
         field_map json "DimensionValueContributionList"
@@ -502,6 +504,7 @@ module CsvFormatDescriptor =
           (Xml.child xml_arg0 "FileCompression") in
       make ?quoteSymbol ?headerList ?delimiter ?containsHeader ?charset
         ?fileCompression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quoteSymbol = field_map json "QuoteSymbol" QuoteSymbol.of_json in
       let headerList = field_map json "HeaderList" HeaderList.of_json in
@@ -539,6 +542,7 @@ module JsonFormatDescriptor =
         (Option.map ~f:JsonFileCompression.of_xml)
           (Xml.child xml_arg0 "FileCompression") in
       make ?charset ?fileCompression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let charset = field_map json "Charset" Charset.of_json in
       let fileCompression =
@@ -639,6 +643,7 @@ module DimensionNameValue =
         ColumnName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionName") in
       make ~dimensionValue ~dimensionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionValue =
         field_map_exn json "DimensionValue" DimensionValue.of_json in
@@ -692,6 +697,7 @@ module ContributionMatrix =
         (Option.map ~f:DimensionContributionList.of_xml)
           (Xml.child xml_arg0 "DimensionContributionList") in
       make ?dimensionContributionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionContributionList =
         field_map json "DimensionContributionList"
@@ -758,6 +764,7 @@ module ValidationExceptionField =
       let name =
         FieldName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~message ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       let name = field_map_exn json "Name" FieldName.of_json in
@@ -973,6 +980,7 @@ module VpcConfiguration =
         SubnetIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetIdList") in
       make ~securityGroupIdList ~subnetIdList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIdList =
         field_map_exn json "SecurityGroupIdList" SecurityGroupIdList.of_json in
@@ -1052,6 +1060,7 @@ module FileFormatDescriptor =
         (Option.map ~f:CsvFormatDescriptor.of_xml)
           (Xml.child xml_arg0 "CsvFormatDescriptor") in
       make ?jsonFormatDescriptor ?csvFormatDescriptor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jsonFormatDescriptor =
         field_map json "JsonFormatDescriptor" JsonFormatDescriptor.of_json in
@@ -1290,6 +1299,7 @@ module ItemizedMetricStats =
       let metricName =
         (Option.map ~f:ColumnName.of_xml) (Xml.child xml_arg0 "MetricName") in
       make ?occurrenceCount ?metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let occurrenceCount = field_map json "OccurrenceCount" Integer.of_json in
       let metricName = field_map json "MetricName" ColumnName.of_json in
@@ -1601,6 +1611,7 @@ module MetricLevelImpact =
       let metricName =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
       make ?contributionMatrix ?numTimeSeries ?metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contributionMatrix =
         field_map json "ContributionMatrix" ContributionMatrix.of_json in
@@ -1688,6 +1699,7 @@ module LambdaConfiguration =
       let roleArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~lambdaArn ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaArn = field_map_exn json "LambdaArn" Arn.of_json in
       let roleArn = field_map_exn json "RoleArn" Arn.of_json in
@@ -1716,6 +1728,7 @@ module SNSConfiguration =
       let roleArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~snsTopicArn ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsTopicArn = field_map_exn json "SnsTopicArn" Arn.of_json in
       let roleArn = field_map_exn json "RoleArn" Arn.of_json in
@@ -1865,6 +1878,7 @@ module Metric =
         ColumnName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
       make ?namespace ~aggregationFunction ~metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace = field_map json "Namespace" Namespace.of_json in
       let aggregationFunction =
@@ -1893,6 +1907,7 @@ module AppFlowConfig =
         (Option.map ~f:FlowName.of_xml) (Xml.child xml_arg0 "FlowName") in
       let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?flowName ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowName = field_map json "FlowName" FlowName.of_json in
       let roleArn = field_map json "RoleArn" Arn.of_json in
@@ -1914,6 +1929,7 @@ module CloudWatchConfig =
     let of_xml xml_arg0 =
       let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "RoleArn" Arn.of_json in make ?roleArn ()
     let to_json v = composed_to_json to_value v
@@ -2002,6 +2018,7 @@ module RDSSourceConfig =
       make ?vpcConfiguration ?roleArn ?tableName ?databaseName
         ?secretManagerArn ?databasePort ?databaseHost ?dBInstanceIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfiguration =
         field_map json "VpcConfiguration" VpcConfiguration.of_json in
@@ -2105,6 +2122,7 @@ module RedshiftSourceConfig =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?vpcConfiguration ?roleArn ?tableName ?databaseName
         ?secretManagerArn ?databasePort ?databaseHost ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfiguration =
         field_map json "VpcConfiguration" VpcConfiguration.of_json in
@@ -2171,6 +2189,7 @@ module S3SourceConfig =
       let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?fileFormatDescriptor ?historicalDataPathList ?templatedPathList
         ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileFormatDescriptor =
         field_map json "FileFormatDescriptor" FileFormatDescriptor.of_json in
@@ -2300,6 +2319,7 @@ module MetricSetSummary =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MetricSetArn") in
       make ?tags ?lastModificationTime ?creationTime ?metricSetName
         ?metricSetDescription ?anomalyDetectorArn ?metricSetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let lastModificationTime =
@@ -2349,6 +2369,7 @@ module TimeSeries =
         TimeSeriesId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimeSeriesId") in
       make ~metricValueList ~dimensionList ~timeSeriesId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricValueList =
         field_map_exn json "MetricValueList" MetricValueList.of_json in
@@ -2439,6 +2460,7 @@ module AnomalyGroupSummary =
           (Xml.child xml_arg0 "StartTime") in
       make ?primaryMetricName ?anomalyGroupScore ?anomalyGroupId ?endTime
         ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let primaryMetricName =
         field_map json "PrimaryMetricName" MetricName.of_json in
@@ -2498,6 +2520,7 @@ module InterMetricImpactDetails =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
       make ?contributionPercentage ?relationshipType ?anomalyGroupId
         ?metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contributionPercentage =
         field_map json "ContributionPercentage"
@@ -2581,6 +2604,7 @@ module AnomalyDetectorSummary =
       make ?tags ?status ?lastModificationTime ?creationTime
         ?anomalyDetectorDescription ?anomalyDetectorName ?anomalyDetectorArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let status = field_map json "Status" AnomalyDetectorStatus.of_json in
@@ -2679,6 +2703,7 @@ module AlertSummary =
       make ?tags ?creationTime ?lastModificationTime ?alertStatus ?alertType
         ?alertSensitivityThreshold ?alertName ?anomalyDetectorArn ?alertArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
@@ -2759,6 +2784,7 @@ module TimeSeriesFeedback =
         (Option.map ~f:TimeSeriesId.of_xml)
           (Xml.child xml_arg0 "TimeSeriesId") in
       make ?isAnomaly ?timeSeriesId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isAnomaly = field_map json "IsAnomaly" Boolean.of_json in
       let timeSeriesId = field_map json "TimeSeriesId" TimeSeriesId.of_json in
@@ -2823,6 +2849,7 @@ module ExecutionStatus =
         (Option.map ~f:TimestampString.of_xml)
           (Xml.child xml_arg0 "Timestamp") in
       make ?failureReason ?status ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason"
@@ -2858,6 +2885,7 @@ module Action =
         (Option.map ~f:SNSConfiguration.of_xml)
           (Xml.child xml_arg0 "SNSConfiguration") in
       make ?lambdaConfiguration ?sNSConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaConfiguration =
         field_map json "LambdaConfiguration" LambdaConfiguration.of_json in
@@ -2898,6 +2926,7 @@ module AccessDeniedException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -2917,6 +2946,7 @@ module InternalServerException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -2951,6 +2981,7 @@ module ResourceNotFoundException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let resourceId = field_map json "ResourceId" ResourceId.of_json in
@@ -2999,6 +3030,7 @@ module ServiceQuotaExceededException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?serviceCode ?quotaCode ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
       let quotaCode = field_map json "QuotaCode" QuotaCode.of_json in
@@ -3022,6 +3054,7 @@ module TooManyRequestsException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -3058,6 +3091,7 @@ module ValidationException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?fields ?reason ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields =
         field_map json "Fields" ValidationExceptionFieldList.of_json in
@@ -3177,6 +3211,7 @@ module MetricSource =
           (Xml.child xml_arg0 "S3SourceConfig") in
       make ?redshiftSourceConfig ?rDSSourceConfig ?cloudWatchConfig
         ?appFlowConfig ?s3SourceConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redshiftSourceConfig =
         field_map json "RedshiftSourceConfig" RedshiftSourceConfig.of_json in
@@ -3234,6 +3269,7 @@ module TimestampColumn =
       let columnName =
         (Option.map ~f:ColumnName.of_xml) (Xml.child xml_arg0 "ColumnName") in
       make ?columnFormat ?columnName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let columnFormat = field_map json "ColumnFormat" DateTimeFormat.of_json in
       let columnName = field_map json "ColumnName" ColumnName.of_json in
@@ -3260,6 +3296,7 @@ module AnomalyDetectorConfig =
         (Option.map ~f:Frequency.of_xml)
           (Xml.child xml_arg0 "AnomalyDetectorFrequency") in
       make ?anomalyDetectorFrequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorFrequency =
         field_map json "AnomalyDetectorFrequency" Frequency.of_json in
@@ -3345,6 +3382,7 @@ module AnomalyGroupTimeSeriesFeedback =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyGroupId") in
       make ~isAnomaly ~timeSeriesId ~anomalyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isAnomaly = field_map_exn json "IsAnomaly" Boolean.of_json in
       let timeSeriesId =
@@ -3497,6 +3535,7 @@ module AnomalyGroupStatistics =
         (Option.map ~f:TimestampString.of_xml)
           (Xml.child xml_arg0 "EvaluationStartDate") in
       make ?itemizedMetricStatsList ?totalCount ?evaluationStartDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let itemizedMetricStatsList =
         field_map json "ItemizedMetricStatsList"
@@ -3707,6 +3746,7 @@ module SampleDataS3SourceConfig =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~fileFormatDescriptor ?historicalDataPathList ?templatedPathList
         ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileFormatDescriptor =
         field_map_exn json "FileFormatDescriptor"
@@ -3771,6 +3811,7 @@ module AnomalyGroupTimeSeries =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyGroupId") in
       make ?timeSeriesId ~anomalyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeSeriesId = field_map json "TimeSeriesId" TimeSeriesId.of_json in
       let anomalyGroupId = field_map_exn json "AnomalyGroupId" UUID.of_json in
@@ -3840,6 +3881,7 @@ module AnomalyGroup =
           (Xml.child xml_arg0 "StartTime") in
       make ?metricLevelImpactList ?primaryMetricName ?anomalyGroupScore
         ?anomalyGroupId ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricLevelImpactList =
         field_map json "MetricLevelImpactList" MetricLevelImpactList.of_json in
@@ -3891,6 +3933,7 @@ module AnomalyDetectorConfigSummary =
         (Option.map ~f:Frequency.of_xml)
           (Xml.child xml_arg0 "AnomalyDetectorFrequency") in
       make ?anomalyDetectorFrequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorFrequency =
         field_map json "AnomalyDetectorFrequency" Frequency.of_json in
@@ -4060,6 +4103,7 @@ module Alert =
       make ?creationTime ?lastModificationTime ?alertStatus ?alertType
         ?alertSensitivityThreshold ?alertName ?anomalyDetectorArn ?alertArn
         ?alertDescription ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
       let lastModificationTime =
@@ -4109,6 +4153,7 @@ module ConflictException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let resourceId = field_map json "ResourceId" ResourceId.of_json in
@@ -4205,6 +4250,7 @@ module UpdateMetricSetResponse =
       let metricSetArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MetricSetArn") in
       make ?metricSetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricSetArn = field_map json "MetricSetArn" Arn.of_json in
       make ?metricSetArn ()
@@ -4288,6 +4334,7 @@ module UpdateMetricSetRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MetricSetArn") in
       make ?metricSource ?metricSetFrequency ?dimensionList ?timestampColumn
         ?offset ?metricList ?metricSetDescription ~metricSetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricSource = field_map json "MetricSource" MetricSource.of_json in
       let metricSetFrequency =
@@ -4384,6 +4431,7 @@ module UpdateAnomalyDetectorResponse =
       let anomalyDetectorArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AnomalyDetectorArn") in
       make ?anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map json "AnomalyDetectorArn" Arn.of_json in
@@ -4442,6 +4490,7 @@ module UpdateAnomalyDetectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ?anomalyDetectorConfig ?anomalyDetectorDescription ?kmsKeyArn
         ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorConfig =
         field_map json "AnomalyDetectorConfig" AnomalyDetectorConfig.of_json in
@@ -4509,6 +4558,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a detector, dataset, or alert."]
@@ -4535,6 +4585,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -4594,6 +4645,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds tags to a detector, dataset, or alert."]
@@ -4619,6 +4671,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -4696,6 +4749,7 @@ module PutFeedbackResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Add feedback for an anomalous metric."]
@@ -4729,6 +4783,7 @@ module PutFeedbackRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ~anomalyGroupTimeSeriesFeedback ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyGroupTimeSeriesFeedback =
         field_map_exn json "AnomalyGroupTimeSeriesFeedback"
@@ -4795,6 +4850,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4815,6 +4871,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -4909,6 +4966,7 @@ module ListMetricSetsResponse =
         (Option.map ~f:MetricSetSummaryList.of_xml)
           (Xml.child xml_arg0 "MetricSetSummaryList") in
       make ?nextToken ?metricSetSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let metricSetSummaryList =
@@ -4948,6 +5006,7 @@ module ListMetricSetsRequest =
       let anomalyDetectorArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AnomalyDetectorArn") in
       make ?nextToken ?maxResults ?anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5073,6 +5132,7 @@ module ListAnomalyGroupTimeSeriesResponse =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "AnomalyGroupId") in
       make ?timeSeriesList ?nextToken ?timestampList ?metricName
         ?anomalyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeSeriesList =
         field_map json "TimeSeriesList" TimeSeriesList.of_json in
@@ -5138,6 +5198,7 @@ module ListAnomalyGroupTimeSeriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ?nextToken ?maxResults ~metricName ~anomalyGroupId
         ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5249,6 +5310,7 @@ module ListAnomalyGroupSummariesResponse =
         (Option.map ~f:AnomalyGroupSummaryList.of_xml)
           (Xml.child xml_arg0 "AnomalyGroupSummaryList") in
       make ?nextToken ?anomalyGroupStatistics ?anomalyGroupSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let anomalyGroupStatistics =
@@ -5308,6 +5370,7 @@ module ListAnomalyGroupSummariesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ?nextToken ?maxResults ~sensitivityThreshold ~anomalyDetectorArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5409,6 +5472,7 @@ module ListAnomalyGroupRelatedMetricsResponse =
         (Option.map ~f:InterMetricImpactList.of_xml)
           (Xml.child xml_arg0 "InterMetricImpactList") in
       make ?nextToken ?interMetricImpactList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let interMetricImpactList =
@@ -5472,6 +5536,7 @@ module ListAnomalyGroupRelatedMetricsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ?nextToken ?maxResults ?relationshipTypeFilter ~anomalyGroupId
         ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5574,6 +5639,7 @@ module ListAnomalyDetectorsResponse =
         (Option.map ~f:AnomalyDetectorSummaryList.of_xml)
           (Xml.child xml_arg0 "AnomalyDetectorSummaryList") in
       make ?nextToken ?anomalyDetectorSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let anomalyDetectorSummaryList =
@@ -5605,6 +5671,7 @@ module ListAnomalyDetectorsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5699,6 +5766,7 @@ module ListAlertsResponse =
         (Option.map ~f:AlertSummaryList.of_xml)
           (Xml.child xml_arg0 "AlertSummaryList") in
       make ?nextToken ?alertSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let alertSummaryList =
@@ -5738,6 +5806,7 @@ module ListAlertsRequest =
       let anomalyDetectorArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AnomalyDetectorArn") in
       make ?maxResults ?nextToken ?anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5832,6 +5901,7 @@ module GetSampleDataResponse =
         (Option.map ~f:HeaderValueList.of_xml)
           (Xml.child xml_arg0 "HeaderValues") in
       make ?sampleRows ?headerValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampleRows = field_map json "SampleRows" SampleRows.of_json in
       let headerValues =
@@ -5857,6 +5927,7 @@ module GetSampleDataRequest =
         (Option.map ~f:SampleDataS3SourceConfig.of_xml)
           (Xml.child xml_arg0 "S3SourceConfig") in
       make ?s3SourceConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3SourceConfig =
         field_map json "S3SourceConfig" SampleDataS3SourceConfig.of_json in
@@ -5953,6 +6024,7 @@ module GetFeedbackResponse =
         (Option.map ~f:TimeSeriesFeedbackList.of_xml)
           (Xml.child xml_arg0 "AnomalyGroupTimeSeriesFeedback") in
       make ?nextToken ?anomalyGroupTimeSeriesFeedback ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let anomalyGroupTimeSeriesFeedback =
@@ -6011,6 +6083,7 @@ module GetFeedbackRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ?nextToken ?maxResults ~anomalyGroupTimeSeriesFeedback
         ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6103,6 +6176,7 @@ module GetAnomalyGroupResponse =
         (Option.map ~f:AnomalyGroup.of_xml)
           (Xml.child xml_arg0 "AnomalyGroup") in
       make ?anomalyGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyGroup = field_map json "AnomalyGroup" AnomalyGroup.of_json in
       make ?anomalyGroup ()
@@ -6133,6 +6207,7 @@ module GetAnomalyGroupRequest =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyGroupId") in
       make ~anomalyDetectorArn ~anomalyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map_exn json "AnomalyDetectorArn" Arn.of_json in
@@ -6327,6 +6402,7 @@ module DescribeMetricSetResponse =
         ?timestampColumn ?metricList ?offset ?lastModificationTime
         ?creationTime ?metricSetDescription ?metricSetName
         ?anomalyDetectorArn ?metricSetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricSource = field_map json "MetricSource" MetricSource.of_json in
       let timezone = field_map json "Timezone" Timezone.of_json in
@@ -6370,6 +6446,7 @@ module DescribeMetricSetRequest =
       let metricSetArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MetricSetArn") in
       make ~metricSetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricSetArn = field_map_exn json "MetricSetArn" Arn.of_json in
       make ~metricSetArn ()
@@ -6541,6 +6618,7 @@ module DescribeAnomalyDetectorResponse =
         ?lastModificationTime ?creationTime ?anomalyDetectorConfig
         ?anomalyDetectorDescription ?anomalyDetectorName ?anomalyDetectorArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureType =
         field_map json "FailureType" AnomalyDetectorFailureType.of_json in
@@ -6584,6 +6662,7 @@ module DescribeAnomalyDetectorRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map_exn json "AnomalyDetectorArn" Arn.of_json in
@@ -6678,6 +6757,7 @@ module DescribeAnomalyDetectionExecutionsResponse =
         (Option.map ~f:ExecutionList.of_xml)
           (Xml.child xml_arg0 "ExecutionList") in
       make ?nextToken ?executionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let executionList =
@@ -6726,6 +6806,7 @@ module DescribeAnomalyDetectionExecutionsRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ?nextToken ?maxResults ?timestamp ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6812,6 +6893,7 @@ module DescribeAlertResponse =
     let of_xml xml_arg0 =
       let alert = (Option.map ~f:Alert.of_xml) (Xml.child xml_arg0 "Alert") in
       make ?alert ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alert = field_map json "Alert" Alert.of_json in make ?alert ()
     let to_json v = composed_to_json to_value v
@@ -6831,6 +6913,7 @@ module DescribeAlertRequest =
       let alertArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AlertArn") in
       make ~alertArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alertArn = field_map_exn json "AlertArn" Arn.of_json in
       make ~alertArn ()
@@ -6917,6 +7000,7 @@ module DeleteAnomalyDetectorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6938,6 +7022,7 @@ module DeleteAnomalyDetectorRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map_exn json "AnomalyDetectorArn" Arn.of_json in
@@ -7016,6 +7101,7 @@ module DeleteAlertResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an alert."]
@@ -7033,6 +7119,7 @@ module DeleteAlertRequest =
       let alertArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AlertArn") in
       make ~alertArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alertArn = field_map_exn json "AlertArn" Arn.of_json in
       make ~alertArn ()
@@ -7118,6 +7205,7 @@ module DeactivateAnomalyDetectorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deactivates an anomaly detector."]
@@ -7139,6 +7227,7 @@ module DeactivateAnomalyDetectorRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map_exn json "AnomalyDetectorArn" Arn.of_json in
@@ -7242,6 +7331,7 @@ module CreateMetricSetResponse =
       let metricSetArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MetricSetArn") in
       make ?metricSetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricSetArn = field_map json "MetricSetArn" Arn.of_json in
       make ?metricSetArn ()
@@ -7354,6 +7444,7 @@ module CreateMetricSetRequest =
       make ?tags ?timezone ~metricSource ?metricSetFrequency ?dimensionList
         ?timestampColumn ?offset ~metricList ?metricSetDescription
         ~metricSetName ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let timezone = field_map json "Timezone" Timezone.of_json in
@@ -7468,6 +7559,7 @@ module CreateAnomalyDetectorResponse =
       let anomalyDetectorArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AnomalyDetectorArn") in
       make ?anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map json "AnomalyDetectorArn" Arn.of_json in
@@ -7530,6 +7622,7 @@ module CreateAnomalyDetectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorName") in
       make ?tags ?kmsKeyArn ~anomalyDetectorConfig
         ?anomalyDetectorDescription ~anomalyDetectorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
@@ -7642,6 +7735,7 @@ module CreateAlertResponse =
       let alertArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AlertArn") in
       make ?alertArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alertArn = field_map json "AlertArn" Arn.of_json in
       make ?alertArn ()
@@ -7710,6 +7804,7 @@ module CreateAlertRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AlertName") in
       make ?tags ~action ~anomalyDetectorArn ?alertDescription
         ~alertSensitivityThreshold ~alertName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let action = field_map_exn json "Action" Action.of_json in
@@ -7796,6 +7891,7 @@ module BackTestAnomalyDetectorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7818,6 +7914,7 @@ module BackTestAnomalyDetectorRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map_exn json "AnomalyDetectorArn" Arn.of_json in
@@ -7905,6 +8002,7 @@ module ActivateAnomalyDetectorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Activates an anomaly detector."]
@@ -7925,6 +8023,7 @@ module ActivateAnomalyDetectorRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyDetectorArn") in
       make ~anomalyDetectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorArn =
         field_map_exn json "AnomalyDetectorArn" Arn.of_json in

@@ -147,6 +147,7 @@ module ActiveDirectoryBackupAttributes =
         (Option.map ~f:ActiveDirectoryFullyQualifiedName.of_xml)
           (Xml.child xml_arg0 "DomainName") in
       make ?resourceARN ?activeDirectoryId ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
       let activeDirectoryId =
@@ -240,6 +241,7 @@ module ActiveDirectoryError =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActiveDirectoryId") in
       make ?message ?type_ ~activeDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let type_ = field_map json "Type" ActiveDirectoryErrorType.of_json in
@@ -449,6 +451,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -587,6 +590,7 @@ module OpenZFSUserOrGroupQuota =
         OpenZFSQuotaType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~storageCapacityQuotaGiB ~id ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageCapacityQuotaGiB =
         field_map_exn json "StorageCapacityQuotaGiB" IntegerNoMax.of_json in
@@ -672,6 +676,7 @@ module OpenZFSOriginSnapshotConfiguration =
       let snapshotARN =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "SnapshotARN") in
       make ?copyStrategy ?snapshotARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyStrategy =
         field_map json "CopyStrategy" OpenZFSCopyStrategy.of_json in
@@ -775,6 +780,7 @@ module OpenZFSClientConfiguration =
         OpenZFSClients.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Clients") in
       make ~options ~clients ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options =
         field_map_exn json "Options" OpenZFSNfsExportOptions.of_json in
@@ -830,6 +836,7 @@ module OpenZFSNfsExport =
         OpenZFSClientConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientConfigurations") in
       make ~clientConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientConfigurations =
         field_map_exn json "ClientConfigurations"
@@ -1049,6 +1056,7 @@ module OpenZFSVolumeConfiguration =
         ?copyTagsToSnapshots ?dataCompressionType ?recordSizeKiB
         ?storageCapacityQuotaGiB ?storageCapacityReservationGiB ?volumePath
         ?parentVolumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userAndGroupQuotas =
         field_map json "UserAndGroupQuotas" OpenZFSUserAndGroupQuotas.of_json in
@@ -1189,6 +1197,7 @@ module TieringPolicy =
         (Option.map ~f:CoolingPeriod.of_xml)
           (Xml.child xml_arg0 "CoolingPeriod") in
       make ?name ?coolingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" TieringPolicyName.of_json in
       let coolingPeriod =
@@ -1425,6 +1434,7 @@ module OntapVolumeConfiguration =
       make ?ontapVolumeType ?uUID ?tieringPolicy ?storageVirtualMachineRoot
         ?storageVirtualMachineId ?storageEfficiencyEnabled ?sizeInMegabytes
         ?securityStyle ?junctionPath ?flexCacheEndpointType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ontapVolumeType =
         field_map json "OntapVolumeType" OntapVolumeType.of_json in
@@ -1464,6 +1474,7 @@ module LifecycleTransitionReason =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1778,6 +1789,7 @@ module WindowsAuditLogConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "FileAccessAuditLogLevel") in
       make ?auditLogDestination ~fileShareAccessAuditLogLevel
         ~fileAccessAuditLogLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogDestination =
         field_map json "AuditLogDestination" GeneralARN.of_json in
@@ -2021,6 +2033,7 @@ module SelfManagedActiveDirectoryAttributes =
           (Xml.child xml_arg0 "DomainName") in
       make ?dnsIps ?userName ?fileSystemAdministratorsGroup
         ?organizationalUnitDistinguishedName ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsIps = field_map json "DnsIps" DnsIps.of_json in
       let userName = field_map json "UserName" DirectoryUserName.of_json in
@@ -2260,6 +2273,7 @@ module Alias =
       let name =
         (Option.map ~f:AlternateDNSName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lifecycle ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycle = field_map json "Lifecycle" AliasLifecycle.of_json in
       let name = field_map json "Name" AlternateDNSName.of_json in
@@ -2447,6 +2461,7 @@ module WindowsFileSystemConfiguration =
         ?throughputCapacity ?preferredFileServerIp ?preferredSubnetId
         ?remoteAdministrationEndpoint ?deploymentType
         ?selfManagedActiveDirectoryConfiguration ?activeDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogConfiguration =
         field_map json "AuditLogConfiguration"
@@ -2661,6 +2676,7 @@ module DiskIopsConfiguration =
         (Option.map ~f:DiskIopsConfigurationMode.of_xml)
           (Xml.child xml_arg0 "Mode") in
       make ?iops ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iops = field_map json "Iops" Iops.of_json in
       let mode = field_map json "Mode" DiskIopsConfigurationMode.of_json in
@@ -2762,6 +2778,7 @@ module OpenZFSFileSystemConfiguration =
         ?throughputCapacity ?deploymentType ?dailyAutomaticBackupStartTime
         ?copyTagsToVolumes ?copyTagsToBackups ?automaticBackupRetentionDays
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rootVolumeId = field_map json "RootVolumeId" VolumeId.of_json in
       let diskIopsConfiguration =
@@ -2930,6 +2947,7 @@ module FileSystemEndpoint =
       let dNSName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
       make ?ipAddresses ?dNSName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddresses =
         field_map json "IpAddresses" OntapEndpointIpAddresses.of_json in
@@ -2965,6 +2983,7 @@ module FileSystemEndpoints =
         (Option.map ~f:FileSystemEndpoint.of_xml)
           (Xml.child xml_arg0 "Intercluster") in
       make ?management ?intercluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let management = field_map json "Management" FileSystemEndpoint.of_json in
       let intercluster =
@@ -3080,6 +3099,7 @@ module OntapFileSystemConfiguration =
         ?preferredSubnetId ?diskIopsConfiguration ?endpoints
         ?endpointIpAddressRange ?deploymentType
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weeklyMaintenanceStartTime =
         field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
@@ -3232,6 +3252,7 @@ module LustreLogConfiguration =
         LustreAccessAuditLogLevel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Level") in
       make ?destination ~level ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination = field_map json "Destination" GeneralARN.of_json in
       let level =
@@ -3382,6 +3403,7 @@ module DataRepositoryFailureDetails =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3510,6 +3532,7 @@ module DataRepositoryConfiguration =
           (Xml.child xml_arg0 "Lifecycle") in
       make ?failureDetails ?autoImportPolicy ?importedFileChunkSize
         ?exportPath ?importPath ?lifecycle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureDetails =
         field_map json "FailureDetails" DataRepositoryFailureDetails.of_json in
@@ -3668,6 +3691,7 @@ module LustreFileSystemConfiguration =
         ?dailyAutomaticBackupStartTime ?mountName ?perUnitStorageThroughput
         ?deploymentType ?dataRepositoryConfiguration
         ?weeklyMaintenanceStartTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logConfiguration =
         field_map json "LogConfiguration" LustreLogConfiguration.of_json in
@@ -3831,6 +3855,7 @@ module FileSystemFailureDetails =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3897,6 +3922,7 @@ module AdministrativeActionFailureDetails =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4026,6 +4052,7 @@ module rec
       make ?targetSnapshotValues ?targetVolumeValues ?failureDetails
         ?targetFileSystemValues ?status ?requestTime ?progressPercent
         ?administrativeActionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetSnapshotValues =
         field_map json "TargetSnapshotValues" Snapshot.of_json in
@@ -4406,6 +4433,8 @@ module rec
              ?networkInterfaceIds ?subnetIds ?vpcId ?storageType
              ?storageCapacity ?failureDetails ?lifecycle ?fileSystemType
              ?fileSystemId ?creationTime ?ownerId ()
+         let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning
+                                                               "-32"]
          let of_json json =
            let openZFSConfiguration =
              field_map json "OpenZFSConfiguration"
@@ -4572,6 +4601,7 @@ module rec
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?administrativeActions ?tags ?lifecycleTransitionReason ?lifecycle
         ?creationTime ?volumeId ?name ?snapshotId ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let administrativeActions =
         field_map json "AdministrativeActions" AdministrativeActions.of_json in
@@ -4954,6 +4984,12 @@ module rec
                                                                     ?fileSystemId
                                                                     ?creationTime
                                                                     ()
+                                                                    let of_string
+                                                                    s =
+                                                                    of_xml
+                                                                    (Awso.Xml.parse_response
+                                                                    s)[@@warning
+                                                                    "-32"]
                                                                     let of_json
                                                                     json =
                                                                     let openZFSConfiguration
@@ -5132,6 +5168,7 @@ module AssociateFileSystemAliasesRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~aliases ~fileSystemId ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliases = field_map_exn json "Aliases" AlternateDNSNames.of_json in
       let fileSystemId =
@@ -5155,6 +5192,7 @@ module InternalServerError =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5173,6 +5211,7 @@ module FileSystemNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5192,6 +5231,7 @@ module BadRequest =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5257,6 +5297,7 @@ module AssociateFileSystemAliasesResponse =
       let aliases =
         (Option.map ~f:Aliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?aliases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliases = field_map json "Aliases" Aliases.of_json in
       make ?aliases ()
@@ -5332,6 +5373,7 @@ module AutoExportPolicy =
       let events =
         (Option.map ~f:EventTypes.of_xml) (Xml.child xml_arg0 "Events") in
       make ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "Events" EventTypes.of_json in
       make ?events ()
@@ -5354,6 +5396,7 @@ module AutoImportPolicy =
       let events =
         (Option.map ~f:EventTypes.of_xml) (Xml.child xml_arg0 "Events") in
       make ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "Events" EventTypes.of_json in
       make ?events ()
@@ -5511,6 +5554,7 @@ module BackupFailureDetails =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5660,6 +5704,7 @@ module Backup =
         ?directoryInformation ~fileSystem ?tags ?resourceARN ?kmsKeyId
         ~creationTime ?progressPercent ~type_ ?failureDetails ~lifecycle
         ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volume = field_map json "Volume" Volume.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -5708,6 +5753,7 @@ module BackupBeingCopied =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?backupId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupId = field_map json "BackupId" BackupId.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -5752,6 +5798,7 @@ module BackupInProgress =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5771,6 +5818,7 @@ module BackupNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5800,6 +5848,7 @@ module BackupRestoring =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?fileSystemId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -5880,6 +5929,7 @@ module CancelDataRepositoryTaskRequest =
       let taskId =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
       make ~taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskId = field_map_exn json "TaskId" TaskId.of_json in
       make ~taskId ()
@@ -5898,6 +5948,7 @@ module UnsupportedOperation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5917,6 +5968,7 @@ module DataRepositoryTaskNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5976,6 +6028,7 @@ module DataRepositoryTaskEnded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -6067,6 +6120,7 @@ module CancelDataRepositoryTaskResponse =
         (Option.map ~f:DataRepositoryTaskLifecycle.of_xml)
           (Xml.child xml_arg0 "Lifecycle") in
       make ?taskId ?lifecycle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskId = field_map json "TaskId" TaskId.of_json in
       let lifecycle =
@@ -6157,6 +6211,7 @@ module CompletionReport =
       let enabled =
         Flag.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?scope ?format ?path ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scope = field_map json "Scope" ReportScope.of_json in
       let format = field_map json "Format" ReportFormat.of_json in
@@ -6245,6 +6300,7 @@ module CopyBackupRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?tags ?copyTags ?kmsKeyId ?sourceRegion ~sourceBackupId
         ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let copyTags = field_map json "CopyTags" Flag.of_json in
@@ -6277,6 +6333,7 @@ module SourceBackupUnavailable =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?backupId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupId = field_map json "BackupId" BackupId.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -6353,6 +6410,7 @@ module ServiceLimitExceeded =
         ServiceLimit.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
       make ?message ~limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let limit = field_map_exn json "Limit" ServiceLimit.of_json in
@@ -6373,6 +6431,7 @@ module InvalidSourceKmsKey =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -6392,6 +6451,7 @@ module InvalidRegion =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -6411,6 +6471,7 @@ module InvalidDestinationKmsKey =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -6430,6 +6491,7 @@ module IncompatibleRegionForMultiAZ =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -6474,6 +6536,7 @@ module IncompatibleParameterError =
         Parameter.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Parameter") in
       make ?message ~parameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let parameter = field_map_exn json "Parameter" Parameter.of_json in
@@ -6607,6 +6670,7 @@ module CopyBackupResponse =
       let backup =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backup = field_map json "Backup" Backup.of_json in make ?backup ()
     let to_json v = composed_to_json to_value v
@@ -6652,6 +6716,7 @@ module CreateBackupRequest =
         (Option.map ~f:FileSystemId.of_xml)
           (Xml.child xml_arg0 "FileSystemId") in
       make ?volumeId ?tags ?clientRequestToken ?fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeId = field_map json "VolumeId" VolumeId.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -6674,6 +6739,7 @@ module VolumeNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -6780,6 +6846,7 @@ module CreateBackupResponse =
       let backup =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backup = field_map json "Backup" Backup.of_json in make ?backup ()
     let to_json v = composed_to_json to_value v
@@ -6812,6 +6879,7 @@ module S3DataRepositoryConfiguration =
         (Option.map ~f:AutoImportPolicy.of_xml)
           (Xml.child xml_arg0 "AutoImportPolicy") in
       make ?autoExportPolicy ?autoImportPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoExportPolicy =
         field_map json "AutoExportPolicy" AutoExportPolicy.of_json in
@@ -6927,6 +6995,7 @@ module CreateDataRepositoryAssociationRequest =
       make ?tags ?clientRequestToken ?s3 ?importedFileChunkSize
         ?batchImportMetaDataOnCreate ~dataRepositoryPath ~fileSystemPath
         ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let clientRequestToken =
@@ -7091,6 +7160,7 @@ module DataRepositoryAssociation =
         ?batchImportMetaDataOnCreate ?dataRepositoryPath ?fileSystemPath
         ?failureDetails ?lifecycle ?fileSystemId ?resourceARN ?associationId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" CreationTime.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -7207,6 +7277,7 @@ module CreateDataRepositoryAssociationResponse =
         (Option.map ~f:DataRepositoryAssociation.of_xml)
           (Xml.child xml_arg0 "Association") in
       make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let association =
         field_map json "Association" DataRepositoryAssociation.of_json in
@@ -7349,6 +7420,7 @@ module CreateDataRepositoryTaskRequest =
         DataRepositoryTaskType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?tags ?clientRequestToken ~report ~fileSystemId ?paths ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let clientRequestToken =
@@ -7375,6 +7447,7 @@ module DataRepositoryTaskExecuting =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -7498,6 +7571,7 @@ module DataRepositoryTaskStatus =
       let totalCount =
         (Option.map ~f:TotalCount.of_xml) (Xml.child xml_arg0 "TotalCount") in
       make ?lastUpdatedTime ?failedCount ?succeededCount ?totalCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTime =
         field_map json "LastUpdatedTime" LastUpdatedTime.of_json in
@@ -7522,6 +7596,7 @@ module DataRepositoryTaskFailureDetails =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -7646,6 +7721,7 @@ module DataRepositoryTask =
       make ?report ?status ?failureDetails ?paths ~fileSystemId ?tags
         ?resourceARN ?endTime ?startTime ~creationTime ~type_ ~lifecycle
         ~taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let report = field_map json "Report" CompletionReport.of_json in
       let status = field_map json "Status" DataRepositoryTaskStatus.of_json in
@@ -7771,6 +7847,7 @@ module CreateDataRepositoryTaskResponse =
         (Option.map ~f:DataRepositoryTask.of_xml)
           (Xml.child xml_arg0 "DataRepositoryTask") in
       make ?dataRepositoryTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataRepositoryTask =
         field_map json "DataRepositoryTask" DataRepositoryTask.of_json in
@@ -7874,6 +7951,7 @@ module WindowsAuditLogCreateConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "FileAccessAuditLogLevel") in
       make ?auditLogDestination ~fileShareAccessAuditLogLevel
         ~fileAccessAuditLogLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogDestination =
         field_map json "AuditLogDestination" GeneralARN.of_json in
@@ -7982,6 +8060,7 @@ module SelfManagedActiveDirectoryConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~dnsIps ~password ~userName ?fileSystemAdministratorsGroup
         ?organizationalUnitDistinguishedName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsIps = field_map_exn json "DnsIps" DnsIps.of_json in
       let password = field_map_exn json "Password" DirectoryPassword.of_json in
@@ -8127,6 +8206,7 @@ module CreateFileSystemWindowsConfiguration =
         ?weeklyMaintenanceStartTime ~throughputCapacity ?preferredSubnetId
         ?deploymentType ?selfManagedActiveDirectoryConfiguration
         ?activeDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogConfiguration =
         field_map json "AuditLogConfiguration"
@@ -8231,6 +8311,7 @@ module OpenZFSCreateRootVolumeConfiguration =
           (Xml.child xml_arg0 "RecordSizeKiB") in
       make ?readOnly ?copyTagsToSnapshots ?userAndGroupQuotas ?nfsExports
         ?dataCompressionType ?recordSizeKiB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let readOnly = field_map json "ReadOnly" ReadOnly.of_json in
       let copyTagsToSnapshots =
@@ -8347,6 +8428,7 @@ module CreateFileSystemOpenZFSConfiguration =
         ?weeklyMaintenanceStartTime ~throughputCapacity ~deploymentType
         ?dailyAutomaticBackupStartTime ?copyTagsToVolumes ?copyTagsToBackups
         ?automaticBackupRetentionDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rootVolumeConfiguration =
         field_map json "RootVolumeConfiguration"
@@ -8397,6 +8479,7 @@ module LustreLogCreateConfiguration =
         LustreAccessAuditLogLevel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Level") in
       make ?destination ~level ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination = field_map json "Destination" GeneralARN.of_json in
       let level =
@@ -8545,6 +8628,7 @@ module CreateFileSystemLustreConfiguration =
         ?dailyAutomaticBackupStartTime ?perUnitStorageThroughput
         ?autoImportPolicy ?deploymentType ?importedFileChunkSize ?exportPath
         ?importPath ?weeklyMaintenanceStartTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logConfiguration =
         field_map json "LogConfiguration"
@@ -8693,6 +8777,7 @@ module CreateFileSystemFromBackupRequest =
       make ?openZFSConfiguration ?fileSystemTypeVersion ?kmsKeyId
         ?storageType ?lustreConfiguration ?windowsConfiguration ?tags
         ?securityGroupIds ~subnetIds ?clientRequestToken ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSConfiguration =
         field_map json "OpenZFSConfiguration"
@@ -8733,6 +8818,7 @@ module MissingFileSystemConfiguration =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -8752,6 +8838,7 @@ module InvalidPerUnitStorageThroughput =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -8809,6 +8896,7 @@ module InvalidNetworkSettings =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?invalidRouteTableId ?invalidSecurityGroupId ?invalidSubnetId
         ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidRouteTableId =
         field_map json "InvalidRouteTableId" RouteTableId.of_json in
@@ -8935,6 +9023,7 @@ module CreateFileSystemFromBackupResponse =
       let fileSystem =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystem = field_map json "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
@@ -9053,6 +9142,7 @@ module CreateFileSystemOntapConfiguration =
         ?preferredSubnetId ?diskIopsConfiguration ?fsxAdminPassword
         ?endpointIpAddressRange ~deploymentType
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weeklyMaintenanceStartTime =
         field_map json "WeeklyMaintenanceStartTime" WeeklyTime.of_json in
@@ -9218,6 +9308,7 @@ module CreateFileSystemRequest =
         ?lustreConfiguration ?windowsConfiguration ?kmsKeyId ?tags
         ?securityGroupIds ~subnetIds ?storageType ~storageCapacity
         ~fileSystemType ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSConfiguration =
         field_map json "OpenZFSConfiguration"
@@ -9265,6 +9356,7 @@ module InvalidImportPath =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -9284,6 +9376,7 @@ module InvalidExportPath =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -9416,6 +9509,7 @@ module CreateFileSystemResponse =
       let fileSystem =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystem = field_map json "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
@@ -9493,6 +9587,7 @@ module CreateOntapVolumeConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "JunctionPath") in
       make ?tieringPolicy ~storageVirtualMachineId ~storageEfficiencyEnabled
         ~sizeInMegabytes ?securityStyle ~junctionPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tieringPolicy =
         field_map json "TieringPolicy" TieringPolicy.of_json in
@@ -9537,6 +9632,7 @@ module CreateOpenZFSOriginSnapshotConfiguration =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotARN") in
       make ~copyStrategy ~snapshotARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyStrategy =
         field_map_exn json "CopyStrategy" OpenZFSCopyStrategy.of_json in
@@ -9683,6 +9779,7 @@ module CreateOpenZFSVolumeConfiguration =
         ?copyTagsToSnapshots ?dataCompressionType ?recordSizeKiB
         ?storageCapacityQuotaGiB ?storageCapacityReservationGiB
         ~parentVolumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userAndGroupQuotas =
         field_map json "UserAndGroupQuotas" OpenZFSUserAndGroupQuotas.of_json in
@@ -9747,6 +9844,7 @@ module CreateSnapshotRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?tags ~volumeId ~name ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
@@ -9822,6 +9920,7 @@ module CreateSnapshotResponse =
       let snapshot =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshot = field_map json "Snapshot" Snapshot.of_json in
       make ?snapshot ()
@@ -9934,6 +10033,7 @@ module CreateSvmActiveDirectoryConfiguration =
         NetBiosAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "NetBiosName") in
       make ?selfManagedActiveDirectoryConfiguration ~netBiosName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selfManagedActiveDirectoryConfiguration =
         field_map json "SelfManagedActiveDirectoryConfiguration"
@@ -10018,6 +10118,7 @@ module CreateStorageVirtualMachineRequest =
           (Xml.child xml_arg0 "ActiveDirectoryConfiguration") in
       make ?rootVolumeSecurityStyle ?tags ?svmAdminPassword ~name
         ~fileSystemId ?clientRequestToken ?activeDirectoryConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rootVolumeSecurityStyle =
         field_map json "RootVolumeSecurityStyle"
@@ -10060,6 +10161,7 @@ module SvmEndpoint =
       let dNSName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
       make ?ipAddresses ?dNSName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddresses =
         field_map json "IpAddresses" OntapEndpointIpAddresses.of_json in
@@ -10102,6 +10204,7 @@ module SvmEndpoints =
       let iscsi =
         (Option.map ~f:SvmEndpoint.of_xml) (Xml.child xml_arg0 "Iscsi") in
       make ?smb ?nfs ?management ?iscsi ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let smb = field_map json "Smb" SvmEndpoint.of_json in
       let nfs = field_map json "Nfs" SvmEndpoint.of_json in
@@ -10138,6 +10241,7 @@ module SvmActiveDirectoryConfiguration =
         (Option.map ~f:NetBiosAlias.of_xml)
           (Xml.child xml_arg0 "NetBiosName") in
       make ?selfManagedActiveDirectoryConfiguration ?netBiosName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selfManagedActiveDirectoryConfiguration =
         field_map json "SelfManagedActiveDirectoryConfiguration"
@@ -10346,6 +10450,7 @@ module StorageVirtualMachine =
         ?subtype ?storageVirtualMachineId ?resourceARN ?name ?lifecycle
         ?fileSystemId ?endpoints ?creationTime ?activeDirectoryConfiguration
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rootVolumeSecurityStyle =
         field_map json "RootVolumeSecurityStyle"
@@ -10476,6 +10581,7 @@ module CreateStorageVirtualMachineResponse =
         (Option.map ~f:StorageVirtualMachine.of_xml)
           (Xml.child xml_arg0 "StorageVirtualMachine") in
       make ?storageVirtualMachine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageVirtualMachine =
         field_map json "StorageVirtualMachine" StorageVirtualMachine.of_json in
@@ -10533,6 +10639,7 @@ module CreateVolumeFromBackupRequest =
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ?tags ?ontapConfiguration ~name ?clientRequestToken ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let ontapConfiguration =
@@ -10559,6 +10666,7 @@ module StorageVirtualMachineNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -10578,6 +10686,7 @@ module MissingVolumeConfiguration =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -10688,6 +10797,7 @@ module CreateVolumeFromBackupResponse =
       let volume =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "Volume") in
       make ?volume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volume = field_map json "Volume" Volume.of_json in make ?volume ()
     let to_json v = composed_to_json to_value v
@@ -10758,6 +10868,7 @@ module CreateVolumeRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?openZFSConfiguration ?tags ?ontapConfiguration ~name ~volumeType
         ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSConfiguration =
         field_map json "OpenZFSConfiguration"
@@ -10883,6 +10994,7 @@ module CreateVolumeResponse =
       let volume =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "Volume") in
       make ?volume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volume = field_map json "Volume" Volume.of_json in make ?volume ()
     let to_json v = composed_to_json to_value v
@@ -10928,6 +11040,7 @@ module DataRepositoryAssociationNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -11067,6 +11180,7 @@ module DataRepositoryTaskFilter =
         (Option.map ~f:DataRepositoryTaskFilterName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map json "Values" DataRepositoryTaskFilterValues.of_json in
@@ -11153,6 +11267,7 @@ module DeleteBackupRequest =
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ?clientRequestToken ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -11256,6 +11371,7 @@ module DeleteBackupResponse =
       let backupId =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "BackupId") in
       make ?lifecycle ?backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycle = field_map json "Lifecycle" BackupLifecycle.of_json in
       let backupId = field_map json "BackupId" BackupId.of_json in
@@ -11312,6 +11428,7 @@ module DeleteDataRepositoryAssociationRequest =
         DataRepositoryAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
       make ~deleteDataInFileSystem ?clientRequestToken ~associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteDataInFileSystem =
         field_map_exn json "DeleteDataInFileSystem"
@@ -11429,6 +11546,7 @@ module DeleteDataRepositoryAssociationResponse =
         (Option.map ~f:DataRepositoryAssociationId.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
       make ?deleteDataInFileSystem ?lifecycle ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteDataInFileSystem =
         field_map json "DeleteDataInFileSystem"
@@ -11464,6 +11582,7 @@ module DeleteFileSystemLustreConfiguration =
       let skipFinalBackup =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
       make ?finalBackupTags ?skipFinalBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
       let skipFinalBackup = field_map json "SkipFinalBackup" Flag.of_json in
@@ -11492,6 +11611,7 @@ module DeleteFileSystemLustreResponse =
       let finalBackupId =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
       let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
@@ -11586,6 +11706,7 @@ module DeleteFileSystemOpenZFSConfiguration =
       let skipFinalBackup =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
       make ?options ?finalBackupTags ?skipFinalBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options =
         field_map json "Options" DeleteFileSystemOpenZFSOptions.of_json in
@@ -11614,6 +11735,7 @@ module DeleteFileSystemOpenZFSResponse =
       let finalBackupId =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
       let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
@@ -11643,6 +11765,7 @@ module DeleteFileSystemWindowsConfiguration =
       let skipFinalBackup =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
       make ?finalBackupTags ?skipFinalBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
       let skipFinalBackup = field_map json "SkipFinalBackup" Flag.of_json in
@@ -11711,6 +11834,7 @@ module DeleteFileSystemRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?openZFSConfiguration ?lustreConfiguration ?windowsConfiguration
         ?clientRequestToken ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSConfiguration =
         field_map json "OpenZFSConfiguration"
@@ -11750,6 +11874,7 @@ module DeleteFileSystemWindowsResponse =
       let finalBackupId =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
       let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
@@ -11880,6 +12005,7 @@ module DeleteFileSystemResponse =
           (Xml.child xml_arg0 "FileSystemId") in
       make ?openZFSResponse ?lustreResponse ?windowsResponse ?lifecycle
         ?fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSResponse =
         field_map json "OpenZFSResponse"
@@ -11973,6 +12099,7 @@ module DeleteSnapshotRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~snapshotId ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let clientRequestToken =
@@ -11994,6 +12121,7 @@ module SnapshotNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -12065,6 +12193,7 @@ module DeleteSnapshotResponse =
       let snapshotId =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?lifecycle ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycle = field_map json "Lifecycle" SnapshotLifecycle.of_json in
       let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
@@ -12098,6 +12227,7 @@ module DeleteStorageVirtualMachineRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~storageVirtualMachineId ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageVirtualMachineId =
         field_map_exn json "StorageVirtualMachineId"
@@ -12190,6 +12320,7 @@ module DeleteStorageVirtualMachineResponse =
         (Option.map ~f:StorageVirtualMachineId.of_xml)
           (Xml.child xml_arg0 "StorageVirtualMachineId") in
       make ?lifecycle ?storageVirtualMachineId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycle =
         field_map json "Lifecycle" StorageVirtualMachineLifecycle.of_json in
@@ -12221,6 +12352,7 @@ module DeleteVolumeOntapConfiguration =
       let skipFinalBackup =
         (Option.map ~f:Flag.of_xml) (Xml.child xml_arg0 "SkipFinalBackup") in
       make ?finalBackupTags ?skipFinalBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
       let skipFinalBackup = field_map json "SkipFinalBackup" Flag.of_json in
@@ -12247,6 +12379,7 @@ module DeleteVolumeOntapResponse =
       let finalBackupId =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "FinalBackupId") in
       make ?finalBackupTags ?finalBackupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalBackupTags = field_map json "FinalBackupTags" Tags.of_json in
       let finalBackupId = field_map json "FinalBackupId" BackupId.of_json in
@@ -12272,6 +12405,7 @@ module DeleteVolumeOpenZFSConfiguration =
         (Option.map ~f:DeleteOpenZFSVolumeOptions.of_xml)
           (Xml.child xml_arg0 "Options") in
       make ?options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options =
         field_map json "Options" DeleteOpenZFSVolumeOptions.of_json in
@@ -12330,6 +12464,7 @@ module DeleteVolumeRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?openZFSConfiguration ?ontapConfiguration ~volumeId
         ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSConfiguration =
         field_map json "OpenZFSConfiguration"
@@ -12429,6 +12564,7 @@ module DeleteVolumeResponse =
       let volumeId =
         (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "VolumeId") in
       make ?ontapResponse ?lifecycle ?volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ontapResponse =
         field_map json "OntapResponse" DeleteVolumeOntapResponse.of_json in
@@ -12584,6 +12720,7 @@ module Filter =
       let name =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" FilterValues.of_json in
       let name = field_map json "Name" FilterName.of_json in
@@ -12653,6 +12790,7 @@ module DescribeBackupsRequest =
       let backupIds =
         (Option.map ~f:BackupIds.of_xml) (Xml.child xml_arg0 "BackupIds") in
       make ?nextToken ?maxResults ?filters ?backupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -12737,6 +12875,7 @@ module DescribeBackupsResponse =
       let backups =
         (Option.map ~f:Backups.of_xml) (Xml.child xml_arg0 "Backups") in
       make ?nextToken ?backups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let backups = field_map json "Backups" Backups.of_json in
@@ -12800,6 +12939,7 @@ module DescribeDataRepositoryAssociationsRequest =
         (Option.map ~f:DataRepositoryAssociationIds.of_xml)
           (Xml.child xml_arg0 "AssociationIds") in
       make ?nextToken ?maxResults ?filters ?associationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" LimitedMaxResults.of_json in
@@ -12823,6 +12963,7 @@ module InvalidDataRepositoryType =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -12916,6 +13057,7 @@ module DescribeDataRepositoryAssociationsResponse =
         (Option.map ~f:DataRepositoryAssociations.of_xml)
           (Xml.child xml_arg0 "Associations") in
       make ?nextToken ?associations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let associations =
@@ -12984,6 +13126,7 @@ module DescribeDataRepositoryTasksRequest =
       let taskIds =
         (Option.map ~f:TaskIds.of_xml) (Xml.child xml_arg0 "TaskIds") in
       make ?nextToken ?maxResults ?filters ?taskIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -13070,6 +13213,7 @@ module DescribeDataRepositoryTasksResponse =
         (Option.map ~f:DataRepositoryTasks.of_xml)
           (Xml.child xml_arg0 "DataRepositoryTasks") in
       make ?nextToken ?dataRepositoryTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dataRepositoryTasks =
@@ -13119,6 +13263,7 @@ module DescribeFileSystemAliasesRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?nextToken ?maxResults ~fileSystemId ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -13195,6 +13340,7 @@ module DescribeFileSystemAliasesResponse =
       let aliases =
         (Option.map ~f:Aliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?nextToken ?aliases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let aliases = field_map json "Aliases" Aliases.of_json in
@@ -13259,6 +13405,7 @@ module DescribeFileSystemsRequest =
         (Option.map ~f:FileSystemIds.of_xml)
           (Xml.child xml_arg0 "FileSystemIds") in
       make ?nextToken ?maxResults ?fileSystemIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -13357,6 +13504,7 @@ module DescribeFileSystemsResponse =
       let fileSystems =
         (Option.map ~f:FileSystems.of_xml) (Xml.child xml_arg0 "FileSystems") in
       make ?nextToken ?fileSystems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let fileSystems = field_map json "FileSystems" FileSystems.of_json in
@@ -13486,6 +13634,7 @@ module SnapshotFilter =
       let name =
         (Option.map ~f:SnapshotFilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" SnapshotFilterValues.of_json in
       let name = field_map json "Name" SnapshotFilterName.of_json in
@@ -13552,6 +13701,7 @@ module DescribeSnapshotsRequest =
       let snapshotIds =
         (Option.map ~f:SnapshotIds.of_xml) (Xml.child xml_arg0 "SnapshotIds") in
       make ?nextToken ?maxResults ?filters ?snapshotIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -13647,6 +13797,7 @@ module DescribeSnapshotsResponse =
       let snapshots =
         (Option.map ~f:Snapshots.of_xml) (Xml.child xml_arg0 "Snapshots") in
       make ?nextToken ?snapshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let snapshots = field_map json "Snapshots" Snapshots.of_json in
@@ -13777,6 +13928,7 @@ module StorageVirtualMachineFilter =
         (Option.map ~f:StorageVirtualMachineFilterName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map json "Values" StorageVirtualMachineFilterValues.of_json in
@@ -13853,6 +14005,7 @@ module DescribeStorageVirtualMachinesRequest =
         (Option.map ~f:StorageVirtualMachineIds.of_xml)
           (Xml.child xml_arg0 "StorageVirtualMachineIds") in
       make ?nextToken ?maxResults ?filters ?storageVirtualMachineIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -13961,6 +14114,7 @@ module DescribeStorageVirtualMachinesResponse =
         (Option.map ~f:StorageVirtualMachines.of_xml)
           (Xml.child xml_arg0 "StorageVirtualMachines") in
       make ?nextToken ?storageVirtualMachines ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let storageVirtualMachines =
@@ -14090,6 +14244,7 @@ module VolumeFilter =
       let name =
         (Option.map ~f:VolumeFilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" VolumeFilterValues.of_json in
       let name = field_map json "Name" VolumeFilterName.of_json in
@@ -14156,6 +14311,7 @@ module DescribeVolumesRequest =
       let volumeIds =
         (Option.map ~f:VolumeIds.of_xml) (Xml.child xml_arg0 "VolumeIds") in
       make ?nextToken ?maxResults ?filters ?volumeIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -14250,6 +14406,7 @@ module DescribeVolumesResponse =
       let volumes =
         (Option.map ~f:Volumes.of_xml) (Xml.child xml_arg0 "Volumes") in
       make ?nextToken ?volumes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let volumes = field_map json "Volumes" Volumes.of_json in
@@ -14291,6 +14448,7 @@ module DisassociateFileSystemAliasesRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~aliases ~fileSystemId ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliases = field_map_exn json "Aliases" AlternateDNSNames.of_json in
       let fileSystemId =
@@ -14360,6 +14518,7 @@ module DisassociateFileSystemAliasesResponse =
       let aliases =
         (Option.map ~f:Aliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?aliases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliases = field_map json "Aliases" Aliases.of_json in
       make ?aliases ()
@@ -14398,6 +14557,7 @@ module ListTagsForResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?nextToken ?maxResults ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -14427,6 +14587,7 @@ module ResourceNotFound =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?message ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
@@ -14457,6 +14618,7 @@ module ResourceDoesNotSupportTagging =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?message ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
@@ -14486,6 +14648,7 @@ module NotServiceResourceError =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?message ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
@@ -14574,6 +14737,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -14603,6 +14767,7 @@ module ReleaseFileSystemNfsV3LocksRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?clientRequestToken ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -14687,6 +14852,7 @@ module ReleaseFileSystemNfsV3LocksResponse =
       let fileSystem =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystem = field_map json "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
@@ -14789,6 +14955,7 @@ module RestoreVolumeFromSnapshotRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?options ~snapshotId ~volumeId ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options =
         field_map json "Options" RestoreOpenZFSVolumeOptions.of_json in
@@ -14862,6 +15029,7 @@ module RestoreVolumeFromSnapshotResponse =
       let volumeId =
         (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "VolumeId") in
       make ?lifecycle ?volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycle = field_map json "Lifecycle" VolumeLifecycle.of_json in
       let volumeId = field_map json "VolumeId" VolumeId.of_json in
@@ -14901,6 +15069,7 @@ module SelfManagedActiveDirectoryConfigurationUpdates =
         (Option.map ~f:DirectoryUserName.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ?dnsIps ?password ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsIps = field_map json "DnsIps" DnsIps.of_json in
       let password = field_map json "Password" DirectoryPassword.of_json in
@@ -14960,6 +15129,7 @@ module TagResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
@@ -15036,6 +15206,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for the TagResource operation."]
@@ -15063,6 +15234,7 @@ module UntagResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
@@ -15139,6 +15311,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response object for UntagResource action."]
@@ -15188,6 +15361,7 @@ module UpdateDataRepositoryAssociationRequest =
         DataRepositoryAssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
       make ?s3 ?importedFileChunkSize ?clientRequestToken ~associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "S3" S3DataRepositoryConfiguration.of_json in
       let importedFileChunkSize =
@@ -15284,6 +15458,7 @@ module UpdateDataRepositoryAssociationResponse =
         (Option.map ~f:DataRepositoryAssociation.of_xml)
           (Xml.child xml_arg0 "Association") in
       make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let association =
         field_map json "Association" DataRepositoryAssociation.of_json in
@@ -15363,6 +15538,7 @@ module UpdateFileSystemLustreConfiguration =
       make ?logConfiguration ?dataCompressionType ?autoImportPolicy
         ?automaticBackupRetentionDays ?dailyAutomaticBackupStartTime
         ?weeklyMaintenanceStartTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logConfiguration =
         field_map json "LogConfiguration"
@@ -15454,6 +15630,7 @@ module UpdateFileSystemOntapConfiguration =
       make ?throughputCapacity ?diskIopsConfiguration
         ?weeklyMaintenanceStartTime ?fsxAdminPassword
         ?dailyAutomaticBackupStartTime ?automaticBackupRetentionDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let throughputCapacity =
         field_map json "ThroughputCapacity" MegabytesPerSecond.of_json in
@@ -15550,6 +15727,7 @@ module UpdateFileSystemOpenZFSConfiguration =
       make ?diskIopsConfiguration ?weeklyMaintenanceStartTime
         ?throughputCapacity ?dailyAutomaticBackupStartTime ?copyTagsToVolumes
         ?copyTagsToBackups ?automaticBackupRetentionDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let diskIopsConfiguration =
         field_map json "DiskIopsConfiguration" DiskIopsConfiguration.of_json in
@@ -15648,6 +15826,7 @@ module UpdateFileSystemWindowsConfiguration =
       make ?auditLogConfiguration ?selfManagedActiveDirectoryConfiguration
         ?throughputCapacity ?automaticBackupRetentionDays
         ?dailyAutomaticBackupStartTime ?weeklyMaintenanceStartTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditLogConfiguration =
         field_map json "AuditLogConfiguration"
@@ -15753,6 +15932,7 @@ module UpdateFileSystemRequest =
       make ?openZFSConfiguration ?ontapConfiguration ?lustreConfiguration
         ?windowsConfiguration ?storageCapacity ?clientRequestToken
         ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSConfiguration =
         field_map json "OpenZFSConfiguration"
@@ -15874,6 +16054,7 @@ module UpdateFileSystemResponse =
       let fileSystem =
         (Option.map ~f:FileSystem.of_xml) (Xml.child xml_arg0 "FileSystem") in
       make ?fileSystem ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystem = field_map json "FileSystem" FileSystem.of_json in
       make ?fileSystem ()
@@ -15940,6 +16121,7 @@ module UpdateOntapVolumeConfiguration =
           (Xml.child xml_arg0 "JunctionPath") in
       make ?tieringPolicy ?storageEfficiencyEnabled ?sizeInMegabytes
         ?securityStyle ?junctionPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tieringPolicy =
         field_map json "TieringPolicy" TieringPolicy.of_json in
@@ -16041,6 +16223,7 @@ module UpdateOpenZFSVolumeConfiguration =
       make ?readOnly ?userAndGroupQuotas ?nfsExports ?dataCompressionType
         ?recordSizeKiB ?storageCapacityQuotaGiB
         ?storageCapacityReservationGiB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let readOnly = field_map json "ReadOnly" ReadOnly.of_json in
       let userAndGroupQuotas =
@@ -16093,6 +16276,7 @@ module UpdateSnapshotRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ~snapshotId ~name ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let name = field_map_exn json "Name" SnapshotName.of_json in
@@ -16159,6 +16343,7 @@ module UpdateSnapshotResponse =
       let snapshot =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshot = field_map json "Snapshot" Snapshot.of_json in
       make ?snapshot ()
@@ -16183,6 +16368,7 @@ module UpdateSvmActiveDirectoryConfiguration =
         (Option.map ~f:SelfManagedActiveDirectoryConfigurationUpdates.of_xml)
           (Xml.child xml_arg0 "SelfManagedActiveDirectoryConfiguration") in
       make ?selfManagedActiveDirectoryConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selfManagedActiveDirectoryConfiguration =
         field_map json "SelfManagedActiveDirectoryConfiguration"
@@ -16244,6 +16430,7 @@ module UpdateStorageVirtualMachineRequest =
           (Xml.child xml_arg0 "ActiveDirectoryConfiguration") in
       make ?svmAdminPassword ~storageVirtualMachineId ?clientRequestToken
         ?activeDirectoryConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let svmAdminPassword =
         field_map json "SvmAdminPassword" AdminPassword.of_json in
@@ -16340,6 +16527,7 @@ module UpdateStorageVirtualMachineResponse =
         (Option.map ~f:StorageVirtualMachine.of_xml)
           (Xml.child xml_arg0 "StorageVirtualMachine") in
       make ?storageVirtualMachine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageVirtualMachine =
         field_map json "StorageVirtualMachine" StorageVirtualMachine.of_json in
@@ -16407,6 +16595,7 @@ module UpdateVolumeRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       make ?openZFSConfiguration ?name ?ontapConfiguration ~volumeId
         ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openZFSConfiguration =
         field_map json "OpenZFSConfiguration"
@@ -16500,6 +16689,7 @@ module UpdateVolumeResponse =
       let volume =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "Volume") in
       make ?volume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volume = field_map json "Volume" Volume.of_json in make ?volume ()
     let to_json v = composed_to_json to_value v

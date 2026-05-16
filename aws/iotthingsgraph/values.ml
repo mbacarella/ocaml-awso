@@ -579,6 +579,7 @@ module DefinitionDocument =
         DefinitionLanguage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "language") in
       make ~text ~language ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text = field_map_exn json "text" DefinitionText.of_json in
       let language = field_map_exn json "language" DefinitionLanguage.of_json in
@@ -806,6 +807,7 @@ module DependencyRevision =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "revisionNumber") in
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?revisionNumber ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionNumber = field_map json "revisionNumber" Version.of_json in
       let id = field_map json "id" Urn.of_json in make ?revisionNumber ?id ()
@@ -880,6 +882,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -905,6 +908,7 @@ module Thing =
       let thingArn =
         (Option.map ~f:ThingArn.of_xml) (Xml.child xml_arg0 "thingArn") in
       make ?thingName ?thingArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thingName = field_map json "thingName" ThingName.of_json in
       let thingArn = field_map json "thingArn" ThingArn.of_json in
@@ -940,6 +944,7 @@ module SystemTemplateSummary =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?createdAt ?revisionNumber ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" Timestamp.of_json in
       let revisionNumber = field_map json "revisionNumber" Version.of_json in
@@ -972,6 +977,7 @@ module SystemTemplateFilter =
         SystemTemplateFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value =
         field_map_exn json "value" SystemTemplateFilterValues.of_json in
@@ -1064,6 +1070,7 @@ module SystemInstanceSummary =
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?greengrassGroupVersionId ?greengrassGroupId ?updatedAt ?createdAt
         ?greengrassGroupName ?target ?status ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let greengrassGroupVersionId =
         field_map json "greengrassGroupVersionId"
@@ -1108,6 +1115,7 @@ module SystemInstanceFilter =
         (Option.map ~f:SystemInstanceFilterName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" SystemInstanceFilterValues.of_json in
       let name = field_map json "name" SystemInstanceFilterName.of_json in
@@ -1144,6 +1152,7 @@ module FlowTemplateSummary =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?createdAt ?revisionNumber ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" Timestamp.of_json in
       let revisionNumber = field_map json "revisionNumber" Version.of_json in
@@ -1177,6 +1186,7 @@ module FlowTemplateFilter =
         FlowTemplateFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" FlowTemplateFilterValues.of_json in
       let name = field_map_exn json "name" FlowTemplateFilterName.of_json in
@@ -1242,6 +1252,7 @@ module FlowExecutionSummary =
           (Xml.child xml_arg0 "flowExecutionId") in
       make ?updatedAt ?createdAt ?flowTemplateId ?systemInstanceId ?status
         ?flowExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "updatedAt" Timestamp.of_json in
       let createdAt = field_map json "createdAt" Timestamp.of_json in
@@ -1292,6 +1303,7 @@ module EntityDescription =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?definition ?createdAt ?type_ ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let definition = field_map json "definition" DefinitionDocument.of_json in
       let createdAt = field_map json "createdAt" Timestamp.of_json in
@@ -1324,6 +1336,7 @@ module EntityFilter =
       let name =
         (Option.map ~f:EntityFilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" EntityFilterValues.of_json in
       let name = field_map json "name" EntityFilterName.of_json in
@@ -1371,6 +1384,7 @@ module FlowExecutionMessage =
         (Option.map ~f:FlowExecutionMessageId.of_xml)
           (Xml.child xml_arg0 "messageId") in
       make ?payload ?timestamp ?eventType ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload =
         field_map json "payload" FlowExecutionMessagePayload.of_json in
@@ -1448,6 +1462,7 @@ module MetricsConfiguration =
         (Option.map ~f:Enabled.of_xml)
           (Xml.child xml_arg0 "cloudMetricEnabled") in
       make ?metricRuleRoleArn ?cloudMetricEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricRuleRoleArn =
         field_map json "metricRuleRoleArn" RoleArn.of_json in
@@ -1483,6 +1498,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1501,6 +1517,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1519,6 +1536,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1581,6 +1599,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1599,6 +1618,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1662,6 +1682,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2130,6 +2151,7 @@ module SystemTemplateDescription =
         (Option.map ~f:SystemTemplateSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?validatedNamespaceVersion ?definition ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validatedNamespaceVersion =
         field_map json "validatedNamespaceVersion" Version.of_json in
@@ -2220,6 +2242,7 @@ module SystemInstanceDescription =
       make ?flowActionsRoleArn ?validatedDependencyRevisions
         ?validatedNamespaceVersion ?metricsConfiguration ?s3BucketName
         ?definition ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowActionsRoleArn =
         field_map json "flowActionsRoleArn" RoleArn.of_json in
@@ -2329,6 +2352,7 @@ module FlowTemplateDescription =
         (Option.map ~f:FlowTemplateSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?validatedNamespaceVersion ?definition ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validatedNamespaceVersion =
         field_map json "validatedNamespaceVersion" Version.of_json in
@@ -2391,6 +2415,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2458,6 +2483,7 @@ module UploadEntityDefinitionsResponse =
       let uploadId =
         UploadId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uploadId") in
       make ~uploadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadId = field_map_exn json "uploadId" UploadId.of_json in
       make ~uploadId ()
@@ -2503,6 +2529,7 @@ module UploadEntityDefinitionsRequest =
         (Option.map ~f:DefinitionDocument.of_xml)
           (Xml.child xml_arg0 "document") in
       make ?deprecateExistingEntities ?syncWithPublicNamespace ?document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deprecateExistingEntities =
         field_map json "deprecateExistingEntities"
@@ -2587,6 +2614,7 @@ module UpdateSystemTemplateResponse =
         (Option.map ~f:SystemTemplateSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary = field_map json "summary" SystemTemplateSummary.of_json in
       make ?summary ()
@@ -2627,6 +2655,7 @@ module UpdateSystemTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "definition") in
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?compatibleNamespaceVersion ~definition ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compatibleNamespaceVersion =
         field_map json "compatibleNamespaceVersion" Version.of_json in
@@ -2708,6 +2737,7 @@ module UpdateFlowTemplateResponse =
         (Option.map ~f:FlowTemplateSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary = field_map json "summary" FlowTemplateSummary.of_json in
       make ?summary ()
@@ -2748,6 +2778,7 @@ module UpdateFlowTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "definition") in
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?compatibleNamespaceVersion ~definition ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compatibleNamespaceVersion =
         field_map json "compatibleNamespaceVersion" Version.of_json in
@@ -2822,6 +2853,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from the specified resource."]
@@ -2851,6 +2883,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -2938,6 +2971,7 @@ module UndeploySystemInstanceResponse =
         (Option.map ~f:SystemInstanceSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary = field_map json "summary" SystemInstanceSummary.of_json in
       make ?summary ()
@@ -2958,6 +2992,7 @@ module UndeploySystemInstanceRequest =
     let of_xml xml_arg0 =
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" Urn.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -3027,6 +3062,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a tag for the specified resource."]
@@ -3052,6 +3088,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -3133,6 +3170,7 @@ module SearchThingsResponse =
       let things =
         (Option.map ~f:Things.of_xml) (Xml.child xml_arg0 "things") in
       make ?nextToken ?things ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let things = field_map json "things" Things.of_json in
@@ -3181,6 +3219,7 @@ module SearchThingsRequest =
       let entityId =
         Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "entityId") in
       make ?namespaceVersion ?maxResults ?nextToken ~entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespaceVersion =
         field_map json "namespaceVersion" Version.of_json in
@@ -3261,6 +3300,7 @@ module SearchSystemTemplatesResponse =
         (Option.map ~f:SystemTemplateSummaries.of_xml)
           (Xml.child xml_arg0 "summaries") in
       make ?nextToken ?summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let summaries =
@@ -3301,6 +3341,7 @@ module SearchSystemTemplatesRequest =
         (Option.map ~f:SystemTemplateFilters.of_xml)
           (Xml.child xml_arg0 "filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -3379,6 +3420,7 @@ module SearchSystemInstancesResponse =
         (Option.map ~f:SystemInstanceSummaries.of_xml)
           (Xml.child xml_arg0 "summaries") in
       make ?nextToken ?summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let summaries =
@@ -3418,6 +3460,7 @@ module SearchSystemInstancesRequest =
         (Option.map ~f:SystemInstanceFilters.of_xml)
           (Xml.child xml_arg0 "filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -3495,6 +3538,7 @@ module SearchFlowTemplatesResponse =
         (Option.map ~f:FlowTemplateSummaries.of_xml)
           (Xml.child xml_arg0 "summaries") in
       make ?nextToken ?summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let summaries =
@@ -3533,6 +3577,7 @@ module SearchFlowTemplatesRequest =
         (Option.map ~f:FlowTemplateFilters.of_xml)
           (Xml.child xml_arg0 "filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -3619,6 +3664,7 @@ module SearchFlowExecutionsResponse =
         (Option.map ~f:FlowExecutionSummaries.of_xml)
           (Xml.child xml_arg0 "summaries") in
       make ?nextToken ?summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let summaries =
@@ -3690,6 +3736,7 @@ module SearchFlowExecutionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "systemInstanceId") in
       make ?maxResults ?nextToken ?endTime ?startTime ?flowExecutionId
         ~systemInstanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -3774,6 +3821,7 @@ module SearchEntitiesResponse =
         (Option.map ~f:EntityDescriptions.of_xml)
           (Xml.child xml_arg0 "descriptions") in
       make ?nextToken ?descriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let descriptions =
@@ -3837,6 +3885,7 @@ module SearchEntitiesRequest =
         EntityTypes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entityTypes") in
       make ?namespaceVersion ?maxResults ?nextToken ?filters ~entityTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespaceVersion =
         field_map json "namespaceVersion" Version.of_json in
@@ -3925,6 +3974,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let tags = field_map json "tags" TagList.of_json in
@@ -3962,6 +4012,7 @@ module ListTagsForResourceRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ~resourceArn ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -4047,6 +4098,7 @@ module ListFlowExecutionMessagesResponse =
         (Option.map ~f:FlowExecutionMessages.of_xml)
           (Xml.child xml_arg0 "messages") in
       make ?nextToken ?messages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let messages = field_map json "messages" FlowExecutionMessages.of_json in
@@ -4087,6 +4139,7 @@ module ListFlowExecutionMessagesRequest =
         FlowExecutionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "flowExecutionId") in
       make ?maxResults ?nextToken ~flowExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -4221,6 +4274,7 @@ module GetUploadStatusResponse =
         UploadId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uploadId") in
       make ~createdDate ?failureReason ?namespaceVersion ?namespaceName
         ?namespaceArn ~uploadStatus ~uploadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map_exn json "createdDate" Timestamp.of_json in
       let failureReason = field_map json "failureReason" StringList.of_json in
@@ -4253,6 +4307,7 @@ module GetUploadStatusRequest =
       let uploadId =
         UploadId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uploadId") in
       make ~uploadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadId = field_map_exn json "uploadId" UploadId.of_json in
       make ~uploadId ()
@@ -4337,6 +4392,7 @@ module GetSystemTemplateRevisionsResponse =
         (Option.map ~f:SystemTemplateSummaries.of_xml)
           (Xml.child xml_arg0 "summaries") in
       make ?nextToken ?summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let summaries =
@@ -4374,6 +4430,7 @@ module GetSystemTemplateRevisionsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?maxResults ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -4453,6 +4510,7 @@ module GetSystemTemplateResponse =
         (Option.map ~f:SystemTemplateDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       make ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" SystemTemplateDescription.of_json in
@@ -4481,6 +4539,7 @@ module GetSystemTemplateRequest =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "revisionNumber") in
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?revisionNumber ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionNumber = field_map json "revisionNumber" Version.of_json in
       let id = field_map_exn json "id" Urn.of_json in
@@ -4558,6 +4617,7 @@ module GetSystemInstanceResponse =
         (Option.map ~f:SystemInstanceDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       make ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" SystemInstanceDescription.of_json in
@@ -4578,6 +4638,7 @@ module GetSystemInstanceRequest =
     let of_xml xml_arg0 =
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Urn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -4680,6 +4741,7 @@ module GetNamespaceDeletionStatusResponse =
       let namespaceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "namespaceArn") in
       make ?errorMessage ?errorCode ?status ?namespaceName ?namespaceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" String_.of_json in
       let errorCode =
@@ -4699,6 +4761,7 @@ module GetNamespaceDeletionStatusRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the status of a namespace deletion task."]
@@ -4781,6 +4844,7 @@ module GetFlowTemplateRevisionsResponse =
         (Option.map ~f:FlowTemplateSummaries.of_xml)
           (Xml.child xml_arg0 "summaries") in
       make ?nextToken ?summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let summaries =
@@ -4818,6 +4882,7 @@ module GetFlowTemplateRevisionsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?maxResults ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -4897,6 +4962,7 @@ module GetFlowTemplateResponse =
         (Option.map ~f:FlowTemplateDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       make ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" FlowTemplateDescription.of_json in
@@ -4925,6 +4991,7 @@ module GetFlowTemplateRequest =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "revisionNumber") in
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?revisionNumber ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionNumber = field_map json "revisionNumber" Version.of_json in
       let id = field_map_exn json "id" Urn.of_json in
@@ -5003,6 +5070,7 @@ module GetEntitiesResponse =
         (Option.map ~f:EntityDescriptions.of_xml)
           (Xml.child xml_arg0 "descriptions") in
       make ?descriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let descriptions =
         field_map json "descriptions" EntityDescriptions.of_json in
@@ -5035,6 +5103,7 @@ module GetEntitiesRequest =
           (Xml.child xml_arg0 "namespaceVersion") in
       let ids = Urns.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
       make ?namespaceVersion ~ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespaceVersion =
         field_map json "namespaceVersion" Version.of_json in
@@ -5105,6 +5174,7 @@ module DissociateEntityFromThingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5133,6 +5203,7 @@ module DissociateEntityFromThingRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~entityType ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entityType = field_map_exn json "entityType" EntityType.of_json in
       let thingName = field_map_exn json "thingName" ThingName.of_json in
@@ -5251,6 +5322,7 @@ module DescribeNamespaceResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "namespaceArn") in
       make ?namespaceVersion ?trackingNamespaceVersion ?trackingNamespaceName
         ?namespaceName ?namespaceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespaceVersion =
         field_map json "namespaceVersion" Version.of_json in
@@ -5284,6 +5356,7 @@ module DescribeNamespaceRequest =
         (Option.map ~f:NamespaceName.of_xml)
           (Xml.child xml_arg0 "namespaceName") in
       make ?namespaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespaceName =
         field_map json "namespaceName" NamespaceName.of_json in
@@ -5353,6 +5426,7 @@ module DeprecateSystemTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deprecates the specified system."]
@@ -5370,6 +5444,7 @@ module DeprecateSystemTemplateRequest =
     let of_xml xml_arg0 =
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Urn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5436,6 +5511,7 @@ module DeprecateFlowTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5454,6 +5530,7 @@ module DeprecateFlowTemplateRequest =
     let of_xml xml_arg0 =
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Urn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5550,6 +5627,7 @@ module DeploySystemInstanceResponse =
         SystemInstanceSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "summary") in
       make ?greengrassDeploymentId ~summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let greengrassDeploymentId =
         field_map json "greengrassDeploymentId"
@@ -5574,6 +5652,7 @@ module DeploySystemInstanceRequest =
     let of_xml xml_arg0 =
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" Urn.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -5641,6 +5720,7 @@ module DeleteSystemTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5659,6 +5739,7 @@ module DeleteSystemTemplateRequest =
     let of_xml xml_arg0 =
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Urn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5726,6 +5807,7 @@ module DeleteSystemInstanceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5743,6 +5825,7 @@ module DeleteSystemInstanceRequest =
     let of_xml xml_arg0 =
       let id = (Option.map ~f:Urn.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" Urn.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -5807,6 +5890,7 @@ module DeleteNamespaceResponse =
       let namespaceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "namespaceArn") in
       make ?namespaceName ?namespaceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespaceName =
         field_map json "namespaceName" NamespaceName.of_json in
@@ -5823,6 +5907,7 @@ module DeleteNamespaceRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5889,6 +5974,7 @@ module DeleteFlowTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5907,6 +5993,7 @@ module DeleteFlowTemplateRequest =
     let of_xml xml_arg0 =
       let id = Urn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Urn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5985,6 +6072,7 @@ module CreateSystemTemplateResponse =
         (Option.map ~f:SystemTemplateSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary = field_map json "summary" SystemTemplateSummary.of_json in
       make ?summary ()
@@ -6017,6 +6105,7 @@ module CreateSystemTemplateRequest =
         DefinitionDocument.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "definition") in
       make ?compatibleNamespaceVersion ~definition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compatibleNamespaceVersion =
         field_map json "compatibleNamespaceVersion" Version.of_json in
@@ -6109,6 +6198,7 @@ module CreateSystemInstanceResponse =
         (Option.map ~f:SystemInstanceSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary = field_map json "summary" SystemInstanceSummary.of_json in
       make ?summary ()
@@ -6190,6 +6280,7 @@ module CreateSystemInstanceRequest =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?flowActionsRoleArn ?metricsConfiguration ?s3BucketName
         ?greengrassGroupName ~target ~definition ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowActionsRoleArn =
         field_map json "flowActionsRoleArn" RoleArn.of_json in
@@ -6289,6 +6380,7 @@ module CreateFlowTemplateResponse =
         (Option.map ~f:FlowTemplateSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary = field_map json "summary" FlowTemplateSummary.of_json in
       make ?summary ()
@@ -6321,6 +6413,7 @@ module CreateFlowTemplateRequest =
         DefinitionDocument.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "definition") in
       make ?compatibleNamespaceVersion ~definition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compatibleNamespaceVersion =
         field_map json "compatibleNamespaceVersion" Version.of_json in
@@ -6392,6 +6485,7 @@ module AssociateEntityToThingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6430,6 +6524,7 @@ module AssociateEntityToThingRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?namespaceVersion ~entityId ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespaceVersion =
         field_map json "namespaceVersion" Version.of_json in

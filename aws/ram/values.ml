@@ -174,6 +174,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" TagValue.of_json in
       let key = field_map json "key" TagKey.of_json in make ?value ?key ()
@@ -273,6 +274,7 @@ module ResourceShareAssociation =
       make ?external_ ?lastUpdatedTime ?creationTime ?statusMessage ?status
         ?associationType ?associatedEntity ?resourceShareName
         ?resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let external_ = field_map json "external" Boolean.of_json in
       let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
@@ -614,6 +616,7 @@ module Resource =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       make ?resourceRegionScope ?lastUpdatedTime ?creationTime ?statusMessage
         ?status ?resourceGroupArn ?resourceShareArn ?type_ ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRegionScope =
         field_map json "resourceRegionScope" ResourceRegionScope.of_json in
@@ -663,6 +666,7 @@ module ServiceNameAndResourceType =
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       make ?resourceRegionScope ?serviceName ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRegionScope =
         field_map json "resourceRegionScope" ResourceRegionScope.of_json in
@@ -754,6 +758,7 @@ module ResourceSharePermissionSummary =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       make ?isResourceTypeDefault ?lastUpdatedTime ?creationTime ?status
         ?resourceType ?name ?defaultVersion ?version ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isResourceTypeDefault =
         field_map json "isResourceTypeDefault" Boolean.of_json in
@@ -823,6 +828,7 @@ module Principal =
           (Xml.child xml_arg0 "resourceShareArn") in
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?external_ ?lastUpdatedTime ?creationTime ?resourceShareArn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let external_ = field_map json "external" Boolean.of_json in
       let lastUpdatedTime = field_map json "lastUpdatedTime" DateTime.of_json in
@@ -930,6 +936,7 @@ module ResourceShare =
       make ?featureSet ?lastUpdatedTime ?creationTime ?tags ?statusMessage
         ?status ?allowExternalPrincipals ?owningAccountId ?name
         ?resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureSet =
         field_map json "featureSet" ResourceShareFeatureSet.of_json in
@@ -971,6 +978,7 @@ module TagFilter =
       let tagKey =
         (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "tagKey") in
       make ?tagValues ?tagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagValues = field_map json "tagValues" TagValueList.of_json in
       let tagKey = field_map json "tagKey" TagKey.of_json in
@@ -1075,6 +1083,7 @@ module ResourceShareInvitation =
       make ?receiverArn ?resourceShareAssociations ?status
         ?invitationTimestamp ?receiverAccountId ?senderAccountId
         ?resourceShareArn ?resourceShareName ?resourceShareInvitationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let receiverArn = field_map json "receiverArn" String_.of_json in
       let resourceShareAssociations =
@@ -1125,6 +1134,7 @@ module IdempotentParameterMismatchException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1144,6 +1154,7 @@ module InvalidClientTokenException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1162,6 +1173,7 @@ module InvalidParameterException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1180,6 +1192,7 @@ module MalformedArnException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1199,6 +1212,7 @@ module MissingRequiredParameterException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1217,6 +1231,7 @@ module OperationNotPermittedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1235,6 +1250,7 @@ module ServerInternalException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1254,6 +1270,7 @@ module ServiceUnavailableException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1272,6 +1289,7 @@ module UnknownResourceException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1313,6 +1331,7 @@ module ResourceArnNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1331,6 +1350,7 @@ module TagLimitExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1350,6 +1370,7 @@ module TagPolicyViolationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1369,6 +1390,7 @@ module ResourceShareInvitationAlreadyAcceptedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1387,6 +1409,7 @@ module ResourceShareInvitationAlreadyRejectedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1405,6 +1428,7 @@ module ResourceShareInvitationArnNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1424,6 +1448,7 @@ module ResourceShareInvitationExpiredException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1442,6 +1467,7 @@ module ResourceShareLimitExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1461,6 +1487,7 @@ module InvalidNextTokenException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1479,6 +1506,7 @@ module InvalidResourceTypeException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1790,6 +1818,7 @@ module InvalidMaxResultsException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1951,6 +1980,7 @@ module ResourceSharePermissionDetail =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       make ?isResourceTypeDefault ?lastUpdatedTime ?creationTime ?permission
         ?resourceType ?name ?defaultVersion ?version ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isResourceTypeDefault =
         field_map json "isResourceTypeDefault" Boolean.of_json in
@@ -1992,6 +2022,7 @@ module InvalidStateTransitionException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -2034,6 +2065,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -2176,6 +2208,7 @@ module UpdateResourceShareResponse =
         (Option.map ~f:ResourceShare.of_xml)
           (Xml.child xml_arg0 "resourceShare") in
       make ?clientToken ?resourceShare ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShare =
@@ -2227,6 +2260,7 @@ module UpdateResourceShareRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ?allowExternalPrincipals ?name ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let allowExternalPrincipals =
@@ -2293,6 +2327,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2323,6 +2358,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ~tagKeys ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceShareArn =
@@ -2435,6 +2471,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2464,6 +2501,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ~tags ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceShareArn =
@@ -2634,6 +2672,7 @@ module RejectResourceShareInvitationResponse =
         (Option.map ~f:ResourceShareInvitation.of_xml)
           (Xml.child xml_arg0 "resourceShareInvitation") in
       make ?clientToken ?resourceShareInvitation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShareInvitation =
@@ -2671,6 +2710,7 @@ module RejectResourceShareInvitationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "resourceShareInvitationArn") in
       make ?clientToken ~resourceShareInvitationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShareInvitationArn =
@@ -2795,6 +2835,7 @@ module PromoteResourceShareCreatedFromPolicyResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnValue = field_map json "returnValue" Boolean.of_json in
       make ?returnValue ()
@@ -2819,6 +2860,7 @@ module PromoteResourceShareCreatedFromPolicyRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceShareArn =
         field_map_exn json "resourceShareArn" String_.of_json in
@@ -2934,6 +2976,7 @@ module ListResourcesResponse =
       let resources =
         (Option.map ~f:ResourceList.of_xml) (Xml.child xml_arg0 "resources") in
       make ?nextToken ?resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let resources = field_map json "resources" ResourceList.of_json in
@@ -3027,6 +3070,7 @@ module ListResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
       make ?resourceRegionScope ?maxResults ?nextToken ?resourceShareArns
         ?resourceArns ?resourceType ?principal ~resourceOwner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRegionScope =
         field_map json "resourceRegionScope"
@@ -3128,6 +3172,7 @@ module ListResourceTypesResponse =
         (Option.map ~f:ServiceNameAndResourceTypeList.of_xml)
           (Xml.child xml_arg0 "resourceTypes") in
       make ?nextToken ?resourceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let resourceTypes =
@@ -3169,6 +3214,7 @@ module ListResourceTypesRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?resourceRegionScope ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRegionScope =
         field_map json "resourceRegionScope"
@@ -3288,6 +3334,7 @@ module ListResourceSharePermissionsResponse =
         (Option.map ~f:ResourceSharePermissionList.of_xml)
           (Xml.child xml_arg0 "permissions") in
       make ?nextToken ?permissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let permissions =
@@ -3329,6 +3376,7 @@ module ListResourceSharePermissionsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?maxResults ?nextToken ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -3436,6 +3484,7 @@ module ListPrincipalsResponse =
         (Option.map ~f:PrincipalList.of_xml)
           (Xml.child xml_arg0 "principals") in
       make ?nextToken ?principals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let principals = field_map json "principals" PrincipalList.of_json in
@@ -3518,6 +3567,7 @@ module ListPrincipalsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
       make ?maxResults ?nextToken ?resourceShareArns ?resourceType
         ?principals ?resourceArn ~resourceOwner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -3626,6 +3676,7 @@ module ListPermissionsResponse =
         (Option.map ~f:ResourceSharePermissionList.of_xml)
           (Xml.child xml_arg0 "permissions") in
       make ?nextToken ?permissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let permissions =
@@ -3664,6 +3715,7 @@ module ListPermissionsRequest =
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       make ?maxResults ?nextToken ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -3782,6 +3834,7 @@ module ListPermissionVersionsResponse =
         (Option.map ~f:ResourceSharePermissionList.of_xml)
           (Xml.child xml_arg0 "permissions") in
       make ?nextToken ?permissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let permissions =
@@ -3823,6 +3876,7 @@ module ListPermissionVersionsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
       make ?maxResults ?nextToken ~permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -3971,6 +4025,7 @@ module ListPendingInvitationResourcesResponse =
       let resources =
         (Option.map ~f:ResourceList.of_xml) (Xml.child xml_arg0 "resources") in
       make ?nextToken ?resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let resources = field_map json "resources" ResourceList.of_json in
@@ -4030,6 +4085,7 @@ module ListPendingInvitationResourcesRequest =
              "resourceShareInvitationArn") in
       make ?resourceRegionScope ?maxResults ?nextToken
         ~resourceShareInvitationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRegionScope =
         field_map json "resourceRegionScope"
@@ -4142,6 +4198,7 @@ module GetResourceSharesResponse =
         (Option.map ~f:ResourceShareList.of_xml)
           (Xml.child xml_arg0 "resourceShares") in
       make ?nextToken ?resourceShares ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let resourceShares =
@@ -4232,6 +4289,7 @@ module GetResourceSharesRequest =
           (Xml.child xml_arg0 "resourceShareArns") in
       make ?permissionArn ?maxResults ?nextToken ?tagFilters ?name
         ~resourceOwner ?resourceShareStatus ?resourceShareArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionArn = field_map json "permissionArn" String_.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4373,6 +4431,7 @@ module GetResourceShareInvitationsResponse =
         (Option.map ~f:ResourceShareInvitationList.of_xml)
           (Xml.child xml_arg0 "resourceShareInvitations") in
       make ?nextToken ?resourceShareInvitations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let resourceShareInvitations =
@@ -4432,6 +4491,7 @@ module GetResourceShareInvitationsRequest =
           (Xml.child xml_arg0 "resourceShareInvitationArns") in
       make ?maxResults ?nextToken ?resourceShareArns
         ?resourceShareInvitationArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -4556,6 +4616,7 @@ module GetResourceShareAssociationsResponse =
         (Option.map ~f:ResourceShareAssociationList.of_xml)
           (Xml.child xml_arg0 "resourceShareAssociations") in
       make ?nextToken ?resourceShareAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let resourceShareAssociations =
@@ -4642,6 +4703,7 @@ module GetResourceShareAssociationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "associationType") in
       make ?maxResults ?nextToken ?associationStatus ?principal ?resourceArn
         ?resourceShareArns ~associationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -4757,6 +4819,7 @@ module GetResourcePoliciesResponse =
       let policies =
         (Option.map ~f:PolicyList.of_xml) (Xml.child xml_arg0 "policies") in
       make ?nextToken ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let policies = field_map json "policies" PolicyList.of_json in
@@ -4802,6 +4865,7 @@ module GetResourcePoliciesRequest =
         ResourceArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArns") in
       make ?maxResults ?nextToken ?principal ~resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -4906,6 +4970,7 @@ module GetPermissionResponse =
         (Option.map ~f:ResourceSharePermissionDetail.of_xml)
           (Xml.child xml_arg0 "permission") in
       make ?permission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permission =
         field_map json "permission" ResourceSharePermissionDetail.of_json in
@@ -4939,6 +5004,7 @@ module GetPermissionRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "permissionArn") in
       make ?permissionVersion ~permissionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionVersion =
         field_map json "permissionVersion" Integer.of_json in
@@ -5011,6 +5077,7 @@ module EnableSharingWithAwsOrganizationResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnValue = field_map json "returnValue" Boolean.of_json in
       make ?returnValue ()
@@ -5025,6 +5092,7 @@ module EnableSharingWithAwsOrganizationRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5179,6 +5247,7 @@ module DisassociateResourceShareResponse =
         (Option.map ~f:ResourceShareAssociationList.of_xml)
           (Xml.child xml_arg0 "resourceShareAssociations") in
       make ?clientToken ?resourceShareAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShareAssociations =
@@ -5233,6 +5302,7 @@ module DisassociateResourceShareRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ?principals ?resourceArns ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let principals =
@@ -5366,6 +5436,7 @@ module DisassociateResourceSharePermissionResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?clientToken ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let returnValue = field_map json "returnValue" Boolean.of_json in
@@ -5407,6 +5478,7 @@ module DisassociateResourceSharePermissionRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ~permissionArn ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let permissionArn = field_map_exn json "permissionArn" String_.of_json in
@@ -5550,6 +5622,7 @@ module DeleteResourceShareResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?clientToken ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let returnValue = field_map json "returnValue" Boolean.of_json in
@@ -5582,6 +5655,7 @@ module DeleteResourceShareRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShareArn =
@@ -5749,6 +5823,7 @@ module CreateResourceShareResponse =
         (Option.map ~f:ResourceShare.of_xml)
           (Xml.child xml_arg0 "resourceShare") in
       make ?clientToken ?resourceShare ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShare =
@@ -5833,6 +5908,7 @@ module CreateResourceShareRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?permissionArns ?clientToken ?allowExternalPrincipals ?tags
         ?principals ?resourceArns ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionArns =
         field_map json "permissionArns" PermissionArnList.of_json in
@@ -6009,6 +6085,7 @@ module AssociateResourceShareResponse =
         (Option.map ~f:ResourceShareAssociationList.of_xml)
           (Xml.child xml_arg0 "resourceShareAssociations") in
       make ?clientToken ?resourceShareAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShareAssociations =
@@ -6063,6 +6140,7 @@ module AssociateResourceShareRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?clientToken ?principals ?resourceArns ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let principals =
@@ -6185,6 +6263,7 @@ module AssociateResourceSharePermissionResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?clientToken ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let returnValue = field_map json "returnValue" Boolean.of_json in
@@ -6250,6 +6329,7 @@ module AssociateResourceSharePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceShareArn") in
       make ?permissionVersion ?clientToken ?replace ~permissionArn
         ~resourceShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionVersion =
         field_map json "permissionVersion" Integer.of_json in
@@ -6425,6 +6505,7 @@ module AcceptResourceShareInvitationResponse =
         (Option.map ~f:ResourceShareInvitation.of_xml)
           (Xml.child xml_arg0 "resourceShareInvitation") in
       make ?clientToken ?resourceShareInvitation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShareInvitation =
@@ -6462,6 +6543,7 @@ module AcceptResourceShareInvitationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "resourceShareInvitationArn") in
       make ?clientToken ~resourceShareInvitationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let resourceShareInvitationArn =

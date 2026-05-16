@@ -105,6 +105,7 @@ module LambdaConfiguration =
         LambdaFunctionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~invocationType ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invocationType =
         field_map_exn json "InvocationType" InvocationType.of_json in
@@ -222,6 +223,7 @@ module ProcessorConfiguration =
         LambdaConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Lambda") in
       make ~lambda ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambda = field_map_exn json "Lambda" LambdaConfiguration.of_json in
       make ~lambda ()
@@ -443,6 +445,7 @@ module MessageAttributeValue =
         (Option.map ~f:MessageAttributeStringValues.of_xml)
           (Xml.child xml_arg0 "StringValues") in
       make ?stringValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringValues =
         field_map json "StringValues" MessageAttributeStringValues.of_json in
@@ -520,6 +523,7 @@ module Processor =
         NonEmptyResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~fallbackAction ~executionOrder ~configuration ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fallbackAction =
         field_map_exn json "FallbackAction" FallbackAction.of_json in
@@ -670,6 +674,7 @@ module ChannelSummary =
           (Xml.child xml_arg0 "Name") in
       make ?lastMessageTimestamp ?metadata ?privacy ?mode ?channelArn ?name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastMessageTimestamp =
         field_map json "LastMessageTimestamp" Timestamp.of_json in
@@ -699,6 +704,7 @@ module Identity =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" ResourceName.of_json in
       let arn = field_map json "Arn" ChimeArn.of_json in make ?name ?arn ()
@@ -725,6 +731,7 @@ module ChannelMessageStatusStructure =
         (Option.map ~f:ChannelMessageStatus.of_xml)
           (Xml.child xml_arg0 "Value") in
       make ?detail ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detail = field_map json "Detail" StatusDetail.of_json in
       let value = field_map json "Value" ChannelMessageStatus.of_json in
@@ -866,6 +873,7 @@ module AppInstanceUserMembershipSummary =
         (Option.map ~f:ChannelMembershipType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?readMarkerTimestamp ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let readMarkerTimestamp =
         field_map json "ReadMarkerTimestamp" Timestamp.of_json in
@@ -1059,6 +1067,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1091,6 +1100,7 @@ module PushNotificationPreferences =
         AllowNotifications.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AllowNotifications") in
       make ?filterRule ~allowNotifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterRule = field_map json "FilterRule" FilterRule.of_json in
       let allowNotifications =
@@ -1116,6 +1126,7 @@ module ChannelModeratedByAppInstanceUserSummary =
         (Option.map ~f:ChannelSummary.of_xml)
           (Xml.child xml_arg0 "ChannelSummary") in
       make ?channelSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelSummary =
         field_map json "ChannelSummary" ChannelSummary.of_json in
@@ -1160,6 +1171,7 @@ module ChannelAssociatedWithFlowSummary =
         (Option.map ~f:NonEmptyResourceName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?metadata ?privacy ?mode ?channelArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata = field_map json "Metadata" Metadata.of_json in
       let privacy = field_map json "Privacy" ChannelPrivacy.of_json in
@@ -1184,6 +1196,7 @@ module ChannelModeratorSummary =
       let moderator =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Moderator") in
       make ?moderator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let moderator = field_map json "Moderator" Identity.of_json in
       make ?moderator ()
@@ -1288,6 +1301,7 @@ module ChannelMessageSummary =
       make ?messageAttributes ?status ?redacted ?sender ?lastEditedTimestamp
         ?lastUpdatedTimestamp ?createdTimestamp ?type_ ?metadata ?content
         ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageAttributes =
         field_map json "MessageAttributes" MessageAttributeMap.of_json in
@@ -1324,6 +1338,7 @@ module ChannelMembershipSummary =
       let member =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Member") in
       make ?member ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "Member" Identity.of_json in
       make ?member ()
@@ -1358,6 +1373,7 @@ module ChannelMembershipForAppInstanceUserSummary =
         (Option.map ~f:ChannelSummary.of_xml)
           (Xml.child xml_arg0 "ChannelSummary") in
       make ?appInstanceUserMembershipSummary ?channelSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appInstanceUserMembershipSummary =
         field_map json "AppInstanceUserMembershipSummary"
@@ -1398,6 +1414,7 @@ module ChannelFlowSummary =
       let channelFlowArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       make ?processors ?name ?channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processors = field_map json "Processors" ProcessorList.of_json in
       let name = field_map json "Name" NonEmptyResourceName.of_json in
@@ -1420,6 +1437,7 @@ module ChannelBanSummary =
       let member =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Member") in
       make ?member ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "Member" Identity.of_json in
       make ?member ()
@@ -1515,6 +1533,7 @@ module PushNotificationConfiguration =
         (Option.map ~f:PushNotificationTitle.of_xml)
           (Xml.child xml_arg0 "Title") in
       make ?type_ ?body ?title ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" PushNotificationType.of_json in
       let body = field_map json "Body" PushNotificationBody.of_json in
@@ -1571,6 +1590,7 @@ module BatchCreateChannelMembershipError =
       let memberArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "MemberArn") in
       make ?errorMessage ?errorCode ?memberArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" String_.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -1595,6 +1615,7 @@ module BadRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -1618,6 +1639,7 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -1641,6 +1663,7 @@ module ForbiddenException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -1664,6 +1687,7 @@ module ServiceFailureException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -1686,6 +1710,7 @@ module ServiceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -1708,6 +1733,7 @@ module ThrottledClientException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -1730,6 +1756,7 @@ module UnauthorizedClientException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -1829,6 +1856,7 @@ module ChannelMembershipPreferences =
         (Option.map ~f:PushNotificationPreferences.of_xml)
           (Xml.child xml_arg0 "PushNotifications") in
       make ?pushNotifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pushNotifications =
         field_map json "PushNotifications"
@@ -2149,6 +2177,7 @@ module MessagingSessionEndpoint =
     let of_xml xml_arg0 =
       let url = (Option.map ~f:UrlType.of_xml) (Xml.child xml_arg0 "Url") in
       make ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" UrlType.of_json in make ?url ()
     let to_json v = composed_to_json to_value v
@@ -2267,6 +2296,7 @@ module ChannelMessage =
       make ?messageAttributes ?status ?persistence ?redacted ?sender
         ?lastUpdatedTimestamp ?lastEditedTimestamp ?createdTimestamp ?type_
         ?metadata ?content ?messageId ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageAttributes =
         field_map json "MessageAttributes" MessageAttributeMap.of_json in
@@ -2308,6 +2338,7 @@ module NotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -2406,6 +2437,7 @@ module Channel =
       make ?channelFlowArn ?lastUpdatedTimestamp ?lastMessageTimestamp
         ?createdTimestamp ?createdBy ?metadata ?privacy ?mode ?channelArn
         ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
       let lastUpdatedTimestamp =
@@ -2460,6 +2492,7 @@ module ChannelModerator =
       let moderator =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Moderator") in
       make ?createdBy ?createdTimestamp ?channelArn ?moderator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdBy = field_map json "CreatedBy" Identity.of_json in
       let createdTimestamp =
@@ -2531,6 +2564,7 @@ module ChannelMembership =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "InvitedBy") in
       make ?lastUpdatedTimestamp ?createdTimestamp ?channelArn ?member ?type_
         ?invitedBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTimestamp =
         field_map json "LastUpdatedTimestamp" Timestamp.of_json in
@@ -2599,6 +2633,7 @@ module ChannelFlow =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       make ?lastUpdatedTimestamp ?createdTimestamp ?name ?processors
         ?channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTimestamp =
         field_map json "LastUpdatedTimestamp" Timestamp.of_json in
@@ -2648,6 +2683,7 @@ module ChannelBan =
       let member =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Member") in
       make ?createdBy ?createdTimestamp ?channelArn ?member ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdBy = field_map json "CreatedBy" Identity.of_json in
       let createdTimestamp =
@@ -2673,6 +2709,7 @@ module ResourceLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -2750,6 +2787,7 @@ module ChannelMessageCallback =
           (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
       make ?messageAttributes ?pushNotification ?metadata ?content ~messageId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageAttributes =
         field_map json "MessageAttributes" MessageAttributeMap.of_json in
@@ -2799,6 +2837,7 @@ module BatchChannelMemberships =
       let invitedBy =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "InvitedBy") in
       make ?channelArn ?members ?type_ ?invitedBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
       let members = field_map json "Members" Members.of_json in
@@ -2963,6 +3002,7 @@ module UpdateChannelResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
       make ?channelArn ()
@@ -3011,6 +3051,7 @@ module UpdateChannelRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?metadata ~mode ~name ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let metadata = field_map json "Metadata" Metadata.of_json in
@@ -3120,6 +3161,7 @@ module UpdateChannelReadMarkerResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
       make ?channelArn ()
@@ -3150,6 +3192,7 @@ module UpdateChannelReadMarkerRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
@@ -3270,6 +3313,7 @@ module UpdateChannelMessageResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?status ?messageId ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "Status" ChannelMessageStatusStructure.of_json in
@@ -3324,6 +3368,7 @@ module UpdateChannelMessageRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?metadata ?content ~messageId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let metadata = field_map json "Metadata" Metadata.of_json in
@@ -3435,6 +3480,7 @@ module UpdateChannelFlowResponse =
       let channelFlowArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       make ?channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
       make ?channelFlowArn ()
@@ -3471,6 +3517,7 @@ module UpdateChannelFlowRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelFlowArn") in
       make ~name ~processors ~channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
       let processors = field_map_exn json "Processors" ProcessorList.of_json in
@@ -3502,6 +3549,7 @@ module UntagResourceRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
@@ -3529,6 +3577,7 @@ module TagResourceRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
@@ -3649,6 +3698,7 @@ module SendChannelMessageResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?status ?messageId ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "Status" ChannelMessageStatusStructure.of_json in
@@ -3750,6 +3800,7 @@ module SendChannelMessageRequest =
       make ?messageAttributes ?pushNotification ~chimeBearer
         ~clientRequestToken ?metadata ~persistence ~type_ ~content
         ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageAttributes =
         field_map json "MessageAttributes" MessageAttributeMap.of_json in
@@ -3870,6 +3921,7 @@ module RedactChannelMessageResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?messageId ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" MessageId.of_json in
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
@@ -3910,6 +3962,7 @@ module RedactChannelMessageRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~messageId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let messageId = field_map_exn json "MessageId" MessageId.of_json in
@@ -4030,6 +4083,7 @@ module PutChannelMembershipPreferencesResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?preferences ?member ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferences =
         field_map json "Preferences" ChannelMembershipPreferences.of_json in
@@ -4081,6 +4135,7 @@ module PutChannelMembershipPreferencesRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~preferences ~chimeBearer ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferences =
         field_map_exn json "Preferences" ChannelMembershipPreferences.of_json in
@@ -4179,6 +4234,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4198,6 +4254,7 @@ module ListTagsForResourceRequest =
       let resourceARN =
         ChimeArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
       make ~resourceARN ()
@@ -4302,6 +4359,7 @@ module ListChannelsResponse =
         (Option.map ~f:ChannelSummaryList.of_xml)
           (Xml.child xml_arg0 "Channels") in
       make ?nextToken ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let channels = field_map json "Channels" ChannelSummaryList.of_json in
@@ -4357,6 +4415,7 @@ module ListChannelsRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "app-instance-arn") in
       make ~chimeBearer ?nextToken ?maxResults ?privacy ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -4468,6 +4527,7 @@ module ListChannelsModeratedByAppInstanceUserResponse =
         (Option.map ~f:ChannelModeratedByAppInstanceUserSummaryList.of_xml)
           (Xml.child xml_arg0 "Channels") in
       make ?nextToken ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let channels =
@@ -4518,6 +4578,7 @@ module ListChannelsModeratedByAppInstanceUserRequest =
         (Option.map ~f:ChimeArn.of_xml)
           (Xml.child xml_arg0 "app-instance-user-arn") in
       make ~chimeBearer ?nextToken ?maxResults ?appInstanceUserArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -4628,6 +4689,7 @@ module ListChannelsAssociatedWithChannelFlowResponse =
         (Option.map ~f:ChannelAssociatedWithFlowSummaryList.of_xml)
           (Xml.child xml_arg0 "Channels") in
       make ?nextToken ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let channels =
@@ -4668,6 +4730,7 @@ module ListChannelsAssociatedWithChannelFlowRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channel-flow-arn") in
       make ?nextToken ?maxResults ~channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4784,6 +4847,7 @@ module ListChannelModeratorsResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelModerators ?nextToken ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelModerators =
         field_map json "ChannelModerators"
@@ -4833,6 +4897,7 @@ module ListChannelModeratorsRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?nextToken ?maxResults ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -4951,6 +5016,7 @@ module ListChannelMessagesResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelMessages ?nextToken ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelMessages =
         field_map json "ChannelMessages" ChannelMessageSummaryList.of_json in
@@ -5029,6 +5095,7 @@ module ListChannelMessagesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?nextToken ?maxResults ?notAfter ?notBefore
         ?sortOrder ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5149,6 +5216,7 @@ module ListChannelMembershipsResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?nextToken ?channelMemberships ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let channelMemberships =
@@ -5209,6 +5277,7 @@ module ListChannelMembershipsRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?nextToken ?maxResults ?type_ ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5322,6 +5391,7 @@ module ListChannelMembershipsForAppInstanceUserResponse =
         (Option.map ~f:ChannelMembershipForAppInstanceUserSummaryList.of_xml)
           (Xml.child xml_arg0 "ChannelMemberships") in
       make ?nextToken ?channelMemberships ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let channelMemberships =
@@ -5372,6 +5442,7 @@ module ListChannelMembershipsForAppInstanceUserRequest =
         (Option.map ~f:ChimeArn.of_xml)
           (Xml.child xml_arg0 "app-instance-user-arn") in
       make ~chimeBearer ?nextToken ?maxResults ?appInstanceUserArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5482,6 +5553,7 @@ module ListChannelFlowsResponse =
         (Option.map ~f:ChannelFlowSummaryList.of_xml)
           (Xml.child xml_arg0 "ChannelFlows") in
       make ?nextToken ?channelFlows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let channelFlows =
@@ -5521,6 +5593,7 @@ module ListChannelFlowsRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "app-instance-arn") in
       make ?nextToken ?maxResults ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5635,6 +5708,7 @@ module ListChannelBansResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelBans ?nextToken ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelBans =
         field_map json "ChannelBans" ChannelBanSummaryList.of_json in
@@ -5682,6 +5756,7 @@ module ListChannelBansRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?nextToken ?maxResults ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5775,6 +5850,7 @@ module GetMessagingSessionEndpointResponse =
         (Option.map ~f:MessagingSessionEndpoint.of_xml)
           (Xml.child xml_arg0 "Endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint =
         field_map json "Endpoint" MessagingSessionEndpoint.of_json in
@@ -5789,6 +5865,7 @@ module GetMessagingSessionEndpointRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the endpoint for the messaging session."]
@@ -5885,6 +5962,7 @@ module GetChannelMessageStatusResponse =
         (Option.map ~f:ChannelMessageStatusStructure.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "Status" ChannelMessageStatusStructure.of_json in
@@ -5922,6 +6000,7 @@ module GetChannelMessageStatusRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~messageId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let messageId = field_map_exn json "MessageId" MessageId.of_json in
@@ -6032,6 +6111,7 @@ module GetChannelMessageResponse =
         (Option.map ~f:ChannelMessage.of_xml)
           (Xml.child xml_arg0 "ChannelMessage") in
       make ?channelMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelMessage =
         field_map json "ChannelMessage" ChannelMessage.of_json in
@@ -6069,6 +6149,7 @@ module GetChannelMessageRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~messageId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let messageId = field_map_exn json "MessageId" MessageId.of_json in
@@ -6181,6 +6262,7 @@ module GetChannelMembershipPreferencesResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?preferences ?member ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferences =
         field_map json "Preferences" ChannelMembershipPreferences.of_json in
@@ -6222,6 +6304,7 @@ module GetChannelMembershipPreferencesRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
@@ -6261,6 +6344,7 @@ module DisassociateChannelFlowRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelFlowArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelFlowArn =
@@ -6360,6 +6444,7 @@ module DescribeChannelResponse =
       let channel =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "Channel") in
       make ?channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channel = field_map json "Channel" Channel.of_json in
       make ?channel ()
@@ -6390,6 +6475,7 @@ module DescribeChannelRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
@@ -6499,6 +6585,7 @@ module DescribeChannelModeratorResponse =
         (Option.map ~f:ChannelModerator.of_xml)
           (Xml.child xml_arg0 "ChannelModerator") in
       make ?channelModerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelModerator =
         field_map json "ChannelModerator" ChannelModerator.of_json in
@@ -6539,6 +6626,7 @@ module DescribeChannelModeratorRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelModeratorArn =
@@ -6642,6 +6730,7 @@ module DescribeChannelModeratedByAppInstanceUserResponse =
         (Option.map ~f:ChannelModeratedByAppInstanceUserSummary.of_xml)
           (Xml.child xml_arg0 "Channel") in
       make ?channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channel =
         field_map json "Channel"
@@ -6684,6 +6773,7 @@ module DescribeChannelModeratedByAppInstanceUserRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~appInstanceUserArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let appInstanceUserArn =
@@ -6795,6 +6885,7 @@ module DescribeChannelMembershipResponse =
         (Option.map ~f:ChannelMembership.of_xml)
           (Xml.child xml_arg0 "ChannelMembership") in
       make ?channelMembership ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelMembership =
         field_map json "ChannelMembership" ChannelMembership.of_json in
@@ -6833,6 +6924,7 @@ module DescribeChannelMembershipRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
@@ -6935,6 +7027,7 @@ module DescribeChannelMembershipForAppInstanceUserResponse =
         (Option.map ~f:ChannelMembershipForAppInstanceUserSummary.of_xml)
           (Xml.child xml_arg0 "ChannelMembership") in
       make ?channelMembership ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelMembership =
         field_map json "ChannelMembership"
@@ -6977,6 +7070,7 @@ module DescribeChannelMembershipForAppInstanceUserRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~appInstanceUserArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let appInstanceUserArn =
@@ -7077,6 +7171,7 @@ module DescribeChannelFlowResponse =
       let channelFlow =
         (Option.map ~f:ChannelFlow.of_xml) (Xml.child xml_arg0 "ChannelFlow") in
       make ?channelFlow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelFlow = field_map json "ChannelFlow" ChannelFlow.of_json in
       make ?channelFlow ()
@@ -7099,6 +7194,7 @@ module DescribeChannelFlowRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelFlowArn") in
       make ~channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelFlowArn =
         field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
@@ -7205,6 +7301,7 @@ module DescribeChannelBanResponse =
       let channelBan =
         (Option.map ~f:ChannelBan.of_xml) (Xml.child xml_arg0 "ChannelBan") in
       make ?channelBan ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelBan = field_map json "ChannelBan" ChannelBan.of_json in
       make ?channelBan ()
@@ -7243,6 +7340,7 @@ module DescribeChannelBanRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
@@ -7276,6 +7374,7 @@ module DeleteChannelRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
@@ -7316,6 +7415,7 @@ module DeleteChannelModeratorRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelModeratorArn =
@@ -7356,6 +7456,7 @@ module DeleteChannelMessageRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~messageId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let messageId = field_map_exn json "MessageId" MessageId.of_json in
@@ -7398,6 +7499,7 @@ module DeleteChannelMembershipRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
@@ -7422,6 +7524,7 @@ module DeleteChannelFlowRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelFlowArn") in
       make ~channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelFlowArn =
         field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
@@ -7463,6 +7566,7 @@ module DeleteChannelBanRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
@@ -7581,6 +7685,7 @@ module CreateChannelResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
       make ?channelArn ()
@@ -7665,6 +7770,7 @@ module CreateChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AppInstanceArn") in
       make ~chimeBearer ?tags ~clientRequestToken ?metadata ?privacy ?mode
         ~name ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -7799,6 +7905,7 @@ module CreateChannelModeratorResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelModerator ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelModerator =
         field_map json "ChannelModerator" Identity.of_json in
@@ -7840,6 +7947,7 @@ module CreateChannelModeratorRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelModeratorArn =
@@ -7964,6 +8072,7 @@ module CreateChannelMembershipResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?member ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "Member" Identity.of_json in
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
@@ -8013,6 +8122,7 @@ module CreateChannelMembershipRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~type_ ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let type_ = field_map_exn json "Type" ChannelMembershipType.of_json in
@@ -8134,6 +8244,7 @@ module CreateChannelFlowResponse =
       let channelFlowArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       make ?channelFlowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
       make ?channelFlowArn ()
@@ -8188,6 +8299,7 @@ module CreateChannelFlowRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AppInstanceArn") in
       make ~clientRequestToken ?tags ~name ~processors ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -8317,6 +8429,7 @@ module CreateChannelBanResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?member ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "Member" Identity.of_json in
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
@@ -8355,6 +8468,7 @@ module CreateChannelBanRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
@@ -8469,6 +8583,7 @@ module ChannelFlowCallbackResponse =
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?callbackId ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callbackId = field_map json "CallbackId" CallbackIdType.of_json in
       let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
@@ -8519,6 +8634,7 @@ module ChannelFlowCallbackRequest =
         CallbackIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallbackId") in
       make ~channelMessage ?deleteResource ~channelArn ~callbackId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelMessage =
         field_map_exn json "ChannelMessage" ChannelMessageCallback.of_json in
@@ -8633,6 +8749,7 @@ module BatchCreateChannelMembershipResponse =
         (Option.map ~f:BatchChannelMemberships.of_xml)
           (Xml.child xml_arg0 "BatchChannelMemberships") in
       make ?errors ?batchChannelMemberships ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map json "Errors" BatchCreateChannelMembershipErrors.of_json in
@@ -8684,6 +8801,7 @@ module BatchCreateChannelMembershipRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArns ?type_ ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let memberArns = field_map_exn json "MemberArns" MemberArns.of_json in
@@ -8723,6 +8841,7 @@ module AssociateChannelFlowRequest =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelFlowArn ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
       let channelFlowArn =

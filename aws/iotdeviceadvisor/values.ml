@@ -251,6 +251,7 @@ module TestCaseRun =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "testCaseRunId") in
       make ?failure ?warnings ?logUrl ?endTime ?startTime ?status
         ?testCaseDefinitionName ?testCaseDefinitionId ?testCaseRunId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failure = field_map json "failure" Failure.of_json in
       let warnings = field_map json "warnings" Warnings.of_json in
@@ -292,6 +293,7 @@ module DeviceUnderTest =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "thingArn") in
       make ?certificateArn ?thingArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn =
         field_map json "certificateArn" AmazonResourceName.of_json in
@@ -502,6 +504,7 @@ module GroupResult =
       let groupId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "groupId") in
       make ?tests ?groupName ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tests = field_map json "tests" TestCaseRuns.of_json in
       let groupName = field_map json "groupName" GroupName.of_json in
@@ -714,6 +717,7 @@ module SuiteRunInformation =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteDefinitionId") in
       make ?failed ?passed ?status ?endAt ?startedAt ?createdAt ?suiteRunId
         ?suiteDefinitionName ?suiteDefinitionVersion ?suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failed = field_map json "failed" SuiteRunResultCount.of_json in
       let passed = field_map json "passed" SuiteRunResultCount.of_json in
@@ -792,6 +796,7 @@ module SuiteDefinitionInformation =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteDefinitionId") in
       make ?createdAt ?intendedForQualification ?defaultDevices
         ?suiteDefinitionName ?suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" Timestamp.of_json in
       let intendedForQualification =
@@ -845,6 +850,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -865,6 +871,7 @@ module ValidationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -927,6 +934,7 @@ module SuiteDefinitionConfiguration =
           (Xml.child xml_arg0 "suiteDefinitionName") in
       make ?devicePermissionRoleArn ?rootGroup ?intendedForQualification
         ?devices ?suiteDefinitionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let devicePermissionRoleArn =
         field_map json "devicePermissionRoleArn" AmazonResourceName.of_json in
@@ -956,6 +964,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -1036,6 +1045,7 @@ module ConflictException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -1073,6 +1083,7 @@ module SuiteRunConfiguration =
         (Option.map ~f:DeviceUnderTest.of_xml)
           (Xml.child xml_arg0 "primaryDevice") in
       make ?parallelRun ?selectedTestList ?primaryDevice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parallelRun = field_map json "parallelRun" ParallelRun.of_json in
       let selectedTestList =
@@ -1194,6 +1205,7 @@ module TestResult =
       let groups =
         (Option.map ~f:GroupResultList.of_xml) (Xml.child xml_arg0 "groups") in
       make ?groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groups = field_map json "groups" GroupResultList.of_json in
       make ?groups ()
@@ -1329,6 +1341,7 @@ module UpdateSuiteDefinitionResponse =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteDefinitionId") in
       make ?lastUpdatedAt ?createdAt ?suiteDefinitionVersion
         ?suiteDefinitionName ?suiteDefinitionArn ?suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
       let createdAt = field_map json "createdAt" Timestamp.of_json in
@@ -1373,6 +1386,7 @@ module UpdateSuiteDefinitionRequest =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ?suiteDefinitionConfiguration ~suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suiteDefinitionConfiguration =
         field_map json "suiteDefinitionConfiguration"
@@ -1436,6 +1450,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1465,6 +1480,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -1526,6 +1542,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1553,6 +1570,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn =
@@ -1614,6 +1632,7 @@ module StopSuiteRunResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1642,6 +1661,7 @@ module StopSuiteRunRequest =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteRunId ~suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suiteRunId = field_map_exn json "suiteRunId" UUID.of_json in
       let suiteDefinitionId =
@@ -1725,6 +1745,7 @@ module StartSuiteRunResponse =
       let suiteRunId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteRunId") in
       make ?createdAt ?suiteRunArn ?suiteRunId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" Timestamp.of_json in
       let suiteRunArn =
@@ -1782,6 +1803,7 @@ module StartSuiteRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ?tags ?suiteRunConfiguration ?suiteDefinitionVersion
         ~suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let suiteRunConfiguration =
@@ -1854,6 +1876,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1876,6 +1899,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" AmazonResourceName.of_json in
@@ -1943,6 +1967,7 @@ module ListSuiteRunsResponse =
         (Option.map ~f:SuiteRunsList.of_xml)
           (Xml.child xml_arg0 "suiteRunsList") in
       make ?nextToken ?suiteRunsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let suiteRunsList =
@@ -1998,6 +2023,7 @@ module ListSuiteRunsRequest =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteDefinitionId") in
       make ?nextToken ?maxResults ?suiteDefinitionVersion ?suiteDefinitionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -2072,6 +2098,7 @@ module ListSuiteDefinitionsResponse =
         (Option.map ~f:SuiteDefinitionInformationList.of_xml)
           (Xml.child xml_arg0 "suiteDefinitionInformationList") in
       make ?nextToken ?suiteDefinitionInformationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let suiteDefinitionInformationList =
@@ -2102,6 +2129,7 @@ module ListSuiteDefinitionsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -2255,6 +2283,7 @@ module GetSuiteRunResponse =
       make ?tags ?errorReason ?status ?endTime ?startTime ?testResult
         ?suiteRunConfiguration ?suiteRunArn ?suiteRunId
         ?suiteDefinitionVersion ?suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let errorReason = field_map json "errorReason" ErrorReason.of_json in
@@ -2299,6 +2328,7 @@ module GetSuiteRunRequest =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteRunId ~suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suiteRunId = field_map_exn json "suiteRunId" UUID.of_json in
       let suiteDefinitionId =
@@ -2371,6 +2401,7 @@ module GetSuiteRunReportResponse =
         (Option.map ~f:QualificationReportDownloadUrl.of_xml)
           (Xml.child xml_arg0 "qualificationReportDownloadUrl") in
       make ?qualificationReportDownloadUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationReportDownloadUrl =
         field_map json "qualificationReportDownloadUrl"
@@ -2401,6 +2432,7 @@ module GetSuiteRunReportRequest =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteRunId ~suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suiteRunId = field_map_exn json "suiteRunId" UUID.of_json in
       let suiteDefinitionId =
@@ -2539,6 +2571,7 @@ module GetSuiteDefinitionResponse =
       make ?tags ?lastModifiedAt ?createdAt ?suiteDefinitionConfiguration
         ?latestVersion ?suiteDefinitionVersion ?suiteDefinitionArn
         ?suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let lastModifiedAt = field_map json "lastModifiedAt" Timestamp.of_json in
@@ -2587,6 +2620,7 @@ module GetSuiteDefinitionRequest =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ?suiteDefinitionVersion ~suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suiteDefinitionVersion =
         field_map json "suiteDefinitionVersion"
@@ -2657,6 +2691,7 @@ module GetEndpointResponse =
       let endpoint =
         (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint = field_map json "endpoint" Endpoint.of_json in
       make ?endpoint ()
@@ -2688,6 +2723,7 @@ module GetEndpointRequest =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "thingArn") in
       make ?certificateArn ?thingArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn =
         field_map json "certificateArn" AmazonResourceName.of_json in
@@ -2739,6 +2775,7 @@ module DeleteSuiteDefinitionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2760,6 +2797,7 @@ module DeleteSuiteDefinitionRequest =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suiteDefinitionId =
         field_map_exn json "suiteDefinitionId" UUID.of_json in
@@ -2852,6 +2890,7 @@ module CreateSuiteDefinitionResponse =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteDefinitionId") in
       make ?createdAt ?suiteDefinitionName ?suiteDefinitionArn
         ?suiteDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" Timestamp.of_json in
       let suiteDefinitionName =
@@ -2888,6 +2927,7 @@ module CreateSuiteDefinitionRequest =
         (Option.map ~f:SuiteDefinitionConfiguration.of_xml)
           (Xml.child xml_arg0 "suiteDefinitionConfiguration") in
       make ?tags ?suiteDefinitionConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let suiteDefinitionConfiguration =

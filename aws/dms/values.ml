@@ -50,6 +50,7 @@ module AvailabilityZone =
     let of_xml xml_arg0 =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
@@ -87,6 +88,7 @@ module Subnet =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SubnetIdentifier") in
       make ?subnetStatus ?subnetAvailabilityZone ?subnetIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetStatus = field_map json "SubnetStatus" String_.of_json in
       let subnetAvailabilityZone =
@@ -208,6 +210,7 @@ module VpcSecurityGroupMembership =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "VpcSecurityGroupId") in
       make ?status ?vpcSecurityGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let vpcSecurityGroupId =
@@ -281,6 +284,7 @@ module PendingMaintenanceAction =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Action") in
       make ?description ?currentApplyDate ?optInStatus ?forcedApplyDate
         ?autoAppliedAfterDate ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let currentApplyDate = field_map json "CurrentApplyDate" TStamp.of_json in
@@ -1016,6 +1020,7 @@ module ReplicationTaskStats =
       make ?fullLoadFinishDate ?fullLoadStartDate ?stopDate ?startDate
         ?freshStartDate ?tablesErrored ?tablesQueued ?tablesLoading
         ?tablesLoaded ?elapsedTimeMillis ?fullLoadProgressPercent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fullLoadFinishDate =
         field_map json "FullLoadFinishDate" TStamp.of_json in
@@ -1067,6 +1072,7 @@ module ReplicationTaskAssessmentRunProgress =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "IndividualAssessmentCount") in
       make ?individualAssessmentCompletedCount ?individualAssessmentCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let individualAssessmentCompletedCount =
         field_map json "IndividualAssessmentCompletedCount" Integer.of_json in
@@ -1187,6 +1193,7 @@ module ReplicationPendingModifiedValues =
           (Xml.child xml_arg0 "ReplicationInstanceClass") in
       make ?engineVersion ?multiAZ ?allocatedStorage
         ?replicationInstanceClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineVersion = field_map json "EngineVersion" String_.of_json in
       let multiAZ = field_map json "MultiAZ" BooleanOptional.of_json in
@@ -1253,6 +1260,7 @@ module ReplicationSubnetGroup =
       make ?subnets ?subnetGroupStatus ?vpcId
         ?replicationSubnetGroupDescription ?replicationSubnetGroupIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnets = field_map json "Subnets" SubnetList.of_json in
       let subnetGroupStatus =
@@ -1486,6 +1494,7 @@ module DmsTransferSettings =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ServiceAccessRoleArn") in
       make ?bucketName ?serviceAccessRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketName = field_map json "BucketName" String_.of_json in
       let serviceAccessRoleArn =
@@ -1604,6 +1613,7 @@ module DocDbSettings =
       make ?secretsManagerSecretId ?secretsManagerAccessRoleArn ?kmsKeyId
         ?docsToInvestigate ?extractDocId ?nestingLevel ?databaseName ?port
         ?serverName ?password ?username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -1645,6 +1655,7 @@ module DynamoDbSettings =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceAccessRoleArn") in
       make ~serviceAccessRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceAccessRoleArn =
         field_map_exn json "ServiceAccessRoleArn" String_.of_json in
@@ -1705,6 +1716,7 @@ module ElasticsearchSettings =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceAccessRoleArn") in
       make ?errorRetryDuration ?fullLoadErrorPercentage ~endpointUri
         ~serviceAccessRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorRetryDuration =
         field_map json "ErrorRetryDuration" IntegerOptional.of_json in
@@ -1856,6 +1868,7 @@ module GcpMySQLSettings =
         ?serverTimezone ?serverName ?port ?password ?parallelLoadThreads
         ?maxFileSize ?targetDbType ?eventsPollInterval ?databaseName
         ?cleanSourceMetadataOnMismatch ?afterConnectScript ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -1982,6 +1995,7 @@ module IBMDb2Settings =
       make ?secretsManagerSecretId ?secretsManagerAccessRoleArn ?username
         ?maxKBytesPerRead ?currentLsn ?setDataCaptureChanges ?serverName
         ?port ?password ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -2194,6 +2208,7 @@ module KafkaSettings =
         ?includeControlDetails ?includeTableAlterOperations
         ?partitionIncludeSchemaTable ?includePartitionValue
         ?includeTransactionDetails ?messageFormat ?topic ?broker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let noHexPrefix = field_map json "NoHexPrefix" BooleanOptional.of_json in
       let saslPassword = field_map json "SaslPassword" SecretString.of_json in
@@ -2349,6 +2364,7 @@ module KinesisSettings =
         ?includeTableAlterOperations ?partitionIncludeSchemaTable
         ?includePartitionValue ?includeTransactionDetails
         ?serviceAccessRoleArn ?messageFormat ?streamArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let noHexPrefix = field_map json "NoHexPrefix" BooleanOptional.of_json in
       let includeNullAndEmpty =
@@ -2514,6 +2530,7 @@ module MicrosoftSQLServerSettings =
         ?useThirdPartyBackupDevice ?useBcpFullLoad ?username ?serverName
         ?safeguardPolicy ?readBackupOnly ?querySingleAlwaysOnNode ?password
         ?controlTablesFileGroup ?databaseName ?bcpPacketSize ?port ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -2679,6 +2696,7 @@ module MongoDbSettings =
         ?authSource ?docsToInvestigate ?extractDocId ?nestingLevel
         ?authMechanism ?authType ?databaseName ?port ?serverName ?password
         ?username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -2844,6 +2862,7 @@ module MySQLSettings =
         ?serverTimezone ?serverName ?port ?password ?parallelLoadThreads
         ?maxFileSize ?targetDbType ?eventsPollInterval ?databaseName
         ?cleanSourceMetadataOnMismatch ?afterConnectScript ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -2954,6 +2973,7 @@ module NeptuneSettings =
           (Xml.child xml_arg0 "ServiceAccessRoleArn") in
       make ?iamAuthEnabled ?maxRetryCount ?maxFileSize ?errorRetryDuration
         ~s3BucketFolder ~s3BucketName ?serviceAccessRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamAuthEnabled =
         field_map json "IamAuthEnabled" BooleanOptional.of_json in
@@ -3406,6 +3426,7 @@ module OracleSettings =
         ?readAheadBlocks ?parallelAsmReadThreads ?allowSelectNestedTables
         ?extraArchivedLogDestIds ?additionalArchivedLogDestId
         ?archivedLogDestId ?addSupplementalLogging ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerOracleAsmSecretId =
         field_map json "SecretsManagerOracleAsmSecretId" String_.of_json in
@@ -3671,6 +3692,7 @@ module PostgreSQLSettings =
         ?heartbeatSchema ?heartbeatEnable ?failTasksOnLobTruncation
         ?executeTimeout ?ddlArtifactsSchema ?databaseName ?maxFileSize
         ?captureDdls ?afterConnectScript ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -3783,6 +3805,7 @@ module RedisSettings =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ?sslCaCertificateArn ?authPassword ?authUserName ?authType
         ?sslSecurityProtocol ~port ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sslCaCertificateArn =
         field_map json "SslCaCertificateArn" String_.of_json in
@@ -4101,6 +4124,7 @@ module RedshiftSettings =
         ?encryptionMode ?emptyAsNull ?dateFormat ?databaseName
         ?connectionTimeout ?compUpdate ?caseSensitiveNames ?bucketName
         ?bucketFolder ?afterConnectScript ?acceptAnyDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -4599,6 +4623,7 @@ module S3Settings =
         ?serverSideEncryptionKmsKeyId ?encryptionMode ?compressionType
         ?bucketName ?bucketFolder ?csvDelimiter ?csvRowDelimiter
         ?externalTableDefinition ?serviceAccessRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datePartitionTimezone =
         field_map json "DatePartitionTimezone" String_.of_json in
@@ -4752,6 +4777,7 @@ module SybaseSettings =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DatabaseName") in
       make ?secretsManagerSecretId ?secretsManagerAccessRoleArn ?username
         ?serverName ?port ?password ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerSecretId =
         field_map json "SecretsManagerSecretId" String_.of_json in
@@ -4885,6 +4911,7 @@ module TableToReload =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SchemaName") in
       make ~tableName ~schemaName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map_exn json "TableName" String_.of_json in
       let schemaName = field_map_exn json "SchemaName" String_.of_json in
@@ -4950,6 +4977,7 @@ module Tag =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?resourceArn ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "ResourceArn" String_.of_json in
       let value = field_map json "Value" String_.of_json in
@@ -5129,6 +5157,7 @@ module TableStatistics =
         ?fullLoadReloaded ?fullLoadEndTime ?fullLoadStartTime
         ?fullLoadErrorRows ?fullLoadCondtnlChkFailedRows ?fullLoadRows ?ddls
         ?updates ?deletes ?inserts ?tableName ?schemaName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validationStateDetails =
         field_map json "ValidationStateDetails" String_.of_json in
@@ -5189,6 +5218,7 @@ module Filter =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "Values" FilterValueList.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -5388,6 +5418,7 @@ module ReplicationTask =
         ?replicationTaskSettings ?tableMappings ?migrationType
         ?replicationInstanceArn ?targetEndpointArn ?sourceEndpointArn
         ?replicationTaskIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetReplicationInstanceArn =
         field_map json "TargetReplicationInstanceArn" String_.of_json in
@@ -5495,6 +5526,7 @@ module ReplicationTaskIndividualAssessment =
       make ?replicationTaskIndividualAssessmentStartDate ?status
         ?individualAssessmentName ?replicationTaskAssessmentRunArn
         ?replicationTaskIndividualAssessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskIndividualAssessmentStartDate =
         field_map json "ReplicationTaskIndividualAssessmentStartDate"
@@ -5646,6 +5678,7 @@ module ReplicationTaskAssessmentRun =
         ?lastFailureMessage ?assessmentProgress
         ?replicationTaskAssessmentRunCreationDate ?status ?replicationTaskArn
         ?replicationTaskAssessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentRunName =
         field_map json "AssessmentRunName" String_.of_json in
@@ -5759,6 +5792,7 @@ module ReplicationTaskAssessmentResult =
       make ?s3ObjectUrl ?assessmentResults ?assessmentResultsFile
         ?assessmentStatus ?replicationTaskLastAssessmentDate
         ?replicationTaskArn ?replicationTaskIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3ObjectUrl = field_map json "S3ObjectUrl" String_.of_json in
       let assessmentResults =
@@ -6026,6 +6060,7 @@ module ReplicationInstance =
         ?replicationSubnetGroup ?availabilityZone ?vpcSecurityGroups
         ?instanceCreateTime ?allocatedStorage ?replicationInstanceStatus
         ?replicationInstanceClass ?replicationInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsNameServers = field_map json "DnsNameServers" String_.of_json in
       let freeUntil = field_map json "FreeUntil" TStamp.of_json in
@@ -6127,6 +6162,7 @@ module ReplicationInstanceTaskLog =
           (Xml.child xml_arg0 "ReplicationTaskName") in
       make ?replicationInstanceTaskLogSize ?replicationTaskArn
         ?replicationTaskName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstanceTaskLogSize =
         field_map json "ReplicationInstanceTaskLogSize" Long.of_json in
@@ -6168,6 +6204,7 @@ module ResourcePendingMaintenanceActions =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ResourceIdentifier") in
       make ?pendingMaintenanceActionDetails ?resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pendingMaintenanceActionDetails =
         field_map json "PendingMaintenanceActionDetails"
@@ -6276,6 +6313,7 @@ module OrderableReplicationInstance =
       make ?releaseStatus ?availabilityZones ?includedAllocatedStorage
         ?defaultAllocatedStorage ?maxAllocatedStorage ?minAllocatedStorage
         ?storageType ?replicationInstanceClass ?engineVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let releaseStatus =
         field_map json "ReleaseStatus" ReleaseStatusValues.of_json in
@@ -6349,6 +6387,7 @@ module Event =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SourceIdentifier") in
       make ?date ?eventCategories ?message ?sourceType ?sourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let date = field_map json "Date" TStamp.of_json in
       let eventCategories =
@@ -6452,6 +6491,7 @@ module EventSubscription =
       make ?enabled ?eventCategoriesList ?sourceIdsList ?sourceType
         ?subscriptionCreationTime ?status ?snsTopicArn ?custSubscriptionId
         ?customerAwsId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       let eventCategoriesList =
@@ -6497,6 +6537,7 @@ module EventCategoryGroup =
       let sourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?eventCategories ?sourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventCategories =
         field_map json "EventCategories" EventCategoriesList.of_json in
@@ -6862,6 +6903,7 @@ module Endpoint =
         ?certificateArn ?endpointArn ?kmsKeyId ?status
         ?extraConnectionAttributes ?databaseName ?port ?serverName ?username
         ?engineDisplayName ?engineName ?endpointType ?endpointIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gcpMySQLSettings =
         field_map json "GcpMySQLSettings" GcpMySQLSettings.of_json in
@@ -6993,6 +7035,7 @@ module SupportedEndpointType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineName") in
       make ?engineDisplayName ?replicationInstanceEngineMinimumVersion
         ?endpointType ?supportsCDC ?engineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineDisplayName =
         field_map json "EngineDisplayName" String_.of_json in
@@ -7095,6 +7138,7 @@ module EndpointSetting =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?defaultValue ?intValueMax ?intValueMin ?applicability ?units
         ?sensitive ?enumValues ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValue = field_map json "DefaultValue" String_.of_json in
       let intValueMax = field_map json "IntValueMax" IntegerOptional.of_json in
@@ -7176,6 +7220,7 @@ module Connection =
           (Xml.child xml_arg0 "ReplicationInstanceArn") in
       make ?replicationInstanceIdentifier ?endpointIdentifier
         ?lastFailureMessage ?status ?endpointArn ?replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstanceIdentifier =
         field_map json "ReplicationInstanceIdentifier" String_.of_json in
@@ -7291,6 +7336,7 @@ module Certificate =
       make ?keyLength ?signingAlgorithm ?validToDate ?validFromDate
         ?certificateOwner ?certificateArn ?certificateWallet ?certificatePem
         ?certificateCreationDate ?certificateIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyLength = field_map json "KeyLength" IntegerOptional.of_json in
       let signingAlgorithm =
@@ -7340,6 +7386,7 @@ module AccountQuota =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "AccountQuotaName") in
       make ?max ?used ?accountQuotaName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" Long.of_json in
       let used = field_map json "Used" Long.of_json in
@@ -7363,6 +7410,7 @@ module AccessDeniedFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7383,6 +7431,7 @@ module InvalidResourceStateFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7403,6 +7452,7 @@ module KMSKeyNotAccessibleFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7422,6 +7472,7 @@ module ResourceNotFoundFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7441,6 +7492,7 @@ module ResourceQuotaExceededFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7491,6 +7543,7 @@ module KMSAccessDeniedFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7511,6 +7564,7 @@ module KMSDisabledFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7530,6 +7584,7 @@ module KMSFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7550,6 +7605,7 @@ module KMSInvalidStateFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7570,6 +7626,7 @@ module KMSNotFoundFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7595,6 +7652,7 @@ module ResourceAlreadyExistsFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceArn ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "resourceArn" ResourceArn.of_json in
       let message = field_map json "message" ExceptionMessage.of_json in
@@ -7616,6 +7674,7 @@ module S3AccessDeniedFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7636,6 +7695,7 @@ module S3ResourceNotFoundFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7820,6 +7880,7 @@ module RefreshSchemasStatus =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EndpointArn") in
       make ?lastFailureMessage ?lastRefreshDate ?status
         ?replicationInstanceArn ?endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastFailureMessage =
         field_map json "LastFailureMessage" String_.of_json in
@@ -7848,6 +7909,7 @@ module InvalidSubnet =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7867,6 +7929,7 @@ module ReplicationSubnetGroupDoesNotCoverEnoughAZs =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7887,6 +7950,7 @@ module SubnetAlreadyInUse =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7930,6 +7994,7 @@ module InsufficientResourceCapacityFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7950,6 +8015,7 @@ module StorageQuotaExceededFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -7969,6 +8035,7 @@ module UpgradeDependencyFailureFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -8013,6 +8080,7 @@ module KMSThrottlingFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -8032,6 +8100,7 @@ module SNSInvalidTopicFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -8051,6 +8120,7 @@ module SNSNoAuthorizationFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -8116,6 +8186,7 @@ module InvalidCertificateFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -8751,6 +8822,7 @@ module TestConnectionResponse =
       let connection =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map json "Connection" Connection.of_json in
       make ?connection ()
@@ -8783,6 +8855,7 @@ module TestConnectionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationInstanceArn") in
       make ~endpointArn ~replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointArn = field_map_exn json "EndpointArn" String_.of_json in
       let replicationInstanceArn =
@@ -8843,6 +8916,7 @@ module StopReplicationTaskResponse =
         (Option.map ~f:ReplicationTask.of_xml)
           (Xml.child xml_arg0 "ReplicationTask") in
       make ?replicationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTask =
         field_map json "ReplicationTask" ReplicationTask.of_json in
@@ -8868,6 +8942,7 @@ module StopReplicationTaskMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationTaskArn") in
       make ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskArn =
         field_map_exn json "ReplicationTaskArn" String_.of_json in
@@ -8936,6 +9011,7 @@ module StartReplicationTaskResponse =
         (Option.map ~f:ReplicationTask.of_xml)
           (Xml.child xml_arg0 "ReplicationTask") in
       make ?replicationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTask =
         field_map json "ReplicationTask" ReplicationTask.of_json in
@@ -9006,6 +9082,7 @@ module StartReplicationTaskMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationTaskArn") in
       make ?cdcStopPosition ?cdcStartPosition ?cdcStartTime
         ~startReplicationTaskType ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cdcStopPosition = field_map json "CdcStopPosition" String_.of_json in
       let cdcStartPosition =
@@ -9161,6 +9238,7 @@ module StartReplicationTaskAssessmentRunResponse =
         (Option.map ~f:ReplicationTaskAssessmentRun.of_xml)
           (Xml.child xml_arg0 "ReplicationTaskAssessmentRun") in
       make ?replicationTaskAssessmentRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskAssessmentRun =
         field_map json "ReplicationTaskAssessmentRun"
@@ -9268,6 +9346,7 @@ module StartReplicationTaskAssessmentRunMessage =
       make ?exclude ?includeOnly ~assessmentRunName ?resultKmsKeyArn
         ?resultEncryptionMode ?resultLocationFolder ~resultLocationBucket
         ~serviceAccessRoleArn ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exclude = field_map json "Exclude" ExcludeTestList.of_json in
       let includeOnly = field_map json "IncludeOnly" IncludeTestList.of_json in
@@ -9342,6 +9421,7 @@ module StartReplicationTaskAssessmentResponse =
         (Option.map ~f:ReplicationTask.of_xml)
           (Xml.child xml_arg0 "ReplicationTask") in
       make ?replicationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTask =
         field_map json "ReplicationTask" ReplicationTask.of_json in
@@ -9367,6 +9447,7 @@ module StartReplicationTaskAssessmentMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationTaskArn") in
       make ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskArn =
         field_map_exn json "ReplicationTaskArn" String_.of_json in
@@ -9408,6 +9489,7 @@ module RemoveTagsFromResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -9435,6 +9517,7 @@ module RemoveTagsFromResourceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" KeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
@@ -9495,6 +9578,7 @@ module ReloadTablesResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ReplicationTaskArn") in
       make ?replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskArn =
         field_map json "ReplicationTaskArn" String_.of_json in
@@ -9539,6 +9623,7 @@ module ReloadTablesMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationTaskArn") in
       make ?reloadOption ~tablesToReload ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reloadOption =
         field_map json "ReloadOption" ReloadOptionValue.of_json in
@@ -9623,6 +9708,7 @@ module RefreshSchemasResponse =
         (Option.map ~f:RefreshSchemasStatus.of_xml)
           (Xml.child xml_arg0 "RefreshSchemasStatus") in
       make ?refreshSchemasStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let refreshSchemasStatus =
         field_map json "RefreshSchemasStatus" RefreshSchemasStatus.of_json in
@@ -9657,6 +9743,7 @@ module RefreshSchemasMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~replicationInstanceArn ~endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstanceArn =
         field_map_exn json "ReplicationInstanceArn" String_.of_json in
@@ -9717,6 +9804,7 @@ module RebootReplicationInstanceResponse =
         (Option.map ~f:ReplicationInstance.of_xml)
           (Xml.child xml_arg0 "ReplicationInstance") in
       make ?replicationInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstance =
         field_map json "ReplicationInstance" ReplicationInstance.of_json in
@@ -9763,6 +9851,7 @@ module RebootReplicationInstanceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationInstanceArn") in
       make ?forcePlannedFailover ?forceFailover ~replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forcePlannedFailover =
         field_map json "ForcePlannedFailover" BooleanOptional.of_json in
@@ -9855,6 +9944,7 @@ module MoveReplicationTaskResponse =
         (Option.map ~f:ReplicationTask.of_xml)
           (Xml.child xml_arg0 "ReplicationTask") in
       make ?replicationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTask =
         field_map json "ReplicationTask" ReplicationTask.of_json in
@@ -9891,6 +9981,7 @@ module MoveReplicationTaskMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationTaskArn") in
       make ~targetReplicationInstanceArn ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetReplicationInstanceArn =
         field_map_exn json "TargetReplicationInstanceArn" String_.of_json in
@@ -9971,6 +10062,7 @@ module ModifyReplicationTaskResponse =
         (Option.map ~f:ReplicationTask.of_xml)
           (Xml.child xml_arg0 "ReplicationTask") in
       make ?replicationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTask =
         field_map json "ReplicationTask" ReplicationTask.of_json in
@@ -10075,6 +10167,7 @@ module ModifyReplicationTaskMessage =
       make ?taskData ?cdcStopPosition ?cdcStartPosition ?cdcStartTime
         ?replicationTaskSettings ?tableMappings ?migrationType
         ?replicationTaskIdentifier ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskData = field_map json "TaskData" String_.of_json in
       let cdcStopPosition = field_map json "CdcStopPosition" String_.of_json in
@@ -10189,6 +10282,7 @@ module ModifyReplicationSubnetGroupResponse =
         (Option.map ~f:ReplicationSubnetGroup.of_xml)
           (Xml.child xml_arg0 "ReplicationSubnetGroup") in
       make ?replicationSubnetGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationSubnetGroup =
         field_map json "ReplicationSubnetGroup"
@@ -10237,6 +10331,7 @@ module ModifyReplicationSubnetGroupMessage =
              "ReplicationSubnetGroupIdentifier") in
       make ~subnetIds ?replicationSubnetGroupDescription
         ~replicationSubnetGroupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetIds =
         field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
@@ -10352,6 +10447,7 @@ module ModifyReplicationInstanceResponse =
         (Option.map ~f:ReplicationInstance.of_xml)
           (Xml.child xml_arg0 "ReplicationInstance") in
       make ?replicationInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstance =
         field_map json "ReplicationInstance" ReplicationInstance.of_json in
@@ -10482,6 +10578,7 @@ module ModifyReplicationInstanceMessage =
         ?preferredMaintenanceWindow ?vpcSecurityGroupIds
         ?replicationInstanceClass ?applyImmediately ?allocatedStorage
         ~replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstanceIdentifier =
         field_map json "ReplicationInstanceIdentifier" String_.of_json in
@@ -10625,6 +10722,7 @@ module ModifyEventSubscriptionResponse =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -10688,6 +10786,7 @@ module ModifyEventSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ?enabled ?eventCategories ?sourceType ?snsTopicArn
         ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" BooleanOptional.of_json in
       let eventCategories =
@@ -10778,6 +10877,7 @@ module ModifyEndpointResponse =
       let endpoint =
         (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "Endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint = field_map json "Endpoint" Endpoint.of_json in
       make ?endpoint ()
@@ -11125,6 +11225,7 @@ module ModifyEndpointMessage =
         ?sslMode ?certificateArn ?extraConnectionAttributes ?databaseName
         ?port ?serverName ?password ?username ?engineName ?endpointType
         ?endpointIdentifier ~endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gcpMySQLSettings =
         field_map json "GcpMySQLSettings" GcpMySQLSettings.of_json in
@@ -11236,6 +11337,7 @@ module ListTagsForResourceResponse =
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       make ?tagList ()
@@ -11265,6 +11367,7 @@ module ListTagsForResourceMessage =
       let resourceArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?resourceArnList ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArnList = field_map json "ResourceArnList" ArnList.of_json in
       let resourceArn = field_map json "ResourceArn" String_.of_json in
@@ -11333,6 +11436,7 @@ module ImportCertificateResponse =
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
       make ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificate = field_map json "Certificate" Certificate.of_json in
       make ?certificate ()
@@ -11387,6 +11491,7 @@ module ImportCertificateMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateIdentifier") in
       make ?tags ?certificateWallet ?certificatePem ~certificateIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let certificateWallet =
@@ -11468,6 +11573,7 @@ module DescribeTableStatisticsResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ReplicationTaskArn") in
       make ?marker ?tableStatistics ?replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let tableStatistics =
@@ -11519,6 +11625,7 @@ module DescribeTableStatisticsMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationTaskArn") in
       make ?filters ?marker ?maxRecords ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -11584,6 +11691,7 @@ module DescribeSchemasResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?schemas ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schemas = field_map json "Schemas" SchemaList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -11623,6 +11731,7 @@ module DescribeSchemasMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ?marker ?maxRecords ~endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -11681,6 +11790,7 @@ module DescribeReplicationTasksResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?replicationTasks ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTasks =
         field_map json "ReplicationTasks" ReplicationTaskList.of_json in
@@ -11729,6 +11839,7 @@ module DescribeReplicationTasksMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?withoutSettings ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let withoutSettings =
         field_map json "WithoutSettings" BooleanOptional.of_json in
@@ -11793,6 +11904,7 @@ module DescribeReplicationTaskIndividualAssessmentsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?replicationTaskIndividualAssessments ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskIndividualAssessments =
         field_map json "ReplicationTaskIndividualAssessments"
@@ -11832,6 +11944,7 @@ module DescribeReplicationTaskIndividualAssessmentsMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -11894,6 +12007,7 @@ module DescribeReplicationTaskAssessmentRunsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?replicationTaskAssessmentRuns ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskAssessmentRuns =
         field_map json "ReplicationTaskAssessmentRuns"
@@ -11933,6 +12047,7 @@ module DescribeReplicationTaskAssessmentRunsMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12001,6 +12116,7 @@ module DescribeReplicationTaskAssessmentResultsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?replicationTaskAssessmentResults ?bucketName ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskAssessmentResults =
         field_map json "ReplicationTaskAssessmentResults"
@@ -12043,6 +12159,7 @@ module DescribeReplicationTaskAssessmentResultsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ReplicationTaskArn") in
       make ?marker ?maxRecords ?replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12104,6 +12221,7 @@ module DescribeReplicationSubnetGroupsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?replicationSubnetGroups ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationSubnetGroups =
         field_map json "ReplicationSubnetGroups"
@@ -12143,6 +12261,7 @@ module DescribeReplicationSubnetGroupsMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12202,6 +12321,7 @@ module DescribeReplicationInstancesResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?replicationInstances ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstances =
         field_map json "ReplicationInstances" ReplicationInstanceList.of_json in
@@ -12240,6 +12360,7 @@ module DescribeReplicationInstancesMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12320,6 +12441,7 @@ module DescribeReplicationInstanceTaskLogsResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ReplicationInstanceArn") in
       make ?marker ?replicationInstanceTaskLogs ?replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let replicationInstanceTaskLogs =
@@ -12366,6 +12488,7 @@ module DescribeReplicationInstanceTaskLogsMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationInstanceArn") in
       make ?marker ?maxRecords ~replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12429,6 +12552,7 @@ module DescribeRefreshSchemasStatusResponse =
         (Option.map ~f:RefreshSchemasStatus.of_xml)
           (Xml.child xml_arg0 "RefreshSchemasStatus") in
       make ?refreshSchemasStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let refreshSchemasStatus =
         field_map json "RefreshSchemasStatus" RefreshSchemasStatus.of_json in
@@ -12453,6 +12577,7 @@ module DescribeRefreshSchemasStatusMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointArn = field_map_exn json "EndpointArn" String_.of_json in
       make ~endpointArn ()
@@ -12510,6 +12635,7 @@ module DescribePendingMaintenanceActionsResponse =
         (Option.map ~f:PendingMaintenanceActions.of_xml)
           (Xml.child xml_arg0 "PendingMaintenanceActions") in
       make ?marker ?pendingMaintenanceActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let pendingMaintenanceActions =
@@ -12557,6 +12683,7 @@ module DescribePendingMaintenanceActionsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ReplicationInstanceArn") in
       make ?maxRecords ?marker ?filters ?replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -12610,6 +12737,7 @@ module DescribeOrderableReplicationInstancesResponse =
         (Option.map ~f:OrderableReplicationInstanceList.of_xml)
           (Xml.child xml_arg0 "OrderableReplicationInstances") in
       make ?marker ?orderableReplicationInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let orderableReplicationInstances =
@@ -12642,6 +12770,7 @@ module DescribeOrderableReplicationInstancesMessage =
         (Option.map ~f:IntegerOptional.of_xml)
           (Xml.child xml_arg0 "MaxRecords") in
       make ?marker ?maxRecords ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12686,6 +12815,7 @@ module DescribeEventsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?events ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "Events" EventList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -12779,6 +12909,7 @@ module DescribeEventsMessage =
           (Xml.child xml_arg0 "SourceIdentifier") in
       make ?marker ?maxRecords ?filters ?eventCategories ?duration ?endTime
         ?startTime ?sourceType ?sourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12848,6 +12979,7 @@ module DescribeEventSubscriptionsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?eventSubscriptionsList ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscriptionsList =
         field_map json "EventSubscriptionsList"
@@ -12897,6 +13029,7 @@ module DescribeEventSubscriptionsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SubscriptionName") in
       make ?marker ?maxRecords ?filters ?subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12942,6 +13075,7 @@ module DescribeEventCategoriesResponse =
         (Option.map ~f:EventCategoryGroupList.of_xml)
           (Xml.child xml_arg0 "EventCategoryGroupList") in
       make ?eventCategoryGroupList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventCategoryGroupList =
         field_map json "EventCategoryGroupList"
@@ -12970,6 +13104,7 @@ module DescribeEventCategoriesMessage =
       let sourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?filters ?sourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let sourceType = field_map json "SourceType" String_.of_json in
@@ -13023,6 +13158,7 @@ module DescribeEndpointsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?endpoints ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoints = field_map json "Endpoints" EndpointList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -13060,6 +13196,7 @@ module DescribeEndpointsMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13111,6 +13248,7 @@ module DescribeEndpointTypesResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?supportedEndpointTypes ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedEndpointTypes =
         field_map json "SupportedEndpointTypes"
@@ -13150,6 +13288,7 @@ module DescribeEndpointTypesMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13200,6 +13339,7 @@ module DescribeEndpointSettingsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?endpointSettings ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointSettings =
         field_map json "EndpointSettings" EndpointSettingsList.of_json in
@@ -13241,6 +13381,7 @@ module DescribeEndpointSettingsMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EngineName") in
       make ?marker ?maxRecords ~engineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13299,6 +13440,7 @@ module DescribeConnectionsResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?connections ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connections = field_map json "Connections" ConnectionList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -13336,6 +13478,7 @@ module DescribeConnectionsMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13393,6 +13536,7 @@ module DescribeCertificatesResponse =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?certificates ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificates =
         field_map json "Certificates" CertificateList.of_json in
@@ -13431,6 +13575,7 @@ module DescribeCertificatesMessage =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?marker ?maxRecords ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13509,6 +13654,7 @@ module DescribeApplicableIndividualAssessmentsResponse =
         (Option.map ~f:IndividualAssessmentNameList.of_xml)
           (Xml.child xml_arg0 "IndividualAssessmentNames") in
       make ?marker ?individualAssessmentNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let individualAssessmentNames =
@@ -13597,6 +13743,7 @@ module DescribeApplicableIndividualAssessmentsMessage =
           (Xml.child xml_arg0 "ReplicationTaskArn") in
       make ?marker ?maxRecords ?migrationType ?targetEngineName
         ?sourceEngineName ?replicationInstanceArn ?replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13659,6 +13806,7 @@ module DescribeAccountAttributesResponse =
         (Option.map ~f:AccountQuotaList.of_xml)
           (Xml.child xml_arg0 "AccountQuotas") in
       make ?uniqueAccountIdentifier ?accountQuotas ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uniqueAccountIdentifier =
         field_map json "UniqueAccountIdentifier" String_.of_json in
@@ -13675,6 +13823,7 @@ module DescribeAccountAttributesMessage =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -13731,6 +13880,7 @@ module DeleteReplicationTaskResponse =
         (Option.map ~f:ReplicationTask.of_xml)
           (Xml.child xml_arg0 "ReplicationTask") in
       make ?replicationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTask =
         field_map json "ReplicationTask" ReplicationTask.of_json in
@@ -13756,6 +13906,7 @@ module DeleteReplicationTaskMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationTaskArn") in
       make ~replicationTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskArn =
         field_map_exn json "ReplicationTaskArn" String_.of_json in
@@ -13827,6 +13978,7 @@ module DeleteReplicationTaskAssessmentRunResponse =
         (Option.map ~f:ReplicationTaskAssessmentRun.of_xml)
           (Xml.child xml_arg0 "ReplicationTaskAssessmentRun") in
       make ?replicationTaskAssessmentRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskAssessmentRun =
         field_map json "ReplicationTaskAssessmentRun"
@@ -13855,6 +14007,7 @@ module DeleteReplicationTaskAssessmentRunMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "ReplicationTaskAssessmentRunArn") in
       make ~replicationTaskAssessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskAssessmentRunArn =
         field_map_exn json "ReplicationTaskAssessmentRunArn" String_.of_json in
@@ -13905,6 +14058,7 @@ module DeleteReplicationSubnetGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -13928,6 +14082,7 @@ module DeleteReplicationSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "ReplicationSubnetGroupIdentifier") in
       make ~replicationSubnetGroupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationSubnetGroupIdentifier =
         field_map_exn json "ReplicationSubnetGroupIdentifier" String_.of_json in
@@ -13987,6 +14142,7 @@ module DeleteReplicationInstanceResponse =
         (Option.map ~f:ReplicationInstance.of_xml)
           (Xml.child xml_arg0 "ReplicationInstance") in
       make ?replicationInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstance =
         field_map json "ReplicationInstance" ReplicationInstance.of_json in
@@ -14012,6 +14168,7 @@ module DeleteReplicationInstanceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationInstanceArn") in
       make ~replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstanceArn =
         field_map_exn json "ReplicationInstanceArn" String_.of_json in
@@ -14071,6 +14228,7 @@ module DeleteEventSubscriptionResponse =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -14095,6 +14253,7 @@ module DeleteEventSubscriptionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionName =
         field_map_exn json "SubscriptionName" String_.of_json in
@@ -14152,6 +14311,7 @@ module DeleteEndpointResponse =
       let endpoint =
         (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "Endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint = field_map json "Endpoint" Endpoint.of_json in
       make ?endpoint ()
@@ -14175,6 +14335,7 @@ module DeleteEndpointMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointArn = field_map_exn json "EndpointArn" String_.of_json in
       make ~endpointArn ()
@@ -14240,6 +14401,7 @@ module DeleteConnectionResponse =
       let connection =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map json "Connection" Connection.of_json in
       make ?connection ()
@@ -14273,6 +14435,7 @@ module DeleteConnectionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~replicationInstanceArn ~endpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstanceArn =
         field_map_exn json "ReplicationInstanceArn" String_.of_json in
@@ -14331,6 +14494,7 @@ module DeleteCertificateResponse =
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
       make ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificate = field_map json "Certificate" Certificate.of_json in
       make ?certificate ()
@@ -14353,6 +14517,7 @@ module DeleteCertificateMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
       make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn =
         field_map_exn json "CertificateArn" String_.of_json in
@@ -14450,6 +14615,7 @@ module CreateReplicationTaskResponse =
         (Option.map ~f:ReplicationTask.of_xml)
           (Xml.child xml_arg0 "ReplicationTask") in
       make ?replicationTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTask =
         field_map json "ReplicationTask" ReplicationTask.of_json in
@@ -14592,6 +14758,7 @@ module CreateReplicationTaskMessage =
         ?cdcStartPosition ?cdcStartTime ?replicationTaskSettings
         ~tableMappings ~migrationType ~replicationInstanceArn
         ~targetEndpointArn ~sourceEndpointArn ~replicationTaskIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceIdentifier =
         field_map json "ResourceIdentifier" String_.of_json in
@@ -14715,6 +14882,7 @@ module CreateReplicationSubnetGroupResponse =
         (Option.map ~f:ReplicationSubnetGroup.of_xml)
           (Xml.child xml_arg0 "ReplicationSubnetGroup") in
       make ?replicationSubnetGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationSubnetGroup =
         field_map json "ReplicationSubnetGroup"
@@ -14772,6 +14940,7 @@ module CreateReplicationSubnetGroupMessage =
              "ReplicationSubnetGroupIdentifier") in
       make ?tags ~subnetIds ~replicationSubnetGroupDescription
         ~replicationSubnetGroupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let subnetIds =
@@ -14918,6 +15087,7 @@ module CreateReplicationInstanceResponse =
         (Option.map ~f:ReplicationInstance.of_xml)
           (Xml.child xml_arg0 "ReplicationInstance") in
       make ?replicationInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationInstance =
         field_map json "ReplicationInstance" ReplicationInstance.of_json in
@@ -15083,6 +15253,7 @@ module CreateReplicationInstanceMessage =
         ?preferredMaintenanceWindow ?replicationSubnetGroupIdentifier
         ?availabilityZone ?vpcSecurityGroupIds ~replicationInstanceClass
         ?allocatedStorage ~replicationInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceIdentifier =
         field_map json "ResourceIdentifier" String_.of_json in
@@ -15241,6 +15412,7 @@ module CreateEventSubscriptionResponse =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -15320,6 +15492,7 @@ module CreateEventSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ?tags ?enabled ?sourceIds ?eventCategories ?sourceType
         ~snsTopicArn ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let enabled = field_map json "Enabled" BooleanOptional.of_json in
@@ -15432,6 +15605,7 @@ module CreateEndpointResponse =
       let endpoint =
         (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "Endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint = field_map json "Endpoint" Endpoint.of_json in
       make ?endpoint ()
@@ -15786,6 +15960,7 @@ module CreateEndpointMessage =
         ?serviceAccessRoleArn ?sslMode ?certificateArn ?tags ?kmsKeyId
         ?extraConnectionAttributes ?databaseName ?port ?serverName ?password
         ?username ~engineName ~endpointType ~endpointIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gcpMySQLSettings =
         field_map json "GcpMySQLSettings" GcpMySQLSettings.of_json in
@@ -15922,6 +16097,7 @@ module CancelReplicationTaskAssessmentRunResponse =
         (Option.map ~f:ReplicationTaskAssessmentRun.of_xml)
           (Xml.child xml_arg0 "ReplicationTaskAssessmentRun") in
       make ?replicationTaskAssessmentRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskAssessmentRun =
         field_map json "ReplicationTaskAssessmentRun"
@@ -15950,6 +16126,7 @@ module CancelReplicationTaskAssessmentRunMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "ReplicationTaskAssessmentRunArn") in
       make ~replicationTaskAssessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationTaskAssessmentRunArn =
         field_map_exn json "ReplicationTaskAssessmentRunArn" String_.of_json in
@@ -16004,6 +16181,7 @@ module ApplyPendingMaintenanceActionResponse =
         (Option.map ~f:ResourcePendingMaintenanceActions.of_xml)
           (Xml.child xml_arg0 "ResourcePendingMaintenanceActions") in
       make ?resourcePendingMaintenanceActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcePendingMaintenanceActions =
         field_map json "ResourcePendingMaintenanceActions"
@@ -16046,6 +16224,7 @@ module ApplyPendingMaintenanceActionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationInstanceArn") in
       make ~optInType ~applyAction ~replicationInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optInType = field_map_exn json "OptInType" String_.of_json in
       let applyAction = field_map_exn json "ApplyAction" String_.of_json in
@@ -16089,6 +16268,7 @@ module AddTagsToResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -16115,6 +16295,7 @@ module AddTagsToResourceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in

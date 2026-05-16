@@ -158,7 +158,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteThingShadow ->
       if is_success
       then
-        let body = Payload.of_string (Awso.Http.Response.body resp) in
+        let body = JsonDocument.of_string (Awso.Http.Response.body resp) in
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteThingShadowResponse.of_header_and_body (headers, body))
@@ -174,7 +174,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetThingShadow ->
       if is_success
       then
-        let body = Payload.of_string (Awso.Http.Response.body resp) in
+        let body = JsonDocument.of_string (Awso.Http.Response.body resp) in
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (GetThingShadowResponse.of_header_and_body (headers, body))
@@ -198,7 +198,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | UpdateThingShadow ->
       if is_success
       then
-        let body = Payload.of_string (Awso.Http.Response.body resp) in
+        let body = JsonDocument.of_string (Awso.Http.Response.body resp) in
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UpdateThingShadowResponse.of_header_and_body (headers, body))

@@ -94,6 +94,7 @@ module ValidationExceptionField =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~name ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" FieldName.of_json in
       let message = field_map_exn json "message" ExceptionMessage.of_json in
@@ -785,6 +786,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -857,6 +859,7 @@ module UserSettingsSummary =
         (Option.map ~f:EnabledType.of_xml) (Xml.child xml_arg0 "copyAllowed") in
       make ?userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
         ?downloadAllowed ?copyAllowed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map json "userSettingsArn" ARN.of_json in
       let uploadAllowed = field_map json "uploadAllowed" EnabledType.of_json in
@@ -883,6 +886,7 @@ module TrustStoreSummary =
       let trustStoreArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
       make ?trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
       make ?trustStoreArn ()
@@ -936,6 +940,7 @@ module CertificateSummary =
         (Option.map ~f:CertificatePrincipal.of_xml)
           (Xml.child xml_arg0 "issuer") in
       make ?thumbprint ?subject ?notValidBefore ?notValidAfter ?issuer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbprint =
         field_map json "thumbprint" CertificateThumbprint.of_json in
@@ -1049,6 +1054,7 @@ module PortalSummary =
       make ?userSettingsArn ?trustStoreArn ?rendererType ?portalStatus
         ?portalEndpoint ?portalArn ?networkSettingsArn ?displayName
         ?creationDate ?browserType ?browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map json "userSettingsArn" ARN.of_json in
       let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
@@ -1090,6 +1096,7 @@ module NetworkSettingsSummary =
       let networkSettingsArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
       make ?vpcId ?networkSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "vpcId" VpcId.of_json in
       let networkSettingsArn =
@@ -1133,6 +1140,7 @@ module IdentityProviderSummary =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "identityProviderArn") in
       make ?identityProviderType ?identityProviderName ?identityProviderArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderType =
         field_map json "identityProviderType" IdentityProviderType.of_json in
@@ -1160,6 +1168,7 @@ module BrowserSettingsSummary =
       let browserSettingsArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
       make ?browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let browserSettingsArn =
         field_map json "browserSettingsArn" ARN.of_json in
@@ -1180,6 +1189,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -1209,6 +1219,7 @@ module InternalServerException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?retryAfterSeconds ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
@@ -1245,6 +1256,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceId = field_map json "resourceId" ResourceId.of_json in
@@ -1288,6 +1300,7 @@ module ThrottlingException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?serviceCode ?retryAfterSeconds ?quotaCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "serviceCode" ServiceCode.of_json in
       let retryAfterSeconds =
@@ -1374,6 +1387,7 @@ module UserSettings =
           (Xml.child xml_arg0 "associatedPortalArns") in
       make ~userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
         ?downloadAllowed ?copyAllowed ?associatedPortalArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
       let uploadAllowed = field_map json "uploadAllowed" EnabledType.of_json in
@@ -1419,6 +1433,7 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionFieldList.of_xml)
           (Xml.child xml_arg0 "fieldList") in
       make ?reason ?message ?fieldList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ValidationExceptionReason.of_json in
       let message = field_map json "message" ExceptionMessage.of_json in
@@ -1487,6 +1502,7 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "serviceCode" ServiceCode.of_json in
       let resourceType = field_map json "resourceType" ResourceType.of_json in
@@ -1662,6 +1678,7 @@ module Portal =
       make ?userSettingsArn ?trustStoreArn ?statusReason ?rendererType
         ?portalStatus ?portalEndpoint ?portalArn ?networkSettingsArn
         ?displayName ?creationDate ?browserType ?browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map json "userSettingsArn" ARN.of_json in
       let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
@@ -1739,6 +1756,7 @@ module NetworkSettings =
           (Xml.child xml_arg0 "associatedPortalArns") in
       make ?vpcId ?subnetIds ?securityGroupIds ~networkSettingsArn
         ?associatedPortalArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "vpcId" VpcId.of_json in
       let subnetIds = field_map json "subnetIds" SubnetIdList.of_json in
@@ -1804,6 +1822,7 @@ module IdentityProvider =
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
       make ?identityProviderType ?identityProviderName
         ?identityProviderDetails ~identityProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderType =
         field_map json "identityProviderType" IdentityProviderType.of_json in
@@ -1855,6 +1874,7 @@ module BrowserSettings =
         (Option.map ~f:ArnList.of_xml)
           (Xml.child xml_arg0 "associatedPortalArns") in
       make ~browserSettingsArn ?browserPolicy ?associatedPortalArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let browserSettingsArn =
         field_map_exn json "browserSettingsArn" ARN.of_json in
@@ -1915,6 +1935,7 @@ module TooManyTagsException =
         (Option.map ~f:TagExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "resourceName" ARN.of_json in
       let message = field_map json "message" TagExceptionMessage.of_json in
@@ -2185,6 +2206,7 @@ module TrustStore =
         (Option.map ~f:ArnList.of_xml)
           (Xml.child xml_arg0 "associatedPortalArns") in
       make ?trustStoreArn ?associatedPortalArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
       let associatedPortalArns =
@@ -2255,6 +2277,7 @@ module Certificate =
           (Xml.child xml_arg0 "body") in
       make ?thumbprint ?subject ?notValidBefore ?notValidAfter ?issuer ?body
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbprint =
         field_map json "thumbprint" CertificateThumbprint.of_json in
@@ -2316,6 +2339,7 @@ module ConflictException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceId = field_map json "resourceId" ResourceId.of_json in
@@ -2452,6 +2476,7 @@ module UpdateUserSettingsResponse =
         UserSettings.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "userSettings") in
       make ~userSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettings =
         field_map_exn json "userSettings" UserSettings.of_json in
@@ -2533,6 +2558,7 @@ module UpdateUserSettingsRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
         ?downloadAllowed ?copyAllowed ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
       let uploadAllowed = field_map json "uploadAllowed" EnabledType.of_json in
@@ -2635,6 +2661,7 @@ module UpdateTrustStoreResponse =
       let trustStoreArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       make ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       make ~trustStoreArn ()
@@ -2688,6 +2715,7 @@ module UpdateTrustStoreRequest =
           (Xml.child xml_arg0 "certificatesToAdd") in
       make ~trustStoreArn ?clientToken ?certificatesToDelete
         ?certificatesToAdd ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -2776,6 +2804,7 @@ module UpdatePortalResponse =
       let portal =
         (Option.map ~f:Portal.of_xml) (Xml.child xml_arg0 "portal") in
       make ?portal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portal = field_map json "portal" Portal.of_json in make ?portal ()
     let to_json v = composed_to_json to_value v
@@ -2802,6 +2831,7 @@ module UpdatePortalRequest =
       let displayName =
         (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
       make ~portalArn ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       let displayName = field_map json "displayName" DisplayName.of_json in
@@ -2888,6 +2918,7 @@ module UpdateNetworkSettingsResponse =
         NetworkSettings.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettings") in
       make ~networkSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkSettings =
         field_map_exn json "networkSettings" NetworkSettings.of_json in
@@ -2948,6 +2979,7 @@ module UpdateNetworkSettingsRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?vpcId ?subnetIds ?securityGroupIds ~networkSettingsArn
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "vpcId" VpcId.of_json in
       let subnetIds = field_map json "subnetIds" SubnetIdList.of_json in
@@ -3041,6 +3073,7 @@ module UpdateIdentityProviderResponse =
         IdentityProvider.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProvider") in
       make ~identityProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProvider =
         field_map_exn json "identityProvider" IdentityProvider.of_json in
@@ -3105,6 +3138,7 @@ module UpdateIdentityProviderRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?identityProviderType ?identityProviderName
         ?identityProviderDetails ~identityProviderArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderType =
         field_map json "identityProviderType" IdentityProviderType.of_json in
@@ -3200,6 +3234,7 @@ module UpdateBrowserSettingsResponse =
         BrowserSettings.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettings") in
       make ~browserSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let browserSettings =
         field_map_exn json "browserSettings" BrowserSettings.of_json in
@@ -3240,6 +3275,7 @@ module UpdateBrowserSettingsRequest =
         (Option.map ~f:BrowserPolicy.of_xml)
           (Xml.child xml_arg0 "browserPolicy") in
       make ?clientToken ~browserSettingsArn ?browserPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let browserSettingsArn =
@@ -3320,6 +3356,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified resource."]
@@ -3345,6 +3382,7 @@ module UntagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -3431,6 +3469,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3462,6 +3501,7 @@ module TagResourceRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~tags ~resourceArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -3549,6 +3589,7 @@ module ListUserSettingsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?userSettings ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettings =
         field_map json "userSettings" UserSettingsList.of_json in
@@ -3580,6 +3621,7 @@ module ListUserSettingsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3665,6 +3707,7 @@ module ListTrustStoresResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?trustStores ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStores =
         field_map json "trustStores" TrustStoreSummaryList.of_json in
@@ -3696,6 +3739,7 @@ module ListTrustStoresRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3796,6 +3840,7 @@ module ListTrustStoreCertificatesResponse =
         (Option.map ~f:CertificateSummaryList.of_xml)
           (Xml.child xml_arg0 "certificateList") in
       make ?trustStoreArn ?nextToken ?certificateList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3835,6 +3880,7 @@ module ListTrustStoreCertificatesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~trustStoreArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3917,6 +3963,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3936,6 +3983,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -4016,6 +4064,7 @@ module ListPortalsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?portals ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portals = field_map json "portals" PortalList.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -4046,6 +4095,7 @@ module ListPortalsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4131,6 +4181,7 @@ module ListNetworkSettingsResponse =
         (Option.map ~f:NetworkSettingsList.of_xml)
           (Xml.child xml_arg0 "networkSettings") in
       make ?nextToken ?networkSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let networkSettings =
@@ -4162,6 +4213,7 @@ module ListNetworkSettingsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4247,6 +4299,7 @@ module ListIdentityProvidersResponse =
         (Option.map ~f:IdentityProviderList.of_xml)
           (Xml.child xml_arg0 "identityProviders") in
       make ?nextToken ?identityProviders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let identityProviders =
@@ -4285,6 +4338,7 @@ module ListIdentityProvidersRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~portalArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -4372,6 +4426,7 @@ module ListBrowserSettingsResponse =
         (Option.map ~f:BrowserSettingsList.of_xml)
           (Xml.child xml_arg0 "browserSettings") in
       make ?nextToken ?browserSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let browserSettings =
@@ -4403,6 +4458,7 @@ module ListBrowserSettingsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4488,6 +4544,7 @@ module GetUserSettingsResponse =
         (Option.map ~f:UserSettings.of_xml)
           (Xml.child xml_arg0 "userSettings") in
       make ?userSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettings = field_map json "userSettings" UserSettings.of_json in
       make ?userSettings ()
@@ -4509,6 +4566,7 @@ module GetUserSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
       make ~userSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
       make ~userSettingsArn ()
@@ -4591,6 +4649,7 @@ module GetTrustStoreResponse =
       let trustStore =
         (Option.map ~f:TrustStore.of_xml) (Xml.child xml_arg0 "trustStore") in
       make ?trustStore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStore = field_map json "trustStore" TrustStore.of_json in
       make ?trustStore ()
@@ -4611,6 +4670,7 @@ module GetTrustStoreRequest =
       let trustStoreArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       make ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       make ~trustStoreArn ()
@@ -4700,6 +4760,7 @@ module GetTrustStoreCertificateResponse =
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "certificate") in
       make ?trustStoreArn ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
       let certificate = field_map json "certificate" Certificate.of_json in
@@ -4729,6 +4790,7 @@ module GetTrustStoreCertificateRequest =
         CertificateThumbprint.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thumbprint") in
       make ~trustStoreArn ~thumbprint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       let thumbprint =
@@ -4822,6 +4884,7 @@ module GetPortalServiceProviderMetadataResponse =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ?serviceProviderSamlMetadata ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceProviderSamlMetadata =
         field_map json "serviceProviderSamlMetadata" SamlMetadata.of_json in
@@ -4843,6 +4906,7 @@ module GetPortalServiceProviderMetadataRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       make ~portalArn ()
@@ -4924,6 +4988,7 @@ module GetPortalResponse =
       let portal =
         (Option.map ~f:Portal.of_xml) (Xml.child xml_arg0 "portal") in
       make ?portal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portal = field_map json "portal" Portal.of_json in make ?portal ()
     let to_json v = composed_to_json to_value v
@@ -4942,6 +5007,7 @@ module GetPortalRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       make ~portalArn ()
@@ -5027,6 +5093,7 @@ module GetNetworkSettingsResponse =
         (Option.map ~f:NetworkSettings.of_xml)
           (Xml.child xml_arg0 "networkSettings") in
       make ?networkSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkSettings =
         field_map json "networkSettings" NetworkSettings.of_json in
@@ -5050,6 +5117,7 @@ module GetNetworkSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
       make ~networkSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkSettingsArn =
         field_map_exn json "networkSettingsArn" ARN.of_json in
@@ -5136,6 +5204,7 @@ module GetIdentityProviderResponse =
         (Option.map ~f:IdentityProvider.of_xml)
           (Xml.child xml_arg0 "identityProvider") in
       make ?identityProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProvider =
         field_map json "identityProvider" IdentityProvider.of_json in
@@ -5159,6 +5228,7 @@ module GetIdentityProviderRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
       make ~identityProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderArn =
         field_map_exn json "identityProviderArn" ARN.of_json in
@@ -5245,6 +5315,7 @@ module GetBrowserSettingsResponse =
         (Option.map ~f:BrowserSettings.of_xml)
           (Xml.child xml_arg0 "browserSettings") in
       make ?browserSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let browserSettings =
         field_map json "browserSettings" BrowserSettings.of_json in
@@ -5268,6 +5339,7 @@ module GetBrowserSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       make ~browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let browserSettingsArn =
         field_map_exn json "browserSettingsArn" ARN.of_json in
@@ -5345,6 +5417,7 @@ module DisassociateUserSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates user settings from a web portal."]
@@ -5362,6 +5435,7 @@ module DisassociateUserSettingsRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       make ~portalArn ()
@@ -5438,6 +5512,7 @@ module DisassociateTrustStoreResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a trust store from a web portal."]
@@ -5455,6 +5530,7 @@ module DisassociateTrustStoreRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       make ~portalArn ()
@@ -5531,6 +5607,7 @@ module DisassociateNetworkSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates network settings from a web portal."]
@@ -5548,6 +5625,7 @@ module DisassociateNetworkSettingsRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       make ~portalArn ()
@@ -5624,6 +5702,7 @@ module DisassociateBrowserSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates browser settings from a web portal."]
@@ -5641,6 +5720,7 @@ module DisassociateBrowserSettingsRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       make ~portalArn ()
@@ -5717,6 +5797,7 @@ module DeleteUserSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes user settings."]
@@ -5736,6 +5817,7 @@ module DeleteUserSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
       make ~userSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
       make ~userSettingsArn ()
@@ -5812,6 +5894,7 @@ module DeleteTrustStoreResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the trust store."]
@@ -5830,6 +5913,7 @@ module DeleteTrustStoreRequest =
       let trustStoreArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       make ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       make ~trustStoreArn ()
@@ -5906,6 +5990,7 @@ module DeletePortalResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a web portal."]
@@ -5923,6 +6008,7 @@ module DeletePortalRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       make ~portalArn ()
@@ -5999,6 +6085,7 @@ module DeleteNetworkSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes network settings."]
@@ -6019,6 +6106,7 @@ module DeleteNetworkSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
       make ~networkSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkSettingsArn =
         field_map_exn json "networkSettingsArn" ARN.of_json in
@@ -6096,6 +6184,7 @@ module DeleteIdentityProviderResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the identity provider."]
@@ -6116,6 +6205,7 @@ module DeleteIdentityProviderRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
       make ~identityProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderArn =
         field_map_exn json "identityProviderArn" ARN.of_json in
@@ -6193,6 +6283,7 @@ module DeleteBrowserSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes browser settings."]
@@ -6213,6 +6304,7 @@ module DeleteBrowserSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       make ~browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let browserSettingsArn =
         field_map_exn json "browserSettingsArn" ARN.of_json in
@@ -6309,6 +6401,7 @@ module CreateUserSettingsResponse =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
       make ~userSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
       make ~userSettingsArn ()
@@ -6389,6 +6482,7 @@ module CreateUserSettingsRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~uploadAllowed ?tags ~printAllowed ~pasteAllowed ~downloadAllowed
         ~copyAllowed ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadAllowed =
         field_map_exn json "uploadAllowed" EnabledType.of_json in
@@ -6495,6 +6589,7 @@ module CreateTrustStoreResponse =
       let trustStoreArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       make ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       make ~trustStoreArn ()
@@ -6534,6 +6629,7 @@ module CreateTrustStoreRequest =
         CertificateList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateList") in
       make ?tags ?clientToken ~certificateList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -6649,6 +6745,7 @@ module CreatePortalResponse =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalEndpoint ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalEndpoint =
         field_map_exn json "portalEndpoint" PortalEndpoint.of_json in
@@ -6711,6 +6808,7 @@ module CreatePortalRequest =
           (Xml.child xml_arg0 "additionalEncryptionContext") in
       make ?tags ?displayName ?customerManagedKey ?clientToken
         ?additionalEncryptionContext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let displayName = field_map json "displayName" DisplayName.of_json in
@@ -6815,6 +6913,7 @@ module CreateNetworkSettingsResponse =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
       make ~networkSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkSettingsArn =
         field_map_exn json "networkSettingsArn" ARN.of_json in
@@ -6870,6 +6969,7 @@ module CreateNetworkSettingsRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~vpcId ?tags ~subnetIds ~securityGroupIds ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "vpcId" VpcId.of_json in
       let tags = field_map json "tags" TagList.of_json in
@@ -6970,6 +7070,7 @@ module CreateIdentityProviderResponse =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
       make ~identityProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderArn =
         field_map_exn json "identityProviderArn" ARN.of_json in
@@ -7033,6 +7134,7 @@ module CreateIdentityProviderRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~portalArn ~identityProviderType ~identityProviderName
         ~identityProviderDetails ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       let identityProviderType =
@@ -7150,6 +7252,7 @@ module CreateBrowserSettingsResponse =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       make ~browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let browserSettingsArn =
         field_map_exn json "browserSettingsArn" ARN.of_json in
@@ -7214,6 +7317,7 @@ module CreateBrowserSettingsRequest =
           (Xml.child xml_arg0 "additionalEncryptionContext") in
       make ?tags ?customerManagedKey ?clientToken ~browserPolicy
         ?additionalEncryptionContext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let customerManagedKey =
@@ -7322,6 +7426,7 @@ module AssociateUserSettingsResponse =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~userSettingsArn ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
@@ -7349,6 +7454,7 @@ module AssociateUserSettingsRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~userSettingsArn ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
@@ -7438,6 +7544,7 @@ module AssociateTrustStoreResponse =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~trustStoreArn ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
@@ -7464,6 +7571,7 @@ module AssociateTrustStoreRequest =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~trustStoreArn ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
@@ -7564,6 +7672,7 @@ module AssociateNetworkSettingsResponse =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
       make ~portalArn ~networkSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       let networkSettingsArn =
@@ -7594,6 +7703,7 @@ module AssociateNetworkSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
       make ~portalArn ~networkSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       let networkSettingsArn =
@@ -7696,6 +7806,7 @@ module AssociateBrowserSettingsResponse =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       make ~portalArn ~browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       let browserSettingsArn =
@@ -7726,6 +7837,7 @@ module AssociateBrowserSettingsRequest =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       make ~portalArn ~browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalArn = field_map_exn json "portalArn" ARN.of_json in
       let browserSettingsArn =

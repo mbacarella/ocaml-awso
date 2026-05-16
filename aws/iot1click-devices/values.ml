@@ -44,6 +44,7 @@ module Attributes =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -157,6 +158,7 @@ module Device =
       let attributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "attributes") in
       make ?type_ ?deviceId ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" Zz__string.of_json in
       let deviceId = field_map json "DeviceId" Zz__string.of_json in
@@ -231,6 +233,7 @@ module DeviceDescription =
           (Xml.child xml_arg0 "attributes") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?type_ ?remainingLife ?enabled ?deviceId ?attributes ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let type_ = field_map json "Type" Zz__string.of_json in
@@ -265,6 +268,7 @@ module DeviceEvent =
       let device =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "device") in
       make ?stdEvent ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stdEvent = field_map json "StdEvent" Zz__string.of_json in
       let device = field_map json "Device" Device.of_json in
@@ -292,6 +296,7 @@ module DeviceMethod =
       let deviceType =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "deviceType") in
       make ?methodName ?deviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let methodName = field_map json "MethodName" Zz__string.of_json in
       let deviceType = field_map json "DeviceType" Zz__string.of_json in
@@ -317,6 +322,7 @@ module InternalFailureException =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -342,6 +348,7 @@ module InvalidRequestException =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -367,6 +374,7 @@ module ResourceNotFoundException =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -417,6 +425,7 @@ module RangeNotSatisfiableException =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -521,6 +530,7 @@ module PreconditionFailedException =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -546,6 +556,7 @@ module ResourceConflictException =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -596,6 +607,7 @@ module ForbiddenException =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -724,6 +736,7 @@ module UpdateDeviceStateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -751,6 +764,7 @@ module UpdateDeviceStateRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ?enabled ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Zz__boolean.of_json in
       let deviceId = field_map_exn json "DeviceId" Zz__string.of_json in
@@ -782,6 +796,7 @@ module UntagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
@@ -849,6 +864,7 @@ module UnclaimDeviceResponse =
       let state =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "state") in
       make ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" Zz__string.of_json in make ?state ()
     let to_json v = composed_to_json to_value v
@@ -871,6 +887,7 @@ module UnclaimDeviceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" Zz__string.of_json in
       make ~deviceId ()
@@ -900,6 +917,7 @@ module TagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
@@ -959,6 +977,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       make ?tags ()
@@ -981,6 +1000,7 @@ module ListTagsForResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
@@ -1056,6 +1076,7 @@ module ListDevicesResponse =
         (Option.map ~f:Zz__listOfDeviceDescription.of_xml)
           (Xml.child xml_arg0 "devices") in
       make ?nextToken ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let devices =
@@ -1092,6 +1113,7 @@ module ListDevicesRequest =
       let deviceType =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "deviceType") in
       make ?nextToken ?maxResults ?deviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1178,6 +1200,7 @@ module ListDeviceEventsResponse =
         (Option.map ~f:Zz__listOfDeviceEvent.of_xml)
           (Xml.child xml_arg0 "events") in
       make ?nextToken ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let events = field_map json "Events" Zz__listOfDeviceEvent.of_json in
@@ -1235,6 +1258,7 @@ module ListDeviceEventsRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ~toTimeStamp ?nextToken ?maxResults ~fromTimeStamp ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let toTimeStamp =
         field_map_exn json "ToTimeStamp" Zz__timestampIso8601.of_json in
@@ -1341,6 +1365,7 @@ module InvokeDeviceMethodResponse =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "deviceMethodResponse") in
       make ?deviceMethodResponse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceMethodResponse =
         field_map json "DeviceMethodResponse" Zz__string.of_json in
@@ -1383,6 +1408,7 @@ module InvokeDeviceMethodRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ?deviceMethodParameters ?deviceMethod ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceMethodParameters =
         field_map json "DeviceMethodParameters" Zz__string.of_json in
@@ -1461,6 +1487,7 @@ module InitiateDeviceClaimResponse =
       let state =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "state") in
       make ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" Zz__string.of_json in make ?state ()
     let to_json v = composed_to_json to_value v
@@ -1483,6 +1510,7 @@ module InitiateDeviceClaimRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" Zz__string.of_json in
       make ~deviceId ()
@@ -1551,6 +1579,7 @@ module GetDeviceMethodsResponse =
         (Option.map ~f:Zz__listOfDeviceMethod.of_xml)
           (Xml.child xml_arg0 "deviceMethods") in
       make ?deviceMethods ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceMethods =
         field_map json "DeviceMethods" Zz__listOfDeviceMethod.of_json in
@@ -1575,6 +1604,7 @@ module GetDeviceMethodsRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" Zz__string.of_json in
       make ~deviceId ()
@@ -1661,6 +1691,7 @@ module FinalizeDeviceClaimResponse =
       let state =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "state") in
       make ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" Zz__string.of_json in make ?state ()
     let to_json v = composed_to_json to_value v
@@ -1689,6 +1720,7 @@ module FinalizeDeviceClaimRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ?tags ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let deviceId = field_map_exn json "DeviceId" Zz__string.of_json in
@@ -1704,6 +1736,7 @@ module Empty =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "On success, an empty object is returned."]
@@ -1729,6 +1762,7 @@ module DeviceEventsResponse =
         (Option.map ~f:Zz__listOfDeviceEvent.of_xml)
           (Xml.child xml_arg0 "events") in
       make ?nextToken ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let events = field_map json "Events" Zz__listOfDeviceEvent.of_json in
@@ -1750,6 +1784,7 @@ module DeviceClaimResponse =
       let state =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "state") in
       make ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" Zz__string.of_json in make ?state ()
     let to_json v = composed_to_json to_value v
@@ -1816,6 +1851,7 @@ module DescribeDeviceResponse =
         (Option.map ~f:DeviceDescription.of_xml)
           (Xml.child xml_arg0 "deviceDescription") in
       make ?deviceDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceDescription =
         field_map json "DeviceDescription" DeviceDescription.of_json in
@@ -1840,6 +1876,7 @@ module DescribeDeviceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceId") in
       make ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" Zz__string.of_json in
       make ~deviceId ()
@@ -1914,6 +1951,7 @@ module ClaimDevicesByClaimCodeResponse =
         (Option.map ~f:Zz__stringMin12Max40.of_xml)
           (Xml.child xml_arg0 "claimCode") in
       make ?total ?claimCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total = field_map json "Total" Zz__integer.of_json in
       let claimCode = field_map json "ClaimCode" Zz__stringMin12Max40.of_json in
@@ -1939,6 +1977,7 @@ module ClaimDevicesByClaimCodeRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "claimCode") in
       make ~claimCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let claimCode = field_map_exn json "ClaimCode" Zz__string.of_json in
       make ~claimCode ()

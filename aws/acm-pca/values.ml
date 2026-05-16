@@ -92,6 +92,7 @@ module CustomAttribute =
         CustomObjectIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectIdentifier") in
       make ~value ~objectIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String1To256.of_json in
       let objectIdentifier =
@@ -467,6 +468,7 @@ module ASN1Subject =
         ?givenName ?surname ?title ?locality ?serialNumber ?commonName ?state
         ?distinguishedNameQualifier ?organizationalUnit ?organization
         ?country ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customAttributes =
         field_map json "CustomAttributes" CustomAttributeList.of_json in
@@ -518,6 +520,7 @@ module EdiPartyName =
         String256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PartyName") in
       make ?nameAssigner ~partyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameAssigner = field_map json "NameAssigner" String256.of_json in
       let partyName = field_map_exn json "PartyName" String256.of_json in
@@ -545,6 +548,7 @@ module OtherName =
         CustomObjectIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TypeId") in
       make ~value ~typeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String256.of_json in
       let typeId = field_map_exn json "TypeId" CustomObjectIdentifier.of_json in
@@ -616,6 +620,7 @@ module AccessMethod =
         (Option.map ~f:CustomObjectIdentifier.of_xml)
           (Xml.child xml_arg0 "CustomObjectIdentifier") in
       make ?accessMethodType ?customObjectIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessMethodType =
         field_map json "AccessMethodType" AccessMethodType.of_json in
@@ -702,6 +707,7 @@ module GeneralName =
         (Option.map ~f:OtherName.of_xml) (Xml.child xml_arg0 "OtherName") in
       make ?registeredId ?ipAddress ?uniformResourceIdentifier ?ediPartyName
         ?directoryName ?dnsName ?rfc822Name ?otherName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registeredId =
         field_map json "RegisteredId" CustomObjectIdentifier.of_json in
@@ -751,6 +757,7 @@ module Qualifier =
       let cpsUri =
         String256.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CpsUri") in
       make ~cpsUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpsUri = field_map_exn json "CpsUri" String256.of_json in
       make ~cpsUri ()
@@ -781,6 +788,7 @@ module AccessDescription =
         AccessMethod.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessMethod") in
       make ~accessLocation ~accessMethod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessLocation =
         field_map_exn json "AccessLocation" GeneralName.of_json in
@@ -829,6 +837,7 @@ module PolicyQualifierInfo =
         PolicyQualifierId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyQualifierId") in
       make ~qualifier ~policyQualifierId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualifier = field_map_exn json "Qualifier" Qualifier.of_json in
       let policyQualifierId =
@@ -943,6 +952,7 @@ module KeyUsage =
       make ?decipherOnly ?encipherOnly ?cRLSign ?keyCertSign ?keyAgreement
         ?dataEncipherment ?keyEncipherment ?nonRepudiation ?digitalSignature
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decipherOnly = field_map json "DecipherOnly" Boolean.of_json in
       let encipherOnly = field_map json "EncipherOnly" Boolean.of_json in
@@ -1176,6 +1186,7 @@ module CsrExtensions =
       let keyUsage =
         (Option.map ~f:KeyUsage.of_xml) (Xml.child xml_arg0 "KeyUsage") in
       make ?subjectInformationAccess ?keyUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subjectInformationAccess =
         field_map json "SubjectInformationAccess"
@@ -1310,6 +1321,7 @@ module CrlConfiguration =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?s3ObjectAcl ?s3BucketName ?customCname ?expirationInDays ~enabled
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3ObjectAcl = field_map json "S3ObjectAcl" S3ObjectAcl.of_json in
       let s3BucketName = field_map json "S3BucketName" String3To255.of_json in
@@ -1348,6 +1360,7 @@ module OcspConfiguration =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?ocspCustomCname ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ocspCustomCname =
         field_map json "OcspCustomCname" String253.of_json in
@@ -1384,6 +1397,7 @@ module PolicyInformation =
         CustomObjectIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertPolicyId") in
       make ?policyQualifiers ~certPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyQualifiers =
         field_map json "PolicyQualifiers" PolicyQualifierInfoList.of_json in
@@ -1425,6 +1439,7 @@ module CustomExtension =
         CustomObjectIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectIdentifier") in
       make ?critical ~value ~objectIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let critical = field_map json "Critical" Boolean.of_json in
       let value = field_map_exn json "Value" Base64String1To4096.of_json in
@@ -1464,6 +1479,7 @@ module ExtendedKeyUsage =
         (Option.map ~f:ExtendedKeyUsageType.of_xml)
           (Xml.child xml_arg0 "ExtendedKeyUsageType") in
       make ?extendedKeyUsageObjectIdentifier ?extendedKeyUsageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extendedKeyUsageObjectIdentifier =
         field_map json "ExtendedKeyUsageObjectIdentifier"
@@ -1688,6 +1704,7 @@ module CertificateAuthorityConfiguration =
         KeyAlgorithm.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "KeyAlgorithm") in
       make ?csrExtensions ~subject ~signingAlgorithm ~keyAlgorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let csrExtensions =
         field_map json "CsrExtensions" CsrExtensions.of_json in
@@ -1854,6 +1871,7 @@ module RevocationConfiguration =
         (Option.map ~f:CrlConfiguration.of_xml)
           (Xml.child xml_arg0 "CrlConfiguration") in
       make ?ocspConfiguration ?crlConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ocspConfiguration =
         field_map json "OcspConfiguration" OcspConfiguration.of_json in
@@ -2010,6 +2028,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -2078,6 +2097,7 @@ module Permission =
           (Xml.child xml_arg0 "CertificateAuthorityArn") in
       make ?policy ?actions ?sourceAccount ?principal ?createdAt
         ?certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" AWSPolicy.of_json in
       let actions = field_map json "Actions" ActionList.of_json in
@@ -2229,6 +2249,7 @@ module CertificateAuthority =
         ?revocationConfiguration ?certificateAuthorityConfiguration
         ?failureReason ?notAfter ?notBefore ?status ?serial ?type_
         ?lastStateChangeAt ?createdAt ?ownerAccount ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyStorageSecurityStandard =
         field_map json "KeyStorageSecurityStandard"
@@ -2319,6 +2340,7 @@ module Extensions =
           (Xml.child xml_arg0 "CertificatePolicies") in
       make ?customExtensions ?subjectAlternativeNames ?keyUsage
         ?extendedKeyUsage ?certificatePolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customExtensions =
         field_map json "CustomExtensions" CustomExtensionList.of_json in
@@ -2467,6 +2489,7 @@ module InvalidArnException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2486,6 +2509,7 @@ module InvalidStateException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2523,6 +2547,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2560,6 +2585,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2604,6 +2630,7 @@ module RequestFailedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2673,6 +2700,7 @@ module InvalidArgsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2691,6 +2719,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2710,6 +2739,7 @@ module MalformedCSRException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2735,6 +2765,7 @@ module ApiPassthrough =
       let extensions =
         (Option.map ~f:Extensions.of_xml) (Xml.child xml_arg0 "Extensions") in
       make ?subject ?extensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subject = field_map json "Subject" ASN1Subject.of_json in
       let extensions = field_map json "Extensions" Extensions.of_json in
@@ -2801,6 +2832,7 @@ module Validity =
         PositiveLong.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ~type_ ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" ValidityPeriodType.of_json in
       let value = field_map_exn json "Value" PositiveLong.of_json in
@@ -2871,6 +2903,7 @@ module RequestInProgressException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3004,6 +3037,7 @@ module InvalidPolicyException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3023,6 +3057,7 @@ module InvalidTagException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3089,6 +3124,7 @@ module UpdateCertificateAuthorityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?status ?revocationConfiguration ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" CertificateAuthorityStatus.of_json in
       let revocationConfiguration =
@@ -3124,6 +3160,7 @@ module UntagCertificateAuthorityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~tags ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let certificateAuthorityArn =
@@ -3145,6 +3182,7 @@ module TooManyTagsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3176,6 +3214,7 @@ module TagCertificateAuthorityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~tags ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let certificateAuthorityArn =
@@ -3222,6 +3261,7 @@ module RevokeCertificateRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~revocationReason ~certificateSerial ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revocationReason =
         field_map_exn json "RevocationReason" RevocationReason.of_json in
@@ -3252,6 +3292,7 @@ module RestoreCertificateAuthorityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArn =
         field_map_exn json "CertificateAuthorityArn" Arn.of_json in
@@ -3272,6 +3313,7 @@ module RequestAlreadyProcessedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3300,6 +3342,7 @@ module PutPolicyRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~policy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" AWSPolicy.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -3320,6 +3363,7 @@ module PermissionAlreadyExistsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3339,6 +3383,7 @@ module MalformedCertificateException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3357,6 +3402,7 @@ module LockoutPreventedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3428,6 +3474,7 @@ module ListTagsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -3469,6 +3516,7 @@ module ListTagsRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?maxResults ?nextToken ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3566,6 +3614,7 @@ module ListPermissionsResponse =
         (Option.map ~f:PermissionList.of_xml)
           (Xml.child xml_arg0 "Permissions") in
       make ?nextToken ?permissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let permissions = field_map json "Permissions" PermissionList.of_json in
@@ -3607,6 +3656,7 @@ module ListPermissionsRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?maxResults ?nextToken ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3669,6 +3719,7 @@ module ListCertificateAuthoritiesResponse =
         (Option.map ~f:CertificateAuthorities.of_xml)
           (Xml.child xml_arg0 "CertificateAuthorities") in
       make ?nextToken ?certificateAuthorities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let certificateAuthorities =
@@ -3711,6 +3762,7 @@ module ListCertificateAuthoritiesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resourceOwner ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceOwner =
         field_map json "ResourceOwner" ResourceOwner.of_json in
@@ -3808,6 +3860,7 @@ module IssueCertificateResponse =
       let certificateArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
       make ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn = field_map json "CertificateArn" Arn.of_json in
       make ?certificateArn ()
@@ -3902,6 +3955,7 @@ module IssueCertificateRequest =
           (Xml.child xml_arg0 "ApiPassthrough") in
       make ?idempotencyToken ?validityNotBefore ~validity ?templateArn
         ~signingAlgorithm ~csr ~certificateAuthorityArn ?apiPassthrough ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" IdempotencyToken.of_json in
@@ -3934,6 +3988,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3977,6 +4032,7 @@ module ImportCertificateAuthorityCertificateRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?certificateChain ~certificate ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateChain =
         field_map json "CertificateChain" CertificateChainBlob.of_json in
@@ -4058,6 +4114,7 @@ module GetPolicyResponse =
       let policy =
         (Option.map ~f:AWSPolicy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" AWSPolicy.of_json in
       make ?policy ()
@@ -4081,6 +4138,7 @@ module GetPolicyRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -4178,6 +4236,7 @@ module GetCertificateResponse =
         (Option.map ~f:CertificateBody.of_xml)
           (Xml.child xml_arg0 "Certificate") in
       make ?certificateChain ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateChain =
         field_map json "CertificateChain" CertificateChain.of_json in
@@ -4214,6 +4273,7 @@ module GetCertificateRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateArn ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
       let certificateAuthorityArn =
@@ -4300,6 +4360,7 @@ module GetCertificateAuthorityCsrResponse =
     let of_xml xml_arg0 =
       let csr = (Option.map ~f:CsrBody.of_xml) (Xml.child xml_arg0 "Csr") in
       make ?csr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let csr = field_map json "Csr" CsrBody.of_json in make ?csr ()
     let to_json v = composed_to_json to_value v
@@ -4324,6 +4385,7 @@ module GetCertificateAuthorityCsrRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArn =
         field_map_exn json "CertificateAuthorityArn" Arn.of_json in
@@ -4402,6 +4464,7 @@ module GetCertificateAuthorityCertificateResponse =
         (Option.map ~f:CertificateBody.of_xml)
           (Xml.child xml_arg0 "Certificate") in
       make ?certificateChain ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateChain =
         field_map json "CertificateChain" CertificateChain.of_json in
@@ -4429,6 +4492,7 @@ module GetCertificateAuthorityCertificateRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArn =
         field_map_exn json "CertificateAuthorityArn" Arn.of_json in
@@ -4491,6 +4555,7 @@ module DescribeCertificateAuthorityResponse =
         (Option.map ~f:CertificateAuthority.of_xml)
           (Xml.child xml_arg0 "CertificateAuthority") in
       make ?certificateAuthority ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthority =
         field_map json "CertificateAuthority" CertificateAuthority.of_json in
@@ -4517,6 +4582,7 @@ module DescribeCertificateAuthorityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArn =
         field_map_exn json "CertificateAuthorityArn" Arn.of_json in
@@ -4608,6 +4674,7 @@ module DescribeCertificateAuthorityAuditReportResponse =
         (Option.map ~f:AuditReportStatus.of_xml)
           (Xml.child xml_arg0 "AuditReportStatus") in
       make ?createdAt ?s3Key ?s3BucketName ?auditReportStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" TStamp.of_json in
       let s3Key = field_map json "S3Key" S3Key.of_json in
@@ -4646,6 +4713,7 @@ module DescribeCertificateAuthorityAuditReportRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~auditReportId ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditReportId =
         field_map_exn json "AuditReportId" AuditReportId.of_json in
@@ -4672,6 +4740,7 @@ module DeletePolicyRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -4713,6 +4782,7 @@ module DeletePermissionRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?sourceAccount ~principal ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceAccount = field_map json "SourceAccount" AccountId.of_json in
       let principal = field_map_exn json "Principal" Principal.of_json in
@@ -4752,6 +4822,7 @@ module DeleteCertificateAuthorityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?permanentDeletionTimeInDays ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permanentDeletionTimeInDays =
         field_map json "PermanentDeletionTimeInDays"
@@ -4805,6 +4876,7 @@ module CreatePermissionRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~actions ?sourceAccount ~principal ~certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions = field_map_exn json "Actions" ActionList.of_json in
       let sourceAccount = field_map json "SourceAccount" AccountId.of_json in
@@ -4887,6 +4959,7 @@ module CreateCertificateAuthorityResponse =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "CertificateAuthorityArn") in
       make ?certificateAuthorityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArn =
         field_map json "CertificateAuthorityArn" Arn.of_json in
@@ -4972,6 +5045,7 @@ module CreateCertificateAuthorityRequest =
       make ?tags ?keyStorageSecurityStandard ?idempotencyToken
         ~certificateAuthorityType ?revocationConfiguration
         ~certificateAuthorityConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let keyStorageSecurityStandard =
@@ -5091,6 +5165,7 @@ module CreateCertificateAuthorityAuditReportResponse =
         (Option.map ~f:AuditReportId.of_xml)
           (Xml.child xml_arg0 "AuditReportId") in
       make ?s3Key ?auditReportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Key = field_map json "S3Key" S3Key.of_json in
       let auditReportId =
@@ -5144,6 +5219,7 @@ module CreateCertificateAuthorityAuditReportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~auditReportResponseFormat ~s3BucketName ~certificateAuthorityArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditReportResponseFormat =
         field_map_exn json "AuditReportResponseFormat"
@@ -5170,6 +5246,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -5188,6 +5265,7 @@ module CertificateMismatchException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()

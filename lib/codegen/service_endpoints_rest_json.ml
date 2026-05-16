@@ -217,7 +217,7 @@ let%expect_test "to_request" =
 ;;
 *)
 
-let of_response data =
+let of_response (service : Botodata.service) data =
   let loc = !Ast_helper.default_loc in
   let body =
     data
@@ -252,12 +252,22 @@ let of_response data =
         in
         match payload_opt with
         | Some payload ->
-          let of_string =
-            Printf.ksprintf
-              Ast_convenience.evar
-              "%s.of_string"
-              (Shape.capitalized_id payload)
+          let payload =
+            let open Option.Let_syntax in
+            (let%bind op = Endpoint.op endpoint in
+             let%bind op_output = op.output in
+             let%bind shape_member =
+               match%bind
+                 List.Assoc.find ~equal:String.equal service.shapes op_output.shape
+               with
+               | Structure_shape ss ->
+                 List.Assoc.find ~equal:String.equal ss.members payload
+               | _ -> None
+             in
+             Some shape_member.shape)
+            |> Option.value ~default:(Shape.capitalized_id payload)
           in
+          let of_string = Ast_convenience.evar (sprintf "%s.of_string" payload) in
           [%expr
             if is_success
             then (
@@ -346,6 +356,12 @@ let%expect_test "of_response" =
   ; Endpoint.create_test "No_output" ~result_module:None ~result_decoder:None
   ]
   |> of_response
+       { metadata = Botodata.empty_metadata_for_tests
+       ; documentation = None
+       ; version = None
+       ; operations = []
+       ; shapes = []
+       }
   |> List.return
   |> Util.structure_to_string
   |> printf "%s%!";
@@ -423,5 +439,5 @@ let%expect_test "of_response" =
 ;;
 
 let make_structure_for_protocol service data =
-  [ to_request service data; of_response data ]
+  [ to_request service data; of_response service data ]
 ;;

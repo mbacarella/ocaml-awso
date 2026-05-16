@@ -96,6 +96,7 @@ module Locale =
         CountryParameters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Country") in
       make ?subdivision ~country ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subdivision =
         field_map json "Subdivision" CountryParameters.of_json in
@@ -286,6 +287,7 @@ module ParameterMapEntry =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Values") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" StringList.of_json in
       let key = field_map json "Key" String_.of_json in make ?values ?key ()
@@ -362,6 +364,7 @@ module QualificationRequirement =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ?actionsGuarded ?requiredToPreview ?localeValues ?integerValues
         ~comparator ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionsGuarded =
         field_map json "ActionsGuarded" HITAccessActions.of_json in
@@ -742,6 +745,7 @@ module PolicyParameter =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Values") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?mapEntries ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mapEntries =
         field_map json "MapEntries" ParameterMapEntryList.of_json in
@@ -823,6 +827,7 @@ module ReviewActionDetail =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ActionId") in
       make ?errorCode ?result ?completeTime ?status ?targetType ?targetId
         ?actionName ?actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode = field_map json "ErrorCode" String_.of_json in
       let result = field_map json "Result" String_.of_json in
@@ -887,6 +892,7 @@ module ReviewResultDetail =
       let actionId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ActionId") in
       make ?value ?key ?questionId ?subjectType ?subjectId ?actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let key = field_map json "Key" String_.of_json in
@@ -1069,6 +1075,7 @@ module NotifyWorkersFailureStatus =
           (Xml.child xml_arg0 "NotifyWorkersFailureCode") in
       make ?workerId ?notifyWorkersFailureMessage ?notifyWorkersFailureCode
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerId = field_map json "WorkerId" CustomerId.of_json in
       let notifyWorkersFailureMessage =
@@ -1142,6 +1149,7 @@ module Qualification =
           (Xml.child xml_arg0 "QualificationTypeId") in
       make ?status ?localeValue ?integerValue ?grantTime ?workerId
         ?qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" QualificationStatus.of_json in
       let localeValue = field_map json "LocaleValue" Locale.of_json in
@@ -1176,6 +1184,7 @@ module WorkerBlock =
       let workerId =
         (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "WorkerId") in
       make ?reason ?workerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" String_.of_json in
       let workerId = field_map json "WorkerId" CustomerId.of_json in
@@ -1375,6 +1384,7 @@ module HIT =
         ?assignmentDurationInSeconds ?expiration ?autoApprovalDelayInSeconds
         ?reward ?maxAssignments ?hITStatus ?keywords ?question ?description
         ?title ?creationTime ?hITLayoutId ?hITGroupId ?hITTypeId ?hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfAssignmentsCompleted =
         field_map json "NumberOfAssignmentsCompleted" Integer.of_json in
@@ -1641,6 +1651,7 @@ module QualificationType =
       make ?autoGrantedValue ?autoGranted ?isRequestable ?retryDelayInSeconds
         ?answerKey ?testDurationInSeconds ?test ?qualificationTypeStatus
         ?keywords ?description ?name ?creationTime ?qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoGrantedValue =
         field_map json "AutoGrantedValue" Integer.of_json in
@@ -1730,6 +1741,7 @@ module QualificationRequest =
           (Xml.child xml_arg0 "QualificationRequestId") in
       make ?submitTime ?answer ?test ?workerId ?qualificationTypeId
         ?qualificationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submitTime = field_map json "SubmitTime" Timestamp.of_json in
       let answer = field_map json "Answer" String_.of_json in
@@ -1788,6 +1800,7 @@ module BonusPayment =
       let workerId =
         (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "WorkerId") in
       make ?grantTime ?reason ?assignmentId ?bonusAmount ?workerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTime = field_map json "GrantTime" Timestamp.of_json in
       let reason = field_map json "Reason" String_.of_json in
@@ -1907,6 +1920,7 @@ module Assignment =
       make ?requesterFeedback ?answer ?deadline ?rejectionTime ?approvalTime
         ?submitTime ?acceptTime ?autoApprovalTime ?assignmentStatus ?hITId
         ?workerId ?assignmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requesterFeedback =
         field_map json "RequesterFeedback" String_.of_json in
@@ -1951,6 +1965,7 @@ module HITLayoutParameter =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -1980,6 +1995,7 @@ module RequestError =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?turkErrorCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let turkErrorCode =
         field_map json "TurkErrorCode" TurkErrorCode.of_json in
@@ -2009,6 +2025,7 @@ module ServiceFault =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?turkErrorCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let turkErrorCode =
         field_map json "TurkErrorCode" TurkErrorCode.of_json in
@@ -2059,6 +2076,7 @@ module NotificationSpecification =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
       make ~eventTypes ~version ~transport ~destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventTypes = field_map_exn json "EventTypes" EventTypeList.of_json in
       let version = field_map_exn json "Version" String_.of_json in
@@ -2298,6 +2316,7 @@ module ReviewPolicy =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       make ?parameters ~policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "Parameters" PolicyParameterList.of_json in
@@ -2333,6 +2352,7 @@ module ReviewReport =
         (Option.map ~f:ReviewResultDetailList.of_xml)
           (Xml.child xml_arg0 "ReviewResults") in
       make ?reviewActions ?reviewResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reviewActions =
         field_map json "ReviewActions" ReviewActionDetailList.of_json in
@@ -2564,6 +2584,7 @@ module UpdateQualificationTypeResponse =
         (Option.map ~f:QualificationType.of_xml)
           (Xml.child xml_arg0 "QualificationType") in
       make ?qualificationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationType =
         field_map json "QualificationType" QualificationType.of_json in
@@ -2666,6 +2687,7 @@ module UpdateQualificationTypeRequest =
       make ?autoGrantedValue ?autoGranted ?retryDelayInSeconds
         ?testDurationInSeconds ?answerKey ?test ?qualificationTypeStatus
         ?description ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoGrantedValue =
         field_map json "AutoGrantedValue" Integer.of_json in
@@ -2727,6 +2749,7 @@ module UpdateNotificationSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2764,6 +2787,7 @@ module UpdateNotificationSettingsRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HITTypeId") in
       make ?active ?notification ~hITTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let active = field_map json "Active" Boolean.of_json in
       let notification =
@@ -2812,6 +2836,7 @@ module UpdateHITTypeOfHITResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2836,6 +2861,7 @@ module UpdateHITTypeOfHITRequest =
       let hITId =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~hITTypeId ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITTypeId = field_map_exn json "HITTypeId" EntityId.of_json in
       let hITId = field_map_exn json "HITId" EntityId.of_json in
@@ -2882,6 +2908,7 @@ module UpdateHITReviewStatusResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2907,6 +2934,7 @@ module UpdateHITReviewStatusRequest =
       let hITId =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ?revert ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revert = field_map json "Revert" Boolean.of_json in
       let hITId = field_map_exn json "HITId" EntityId.of_json in
@@ -2953,6 +2981,7 @@ module UpdateExpirationForHITResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2978,6 +3007,7 @@ module UpdateExpirationForHITRequest =
       let hITId =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~expireAt ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expireAt = field_map_exn json "ExpireAt" Timestamp.of_json in
       let hITId = field_map_exn json "HITId" EntityId.of_json in
@@ -3024,6 +3054,7 @@ module SendTestEventNotificationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3055,6 +3086,7 @@ module SendTestEventNotificationRequest =
         NotificationSpecification.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
       make ~testEventType ~notification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testEventType =
         field_map_exn json "TestEventType" EventType.of_json in
@@ -3103,6 +3135,7 @@ module SendBonusResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3164,6 +3197,7 @@ module SendBonusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkerId") in
       make ?uniqueRequestToken ~reason ~assignmentId ~bonusAmount ~workerId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uniqueRequestToken =
         field_map json "UniqueRequestToken" IdempotencyToken.of_json in
@@ -3216,6 +3250,7 @@ module RejectQualificationRequestResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3247,6 +3282,7 @@ module RejectQualificationRequestRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationRequestId") in
       make ?reason ~qualificationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" String_.of_json in
       let qualificationRequestId =
@@ -3294,6 +3330,7 @@ module RejectAssignmentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3324,6 +3361,7 @@ module RejectAssignmentRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ~requesterFeedback ~assignmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requesterFeedback =
         field_map_exn json "RequesterFeedback" String_.of_json in
@@ -3383,6 +3421,7 @@ module NotifyWorkersResponse =
         (Option.map ~f:NotifyWorkersFailureStatusList.of_xml)
           (Xml.child xml_arg0 "NotifyWorkersFailureStatuses") in
       make ?notifyWorkersFailureStatuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notifyWorkersFailureStatuses =
         field_map json "NotifyWorkersFailureStatuses"
@@ -3424,6 +3463,7 @@ module NotifyWorkersRequest =
       let subject =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
       make ~workerIds ~messageText ~subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerIds = field_map_exn json "WorkerIds" CustomerIdList.of_json in
       let messageText = field_map_exn json "MessageText" String_.of_json in
@@ -3495,6 +3535,7 @@ module ListWorkersWithQualificationTypeResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?qualifications ?numResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualifications =
         field_map json "Qualifications" QualificationList.of_json in
@@ -3544,6 +3585,7 @@ module ListWorkersWithQualificationTypeRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ?maxResults ?nextToken ?status ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3617,6 +3659,7 @@ module ListWorkerBlocksResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?workerBlocks ?numResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerBlocks =
         field_map json "WorkerBlocks" WorkerBlockList.of_json in
@@ -3646,6 +3689,7 @@ module ListWorkerBlocksRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3711,6 +3755,7 @@ module ListReviewableHITsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?hITs ?numResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITs = field_map json "HITs" HITList.of_json in
       let numResults = field_map json "NumResults" Integer.of_json in
@@ -3756,6 +3801,7 @@ module ListReviewableHITsRequest =
       let hITTypeId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "HITTypeId") in
       make ?maxResults ?nextToken ?status ?hITTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3864,6 +3910,7 @@ module ListReviewPolicyResultsForHITResponse =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "HITId") in
       make ?nextToken ?hITReviewReport ?assignmentReviewReport
         ?hITReviewPolicy ?assignmentReviewPolicy ?hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let hITReviewReport =
@@ -3944,6 +3991,7 @@ module ListReviewPolicyResultsForHITRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ?maxResults ?nextToken ?retrieveResults ?retrieveActions
         ?policyLevels ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -4020,6 +4068,7 @@ module ListQualificationTypesResponse =
       let numResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NumResults") in
       make ?qualificationTypes ?nextToken ?numResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationTypes =
         field_map json "QualificationTypes" QualificationTypeList.of_json in
@@ -4084,6 +4133,7 @@ module ListQualificationTypesRequest =
       let query = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Query") in
       make ?maxResults ?nextToken ?mustBeOwnedByCaller ~mustBeRequestable
         ?query ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -4161,6 +4211,7 @@ module ListQualificationRequestsResponse =
       let numResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NumResults") in
       make ?qualificationRequests ?nextToken ?numResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationRequests =
         field_map json "QualificationRequests"
@@ -4202,6 +4253,7 @@ module ListQualificationRequestsRequest =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "QualificationTypeId") in
       make ?maxResults ?nextToken ?qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -4269,6 +4321,7 @@ module ListHITsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?hITs ?numResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITs = field_map json "HITs" HITList.of_json in
       let numResults = field_map json "NumResults" Integer.of_json in
@@ -4297,6 +4350,7 @@ module ListHITsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -4362,6 +4416,7 @@ module ListHITsForQualificationTypeResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?hITs ?numResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITs = field_map json "HITs" HITList.of_json in
       let numResults = field_map json "NumResults" Integer.of_json in
@@ -4402,6 +4457,7 @@ module ListHITsForQualificationTypeRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ?maxResults ?nextToken ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -4474,6 +4530,7 @@ module ListBonusPaymentsResponse =
       let numResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NumResults") in
       make ?bonusPayments ?nextToken ?numResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bonusPayments =
         field_map json "BonusPayments" BonusPaymentList.of_json in
@@ -4518,6 +4575,7 @@ module ListBonusPaymentsRequest =
       let hITId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "HITId") in
       make ?maxResults ?nextToken ?assignmentId ?hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -4589,6 +4647,7 @@ module ListAssignmentsForHITResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?assignments ?numResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assignments = field_map json "Assignments" AssignmentList.of_json in
       let numResults = field_map json "NumResults" Integer.of_json in
@@ -4633,6 +4692,7 @@ module ListAssignmentsForHITRequest =
       let hITId =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ?assignmentStatuses ?maxResults ?nextToken ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assignmentStatuses =
         field_map json "AssignmentStatuses" AssignmentStatusList.of_json in
@@ -4691,6 +4751,7 @@ module GetQualificationTypeResponse =
         (Option.map ~f:QualificationType.of_xml)
           (Xml.child xml_arg0 "QualificationType") in
       make ?qualificationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationType =
         field_map json "QualificationType" QualificationType.of_json in
@@ -4716,6 +4777,7 @@ module GetQualificationTypeRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationTypeId =
         field_map_exn json "QualificationTypeId" EntityId.of_json in
@@ -4772,6 +4834,7 @@ module GetQualificationScoreResponse =
         (Option.map ~f:Qualification.of_xml)
           (Xml.child xml_arg0 "Qualification") in
       make ?qualification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualification =
         field_map json "Qualification" Qualification.of_json in
@@ -4805,6 +4868,7 @@ module GetQualificationScoreRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ~workerId ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
       let qualificationTypeId =
@@ -4856,6 +4920,7 @@ module GetHITResponse =
     let of_xml xml_arg0 =
       let hIT = (Option.map ~f:HIT.of_xml) (Xml.child xml_arg0 "HIT") in
       make ?hIT ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hIT = field_map json "HIT" HIT.of_json in make ?hIT ()
     let to_json v = composed_to_json to_value v
@@ -4875,6 +4940,7 @@ module GetHITRequest =
       let hITId =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITId = field_map_exn json "HITId" EntityId.of_json in
       make ~hITId ()
@@ -4928,6 +4994,7 @@ module GetFileUploadURLResponse =
       let fileUploadURL =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FileUploadURL") in
       make ?fileUploadURL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileUploadURL = field_map json "FileUploadURL" String_.of_json in
       make ?fileUploadURL ()
@@ -4962,6 +5029,7 @@ module GetFileUploadURLRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ~questionIdentifier ~assignmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let questionIdentifier =
         field_map_exn json "QuestionIdentifier" String_.of_json in
@@ -5022,6 +5090,7 @@ module GetAssignmentResponse =
       let assignment =
         (Option.map ~f:Assignment.of_xml) (Xml.child xml_arg0 "Assignment") in
       make ?hIT ?assignment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hIT = field_map json "HIT" HIT.of_json in
       let assignment = field_map json "Assignment" Assignment.of_json in
@@ -5046,6 +5115,7 @@ module GetAssignmentRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ~assignmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assignmentId = field_map_exn json "AssignmentId" EntityId.of_json in
       make ~assignmentId ()
@@ -5106,6 +5176,7 @@ module GetAccountBalanceResponse =
         (Option.map ~f:CurrencyAmount.of_xml)
           (Xml.child xml_arg0 "AvailableBalance") in
       make ?onHoldBalance ?availableBalance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onHoldBalance =
         field_map json "OnHoldBalance" CurrencyAmount.of_json in
@@ -5123,6 +5194,7 @@ module GetAccountBalanceRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5166,6 +5238,7 @@ module DisassociateQualificationFromWorkerResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5205,6 +5278,7 @@ module DisassociateQualificationFromWorkerRequest =
         CustomerId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkerId") in
       make ?reason ~qualificationTypeId ~workerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" String_.of_json in
       let qualificationTypeId =
@@ -5253,6 +5327,7 @@ module DeleteWorkerBlockResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5279,6 +5354,7 @@ module DeleteWorkerBlockRequest =
         CustomerId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkerId") in
       make ?reason ~workerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" String_.of_json in
       let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
@@ -5325,6 +5401,7 @@ module DeleteQualificationTypeResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5347,6 +5424,7 @@ module DeleteQualificationTypeRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationTypeId =
         field_map_exn json "QualificationTypeId" EntityId.of_json in
@@ -5393,6 +5471,7 @@ module DeleteHITResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5411,6 +5490,7 @@ module DeleteHITRequest =
       let hITId =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITId = field_map_exn json "HITId" EntityId.of_json in
       make ~hITId ()
@@ -5456,6 +5536,7 @@ module CreateWorkerBlockResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5482,6 +5563,7 @@ module CreateWorkerBlockRequest =
         CustomerId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkerId") in
       make ~reason ~workerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map_exn json "Reason" String_.of_json in
       let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
@@ -5538,6 +5620,7 @@ module CreateQualificationTypeResponse =
         (Option.map ~f:QualificationType.of_xml)
           (Xml.child xml_arg0 "QualificationType") in
       make ?qualificationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationType =
         field_map json "QualificationType" QualificationType.of_json in
@@ -5648,6 +5731,7 @@ module CreateQualificationTypeRequest =
       make ?autoGrantedValue ?autoGranted ?testDurationInSeconds ?answerKey
         ?test ?retryDelayInSeconds ~qualificationTypeStatus ~description
         ?keywords ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoGrantedValue =
         field_map json "AutoGrantedValue" Integer.of_json in
@@ -5715,6 +5799,7 @@ module CreateHITWithHITTypeResponse =
     let of_xml xml_arg0 =
       let hIT = (Option.map ~f:HIT.of_xml) (Xml.child xml_arg0 "HIT") in
       make ?hIT ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hIT = field_map json "HIT" HIT.of_json in make ?hIT ()
     let to_json v = composed_to_json to_value v
@@ -5827,6 +5912,7 @@ module CreateHITWithHITTypeRequest =
       make ?hITLayoutParameters ?hITLayoutId ?hITReviewPolicy
         ?assignmentReviewPolicy ?uniqueRequestToken ?requesterAnnotation
         ?question ~lifetimeInSeconds ?maxAssignments ~hITTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITLayoutParameters =
         field_map json "HITLayoutParameters" HITLayoutParameterList.of_json in
@@ -5896,6 +5982,7 @@ module CreateHITTypeResponse =
       let hITTypeId =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "HITTypeId") in
       make ?hITTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITTypeId = field_map json "HITTypeId" EntityId.of_json in
       make ?hITTypeId ()
@@ -5982,6 +6069,7 @@ module CreateHITTypeRequest =
           (Xml.child xml_arg0 "AutoApprovalDelayInSeconds") in
       make ?qualificationRequirements ~description ?keywords ~title ~reward
         ~assignmentDurationInSeconds ?autoApprovalDelayInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualificationRequirements =
         field_map json "QualificationRequirements"
@@ -6044,6 +6132,7 @@ module CreateHITResponse =
     let of_xml xml_arg0 =
       let hIT = (Option.map ~f:HIT.of_xml) (Xml.child xml_arg0 "HIT") in
       make ?hIT ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hIT = field_map json "HIT" HIT.of_json in make ?hIT ()
     let to_json v = composed_to_json to_value v
@@ -6217,6 +6306,7 @@ module CreateHITRequest =
         ?qualificationRequirements ?requesterAnnotation ?question
         ~description ?keywords ~title ~reward ~assignmentDurationInSeconds
         ~lifetimeInSeconds ?autoApprovalDelayInSeconds ?maxAssignments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hITLayoutParameters =
         field_map json "HITLayoutParameters" HITLayoutParameterList.of_json in
@@ -6291,6 +6381,7 @@ module CreateAdditionalAssignmentsForHITResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6331,6 +6422,7 @@ module CreateAdditionalAssignmentsForHITRequest =
       let hITId =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ?uniqueRequestToken ~numberOfAdditionalAssignments ~hITId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uniqueRequestToken =
         field_map json "UniqueRequestToken" IdempotencyToken.of_json in
@@ -6380,6 +6472,7 @@ module AssociateQualificationWithWorkerResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6429,6 +6522,7 @@ module AssociateQualificationWithWorkerRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ?sendNotification ?integerValue ~workerId ~qualificationTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendNotification =
         field_map json "SendNotification" Boolean.of_json in
@@ -6479,6 +6573,7 @@ module ApproveAssignmentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6520,6 +6615,7 @@ module ApproveAssignmentRequest =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ?overrideRejection ?requesterFeedback ~assignmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrideRejection =
         field_map json "OverrideRejection" Boolean.of_json in
@@ -6569,6 +6665,7 @@ module AcceptQualificationRequestResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6600,6 +6697,7 @@ module AcceptQualificationRequestRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationRequestId") in
       make ?integerValue ~qualificationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let integerValue = field_map json "IntegerValue" Integer.of_json in
       let qualificationRequestId =

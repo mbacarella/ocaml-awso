@@ -153,6 +153,7 @@ module MessageAttributeValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StringValue") in
       make ~dataType ?binaryListValues ?stringListValues ?binaryValue
         ?stringValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataType = field_map_exn json "DataType" String_.of_json in
       let binaryListValues =
@@ -243,6 +244,7 @@ module MessageSystemAttributeValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StringValue") in
       make ~dataType ?binaryListValues ?stringListValues ?binaryValue
         ?stringValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataType = field_map_exn json "DataType" String_.of_json in
       let binaryListValues =
@@ -577,6 +579,7 @@ module BatchResultErrorEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "SenderFault") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?message ~code ~senderFault ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map_exn json "Code" String_.of_json in
@@ -649,6 +652,7 @@ module SendMessageBatchResultEntry =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?sequenceNumber ?mD5OfMessageSystemAttributes
         ?mD5OfMessageAttributes ~mD5OfMessageBody ~messageId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sequenceNumber = field_map json "SequenceNumber" String_.of_json in
       let mD5OfMessageSystemAttributes =
@@ -739,6 +743,7 @@ module SendMessageBatchRequestEntry =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?messageGroupId ?messageDeduplicationId ?messageSystemAttributes
         ?messageAttributes ?delaySeconds ~messageBody ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageGroupId = field_map json "MessageGroupId" String_.of_json in
       let messageDeduplicationId =
@@ -829,6 +834,7 @@ module Message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageAttributes ?mD5OfMessageAttributes ?attributes ?body
         ?mD5OfBody ?receiptHandle ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageAttributes =
         field_map json "MessageAttributes" MessageBodyAttributeMap.of_json in
@@ -870,6 +876,7 @@ module DeleteMessageBatchResultEntry =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -895,6 +902,7 @@ module DeleteMessageBatchRequestEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "ReceiptHandle") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~receiptHandle ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let receiptHandle = field_map_exn json "ReceiptHandle" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -916,6 +924,7 @@ module ChangeMessageVisibilityBatchResultEntry =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -953,6 +962,7 @@ module ChangeMessageVisibilityBatchRequestEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "ReceiptHandle") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?visibilityTimeout ~receiptHandle ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let visibilityTimeout =
         field_map json "VisibilityTimeout" Integer.of_json in
@@ -1039,6 +1049,7 @@ module InvalidMessageContents =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The message contains characters outside the allowed set."]
@@ -1050,6 +1061,7 @@ module UnsupportedOperation =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Error code 400. Unsupported operation."]
@@ -1061,6 +1073,7 @@ module BatchEntryIdsNotDistinct =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1073,6 +1086,7 @@ module BatchRequestTooLong =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1101,6 +1115,7 @@ module EmptyBatchRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The batch request doesn't contain any entries."]
@@ -1112,6 +1127,7 @@ module InvalidBatchEntryId =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1140,6 +1156,7 @@ module TooManyEntriesInBatchRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1182,6 +1199,7 @@ module OverLimit =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1266,6 +1284,7 @@ module QueueDoesNotExist =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified queue doesn't exist."]
@@ -1277,6 +1296,7 @@ module InvalidAttributeName =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified attribute doesn't exist."]
@@ -1320,6 +1340,7 @@ module QueueDeletedRecently =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1332,6 +1353,7 @@ module QueueNameExists =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1418,6 +1440,7 @@ module UntagQueueRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~tagKeys ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
@@ -1445,6 +1468,7 @@ module TagQueueRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~tags ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
@@ -1477,6 +1501,7 @@ module SetQueueAttributesRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~attributes ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map_exn json "Attributes" QueueAttributeMap.of_json in
@@ -1592,6 +1617,7 @@ module SendMessageResult =
           (Xml.child xml_arg0 "MD5OfMessageBody") in
       make ?sequenceNumber ?messageId ?mD5OfMessageSystemAttributes
         ?mD5OfMessageAttributes ?mD5OfMessageBody ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sequenceNumber = field_map json "SequenceNumber" String_.of_json in
       let messageId = field_map json "MessageId" String_.of_json in
@@ -1683,6 +1709,7 @@ module SendMessageRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ?messageGroupId ?messageDeduplicationId ?messageSystemAttributes
         ?messageAttributes ?delaySeconds ~messageBody ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageGroupId = field_map json "MessageGroupId" String_.of_json in
       let messageDeduplicationId =
@@ -1813,6 +1840,7 @@ module SendMessageBatchResult =
         SendMessageBatchResultEntryList.of_xml
           (Xml.children xml_arg0 "SendMessageBatchResultEntry") in
       make ~failed ~successful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failed =
         field_map_exn json "Failed" BatchResultErrorEntryList.of_json in
@@ -1847,6 +1875,7 @@ module SendMessageBatchRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~entries ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entries =
         field_map_exn json "Entries" SendMessageBatchRequestEntryList.of_json in
@@ -1877,6 +1906,7 @@ module RemovePermissionRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~label ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let label = field_map_exn json "Label" String_.of_json in
       let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
@@ -1934,6 +1964,7 @@ module ReceiveMessageResult =
         (Option.map ~f:MessageList.of_xml)
           (Some (Xml.children xml_arg0 "Message")) in
       make ?messages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messages = field_map json "Messages" MessageList.of_json in
       make ?messages ()
@@ -2022,6 +2053,7 @@ module ReceiveMessageRequest =
       make ?receiveRequestAttemptId ?waitTimeSeconds ?visibilityTimeout
         ?maxNumberOfMessages ?messageAttributeNames ?attributeNames ~queueUrl
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let receiveRequestAttemptId =
         field_map json "ReceiveRequestAttemptId" String_.of_json in
@@ -2049,6 +2081,7 @@ module ReceiptHandleIsInvalid =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified receipt handle isn't valid."]
@@ -2068,6 +2101,7 @@ module PurgeQueueRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
       make ~queueUrl ()
@@ -2081,6 +2115,7 @@ module PurgeQueueInProgress =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2093,6 +2128,7 @@ module MessageNotInflight =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified message isn't in flight."]
@@ -2151,6 +2187,7 @@ module ListQueuesResult =
         (Option.map ~f:QueueUrlList.of_xml)
           (Some (Xml.children xml_arg0 "QueueUrl")) in
       make ?nextToken ?queueUrls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let queueUrls = field_map json "QueueUrls" QueueUrlList.of_json in
@@ -2188,6 +2225,7 @@ module ListQueuesRequest =
       let queueNamePrefix =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QueueNamePrefix") in
       make ?maxResults ?nextToken ?queueNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -2236,6 +2274,7 @@ module ListQueueTagsResult =
       let xml_arg0 = Xml.child_exn ~context:context_ t "ListQueueTagsResult" in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tag") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2255,6 +2294,7 @@ module ListQueueTagsRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
       make ~queueUrl ()
@@ -2326,6 +2366,7 @@ module ListDeadLetterSourceQueuesResult =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let queueUrls = QueueUrlList.of_xml (Xml.children xml_arg0 "QueueUrl") in
       make ?nextToken ~queueUrls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let queueUrls = field_map_exn json "queueUrls" QueueUrlList.of_json in
@@ -2362,6 +2403,7 @@ module ListDeadLetterSourceQueuesRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ?maxResults ?nextToken ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -2377,6 +2419,7 @@ module InvalidIdFormat =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2432,6 +2475,7 @@ module GetQueueUrlResult =
       let queueUrl =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QueueUrl") in
       make ?queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueUrl = field_map json "QueueUrl" String_.of_json in
       make ?queueUrl ()
@@ -2464,6 +2508,7 @@ module GetQueueUrlRequest =
       let queueName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueName") in
       make ?queueOwnerAWSAccountId ~queueName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueOwnerAWSAccountId =
         field_map json "QueueOwnerAWSAccountId" String_.of_json in
@@ -2527,6 +2572,7 @@ module GetQueueAttributesResult =
         (Option.map ~f:QueueAttributeMap.of_xml)
           (Xml.child xml_arg0 "Attribute") in
       make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" QueueAttributeMap.of_json in
       make ?attributes ()
@@ -2558,6 +2604,7 @@ module GetQueueAttributesRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ?attributeNames ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeNames =
         field_map json "AttributeNames" AttributeNameList.of_json in
@@ -2581,6 +2628,7 @@ module DeleteQueueRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
       make ~queueUrl ()
@@ -2611,6 +2659,7 @@ module DeleteMessageRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~receiptHandle ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let receiptHandle = field_map_exn json "ReceiptHandle" String_.of_json in
       let queueUrl = field_map_exn json "QueueUrl" String_.of_json in
@@ -2712,6 +2761,7 @@ module DeleteMessageBatchResult =
         DeleteMessageBatchResultEntryList.of_xml
           (Xml.children xml_arg0 "DeleteMessageBatchResultEntry") in
       make ~failed ~successful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failed =
         field_map_exn json "Failed" BatchResultErrorEntryList.of_json in
@@ -2747,6 +2797,7 @@ module DeleteMessageBatchRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~entries ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entries =
         field_map_exn json "Entries"
@@ -2814,6 +2865,7 @@ module CreateQueueResult =
       let queueUrl =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QueueUrl") in
       make ?queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueUrl = field_map json "QueueUrl" String_.of_json in
       make ?queueUrl ()
@@ -2851,6 +2903,7 @@ module CreateQueueRequest =
       let queueName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueName") in
       make ?tags ?attributes ~queueName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let attributes = field_map json "Attributes" QueueAttributeMap.of_json in
@@ -2892,6 +2945,7 @@ module ChangeMessageVisibilityRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~visibilityTimeout ~receiptHandle ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let visibilityTimeout =
         field_map_exn json "VisibilityTimeout" Integer.of_json in
@@ -3001,6 +3055,7 @@ module ChangeMessageVisibilityBatchResult =
         ChangeMessageVisibilityBatchResultEntryList.of_xml
           (Xml.children xml_arg0 "ChangeMessageVisibilityBatchResultEntry") in
       make ~failed ~successful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failed =
         field_map_exn json "Failed" BatchResultErrorEntryList.of_json in
@@ -3037,6 +3092,7 @@ module ChangeMessageVisibilityBatchRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~entries ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entries =
         field_map_exn json "Entries"
@@ -3084,6 +3140,7 @@ module AddPermissionRequest =
       let queueUrl =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueUrl") in
       make ~actions ~aWSAccountIds ~label ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions = field_map_exn json "Actions" ActionNameList.of_json in
       let aWSAccountIds =

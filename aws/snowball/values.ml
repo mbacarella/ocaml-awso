@@ -115,6 +115,7 @@ module EventTriggerDefinition =
         (Option.map ~f:ResourceARN.of_xml)
           (Xml.child xml_arg0 "EventResourceARN") in
       make ?eventResourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventResourceARN =
         field_map json "EventResourceARN" ResourceARN.of_json in
@@ -169,6 +170,7 @@ module TargetOnDeviceService =
         (Option.map ~f:DeviceServiceName.of_xml)
           (Xml.child xml_arg0 "ServiceName") in
       make ?transferOption ?serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transferOption =
         field_map json "TransferOption" TransferOption.of_json in
@@ -262,6 +264,7 @@ module KeyRange =
       let beginMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BeginMarker") in
       make ?endMarker ?beginMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endMarker = field_map json "EndMarker" String_.of_json in
       let beginMarker = field_map json "BeginMarker" String_.of_json in
@@ -310,6 +313,7 @@ module WirelessConnection =
       let isWifiEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsWifiEnabled") in
       make ?isWifiEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isWifiEnabled = field_map json "IsWifiEnabled" Boolean.of_json in
       make ?isWifiEnabled ()
@@ -337,6 +341,7 @@ module Ec2AmiResource =
       let amiId =
         AmiId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AmiId") in
       make ?snowballAmiId ~amiId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snowballAmiId = field_map json "SnowballAmiId" String_.of_json in
       let amiId = field_map_exn json "AmiId" AmiId.of_json in
@@ -369,6 +374,7 @@ module LambdaResource =
       let lambdaArn =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "LambdaArn") in
       make ?eventTriggers ?lambdaArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventTriggers =
         field_map json "EventTriggers" EventTriggerDefinitionList.of_json in
@@ -409,6 +415,7 @@ module S3Resource =
       let bucketArn =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "BucketArn") in
       make ?targetOnDeviceServices ?keyRange ?bucketArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetOnDeviceServices =
         field_map json "TargetOnDeviceServices"
@@ -583,6 +590,7 @@ module SnowconeDeviceConfiguration =
         (Option.map ~f:WirelessConnection.of_xml)
           (Xml.child xml_arg0 "WirelessConnection") in
       make ?wirelessConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessConnection =
         field_map json "WirelessConnection" WirelessConnection.of_json in
@@ -730,6 +738,7 @@ module NFSOnDeviceServiceConfiguration =
         (Option.map ~f:StorageLimit.of_xml)
           (Xml.child xml_arg0 "StorageLimit") in
       make ?storageUnit ?storageLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageUnit = field_map json "StorageUnit" StorageUnit.of_json in
       let storageLimit = field_map json "StorageLimit" StorageLimit.of_json in
@@ -761,6 +770,7 @@ module TGWOnDeviceServiceConfiguration =
         (Option.map ~f:StorageLimit.of_xml)
           (Xml.child xml_arg0 "StorageLimit") in
       make ?storageUnit ?storageLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageUnit = field_map json "StorageUnit" StorageUnit.of_json in
       let storageLimit = field_map json "StorageLimit" StorageLimit.of_json in
@@ -790,6 +800,7 @@ module Shipment =
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       make ?trackingNumber ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackingNumber = field_map json "TrackingNumber" String_.of_json in
       let status = field_map json "Status" String_.of_json in
@@ -842,6 +853,7 @@ module INDTaxDocuments =
     let of_xml xml_arg0 =
       let gSTIN = (Option.map ~f:GSTIN.of_xml) (Xml.child xml_arg0 "GSTIN") in
       make ?gSTIN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gSTIN = field_map json "GSTIN" GSTIN.of_json in make ?gSTIN ()
     let to_json v = composed_to_json to_value v
@@ -1115,6 +1127,7 @@ module DataTransfer =
       let bytesTransferred =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "BytesTransferred") in
       make ?totalObjects ?totalBytes ?objectsTransferred ?bytesTransferred ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalObjects = field_map json "TotalObjects" Long.of_json in
       let totalBytes = field_map json "TotalBytes" Long.of_json in
@@ -1145,6 +1158,7 @@ module DeviceConfiguration =
         (Option.map ~f:SnowconeDeviceConfiguration.of_xml)
           (Xml.child xml_arg0 "SnowconeDeviceConfiguration") in
       make ?snowconeDeviceConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snowconeDeviceConfiguration =
         field_map json "SnowconeDeviceConfiguration"
@@ -1190,6 +1204,7 @@ module JobLogs =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "JobCompletionReportURI") in
       make ?jobFailureLogURI ?jobSuccessLogURI ?jobCompletionReportURI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobFailureLogURI =
         field_map json "JobFailureLogURI" String_.of_json in
@@ -1236,6 +1251,7 @@ module JobResource =
         (Option.map ~f:S3ResourceList.of_xml)
           (Xml.child xml_arg0 "S3Resources") in
       make ?ec2AmiResources ?lambdaResources ?s3Resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ec2AmiResources =
         field_map json "Ec2AmiResources" Ec2AmiResourceList.of_json in
@@ -1298,6 +1314,7 @@ module Notification =
       let snsTopicARN =
         (Option.map ~f:SnsTopicARN.of_xml) (Xml.child xml_arg0 "SnsTopicARN") in
       make ?notifyAll ?jobStatesToNotify ?snsTopicARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notifyAll = field_map json "NotifyAll" Boolean.of_json in
       let jobStatesToNotify =
@@ -1337,6 +1354,7 @@ module OnDeviceServiceConfiguration =
         (Option.map ~f:NFSOnDeviceServiceConfiguration.of_xml)
           (Xml.child xml_arg0 "NFSOnDeviceService") in
       make ?tGWOnDeviceService ?nFSOnDeviceService ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tGWOnDeviceService =
         field_map json "TGWOnDeviceService"
@@ -1429,6 +1447,7 @@ module ShippingDetails =
         (Option.map ~f:ShippingOption.of_xml)
           (Xml.child xml_arg0 "ShippingOption") in
       make ?outboundShipment ?inboundShipment ?shippingOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outboundShipment =
         field_map json "OutboundShipment" Shipment.of_json in
@@ -1495,6 +1514,7 @@ module TaxDocuments =
       let iND =
         (Option.map ~f:INDTaxDocuments.of_xml) (Xml.child xml_arg0 "IND") in
       make ?iND ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iND = field_map json "IND" INDTaxDocuments.of_json in make ?iND ()
     let to_json v = composed_to_json to_value v
@@ -1608,6 +1628,7 @@ module LongTermPricingListEntry =
         ?isLongTermPricingAutoRenew ?replacementJob ?currentActiveJob
         ?longTermPricingType ?longTermPricingStartDate
         ?longTermPricingEndDate ?longTermPricingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobIds =
         field_map json "JobIds" LongTermPricingAssociatedJobIdList.of_json in
@@ -1698,6 +1719,7 @@ module JobListEntry =
       let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?description ?creationDate ?snowballType ?jobType ?isMaster
         ?jobState ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let creationDate = field_map json "CreationDate" Timestamp.of_json in
@@ -1730,6 +1752,7 @@ module CompatibleImage =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let amiId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AmiId") in
       make ?name ?amiId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" String_.of_json in
       let amiId = field_map json "AmiId" String_.of_json in
@@ -1776,6 +1799,7 @@ module ClusterListEntry =
       let clusterId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterId") in
       make ?description ?creationDate ?clusterState ?clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let creationDate = field_map json "CreationDate" Timestamp.of_json in
@@ -1994,6 +2018,7 @@ module JobMetadata =
         ?snowballCapacityPreference ?shippingDetails ?addressId ?roleARN
         ?kmsKeyARN ?description ?resources ?creationDate ?snowballType
         ?jobType ?jobState ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onDeviceServiceConfiguration =
         field_map json "OnDeviceServiceConfiguration"
@@ -2159,6 +2184,7 @@ module Address =
       make ?isRestricted ?phoneNumber ?postalCode ?country ?landmark
         ?prefectureOrDistrict ?stateOrProvince ?city ?street3 ?street2
         ?street1 ?company ?name ?addressId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isRestricted = field_map json "IsRestricted" Boolean.of_json in
       let phoneNumber = field_map json "PhoneNumber" String_.of_json in
@@ -2201,6 +2227,7 @@ module InvalidResourceException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -2221,6 +2248,7 @@ module InvalidJobStateException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2265,6 +2293,7 @@ module ClusterLimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2284,6 +2313,7 @@ module Ec2RequestFailedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2303,6 +2333,7 @@ module InvalidInputCombinationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2322,6 +2353,7 @@ module KMSRequestFailedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2363,6 +2395,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2522,6 +2555,7 @@ module ConflictException =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ConflictResource") in
       make ?message ?conflictResource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let conflictResource =
@@ -2731,6 +2765,7 @@ module ClusterMetadata =
         ?notification ?shippingOption ?addressId ?resources ?creationDate
         ?snowballType ?jobType ?clusterState ?roleARN ?kmsKeyARN ?description
         ?clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onDeviceServiceConfiguration =
         field_map json "OnDeviceServiceConfiguration"
@@ -2794,6 +2829,7 @@ module ReturnShippingLabelAlreadyExistsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2813,6 +2849,7 @@ module InvalidAddressException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2832,6 +2869,7 @@ module UnsupportedAddressException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2873,6 +2911,7 @@ module UpdateLongTermPricingResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the long-term pricing type."]
@@ -2912,6 +2951,7 @@ module UpdateLongTermPricingRequest =
         LongTermPricingId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LongTermPricingId") in
       make ?isLongTermPricingAutoRenew ?replacementJob ~longTermPricingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isLongTermPricingAutoRenew =
         field_map json "IsLongTermPricingAutoRenew" JavaBoolean.of_json in
@@ -2965,6 +3005,7 @@ module UpdateJobShipmentStateResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2994,6 +3035,7 @@ module UpdateJobShipmentStateRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~shipmentState ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shipmentState =
         field_map_exn json "ShipmentState" ShipmentState.of_json in
@@ -3087,6 +3129,7 @@ module UpdateJobResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3196,6 +3239,7 @@ module UpdateJobRequest =
       make ?forwardingAddressId ?snowballCapacityPreference ?description
         ?shippingOption ?addressId ?onDeviceServiceConfiguration ?resources
         ?notification ?roleARN ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forwardingAddressId =
         field_map json "ForwardingAddressId" AddressId.of_json in
@@ -3292,6 +3336,7 @@ module UpdateClusterResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3390,6 +3435,7 @@ module UpdateClusterRequest =
       make ?forwardingAddressId ?notification ?shippingOption ?addressId
         ?onDeviceServiceConfiguration ?resources ?description ?roleARN
         ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forwardingAddressId =
         field_map json "ForwardingAddressId" AddressId.of_json in
@@ -3472,6 +3518,7 @@ module ListLongTermPricingResult =
         (Option.map ~f:LongTermPricingEntryList.of_xml)
           (Xml.child xml_arg0 "LongTermPricingEntries") in
       make ?nextToken ?longTermPricingEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let longTermPricingEntries =
@@ -3503,6 +3550,7 @@ module ListLongTermPricingRequest =
       let maxResults =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" ListLimit.of_json in
@@ -3561,6 +3609,7 @@ module ListJobsResult =
         (Option.map ~f:JobListEntryList.of_xml)
           (Xml.child xml_arg0 "JobListEntries") in
       make ?nextToken ?jobListEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let jobListEntries =
@@ -3591,6 +3640,7 @@ module ListJobsRequest =
       let maxResults =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" ListLimit.of_json in
@@ -3659,6 +3709,7 @@ module ListCompatibleImagesResult =
         (Option.map ~f:CompatibleImageList.of_xml)
           (Xml.child xml_arg0 "CompatibleImages") in
       make ?nextToken ?compatibleImages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let compatibleImages =
@@ -3690,6 +3741,7 @@ module ListCompatibleImagesRequest =
       let maxResults =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" ListLimit.of_json in
@@ -3749,6 +3801,7 @@ module ListClustersResult =
         (Option.map ~f:ClusterListEntryList.of_xml)
           (Xml.child xml_arg0 "ClusterListEntries") in
       make ?nextToken ?clusterListEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let clusterListEntries =
@@ -3779,6 +3832,7 @@ module ListClustersRequest =
       let maxResults =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" ListLimit.of_json in
@@ -3847,6 +3901,7 @@ module ListClusterJobsResult =
         (Option.map ~f:JobListEntryList.of_xml)
           (Xml.child xml_arg0 "JobListEntries") in
       make ?nextToken ?jobListEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let jobListEntries =
@@ -3886,6 +3941,7 @@ module ListClusterJobsRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?nextToken ?maxResults ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" ListLimit.of_json in
@@ -3946,6 +4002,7 @@ module GetSoftwareUpdatesResult =
       let updatesURI =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UpdatesURI") in
       make ?updatesURI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatesURI = field_map json "UpdatesURI" String_.of_json in
       make ?updatesURI ()
@@ -3968,6 +4025,7 @@ module GetSoftwareUpdatesRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -4014,6 +4072,7 @@ module GetSnowballUsageResult =
       let snowballLimit =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "SnowballLimit") in
       make ?snowballsInUse ?snowballLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snowballsInUse = field_map json "SnowballsInUse" Integer.of_json in
       let snowballLimit = field_map json "SnowballLimit" Integer.of_json in
@@ -4029,6 +4088,7 @@ module GetSnowballUsageRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4085,6 +4145,7 @@ module GetJobUnlockCodeResult =
       let unlockCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UnlockCode") in
       make ?unlockCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unlockCode = field_map json "UnlockCode" String_.of_json in
       make ?unlockCode ()
@@ -4107,6 +4168,7 @@ module GetJobUnlockCodeRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -4164,6 +4226,7 @@ module GetJobManifestResult =
       let manifestURI =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ManifestURI") in
       make ?manifestURI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let manifestURI = field_map json "ManifestURI" String_.of_json in
       make ?manifestURI ()
@@ -4186,6 +4249,7 @@ module GetJobManifestRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -4272,6 +4336,7 @@ module DescribeReturnShippingLabelResult =
         (Option.map ~f:ShippingLabelStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?returnShippingLabelURI ?expirationDate ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnShippingLabelURI =
         field_map json "ReturnShippingLabelURI" String_.of_json in
@@ -4297,6 +4362,7 @@ module DescribeReturnShippingLabelRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -4354,6 +4420,7 @@ module DescribeJobResult =
       let jobMetadata =
         (Option.map ~f:JobMetadata.of_xml) (Xml.child xml_arg0 "JobMetadata") in
       make ?subJobMetadata ?jobMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subJobMetadata =
         field_map json "SubJobMetadata" JobMetadataList.of_json in
@@ -4378,6 +4445,7 @@ module DescribeJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -4428,6 +4496,7 @@ module DescribeClusterResult =
         (Option.map ~f:ClusterMetadata.of_xml)
           (Xml.child xml_arg0 "ClusterMetadata") in
       make ?clusterMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterMetadata =
         field_map json "ClusterMetadata" ClusterMetadata.of_json in
@@ -4452,6 +4521,7 @@ module DescribeClusterRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
       make ~clusterId ()
@@ -4517,6 +4587,7 @@ module DescribeAddressesResult =
       let addresses =
         (Option.map ~f:AddressList.of_xml) (Xml.child xml_arg0 "Addresses") in
       make ?nextToken ?addresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let addresses = field_map json "Addresses" AddressList.of_json in
@@ -4546,6 +4617,7 @@ module DescribeAddressesRequest =
       let maxResults =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" ListLimit.of_json in
@@ -4596,6 +4668,7 @@ module DescribeAddressResult =
       let address =
         (Option.map ~f:Address.of_xml) (Xml.child xml_arg0 "Address") in
       make ?address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let address = field_map json "Address" Address.of_json in
       make ?address ()
@@ -4619,6 +4692,7 @@ module DescribeAddressRequest =
         AddressId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AddressId") in
       make ~addressId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressId = field_map_exn json "AddressId" AddressId.of_json in
       make ~addressId ()
@@ -4712,6 +4786,7 @@ module CreateReturnShippingLabelResult =
         (Option.map ~f:ShippingLabelStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ShippingLabelStatus.of_json in
       make ?status ()
@@ -4744,6 +4819,7 @@ module CreateReturnShippingLabelRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?shippingOption ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shippingOption =
         field_map json "ShippingOption" ShippingOption.of_json in
@@ -4796,6 +4872,7 @@ module CreateLongTermPricingResult =
         (Option.map ~f:LongTermPricingId.of_xml)
           (Xml.child xml_arg0 "LongTermPricingId") in
       make ?longTermPricingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let longTermPricingId =
         field_map json "LongTermPricingId" LongTermPricingId.of_json in
@@ -4842,6 +4919,7 @@ module CreateLongTermPricingRequest =
         LongTermPricingType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LongTermPricingType") in
       make ?snowballType ?isLongTermPricingAutoRenew ~longTermPricingType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snowballType = field_map json "SnowballType" SnowballType.of_json in
       let isLongTermPricingAutoRenew =
@@ -4934,6 +5012,7 @@ module CreateJobResult =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -5111,6 +5190,7 @@ module CreateJobRequest =
         ?notification ?shippingOption ?snowballCapacityPreference ?roleARN
         ?kmsKeyARN ?addressId ?description ?onDeviceServiceConfiguration
         ?resources ?jobType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let longTermPricingId =
         field_map json "LongTermPricingId" LongTermPricingId.of_json in
@@ -5217,6 +5297,7 @@ module CreateClusterResult =
       let clusterId =
         (Option.map ~f:ClusterId.of_xml) (Xml.child xml_arg0 "ClusterId") in
       make ?clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterId = field_map json "ClusterId" ClusterId.of_json in
       make ?clusterId ()
@@ -5357,6 +5438,7 @@ module CreateClusterRequest =
       make ?remoteManagement ?taxDocuments ?forwardingAddressId ?notification
         ~shippingOption ~snowballType ~roleARN ?kmsKeyARN ~addressId
         ?description ?onDeviceServiceConfiguration ~resources ~jobType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteManagement =
         field_map json "RemoteManagement" RemoteManagement.of_json in
@@ -5437,6 +5519,7 @@ module CreateAddressResult =
       let addressId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AddressId") in
       make ?addressId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressId = field_map json "AddressId" String_.of_json in
       make ?addressId ()
@@ -5458,6 +5541,7 @@ module CreateAddressRequest =
       let address =
         Address.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Address") in
       make ~address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let address = field_map_exn json "Address" Address.of_json in
       make ~address ()
@@ -5517,6 +5601,7 @@ module CancelJobResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5537,6 +5622,7 @@ module CancelJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -5595,6 +5681,7 @@ module CancelClusterResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5617,6 +5704,7 @@ module CancelClusterRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
       make ~clusterId ()

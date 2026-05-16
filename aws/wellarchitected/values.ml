@@ -333,6 +333,7 @@ module ChoiceContent =
         (Option.map ~f:ChoiceContentDisplayText.of_xml)
           (Xml.child xml_arg0 "DisplayText") in
       make ?url ?displayText ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" ChoiceContentUrl.of_json in
       let displayText =
@@ -406,6 +407,7 @@ module QuestionDifference =
       let questionId =
         (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
       make ?differenceStatus ?questionTitle ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let differenceStatus =
         field_map json "DifferenceStatus" DifferenceStatus.of_json in
@@ -731,6 +733,7 @@ module ChoiceImprovementPlan =
       let choiceId =
         (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
       make ?improvementPlanUrl ?displayText ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let improvementPlanUrl =
         field_map json "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
@@ -764,6 +767,7 @@ module ChoiceAnswerSummary =
       let choiceId =
         (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
       make ?reason ?status ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" ChoiceReason.of_json in
       let status = field_map json "Status" ChoiceStatus.of_json in
@@ -822,6 +826,7 @@ module Choice =
       let choiceId =
         (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
       make ?improvementPlan ?helpfulResource ?description ?title ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let improvementPlan =
         field_map json "ImprovementPlan" ChoiceContent.of_json in
@@ -950,6 +955,7 @@ module ValidationExceptionField =
         ValidationExceptionFieldName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~message ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ExceptionMessage.of_json in
       let name =
@@ -987,6 +993,7 @@ module PillarReviewSummary =
       let pillarId =
         (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
       make ?riskCounts ?notes ?pillarName ?pillarId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
       let notes = field_map json "Notes" Notes.of_json in
@@ -1027,6 +1034,7 @@ module ChoiceAnswer =
       let choiceId =
         (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
       make ?notes ?reason ?status ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notes = field_map json "Notes" ChoiceNotes.of_json in
       let reason = field_map json "Reason" ChoiceReason.of_json in
@@ -1247,6 +1255,7 @@ module LensUpgradeSummary =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?latestLensVersion ?currentLensVersion ?lensArn ?lensAlias
         ?workloadName ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestLensVersion =
         field_map json "LatestLensVersion" LensVersion.of_json in
@@ -1391,6 +1400,7 @@ module WorkloadSummary =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?improvementStatus ?riskCounts ?lenses ?updatedAt ?owner
         ?workloadName ?workloadArn ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let improvementStatus =
         field_map json "ImprovementStatus" WorkloadImprovementStatus.of_json in
@@ -1926,6 +1936,7 @@ module PillarDifference =
       let pillarId =
         (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
       make ?questionDifferences ?differenceStatus ?pillarName ?pillarId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let questionDifferences =
         field_map json "QuestionDifferences" QuestionDifferences.of_json in
@@ -2181,6 +2192,7 @@ module ChoiceUpdate =
         ChoiceStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?notes ?reason ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notes = field_map json "Notes" ChoiceNotes.of_json in
       let reason = field_map json "Reason" ChoiceReason.of_json in
@@ -2220,6 +2232,7 @@ module WorkloadShareSummary =
       let shareId =
         (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
       make ?status ?permissionType ?sharedWith ?shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ShareStatus.of_json in
       let permissionType =
@@ -2306,6 +2319,7 @@ module ShareInvitationSummary =
           (Xml.child xml_arg0 "ShareInvitationId") in
       make ?lensArn ?lensName ?workloadId ?workloadName ?shareResourceType
         ?permissionType ?sharedWith ?sharedBy ?shareInvitationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensArn = field_map json "LensArn" LensArn.of_json in
       let lensName = field_map json "LensName" LensName.of_json in
@@ -2346,6 +2360,7 @@ module NotificationSummary =
       let type_ =
         (Option.map ~f:NotificationType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?lensUpgradeSummary ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensUpgradeSummary =
         field_map json "LensUpgradeSummary" LensUpgradeSummary.of_json in
@@ -2390,6 +2405,7 @@ module MilestoneSummary =
         (Option.map ~f:MilestoneNumber.of_xml)
           (Xml.child xml_arg0 "MilestoneNumber") in
       make ?workloadSummary ?recordedAt ?milestoneName ?milestoneNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workloadSummary =
         field_map json "WorkloadSummary" WorkloadSummary.of_json in
@@ -2477,6 +2493,7 @@ module LensSummary =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       make ?lensStatus ?owner ?lensVersion ?updatedAt ?createdAt ?description
         ?lensType ?lensName ?lensAlias ?lensArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensStatus = field_map json "LensStatus" LensStatus.of_json in
       let owner = field_map json "Owner" AwsAccountId.of_json in
@@ -2516,6 +2533,7 @@ module LensShareSummary =
       let shareId =
         (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
       make ?status ?sharedWith ?shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ShareStatus.of_json in
       let sharedWith = field_map json "SharedWith" SharedWith.of_json in
@@ -2579,6 +2597,7 @@ module LensReviewSummary =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
       make ?riskCounts ?updatedAt ?lensStatus ?lensName ?lensVersion ?lensArn
         ?lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
@@ -2646,6 +2665,7 @@ module ImprovementSummary =
         (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
       make ?improvementPlans ?improvementPlanUrl ?risk ?questionTitle
         ?pillarId ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let improvementPlans =
         field_map json "ImprovementPlans" ChoiceImprovementPlans.of_json in
@@ -2739,6 +2759,7 @@ module AnswerSummary =
         (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
       make ?reason ?risk ?isApplicable ?choiceAnswerSummaries
         ?selectedChoices ?choices ?questionTitle ?pillarId ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" AnswerReason.of_json in
       let risk = field_map json "Risk" Risk.of_json in
@@ -2946,6 +2967,7 @@ module Workload =
         ?architecturalDesign ?nonAwsRegions ?awsRegions ?accountIds
         ?updatedAt ?environment ?description ?workloadName ?workloadArn
         ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let shareInvitationId =
@@ -3074,6 +3096,7 @@ module AccessDeniedException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ExceptionMessage.of_json in
       make ~message ()
@@ -3109,6 +3132,7 @@ module ConflictException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" ExceptionResourceType.of_json in
@@ -3133,6 +3157,7 @@ module InternalServerException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ExceptionMessage.of_json in
       make ~message ()
@@ -3168,6 +3193,7 @@ module ResourceNotFoundException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" ExceptionResourceType.of_json in
@@ -3203,6 +3229,7 @@ module ThrottlingException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?serviceCode ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
       let quotaCode = field_map json "QuotaCode" QuotaCode.of_json in
@@ -3239,6 +3266,7 @@ module ValidationException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?fields ?reason ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields =
         field_map json "Fields" ValidationExceptionFieldList.of_json in
@@ -3306,6 +3334,7 @@ module WorkloadShare =
         (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
       make ?workloadId ?workloadName ?status ?permissionType ?sharedWith
         ?sharedBy ?shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
       let workloadName = field_map json "WorkloadName" WorkloadName.of_json in
@@ -3368,6 +3397,7 @@ module ShareInvitation =
           (Xml.child xml_arg0 "ShareInvitationId") in
       make ?lensArn ?lensAlias ?workloadId ?shareResourceType
         ?shareInvitationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensArn = field_map json "LensArn" LensArn.of_json in
       let lensAlias = field_map json "LensAlias" LensAlias.of_json in
@@ -3483,6 +3513,7 @@ module LensReview =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
       make ?nextToken ?riskCounts ?notes ?updatedAt ?pillarReviewSummaries
         ?lensStatus ?lensName ?lensVersion ?lensArn ?lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
@@ -3645,6 +3676,7 @@ module Answer =
         ?choices ?helpfulResourceDisplayText ?helpfulResourceUrl
         ?improvementPlanUrl ?questionDescription ?questionTitle ?pillarId
         ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" AnswerReason.of_json in
       let notes = field_map json "Notes" Notes.of_json in
@@ -4259,6 +4291,7 @@ module ServiceQuotaExceededException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~serviceCode ~quotaCode ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
       let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
@@ -4323,6 +4356,7 @@ module Milestone =
         (Option.map ~f:MilestoneNumber.of_xml)
           (Xml.child xml_arg0 "MilestoneNumber") in
       make ?workload ?recordedAt ?milestoneName ?milestoneNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workload = field_map json "Workload" Workload.of_json in
       let recordedAt = field_map json "RecordedAt" Timestamp.of_json in
@@ -4351,6 +4385,7 @@ module VersionDifferences =
         (Option.map ~f:PillarDifferences.of_xml)
           (Xml.child xml_arg0 "PillarDifferences") in
       make ?pillarDifferences ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pillarDifferences =
         field_map json "PillarDifferences" PillarDifferences.of_json in
@@ -4384,6 +4419,7 @@ module LensReviewReport =
       let lensAlias =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
       make ?base64String ?lensArn ?lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let base64String = field_map json "Base64String" Base64String.of_json in
       let lensArn = field_map json "LensArn" LensArn.of_json in
@@ -4445,6 +4481,7 @@ module Lens =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       make ?shareInvitationId ?owner ?description ?name ?lensVersion ?lensArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareInvitationId =
         field_map json "ShareInvitationId" ShareInvitationId.of_json in
@@ -4532,6 +4569,7 @@ module UpgradeLensReviewInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?clientRequestToken ~milestoneName ~lensAlias ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -4635,6 +4673,7 @@ module UpdateWorkloadShareOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?workloadShare ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workloadShare =
         field_map json "WorkloadShare" WorkloadShare.of_json in
@@ -4670,6 +4709,7 @@ module UpdateWorkloadShareInput =
       let shareId =
         ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
       make ~permissionType ~workloadId ~shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionType =
         field_map_exn json "PermissionType" PermissionType.of_json in
@@ -4763,6 +4803,7 @@ module UpdateWorkloadOutput =
       let workload =
         (Option.map ~f:Workload.of_xml) (Xml.child xml_arg0 "Workload") in
       make ?workload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workload = field_map json "Workload" Workload.of_json in
       make ?workload ()
@@ -4905,6 +4946,7 @@ module UpdateWorkloadInput =
         ?isReviewOwnerUpdateAcknowledged ?reviewOwner ?architecturalDesign
         ?pillarPriorities ?nonAwsRegions ?awsRegions ?accountIds ?environment
         ?description ?workloadName ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let improvementStatus =
         field_map json "ImprovementStatus" WorkloadImprovementStatus.of_json in
@@ -5027,6 +5069,7 @@ module UpdateShareInvitationOutput =
         (Option.map ~f:ShareInvitation.of_xml)
           (Xml.child xml_arg0 "ShareInvitation") in
       make ?shareInvitation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareInvitation =
         field_map json "ShareInvitation" ShareInvitation.of_json in
@@ -5059,6 +5102,7 @@ module UpdateShareInvitationInput =
         ShareInvitationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ShareInvitationId") in
       make ~shareInvitationAction ~shareInvitationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareInvitationAction =
         field_map_exn json "ShareInvitationAction"
@@ -5159,6 +5203,7 @@ module UpdateLensReviewOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?lensReview ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensReview = field_map json "LensReview" LensReview.of_json in
       let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
@@ -5198,6 +5243,7 @@ module UpdateLensReviewInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?pillarNotes ?lensNotes ~lensAlias ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pillarNotes = field_map json "PillarNotes" PillarNotes.of_json in
       let lensNotes = field_map json "LensNotes" Notes.of_json in
@@ -5307,6 +5353,7 @@ module UpdateAnswerOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?answer ?lensArn ?lensAlias ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let answer = field_map json "Answer" Answer.of_json in
       let lensArn = field_map json "LensArn" LensArn.of_json in
@@ -5389,6 +5436,7 @@ module UpdateAnswerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?reason ?isApplicable ?notes ?choiceUpdates ?selectedChoices
         ~questionId ~lensAlias ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" AnswerReason.of_json in
       let isApplicable = field_map json "IsApplicable" IsApplicable.of_json in
@@ -5448,6 +5496,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5476,6 +5525,7 @@ module UntagResourceInput =
         WorkloadArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadArn") in
       make ~tagKeys ~workloadArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let workloadArn = field_map_exn json "WorkloadArn" WorkloadArn.of_json in
@@ -5527,6 +5577,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more tags to the specified resource."]
@@ -5550,6 +5601,7 @@ module TagResourceInput =
         WorkloadArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadArn") in
       make ~tags ~workloadArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let workloadArn = field_map_exn json "WorkloadArn" WorkloadArn.of_json in
@@ -5631,6 +5683,7 @@ module ListWorkloadsOutput =
         (Option.map ~f:WorkloadSummaries.of_xml)
           (Xml.child xml_arg0 "WorkloadSummaries") in
       make ?nextToken ?workloadSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let workloadSummaries =
@@ -5669,6 +5722,7 @@ module ListWorkloadsInput =
         (Option.map ~f:WorkloadNamePrefix.of_xml)
           (Xml.child xml_arg0 "WorkloadNamePrefix") in
       make ?maxResults ?nextToken ?workloadNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListWorkloadsMaxResults.of_json in
@@ -5769,6 +5823,7 @@ module ListWorkloadSharesOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?workloadShareSummaries ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let workloadShareSummaries =
@@ -5818,6 +5873,7 @@ module ListWorkloadSharesInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ?sharedWithPrefix ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListWorkloadSharesMaxResults.of_json in
@@ -5876,6 +5932,7 @@ module ListTagsForResourceOutput =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5895,6 +5952,7 @@ module ListTagsForResourceInput =
         WorkloadArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadArn") in
       make ~workloadArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workloadArn = field_map_exn json "WorkloadArn" WorkloadArn.of_json in
       make ~workloadArn ()
@@ -5977,6 +6035,7 @@ module ListShareInvitationsOutput =
         (Option.map ~f:ShareInvitationSummaries.of_xml)
           (Xml.child xml_arg0 "ShareInvitationSummaries") in
       make ?nextToken ?shareInvitationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let shareInvitationSummaries =
@@ -6041,6 +6100,7 @@ module ListShareInvitationsInput =
           (Xml.child xml_arg0 "WorkloadNamePrefix") in
       make ?maxResults ?nextToken ?shareResourceType ?lensNamePrefix
         ?workloadNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListShareInvitationsMaxResults.of_json in
@@ -6132,6 +6192,7 @@ module ListNotificationsOutput =
         (Option.map ~f:NotificationSummaries.of_xml)
           (Xml.child xml_arg0 "NotificationSummaries") in
       make ?nextToken ?notificationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let notificationSummaries =
@@ -6167,6 +6228,7 @@ module ListNotificationsInput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListNotificationsMaxResults.of_json in
@@ -6265,6 +6327,7 @@ module ListMilestonesOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?milestoneSummaries ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let milestoneSummaries =
@@ -6299,6 +6362,7 @@ module ListMilestonesInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6381,6 +6445,7 @@ module ListLensesOutput =
         (Option.map ~f:LensSummaries.of_xml)
           (Xml.child xml_arg0 "LensSummaries") in
       make ?nextToken ?lensSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lensSummaries =
@@ -6427,6 +6492,7 @@ module ListLensesInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?lensName ?lensStatus ?lensType ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensName = field_map json "LensName" LensName.of_json in
       let lensStatus = field_map json "LensStatus" LensStatusType.of_json in
@@ -6521,6 +6587,7 @@ module ListLensSharesOutput =
         (Option.map ~f:LensShareSummaries.of_xml)
           (Xml.child xml_arg0 "LensShareSummaries") in
       make ?nextToken ?lensShareSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lensShareSummaries =
@@ -6568,6 +6635,7 @@ module ListLensSharesInput =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ?maxResults ?nextToken ?sharedWithPrefix ~lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListWorkloadSharesMaxResults.of_json in
@@ -6676,6 +6744,7 @@ module ListLensReviewsOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?lensReviewSummaries ?milestoneNumber ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lensReviewSummaries =
@@ -6720,6 +6789,7 @@ module ListLensReviewsInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ?milestoneNumber ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6845,6 +6915,7 @@ module ListLensReviewImprovementsOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?improvementSummaries ?lensArn ?lensAlias
         ?milestoneNumber ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let improvementSummaries =
@@ -6917,6 +6988,7 @@ module ListLensReviewImprovementsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ?milestoneNumber ?pillarId ~lensAlias
         ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults"
@@ -7047,6 +7119,7 @@ module ListAnswersOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?answerSummaries ?lensArn ?lensAlias ?milestoneNumber
         ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let answerSummaries =
@@ -7118,6 +7191,7 @@ module ListAnswersInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ?milestoneNumber ?pillarId ~lensAlias
         ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListAnswersMaxResults.of_json in
@@ -7233,6 +7307,7 @@ module ImportLensOutput =
       let lensArn =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       make ?status ?lensArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ImportLensStatus.of_json in
       let lensArn = field_map json "LensArn" LensArn.of_json in
@@ -7274,6 +7349,7 @@ module ImportLensInput =
       let lensAlias =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
       make ?tags ~clientRequestToken ~jSONString ?lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let clientRequestToken =
@@ -7360,6 +7436,7 @@ module GetWorkloadOutput =
       let workload =
         (Option.map ~f:Workload.of_xml) (Xml.child xml_arg0 "Workload") in
       make ?workload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workload = field_map json "Workload" Workload.of_json in
       make ?workload ()
@@ -7380,6 +7457,7 @@ module GetWorkloadInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
       make ~workloadId ()
@@ -7467,6 +7545,7 @@ module GetMilestoneOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?milestone ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let milestone = field_map json "Milestone" Milestone.of_json in
       let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
@@ -7496,6 +7575,7 @@ module GetMilestoneInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~milestoneNumber ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let milestoneNumber =
         field_map_exn json "MilestoneNumber" MilestoneNumber.of_json in
@@ -7626,6 +7706,7 @@ module GetLensVersionDifferenceOutput =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
       make ?versionDifferences ?latestLensVersion ?targetLensVersion
         ?baseLensVersion ?lensArn ?lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionDifferences =
         field_map json "VersionDifferences" VersionDifferences.of_json in
@@ -7674,6 +7755,7 @@ module GetLensVersionDifferenceInput =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ?targetLensVersion ?baseLensVersion ~lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetLensVersion =
         field_map json "TargetLensVersion" LensVersion.of_json in
@@ -7775,6 +7857,7 @@ module GetLensReviewReportOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?lensReviewReport ?milestoneNumber ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensReviewReport =
         field_map json "LensReviewReport" LensReviewReport.of_json in
@@ -7814,6 +7897,7 @@ module GetLensReviewReportInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?milestoneNumber ~lensAlias ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let milestoneNumber =
         field_map json "MilestoneNumber" MilestoneNumber.of_json in
@@ -7912,6 +7996,7 @@ module GetLensReviewOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?lensReview ?milestoneNumber ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensReview = field_map json "LensReview" LensReview.of_json in
       let milestoneNumber =
@@ -7950,6 +8035,7 @@ module GetLensReviewInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?milestoneNumber ~lensAlias ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let milestoneNumber =
         field_map json "MilestoneNumber" MilestoneNumber.of_json in
@@ -8033,6 +8119,7 @@ module GetLensOutput =
     let of_xml xml_arg0 =
       let lens = (Option.map ~f:Lens.of_xml) (Xml.child xml_arg0 "Lens") in
       make ?lens ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lens = field_map json "Lens" Lens.of_json in make ?lens ()
     let to_json v = composed_to_json to_value v
@@ -8059,6 +8146,7 @@ module GetLensInput =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ?lensVersion ~lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensVersion = field_map json "LensVersion" LensVersion.of_json in
       let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
@@ -8166,6 +8254,7 @@ module GetAnswerOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?answer ?lensArn ?lensAlias ?milestoneNumber ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let answer = field_map json "Answer" Answer.of_json in
       let lensArn = field_map json "LensArn" LensArn.of_json in
@@ -8212,6 +8301,7 @@ module GetAnswerInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?milestoneNumber ~questionId ~lensAlias ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let milestoneNumber =
         field_map json "MilestoneNumber" MilestoneNumber.of_json in
@@ -8298,6 +8388,7 @@ module ExportLensOutput =
       let lensJSON =
         (Option.map ~f:LensJSON.of_xml) (Xml.child xml_arg0 "LensJSON") in
       make ?lensJSON ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensJSON = field_map json "LensJSON" LensJSON.of_json in
       make ?lensJSON ()
@@ -8326,6 +8417,7 @@ module ExportLensInput =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ?lensVersion ~lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensVersion = field_map json "LensVersion" LensVersion.of_json in
       let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
@@ -8354,6 +8446,7 @@ module DisassociateLensesInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~lensAliases ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensAliases = field_map_exn json "LensAliases" LensAliases.of_json in
       let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
@@ -8389,6 +8482,7 @@ module DeleteWorkloadShareInput =
       let shareId =
         ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
       make ~clientRequestToken ~workloadId ~shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -8420,6 +8514,7 @@ module DeleteWorkloadInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~clientRequestToken ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -8456,6 +8551,7 @@ module DeleteLensShareInput =
       let shareId =
         ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
       make ~clientRequestToken ~lensAlias ~shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -8496,6 +8592,7 @@ module DeleteLensInput =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ~lensStatus ~clientRequestToken ~lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensStatus = field_map_exn json "LensStatus" LensStatusType.of_json in
       let clientRequestToken =
@@ -8606,6 +8703,7 @@ module CreateWorkloadShareOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?shareId ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareId = field_map json "ShareId" ShareId.of_json in
       let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
@@ -8649,6 +8747,7 @@ module CreateWorkloadShareInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~clientRequestToken ~permissionType ~sharedWith ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -8752,6 +8851,7 @@ module CreateWorkloadOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?workloadArn ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workloadArn = field_map json "WorkloadArn" WorkloadArn.of_json in
       let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
@@ -8883,6 +8983,7 @@ module CreateWorkloadInput =
       make ?tags ~clientRequestToken ?notes ~lenses ?industry ?industryType
         ~reviewOwner ?architecturalDesign ?pillarPriorities ?nonAwsRegions
         ?awsRegions ?accountIds ~environment ~description ~workloadName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let clientRequestToken =
@@ -9018,6 +9119,7 @@ module CreateMilestoneOutput =
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?milestoneNumber ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let milestoneNumber =
         field_map json "MilestoneNumber" MilestoneNumber.of_json in
@@ -9055,6 +9157,7 @@ module CreateMilestoneInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~clientRequestToken ~milestoneName ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -9167,6 +9270,7 @@ module CreateLensVersionOutput =
       let lensArn =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       make ?lensVersion ?lensArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensVersion = field_map json "LensVersion" LensVersion.of_json in
       let lensArn = field_map json "LensArn" LensArn.of_json in
@@ -9214,6 +9318,7 @@ module CreateLensVersionInput =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ~clientRequestToken ?isMajorVersion ~lensVersion ~lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -9321,6 +9426,7 @@ module CreateLensShareOutput =
       let shareId =
         (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
       make ?shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareId = field_map json "ShareId" ShareId.of_json in
       make ?shareId ()
@@ -9357,6 +9463,7 @@ module CreateLensShareInput =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ~clientRequestToken ~sharedWith ~lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -9387,6 +9494,7 @@ module AssociateLensesInput =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~lensAliases ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lensAliases = field_map_exn json "LensAliases" LensAliases.of_json in
       let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in

@@ -110,6 +110,7 @@ module CancelJobRunRequest =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobRunId") in
       make ~virtualClusterId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map_exn json "virtualClusterId" ResourceIdString.of_json in
@@ -151,6 +152,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String1024.of_json in
       make ?message ()
@@ -169,6 +171,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String1024.of_json in
       make ?message ()
@@ -234,6 +237,7 @@ module CancelJobRunResponse =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map json "virtualClusterId" ResourceIdString.of_json in
@@ -269,6 +273,7 @@ module Certificate =
         (Option.map ~f:ACMCertArn.of_xml)
           (Xml.child xml_arg0 "certificateArn") in
       make ?certificateData ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateData =
         field_map json "certificateData" Base64Encoded.of_json in
@@ -362,6 +367,7 @@ module CloudWatchMonitoringConfiguration =
         LogGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?logStreamNamePrefix ~logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logStreamNamePrefix =
         field_map json "logStreamNamePrefix" String256.of_json in
@@ -479,6 +485,7 @@ module rec
         String1024.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "classification") in
       make ?configurations ?properties ~classification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurations =
         field_map json "configurations" ConfigurationList.of_json in
@@ -562,6 +569,7 @@ module S3MonitoringConfiguration =
       let logUri =
         UriString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "logUri") in
       make ~logUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logUri = field_map_exn json "logUri" UriString.of_json in
       make ~logUri ()
@@ -637,6 +645,7 @@ module MonitoringConfiguration =
           (Xml.child xml_arg0 "persistentAppUI") in
       make ?s3MonitoringConfiguration ?cloudWatchMonitoringConfiguration
         ?persistentAppUI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3MonitoringConfiguration =
         field_map json "s3MonitoringConfiguration"
@@ -679,6 +688,7 @@ module ConfigurationOverrides =
         (Option.map ~f:ConfigurationList.of_xml)
           (Xml.child xml_arg0 "applicationConfiguration") in
       make ?monitoringConfiguration ?applicationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitoringConfiguration =
         field_map json "monitoringConfiguration"
@@ -727,6 +737,7 @@ module EksInfo =
         (Option.map ~f:KubernetesNamespace.of_xml)
           (Xml.child xml_arg0 "namespace") in
       make ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace = field_map json "namespace" KubernetesNamespace.of_json in
       make ?namespace ()
@@ -747,6 +758,7 @@ module ContainerInfo =
       let eksInfo =
         (Option.map ~f:EksInfo.of_xml) (Xml.child xml_arg0 "eksInfo") in
       make ?eksInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eksInfo = field_map json "eksInfo" EksInfo.of_json in
       make ?eksInfo ()
@@ -798,6 +810,7 @@ module ContainerProvider =
         ContainerProviderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?info ~id ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let info = field_map json "info" ContainerInfo.of_json in
       let id = field_map_exn json "id" ClusterId.of_json in
@@ -1048,6 +1061,7 @@ module CreateManagedEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~clientToken ?configurationOverrides ?certificateArn
         ~executionRoleArn ~releaseLabel ~type_ ~virtualClusterId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
@@ -1081,6 +1095,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String1024.of_json in
       make ?message ()
@@ -1188,6 +1203,7 @@ module CreateManagedEndpointResponse =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map json "virtualClusterId" ResourceIdString.of_json in
@@ -1236,6 +1252,7 @@ module CreateVirtualClusterRequest =
         ResourceNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~clientToken ~containerProvider ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
@@ -1338,6 +1355,7 @@ module CreateVirtualClusterResponse =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" VirtualClusterArn.of_json in
       let name = field_map json "name" ResourceNameString.of_json in
@@ -1382,6 +1400,7 @@ module DeleteManagedEndpointRequest =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       make ~virtualClusterId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map_exn json "virtualClusterId" ResourceIdString.of_json in
@@ -1450,6 +1469,7 @@ module DeleteManagedEndpointResponse =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map json "virtualClusterId" ResourceIdString.of_json in
@@ -1475,6 +1495,7 @@ module DeleteVirtualClusterRequest =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ResourceIdString.of_json in
       make ~id ()
@@ -1533,6 +1554,7 @@ module DeleteVirtualClusterResponse =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" ResourceIdString.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -1563,6 +1585,7 @@ module DescribeJobRunRequest =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobRunId") in
       make ~virtualClusterId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map_exn json "virtualClusterId" ResourceIdString.of_json in
@@ -1761,6 +1784,7 @@ module SparkSubmitJobDriver =
         EntryPointPath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entryPoint") in
       make ?sparkSubmitParameters ?entryPointArguments ~entryPoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sparkSubmitParameters =
         field_map json "sparkSubmitParameters" SparkSubmitParameters.of_json in
@@ -1788,6 +1812,7 @@ module JobDriver =
         (Option.map ~f:SparkSubmitJobDriver.of_xml)
           (Xml.child xml_arg0 "sparkSubmitJobDriver") in
       make ?sparkSubmitJobDriver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sparkSubmitJobDriver =
         field_map json "sparkSubmitJobDriver" SparkSubmitJobDriver.of_json in
@@ -1982,6 +2007,7 @@ module JobRun =
         ?createdAt ?jobDriver ?configurationOverrides ?releaseLabel
         ?executionRoleArn ?clientToken ?state ?arn ?virtualClusterId ?name
         ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let failureReason =
@@ -2072,6 +2098,7 @@ module DescribeJobRunResponse =
       let jobRun =
         (Option.map ~f:JobRun.of_xml) (Xml.child xml_arg0 "jobRun") in
       make ?jobRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobRun = field_map json "jobRun" JobRun.of_json in make ?jobRun ()
     let to_json v = composed_to_json to_value v
@@ -2102,6 +2129,7 @@ module DescribeManagedEndpointRequest =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       make ~virtualClusterId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map_exn json "virtualClusterId" ResourceIdString.of_json in
@@ -2320,6 +2348,7 @@ module Endpoint =
         ?createdAt ?serverUrl ?configurationOverrides ?certificateAuthority
         ?certificateArn ?executionRoleArn ?releaseLabel ?state ?type_
         ?virtualClusterId ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let failureReason =
@@ -2413,6 +2442,7 @@ module DescribeManagedEndpointResponse =
       let endpoint =
         (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint = field_map json "endpoint" Endpoint.of_json in
       make ?endpoint ()
@@ -2436,6 +2466,7 @@ module DescribeVirtualClusterRequest =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ResourceIdString.of_json in
       make ~id ()
@@ -2537,6 +2568,7 @@ module VirtualCluster =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?createdAt ?containerProvider ?state ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let createdAt = field_map json "createdAt" Date.of_json in
@@ -2613,6 +2645,7 @@ module DescribeVirtualClusterResponse =
         (Option.map ~f:VirtualCluster.of_xml)
           (Xml.child xml_arg0 "virtualCluster") in
       make ?virtualCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualCluster =
         field_map json "virtualCluster" VirtualCluster.of_json in
@@ -2843,6 +2876,7 @@ module ListJobRunsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
       make ?nextToken ?maxResults ?states ?name ?createdAfter ?createdBefore
         ~virtualClusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" JavaInteger.of_json in
@@ -2915,6 +2949,7 @@ module ListJobRunsResponse =
       let jobRuns =
         (Option.map ~f:JobRuns.of_xml) (Xml.child xml_arg0 "jobRuns") in
       make ?nextToken ?jobRuns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let jobRuns = field_map json "jobRuns" JobRuns.of_json in
@@ -2991,6 +3026,7 @@ module ListManagedEndpointsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
       make ?nextToken ?maxResults ?states ?types ?createdAfter ?createdBefore
         ~virtualClusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" JavaInteger.of_json in
@@ -3062,6 +3098,7 @@ module ListManagedEndpointsResponse =
       let endpoints =
         (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "endpoints") in
       make ?nextToken ?endpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let endpoints = field_map json "endpoints" Endpoints.of_json in
@@ -3107,6 +3144,7 @@ module ListTagsForResourceRequest =
         RsiArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" RsiArn.of_json in
       make ~resourceArn ()
@@ -3169,6 +3207,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3273,6 +3312,7 @@ module ListVirtualClustersRequest =
           (Xml.child xml_arg0 "containerProviderId") in
       make ?nextToken ?maxResults ?states ?createdBefore ?createdAfter
         ?containerProviderType ?containerProviderId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" JavaInteger.of_json in
@@ -3372,6 +3412,7 @@ module ListVirtualClustersResponse =
         (Option.map ~f:VirtualClusters.of_xml)
           (Xml.child xml_arg0 "virtualClusters") in
       make ?nextToken ?virtualClusters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let virtualClusters =
@@ -3457,6 +3498,7 @@ module StartJobRunRequest =
         (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
       make ?tags ?configurationOverrides ~jobDriver ~releaseLabel
         ~executionRoleArn ~clientToken ~virtualClusterId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let configurationOverrides =
@@ -3557,6 +3599,7 @@ module StartJobRunResponse =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualClusterId =
         field_map json "virtualClusterId" ResourceIdString.of_json in
@@ -3615,6 +3658,7 @@ module TagResourceRequest =
         RsiArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" RsiArn.of_json in
@@ -3675,6 +3719,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3701,6 +3746,7 @@ module UntagResourceRequest =
         RsiArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" RsiArn.of_json in
@@ -3760,6 +3806,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from resources."]

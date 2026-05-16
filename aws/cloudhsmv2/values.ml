@@ -343,6 +343,7 @@ module Hsm =
           (Xml.child xml_arg0 "AvailabilityZone") in
       make ?stateMessage ?state ~hsmId ?eniIp ?eniId ?subnetId ?clusterId
         ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateMessage = field_map json "StateMessage" String_.of_json in
       let state = field_map json "State" HsmState.of_json in
@@ -377,6 +378,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -438,6 +440,7 @@ module BackupRetentionPolicy =
         (Option.map ~f:BackupRetentionType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" BackupRetentionValue.of_json in
       let type_ = field_map json "Type" BackupRetentionType.of_json in
@@ -503,6 +506,7 @@ module Certificates =
         (Option.map ~f:Cert.of_xml) (Xml.child xml_arg0 "ClusterCsr") in
       make ?clusterCertificate ?manufacturerHardwareCertificate
         ?awsHardwareCertificate ?hsmCertificate ?clusterCsr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterCertificate =
         field_map json "ClusterCertificate" Cert.of_json in
@@ -948,6 +952,7 @@ module Cluster =
       make ?tagList ?certificates ?vpcId ?subnetMapping ?stateMessage ?state
         ?sourceBackupId ?securityGroup ?preCoPassword ?hsmType ?hsms
         ?createTimestamp ?clusterId ?backupRetentionPolicy ?backupPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       let certificates = field_map json "Certificates" Certificates.of_json in
@@ -1113,6 +1118,7 @@ module Backup =
       make ?tagList ?deleteTimestamp ?sourceCluster ?sourceBackup
         ?sourceRegion ?neverExpires ?copyTimestamp ?createTimestamp
         ?clusterId ?backupState ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       let deleteTimestamp =
@@ -1146,6 +1152,7 @@ module CloudHsmAccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1165,6 +1172,7 @@ module CloudHsmInternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1184,6 +1192,7 @@ module CloudHsmInvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1203,6 +1212,7 @@ module CloudHsmResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1222,6 +1232,7 @@ module CloudHsmServiceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1240,6 +1251,7 @@ module CloudHsmTagException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1506,6 +1518,7 @@ module DestinationBackup =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "CreateTimestamp") in
       make ?sourceCluster ?sourceBackup ?sourceRegion ?createTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceCluster = field_map json "SourceCluster" ClusterId.of_json in
       let sourceBackup = field_map json "SourceBackup" BackupId.of_json in
@@ -1606,6 +1619,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1636,6 +1650,7 @@ module UntagResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeyList ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeyList = field_map_exn json "TagKeyList" TagKeyList.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -1733,6 +1748,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1759,6 +1775,7 @@ module TagResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagList ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map_exn json "TagList" TagList.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -1854,6 +1871,7 @@ module RestoreBackupResponse =
       let backup =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backup = field_map json "Backup" Backup.of_json in make ?backup ()
     let to_json v = composed_to_json to_value v
@@ -1876,6 +1894,7 @@ module RestoreBackupRequest =
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupId = field_map_exn json "BackupId" BackupId.of_json in
       make ~backupId ()
@@ -1968,6 +1987,7 @@ module ModifyClusterResponse =
       let cluster =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cluster = field_map json "Cluster" Cluster.of_json in
       make ?cluster ()
@@ -1999,6 +2019,7 @@ module ModifyClusterRequest =
         BackupRetentionPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BackupRetentionPolicy") in
       make ~clusterId ~backupRetentionPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
       let backupRetentionPolicy =
@@ -2093,6 +2114,7 @@ module ModifyBackupAttributesResponse =
       let backup =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backup = field_map json "Backup" Backup.of_json in make ?backup ()
     let to_json v = composed_to_json to_value v
@@ -2122,6 +2144,7 @@ module ModifyBackupAttributesRequest =
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ~neverExpires ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let neverExpires = field_map_exn json "NeverExpires" Boolean.of_json in
       let backupId = field_map_exn json "BackupId" BackupId.of_json in
@@ -2231,6 +2254,7 @@ module ListTagsResponse =
       let tagList =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagList") in
       make ?nextToken ~tagList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tagList = field_map_exn json "TagList" TagList.of_json in
@@ -2270,6 +2294,7 @@ module ListTagsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?maxResults ?nextToken ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2372,6 +2397,7 @@ module InitializeClusterResponse =
       let state =
         (Option.map ~f:ClusterState.of_xml) (Xml.child xml_arg0 "State") in
       make ?stateMessage ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateMessage = field_map json "StateMessage" StateMessage.of_json in
       let state = field_map json "State" ClusterState.of_json in
@@ -2411,6 +2437,7 @@ module InitializeClusterRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~trustAnchor ~signedCert ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustAnchor = field_map_exn json "TrustAnchor" Cert.of_json in
       let signedCert = field_map_exn json "SignedCert" Cert.of_json in
@@ -2509,6 +2536,7 @@ module DescribeClustersResponse =
       let clusters =
         (Option.map ~f:Clusters.of_xml) (Xml.child xml_arg0 "Clusters") in
       make ?nextToken ?clusters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let clusters = field_map json "Clusters" Clusters.of_json in
@@ -2547,6 +2575,7 @@ module DescribeClustersRequest =
       let filters =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ClustersMaxSize.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2657,6 +2686,7 @@ module DescribeBackupsResponse =
       let backups =
         (Option.map ~f:Backups.of_xml) (Xml.child xml_arg0 "Backups") in
       make ?nextToken ?backups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let backups = field_map json "Backups" Backups.of_json in
@@ -2703,6 +2733,7 @@ module DescribeBackupsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sortAscending ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortAscending = field_map json "SortAscending" Boolean.of_json in
       let filters = field_map json "Filters" Filters.of_json in
@@ -2798,6 +2829,7 @@ module DeleteHsmResponse =
     let of_xml xml_arg0 =
       let hsmId = (Option.map ~f:HsmId.of_xml) (Xml.child xml_arg0 "HsmId") in
       make ?hsmId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hsmId = field_map json "HsmId" HsmId.of_json in make ?hsmId ()
     let to_json v = composed_to_json to_value v
@@ -2839,6 +2871,7 @@ module DeleteHsmRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?eniIp ?eniId ?hsmId ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eniIp = field_map json "EniIp" IpAddress.of_json in
       let eniId = field_map json "EniId" EniId.of_json in
@@ -2945,6 +2978,7 @@ module DeleteClusterResponse =
       let cluster =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cluster = field_map json "Cluster" Cluster.of_json in
       make ?cluster ()
@@ -2969,6 +3003,7 @@ module DeleteClusterRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
       make ~clusterId ()
@@ -3063,6 +3098,7 @@ module DeleteBackupResponse =
       let backup =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backup = field_map json "Backup" Backup.of_json in make ?backup ()
     let to_json v = composed_to_json to_value v
@@ -3085,6 +3121,7 @@ module DeleteBackupRequest =
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupId = field_map_exn json "BackupId" BackupId.of_json in
       make ~backupId ()
@@ -3177,6 +3214,7 @@ module CreateHsmResponse =
     let of_xml xml_arg0 =
       let hsm = (Option.map ~f:Hsm.of_xml) (Xml.child xml_arg0 "Hsm") in
       make ?hsm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hsm = field_map json "Hsm" Hsm.of_json in make ?hsm ()
     let to_json v = composed_to_json to_value v
@@ -3216,6 +3254,7 @@ module CreateHsmRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?ipAddress ~availabilityZone ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddress = field_map json "IpAddress" IpAddress.of_json in
       let availabilityZone =
@@ -3322,6 +3361,7 @@ module CreateClusterResponse =
       let cluster =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cluster = field_map json "Cluster" Cluster.of_json in
       make ?cluster ()
@@ -3384,6 +3424,7 @@ module CreateClusterRequest =
           (Xml.child xml_arg0 "BackupRetentionPolicy") in
       make ?tagList ~subnetIds ?sourceBackupId ~hsmType
         ?backupRetentionPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
@@ -3495,6 +3536,7 @@ module CopyBackupToRegionResponse =
         (Option.map ~f:DestinationBackup.of_xml)
           (Xml.child xml_arg0 "DestinationBackup") in
       make ?destinationBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationBackup =
         field_map json "DestinationBackup" DestinationBackup.of_json in
@@ -3534,6 +3576,7 @@ module CopyBackupToRegionRequest =
         Region.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationRegion") in
       make ?tagList ~backupId ~destinationRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       let backupId = field_map_exn json "BackupId" BackupId.of_json in

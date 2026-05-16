@@ -116,6 +116,7 @@ module AccountInfo =
       let accountId =
         (Option.map ~f:AccountIdType.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?emailAddress ?accountName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress =
         field_map json "emailAddress" EmailAddressType.of_json in
@@ -159,6 +160,7 @@ module RoleInfo =
       let roleName =
         (Option.map ~f:RoleNameType.of_xml) (Xml.child xml_arg0 "roleName") in
       make ?accountId ?roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "accountId" AccountIdType.of_json in
       let roleName = field_map json "roleName" RoleNameType.of_json in
@@ -269,6 +271,7 @@ module InvalidRequestException =
         (Option.map ~f:ErrorDescription.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorDescription.of_json in
       make ?message ()
@@ -302,6 +305,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorDescription.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorDescription.of_json in
       make ?message ()
@@ -321,6 +325,7 @@ module TooManyRequestsException =
         (Option.map ~f:ErrorDescription.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorDescription.of_json in
       make ?message ()
@@ -341,6 +346,7 @@ module UnauthorizedException =
         (Option.map ~f:ErrorDescription.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorDescription.of_json in
       make ?message ()
@@ -436,6 +442,7 @@ module RoleCredentials =
         (Option.map ~f:AccessKeyType.of_xml)
           (Xml.child xml_arg0 "accessKeyId") in
       make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiration =
         field_map json "expiration" ExpirationTimestampType.of_json in
@@ -475,6 +482,7 @@ module LogoutRequest =
         AccessTokenType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-sso_bearer_token") in
       make ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "accessToken" AccessTokenType.of_json in
@@ -561,6 +569,7 @@ module ListAccountsResponse =
       let nextToken =
         (Option.map ~f:NextTokenType.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?accountList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountList = field_map json "accountList" AccountListType.of_json in
       let nextToken = field_map json "nextToken" NextTokenType.of_json in
@@ -603,6 +612,7 @@ module ListAccountsRequest =
         (Option.map ~f:NextTokenType.of_xml)
           (Xml.child xml_arg0 "next_token") in
       make ~accessToken ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "accessToken" AccessTokenType.of_json in
@@ -688,6 +698,7 @@ module ListAccountRolesResponse =
       let nextToken =
         (Option.map ~f:NextTokenType.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?roleList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleList = field_map json "roleList" RoleListType.of_json in
       let nextToken = field_map json "nextToken" NextTokenType.of_json in
@@ -738,6 +749,7 @@ module ListAccountRolesRequest =
         (Option.map ~f:NextTokenType.of_xml)
           (Xml.child xml_arg0 "next_token") in
       make ~accountId ~accessToken ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "accountId" AccountIdType.of_json in
       let accessToken =
@@ -820,6 +832,7 @@ module GetRoleCredentialsResponse =
         (Option.map ~f:RoleCredentials.of_xml)
           (Xml.child xml_arg0 "roleCredentials") in
       make ?roleCredentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleCredentials =
         field_map json "roleCredentials" RoleCredentials.of_json in
@@ -862,6 +875,7 @@ module GetRoleCredentialsRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "role_name") in
       make ~accessToken ~accountId ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "accessToken" AccessTokenType.of_json in

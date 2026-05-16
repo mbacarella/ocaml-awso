@@ -180,6 +180,7 @@ module EFSAuthorizationConfig =
       let accessPointId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessPointId") in
       make ?iam ?accessPointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iam = field_map json "iam" EFSAuthorizationConfigIAM.of_json in
       let accessPointId = field_map json "accessPointId" String_.of_json in
@@ -246,6 +247,7 @@ module Device =
       let hostPath =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "hostPath") in
       make ?permissions ?containerPath ~hostPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissions =
         field_map json "permissions" DeviceCgroupPermissions.of_json in
@@ -285,6 +287,7 @@ module Tmpfs =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "containerPath") in
       make ?mountOptions ~size ~containerPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountOptions = field_map json "mountOptions" StringList.of_json in
       let size = field_map_exn json "size" Integer.of_json in
@@ -314,6 +317,7 @@ module Secret =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~valueFrom ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valueFrom = field_map_exn json "valueFrom" String_.of_json in
       let name = field_map_exn json "name" String_.of_json in
@@ -423,6 +427,7 @@ module EFSVolumeConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "fileSystemId") in
       make ?authorizationConfig ?transitEncryptionPort ?transitEncryption
         ?rootDirectory ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authorizationConfig =
         field_map json "authorizationConfig" EFSAuthorizationConfig.of_json in
@@ -453,6 +458,7 @@ module Host =
       let sourcePath =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourcePath") in
       make ?sourcePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourcePath = field_map json "sourcePath" String_.of_json in
       make ?sourcePath ()
@@ -479,6 +485,7 @@ module KeyValuePair =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" String_.of_json in
       let name = field_map json "name" String_.of_json in
@@ -653,6 +660,7 @@ module MountPoint =
       let containerPath =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "containerPath") in
       make ?sourceVolume ?readOnly ?containerPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceVolume = field_map json "sourceVolume" String_.of_json in
       let readOnly = field_map json "readOnly" Boolean.of_json in
@@ -709,6 +717,7 @@ module ResourceRequirement =
       let value =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
       make ~type_ ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" ResourceType.of_json in
       let value = field_map_exn json "value" String_.of_json in
@@ -740,6 +749,7 @@ module Ulimit =
       let hardLimit =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "hardLimit") in
       make ~softLimit ~name ~hardLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let softLimit = field_map_exn json "softLimit" Integer.of_json in
       let name = field_map_exn json "name" String_.of_json in
@@ -780,6 +790,7 @@ module Volume =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "host") in
       make ?efsVolumeConfiguration ?name ?host ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let efsVolumeConfiguration =
         field_map json "efsVolumeConfiguration"
@@ -819,6 +830,7 @@ module NetworkInterface =
       let attachmentId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attachmentId") in
       make ?privateIpv4Address ?ipv6Address ?attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateIpv4Address =
         field_map json "privateIpv4Address" String_.of_json in
@@ -870,6 +882,7 @@ module FargatePlatformConfiguration =
       let platformVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "platformVersion") in
       make ?platformVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platformVersion = field_map json "platformVersion" String_.of_json in
       make ?platformVersion ()
@@ -941,6 +954,7 @@ module LinuxParameters =
         (Option.map ~f:DevicesList.of_xml) (Xml.child xml_arg0 "devices") in
       make ?swappiness ?maxSwap ?tmpfs ?sharedMemorySize ?initProcessEnabled
         ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let swappiness = field_map json "swappiness" Integer.of_json in
       let maxSwap = field_map json "maxSwap" Integer.of_json in
@@ -991,6 +1005,7 @@ module LogConfiguration =
         LogDriver.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logDriver") in
       make ?secretOptions ?options ~logDriver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretOptions = field_map json "secretOptions" SecretList.of_json in
       let options =
@@ -1042,6 +1057,7 @@ module NetworkConfiguration =
         (Option.map ~f:AssignPublicIp.of_xml)
           (Xml.child xml_arg0 "assignPublicIp") in
       make ?assignPublicIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assignPublicIp =
         field_map json "assignPublicIp" AssignPublicIp.of_json in
@@ -1349,6 +1365,7 @@ module ContainerProperties =
         ?instanceType ?user ?ulimits ?privileged ?readonlyRootFilesystem
         ?mountPoints ?environment ?volumes ?executionRoleArn ?jobRoleArn
         ?command ?memory ?vcpus ?image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fargatePlatformConfiguration =
         field_map json "fargatePlatformConfiguration"
@@ -1467,6 +1484,7 @@ module ShareAttributes =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "shareIdentifier") in
       make ?weightFactor ~shareIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weightFactor = field_map json "weightFactor" Float.of_json in
       let shareIdentifier =
@@ -1540,6 +1558,7 @@ module AttemptContainerDetail =
           (Xml.child xml_arg0 "containerInstanceArn") in
       make ?networkInterfaces ?logStreamName ?reason ?exitCode ?taskArn
         ?containerInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaces =
         field_map json "networkInterfaces" NetworkInterfaceList.of_json in
@@ -1619,6 +1638,7 @@ module NodeRangeProperty =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetNodes") in
       make ?container ~targetNodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let container = field_map json "container" ContainerProperties.of_json in
       let targetNodes = field_map_exn json "targetNodes" String_.of_json in
@@ -1667,6 +1687,7 @@ module EvaluateOnExit =
       let onStatusReason =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "onStatusReason") in
       make ~action ?onExitCode ?onReason ?onStatusReason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map_exn json "action" RetryAction.of_json in
       let onExitCode = field_map json "onExitCode" String_.of_json in
@@ -1703,6 +1724,7 @@ module Ec2Configuration =
         ImageType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageType") in
       make ?imageIdOverride ~imageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageIdOverride =
         field_map json "imageIdOverride" ImageIdOverride.of_json in
@@ -1775,6 +1797,7 @@ module ContainerOverrides =
       let vcpus = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "vcpus") in
       make ?resourceRequirements ?environment ?instanceType ?command ?memory
         ?vcpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRequirements =
         field_map json "resourceRequirements" ResourceRequirements.of_json in
@@ -1912,6 +1935,7 @@ module AttemptDetail =
         (Option.map ~f:AttemptContainerDetail.of_xml)
           (Xml.child xml_arg0 "container") in
       make ?statusReason ?stoppedAt ?startedAt ?container ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason = field_map json "statusReason" String_.of_json in
       let stoppedAt = field_map json "stoppedAt" Long.of_json in
@@ -1941,6 +1965,7 @@ module JobDependency =
         (Option.map ~f:ArrayJobDependency.of_xml) (Xml.child xml_arg0 "type") in
       let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?type_ ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" ArrayJobDependency.of_json in
       let jobId = field_map json "jobId" String_.of_json in
@@ -2043,6 +2068,7 @@ module ComputeEnvironmentOrder =
       let order =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "order") in
       make ~computeEnvironment ~order ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeEnvironment =
         field_map_exn json "computeEnvironment" String_.of_json in
@@ -2169,6 +2195,7 @@ module LaunchTemplateSpecification =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "launchTemplateId") in
       make ?version ?launchTemplateName ?launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" String_.of_json in
       let launchTemplateName =
@@ -2233,6 +2260,7 @@ module NodePropertyOverride =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetNodes") in
       make ?containerOverrides ~targetNodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerOverrides =
         field_map json "containerOverrides" ContainerOverrides.of_json in
@@ -2261,6 +2289,7 @@ module ArrayPropertiesSummary =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "index") in
       let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "size") in
       make ?index ?size ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let index = field_map json "index" Integer.of_json in
       let size = field_map json "size" Integer.of_json in
@@ -2288,6 +2317,7 @@ module ContainerSummary =
       let exitCode =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "exitCode") in
       make ?reason ?exitCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" String_.of_json in
       let exitCode = field_map json "exitCode" Integer.of_json in
@@ -2365,6 +2395,7 @@ module NodePropertiesSummary =
       let isMainNode =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isMainNode") in
       make ?nodeIndex ?numNodes ?isMainNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeIndex = field_map json "nodeIndex" Integer.of_json in
       let numNodes = field_map json "numNodes" Integer.of_json in
@@ -2411,6 +2442,7 @@ module FairsharePolicy =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "shareDecaySeconds") in
       make ?shareDistribution ?computeReservation ?shareDecaySeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareDistribution =
         field_map json "shareDistribution" ShareAttributesList.of_json in
@@ -2482,6 +2514,7 @@ module ArrayPropertiesDetail =
         (Option.map ~f:ArrayJobStatusSummary.of_xml)
           (Xml.child xml_arg0 "statusSummary") in
       make ?index ?size ?statusSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let index = field_map json "index" Integer.of_json in
       let size = field_map json "size" Integer.of_json in
@@ -2754,6 +2787,7 @@ module ContainerDetail =
         ?containerInstanceArn ?reason ?exitCode ?user ?privileged ?ulimits
         ?readonlyRootFilesystem ?mountPoints ?environment ?volumes
         ?executionRoleArn ?jobRoleArn ?command ?memory ?vcpus ?image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fargatePlatformConfiguration =
         field_map json "fargatePlatformConfiguration"
@@ -2843,6 +2877,7 @@ module JobTimeout =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "attemptDurationSeconds") in
       make ?attemptDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attemptDurationSeconds =
         field_map json "attemptDurationSeconds" Integer.of_json in
@@ -2872,6 +2907,7 @@ module NodeDetails =
       let nodeIndex =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "nodeIndex") in
       make ?isMainNode ?nodeIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isMainNode = field_map json "isMainNode" Boolean.of_json in
       let nodeIndex = field_map json "nodeIndex" Integer.of_json in
@@ -2913,6 +2949,7 @@ module NodeProperties =
       let numNodes =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "numNodes") in
       make ~nodeRangeProperties ~mainNode ~numNodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeRangeProperties =
         field_map_exn json "nodeRangeProperties" NodeRangeProperties.of_json in
@@ -3000,6 +3037,7 @@ module RetryStrategy =
       let attempts =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "attempts") in
       make ?evaluateOnExit ?attempts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluateOnExit =
         field_map json "evaluateOnExit" EvaluateOnExitList.of_json in
@@ -3348,6 +3386,7 @@ module ComputeResource =
         ?placementGroup ?tags ?instanceRole ?ec2KeyPair ?securityGroupIds
         ~subnets ?imageId ?instanceTypes ?desiredvCpus ~maxvCpus ?minvCpus
         ?allocationStrategy ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ec2Configuration =
         field_map json "ec2Configuration" Ec2ConfigurationList.of_json in
@@ -3419,6 +3458,7 @@ module SchedulingPolicyListingDetail =
       let arn =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" String_.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -3533,6 +3573,7 @@ module JobSummary =
       make ?jobDefinition ?nodeProperties ?arrayProperties ?container
         ?stoppedAt ?startedAt ?statusReason ?status ?createdAt ~jobName
         ~jobId ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobDefinition = field_map json "jobDefinition" String_.of_json in
       let nodeProperties =
@@ -3572,6 +3613,7 @@ module KeyValuesPair =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "values") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" StringList.of_json in
       let name = field_map json "name" String_.of_json in
@@ -3616,6 +3658,7 @@ module SchedulingPolicyDetail =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?fairsharePolicy ~arn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagrisTagsMap.of_json in
       let fairsharePolicy =
@@ -3839,6 +3882,7 @@ module JobDetail =
         ~jobDefinition ?dependsOn ?stoppedAt ~startedAt ?retryStrategy
         ?createdAt ?statusReason ?attempts ?schedulingPriority
         ?shareIdentifier ~status ~jobQueue ~jobId ~jobName ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platformCapabilities =
         field_map json "platformCapabilities" PlatformCapabilityList.of_json in
@@ -3965,6 +4009,7 @@ module JobQueueDetail =
           (Xml.child_exn ~context:context_ xml_arg0 "jobQueueName") in
       make ?tags ~computeEnvironmentOrder ~priority ?statusReason ?status
         ?schedulingPolicyArn ~state ~jobQueueArn ~jobQueueName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagrisTagsMap.of_json in
       let computeEnvironmentOrder =
@@ -4119,6 +4164,7 @@ module JobDefinition =
         ?timeout ?containerProperties ?retryStrategy ?parameters
         ?schedulingPriority ~type_ ?status ~revision ~jobDefinitionArn
         ~jobDefinitionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platformCapabilities =
         field_map json "platformCapabilities" PlatformCapabilityList.of_json in
@@ -4254,6 +4300,7 @@ module ComputeEnvironmentDetail =
       make ?serviceRole ?computeResources ?statusReason ?status ?state ?type_
         ?tags ~ecsClusterArn ?unmanagedvCpus ~computeEnvironmentArn
         ~computeEnvironmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceRole = field_map json "serviceRole" String_.of_json in
       let computeResources =
@@ -4287,6 +4334,7 @@ module ClientException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -4306,6 +4354,7 @@ module ServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -4360,6 +4409,7 @@ module ComputeResourceUpdate =
       let minvCpus =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "minvCpus") in
       make ?securityGroupIds ?subnets ?desiredvCpus ?maxvCpus ?minvCpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "securityGroupIds" StringList.of_json in
@@ -4411,6 +4461,7 @@ module ArrayProperties =
     let of_xml xml_arg0 =
       let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "size") in
       make ?size ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let size = field_map json "size" Integer.of_json in make ?size ()
     let to_json v = composed_to_json to_value v
@@ -4441,6 +4492,7 @@ module NodeOverrides =
       let numNodes =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "numNodes") in
       make ?nodePropertyOverrides ?numNodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodePropertyOverrides =
         field_map json "nodePropertyOverrides" NodePropertyOverrides.of_json in
@@ -4715,6 +4767,7 @@ module UpdateSchedulingPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a scheduling policy."]
@@ -4743,6 +4796,7 @@ module UpdateSchedulingPolicyRequest =
       let arn =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?fairsharePolicy ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fairsharePolicy =
         field_map json "fairsharePolicy" FairsharePolicy.of_json in
@@ -4803,6 +4857,7 @@ module UpdateJobQueueResponse =
       let jobQueueName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueName") in
       make ?jobQueueArn ?jobQueueName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobQueueArn = field_map json "jobQueueArn" String_.of_json in
       let jobQueueName = field_map json "jobQueueName" String_.of_json in
@@ -4867,6 +4922,7 @@ module UpdateJobQueueRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
       make ?computeEnvironmentOrder ?priority ?schedulingPolicyArn ?state
         ~jobQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeEnvironmentOrder =
         field_map json "computeEnvironmentOrder"
@@ -4940,6 +4996,7 @@ module UpdateComputeEnvironmentResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "computeEnvironmentName") in
       make ?computeEnvironmentArn ?computeEnvironmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeEnvironmentArn =
         field_map json "computeEnvironmentArn" String_.of_json in
@@ -5005,6 +5062,7 @@ module UpdateComputeEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironment") in
       make ?serviceRole ?computeResources ?unmanagedvCpus ?state
         ~computeEnvironment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceRole = field_map json "serviceRole" String_.of_json in
       let computeResources =
@@ -5057,6 +5115,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes specified tags from an Batch resource."]
@@ -5085,6 +5144,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeysList.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -5131,6 +5191,7 @@ module TerminateJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5157,6 +5218,7 @@ module TerminateJobRequest =
       let jobId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~reason ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map_exn json "reason" String_.of_json in
       let jobId = field_map_exn json "jobId" String_.of_json in
@@ -5203,6 +5265,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5232,6 +5295,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagrisTagsMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -5296,6 +5360,7 @@ module SubmitJobResponse =
       let jobArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
       make ~jobId ~jobName ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" String_.of_json in
       let jobName = field_map_exn json "jobName" String_.of_json in
@@ -5445,6 +5510,7 @@ module SubmitJobRequest =
         ?containerOverrides ?parameters ~jobDefinition ?dependsOn
         ?arrayProperties ?schedulingPriorityOverride ?shareIdentifier
         ~jobQueue ~jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagrisTagsMap.of_json in
       let timeout = field_map json "timeout" JobTimeout.of_json in
@@ -5533,6 +5599,7 @@ module RegisterJobDefinitionResponse =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobDefinitionName") in
       make ~revision ~jobDefinitionArn ~jobDefinitionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "revision" Integer.of_json in
       let jobDefinitionArn =
@@ -5659,6 +5726,7 @@ module RegisterJobDefinitionRequest =
       make ?platformCapabilities ?tags ?timeout ?propagateTags ?retryStrategy
         ?nodeProperties ?containerProperties ?schedulingPriority ?parameters
         ~type_ ~jobDefinitionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platformCapabilities =
         field_map json "platformCapabilities" PlatformCapabilityList.of_json in
@@ -5728,6 +5796,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagrisTagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5751,6 +5820,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -5814,6 +5884,7 @@ module ListSchedulingPoliciesResponse =
         (Option.map ~f:SchedulingPolicyListingDetailList.of_xml)
           (Xml.child xml_arg0 "schedulingPolicies") in
       make ?nextToken ?schedulingPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let schedulingPolicies =
@@ -5845,6 +5916,7 @@ module ListSchedulingPoliciesRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -5908,6 +5980,7 @@ module ListJobsResponse =
         JobSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobSummaryList") in
       make ?nextToken ~jobSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let jobSummaryList =
@@ -5986,6 +6059,7 @@ module ListJobsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueue") in
       make ?filters ?nextToken ?maxResults ?jobStatus ?multiNodeJobId
         ?arrayJobId ?jobQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" ListJobsFilterList.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -6048,6 +6122,7 @@ module DescribeSchedulingPoliciesResponse =
         (Option.map ~f:SchedulingPolicyDetailList.of_xml)
           (Xml.child xml_arg0 "schedulingPolicies") in
       make ?schedulingPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schedulingPolicies =
         field_map json "schedulingPolicies"
@@ -6071,6 +6146,7 @@ module DescribeSchedulingPoliciesRequest =
       let arns =
         StringList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arns") in
       make ~arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arns = field_map_exn json "arns" StringList.of_json in
       make ~arns ()
@@ -6122,6 +6198,7 @@ module DescribeJobsResponse =
       let jobs =
         (Option.map ~f:JobDetailList.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobs = field_map json "jobs" JobDetailList.of_json in make ?jobs ()
     let to_json v = composed_to_json to_value v
@@ -6140,6 +6217,7 @@ module DescribeJobsRequest =
       let jobs =
         StringList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobs") in
       make ~jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobs = field_map_exn json "jobs" StringList.of_json in
       make ~jobs ()
@@ -6201,6 +6279,7 @@ module DescribeJobQueuesResponse =
         (Option.map ~f:JobQueueDetailList.of_xml)
           (Xml.child xml_arg0 "jobQueues") in
       make ?nextToken ?jobQueues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let jobQueues = field_map json "jobQueues" JobQueueDetailList.of_json in
@@ -6237,6 +6316,7 @@ module DescribeJobQueuesRequest =
       let jobQueues =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "jobQueues") in
       make ?nextToken ?maxResults ?jobQueues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -6300,6 +6380,7 @@ module DescribeJobDefinitionsResponse =
         (Option.map ~f:JobDefinitionList.of_xml)
           (Xml.child xml_arg0 "jobDefinitions") in
       make ?nextToken ?jobDefinitions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let jobDefinitions =
@@ -6363,6 +6444,7 @@ module DescribeJobDefinitionsRequest =
           (Xml.child xml_arg0 "jobDefinitions") in
       make ?nextToken ?status ?jobDefinitionName ?maxResults ?jobDefinitions
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let status = field_map json "status" String_.of_json in
@@ -6431,6 +6513,7 @@ module DescribeComputeEnvironmentsResponse =
         (Option.map ~f:ComputeEnvironmentDetailList.of_xml)
           (Xml.child xml_arg0 "computeEnvironments") in
       make ?nextToken ?computeEnvironments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let computeEnvironments =
@@ -6473,6 +6556,7 @@ module DescribeComputeEnvironmentsRequest =
         (Option.map ~f:StringList.of_xml)
           (Xml.child xml_arg0 "computeEnvironments") in
       make ?nextToken ?maxResults ?computeEnvironments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -6521,6 +6605,7 @@ module DeregisterJobDefinitionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6543,6 +6628,7 @@ module DeregisterJobDefinitionRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobDefinition") in
       make ~jobDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobDefinition = field_map_exn json "jobDefinition" String_.of_json in
       make ~jobDefinition ()
@@ -6589,6 +6675,7 @@ module DeleteSchedulingPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6609,6 +6696,7 @@ module DeleteSchedulingPolicyRequest =
       let arn =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" String_.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -6654,6 +6742,7 @@ module DeleteJobQueueResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6674,6 +6763,7 @@ module DeleteJobQueueRequest =
       let jobQueue =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
       make ~jobQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobQueue = field_map_exn json "jobQueue" String_.of_json in
       make ~jobQueue ()
@@ -6719,6 +6809,7 @@ module DeleteComputeEnvironmentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6742,6 +6833,7 @@ module DeleteComputeEnvironmentRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironment") in
       make ~computeEnvironment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeEnvironment =
         field_map_exn json "computeEnvironment" String_.of_json in
@@ -6801,6 +6893,7 @@ module CreateSchedulingPolicyResponse =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~arn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" String_.of_json in
       let name = field_map_exn json "name" String_.of_json in
@@ -6838,6 +6931,7 @@ module CreateSchedulingPolicyRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?fairsharePolicy ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagrisTagsMap.of_json in
       let fairsharePolicy =
@@ -6901,6 +6995,7 @@ module CreateJobQueueResponse =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobQueueName") in
       make ~jobQueueArn ~jobQueueName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobQueueArn = field_map_exn json "jobQueueArn" String_.of_json in
       let jobQueueName = field_map_exn json "jobQueueName" String_.of_json in
@@ -6974,6 +7069,7 @@ module CreateJobQueueRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "jobQueueName") in
       make ?tags ~computeEnvironmentOrder ~priority ?schedulingPolicyArn
         ?state ~jobQueueName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagrisTagsMap.of_json in
       let computeEnvironmentOrder =
@@ -7048,6 +7144,7 @@ module CreateComputeEnvironmentResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "computeEnvironmentName") in
       make ?computeEnvironmentArn ?computeEnvironmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeEnvironmentArn =
         field_map json "computeEnvironmentArn" String_.of_json in
@@ -7130,6 +7227,7 @@ module CreateComputeEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironmentName") in
       make ?tags ?serviceRole ?computeResources ?unmanagedvCpus ?state ~type_
         ~computeEnvironmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagrisTagsMap.of_json in
       let serviceRole = field_map json "serviceRole" String_.of_json in
@@ -7184,6 +7282,7 @@ module CancelJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7209,6 +7308,7 @@ module CancelJobRequest =
       let jobId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~reason ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map_exn json "reason" String_.of_json in
       let jobId = field_map_exn json "jobId" String_.of_json in

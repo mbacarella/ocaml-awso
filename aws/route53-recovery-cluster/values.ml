@@ -58,6 +58,7 @@ module ValidationExceptionField =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~message ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       let name = field_map_exn json "name" String_.of_json in
@@ -246,6 +247,7 @@ module UpdateRoutingControlStateEntry =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlState ~routingControlArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlState =
         field_map_exn json "RoutingControlState" RoutingControlState.of_json in
@@ -312,6 +314,7 @@ module RoutingControl =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ControlPanelArn") in
       make ?routingControlState ?routingControlName ?routingControlArn
         ?controlPanelName ?controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlState =
         field_map json "RoutingControlState" RoutingControlState.of_json in
@@ -339,6 +342,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -373,6 +377,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -393,6 +398,7 @@ module EndpointTemporarilyUnavailableException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -421,6 +427,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
@@ -458,6 +465,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -509,6 +517,7 @@ module ServiceLimitExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "serviceCode" String_.of_json in
       let limitCode = field_map_exn json "limitCode" String_.of_json in
@@ -541,6 +550,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
@@ -576,6 +586,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?fields ?reason ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields =
         field_map json "fields" ValidationExceptionFieldList.of_json in
@@ -795,6 +806,7 @@ module UpdateRoutingControlStatesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -831,6 +843,7 @@ module UpdateRoutingControlStatesRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "UpdateRoutingControlStateEntries") in
       make ?safetyRulesToOverride ~updateRoutingControlStateEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let safetyRulesToOverride =
         field_map json "SafetyRulesToOverride" Arns.of_json in
@@ -933,6 +946,7 @@ module UpdateRoutingControlStateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -975,6 +989,7 @@ module UpdateRoutingControlStateRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ?safetyRulesToOverride ~routingControlState ~routingControlArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let safetyRulesToOverride =
         field_map json "SafetyRulesToOverride" Arns.of_json in
@@ -1086,6 +1101,7 @@ module ListRoutingControlsResponse =
         RoutingControls.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControls") in
       make ?nextToken ~routingControls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PageToken.of_json in
       let routingControls =
@@ -1125,6 +1141,7 @@ module ListRoutingControlsRequest =
       let controlPanelArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ControlPanelArn") in
       make ?maxResults ?nextToken ?controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PageToken.of_json in
@@ -1243,6 +1260,7 @@ module GetRoutingControlStateResponse =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ?routingControlName ~routingControlState ~routingControlArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlName =
         field_map json "RoutingControlName" RoutingControlName.of_json in
@@ -1272,6 +1290,7 @@ module GetRoutingControlStateRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlArn =
         field_map_exn json "RoutingControlArn" Arn.of_json in

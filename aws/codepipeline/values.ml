@@ -228,6 +228,7 @@ module InputArtifact =
       let name =
         ArtifactName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" ArtifactName.of_json in
       make ~name ()
@@ -250,6 +251,7 @@ module OutputArtifact =
       let name =
         ArtifactName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" ArtifactName.of_json in
       make ~name ()
@@ -296,6 +298,7 @@ module S3ArtifactLocation =
         S3BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~objectKey ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectKey = field_map_exn json "objectKey" S3ObjectKey.of_json in
       let bucketName = field_map_exn json "bucketName" S3BucketName.of_json in
@@ -515,6 +518,7 @@ module ActionTypeId =
         ActionCategory.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~owner ~category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let provider = field_map_exn json "provider" ActionProvider.of_json in
@@ -682,6 +686,7 @@ module ArtifactLocation =
         (Option.map ~f:ArtifactLocationType.of_xml)
           (Xml.child xml_arg0 "type") in
       make ?s3Location ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Location = field_map json "s3Location" S3ArtifactLocation.of_json in
       let type_ = field_map json "type" ArtifactLocationType.of_json in
@@ -795,6 +800,7 @@ module S3Location =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map json "key" S3Key.of_json in
       let bucket = field_map json "bucket" S3Bucket.of_json in
@@ -866,6 +872,7 @@ module ErrorDetails =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       let code = field_map json "code" Code.of_json in make ?message ?code ()
@@ -1113,6 +1120,7 @@ module ActionDeclaration =
         ActionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?namespace ?region ?roleArn ?inputArtifacts ?outputArtifacts
         ?configuration ?runOrder ~actionTypeId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace = field_map json "namespace" ActionNamespace.of_json in
       let region = field_map json "region" AWSRegionName.of_json in
@@ -1150,6 +1158,7 @@ module BlockerDeclaration =
       let name =
         BlockerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" BlockerType.of_json in
       let name = field_map_exn json "name" BlockerName.of_json in
@@ -1303,6 +1312,7 @@ module Artifact =
       let name =
         (Option.map ~f:ArtifactName.of_xml) (Xml.child xml_arg0 "name") in
       make ?location ?revision ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "location" ArtifactLocation.of_json in
       let revision = field_map json "revision" Revision.of_json in
@@ -1335,6 +1345,7 @@ module ActionContext =
       let name =
         (Option.map ~f:ActionName.of_xml) (Xml.child xml_arg0 "name") in
       make ?actionExecutionId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionExecutionId =
         field_map json "actionExecutionId" ActionExecutionId.of_json in
@@ -1412,6 +1423,7 @@ module StageContext =
     let of_xml xml_arg0 =
       let name = (Option.map ~f:StageName.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" StageName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
@@ -1514,6 +1526,7 @@ module WebhookFilterRule =
       let jsonPath =
         JsonPath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jsonPath") in
       make ?matchEquals ~jsonPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchEquals = field_map json "matchEquals" MatchEquals.of_json in
       let jsonPath = field_map_exn json "jsonPath" JsonPath.of_json in
@@ -1622,6 +1635,7 @@ module ArtifactDetail =
       let name =
         (Option.map ~f:ArtifactName.of_xml) (Xml.child xml_arg0 "name") in
       make ?s3location ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3location = field_map json "s3location" S3Location.of_json in
       let name = field_map json "name" ArtifactName.of_json in
@@ -1802,6 +1816,7 @@ module ActionExecution =
       make ?errorDetails ?percentComplete ?externalExecutionUrl
         ?externalExecutionId ?lastUpdatedBy ?token ?lastStatusChange ?summary
         ?status ?actionExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorDetails = field_map json "errorDetails" ErrorDetails.of_json in
       let percentComplete =
@@ -1858,6 +1873,7 @@ module ActionRevision =
         Revision.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "revisionId") in
       make ~created ~revisionChangeId ~revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let created = field_map_exn json "created" Timestamp.of_json in
       let revisionChangeId =
@@ -1930,6 +1946,7 @@ module EncryptionKey =
         EncryptionKeyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~type_ ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" EncryptionKeyType.of_json in
       let id = field_map_exn json "id" EncryptionKeyId.of_json in
@@ -2016,6 +2033,7 @@ module JobWorkerExecutorConfiguration =
         (Option.map ~f:PollingAccountList.of_xml)
           (Xml.child xml_arg0 "pollingAccounts") in
       make ?pollingServicePrincipals ?pollingAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pollingServicePrincipals =
         field_map json "pollingServicePrincipals"
@@ -2045,6 +2063,7 @@ module LambdaExecutorConfiguration =
         LambdaFunctionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "lambdaFunctionArn") in
       make ~lambdaFunctionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaFunctionArn =
         field_map_exn json "lambdaFunctionArn" LambdaFunctionArn.of_json in
@@ -2117,6 +2136,7 @@ module AWSSessionCredentials =
         AccessKeyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessKeyId") in
       make ~sessionToken ~secretAccessKey ~accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionToken =
         field_map_exn json "sessionToken" SessionToken.of_json in
@@ -2144,6 +2164,7 @@ module ActionConfiguration =
         (Option.map ~f:ActionConfigurationMap.of_xml)
           (Xml.child xml_arg0 "configuration") in
       make ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "configuration" ActionConfigurationMap.of_json in
@@ -2244,6 +2265,7 @@ module PipelineContext =
         (Option.map ~f:PipelineName.of_xml)
           (Xml.child xml_arg0 "pipelineName") in
       make ?pipelineExecutionId ?pipelineArn ?action ?stage ?pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionId =
         field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
@@ -2274,6 +2296,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -2310,6 +2333,7 @@ module WebhookAuthConfiguration =
         (Option.map ~f:WebhookAuthConfigurationAllowedIPRange.of_xml)
           (Xml.child xml_arg0 "AllowedIPRange") in
       make ?secretToken ?allowedIPRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretToken =
         field_map json "SecretToken"
@@ -2495,6 +2519,7 @@ module SourceRevision =
         ActionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actionName") in
       make ?revisionUrl ?revisionSummary ?revisionId ~actionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionUrl = field_map json "revisionUrl" Url.of_json in
       let revisionSummary =
@@ -2588,6 +2613,7 @@ module ActionConfigurationProperty =
         ActionConfigurationKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?type_ ?description ?queryable ~secret ~key ~required ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ =
         field_map json "type" ActionConfigurationPropertyType.of_json in
@@ -2752,6 +2778,7 @@ module ActionExecutionResult =
           (Xml.child xml_arg0 "externalExecutionId") in
       make ?externalExecutionUrl ?externalExecutionSummary
         ?externalExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalExecutionUrl =
         field_map json "externalExecutionUrl" Url.of_json in
@@ -2848,6 +2875,7 @@ module ActionState =
         (Option.map ~f:ActionName.of_xml) (Xml.child xml_arg0 "actionName") in
       make ?revisionUrl ?entityUrl ?latestExecution ?currentRevision
         ?actionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionUrl = field_map json "revisionUrl" Url.of_json in
       let entityUrl = field_map json "entityUrl" Url.of_json in
@@ -2992,6 +3020,7 @@ module ArtifactStore =
         ArtifactStoreType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?encryptionKey ~location ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKey =
         field_map json "encryptionKey" EncryptionKey.of_json in
@@ -3031,6 +3060,7 @@ module StageDeclaration =
       let name =
         StageName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~actions ?blockers ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions =
         field_map_exn json "actions" StageActionDeclarationList.of_json in
@@ -3108,6 +3138,7 @@ module ExecutorConfiguration =
         (Option.map ~f:LambdaExecutorConfiguration.of_xml)
           (Xml.child xml_arg0 "lambdaExecutorConfiguration") in
       make ?jobWorkerExecutorConfiguration ?lambdaExecutorConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobWorkerExecutorConfiguration =
         field_map json "jobWorkerExecutorConfiguration"
@@ -3280,6 +3311,7 @@ module ActionTypeProperty =
         ActionConfigurationKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?description ?queryable ~noEcho ~key ~optional ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" PropertyDescription.of_json in
@@ -3418,6 +3450,7 @@ module JobData =
       make ?encryptionKey ?continuationToken ?artifactCredentials
         ?outputArtifacts ?inputArtifacts ?pipelineContext
         ?actionConfiguration ?actionTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKey =
         field_map json "encryptionKey" EncryptionKey.of_json in
@@ -3563,6 +3596,7 @@ module WebhookDefinition =
         WebhookName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~authenticationConfiguration ~authentication ~filters
         ~targetAction ~targetPipeline ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationConfiguration =
         field_map_exn json "authenticationConfiguration"
@@ -3675,6 +3709,7 @@ module ExecutionTrigger =
       let triggerType =
         (Option.map ~f:TriggerType.of_xml) (Xml.child xml_arg0 "triggerType") in
       make ?triggerDetail ?triggerType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggerDetail =
         field_map json "triggerDetail" TriggerDetail.of_json in
@@ -3767,6 +3802,7 @@ module StopExecutionTrigger =
         (Option.map ~f:StopPipelineExecutionReason.of_xml)
           (Xml.child xml_arg0 "reason") in
       make ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "reason" StopPipelineExecutionReason.of_json in
@@ -3853,6 +3889,7 @@ module ActionTypeSettings =
           (Xml.child xml_arg0 "thirdPartyConfigurationUrl") in
       make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
         ?thirdPartyConfigurationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionUrlTemplate =
         field_map json "revisionUrlTemplate" UrlTemplate.of_json in
@@ -3895,6 +3932,7 @@ module ArtifactDetails =
         MinimumArtifactCount.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "minimumCount") in
       make ~maximumCount ~minimumCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maximumCount =
         field_map_exn json "maximumCount" MaximumArtifactCount.of_json in
@@ -3978,6 +4016,7 @@ module ActionExecutionInput =
           (Xml.child xml_arg0 "actionTypeId") in
       make ?namespace ?inputArtifacts ?region ?roleArn ?resolvedConfiguration
         ?configuration ?actionTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace = field_map json "namespace" ActionNamespace.of_json in
       let inputArtifacts =
@@ -4031,6 +4070,7 @@ module ActionExecutionOutput =
         (Option.map ~f:ArtifactDetailList.of_xml)
           (Xml.child xml_arg0 "outputArtifacts") in
       make ?outputVariables ?executionResult ?outputArtifacts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputVariables =
         field_map json "outputVariables" OutputVariablesMap.of_json in
@@ -4093,6 +4133,7 @@ module StageExecution =
         PipelineExecutionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineExecutionId") in
       make ~status ~pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" StageExecutionStatus.of_json in
       let pipelineExecutionId =
@@ -4145,6 +4186,7 @@ module TransitionState =
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?disabledReason ?lastChangedAt ?lastChangedBy ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disabledReason =
         field_map json "disabledReason" DisabledReason.of_json in
@@ -4222,6 +4264,7 @@ module ArtifactRevision =
         (Option.map ~f:ArtifactName.of_xml) (Xml.child xml_arg0 "name") in
       make ?revisionUrl ?created ?revisionSummary ?revisionChangeIdentifier
         ?revisionId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionUrl = field_map json "revisionUrl" Url.of_json in
       let created = field_map json "created" Timestamp.of_json in
@@ -4319,6 +4362,7 @@ module ActionTypeArtifactDetails =
         MinimumActionTypeArtifactCount.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "minimumCount") in
       make ~maximumCount ~minimumCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maximumCount =
         field_map_exn json "maximumCount"
@@ -4393,6 +4437,7 @@ module ActionTypeExecutor =
         ExecutorConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
       make ?jobTimeout ?policyStatementsTemplate ~type_ ~configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTimeout = field_map json "jobTimeout" JobTimeout.of_json in
       let policyStatementsTemplate =
@@ -4445,6 +4490,7 @@ module ActionTypeIdentifier =
         ActionCategory.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~owner ~category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let provider = field_map_exn json "provider" ActionProvider.of_json in
@@ -4473,6 +4519,7 @@ module ActionTypePermissions =
         AllowedAccounts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "allowedAccounts") in
       make ~allowedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowedAccounts =
         field_map_exn json "allowedAccounts" AllowedAccounts.of_json in
@@ -4558,6 +4605,7 @@ module ActionTypeUrls =
         (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "configurationUrl") in
       make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
         ?configurationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionUrlTemplate =
         field_map json "revisionUrlTemplate" UrlTemplate.of_json in
@@ -4684,6 +4732,7 @@ module ThirdPartyJob =
       let clientId =
         (Option.map ~f:ClientId.of_xml) (Xml.child xml_arg0 "clientId") in
       make ?jobId ?clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "jobId" JobId.of_json in
       let clientId = field_map json "clientId" ClientId.of_json in
@@ -4722,6 +4771,7 @@ module Job =
       let data = (Option.map ~f:JobData.of_xml) (Xml.child xml_arg0 "data") in
       let id = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "id") in
       make ?accountId ?nonce ?data ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "accountId" AccountId.of_json in
       let nonce = field_map json "nonce" Nonce.of_json in
@@ -4821,6 +4871,7 @@ module ListWebhookItem =
           (Xml.child_exn ~context:context_ xml_arg0 "definition") in
       make ?tags ?arn ?lastTriggered ?errorCode ?errorMessage ~url
         ~definition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let arn = field_map json "arn" WebhookArn.of_json in
@@ -4871,6 +4922,7 @@ module PipelineSummary =
       let name =
         (Option.map ~f:PipelineName.of_xml) (Xml.child xml_arg0 "name") in
       make ?updated ?created ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updated = field_map json "updated" Timestamp.of_json in
       let created = field_map json "created" Timestamp.of_json in
@@ -4956,6 +5008,7 @@ module PipelineExecutionSummary =
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?stopTrigger ?trigger ?sourceRevisions ?lastUpdateTime ?startTime
         ?status ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stopTrigger =
         field_map json "stopTrigger" StopExecutionTrigger.of_json in
@@ -5030,6 +5083,7 @@ module ActionType =
         ActionTypeId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~outputArtifactDetails ~inputArtifactDetails
         ?actionConfigurationProperties ?settings ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputArtifactDetails =
         field_map_exn json "outputArtifactDetails" ArtifactDetails.of_json in
@@ -5141,6 +5195,7 @@ module ActionExecutionDetail =
       make ?output ?input ?status ?lastUpdateTime ?startTime ?actionName
         ?stageName ?pipelineVersion ?actionExecutionId ?pipelineExecutionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let output = field_map json "output" ActionExecutionOutput.of_json in
       let input = field_map json "input" ActionExecutionInput.of_json in
@@ -5253,6 +5308,7 @@ module ThirdPartyJobData =
       make ?encryptionKey ?continuationToken ?artifactCredentials
         ?outputArtifacts ?inputArtifacts ?pipelineContext
         ?actionConfiguration ?actionTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKey =
         field_map json "encryptionKey" EncryptionKey.of_json in
@@ -5349,6 +5405,7 @@ module StageState =
         (Option.map ~f:StageName.of_xml) (Xml.child xml_arg0 "stageName") in
       make ?latestExecution ?actionStates ?inboundTransitionState
         ?inboundExecution ?stageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestExecution =
         field_map json "latestExecution" StageExecution.of_json in
@@ -5409,6 +5466,7 @@ module InvalidActionDeclarationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5421,6 +5479,7 @@ module InvalidBlockerDeclarationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Reserved for future use."]
@@ -5432,6 +5491,7 @@ module InvalidStageDeclarationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5444,6 +5504,7 @@ module InvalidStructureException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The structure was specified in an invalid format."]
@@ -5455,6 +5516,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5522,6 +5584,7 @@ module PipelineDeclaration =
       let name =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?version ~stages ?artifactStores ?artifactStore ~roleArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" PipelineVersion.of_json in
       let stages =
@@ -5544,6 +5607,7 @@ module ValidationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The validation was specified in an invalid format."]
@@ -5635,6 +5699,7 @@ module ActionTypeDeclaration =
           (Xml.child xml_arg0 "description") in
       make ?urls ?properties ?permissions ~outputArtifactDetails
         ~inputArtifactDetails ~id ~executor ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let urls = field_map json "urls" ActionTypeUrls.of_json in
       let properties =
@@ -5669,6 +5734,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5688,6 +5754,7 @@ module InvalidArnException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5706,6 +5773,7 @@ module InvalidTagsException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5719,6 +5787,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource was specified in an invalid format."]
@@ -5776,6 +5845,7 @@ module TooManyTagsException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5794,6 +5864,7 @@ module ConflictException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5813,6 +5884,7 @@ module DuplicatedStopRequestException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5832,6 +5904,7 @@ module PipelineExecutionNotStoppableException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5846,6 +5919,7 @@ module PipelineNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5878,6 +5952,7 @@ module NotLatestPipelineExecutionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5890,6 +5965,7 @@ module StageNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5902,6 +5978,7 @@ module StageNotRetryableException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5932,6 +6009,7 @@ module WebhookNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5944,6 +6022,7 @@ module InvalidWebhookAuthenticationParametersException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5956,6 +6035,7 @@ module InvalidWebhookFilterPatternException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified event filter rule is in an invalid format."]
@@ -6019,6 +6099,7 @@ module CurrentRevision =
       let revision =
         Revision.of_xml (Xml.child_exn ~context:context_ xml_arg0 "revision") in
       make ?revisionSummary ?created ~changeIdentifier ~revision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionSummary =
         field_map json "revisionSummary" RevisionSummary.of_json in
@@ -6065,6 +6146,7 @@ module ExecutionDetails =
         (Option.map ~f:ExecutionSummary.of_xml)
           (Xml.child xml_arg0 "summary") in
       make ?percentComplete ?externalExecutionId ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let percentComplete =
         field_map json "percentComplete" Percentage.of_json in
@@ -6103,6 +6185,7 @@ module FailureDetails =
       let type_ =
         FailureType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?externalExecutionId ~message ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalExecutionId =
         field_map json "externalExecutionId" ExecutionId.of_json in
@@ -6119,6 +6202,7 @@ module ActionNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified action cannot be found."]
@@ -6130,6 +6214,7 @@ module ApprovalAlreadyCompletedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6142,6 +6227,7 @@ module InvalidApprovalTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6171,6 +6257,7 @@ module ApprovalResult =
         ApprovalSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "summary") in
       make ~status ~summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" ApprovalStatus.of_json in
       let summary = field_map_exn json "summary" ApprovalSummary.of_json in
@@ -6204,6 +6291,7 @@ module ActionTypeNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified action type cannot be found."]
@@ -6312,6 +6400,7 @@ module InvalidNextTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6502,6 +6591,7 @@ module PipelineExecutionNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6524,6 +6614,7 @@ module ActionExecutionFilter =
         (Option.map ~f:PipelineExecutionId.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionId =
         field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
@@ -6538,6 +6629,7 @@ module InvalidClientTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The client token was specified in an invalid format"]
@@ -6549,6 +6641,7 @@ module InvalidJobException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6561,6 +6654,7 @@ module JobNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6591,6 +6685,7 @@ module ThirdPartyJobDetails =
       let id =
         (Option.map ~f:ThirdPartyJobId.of_xml) (Xml.child xml_arg0 "id") in
       make ?nonce ?data ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nonce = field_map json "nonce" Nonce.of_json in
       let data = field_map json "data" ThirdPartyJobData.of_json in
@@ -6652,6 +6747,7 @@ module PipelineMetadata =
       let pipelineArn =
         (Option.map ~f:PipelineArn.of_xml) (Xml.child xml_arg0 "pipelineArn") in
       make ?updated ?created ?pipelineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updated = field_map json "updated" Timestamp.of_json in
       let created = field_map json "created" Timestamp.of_json in
@@ -6667,6 +6763,7 @@ module PipelineVersionNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6743,6 +6840,7 @@ module PipelineExecution =
           (Xml.child xml_arg0 "pipelineName") in
       make ?artifactRevisions ?statusSummary ?status ?pipelineExecutionId
         ?pipelineVersion ?pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactRevisions =
         field_map json "artifactRevisions" ArtifactRevisionList.of_json in
@@ -6783,6 +6881,7 @@ module JobDetails =
       let data = (Option.map ~f:JobData.of_xml) (Xml.child xml_arg0 "data") in
       let id = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "id") in
       make ?accountId ?data ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "accountId" AccountId.of_json in
       let data = field_map json "data" JobData.of_json in
@@ -6824,6 +6923,7 @@ module PipelineNameInUseException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified pipeline name is already in use."]
@@ -6835,6 +6935,7 @@ module InvalidNonceException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The nonce was specified in an invalid format."]
@@ -6977,6 +7078,7 @@ module UpdatePipelineOutput =
         (Option.map ~f:PipelineDeclaration.of_xml)
           (Xml.child xml_arg0 "pipeline") in
       make ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipeline = field_map json "pipeline" PipelineDeclaration.of_json in
       make ?pipeline ()
@@ -6999,6 +7101,7 @@ module UpdatePipelineInput =
         PipelineDeclaration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipeline") in
       make ~pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipeline =
         field_map_exn json "pipeline" PipelineDeclaration.of_json in
@@ -7023,6 +7126,7 @@ module UpdateActionTypeInput =
         ActionTypeDeclaration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actionType") in
       make ~actionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionType =
         field_map_exn json "actionType" ActionTypeDeclaration.of_json in
@@ -7104,6 +7208,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from an AWS resource."]
@@ -7133,6 +7238,7 @@ module UntagResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -7222,6 +7328,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7249,6 +7356,7 @@ module TagResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -7342,6 +7450,7 @@ module StopPipelineExecutionOutput =
         (Option.map ~f:PipelineExecutionId.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionId =
         field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
@@ -7392,6 +7501,7 @@ module StopPipelineExecutionInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ?reason ?abandon ~pipelineExecutionId ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "reason" StopPipelineExecutionReason.of_json in
@@ -7467,6 +7577,7 @@ module StartPipelineExecutionOutput =
         (Option.map ~f:PipelineExecutionId.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionId =
         field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
@@ -7498,6 +7609,7 @@ module StartPipelineExecutionInput =
       let name =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?clientRequestToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -7599,6 +7711,7 @@ module RetryStageExecutionOutput =
         (Option.map ~f:PipelineExecutionId.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionId =
         field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
@@ -7649,6 +7762,7 @@ module RetryStageExecutionInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~retryMode ~pipelineExecutionId ~stageName ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryMode = field_map_exn json "retryMode" StageRetryMode.of_json in
       let pipelineExecutionId =
@@ -7672,6 +7786,7 @@ module RequestFailedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -7722,6 +7837,7 @@ module RegisterWebhookWithThirdPartyOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7742,6 +7858,7 @@ module RegisterWebhookWithThirdPartyInput =
       let webhookName =
         (Option.map ~f:WebhookName.of_xml) (Xml.child xml_arg0 "webhookName") in
       make ?webhookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhookName = field_map json "webhookName" WebhookName.of_json in
       make ?webhookName ()
@@ -7865,6 +7982,7 @@ module PutWebhookOutput =
       let webhook =
         (Option.map ~f:ListWebhookItem.of_xml) (Xml.child xml_arg0 "webhook") in
       make ?webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhook = field_map json "webhook" ListWebhookItem.of_json in
       make ?webhook ()
@@ -7892,6 +8010,7 @@ module PutWebhookInput =
         WebhookDefinition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
       make ?tags ~webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let webhook = field_map_exn json "webhook" WebhookDefinition.of_json in
@@ -7960,6 +8079,7 @@ module PutThirdPartyJobSuccessResultInput =
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ?executionDetails ?continuationToken ?currentRevision ~clientToken
         ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionDetails =
         field_map json "executionDetails" ExecutionDetails.of_json in
@@ -8008,6 +8128,7 @@ module PutThirdPartyJobFailureResultInput =
         ThirdPartyJobId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~failureDetails ~clientToken ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureDetails =
         field_map_exn json "failureDetails" FailureDetails.of_json in
@@ -8079,6 +8200,7 @@ module PutJobSuccessResultInput =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ?outputVariables ?executionDetails ?continuationToken
         ?currentRevision ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputVariables =
         field_map json "outputVariables" OutputVariablesMap.of_json in
@@ -8117,6 +8239,7 @@ module PutJobFailureResultInput =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~failureDetails ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureDetails =
         field_map_exn json "failureDetails" FailureDetails.of_json in
@@ -8217,6 +8340,7 @@ module PutApprovalResultOutput =
       let approvedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "approvedAt") in
       make ?approvedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvedAt = field_map json "approvedAt" Timestamp.of_json in
       make ?approvedAt ()
@@ -8272,6 +8396,7 @@ module PutApprovalResultInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~token ~result ~actionName ~stageName ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let token = field_map_exn json "token" ApprovalToken.of_json in
       let result = field_map_exn json "result" ApprovalResult.of_json in
@@ -8361,6 +8486,7 @@ module PutActionRevisionOutput =
       let newRevision =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "newRevision") in
       make ?pipelineExecutionId ?newRevision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionId =
         field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
@@ -8410,6 +8536,7 @@ module PutActionRevisionInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~actionRevision ~actionName ~stageName ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionRevision =
         field_map_exn json "actionRevision" ActionRevision.of_json in
@@ -8473,6 +8600,7 @@ module PollForThirdPartyJobsOutput =
       let jobs =
         (Option.map ~f:ThirdPartyJobList.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobs = field_map json "jobs" ThirdPartyJobList.of_json in
       make ?jobs ()
@@ -8504,6 +8632,7 @@ module PollForThirdPartyJobsInput =
         ActionTypeId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actionTypeId") in
       make ?maxBatchSize ~actionTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxBatchSize = field_map json "maxBatchSize" MaxBatchSize.of_json in
       let actionTypeId =
@@ -8562,6 +8691,7 @@ module PollForJobsOutput =
     let of_xml xml_arg0 =
       let jobs = (Option.map ~f:JobList.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobs = field_map json "jobs" JobList.of_json in make ?jobs ()
     let to_json v = composed_to_json to_value v
@@ -8601,6 +8731,7 @@ module PollForJobsInput =
         ActionTypeId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actionTypeId") in
       make ?queryParam ?maxBatchSize ~actionTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryParam = field_map json "queryParam" QueryParamMap.of_json in
       let maxBatchSize = field_map json "maxBatchSize" MaxBatchSize.of_json in
@@ -8622,6 +8753,7 @@ module OutputVariablesSizeExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -8686,6 +8818,7 @@ module ListWebhooksOutput =
       let webhooks =
         (Option.map ~f:WebhookList.of_xml) (Xml.child xml_arg0 "webhooks") in
       make ?nextToken ?webhooks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let webhooks = field_map json "webhooks" WebhookList.of_json in
@@ -8716,6 +8849,7 @@ module ListWebhooksInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8796,6 +8930,7 @@ module ListTagsForResourceOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let tags = field_map json "tags" TagList.of_json in
@@ -8835,6 +8970,7 @@ module ListTagsForResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8900,6 +9036,7 @@ module ListPipelinesOutput =
       let pipelines =
         (Option.map ~f:PipelineList.of_xml) (Xml.child xml_arg0 "pipelines") in
       make ?nextToken ?pipelines ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let pipelines = field_map json "pipelines" PipelineList.of_json in
@@ -8929,6 +9066,7 @@ module ListPipelinesInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxPipelines.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -9005,6 +9143,7 @@ module ListPipelineExecutionsOutput =
         (Option.map ~f:PipelineExecutionSummaryList.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionSummaries") in
       make ?nextToken ?pipelineExecutionSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let pipelineExecutionSummaries =
@@ -9047,6 +9186,7 @@ module ListPipelineExecutionsInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ?nextToken ?maxResults ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -9115,6 +9255,7 @@ module ListActionTypesOutput =
         ActionTypeList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actionTypes") in
       make ?nextToken ~actionTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let actionTypes =
@@ -9156,6 +9297,7 @@ module ListActionTypesInput =
         (Option.map ~f:ActionOwner.of_xml)
           (Xml.child xml_arg0 "actionOwnerFilter") in
       make ?regionFilter ?nextToken ?actionOwnerFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regionFilter = field_map json "regionFilter" AWSRegionName.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -9247,6 +9389,7 @@ module ListActionExecutionsOutput =
         (Option.map ~f:ActionExecutionDetailList.of_xml)
           (Xml.child xml_arg0 "actionExecutionDetails") in
       make ?nextToken ?actionExecutionDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let actionExecutionDetails =
@@ -9297,6 +9440,7 @@ module ListActionExecutionsInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ?nextToken ?maxResults ?filter ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -9315,6 +9459,7 @@ module InvalidJobStateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The job state was specified in an invalid format."]
@@ -9392,6 +9537,7 @@ module GetThirdPartyJobDetailsOutput =
         (Option.map ~f:ThirdPartyJobDetails.of_xml)
           (Xml.child xml_arg0 "jobDetails") in
       make ?jobDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobDetails =
         field_map json "jobDetails" ThirdPartyJobDetails.of_json in
@@ -9424,6 +9570,7 @@ module GetThirdPartyJobDetailsInput =
         ThirdPartyJobId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~clientToken ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let jobId = field_map_exn json "jobId" ThirdPartyJobId.of_json in
@@ -9525,6 +9672,7 @@ module GetPipelineStateOutput =
         (Option.map ~f:PipelineName.of_xml)
           (Xml.child xml_arg0 "pipelineName") in
       make ?updated ?created ?stageStates ?pipelineVersion ?pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updated = field_map json "updated" Timestamp.of_json in
       let created = field_map json "created" Timestamp.of_json in
@@ -9551,6 +9699,7 @@ module GetPipelineStateInput =
       let name =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" PipelineName.of_json in
       make ~name ()
@@ -9629,6 +9778,7 @@ module GetPipelineOutput =
         (Option.map ~f:PipelineDeclaration.of_xml)
           (Xml.child xml_arg0 "pipeline") in
       make ?metadata ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata = field_map json "metadata" PipelineMetadata.of_json in
       let pipeline = field_map json "pipeline" PipelineDeclaration.of_json in
@@ -9658,6 +9808,7 @@ module GetPipelineInput =
       let name =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" PipelineVersion.of_json in
       let name = field_map_exn json "name" PipelineName.of_json in
@@ -9731,6 +9882,7 @@ module GetPipelineExecutionOutput =
         (Option.map ~f:PipelineExecution.of_xml)
           (Xml.child xml_arg0 "pipelineExecution") in
       make ?pipelineExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecution =
         field_map json "pipelineExecution" PipelineExecution.of_json in
@@ -9765,6 +9917,7 @@ module GetPipelineExecutionInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~pipelineExecutionId ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionId =
         field_map_exn json "pipelineExecutionId" PipelineExecutionId.of_json in
@@ -9825,6 +9978,7 @@ module GetJobDetailsOutput =
       let jobDetails =
         (Option.map ~f:JobDetails.of_xml) (Xml.child xml_arg0 "jobDetails") in
       make ?jobDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobDetails = field_map json "jobDetails" JobDetails.of_json in
       make ?jobDetails ()
@@ -9845,6 +9999,7 @@ module GetJobDetailsInput =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -9905,6 +10060,7 @@ module GetActionTypeOutput =
         (Option.map ~f:ActionTypeDeclaration.of_xml)
           (Xml.child xml_arg0 "actionType") in
       make ?actionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionType =
         field_map json "actionType" ActionTypeDeclaration.of_json in
@@ -9952,6 +10108,7 @@ module GetActionTypeInput =
         ActionCategory.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~owner ~category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let provider = field_map_exn json "provider" ActionProvider.of_json in
@@ -9997,6 +10154,7 @@ module EnableStageTransitionInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~transitionType ~stageName ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitionType =
         field_map_exn json "transitionType" StageTransitionType.of_json in
@@ -10050,6 +10208,7 @@ module DisableStageTransitionInput =
         PipelineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~reason ~transitionType ~stageName ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map_exn json "reason" DisabledReason.of_json in
       let transitionType =
@@ -10104,6 +10263,7 @@ module DeregisterWebhookWithThirdPartyOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10123,6 +10283,7 @@ module DeregisterWebhookWithThirdPartyInput =
       let webhookName =
         (Option.map ~f:WebhookName.of_xml) (Xml.child xml_arg0 "webhookName") in
       make ?webhookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhookName = field_map json "webhookName" WebhookName.of_json in
       make ?webhookName ()
@@ -10176,6 +10337,7 @@ module DeleteWebhookOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10195,6 +10357,7 @@ module DeleteWebhookInput =
       let name =
         WebhookName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" WebhookName.of_json in
       make ~name ()
@@ -10216,6 +10379,7 @@ module DeletePipelineInput =
       let name =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" PipelineName.of_json in
       make ~name ()
@@ -10253,6 +10417,7 @@ module DeleteCustomActionTypeInput =
         ActionCategory.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let provider = field_map_exn json "provider" ActionProvider.of_json in
@@ -10404,6 +10569,7 @@ module CreatePipelineOutput =
         (Option.map ~f:PipelineDeclaration.of_xml)
           (Xml.child xml_arg0 "pipeline") in
       make ?tags ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let pipeline = field_map json "pipeline" PipelineDeclaration.of_json in
@@ -10431,6 +10597,7 @@ module CreatePipelineInput =
         PipelineDeclaration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pipeline") in
       make ?tags ~pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let pipeline =
@@ -10526,6 +10693,7 @@ module CreateCustomActionTypeOutput =
         ActionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actionType") in
       make ?tags ~actionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let actionType = field_map_exn json "actionType" ActionType.of_json in
@@ -10617,6 +10785,7 @@ module CreateCustomActionTypeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ?tags ~outputArtifactDetails ~inputArtifactDetails
         ?configurationProperties ?settings ~version ~provider ~category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let outputArtifactDetails =
@@ -10643,6 +10812,7 @@ module ActionTypeAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10719,6 +10889,7 @@ module AcknowledgeThirdPartyJobOutput =
       let status =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" JobStatus.of_json in
       make ?status ()
@@ -10757,6 +10928,7 @@ module AcknowledgeThirdPartyJobInput =
         ThirdPartyJobId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~clientToken ~nonce ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let nonce = field_map_exn json "nonce" Nonce.of_json in
@@ -10825,6 +10997,7 @@ module AcknowledgeJobOutput =
       let status =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" JobStatus.of_json in
       make ?status ()
@@ -10853,6 +11026,7 @@ module AcknowledgeJobInput =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~nonce ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nonce = field_map_exn json "nonce" Nonce.of_json in
       let jobId = field_map_exn json "jobId" JobId.of_json in

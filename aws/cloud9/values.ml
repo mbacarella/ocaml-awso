@@ -197,6 +197,7 @@ module EnvironmentLifecycle =
         (Option.map ~f:EnvironmentLifecycleStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?failureResource ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureResource = field_map json "failureResource" String_.of_json in
       let reason = field_map json "reason" String_.of_json in
@@ -375,6 +376,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -472,6 +474,7 @@ module Environment =
       let id = (Option.map ~f:EnvironmentId.of_xml) (Xml.child xml_arg0 "id") in
       make ?managedCredentialsStatus ?lifecycle ~ownerArn ~arn
         ?connectionType ~type_ ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let managedCredentialsStatus =
         field_map json "managedCredentialsStatus"
@@ -538,6 +541,7 @@ module EnvironmentMember =
         Permissions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "permissions") in
       make ?lastAccess ~environmentId ~userArn ~userId ~permissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastAccess = field_map json "lastAccess" Timestamp.of_json in
       let environmentId =
@@ -557,6 +561,7 @@ module BadRequestException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The target request is invalid."]
@@ -568,6 +573,7 @@ module ConflictException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A conflict occurred."]
@@ -579,6 +585,7 @@ module ForbiddenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An access permissions issue occurred."]
@@ -590,6 +597,7 @@ module InternalServerErrorException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal server error occurred."]
@@ -601,6 +609,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A service limit was exceeded."]
@@ -612,6 +621,7 @@ module NotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The target resource cannot be found."]
@@ -623,6 +633,7 @@ module TooManyRequestsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -688,6 +699,7 @@ module ConcurrentAccessException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A concurrent access issue occurred."]
@@ -1142,6 +1154,7 @@ module UpdateEnvironmentResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1190,6 +1203,7 @@ module UpdateEnvironmentRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ?managedCredentialsAction ?description ?name ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let managedCredentialsAction =
         field_map json "managedCredentialsAction"
@@ -1304,6 +1318,7 @@ module UpdateEnvironmentMembershipResult =
         (Option.map ~f:EnvironmentMember.of_xml)
           (Xml.child xml_arg0 "membership") in
       make ?membership ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let membership = field_map json "membership" EnvironmentMember.of_json in
       make ?membership ()
@@ -1343,6 +1358,7 @@ module UpdateEnvironmentMembershipRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~permissions ~userArn ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissions =
         field_map_exn json "permissions" MemberPermissions.of_json in
@@ -1417,6 +1433,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from an Cloud9 development environment."]
@@ -1446,6 +1463,7 @@ module UntagResourceRequest =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -1517,6 +1535,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1545,6 +1564,7 @@ module TagResourceRequest =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN =
@@ -1614,6 +1634,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1637,6 +1658,7 @@ module ListTagsForResourceRequest =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" EnvironmentArn.of_json in
@@ -1751,6 +1773,7 @@ module ListEnvironmentsResult =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?environmentIds ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentIds =
         field_map json "environmentIds" EnvironmentIdList.of_json in
@@ -1782,6 +1805,7 @@ module ListEnvironmentsRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -1889,6 +1913,7 @@ module DescribeEnvironmentsResult =
         (Option.map ~f:EnvironmentList.of_xml)
           (Xml.child xml_arg0 "environments") in
       make ?environments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environments =
         field_map json "environments" EnvironmentList.of_json in
@@ -1914,6 +1939,7 @@ module DescribeEnvironmentsRequest =
         BoundedEnvironmentIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentIds") in
       make ~environmentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentIds =
         field_map_exn json "environmentIds" BoundedEnvironmentIdList.of_json in
@@ -2027,6 +2053,7 @@ module DescribeEnvironmentStatusResult =
         EnvironmentStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~message ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       let status = field_map_exn json "status" EnvironmentStatus.of_json in
@@ -2052,6 +2079,7 @@ module DescribeEnvironmentStatusRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentId =
         field_map_exn json "environmentId" EnvironmentId.of_json in
@@ -2167,6 +2195,7 @@ module DescribeEnvironmentMembershipsResult =
         (Option.map ~f:EnvironmentMembersList.of_xml)
           (Xml.child xml_arg0 "memberships") in
       make ?nextToken ?memberships ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let memberships =
@@ -2226,6 +2255,7 @@ module DescribeEnvironmentMembershipsRequest =
       let userArn =
         (Option.map ~f:UserArn.of_xml) (Xml.child xml_arg0 "userArn") in
       make ?maxResults ?nextToken ?permissions ?environmentId ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -2328,6 +2358,7 @@ module DeleteEnvironmentResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2349,6 +2380,7 @@ module DeleteEnvironmentRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentId =
         field_map_exn json "environmentId" EnvironmentId.of_json in
@@ -2447,6 +2479,7 @@ module DeleteEnvironmentMembershipResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2476,6 +2509,7 @@ module DeleteEnvironmentMembershipRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~userArn ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map_exn json "userArn" UserArn.of_json in
       let environmentId =
@@ -2585,6 +2619,7 @@ module CreateEnvironmentMembershipResult =
         EnvironmentMember.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "membership") in
       make ~membership ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let membership =
         field_map_exn json "membership" EnvironmentMember.of_json in
@@ -2625,6 +2660,7 @@ module CreateEnvironmentMembershipRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~permissions ~userArn ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissions =
         field_map_exn json "permissions" MemberPermissions.of_json in
@@ -2735,6 +2771,7 @@ module CreateEnvironmentEC2Result =
         (Option.map ~f:EnvironmentId.of_xml)
           (Xml.child xml_arg0 "environmentId") in
       make ?environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentId =
         field_map json "environmentId" EnvironmentId.of_json in
@@ -2854,6 +2891,7 @@ module CreateEnvironmentEC2Request =
       make ?dryRun ?connectionType ?tags ?ownerArn ?automaticStopTimeMinutes
         ?imageId ?subnetId ~instanceType ?clientRequestToken ?description
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "dryRun" NullableBoolean.of_json in
       let connectionType =

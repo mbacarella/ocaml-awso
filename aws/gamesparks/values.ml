@@ -45,6 +45,7 @@ module Document =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -133,6 +134,7 @@ module Section =
       let attributes =
         (Option.map ~f:Document.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?size ?name ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let size = field_map json "Size" ByteSize.of_json in
       let name = field_map json "Name" SectionName.of_json in
@@ -859,6 +861,7 @@ module SectionModification =
         Operation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Operation") in
       make ?value ~section ~path ~operation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Document.of_json in
       let section = field_map_exn json "Section" SectionName.of_json in
@@ -968,6 +971,7 @@ module StageSummary =
         (Option.map ~f:StageDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ?tags ?state ?name ?gameKey ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" StageState.of_json in
@@ -1032,6 +1036,7 @@ module StageDeploymentSummary =
           (Xml.child xml_arg0 "DeploymentAction") in
       make ?snapshotId ?lastUpdated ?deploymentState ?deploymentId
         ?deploymentAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
       let lastUpdated = field_map json "LastUpdated" DateTime.of_json in
@@ -1078,6 +1083,7 @@ module SnapshotSummary =
       let created =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "Created") in
       make ?lastUpdated ?id ?description ?created ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdated = field_map json "LastUpdated" DateTime.of_json in
       let id = field_map json "Id" SnapshotId.of_json in
@@ -1142,6 +1148,7 @@ module GeneratedCodeJobDetails =
         (Option.map ~f:GeneratedCodeJobDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ?status ?s3Url ?generatedCodeJobId ?expirationTime ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" GeneratedCodeJobState.of_json in
       let s3Url = field_map json "S3Url" S3PresignedUrl.of_json in
@@ -1183,6 +1190,7 @@ module GameSummary =
         (Option.map ~f:GameDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ?tags ?state ?name ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" GameState.of_json in
@@ -1221,6 +1229,7 @@ module ExtensionDetails =
         (Option.map ~f:ExtensionDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ?namespace ?name ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace = field_map json "Namespace" ExtensionNamespace.of_json in
       let name = field_map json "Name" ExtensionName.of_json in
@@ -1266,6 +1275,7 @@ module ExtensionVersionDetails =
       let name =
         (Option.map ~f:ExtensionName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?version ?schema ?namespace ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" ExtensionVersion.of_json in
       let schema = field_map json "Schema" ExtensionVersionSchema.of_json in
@@ -1306,6 +1316,7 @@ module Connection =
       let created =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "Created") in
       make ?id ?created ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" ConnectionId.of_json in
       let created = field_map json "Created" DateTime.of_json in
@@ -1326,6 +1337,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1346,6 +1358,7 @@ module InternalServerException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1365,6 +1378,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1452,6 +1466,7 @@ module StageDetails =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?state ?role ?name ?logGroup ?lastUpdated ?gameKey
         ?description ?created ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" StageState.of_json in
@@ -1481,6 +1496,7 @@ module ThrottlingException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1500,6 +1516,7 @@ module ValidationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1545,6 +1562,7 @@ module SnapshotDetails =
       let created =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "Created") in
       make ?sections ?lastUpdated ?id ?description ?created ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sections = field_map json "Sections" Sections.of_json in
       let lastUpdated = field_map json "LastUpdated" DateTime.of_json in
@@ -1623,6 +1641,7 @@ module GameDetails =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?state ?name ?lastUpdated ?enableTerminationProtection
         ?description ?created ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" GameState.of_json in
@@ -1665,6 +1684,7 @@ module GameConfigurationDetails =
       let created =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "Created") in
       make ?sections ?lastUpdated ?created ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sections = field_map json "Sections" Sections.of_json in
       let lastUpdated = field_map json "LastUpdated" DateTime.of_json in
@@ -1687,6 +1707,7 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1784,6 +1805,7 @@ module ConflictException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1853,6 +1875,7 @@ module StageDeploymentDetails =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "Created") in
       make ?snapshotId ?lastUpdated ?deploymentState ?deploymentId
         ?deploymentAction ?created ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
       let lastUpdated = field_map json "LastUpdated" DateTime.of_json in
@@ -1918,6 +1941,7 @@ module Generator =
         (Option.map ~f:GameSdkVersion.of_xml)
           (Xml.child xml_arg0 "GameSdkVersion") in
       make ?targetPlatform ?language ?gameSdkVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetPlatform =
         field_map json "TargetPlatform" TargetPlatform.of_json in
@@ -2161,6 +2185,7 @@ module ImportGameConfigurationSource =
         RawGameConfigurationData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "File") in
       make ~file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let file = field_map_exn json "File" RawGameConfigurationData.of_json in
       make ~file ()
@@ -2341,6 +2366,7 @@ module UpdateStageResult =
       let stage =
         (Option.map ~f:StageDetails.of_xml) (Xml.child xml_arg0 "Stage") in
       make ?stage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stage = field_map json "Stage" StageDetails.of_json in
       make ?stage ()
@@ -2382,6 +2408,7 @@ module UpdateStageRequest =
         (Option.map ~f:StageDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ~stageName ?role ~gameName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let role = field_map json "Role" RoleARN.of_json in
@@ -2470,6 +2497,7 @@ module UpdateSnapshotResult =
         (Option.map ~f:SnapshotDetails.of_xml)
           (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshot = field_map json "Snapshot" SnapshotDetails.of_json in
       make ?snapshot ()
@@ -2504,6 +2532,7 @@ module UpdateSnapshotRequest =
         (Option.map ~f:SnapshotDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ~snapshotId ~gameName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let gameName = field_map_exn json "GameName" GameName.of_json in
@@ -2589,6 +2618,7 @@ module UpdateGameResult =
       let game =
         (Option.map ~f:GameDetails.of_xml) (Xml.child xml_arg0 "Game") in
       make ?game ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let game = field_map json "Game" GameDetails.of_json in make ?game ()
     let to_json v = composed_to_json to_value v
@@ -2616,6 +2646,7 @@ module UpdateGameRequest =
         (Option.map ~f:GameDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ~gameName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameName = field_map_exn json "GameName" GameName.of_json in
       let description = field_map json "Description" GameDescription.of_json in
@@ -2714,6 +2745,7 @@ module UpdateGameConfigurationResult =
         (Option.map ~f:GameConfigurationDetails.of_xml)
           (Xml.child xml_arg0 "GameConfiguration") in
       make ?gameConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameConfiguration =
         field_map json "GameConfiguration" GameConfigurationDetails.of_json in
@@ -2743,6 +2775,7 @@ module UpdateGameConfigurationRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~modifications ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modifications =
         field_map_exn json "Modifications" SectionModificationList.of_json in
@@ -2803,6 +2836,7 @@ module UntagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a GameSparks resource."]
@@ -2830,6 +2864,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -2889,6 +2924,7 @@ module TagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds tags to a GameSparks resource."]
@@ -2914,6 +2950,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -3009,6 +3046,7 @@ module StartStageDeploymentResult =
         (Option.map ~f:StageDeploymentDetails.of_xml)
           (Xml.child xml_arg0 "StageDeployment") in
       make ?stageDeployment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageDeployment =
         field_map json "StageDeployment" StageDeploymentDetails.of_json in
@@ -3053,6 +3091,7 @@ module StartStageDeploymentRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ~stageName ~snapshotId ~gameName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
@@ -3143,6 +3182,7 @@ module StartGeneratedCodeJobResult =
         (Option.map ~f:GeneratedCodeJobId.of_xml)
           (Xml.child xml_arg0 "GeneratedCodeJobId") in
       make ?generatedCodeJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generatedCodeJobId =
         field_map json "GeneratedCodeJobId" GeneratedCodeJobId.of_json in
@@ -3180,6 +3220,7 @@ module StartGeneratedCodeJobRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~snapshotId ~generator ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let generator = field_map_exn json "Generator" Generator.of_json in
@@ -3246,6 +3287,7 @@ module ListTagsForResourceResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3268,6 +3310,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -3358,6 +3401,7 @@ module ListStagesResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?stages ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stages = field_map json "Stages" StageSummaryList.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3393,6 +3437,7 @@ module ListStagesRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ?nextToken ?maxResults ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3488,6 +3533,7 @@ module ListStageDeploymentsResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?stageDeployments ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageDeployments =
         field_map json "StageDeployments" StageDeploymentList.of_json in
@@ -3532,6 +3578,7 @@ module ListStageDeploymentsRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~stageName ?nextToken ?maxResults ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3629,6 +3676,7 @@ module ListSnapshotsResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?snapshots ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshots = field_map json "Snapshots" SnapshotSummaryList.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3665,6 +3713,7 @@ module ListSnapshotsRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ?nextToken ?maxResults ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3761,6 +3810,7 @@ module ListGeneratedCodeJobsResult =
         (Option.map ~f:GeneratedCodeJobDetailsList.of_xml)
           (Xml.child xml_arg0 "GeneratedCodeJobs") in
       make ?nextToken ?generatedCodeJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let generatedCodeJobs =
@@ -3806,6 +3856,7 @@ module ListGeneratedCodeJobsRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~snapshotId ?nextToken ?maxResults ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3889,6 +3940,7 @@ module ListGamesResult =
       let games =
         (Option.map ~f:GameSummaryList.of_xml) (Xml.child xml_arg0 "Games") in
       make ?nextToken ?games ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let games = field_map json "Games" GameSummaryList.of_json in
@@ -3918,6 +3970,7 @@ module ListGamesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4002,6 +4055,7 @@ module ListExtensionsResult =
         (Option.map ~f:ExtensionDetailsList.of_xml)
           (Xml.child xml_arg0 "Extensions") in
       make ?nextToken ?extensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let extensions =
@@ -4033,6 +4087,7 @@ module ListExtensionsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4128,6 +4183,7 @@ module ListExtensionVersionsResult =
         (Option.map ~f:ExtensionVersionDetailsList.of_xml)
           (Xml.child xml_arg0 "ExtensionVersions") in
       make ?nextToken ?extensionVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let extensionVersions =
@@ -4175,6 +4231,7 @@ module ListExtensionVersionsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ~namespace ~name ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let namespace =
@@ -4277,6 +4334,7 @@ module ImportGameConfigurationResult =
         (Option.map ~f:GameConfigurationDetails.of_xml)
           (Xml.child xml_arg0 "GameConfiguration") in
       make ?gameConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameConfiguration =
         field_map json "GameConfiguration" GameConfigurationDetails.of_json in
@@ -4307,6 +4365,7 @@ module ImportGameConfigurationRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~importSource ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let importSource =
         field_map_exn json "ImportSource"
@@ -4394,6 +4453,7 @@ module GetStageResult =
       let stage =
         (Option.map ~f:StageDetails.of_xml) (Xml.child xml_arg0 "Stage") in
       make ?stage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stage = field_map json "Stage" StageDetails.of_json in
       make ?stage ()
@@ -4419,6 +4479,7 @@ module GetStageRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~stageName ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let gameName = field_map_exn json "GameName" GameName.of_json in
@@ -4506,6 +4567,7 @@ module GetStageDeploymentResult =
         (Option.map ~f:StageDeploymentDetails.of_xml)
           (Xml.child xml_arg0 "StageDeployment") in
       make ?stageDeployment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageDeployment =
         field_map json "StageDeployment" StageDeploymentDetails.of_json in
@@ -4542,6 +4604,7 @@ module GetStageDeploymentRequest =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "DeploymentId") in
       make ~stageName ~gameName ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let gameName = field_map_exn json "GameName" GameName.of_json in
@@ -4628,6 +4691,7 @@ module GetSnapshotResult =
         (Option.map ~f:SnapshotDetails.of_xml)
           (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshot = field_map json "Snapshot" SnapshotDetails.of_json in
       make ?snapshot ()
@@ -4661,6 +4725,7 @@ module GetSnapshotRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~snapshotId ?sections ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let sections = field_map json "Sections" SectionList.of_json in
@@ -4749,6 +4814,7 @@ module GetPlayerConnectionStatusResult =
         (Option.map ~f:ConnectionList.of_xml)
           (Xml.child xml_arg0 "Connections") in
       make ?connections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connections = field_map json "Connections" ConnectionList.of_json in
       make ?connections ()
@@ -4782,6 +4848,7 @@ module GetPlayerConnectionStatusRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~stageName ~playerId ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let playerId = field_map_exn json "PlayerId" PlayerId.of_json in
@@ -4870,6 +4937,7 @@ module GetGeneratedCodeJobResult =
         (Option.map ~f:GeneratedCodeJobDetails.of_xml)
           (Xml.child xml_arg0 "GeneratedCodeJob") in
       make ?generatedCodeJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generatedCodeJob =
         field_map json "GeneratedCodeJob" GeneratedCodeJobDetails.of_json in
@@ -4907,6 +4975,7 @@ module GetGeneratedCodeJobRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~snapshotId ~jobId ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let jobId = field_map_exn json "JobId" GeneratedCodeJobId.of_json in
@@ -4992,6 +5061,7 @@ module GetGameResult =
       let game =
         (Option.map ~f:GameDetails.of_xml) (Xml.child xml_arg0 "Game") in
       make ?game ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let game = field_map json "Game" GameDetails.of_json in make ?game ()
     let to_json v = composed_to_json to_value v
@@ -5011,6 +5081,7 @@ module GetGameRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameName = field_map_exn json "GameName" GameName.of_json in
       make ~gameName ()
@@ -5097,6 +5168,7 @@ module GetGameConfigurationResult =
         (Option.map ~f:GameConfigurationDetails.of_xml)
           (Xml.child xml_arg0 "GameConfiguration") in
       make ?gameConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameConfiguration =
         field_map json "GameConfiguration" GameConfigurationDetails.of_json in
@@ -5123,6 +5195,7 @@ module GetGameConfigurationRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ?sections ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sections = field_map json "Sections" SectionList.of_json in
       let gameName = field_map_exn json "GameName" GameName.of_json in
@@ -5209,6 +5282,7 @@ module GetExtensionVersionResult =
         (Option.map ~f:ExtensionVersionDetails.of_xml)
           (Xml.child xml_arg0 "ExtensionVersion") in
       make ?extensionVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extensionVersion =
         field_map json "ExtensionVersion" ExtensionVersionDetails.of_json in
@@ -5246,6 +5320,7 @@ module GetExtensionVersionRequest =
         ExtensionVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExtensionVersion") in
       make ~namespace ~name ~extensionVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace =
         field_map_exn json "Namespace" ExtensionNamespace.of_json in
@@ -5334,6 +5409,7 @@ module GetExtensionResult =
         (Option.map ~f:ExtensionDetails.of_xml)
           (Xml.child xml_arg0 "Extension") in
       make ?extension ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extension = field_map json "Extension" ExtensionDetails.of_json in
       make ?extension ()
@@ -5361,6 +5437,7 @@ module GetExtensionRequest =
         ExtensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~namespace ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace =
         field_map_exn json "Namespace" ExtensionNamespace.of_json in
@@ -5447,6 +5524,7 @@ module ExportSnapshotResult =
       let s3Url =
         (Option.map ~f:S3PresignedUrl.of_xml) (Xml.child xml_arg0 "S3Url") in
       make ?s3Url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Url = field_map json "S3Url" S3PresignedUrl.of_json in
       make ?s3Url ()
@@ -5474,6 +5552,7 @@ module ExportSnapshotRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~snapshotId ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       let gameName = field_map_exn json "GameName" GameName.of_json in
@@ -5570,6 +5649,7 @@ module DisconnectPlayerResult =
         (Option.map ~f:ConnectionIdList.of_xml)
           (Xml.child xml_arg0 "DisconnectFailures") in
       make ?disconnectSuccesses ?disconnectFailures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disconnectSuccesses =
         field_map json "DisconnectSuccesses" ConnectionIdList.of_json in
@@ -5606,6 +5686,7 @@ module DisconnectPlayerRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~stageName ~playerId ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let playerId = field_map_exn json "PlayerId" PlayerId.of_json in
@@ -5694,6 +5775,7 @@ module DeleteStageResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5718,6 +5800,7 @@ module DeleteStageRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~stageName ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map_exn json "StageName" StageName.of_json in
       let gameName = field_map_exn json "GameName" GameName.of_json in
@@ -5796,6 +5879,7 @@ module DeleteGameResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a game."]
@@ -5814,6 +5898,7 @@ module DeleteGameRequest =
       let gameName =
         GameName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GameName") in
       make ~gameName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameName = field_map_exn json "GameName" GameName.of_json in
       make ~gameName ()
@@ -5906,6 +5991,7 @@ module CreateStageResult =
       let stage =
         (Option.map ~f:StageDetails.of_xml) (Xml.child xml_arg0 "Stage") in
       make ?stage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stage = field_map json "Stage" StageDetails.of_json in
       make ?stage ()
@@ -5963,6 +6049,7 @@ module CreateStageRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~stageName ~role ~gameName ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let stageName = field_map_exn json "StageName" StageName.of_json in
@@ -6063,6 +6150,7 @@ module CreateSnapshotResult =
         (Option.map ~f:SnapshotDetails.of_xml)
           (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshot = field_map json "Snapshot" SnapshotDetails.of_json in
       make ?snapshot ()
@@ -6091,6 +6179,7 @@ module CreateSnapshotRequest =
         (Option.map ~f:SnapshotDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ~gameName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameName = field_map_exn json "GameName" GameName.of_json in
       let description =
@@ -6187,6 +6276,7 @@ module CreateGameResult =
       let game =
         (Option.map ~f:GameDetails.of_xml) (Xml.child xml_arg0 "Game") in
       make ?game ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let game = field_map json "Game" GameDetails.of_json in make ?game ()
     let to_json v = composed_to_json to_value v
@@ -6228,6 +6318,7 @@ module CreateGameRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~gameName ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let gameName = field_map_exn json "GameName" GameName.of_json in

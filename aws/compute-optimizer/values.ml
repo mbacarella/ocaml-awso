@@ -265,6 +265,7 @@ module ReasonCodeSummary =
       let name =
         (Option.map ~f:FindingReasonCode.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" SummaryValue.of_json in
       let name = field_map json "name" FindingReasonCode.of_json in
@@ -302,6 +303,7 @@ module LambdaFunctionMemoryProjectedMetric =
         (Option.map ~f:LambdaFunctionMemoryMetricName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" MetricValue.of_json in
       let statistic =
@@ -331,6 +333,7 @@ module EstimatedMonthlySavings =
       let currency =
         (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
       make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" Value.of_json in
       let currency = field_map json "currency" Currency.of_json in
@@ -430,6 +433,7 @@ module UtilizationMetric =
       let name =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" MetricValue.of_json in
       let statistic = field_map json "statistic" MetricStatistic.of_json in
@@ -715,6 +719,7 @@ module SavingsOpportunity =
         (Option.map ~f:SavingsOpportunityPercentage.of_xml)
           (Xml.child xml_arg0 "savingsOpportunityPercentage") in
       make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let estimatedMonthlySavings =
         field_map json "estimatedMonthlySavings"
@@ -1098,6 +1103,7 @@ module VolumeConfiguration =
         (Option.map ~f:VolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
       make ?volumeBurstThroughput ?volumeBaselineThroughput ?volumeBurstIOPS
         ?volumeBaselineIOPS ?volumeSize ?volumeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeBurstThroughput =
         field_map json "volumeBurstThroughput" VolumeBurstThroughput.of_json in
@@ -1156,6 +1162,7 @@ module AutoScalingGroupConfiguration =
         (Option.map ~f:DesiredCapacity.of_xml)
           (Xml.child xml_arg0 "desiredCapacity") in
       make ?instanceType ?maxSize ?minSize ?desiredCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceType = field_map json "instanceType" InstanceType.of_json in
       let maxSize = field_map json "maxSize" MaxSize.of_json in
@@ -1286,6 +1293,7 @@ module Summary =
         (Option.map ~f:SummaryValue.of_xml) (Xml.child xml_arg0 "value") in
       let name = (Option.map ~f:Finding.of_xml) (Xml.child xml_arg0 "name") in
       make ?reasonCodeSummaries ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reasonCodeSummaries =
         field_map json "reasonCodeSummaries" ReasonCodeSummaries.of_json in
@@ -1385,6 +1393,7 @@ module LambdaFunctionMemoryRecommendationOption =
       let rank = (Option.map ~f:Rank.of_xml) (Xml.child xml_arg0 "rank") in
       make ?savingsOpportunity ?projectedUtilizationMetrics ?memorySize ?rank
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let savingsOpportunity =
         field_map json "savingsOpportunity" SavingsOpportunity.of_json in
@@ -1466,6 +1475,7 @@ module LambdaFunctionUtilizationMetric =
         (Option.map ~f:LambdaFunctionMetricName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" MetricValue.of_json in
       let statistic =
@@ -1515,6 +1525,7 @@ module ProjectedMetric =
       let name =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?timestamps ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" MetricValues.of_json in
       let timestamps = field_map json "timestamps" Timestamps.of_json in
@@ -1800,6 +1811,7 @@ module InstanceRecommendationOption =
           (Xml.child xml_arg0 "instanceType") in
       make ?migrationEffort ?savingsOpportunity ?rank ?performanceRisk
         ?platformDifferences ?projectedUtilizationMetrics ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationEffort =
         field_map json "migrationEffort" MigrationEffort.of_json in
@@ -1848,6 +1860,7 @@ module RecommendationSource =
         (Option.map ~f:RecommendationSourceArn.of_xml)
           (Xml.child xml_arg0 "recommendationSourceArn") in
       make ?recommendationSourceType ?recommendationSourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationSourceType =
         field_map json "recommendationSourceType"
@@ -1888,6 +1901,7 @@ module EBSUtilizationMetric =
       let name =
         (Option.map ~f:EBSMetricName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" MetricValue.of_json in
       let statistic = field_map json "statistic" MetricStatistic.of_json in
@@ -1940,6 +1954,7 @@ module VolumeRecommendationOption =
         (Option.map ~f:VolumeConfiguration.of_xml)
           (Xml.child xml_arg0 "configuration") in
       make ?savingsOpportunity ?rank ?performanceRisk ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let savingsOpportunity =
         field_map json "savingsOpportunity" SavingsOpportunity.of_json in
@@ -2024,6 +2039,7 @@ module AutoScalingGroupRecommendationOption =
           (Xml.child xml_arg0 "configuration") in
       make ?migrationEffort ?savingsOpportunity ?rank ?performanceRisk
         ?projectedUtilizationMetrics ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationEffort =
         field_map json "migrationEffort" MigrationEffort.of_json in
@@ -2072,6 +2088,7 @@ module S3Destination =
         (Option.map ~f:DestinationBucket.of_xml)
           (Xml.child xml_arg0 "bucket") in
       make ?metadataKey ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadataKey = field_map json "metadataKey" MetadataKey.of_json in
       let key = field_map json "key" DestinationKey.of_json in
@@ -2127,6 +2144,7 @@ module CurrentPerformanceRiskRatings =
         (Option.map ~f:Medium.of_xml) (Xml.child xml_arg0 "medium") in
       let high = (Option.map ~f:High.of_xml) (Xml.child xml_arg0 "high") in
       make ?veryLow ?low ?medium ?high ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let veryLow = field_map json "veryLow" VeryLow.of_json in
       let low = field_map json "low" Low.of_json in
@@ -2214,6 +2232,7 @@ module Scope =
         (Option.map ~f:ScopeValue.of_xml) (Xml.child xml_arg0 "value") in
       let name = (Option.map ~f:ScopeName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" ScopeValue.of_json in
       let name = field_map json "name" ScopeName.of_json in
@@ -2694,6 +2713,7 @@ module EffectiveRecommendationPreferences =
           (Xml.child xml_arg0 "cpuVendorArchitectures") in
       make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics
         ?cpuVendorArchitectures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferredWorkloadTypes =
         field_map json "inferredWorkloadTypes"
@@ -3079,6 +3099,7 @@ module ExportDestination =
     let of_xml xml_arg0 =
       let s3 = (Option.map ~f:S3Destination.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "s3" S3Destination.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
@@ -3240,6 +3261,7 @@ module RecommendationSummary =
         (Option.map ~f:Summaries.of_xml) (Xml.child xml_arg0 "summaries") in
       make ?currentPerformanceRiskRatings ?savingsOpportunity ?accountId
         ?recommendationResourceType ?summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentPerformanceRiskRatings =
         field_map json "currentPerformanceRiskRatings"
@@ -3307,6 +3329,7 @@ module RecommendationPreferencesDetail =
       let scope = (Option.map ~f:Scope.of_xml) (Xml.child xml_arg0 "scope") in
       make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics
         ?resourceType ?scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferredWorkloadTypes =
         field_map json "inferredWorkloadTypes"
@@ -3456,6 +3479,7 @@ module LambdaFunctionRecommendation =
         ?findingReasonCodes ?finding ?lastRefreshTimestamp
         ?lookbackPeriodInDays ?utilizationMetrics ?numberOfInvocations
         ?currentMemorySize ?accountId ?functionVersion ?functionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentPerformanceRisk =
         field_map json "currentPerformanceRisk"
@@ -3514,6 +3538,7 @@ module LambdaFunctionRecommendationFilter =
         (Option.map ~f:LambdaFunctionRecommendationFilterName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValues.of_json in
       let name =
@@ -3562,6 +3587,7 @@ module AccountEnrollmentStatus =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?lastUpdatedTimestamp ?statusReason ?status ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTimestamp =
         field_map json "lastUpdatedTimestamp" LastUpdatedTimestamp.of_json in
@@ -3595,6 +3621,7 @@ module EnrollmentFilter =
         (Option.map ~f:EnrollmentFilterName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValues.of_json in
       let name = field_map json "name" EnrollmentFilterName.of_json in
@@ -3636,6 +3663,7 @@ module RecommendedOptionProjectedMetric =
         (Option.map ~f:RecommendedInstanceType.of_xml)
           (Xml.child xml_arg0 "recommendedInstanceType") in
       make ?projectedMetrics ?rank ?recommendedInstanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectedMetrics =
         field_map json "projectedMetrics" ProjectedMetrics.of_json in
@@ -3670,6 +3698,7 @@ module GetRecommendationError =
       let identifier =
         (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "identifier") in
       make ?message ?code ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       let code = field_map json "code" Code.of_json in
@@ -3832,6 +3861,7 @@ module InstanceRecommendation =
         ?recommendationOptions ?lookBackPeriodInDays ?utilizationMetrics
         ?findingReasonCodes ?finding ?currentInstanceType ?instanceName
         ?accountId ?instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferredWorkloadTypes =
         field_map json "inferredWorkloadTypes" InferredWorkloadTypes.of_json in
@@ -3889,6 +3919,7 @@ module Filter =
       let name =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValues.of_json in
       let name = field_map json "name" FilterName.of_json in
@@ -3995,6 +4026,7 @@ module VolumeRecommendation =
         ?volumeRecommendationOptions ?lookBackPeriodInDays
         ?utilizationMetrics ?finding ?currentConfiguration ?accountId
         ?volumeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentPerformanceRisk =
         field_map json "currentPerformanceRisk"
@@ -4042,6 +4074,7 @@ module EBSFilter =
       let name =
         (Option.map ~f:EBSFilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValues.of_json in
       let name = field_map json "name" EBSFilterName.of_json in
@@ -4185,6 +4218,7 @@ module AutoScalingGroupRecommendation =
         ?currentPerformanceRisk ?lastRefreshTimestamp ?recommendationOptions
         ?currentConfiguration ?lookBackPeriodInDays ?utilizationMetrics
         ?finding ?autoScalingGroupName ?autoScalingGroupArn ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferredWorkloadTypes =
         field_map json "inferredWorkloadTypes" InferredWorkloadTypes.of_json in
@@ -5054,6 +5088,7 @@ module RecommendationExportJob =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?failureReason ?lastUpdatedTimestamp ?creationTimestamp ?status
         ?resourceType ?destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "failureReason" FailureReason.of_json in
@@ -5093,6 +5128,7 @@ module JobFilter =
       let name =
         (Option.map ~f:JobFilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValues.of_json in
       let name = field_map json "name" JobFilterName.of_json in
@@ -5141,6 +5177,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5160,6 +5197,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5178,6 +5216,7 @@ module InvalidParameterValueException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5197,6 +5236,7 @@ module MissingAuthenticationToken =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5216,6 +5256,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5237,6 +5278,7 @@ module ThrottlingException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -5268,6 +5310,7 @@ module OptInRequiredException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5286,6 +5329,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5434,6 +5478,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5641,6 +5686,7 @@ module RecommendationPreferences =
         (Option.map ~f:CpuVendorArchitectures.of_xml)
           (Xml.child xml_arg0 "cpuVendorArchitectures") in
       make ?cpuVendorArchitectures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuVendorArchitectures =
         field_map json "cpuVendorArchitectures"
@@ -5940,6 +5986,7 @@ module S3DestinationConfig =
         (Option.map ~f:DestinationBucket.of_xml)
           (Xml.child xml_arg0 "bucket") in
       make ?keyPrefix ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPrefix = field_map json "keyPrefix" DestinationKeyPrefix.of_json in
       let bucket = field_map json "bucket" DestinationBucket.of_json in
@@ -6225,6 +6272,7 @@ module UpdateEnrollmentStatusResponse =
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
       make ?statusReason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason = field_map json "statusReason" StatusReason.of_json in
       let status = field_map json "status" Status.of_json in
@@ -6259,6 +6307,7 @@ module UpdateEnrollmentStatusRequest =
       let status =
         Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ?includeMemberAccounts ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeMemberAccounts =
         field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
@@ -6370,6 +6419,7 @@ module PutRecommendationPreferencesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6426,6 +6476,7 @@ module PutRecommendationPreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics ?scope
         ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferredWorkloadTypes =
         field_map json "inferredWorkloadTypes"
@@ -6553,6 +6604,7 @@ module GetRecommendationSummariesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?recommendationSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationSummaries =
         field_map json "recommendationSummaries"
@@ -6592,6 +6644,7 @@ module GetRecommendationSummariesRequest =
       let accountIds =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?maxResults ?nextToken ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6723,6 +6776,7 @@ module GetRecommendationPreferencesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?recommendationPreferencesDetails ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationPreferencesDetails =
         field_map json "recommendationPreferencesDetails"
@@ -6771,6 +6825,7 @@ module GetRecommendationPreferencesRequest =
         ResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?maxResults ?nextToken ?scope ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6903,6 +6958,7 @@ module GetLambdaFunctionRecommendationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?lambdaFunctionRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaFunctionRecommendations =
         field_map json "lambdaFunctionRecommendations"
@@ -6963,6 +7019,7 @@ module GetLambdaFunctionRecommendationsRequest =
         (Option.map ~f:FunctionArns.of_xml)
           (Xml.child xml_arg0 "functionArns") in
       make ?maxResults ?nextToken ?filters ?accountIds ?functionArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -7077,6 +7134,7 @@ module GetEnrollmentStatusesForOrganizationResponse =
         (Option.map ~f:AccountEnrollmentStatuses.of_xml)
           (Xml.child xml_arg0 "accountEnrollmentStatuses") in
       make ?nextToken ?accountEnrollmentStatuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let accountEnrollmentStatuses =
@@ -7117,6 +7175,7 @@ module GetEnrollmentStatusesForOrganizationRequest =
         (Option.map ~f:EnrollmentFilters.of_xml)
           (Xml.child xml_arg0 "filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -7264,6 +7323,7 @@ module GetEnrollmentStatusResponse =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
       make ?numberOfMemberAccountsOptedIn ?lastUpdatedTimestamp
         ?memberAccountsEnrolled ?statusReason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfMemberAccountsOptedIn =
         field_map json "numberOfMemberAccountsOptedIn"
@@ -7288,6 +7348,7 @@ module GetEnrollmentStatusRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7407,6 +7468,7 @@ module GetEffectiveRecommendationPreferencesResponse =
         (Option.map ~f:EnhancedInfrastructureMetrics.of_xml)
           (Xml.child xml_arg0 "enhancedInfrastructureMetrics") in
       make ?enhancedInfrastructureMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enhancedInfrastructureMetrics =
         field_map json "enhancedInfrastructureMetrics"
@@ -7433,6 +7495,7 @@ module GetEffectiveRecommendationPreferencesRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -7554,6 +7617,7 @@ module GetEC2RecommendationProjectedMetricsResponse =
         (Option.map ~f:RecommendedOptionProjectedMetrics.of_xml)
           (Xml.child xml_arg0 "recommendedOptionProjectedMetrics") in
       make ?recommendedOptionProjectedMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendedOptionProjectedMetrics =
         field_map json "recommendedOptionProjectedMetrics"
@@ -7629,6 +7693,7 @@ module GetEC2RecommendationProjectedMetricsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceArn") in
       make ?recommendationPreferences ~endTime ~startTime ~period ~stat
         ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationPreferences =
         field_map json "recommendationPreferences"
@@ -7773,6 +7838,7 @@ module GetEC2InstanceRecommendationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?errors ?instanceRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "errors" GetRecommendationErrors.of_json in
       let instanceRecommendations =
@@ -7849,6 +7915,7 @@ module GetEC2InstanceRecommendationsRequest =
           (Xml.child xml_arg0 "instanceArns") in
       make ?recommendationPreferences ?accountIds ?filters ?maxResults
         ?nextToken ?instanceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationPreferences =
         field_map json "recommendationPreferences"
@@ -7992,6 +8059,7 @@ module GetEBSVolumeRecommendationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?errors ?volumeRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "errors" GetRecommendationErrors.of_json in
       let volumeRecommendations =
@@ -8047,6 +8115,7 @@ module GetEBSVolumeRecommendationsRequest =
       let volumeArns =
         (Option.map ~f:VolumeArns.of_xml) (Xml.child xml_arg0 "volumeArns") in
       make ?accountIds ?filters ?maxResults ?nextToken ?volumeArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map json "accountIds" AccountIds.of_json in
       let filters = field_map json "filters" EBSFilters.of_json in
@@ -8188,6 +8257,7 @@ module GetAutoScalingGroupRecommendationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?errors ?autoScalingGroupRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "errors" GetRecommendationErrors.of_json in
       let autoScalingGroupRecommendations =
@@ -8264,6 +8334,7 @@ module GetAutoScalingGroupRecommendationsRequest =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?recommendationPreferences ?filters ?maxResults ?nextToken
         ?autoScalingGroupArns ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationPreferences =
         field_map json "recommendationPreferences"
@@ -8396,6 +8467,7 @@ module ExportLambdaFunctionRecommendationsResponse =
           (Xml.child xml_arg0 "s3Destination") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Destination =
         field_map json "s3Destination" S3Destination.of_json in
@@ -8475,6 +8547,7 @@ module ExportLambdaFunctionRecommendationsRequest =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
         ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeMemberAccounts =
         field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
@@ -8611,6 +8684,7 @@ module ExportEC2InstanceRecommendationsResponse =
           (Xml.child xml_arg0 "s3Destination") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Destination =
         field_map json "s3Destination" S3Destination.of_json in
@@ -8699,6 +8773,7 @@ module ExportEC2InstanceRecommendationsRequest =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
         ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationPreferences =
         field_map json "recommendationPreferences"
@@ -8834,6 +8909,7 @@ module ExportEBSVolumeRecommendationsResponse =
           (Xml.child xml_arg0 "s3Destination") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Destination =
         field_map json "s3Destination" S3Destination.of_json in
@@ -8909,6 +8985,7 @@ module ExportEBSVolumeRecommendationsRequest =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
         ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeMemberAccounts =
         field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
@@ -9043,6 +9120,7 @@ module ExportAutoScalingGroupRecommendationsResponse =
           (Xml.child xml_arg0 "s3Destination") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Destination =
         field_map json "s3Destination" S3Destination.of_json in
@@ -9132,6 +9210,7 @@ module ExportAutoScalingGroupRecommendationsRequest =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
         ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationPreferences =
         field_map json "recommendationPreferences"
@@ -9272,6 +9351,7 @@ module DescribeRecommendationExportJobsResponse =
         (Option.map ~f:RecommendationExportJobs.of_xml)
           (Xml.child xml_arg0 "recommendationExportJobs") in
       make ?nextToken ?recommendationExportJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let recommendationExportJobs =
@@ -9318,6 +9398,7 @@ module DescribeRecommendationExportJobsRequest =
       let jobIds =
         (Option.map ~f:JobIds.of_xml) (Xml.child xml_arg0 "jobIds") in
       make ?maxResults ?nextToken ?filters ?jobIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -9430,6 +9511,7 @@ module DeleteRecommendationPreferencesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9471,6 +9553,7 @@ module DeleteRecommendationPreferencesRequest =
         ResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~recommendationPreferenceNames ?scope ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationPreferenceNames =
         field_map_exn json "recommendationPreferenceNames"

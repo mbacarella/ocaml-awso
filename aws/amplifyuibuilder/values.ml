@@ -57,6 +57,7 @@ module FormBindingElement =
       let element =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "element") in
       make ~property ~element ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let property = field_map_exn json "property" String_.of_json in
       let element = field_map_exn json "element" String_.of_json in
@@ -114,6 +115,7 @@ module ComponentPropertyBindingProperties =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "property") in
       let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
       make ~property ?field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let property = field_map_exn json "property" String_.of_json in
       let field = field_map json "field" String_.of_json in
@@ -237,6 +239,7 @@ module rec
       let else_ =
         (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "else") in
       make ?then_ ?property ?operator ?operandType ?operand ?field ?else_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let then_ = field_map json "then" ComponentProperty.of_json in
       let property = field_map json "property" String_.of_json in
@@ -459,6 +462,7 @@ module rec
       make ?value ?userAttribute ?type_ ?property ?model ?importedValue
         ?event ?defaultValue ?configured ?condition ?concat ?componentName
         ?collectionBindingProperties ?bindings ?bindingProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" String_.of_json in
       let userAttribute = field_map json "userAttribute" String_.of_json in
@@ -551,6 +555,7 @@ module MutationActionSetStateParameter =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentName") in
       make ~set ~property ~componentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let set = field_map_exn json "set" ComponentProperty.of_json in
       let property = field_map_exn json "property" String_.of_json in
@@ -679,6 +684,7 @@ module ActionParameters =
         (Option.map ~f:ComponentProperty.of_xml)
           (Xml.child xml_arg0 "anchor") in
       make ?url ?type_ ?target ?state ?model ?id ?global ?fields ?anchor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" ComponentProperty.of_json in
       let type_ = field_map json "type" ComponentProperty.of_json in
@@ -901,6 +907,7 @@ module ComponentVariant =
         (Option.map ~f:ComponentOverrides.of_xml)
           (Xml.child xml_arg0 "overrides") in
       make ?variantValues ?overrides ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let variantValues =
         field_map json "variantValues" ComponentVariantValues.of_json in
@@ -1000,6 +1007,7 @@ module ComponentEvent =
       let action =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "action") in
       make ?parameters ?bindingEvent ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "parameters" ActionParameters.of_json in
       let bindingEvent = field_map json "bindingEvent" String_.of_json in
@@ -1080,6 +1088,7 @@ module SortProperty =
         SortDirection.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "direction") in
       make ~field ~direction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let field = field_map_exn json "field" String_.of_json in
       let direction = field_map_exn json "direction" SortDirection.of_json in
@@ -1174,6 +1183,7 @@ module rec
       let and_ =
         (Option.map ~f:PredicateList.of_xml) (Xml.child xml_arg0 "and") in
       make ?or_ ?operator ?operand ?field ?and_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let or_ = field_map json "or" PredicateList.of_json in
       let operator = field_map json "operator" String_.of_json in
@@ -1281,6 +1291,7 @@ module ComponentDataConfiguration =
         (Option.map ~f:IdentifierList.of_xml)
           (Xml.child xml_arg0 "identifiers") in
       make ?sort ?predicate ~model ?identifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sort = field_map json "sort" SortPropertyList.of_json in
       let predicate = field_map json "predicate" Predicate.of_json in
@@ -1415,6 +1426,7 @@ module rec
         (Option.map ~f:ComponentChildList.of_xml)
           (Xml.child xml_arg0 "children") in
       make ?sourceId ~properties ~name ?events ~componentType ?children ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceId = field_map json "sourceId" String_.of_json in
       let properties =
@@ -1519,6 +1531,7 @@ module ComponentBindingPropertiesValueProperties =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?userAttribute ?predicates ?model ?key ?field ?defaultValue
         ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userAttribute = field_map json "userAttribute" String_.of_json in
       let predicates = field_map json "predicates" PredicateList.of_json in
@@ -1561,6 +1574,7 @@ module ComponentBindingPropertiesValue =
         (Option.map ~f:ComponentBindingPropertiesValueProperties.of_xml)
           (Xml.child xml_arg0 "bindingProperties") in
       make ?type_ ?defaultValue ?bindingProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" String_.of_json in
       let defaultValue = field_map json "defaultValue" String_.of_json in
@@ -1762,6 +1776,7 @@ module Component =
         ~name ?modifiedAt ~id ?events ~environmentName ~createdAt
         ~componentType ?collectionProperties ?children ~bindingProperties
         ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let variants = field_map_exn json "variants" ComponentVariants.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -1863,6 +1878,7 @@ module ComponentSummary =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~name ~id ~environmentName ~componentType ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" ComponentName.of_json in
       let id = field_map_exn json "id" Uuid.of_json in
@@ -2017,6 +2033,7 @@ module CreateComponentData =
       make ~variants ?tags ?sourceId ?schemaVersion ~properties ~overrides
         ~name ?events ~componentType ?collectionProperties ?children
         ~bindingProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let variants = field_map_exn json "variants" ComponentVariants.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -2064,6 +2081,21 @@ module CreateComponentRequest =
           fun ~environmentName ->
             fun () ->
               { clientToken; appId; componentToCreate; environmentName }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(String_.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~componentToCreate:pipe
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName")) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
@@ -2084,6 +2116,7 @@ module CreateComponentRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~environmentName ~componentToCreate ?clientToken ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentName =
         field_map_exn json "environmentName" String_.of_json in
@@ -2107,6 +2140,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2126,6 +2160,7 @@ module ResourceConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2145,6 +2180,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2164,6 +2200,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2233,6 +2270,8 @@ module CreateComponentResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?entity:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("entity", (Option.map x.entity ~f:Component.to_value))]
@@ -2241,6 +2280,7 @@ module CreateComponentResponse =
       let entity =
         (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entity = field_map json "entity" Component.of_json in
       make ?entity ()
@@ -2282,6 +2322,7 @@ module rec
         (Option.map ~f:ThemeValuesList.of_xml)
           (Xml.child xml_arg0 "children") in
       make ?value ?children ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" String_.of_json in
       let children = field_map json "children" ThemeValuesList.of_json in
@@ -2319,6 +2360,7 @@ module rec
         (Option.map ~f:ThemeValue.of_xml) (Xml.child xml_arg0 "value") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" ThemeValue.of_json in
       let key = field_map json "key" String_.of_json in make ?value ?key ()
@@ -2413,6 +2455,7 @@ module CreateThemeData =
       let name =
         ThemeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~values ?tags ?overrides ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "values" ThemeValuesList.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -2441,6 +2484,20 @@ module CreateThemeRequest =
         fun ~environmentName ->
           fun ~themeToCreate ->
             fun () -> { clientToken; appId; environmentName; themeToCreate }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(String_.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName")) ~themeToCreate:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
@@ -2460,6 +2517,7 @@ module CreateThemeRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~themeToCreate ~environmentName ?clientToken ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let themeToCreate =
         field_map_exn json "themeToCreate" CreateThemeData.of_json in
@@ -2556,6 +2614,7 @@ module Theme =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~values ?tags ?overrides ~name ?modifiedAt ~id ~environmentName
         ~createdAt ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "values" ThemeValuesList.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -2637,6 +2696,8 @@ module CreateThemeResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?entity:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("entity", (Option.map x.entity ~f:Theme.to_value))]
@@ -2644,6 +2705,7 @@ module CreateThemeResponse =
     let of_xml xml_arg0 =
       let entity = (Option.map ~f:Theme.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entity = field_map json "entity" Theme.of_json in make ?entity ()
     let to_json v = composed_to_json to_value v
@@ -2678,6 +2740,7 @@ module DeleteComponentRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Uuid.of_json in
       let environmentName =
@@ -2715,6 +2778,7 @@ module DeleteThemeRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Uuid.of_json in
       let environmentName =
@@ -2776,6 +2840,7 @@ module ExchangeCodeForTokenRequestBody =
         SensitiveString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~redirectUri ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redirectUri = field_map_exn json "redirectUri" String_.of_json in
       let code = field_map_exn json "code" SensitiveString.of_json in
@@ -2794,6 +2859,13 @@ module ExchangeCodeForTokenRequest =
         [@ocaml.doc "Describes the configuration of the request."]}
     let context_ = "ExchangeCodeForTokenRequest"
     let make ~provider = fun ~request -> fun () -> { provider; request }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~provider:(TokenProviders.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "provider")) ~request:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("provider", (Some (TokenProviders.to_value x.provider)));
@@ -2808,6 +2880,7 @@ module ExchangeCodeForTokenRequest =
         TokenProviders.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "provider") in
       make ~request ~provider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let request =
         field_map_exn json "request" ExchangeCodeForTokenRequestBody.of_json in
@@ -2886,6 +2959,7 @@ module ExchangeCodeForTokenResponse =
         SensitiveString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessToken") in
       make ~refreshToken ~expiresIn ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let refreshToken =
         field_map_exn json "refreshToken" SensitiveString.of_json in
@@ -2927,6 +3001,7 @@ module ExportComponentsRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?nextToken ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let environmentName =
@@ -2996,6 +3071,7 @@ module ExportComponentsResponse =
         ComponentList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entities") in
       make ?nextToken ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let entities = field_map_exn json "entities" ComponentList.of_json in
@@ -3035,6 +3111,7 @@ module ExportThemesRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?nextToken ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let environmentName =
@@ -3126,6 +3203,7 @@ module ExportThemesResponse =
         ThemeList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entities") in
       make ?nextToken ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let entities = field_map_exn json "entities" ThemeList.of_json in
@@ -3160,6 +3238,7 @@ module GetComponentRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Uuid.of_json in
       let environmentName =
@@ -3181,6 +3260,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -3240,6 +3320,8 @@ module GetComponentResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?component:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("component", (Option.map x.component ~f:Component.to_value))]
@@ -3248,6 +3330,7 @@ module GetComponentResponse =
       let component =
         (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
       make ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let component = field_map json "component" Component.of_json in
       make ?component ()
@@ -3280,6 +3363,7 @@ module GetThemeRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" Uuid.of_json in
       let environmentName =
@@ -3340,12 +3424,15 @@ module GetThemeResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?theme:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("theme", (Option.map x.theme ~f:Theme.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let theme = (Option.map ~f:Theme.of_xml) (Xml.child xml_arg0 "theme") in
       make ?theme ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let theme = field_map json "theme" Theme.of_json in make ?theme ()
     let to_json v = composed_to_json to_value v
@@ -3406,6 +3493,7 @@ module ListComponentsRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?nextToken ?maxResults ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults =
@@ -3476,6 +3564,7 @@ module ListComponentsResponse =
         ComponentSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entities") in
       make ?nextToken ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let entities =
@@ -3540,6 +3629,7 @@ module ListThemesRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?nextToken ?maxResults ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" ListThemesLimit.of_json in
@@ -3584,6 +3674,7 @@ module ThemeSummary =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~name ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" ThemeName.of_json in
       let id = field_map_exn json "id" Uuid.of_json in
@@ -3676,6 +3767,7 @@ module ListThemesResponse =
         ThemeSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entities") in
       make ?nextToken ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let entities = field_map_exn json "entities" ThemeSummaryList.of_json in
@@ -3701,6 +3793,7 @@ module RefreshTokenRequestBody =
         SensitiveString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "token") in
       make ~token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let token = field_map_exn json "token" SensitiveString.of_json in
       make ~token ()
@@ -3718,6 +3811,13 @@ module RefreshTokenRequest =
     let context_ = "RefreshTokenRequest"
     let make ~provider =
       fun ~refreshTokenBody -> fun () -> { provider; refreshTokenBody }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~provider:(TokenProviders.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "provider")) ~refreshTokenBody:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("provider", (Some (TokenProviders.to_value x.provider)));
@@ -3732,6 +3832,7 @@ module RefreshTokenRequest =
         TokenProviders.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "provider") in
       make ~refreshTokenBody ~provider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let refreshTokenBody =
         field_map_exn json "refreshTokenBody" RefreshTokenRequestBody.of_json in
@@ -3789,6 +3890,7 @@ module RefreshTokenResponse =
         SensitiveString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessToken") in
       make ~expiresIn ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiresIn = field_map_exn json "expiresIn" Integer.of_json in
       let accessToken =
@@ -3917,6 +4019,7 @@ module UpdateComponentData =
       make ?variants ?sourceId ?schemaVersion ?properties ?overrides ?name
         ?id ?events ?componentType ?collectionProperties ?children
         ?bindingProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let variants = field_map json "variants" ComponentVariants.of_json in
       let sourceId = field_map json "sourceId" String_.of_json in
@@ -3961,6 +4064,23 @@ module UpdateComponentRequest =
             fun ~updatedComponent ->
               fun () ->
                 { clientToken; appId; environmentName; id; updatedComponent }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(String_.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName"))
+            ~id:(Uuid.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "id")) ~updatedComponent:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
@@ -3983,6 +4103,7 @@ module UpdateComponentRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~updatedComponent ~id ~environmentName ?clientToken ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedComponent =
         field_map_exn json "updatedComponent" UpdateComponentData.of_json in
@@ -4046,6 +4167,8 @@ module UpdateComponentResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?entity:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("entity", (Option.map x.entity ~f:Component.to_value))]
@@ -4054,6 +4177,7 @@ module UpdateComponentResponse =
       let entity =
         (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entity = field_map json "entity" Component.of_json in
       make ?entity ()
@@ -4094,6 +4218,7 @@ module UpdateThemeData =
       let name = (Option.map ~f:ThemeName.of_xml) (Xml.child xml_arg0 "name") in
       let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
       make ~values ?overrides ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "values" ThemeValuesList.of_json in
       let overrides = field_map json "overrides" ThemeValuesList.of_json in
@@ -4122,6 +4247,23 @@ module UpdateThemeRequest =
             fun ~updatedTheme ->
               fun () ->
                 { clientToken; appId; environmentName; id; updatedTheme }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(String_.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName"))
+            ~id:(Uuid.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "id")) ~updatedTheme:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
@@ -4143,6 +4285,7 @@ module UpdateThemeRequest =
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~updatedTheme ~id ~environmentName ?clientToken ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedTheme =
         field_map_exn json "updatedTheme" UpdateThemeData.of_json in
@@ -4206,6 +4349,8 @@ module UpdateThemeResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?entity:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("entity", (Option.map x.entity ~f:Theme.to_value))]
@@ -4213,6 +4358,7 @@ module UpdateThemeResponse =
     let of_xml xml_arg0 =
       let entity = (Option.map ~f:Theme.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entity = field_map json "entity" Theme.of_json in make ?entity ()
     let to_json v = composed_to_json to_value v

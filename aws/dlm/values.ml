@@ -151,6 +151,7 @@ module CrossRegionCopyRetainRule =
       let interval =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       make ?intervalUnit ?interval ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intervalUnit =
         field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
@@ -183,6 +184,7 @@ module EncryptionConfiguration =
         Encrypted.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Encrypted") in
       make ?cmkArn ~encrypted ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cmkArn = field_map json "CmkArn" CmkArn.of_json in
       let encrypted = field_map_exn json "Encrypted" Encrypted.of_json in
@@ -269,6 +271,7 @@ module CrossRegionCopyDeprecateRule =
       let interval =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       make ?intervalUnit ?interval ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intervalUnit =
         field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
@@ -395,6 +398,7 @@ module CrossRegionCopyAction =
       let target =
         Target.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Target") in
       make ?retainRule ~encryptionConfiguration ~target ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retainRule =
         field_map json "RetainRule" CrossRegionCopyRetainRule.of_json in
@@ -572,6 +576,7 @@ module CrossRegionCopyRule =
           (Xml.child xml_arg0 "TargetRegion") in
       make ?deprecateRule ?retainRule ?copyTags ?cmkArn ~encrypted ?target
         ?targetRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deprecateRule =
         field_map json "DeprecateRule" CrossRegionCopyDeprecateRule.of_json in
@@ -670,6 +675,7 @@ module ShareRule =
         ShareTargetAccountList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetAccounts") in
       make ?unshareIntervalUnit ?unshareInterval ~targetAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unshareIntervalUnit =
         field_map json "UnshareIntervalUnit"
@@ -700,6 +706,7 @@ module Tag =
       let key =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String_.of_json in
       let key = field_map_exn json "Key" String_.of_json in
@@ -884,6 +891,7 @@ module CreateRule =
       let location =
         (Option.map ~f:LocationValues.of_xml) (Xml.child xml_arg0 "Location") in
       make ?cronExpression ?times ?intervalUnit ?interval ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cronExpression =
         field_map json "CronExpression" CronExpression.of_json in
@@ -956,6 +964,7 @@ module DeprecateRule =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "Count") in
       make ?intervalUnit ?interval ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intervalUnit =
         field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
@@ -1005,6 +1014,7 @@ module FastRestoreRule =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "Count") in
       make ~availabilityZones ?intervalUnit ?interval ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availabilityZones =
         field_map_exn json "AvailabilityZones" AvailabilityZoneList.of_json in
@@ -1046,6 +1056,7 @@ module RetainRule =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "Count") in
       make ?intervalUnit ?interval ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intervalUnit =
         field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
@@ -1181,6 +1192,7 @@ module Action =
       let name =
         ActionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~crossRegionCopy ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let crossRegionCopy =
         field_map_exn json "CrossRegionCopy"
@@ -1226,6 +1238,7 @@ module EventParameters =
         EventTypeValues.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventType") in
       make ~descriptionRegex ~snapshotOwner ~eventType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let descriptionRegex =
         field_map_exn json "DescriptionRegex" DescriptionRegex.of_json in
@@ -1426,6 +1439,7 @@ module Schedule =
         (Option.map ~f:ScheduleName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?deprecateRule ?shareRules ?crossRegionCopyRules ?fastRestoreRule
         ?retainRule ?createRule ?variableTags ?tagsToAdd ?copyTags ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deprecateRule =
         field_map json "DeprecateRule" DeprecateRule.of_json in
@@ -1569,6 +1583,7 @@ module EventSource =
         EventSourceValues.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?parameters ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "Parameters" EventParameters.of_json in
       let type_ = field_map_exn json "Type" EventSourceValues.of_json in
@@ -1600,6 +1615,7 @@ module Parameters =
         (Option.map ~f:ExcludeBootVolume.of_xml)
           (Xml.child xml_arg0 "ExcludeBootVolume") in
       make ?noReboot ?excludeBootVolume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let noReboot = field_map json "NoReboot" NoReboot.of_json in
       let excludeBootVolume =
@@ -2035,6 +2051,7 @@ module PolicyDetails =
           (Xml.child xml_arg0 "PolicyType") in
       make ?actions ?eventSource ?parameters ?schedules ?targetTags
         ?resourceLocations ?resourceTypes ?policyType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions = field_map json "Actions" ActionList.of_json in
       let eventSource = field_map json "EventSource" EventSource.of_json in
@@ -2126,6 +2143,7 @@ module LifecyclePolicySummary =
       let policyId =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
       make ?policyType ?tags ?state ?description ?policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyType = field_map json "PolicyType" PolicyTypeValues.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -2173,6 +2191,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "Code" ErrorCode.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -2221,6 +2240,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?mutuallyExclusiveParameters ?requiredParameters ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mutuallyExclusiveParameters =
         field_map json "MutuallyExclusiveParameters" ParameterList.of_json in
@@ -2257,6 +2277,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -2296,6 +2317,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceIds ?resourceType ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceIds = field_map json "ResourceIds" PolicyIdList.of_json in
       let resourceType = field_map json "ResourceType" String_.of_json in
@@ -2452,6 +2474,7 @@ module LifecyclePolicy =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
       make ?policyArn ?tags ?policyDetails ?dateModified ?dateCreated
         ?executionRoleArn ?statusMessage ?state ?description ?policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map json "PolicyArn" PolicyArn.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -2615,6 +2638,7 @@ module UpdateLifecyclePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified lifecycle policy."]
@@ -2676,6 +2700,7 @@ module UpdateLifecyclePolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
       make ?policyDetails ?description ?state ?executionRoleArn ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDetails =
         field_map json "PolicyDetails" PolicyDetails.of_json in
@@ -2741,6 +2766,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -2767,6 +2793,7 @@ module UntagResourceRequest =
         PolicyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" PolicyArn.of_json in
@@ -2826,6 +2853,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
@@ -2850,6 +2878,7 @@ module TagResourceRequest =
         PolicyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" PolicyArn.of_json in
@@ -2913,6 +2942,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2934,6 +2964,7 @@ module ListTagsForResourceRequest =
         PolicyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" PolicyArn.of_json in
       make ~resourceArn ()
@@ -2999,6 +3030,7 @@ module GetLifecyclePolicyResponse =
       let policy =
         (Option.map ~f:LifecyclePolicy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" LifecyclePolicy.of_json in
       make ?policy ()
@@ -3021,6 +3053,7 @@ module GetLifecyclePolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
       make ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
       make ~policyId ()
@@ -3098,6 +3131,7 @@ module GetLifecyclePoliciesResponse =
         (Option.map ~f:LifecyclePolicySummaryList.of_xml)
           (Xml.child xml_arg0 "Policies") in
       make ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policies =
         field_map json "Policies" LifecyclePolicySummaryList.of_json in
@@ -3155,6 +3189,7 @@ module GetLifecyclePoliciesRequest =
       let policyIds =
         (Option.map ~f:PolicyIdList.of_xml) (Xml.child xml_arg0 "policyIds") in
       make ?tagsToAdd ?targetTags ?resourceTypes ?state ?policyIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsToAdd = field_map json "TagsToAdd" TagsToAddFilterList.of_json in
       let targetTags =
@@ -3220,6 +3255,7 @@ module DeleteLifecyclePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3240,6 +3276,7 @@ module DeleteLifecyclePolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
       make ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
       make ~policyId ()
@@ -3306,6 +3343,7 @@ module CreateLifecyclePolicyResponse =
       let policyId =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
       make ?policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyId = field_map json "PolicyId" PolicyId.of_json in
       make ?policyId ()
@@ -3362,6 +3400,7 @@ module CreateLifecyclePolicyRequest =
         ExecutionRoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
       make ?tags ~policyDetails ~state ~description ~executionRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let policyDetails =

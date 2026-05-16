@@ -86,6 +86,7 @@ module Attribute =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?alternateValueEncoding ~value ?alternateNameEncoding ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alternateValueEncoding =
         field_map json "AlternateValueEncoding" String_.of_json in
@@ -122,6 +123,7 @@ module ReplaceableAttribute =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?replace ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replace = field_map json "Replace" Boolean.of_json in
       let value = field_map_exn json "Value" String_.of_json in
@@ -200,6 +202,7 @@ module Item =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~attributes ?alternateNameEncoding ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map_exn json "Attributes" AttributeList.of_json in
       let alternateNameEncoding =
@@ -229,6 +232,7 @@ module ReplaceableItem =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ItemName") in
       make ~attributes ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map_exn json "Attributes" ReplaceableAttributeList.of_json in
@@ -255,6 +259,7 @@ module DeletableItem =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ItemName") in
       make ?attributes ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" AttributeList.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -274,6 +279,7 @@ module InvalidNextToken =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -292,6 +298,7 @@ module InvalidNumberPredicates =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -310,6 +317,7 @@ module InvalidNumberValueTests =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -328,6 +336,7 @@ module InvalidParameterValue =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -346,6 +355,7 @@ module InvalidQueryExpression =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -377,6 +387,7 @@ module MissingParameter =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -396,6 +407,7 @@ module NoSuchDomain =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -414,6 +426,7 @@ module RequestTimeout =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -433,6 +446,7 @@ module TooManyRequestedAttributes =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -464,6 +478,7 @@ module UpdateCondition =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?exists ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exists = field_map json "Exists" Boolean.of_json in
       let value = field_map json "Value" String_.of_json in
@@ -681,6 +696,7 @@ module SelectResult =
       let items =
         (Option.map ~f:ItemList.of_xml) (Some (Xml.children xml_arg0 "Item")) in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let items = field_map json "Items" ItemList.of_json in
@@ -720,6 +736,7 @@ module SelectRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SelectExpression") in
       make ?consistentRead ?nextToken ~selectExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consistentRead = field_map json "ConsistentRead" Boolean.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -768,6 +785,7 @@ module PutAttributesRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?expected ~attributes ~itemName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expected = field_map json "Expected" UpdateCondition.of_json in
       let attributes =
@@ -791,6 +809,7 @@ module NumberSubmittedItemsExceeded =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -809,6 +828,7 @@ module NumberSubmittedAttributesExceeded =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -827,6 +847,7 @@ module NumberItemAttributesExceeded =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -845,6 +866,7 @@ module NumberDomainsExceeded =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -863,6 +885,7 @@ module NumberDomainBytesExceeded =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -881,6 +904,7 @@ module NumberDomainAttributesExceeded =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -959,6 +983,7 @@ module ListDomainsResult =
         (Option.map ~f:DomainNameList.of_xml)
           (Some (Xml.children xml_arg0 "DomainName")) in
       make ?nextToken ?domainNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let domainNames = field_map json "DomainNames" DomainNameList.of_json in
@@ -991,6 +1016,7 @@ module ListDomainsRequest =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "MaxNumberOfDomains") in
       make ?nextToken ?maxNumberOfDomains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxNumberOfDomains =
@@ -1068,6 +1094,7 @@ module GetAttributesResult =
         (Option.map ~f:AttributeList.of_xml)
           (Some (Xml.children xml_arg0 "Attribute")) in
       make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" AttributeList.of_json in
       make ?attributes ()
@@ -1114,6 +1141,7 @@ module GetAttributesRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?consistentRead ?attributeNames ~itemName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consistentRead = field_map json "ConsistentRead" Boolean.of_json in
       let attributeNames =
@@ -1137,6 +1165,7 @@ module DuplicateItemName =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()
@@ -1265,6 +1294,7 @@ module DomainMetadataResult =
       make ?timestamp ?attributeValuesSizeBytes ?attributeValueCount
         ?attributeNamesSizeBytes ?attributeNameCount ?itemNamesSizeBytes
         ?itemCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" Integer.of_json in
       let attributeValuesSizeBytes =
@@ -1302,6 +1332,7 @@ module DomainMetadataRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" String_.of_json in
       make ~domainName ()
@@ -1324,6 +1355,7 @@ module DeleteDomainRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" String_.of_json in
       make ~domainName ()
@@ -1372,6 +1404,7 @@ module DeleteAttributesRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?expected ?attributes ~itemName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expected = field_map json "Expected" UpdateCondition.of_json in
       let attributes = field_map json "Attributes" AttributeList.of_json in
@@ -1399,6 +1432,7 @@ module CreateDomainRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" String_.of_json in
       make ~domainName ()
@@ -1427,6 +1461,7 @@ module BatchPutAttributesRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~items ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "Items" ReplaceableItemList.of_json in
       let domainName = field_map_exn json "DomainName" String_.of_json in
@@ -1456,6 +1491,7 @@ module BatchDeleteAttributesRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~items ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "Items" DeletableItemList.of_json in
       let domainName = field_map_exn json "DomainName" String_.of_json in
@@ -1476,6 +1512,7 @@ module AttributeDoesNotExist =
       let boxUsage =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boxUsage = field_map json "BoxUsage" Float.of_json in
       make ?boxUsage ()

@@ -167,6 +167,7 @@ module BaseScreenshot =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScreenshotName") in
       make ?ignoreCoordinates ~screenshotName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ignoreCoordinates =
         field_map json "IgnoreCoordinates"
@@ -295,6 +296,7 @@ module S3EncryptionConfig =
         (Option.map ~f:EncryptionMode.of_xml)
           (Xml.child xml_arg0 "EncryptionMode") in
       make ?kmsKeyArn ?encryptionMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
       let encryptionMode =
@@ -623,6 +625,7 @@ module CanaryRunStatus =
       let state =
         (Option.map ~f:CanaryRunState.of_xml) (Xml.child xml_arg0 "State") in
       make ?stateReasonCode ?stateReason ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateReasonCode =
         field_map json "StateReasonCode" CanaryRunStateReasonCode.of_json in
@@ -650,6 +653,7 @@ module CanaryRunTimeline =
       let started =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Started") in
       make ?completed ?started ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let completed = field_map json "Completed" Timestamp.of_json in
       let started = field_map json "Started" Timestamp.of_json in
@@ -722,6 +726,7 @@ module ArtifactConfigOutput =
         (Option.map ~f:S3EncryptionConfig.of_xml)
           (Xml.child xml_arg0 "S3Encryption") in
       make ?s3Encryption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Encryption =
         field_map json "S3Encryption" S3EncryptionConfig.of_json in
@@ -754,6 +759,7 @@ module CanaryCodeOutput =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SourceLocationArn") in
       make ?handler ?sourceLocationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handler = field_map json "Handler" String_.of_json in
       let sourceLocationArn =
@@ -798,6 +804,7 @@ module CanaryRunConfigOutput =
         (Option.map ~f:MaxFifteenMinutesInSeconds.of_xml)
           (Xml.child xml_arg0 "TimeoutInSeconds") in
       make ?activeTracing ?memoryInMB ?timeoutInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activeTracing =
         field_map json "ActiveTracing" NullableBoolean.of_json in
@@ -833,6 +840,7 @@ module CanaryScheduleOutput =
       let expression =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Expression") in
       make ?durationInSeconds ?expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds" MaxOneYearInSeconds.of_json in
@@ -873,6 +881,7 @@ module CanaryStatus =
       let state =
         (Option.map ~f:CanaryState.of_xml) (Xml.child xml_arg0 "State") in
       make ?stateReasonCode ?stateReason ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateReasonCode =
         field_map json "StateReasonCode" CanaryStateReasonCode.of_json in
@@ -919,6 +928,7 @@ module CanaryTimeline =
       let created =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Created") in
       make ?lastStopped ?lastStarted ?lastModified ?created ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastStopped = field_map json "LastStopped" Timestamp.of_json in
       let lastStarted = field_map json "LastStarted" Timestamp.of_json in
@@ -1048,6 +1058,7 @@ module VisualReferenceOutput =
         (Option.map ~f:BaseScreenshots.of_xml)
           (Xml.child xml_arg0 "BaseScreenshots") in
       make ?baseCanaryRunId ?baseScreenshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let baseCanaryRunId = field_map json "BaseCanaryRunId" String_.of_json in
       let baseScreenshots =
@@ -1085,6 +1096,7 @@ module VpcConfigOutput =
         (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       make ?securityGroupIds ?subnetIds ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
@@ -1136,6 +1148,7 @@ module CanaryRun =
         (Option.map ~f:CanaryName.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
       make ?artifactS3Location ?timeline ?status ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactS3Location =
         field_map json "ArtifactS3Location" String_.of_json in
@@ -1265,6 +1278,7 @@ module RuntimeVersion =
       let versionName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VersionName") in
       make ?deprecationDate ?releaseDate ?description ?versionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deprecationDate =
         field_map json "DeprecationDate" Timestamp.of_json in
@@ -1431,6 +1445,7 @@ module Canary =
         ?engineArn ?artifactS3Location ?timeline ?status
         ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
         ?runConfig ?schedule ?executionRoleArn ?code ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactConfig =
         field_map json "ArtifactConfig" ArtifactConfigOutput.of_json in
@@ -1482,6 +1497,7 @@ module CanaryLastRun =
       let canaryName =
         (Option.map ~f:CanaryName.of_xml) (Xml.child xml_arg0 "CanaryName") in
       make ?lastRun ?canaryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastRun = field_map json "LastRun" CanaryRun.of_json in
       let canaryName = field_map json "CanaryName" CanaryName.of_json in
@@ -1502,6 +1518,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1520,6 +1537,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1538,6 +1556,7 @@ module RequestEntityTooLargeException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1556,6 +1575,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1574,6 +1594,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1597,6 +1618,7 @@ module ArtifactConfigInput =
         (Option.map ~f:S3EncryptionConfig.of_xml)
           (Xml.child xml_arg0 "S3Encryption") in
       make ?s3Encryption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Encryption =
         field_map json "S3Encryption" S3EncryptionConfig.of_json in
@@ -1649,6 +1671,7 @@ module CanaryCodeInput =
       let s3Bucket =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3Bucket") in
       make ~handler ?zipFile ?s3Version ?s3Key ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handler = field_map_exn json "Handler" CodeHandler.of_json in
       let zipFile = field_map json "ZipFile" Blob.of_json in
@@ -1712,6 +1735,7 @@ module CanaryRunConfigInput =
           (Xml.child xml_arg0 "TimeoutInSeconds") in
       make ?environmentVariables ?activeTracing ?memoryInMB ?timeoutInSeconds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentVariables =
         field_map json "EnvironmentVariables" EnvironmentVariablesMap.of_json in
@@ -1752,6 +1776,7 @@ module CanaryScheduleInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
       make ?durationInSeconds ~expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds" MaxOneYearInSeconds.of_json in
@@ -1787,6 +1812,7 @@ module VisualReferenceInput =
         (Option.map ~f:BaseScreenshots.of_xml)
           (Xml.child xml_arg0 "BaseScreenshots") in
       make ~baseCanaryRunId ?baseScreenshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let baseCanaryRunId =
         field_map_exn json "BaseCanaryRunId" String_.of_json in
@@ -1819,6 +1845,7 @@ module VpcConfigInput =
       let subnetIds =
         (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       make ?securityGroupIds ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
@@ -2157,6 +2184,7 @@ module UpdateCanaryResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2288,6 +2316,7 @@ module UpdateCanaryRequest =
       make ?artifactConfig ?artifactS3Location ?visualReference ?vpcConfig
         ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
         ?runConfig ?schedule ?runtimeVersion ?executionRoleArn ?code ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactConfig =
         field_map json "ArtifactConfig" ArtifactConfigInput.of_json in
@@ -2366,6 +2395,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified canary."]
@@ -2394,6 +2424,7 @@ module UntagResourceRequest =
         CanaryArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" CanaryArn.of_json in
@@ -2453,6 +2484,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2481,6 +2513,7 @@ module TagResourceRequest =
         CanaryArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" CanaryArn.of_json in
@@ -2550,6 +2583,7 @@ module StopCanaryResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2570,6 +2604,7 @@ module StopCanaryRequest =
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" CanaryName.of_json in
       make ~name ()
@@ -2638,6 +2673,7 @@ module StartCanaryResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2658,6 +2694,7 @@ module StartCanaryRequest =
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" CanaryName.of_json in
       make ~name ()
@@ -2723,6 +2760,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2745,6 +2783,7 @@ module ListTagsForResourceRequest =
         CanaryArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" CanaryArn.of_json in
       make ~resourceArn ()
@@ -2818,6 +2857,7 @@ module GetCanaryRunsResponse =
       let canaryRuns =
         (Option.map ~f:CanaryRuns.of_xml) (Xml.child xml_arg0 "CanaryRuns") in
       make ?nextToken ?canaryRuns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let canaryRuns = field_map json "CanaryRuns" CanaryRuns.of_json in
@@ -2854,6 +2894,7 @@ module GetCanaryRunsRequest =
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?maxResults ?nextToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -2913,6 +2954,7 @@ module GetCanaryResponse =
       let canary =
         (Option.map ~f:Canary.of_xml) (Xml.child xml_arg0 "Canary") in
       make ?canary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canary = field_map json "Canary" Canary.of_json in make ?canary ()
     let to_json v = composed_to_json to_value v
@@ -2933,6 +2975,7 @@ module GetCanaryRequest =
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" CanaryName.of_json in
       make ~name ()
@@ -3000,6 +3043,7 @@ module DescribeRuntimeVersionsResponse =
         (Option.map ~f:RuntimeVersionList.of_xml)
           (Xml.child xml_arg0 "RuntimeVersions") in
       make ?nextToken ?runtimeVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let runtimeVersions =
@@ -3031,6 +3075,7 @@ module DescribeRuntimeVersionsRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -3096,6 +3141,7 @@ module DescribeCanariesResponse =
       let canaries =
         (Option.map ~f:Canaries.of_xml) (Xml.child xml_arg0 "Canaries") in
       make ?nextToken ?canaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let canaries = field_map json "Canaries" Canaries.of_json in
@@ -3137,6 +3183,7 @@ module DescribeCanariesRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?names ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let names = field_map json "Names" DescribeCanariesNameFilter.of_json in
       let maxResults = field_map json "MaxResults" MaxCanaryResults.of_json in
@@ -3206,6 +3253,7 @@ module DescribeCanariesLastRunResponse =
         (Option.map ~f:CanariesLastRun.of_xml)
           (Xml.child xml_arg0 "CanariesLastRun") in
       make ?nextToken ?canariesLastRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let canariesLastRun =
@@ -3246,6 +3294,7 @@ module DescribeCanariesLastRunRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?names ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let names =
         field_map json "Names" DescribeCanariesLastRunNameFilter.of_json in
@@ -3317,6 +3366,7 @@ module DeleteCanaryResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3337,6 +3387,7 @@ module DeleteCanaryRequest =
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" CanaryName.of_json in
       make ~name ()
@@ -3405,6 +3456,7 @@ module CreateCanaryResponse =
       let canary =
         (Option.map ~f:Canary.of_xml) (Xml.child xml_arg0 "Canary") in
       make ?canary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canary = field_map json "Canary" Canary.of_json in make ?canary ()
     let to_json v = composed_to_json to_value v
@@ -3536,6 +3588,7 @@ module CreateCanaryRequest =
         ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
         ?runConfig ~schedule ~executionRoleArn ~artifactS3Location ~code
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactConfig =
         field_map json "ArtifactConfig" ArtifactConfigInput.of_json in

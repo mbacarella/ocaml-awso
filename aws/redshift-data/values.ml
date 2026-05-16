@@ -76,6 +76,7 @@ module SqlParameter =
         ParameterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" ParameterValue.of_json in
       let name = field_map_exn json "name" ParameterName.of_json in
@@ -405,6 +406,7 @@ module Field =
         (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "blobValue") in
       make ?stringValue ?longValue ?isNull ?doubleValue ?booleanValue
         ?blobValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringValue = field_map json "stringValue" String_.of_json in
       let longValue = field_map json "longValue" BoxedLong.of_json in
@@ -492,6 +494,7 @@ module TableMember =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schema") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?type_ ?schema ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" String_.of_json in
       let schema = field_map json "schema" String_.of_json in
@@ -598,6 +601,7 @@ module StatementData =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?updatedAt ?status ?statementName ?secretArn ?queryStrings
         ?queryString ?queryParameters ?isBatchStatement ~id ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let status = field_map json "Status" StatusString.of_json in
@@ -720,6 +724,7 @@ module ColumnMetadata =
       make ?typeName ?tableName ?schemaName ?scale ?precision ?nullable ?name
         ?length ?label ?isSigned ?isCurrency ?isCaseSensitive ?columnDefault
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let typeName = field_map json "typeName" String_.of_json in
       let tableName = field_map json "tableName" String_.of_json in
@@ -864,6 +869,7 @@ module SubStatementData =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?updatedAt ?status ?resultSize ?resultRows ?redshiftQueryId
         ?queryString ~id ?hasResultSet ?error ?duration ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let status = field_map json "Status" StatementStatusString.of_json in
@@ -893,6 +899,7 @@ module DatabaseConnectionException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -912,6 +919,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -956,6 +964,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1128,6 +1137,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
       let message = field_map_exn json "Message" String_.of_json in
@@ -1172,6 +1182,7 @@ module ActiveStatementsExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1199,6 +1210,7 @@ module ExecuteStatementException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~statementId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statementId = field_map_exn json "StatementId" String_.of_json in
       let message = field_map_exn json "Message" String_.of_json in
@@ -1277,6 +1289,7 @@ module BatchExecuteStatementException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~statementId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statementId = field_map_exn json "StatementId" String_.of_json in
       let message = field_map_exn json "Message" String_.of_json in
@@ -1380,6 +1393,7 @@ module ListTablesResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?tables ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tables = field_map json "Tables" TableList.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -1477,6 +1491,7 @@ module ListTablesRequest =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?tablePattern ?secretArn ?schemaPattern ?nextToken ?maxResults
         ?dbUser ~database ?connectedDatabase ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tablePattern = field_map json "TablePattern" String_.of_json in
       let secretArn = field_map json "SecretArn" SecretArn.of_json in
@@ -1553,6 +1568,7 @@ module ListStatementsResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~statements ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statements = field_map_exn json "Statements" StatementList.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -1610,6 +1626,7 @@ module ListStatementsRequest =
         (Option.map ~f:ListStatementsLimit.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?status ?statementName ?roleLevel ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" StatusString.of_json in
       let statementName =
@@ -1690,6 +1707,7 @@ module ListSchemasResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?schemas ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schemas = field_map json "Schemas" SchemaList.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -1779,6 +1797,7 @@ module ListSchemasRequest =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?secretArn ?schemaPattern ?nextToken ?maxResults ?dbUser ~database
         ?connectedDatabase ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArn = field_map json "SecretArn" SecretArn.of_json in
       let schemaPattern = field_map json "SchemaPattern" String_.of_json in
@@ -1863,6 +1882,7 @@ module ListDatabasesResponse =
       let databases =
         (Option.map ~f:DatabaseList.of_xml) (Xml.child xml_arg0 "Databases") in
       make ?nextToken ?databases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let databases = field_map json "Databases" DatabaseList.of_json in
@@ -1934,6 +1954,7 @@ module ListDatabasesRequest =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?secretArn ?nextToken ?maxResults ?dbUser ~database
         ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArn = field_map json "SecretArn" SecretArn.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -2031,6 +2052,7 @@ module GetStatementResultResponse =
         (Option.map ~f:ColumnMetadataList.of_xml)
           (Xml.child xml_arg0 "ColumnMetadata") in
       make ?totalNumRows ~records ?nextToken ?columnMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalNumRows = field_map json "TotalNumRows" Long.of_json in
       let records = field_map_exn json "Records" SqlRecords.of_json in
@@ -2064,6 +2086,7 @@ module GetStatementResultRequest =
       let id =
         StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let id = field_map_exn json "Id" StatementId.of_json in
@@ -2176,6 +2199,7 @@ module ExecuteStatementOutput =
         (Option.map ~f:Location.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?secretArn ?id ?dbUser ?database ?createdAt ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArn = field_map json "SecretArn" SecretArn.of_json in
       let id = field_map json "Id" StatementId.of_json in
@@ -2270,6 +2294,7 @@ module ExecuteStatementInput =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?withEvent ?statementName ~sql ?secretArn ?parameters ?dbUser
         ~database ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let withEvent = field_map json "WithEvent" Boolean.of_json in
       let statementName =
@@ -2360,6 +2385,7 @@ module DescribeTableResponse =
       let columnList =
         (Option.map ~f:ColumnList.of_xml) (Xml.child xml_arg0 "ColumnList") in
       make ?tableName ?nextToken ?columnList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map json "TableName" String_.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -2457,6 +2483,7 @@ module DescribeTableRequest =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?table ?secretArn ?schema ?nextToken ?maxResults ?dbUser ~database
         ?connectedDatabase ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let table = field_map json "Table" String_.of_json in
       let secretArn = field_map json "SecretArn" SecretArn.of_json in
@@ -2677,6 +2704,7 @@ module DescribeStatementResponse =
         ?resultRows ?redshiftQueryId ?redshiftPid ?queryString
         ?queryParameters ~id ?hasResultSet ?error ?duration ?dbUser ?database
         ?createdAt ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let subStatements =
@@ -2722,6 +2750,7 @@ module DescribeStatementRequest =
       let id =
         StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" StatementId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -2799,6 +2828,7 @@ module CancelStatementResponse =
       let status =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Boolean.of_json in make ?status ()
     let to_json v = composed_to_json to_value v
@@ -2820,6 +2850,7 @@ module CancelStatementRequest =
       let id =
         StatementId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" StatementId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -2932,6 +2963,7 @@ module BatchExecuteStatementOutput =
         (Option.map ~f:Location.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?secretArn ?id ?dbUser ?database ?createdAt ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArn = field_map json "SecretArn" SecretArn.of_json in
       let id = field_map json "Id" StatementId.of_json in
@@ -3016,6 +3048,7 @@ module BatchExecuteStatementInput =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?withEvent ?statementName ~sqls ?secretArn ?dbUser ~database
         ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let withEvent = field_map json "WithEvent" Boolean.of_json in
       let statementName =

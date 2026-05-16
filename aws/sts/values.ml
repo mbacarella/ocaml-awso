@@ -222,6 +222,7 @@ module PolicyDescriptorType =
     let of_xml xml_arg0 =
       let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" ArnType.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -251,6 +252,7 @@ module Tag =
       let key =
         TagKeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValueType.of_json in
       let key = field_map_exn json "Key" TagKeyType.of_json in
@@ -387,6 +389,7 @@ module Credentials =
         AccessKeyIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyId") in
       make ~expiration ~sessionToken ~secretAccessKey ~accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiration = field_map_exn json "Expiration" DateType.of_json in
       let sessionToken = field_map_exn json "SessionToken" TokenType.of_json in
@@ -412,6 +415,7 @@ module RegionDisabledException =
         (Option.map ~f:RegionDisabledMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" RegionDisabledMessage.of_json in
       make ?message ()
@@ -503,6 +507,7 @@ module FederatedUser =
         FederatedIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FederatedUserId") in
       make ~arn ~federatedUserId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" ArnType.of_json in
       let federatedUserId =
@@ -526,6 +531,7 @@ module MalformedPolicyDocumentException =
         (Option.map ~f:MalformedPolicyDocumentMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" MalformedPolicyDocumentMessage.of_json in
@@ -548,6 +554,7 @@ module PackedPolicyTooLargeException =
         (Option.map ~f:PackedPolicyTooLargeMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" PackedPolicyTooLargeMessage.of_json in
@@ -703,6 +710,7 @@ module InvalidAuthorizationMessageException =
         (Option.map ~f:InvalidAuthorizationMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" InvalidAuthorizationMessage.of_json in
@@ -766,6 +774,7 @@ module AssumedRoleUser =
         AssumedRoleIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssumedRoleId") in
       make ~arn ~assumedRoleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" ArnType.of_json in
       let assumedRoleId =
@@ -802,6 +811,7 @@ module ExpiredTokenException =
         (Option.map ~f:ExpiredIdentityTokenMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" ExpiredIdentityTokenMessage.of_json in
@@ -824,6 +834,7 @@ module IDPCommunicationErrorException =
         (Option.map ~f:IdpCommunicationErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" IdpCommunicationErrorMessage.of_json in
@@ -846,6 +857,7 @@ module IDPRejectedClaimException =
         (Option.map ~f:IdpRejectedClaimMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" IdpRejectedClaimMessage.of_json in
       make ?message ()
@@ -867,6 +879,7 @@ module InvalidIdentityTokenException =
         (Option.map ~f:InvalidIdentityTokenMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" InvalidIdentityTokenMessage.of_json in
@@ -1158,6 +1171,7 @@ module GetSessionTokenResponse =
       let credentials =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let credentials = field_map json "Credentials" Credentials.of_json in
       make ?credentials ()
@@ -1199,6 +1213,7 @@ module GetSessionTokenRequest =
         (Option.map ~f:DurationSecondsType.of_xml)
           (Xml.child xml_arg0 "DurationSeconds") in
       make ?tokenCode ?serialNumber ?durationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tokenCode = field_map json "TokenCode" TokenCodeType.of_json in
       let serialNumber =
@@ -1310,6 +1325,7 @@ module GetFederationTokenResponse =
       let credentials =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?packedPolicySize ?federatedUser ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let packedPolicySize =
         field_map json "PackedPolicySize" NonNegativeIntegerType.of_json in
@@ -1372,6 +1388,7 @@ module GetFederationTokenRequest =
       let name =
         UserNameType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?durationSeconds ?policyArns ?policy ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let durationSeconds =
@@ -1445,6 +1462,7 @@ module GetCallerIdentityResponse =
       let userId =
         (Option.map ~f:UserIdType.of_xml) (Xml.child xml_arg0 "UserId") in
       make ?arn ?account ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnType.of_json in
       let account = field_map json "Account" AccountType.of_json in
@@ -1461,6 +1479,7 @@ module GetCallerIdentityRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1510,6 +1529,7 @@ module GetAccessKeyInfoResponse =
       let account =
         (Option.map ~f:AccountType.of_xml) (Xml.child xml_arg0 "Account") in
       make ?account ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let account = field_map json "Account" AccountType.of_json in
       make ?account ()
@@ -1534,6 +1554,7 @@ module GetAccessKeyInfoRequest =
         AccessKeyIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyId") in
       make ~accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessKeyId =
         field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
@@ -1605,6 +1626,7 @@ module DecodeAuthorizationMessageResponse =
         (Option.map ~f:DecodedMessageType.of_xml)
           (Xml.child xml_arg0 "DecodedMessage") in
       make ?decodedMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decodedMessage =
         field_map json "DecodedMessage" DecodedMessageType.of_json in
@@ -1631,6 +1653,7 @@ module DecodeAuthorizationMessageRequest =
         EncodedMessageType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EncodedMessage") in
       make ~encodedMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encodedMessage =
         field_map_exn json "EncodedMessage" EncodedMessageType.of_json in
@@ -1821,6 +1844,7 @@ module AssumeRoleWithWebIdentityResponse =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?sourceIdentity ?audience ?provider ?packedPolicySize
         ?assumedRoleUser ?subjectFromWebIdentityToken ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceIdentity =
         field_map json "SourceIdentity" SourceIdentityType.of_json in
@@ -1919,6 +1943,7 @@ module AssumeRoleWithWebIdentityRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ?durationSeconds ?policy ?policyArns ?providerId ~webIdentityToken
         ~roleSessionName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationSeconds =
         field_map json "DurationSeconds" RoleDurationSecondsType.of_json in
@@ -2121,6 +2146,7 @@ module AssumeRoleWithSAMLResponse =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?sourceIdentity ?nameQualifier ?audience ?issuer ?subjectType
         ?subject ?packedPolicySize ?assumedRoleUser ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceIdentity =
         field_map json "SourceIdentity" SourceIdentityType.of_json in
@@ -2211,6 +2237,7 @@ module AssumeRoleWithSAMLRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ?durationSeconds ?policy ?policyArns ~sAMLAssertion ~principalArn
         ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationSeconds =
         field_map json "DurationSeconds" RoleDurationSecondsType.of_json in
@@ -2348,6 +2375,7 @@ module AssumeRoleResponse =
       let credentials =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?sourceIdentity ?packedPolicySize ?assumedRoleUser ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceIdentity =
         field_map json "SourceIdentity" SourceIdentityType.of_json in
@@ -2477,6 +2505,7 @@ module AssumeRoleRequest =
       make ?sourceIdentity ?tokenCode ?serialNumber ?externalId
         ?transitiveTagKeys ?tags ?durationSeconds ?policy ?policyArns
         ~roleSessionName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceIdentity =
         field_map json "SourceIdentity" SourceIdentityType.of_json in

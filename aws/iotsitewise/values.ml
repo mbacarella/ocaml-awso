@@ -115,6 +115,7 @@ module VariableValue =
       let propertyId =
         Macro.of_xml (Xml.child_exn ~context:context_ xml_arg0 "propertyId") in
       make ?hierarchyId ~propertyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hierarchyId = field_map json "hierarchyId" Macro.of_json in
       let propertyId = field_map_exn json "propertyId" Macro.of_json in
@@ -174,6 +175,7 @@ module ForwardingConfig =
         ForwardingConfigState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map_exn json "state" ForwardingConfigState.of_json in
       make ~state ()
@@ -203,6 +205,7 @@ module ExpressionVariable =
       let name =
         VariableName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" VariableValue.of_json in
       let name = field_map_exn json "name" VariableName.of_json in
@@ -251,6 +254,7 @@ module TumblingWindow =
       let interval =
         Interval.of_xml (Xml.child_exn ~context:context_ xml_arg0 "interval") in
       make ?offset ~interval ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offset = field_map json "offset" Offset.of_json in
       let interval = field_map_exn json "interval" Interval.of_json in
@@ -298,6 +302,7 @@ module MeasurementProcessingConfig =
         ForwardingConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "forwardingConfig") in
       make ~forwardingConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forwardingConfig =
         field_map_exn json "forwardingConfig" ForwardingConfig.of_json in
@@ -366,6 +371,7 @@ module MetricProcessingConfig =
         ComputeLocation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "computeLocation") in
       make ~computeLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeLocation =
         field_map_exn json "computeLocation" ComputeLocation.of_json in
@@ -388,6 +394,7 @@ module MetricWindow =
       let tumbling =
         (Option.map ~f:TumblingWindow.of_xml) (Xml.child xml_arg0 "tumbling") in
       make ?tumbling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tumbling = field_map json "tumbling" TumblingWindow.of_json in
       make ?tumbling ()
@@ -419,6 +426,7 @@ module TransformProcessingConfig =
         ComputeLocation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "computeLocation") in
       make ?forwardingConfig ~computeLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forwardingConfig =
         field_map json "forwardingConfig" ForwardingConfig.of_json in
@@ -524,6 +532,7 @@ module Attribute =
         (Option.map ~f:DefaultValue.of_xml)
           (Xml.child xml_arg0 "defaultValue") in
       make ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValue = field_map json "defaultValue" DefaultValue.of_json in
       make ?defaultValue ()
@@ -549,6 +558,7 @@ module Measurement =
         (Option.map ~f:MeasurementProcessingConfig.of_xml)
           (Xml.child xml_arg0 "processingConfig") in
       make ?processingConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processingConfig =
         field_map json "processingConfig" MeasurementProcessingConfig.of_json in
@@ -599,6 +609,7 @@ module Metric =
         Expression.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "expression") in
       make ?processingConfig ~window ~variables ~expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processingConfig =
         field_map json "processingConfig" MetricProcessingConfig.of_json in
@@ -646,6 +657,7 @@ module Transform =
         Expression.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "expression") in
       make ?processingConfig ~variables ~expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processingConfig =
         field_map json "processingConfig" TransformProcessingConfig.of_json in
@@ -677,6 +689,7 @@ module DetailedError =
         DetailedErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" DetailedErrorMessage.of_json in
       let code = field_map_exn json "code" DetailedErrorCode.of_json in
@@ -749,6 +762,7 @@ module TimeInNanos =
         TimeInSeconds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timeInSeconds") in
       make ?offsetInNanos ~timeInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offsetInNanos =
         field_map json "offsetInNanos" OffsetInNanos.of_json in
@@ -931,6 +945,7 @@ module PropertyType =
       let attribute =
         (Option.map ~f:Attribute.of_xml) (Xml.child xml_arg0 "attribute") in
       make ?metric ?transform ?measurement ?attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metric = field_map json "metric" Metric.of_json in
       let transform = field_map json "transform" Transform.of_json in
@@ -1217,6 +1232,7 @@ module PropertyNotification =
         PropertyNotificationTopic.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "topic") in
       make ~state ~topic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map_exn json "state" PropertyNotificationState.of_json in
@@ -1373,6 +1389,7 @@ module Variant =
         (Option.map ~f:PropertyValueStringValue.of_xml)
           (Xml.child xml_arg0 "stringValue") in
       make ?booleanValue ?doubleValue ?integerValue ?stringValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let booleanValue =
         field_map json "booleanValue" PropertyValueBooleanValue.of_json in
@@ -1433,6 +1450,7 @@ module AssetModelProperty =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "id") in
       make ~type_ ?unit ?dataTypeSpec ~dataType ~name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" PropertyType.of_json in
       let unit = field_map json "unit" PropertyUnit.of_json in
@@ -1462,6 +1480,7 @@ module MonitorErrorDetails =
       let code =
         (Option.map ~f:MonitorErrorCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MonitorErrorMessage.of_json in
       let code = field_map json "code" MonitorErrorCode.of_json in
@@ -1531,6 +1550,7 @@ module GatewayCapabilitySummary =
         CapabilityNamespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "capabilityNamespace") in
       make ~capabilitySyncStatus ~capabilityNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capabilitySyncStatus =
         field_map_exn json "capabilitySyncStatus"
@@ -1557,6 +1577,7 @@ module Greengrass =
       let groupArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "groupArn") in
       make ~groupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupArn = field_map_exn json "groupArn" ARN.of_json in
       make ~groupArn ()
@@ -1582,6 +1603,7 @@ module GreengrassV2 =
         CoreDeviceThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreDeviceThingName") in
       make ~coreDeviceThingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreDeviceThingName =
         field_map_exn json "coreDeviceThingName" CoreDeviceThingName.of_json in
@@ -1610,6 +1632,7 @@ module AssetHierarchy =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "id") in
       make ~name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" Name.of_json in
       let id = field_map json "id" ID.of_json in make ~name ?id ()
@@ -1676,6 +1699,7 @@ module ErrorDetails =
       let code =
         ErrorCode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ?details ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" DetailedErrors.of_json in
       let message = field_map_exn json "message" ErrorMessage.of_json in
@@ -1735,6 +1759,7 @@ module GroupIdentity =
       let id =
         IdentityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" IdentityId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -1755,6 +1780,7 @@ module IAMRoleIdentity =
     let of_xml xml_arg0 =
       let arn = ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" ARN.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -1775,6 +1801,7 @@ module IAMUserIdentity =
     let of_xml xml_arg0 =
       let arn = ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" ARN.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -1795,6 +1822,7 @@ module UserIdentity =
       let id =
         IdentityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" IdentityId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -1811,6 +1839,7 @@ module PortalResource =
     let of_xml xml_arg0 =
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ID.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -1826,6 +1855,7 @@ module ProjectResource =
     let of_xml xml_arg0 =
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ID.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -1909,6 +1939,7 @@ module AssetProperty =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?unit ?dataTypeSpec ~dataType ?notification ?alias ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "unit" PropertyUnit.of_json in
       let dataTypeSpec = field_map json "dataTypeSpec" Name.of_json in
@@ -1966,6 +1997,7 @@ module AssetModelPropertyDefinition =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~type_ ?unit ?dataTypeSpec ~dataType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" PropertyType.of_json in
       let unit = field_map json "unit" PropertyUnit.of_json in
@@ -2008,6 +2040,7 @@ module BatchPutAssetPropertyError =
         BatchPutAssetPropertyValueErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "errorCode") in
       make ~timestamps ~errorMessage ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamps = field_map_exn json "timestamps" Timestamps.of_json in
       let errorMessage =
@@ -2047,6 +2080,7 @@ module AssetPropertyValue =
       let value =
         Variant.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
       make ?quality ~timestamp ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quality = field_map json "quality" Quality.of_json in
       let timestamp = field_map_exn json "timestamp" TimeInNanos.of_json in
@@ -2179,6 +2213,7 @@ module PortalStatus =
       let state =
         PortalState.of_xml (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ?error ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "error" MonitorErrorDetails.of_json in
       let state = field_map_exn json "state" PortalState.of_json in
@@ -2256,6 +2291,7 @@ module GatewayPlatform =
       let greengrass =
         (Option.map ~f:Greengrass.of_xml) (Xml.child xml_arg0 "greengrass") in
       make ?greengrassV2 ?greengrass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let greengrassV2 = field_map json "greengrassV2" GreengrassV2.of_json in
       let greengrass = field_map json "greengrass" Greengrass.of_json in
@@ -2306,6 +2342,7 @@ module AssetStatus =
       let state =
         AssetState.of_xml (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ?error ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "error" ErrorDetails.of_json in
       let state = field_map_exn json "state" AssetState.of_json in
@@ -2334,6 +2371,7 @@ module AssetHierarchyInfo =
       let parentAssetId =
         (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "parentAssetId") in
       make ?childAssetId ?parentAssetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let childAssetId = field_map json "childAssetId" ID.of_json in
       let parentAssetId = field_map json "parentAssetId" ID.of_json in
@@ -2383,6 +2421,7 @@ module AssetModelStatus =
         AssetModelState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ?error ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "error" ErrorDetails.of_json in
       let state = field_map_exn json "state" AssetModelState.of_json in
@@ -2421,6 +2460,7 @@ module Identity =
       let user =
         (Option.map ~f:UserIdentity.of_xml) (Xml.child xml_arg0 "user") in
       make ?iamRole ?iamUser ?group ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamRole = field_map json "iamRole" IAMRoleIdentity.of_json in
       let iamUser = field_map json "iamUser" IAMUserIdentity.of_json in
@@ -2473,6 +2513,7 @@ module Resource =
       let portal =
         (Option.map ~f:PortalResource.of_xml) (Xml.child xml_arg0 "portal") in
       make ?project ?portal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let project = field_map json "project" ProjectResource.of_json in
       let portal = field_map json "portal" PortalResource.of_json in
@@ -2542,6 +2583,7 @@ module Aggregates =
         (Option.map ~f:AggregatedDoubleValue.of_xml)
           (Xml.child xml_arg0 "average") in
       make ?standardDeviation ?sum ?minimum ?maximum ?count ?average ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let standardDeviation =
         field_map json "standardDeviation" AggregatedDoubleValue.of_json in
@@ -2780,6 +2822,7 @@ module ImageFile =
         ImageFileData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "data") in
       make ~type_ ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" ImageFileType.of_json in
       let data = field_map_exn json "data" ImageFileData.of_json in
@@ -2823,6 +2866,7 @@ module AssetModelCompositeModel =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?properties ~type_ ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map json "properties" AssetModelProperties.of_json in
@@ -2864,6 +2908,7 @@ module AssetModelHierarchy =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "id") in
       make ~childAssetModelId ~name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let childAssetModelId =
         field_map_exn json "childAssetModelId" ID.of_json in
@@ -2960,6 +3005,7 @@ module ConfigurationErrorDetails =
       let code =
         ErrorCode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       let code = field_map_exn json "code" ErrorCode.of_json in
@@ -3020,6 +3066,7 @@ module CustomerManagedS3Storage =
       let s3ResourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "s3ResourceArn") in
       make ~roleArn ~s3ResourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" ARN.of_json in
       let s3ResourceArn = field_map_exn json "s3ResourceArn" ARN.of_json in
@@ -3162,6 +3209,7 @@ module TimeSeriesSummary =
       let assetId = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "assetId") in
       make ~timeSeriesLastUpdateDate ~timeSeriesCreationDate ?dataTypeSpec
         ~dataType ~timeSeriesId ?alias ?propertyId ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeSeriesLastUpdateDate =
         field_map_exn json "timeSeriesLastUpdateDate" Timestamp.of_json in
@@ -3220,6 +3268,7 @@ module ProjectSummary =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?lastUpdateDate ?creationDate ?description ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateDate = field_map json "lastUpdateDate" Timestamp.of_json in
       let creationDate = field_map json "creationDate" Timestamp.of_json in
@@ -3300,6 +3349,7 @@ module PortalSummary =
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~status ?roleArn ?lastUpdateDate ?creationDate ~startUrl
         ?description ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" PortalStatus.of_json in
       let roleArn = field_map json "roleArn" ARN.of_json in
@@ -3375,6 +3425,7 @@ module GatewaySummary =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~lastUpdateDate ~creationDate ?gatewayCapabilitySummaries
         ?gatewayPlatform ~gatewayName ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateDate =
         field_map_exn json "lastUpdateDate" Timestamp.of_json in
@@ -3433,6 +3484,7 @@ module DashboardSummary =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?lastUpdateDate ?creationDate ?description ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateDate = field_map json "lastUpdateDate" Timestamp.of_json in
       let creationDate = field_map json "creationDate" Timestamp.of_json in
@@ -3514,6 +3566,7 @@ module AssociatedAssetsSummary =
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~hierarchies ~status ~lastUpdateDate ~creationDate ~assetModelId
         ~name ~arn ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hierarchies =
         field_map_exn json "hierarchies" AssetHierarchies.of_json in
@@ -3601,6 +3654,7 @@ module AssetSummary =
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~hierarchies ~status ~lastUpdateDate ~creationDate ~assetModelId
         ~name ~arn ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hierarchies =
         field_map_exn json "hierarchies" AssetHierarchies.of_json in
@@ -3644,6 +3698,7 @@ module AssetRelationshipSummary =
         (Option.map ~f:AssetHierarchyInfo.of_xml)
           (Xml.child xml_arg0 "hierarchyInfo") in
       make ~relationshipType ?hierarchyInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relationshipType =
         field_map_exn json "relationshipType" AssetRelationshipType.of_json in
@@ -3720,6 +3775,7 @@ module AssetModelSummary =
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~status ~lastUpdateDate ~creationDate ~description ~name ~arn ~id
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" AssetModelStatus.of_json in
       let lastUpdateDate =
@@ -3795,6 +3851,7 @@ module AccessPolicySummary =
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?lastUpdateDate ?creationDate ~permission ~resource ~identity ~id
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateDate = field_map json "lastUpdateDate" Timestamp.of_json in
       let creationDate = field_map json "creationDate" Timestamp.of_json in
@@ -3826,6 +3883,7 @@ module InterpolatedAssetPropertyValue =
         TimeInNanos.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
       make ~value ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" Variant.of_json in
       let timestamp = field_map_exn json "timestamp" TimeInNanos.of_json in
@@ -3861,6 +3919,7 @@ module AggregatedValue =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
       make ~value ?quality ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" Aggregates.of_json in
       let quality = field_map json "quality" Quality.of_json in
@@ -3943,6 +4002,7 @@ module AssetCompositeModel =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~properties ~type_ ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map_exn json "properties" AssetProperties.of_json in
@@ -4010,6 +4070,7 @@ module Property =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?type_ ?unit ~dataType ?notification ?alias ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" PropertyType.of_json in
       let unit = field_map json "unit" PropertyUnit.of_json in
@@ -4059,6 +4120,7 @@ module AssetModelCompositeModelDefinition =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?properties ~type_ ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map json "properties" AssetModelPropertyDefinitions.of_json in
@@ -4093,6 +4155,7 @@ module AssetModelHierarchyDefinition =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~childAssetModelId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let childAssetModelId =
         field_map_exn json "childAssetModelId" ID.of_json in
@@ -4122,6 +4185,7 @@ module BatchPutAssetPropertyErrorEntry =
       let entryId =
         EntryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "entryId") in
       make ~errors ~entryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map_exn json "errors" BatchPutAssetPropertyErrors.of_json in
@@ -4178,6 +4242,7 @@ module PutAssetPropertyValueEntry =
       let entryId =
         EntryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "entryId") in
       make ~propertyValues ?propertyAlias ?propertyId ?assetId ~entryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyValues =
         field_map_exn json "propertyValues" AssetPropertyValues.of_json in
@@ -4216,6 +4281,7 @@ module AssetErrorDetails =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ~message ~code ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" AssetErrorMessage.of_json in
       let code = field_map_exn json "code" AssetErrorCode.of_json in
@@ -4239,6 +4305,7 @@ module InternalFailureException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -4260,6 +4327,7 @@ module InvalidRequestException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -4281,6 +4349,7 @@ module ResourceNotFoundException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -4301,6 +4370,7 @@ module ThrottlingException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -4359,6 +4429,7 @@ module ConflictingOperationException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceArn ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       let resourceId = field_map_exn json "resourceId" ResourceId.of_json in
@@ -4393,6 +4464,7 @@ module Alarms =
       let alarmRoleArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "alarmRoleArn") in
       make ?notificationLambdaArn ~alarmRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationLambdaArn =
         field_map json "notificationLambdaArn" ARN.of_json in
@@ -4439,6 +4511,7 @@ module Image =
       let file = (Option.map ~f:ImageFile.of_xml) (Xml.child xml_arg0 "file") in
       let id = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "id") in
       make ?file ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let file = field_map json "file" ImageFile.of_json in
       let id = field_map json "id" ID.of_json in make ?file ?id ()
@@ -4460,6 +4533,7 @@ module LimitExceededException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -4534,6 +4608,7 @@ module ResourceAlreadyExistsException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceArn ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       let resourceId = field_map_exn json "resourceId" ResourceId.of_json in
@@ -4608,6 +4683,7 @@ module UnauthorizedException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -4664,6 +4740,7 @@ module TooManyTagsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName =
         field_map json "resourceName" AmazonResourceName.of_json in
@@ -4727,6 +4804,7 @@ module ConfigurationStatus =
         ConfigurationState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ?error ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "error" ConfigurationErrorDetails.of_json in
       let state = field_map_exn json "state" ConfigurationState.of_json in
@@ -4784,6 +4862,7 @@ module MultiLayerStorage =
           (Xml.child_exn ~context:context_ xml_arg0
              "customerManagedS3Storage") in
       make ~customerManagedS3Storage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerManagedS3Storage =
         field_map_exn json "customerManagedS3Storage"
@@ -4816,6 +4895,7 @@ module RetentionPeriod =
         (Option.map ~f:NumberOfDays.of_xml)
           (Xml.child xml_arg0 "numberOfDays") in
       make ?unlimited ?numberOfDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unlimited = field_map json "unlimited" Unlimited.of_json in
       let numberOfDays = field_map json "numberOfDays" NumberOfDays.of_json in
@@ -4864,6 +4944,7 @@ module LoggingOptions =
         LoggingLevel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "level") in
       make ~level ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let level = field_map_exn json "level" LoggingLevel.of_json in
       make ~level ()
@@ -5404,6 +5485,7 @@ module ServiceUnavailableException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -5663,6 +5745,7 @@ module ImageLocation =
       let url = Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "url") in
       let id = ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~url ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map_exn json "url" Url.of_json in
       let id = field_map_exn json "id" ID.of_json in make ~url ~id ()
@@ -5743,6 +5826,7 @@ module CompositeModelProperty =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~assetProperty ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetProperty = field_map_exn json "assetProperty" Property.of_json in
       let type_ = field_map_exn json "type" Name.of_json in
@@ -6015,6 +6099,7 @@ module UpdateProjectResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an IoT SiteWise Monitor project."]
@@ -6055,6 +6140,7 @@ module UpdateProjectRequest =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?clientToken ?projectDescription ~projectName ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let projectDescription =
@@ -6147,6 +6233,7 @@ module UpdatePortalResponse =
         PortalStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "portalStatus") in
       make ~portalStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalStatus =
         field_map_exn json "portalStatus" PortalStatus.of_json in
@@ -6237,6 +6324,7 @@ module UpdatePortalRequest =
       make ?alarms ?notificationSenderEmail ?clientToken ~roleArn
         ?portalLogoImage ~portalContactEmail ?portalDescription ~portalName
         ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarms = field_map json "alarms" Alarms.of_json in
       let notificationSenderEmail =
@@ -6276,6 +6364,7 @@ module UpdateGatewayRequest =
       let gatewayId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~gatewayName ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayName = field_map_exn json "gatewayName" Name.of_json in
       let gatewayId = field_map_exn json "gatewayId" ID.of_json in
@@ -6384,6 +6473,7 @@ module UpdateGatewayCapabilityConfigurationResponse =
         CapabilityNamespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "capabilityNamespace") in
       make ~capabilitySyncStatus ~capabilityNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capabilitySyncStatus =
         field_map_exn json "capabilitySyncStatus"
@@ -6429,6 +6519,7 @@ module UpdateGatewayCapabilityConfigurationRequest =
       let gatewayId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~capabilityConfiguration ~capabilityNamespace ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capabilityConfiguration =
         field_map_exn json "capabilityConfiguration"
@@ -6502,6 +6593,7 @@ module UpdateDashboardResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an IoT SiteWise Monitor dashboard."]
@@ -6560,6 +6652,7 @@ module UpdateDashboardRequest =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dashboardId") in
       make ?clientToken ~dashboardDefinition ?dashboardDescription
         ~dashboardName ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let dashboardDefinition =
@@ -6666,6 +6759,7 @@ module UpdateAssetResponse =
         AssetStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetStatus") in
       make ~assetStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetStatus = field_map_exn json "assetStatus" AssetStatus.of_json in
       make ~assetStatus ()
@@ -6699,6 +6793,7 @@ module UpdateAssetRequest =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?clientToken ~assetName ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let assetName = field_map_exn json "assetName" Name.of_json in
@@ -6763,6 +6858,7 @@ module UpdateAssetPropertyRequest =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?clientToken ?propertyNotificationState ?propertyAlias ~propertyId
         ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let propertyNotificationState =
@@ -6881,6 +6977,7 @@ module UpdateAssetModelResponse =
         AssetModelStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetModelStatus") in
       make ~assetModelStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetModelStatus =
         field_map_exn json "assetModelStatus" AssetModelStatus.of_json in
@@ -6966,6 +7063,7 @@ module UpdateAssetModelRequest =
       make ?clientToken ?assetModelCompositeModels ?assetModelHierarchies
         ?assetModelProperties ?assetModelDescription ~assetModelName
         ~assetModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let assetModelCompositeModels =
@@ -7047,6 +7145,7 @@ module UpdateAccessPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7109,6 +7208,7 @@ module UpdateAccessPolicyRequest =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accessPolicyId") in
       make ?clientToken ~accessPolicyPermission ~accessPolicyResource
         ~accessPolicyIdentity ~accessPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let accessPolicyPermission =
@@ -7214,6 +7314,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from an IoT SiteWise resource."]
@@ -7241,6 +7342,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -7348,6 +7450,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7375,6 +7478,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn =
@@ -7527,6 +7631,7 @@ module PutStorageConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "storageType") in
       make ~configurationStatus ?retentionPeriod ?disassociatedDataStorage
         ?multiLayerStorage ~storageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationStatus =
         field_map_exn json "configurationStatus" ConfigurationStatus.of_json in
@@ -7594,6 +7699,7 @@ module PutStorageConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "storageType") in
       make ?retentionPeriod ?disassociatedDataStorage ?multiLayerStorage
         ~storageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retentionPeriod =
         field_map json "retentionPeriod" RetentionPeriod.of_json in
@@ -7680,6 +7786,7 @@ module PutLoggingOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sets logging options for IoT SiteWise."]
@@ -7701,6 +7808,7 @@ module PutLoggingOptionsRequest =
         LoggingOptions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "loggingOptions") in
       make ~loggingOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingOptions =
         field_map_exn json "loggingOptions" LoggingOptions.of_json in
@@ -7808,6 +7916,7 @@ module PutDefaultEncryptionConfigurationResponse =
         EncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "encryptionType") in
       make ~configurationStatus ?kmsKeyArn ~encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationStatus =
         field_map_exn json "configurationStatus" ConfigurationStatus.of_json in
@@ -7844,6 +7953,7 @@ module PutDefaultEncryptionConfigurationRequest =
         EncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "encryptionType") in
       make ?kmsKeyId ~encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "kmsKeyId" KmsKeyId.of_json in
       let encryptionType =
@@ -7932,6 +8042,7 @@ module ListTimeSeriesResponse =
         TimeSeriesSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimeSeriesSummaries") in
       make ?nextToken ~timeSeriesSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let timeSeriesSummaries =
@@ -7988,6 +8099,7 @@ module ListTimeSeriesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?timeSeriesType ?aliasPrefix ?assetId ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeSeriesType =
         field_map json "timeSeriesType" ListTimeSeriesType.of_json in
@@ -8096,6 +8208,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -8117,6 +8230,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" AmazonResourceName.of_json in
@@ -8193,6 +8307,7 @@ module ListProjectsResponse =
         ProjectSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectSummaries") in
       make ?nextToken ~projectSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let projectSummaries =
@@ -8230,6 +8345,7 @@ module ListProjectsRequest =
       let portalId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
       make ?maxResults ?nextToken ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8306,6 +8422,7 @@ module ListProjectAssetsResponse =
       let assetIds =
         AssetIDs.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetIds") in
       make ?nextToken ~assetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assetIds = field_map_exn json "assetIds" AssetIDs.of_json in
@@ -8342,6 +8459,7 @@ module ListProjectAssetsRequest =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?maxResults ?nextToken ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8419,6 +8537,7 @@ module ListPortalsResponse =
         (Option.map ~f:PortalSummaries.of_xml)
           (Xml.child xml_arg0 "portalSummaries") in
       make ?nextToken ?portalSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let portalSummaries =
@@ -8450,6 +8569,7 @@ module ListPortalsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8527,6 +8647,7 @@ module ListGatewaysResponse =
         GatewaySummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewaySummaries") in
       make ?nextToken ~gatewaySummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let gatewaySummaries =
@@ -8557,6 +8678,7 @@ module ListGatewaysRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8633,6 +8755,7 @@ module ListDashboardsResponse =
         DashboardSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dashboardSummaries") in
       make ?nextToken ~dashboardSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let dashboardSummaries =
@@ -8670,6 +8793,7 @@ module ListDashboardsRequest =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?maxResults ?nextToken ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8757,6 +8881,7 @@ module ListAssociatedAssetsResponse =
         AssociatedAssetsSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetSummaries") in
       make ?nextToken ~assetSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assetSummaries =
@@ -8819,6 +8944,7 @@ module ListAssociatedAssetsRequest =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?maxResults ?nextToken ?traversalDirection ?hierarchyId ~assetId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -8910,6 +9036,7 @@ module ListAssetsResponse =
         AssetSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetSummaries") in
       make ?nextToken ~assetSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assetSummaries =
@@ -8956,6 +9083,7 @@ module ListAssetsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?filter ?assetModelId ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "filter" ListAssetsFilter.of_json in
       let assetModelId = field_map json "assetModelId" ID.of_json in
@@ -9048,6 +9176,7 @@ module ListAssetRelationshipsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "assetRelationshipSummaries") in
       make ?nextToken ~assetRelationshipSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assetRelationshipSummaries =
@@ -9095,6 +9224,7 @@ module ListAssetRelationshipsRequest =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?maxResults ?nextToken ~traversalType ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -9176,6 +9306,7 @@ module ListAssetModelsResponse =
         AssetModelSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetModelSummaries") in
       make ?nextToken ~assetModelSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assetModelSummaries =
@@ -9207,6 +9338,7 @@ module ListAssetModelsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -9285,6 +9417,7 @@ module ListAccessPoliciesResponse =
         AccessPolicySummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessPolicySummaries") in
       make ?nextToken ~accessPolicySummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let accessPolicySummaries =
@@ -9366,6 +9499,7 @@ module ListAccessPoliciesRequest =
           (Xml.child xml_arg0 "identityType") in
       make ?maxResults ?nextToken ?iamArn ?resourceId ?resourceType
         ?identityId ?identityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -9473,6 +9607,7 @@ module GetInterpolatedAssetPropertyValuesResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "interpolatedAssetPropertyValues") in
       make ?nextToken ~interpolatedAssetPropertyValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let interpolatedAssetPropertyValues =
@@ -9614,6 +9749,7 @@ module GetInterpolatedAssetPropertyValuesRequest =
         ~intervalInSeconds ~quality ?endTimeOffsetInNanos ~endTimeInSeconds
         ?startTimeOffsetInNanos ~startTimeInSeconds ?propertyAlias
         ?propertyId ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intervalWindowInSeconds =
         field_map json "intervalWindowInSeconds"
@@ -9726,6 +9862,7 @@ module GetAssetPropertyValueResponse =
         (Option.map ~f:AssetPropertyValue.of_xml)
           (Xml.child xml_arg0 "propertyValue") in
       make ?propertyValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyValue =
         field_map json "propertyValue" AssetPropertyValue.of_json in
@@ -9761,6 +9898,7 @@ module GetAssetPropertyValueRequest =
         (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "propertyId") in
       let assetId = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "assetId") in
       make ?propertyAlias ?propertyId ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyAlias =
         field_map json "propertyAlias" AssetPropertyAlias.of_json in
@@ -9863,6 +10001,7 @@ module GetAssetPropertyValueHistoryResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "assetPropertyValueHistory") in
       make ?nextToken ~assetPropertyValueHistory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assetPropertyValueHistory =
@@ -9955,6 +10094,7 @@ module GetAssetPropertyValueHistoryRequest =
       let assetId = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "assetId") in
       make ?maxResults ?nextToken ?timeOrdering ?qualities ?endDate
         ?startDate ?propertyAlias ?propertyId ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -10061,6 +10201,7 @@ module GetAssetPropertyAggregatesResponse =
         AggregatedValues.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "aggregatedValues") in
       make ?nextToken ~aggregatedValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let aggregatedValues =
@@ -10171,6 +10312,7 @@ module GetAssetPropertyAggregatesRequest =
       make ?maxResults ?nextToken ?timeOrdering ~endDate ~startDate
         ?qualities ~resolution ~aggregateTypes ?propertyAlias ?propertyId
         ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -10228,6 +10370,7 @@ module DisassociateTimeSeriesFromAssetPropertyRequest =
         PropertyAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alias") in
       make ?clientToken ~propertyId ~assetId ~alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let propertyId = field_map_exn json "propertyId" ID.of_json in
@@ -10275,6 +10418,7 @@ module DisassociateAssetsRequest =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?clientToken ~childAssetId ~hierarchyId ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let childAssetId = field_map_exn json "childAssetId" ID.of_json in
@@ -10417,6 +10561,7 @@ module DescribeTimeSeriesResponse =
       let assetId = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "assetId") in
       make ~timeSeriesLastUpdateDate ~timeSeriesCreationDate ?dataTypeSpec
         ~dataType ~timeSeriesId ?alias ?propertyId ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeSeriesLastUpdateDate =
         field_map_exn json "timeSeriesLastUpdateDate" Timestamp.of_json in
@@ -10460,6 +10605,7 @@ module DescribeTimeSeriesRequest =
       let alias =
         (Option.map ~f:PropertyAlias.of_xml) (Xml.child xml_arg0 "alias") in
       make ?propertyId ?assetId ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyId = field_map json "propertyId" ID.of_json in
       let assetId = field_map json "assetId" ID.of_json in
@@ -10613,6 +10759,7 @@ module DescribeStorageConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "storageType") in
       make ?lastUpdateDate ~configurationStatus ?retentionPeriod
         ?disassociatedDataStorage ?multiLayerStorage ~storageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateDate = field_map json "lastUpdateDate" Timestamp.of_json in
       let configurationStatus =
@@ -10638,6 +10785,7 @@ module DescribeStorageConfigurationRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10765,6 +10913,7 @@ module DescribeProjectResponse =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ~projectLastUpdateDate ~projectCreationDate ?projectDescription
         ~portalId ~projectName ~projectArn ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectLastUpdateDate =
         field_map_exn json "projectLastUpdateDate" Timestamp.of_json in
@@ -10793,6 +10942,7 @@ module DescribeProjectRequest =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectId = field_map_exn json "projectId" ID.of_json in
       make ~projectId ()
@@ -10994,6 +11144,7 @@ module DescribePortalResponse =
         ?portalLogoImageLocation ~portalLastUpdateDate ~portalCreationDate
         ~portalStatus ~portalContactEmail ~portalStartUrl ~portalClientId
         ?portalDescription ~portalName ~portalArn ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarms = field_map json "alarms" Alarms.of_json in
       let notificationSenderEmail =
@@ -11037,6 +11188,7 @@ module DescribePortalRequest =
       let portalId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
       make ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalId = field_map_exn json "portalId" ID.of_json in
       make ~portalId ()
@@ -11114,6 +11266,7 @@ module DescribeLoggingOptionsResponse =
         LoggingOptions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "loggingOptions") in
       make ~loggingOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingOptions =
         field_map_exn json "loggingOptions" LoggingOptions.of_json in
@@ -11128,6 +11281,7 @@ module DescribeLoggingOptionsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the current IoT SiteWise logging options."]
@@ -11258,6 +11412,7 @@ module DescribeGatewayResponse =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~lastUpdateDate ~creationDate ~gatewayCapabilitySummaries
         ?gatewayPlatform ~gatewayArn ~gatewayName ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateDate =
         field_map_exn json "lastUpdateDate" Timestamp.of_json in
@@ -11288,6 +11443,7 @@ module DescribeGatewayRequest =
       let gatewayId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayId = field_map_exn json "gatewayId" ID.of_json in
       make ~gatewayId ()
@@ -11398,6 +11554,7 @@ module DescribeGatewayCapabilityConfigurationResponse =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~capabilitySyncStatus ~capabilityConfiguration
         ~capabilityNamespace ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capabilitySyncStatus =
         field_map_exn json "capabilitySyncStatus"
@@ -11440,6 +11597,7 @@ module DescribeGatewayCapabilityConfigurationRequest =
       let gatewayId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~capabilityNamespace ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capabilityNamespace =
         field_map_exn json "capabilityNamespace" CapabilityNamespace.of_json in
@@ -11529,6 +11687,7 @@ module DescribeDefaultEncryptionConfigurationResponse =
         EncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "encryptionType") in
       make ~configurationStatus ?kmsKeyArn ~encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationStatus =
         field_map_exn json "configurationStatus" ConfigurationStatus.of_json in
@@ -11547,6 +11706,7 @@ module DescribeDefaultEncryptionConfigurationRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11687,6 +11847,7 @@ module DescribeDashboardResponse =
       make ~dashboardLastUpdateDate ~dashboardCreationDate
         ~dashboardDefinition ?dashboardDescription ~projectId ~dashboardName
         ~dashboardArn ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardLastUpdateDate =
         field_map_exn json "dashboardLastUpdateDate" Timestamp.of_json in
@@ -11720,6 +11881,7 @@ module DescribeDashboardRequest =
       let dashboardId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dashboardId") in
       make ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardId = field_map_exn json "dashboardId" ID.of_json in
       make ~dashboardId ()
@@ -11879,6 +12041,7 @@ module DescribeAssetResponse =
       make ~assetStatus ~assetLastUpdateDate ~assetCreationDate
         ?assetCompositeModels ~assetHierarchies ~assetProperties
         ~assetModelId ~assetName ~assetArn ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetStatus = field_map_exn json "assetStatus" AssetStatus.of_json in
       let assetLastUpdateDate =
@@ -11913,6 +12076,7 @@ module DescribeAssetRequest =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetId = field_map_exn json "assetId" ID.of_json in
       make ~assetId ()
@@ -12022,6 +12186,7 @@ module DescribeAssetPropertyResponse =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?compositeModel ?assetProperty ~assetModelId ~assetName ~assetId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compositeModel =
         field_map json "compositeModel" CompositeModelProperty.of_json in
@@ -12053,6 +12218,7 @@ module DescribeAssetPropertyRequest =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ~propertyId ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyId = field_map_exn json "propertyId" ID.of_json in
       let assetId = field_map_exn json "assetId" ID.of_json in
@@ -12222,6 +12388,7 @@ module DescribeAssetModelResponse =
         ~assetModelCreationDate ?assetModelCompositeModels
         ~assetModelHierarchies ~assetModelProperties ~assetModelDescription
         ~assetModelName ~assetModelArn ~assetModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetModelStatus =
         field_map_exn json "assetModelStatus" AssetModelStatus.of_json in
@@ -12264,6 +12431,7 @@ module DescribeAssetModelRequest =
       let assetModelId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetModelId") in
       make ~assetModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetModelId = field_map_exn json "assetModelId" ID.of_json in
       make ~assetModelId ()
@@ -12405,6 +12573,7 @@ module DescribeAccessPolicyResponse =
       make ~accessPolicyLastUpdateDate ~accessPolicyCreationDate
         ~accessPolicyPermission ~accessPolicyResource ~accessPolicyIdentity
         ~accessPolicyArn ~accessPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPolicyLastUpdateDate =
         field_map_exn json "accessPolicyLastUpdateDate" Timestamp.of_json in
@@ -12439,6 +12608,7 @@ module DescribeAccessPolicyRequest =
       let accessPolicyId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accessPolicyId") in
       make ~accessPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPolicyId = field_map_exn json "accessPolicyId" ID.of_json in
       make ~accessPolicyId ()
@@ -12479,6 +12649,7 @@ module DeleteTimeSeriesRequest =
       let alias =
         (Option.map ~f:PropertyAlias.of_xml) (Xml.child xml_arg0 "alias") in
       make ?clientToken ?propertyId ?assetId ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let propertyId = field_map json "propertyId" ID.of_json in
@@ -12550,6 +12721,7 @@ module DeleteProjectResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a project from IoT SiteWise Monitor."]
@@ -12575,6 +12747,7 @@ module DeleteProjectRequest =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?clientToken ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let projectId = field_map_exn json "projectId" ID.of_json in
@@ -12664,6 +12837,7 @@ module DeletePortalResponse =
         PortalStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "portalStatus") in
       make ~portalStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portalStatus =
         field_map_exn json "portalStatus" PortalStatus.of_json in
@@ -12692,6 +12866,7 @@ module DeletePortalRequest =
       let portalId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
       make ?clientToken ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let portalId = field_map_exn json "portalId" ID.of_json in
@@ -12712,6 +12887,7 @@ module DeleteGatewayRequest =
       let gatewayId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayId = field_map_exn json "gatewayId" ID.of_json in
       make ~gatewayId ()
@@ -12780,6 +12956,7 @@ module DeleteDashboardResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a dashboard from IoT SiteWise Monitor."]
@@ -12805,6 +12982,7 @@ module DeleteDashboardRequest =
       let dashboardId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dashboardId") in
       make ?clientToken ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let dashboardId = field_map_exn json "dashboardId" ID.of_json in
@@ -12894,6 +13072,7 @@ module DeleteAssetResponse =
         AssetStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetStatus") in
       make ~assetStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetStatus = field_map_exn json "assetStatus" AssetStatus.of_json in
       make ~assetStatus ()
@@ -12922,6 +13101,7 @@ module DeleteAssetRequest =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?clientToken ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let assetId = field_map_exn json "assetId" ID.of_json in
@@ -13013,6 +13193,7 @@ module DeleteAssetModelResponse =
         AssetModelStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetModelStatus") in
       make ~assetModelStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetModelStatus =
         field_map_exn json "assetModelStatus" AssetModelStatus.of_json in
@@ -13042,6 +13223,7 @@ module DeleteAssetModelRequest =
       let assetModelId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetModelId") in
       make ?clientToken ~assetModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let assetModelId = field_map_exn json "assetModelId" ID.of_json in
@@ -13111,6 +13293,7 @@ module DeleteAccessPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13138,6 +13321,7 @@ module DeleteAccessPolicyRequest =
       let accessPolicyId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accessPolicyId") in
       make ?clientToken ~accessPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let accessPolicyId = field_map_exn json "accessPolicyId" ID.of_json in
@@ -13230,6 +13414,7 @@ module CreateProjectResponse =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ~projectArn ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map_exn json "projectArn" ARN.of_json in
       let projectId = field_map_exn json "projectId" ID.of_json in
@@ -13287,6 +13472,7 @@ module CreateProjectRequest =
       let portalId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
       make ?tags ?clientToken ?projectDescription ~projectName ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -13417,6 +13603,7 @@ module CreatePortalResponse =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
       make ~ssoApplicationId ~portalStatus ~portalStartUrl ~portalArn
         ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ssoApplicationId =
         field_map_exn json "ssoApplicationId" SSOApplicationId.of_json in
@@ -13529,6 +13716,7 @@ module CreatePortalRequest =
       make ?alarms ?notificationSenderEmail ?portalAuthMode ?tags ~roleArn
         ?portalLogoImageFile ?clientToken ~portalContactEmail
         ?portalDescription ~portalName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarms = field_map json "alarms" Alarms.of_json in
       let notificationSenderEmail =
@@ -13639,6 +13827,7 @@ module CreateGatewayResponse =
       let gatewayId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayId") in
       make ~gatewayArn ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map_exn json "gatewayArn" ARN.of_json in
       let gatewayId = field_map_exn json "gatewayId" ID.of_json in
@@ -13678,6 +13867,7 @@ module CreateGatewayRequest =
       let gatewayName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "gatewayName") in
       make ?tags ~gatewayPlatform ~gatewayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let gatewayPlatform =
@@ -13772,6 +13962,7 @@ module CreateDashboardResponse =
       let dashboardId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dashboardId") in
       make ~dashboardArn ~dashboardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardArn = field_map_exn json "dashboardArn" ARN.of_json in
       let dashboardId = field_map_exn json "dashboardId" ID.of_json in
@@ -13841,6 +14032,7 @@ module CreateDashboardRequest =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?tags ?clientToken ~dashboardDefinition ?dashboardDescription
         ~dashboardName ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -13971,6 +14163,7 @@ module CreateAssetResponse =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ~assetStatus ~assetArn ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetStatus = field_map_exn json "assetStatus" AssetStatus.of_json in
       let assetArn = field_map_exn json "assetArn" ARN.of_json in
@@ -14015,6 +14208,7 @@ module CreateAssetRequest =
       let assetName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetName") in
       make ?tags ?clientToken ~assetModelId ~assetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -14143,6 +14337,7 @@ module CreateAssetModelResponse =
       let assetModelId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetModelId") in
       make ~assetModelStatus ~assetModelArn ~assetModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assetModelStatus =
         field_map_exn json "assetModelStatus" AssetModelStatus.of_json in
@@ -14232,6 +14427,7 @@ module CreateAssetModelRequest =
       make ?tags ?clientToken ?assetModelCompositeModels
         ?assetModelHierarchies ?assetModelProperties ?assetModelDescription
         ~assetModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -14339,6 +14535,7 @@ module CreateAccessPolicyResponse =
       let accessPolicyId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accessPolicyId") in
       make ~accessPolicyArn ~accessPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPolicyArn = field_map_exn json "accessPolicyArn" ARN.of_json in
       let accessPolicyId = field_map_exn json "accessPolicyId" ID.of_json in
@@ -14405,6 +14602,7 @@ module CreateAccessPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "accessPolicyIdentity") in
       make ?tags ?clientToken ~accessPolicyPermission ~accessPolicyResource
         ~accessPolicyIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -14523,6 +14721,7 @@ module BatchPutAssetPropertyValueResponse =
         BatchPutAssetPropertyErrorEntries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "errorEntries") in
       make ~errorEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorEntries =
         field_map_exn json "errorEntries"
@@ -14550,6 +14749,7 @@ module BatchPutAssetPropertyValueRequest =
         PutAssetPropertyValueEntries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entries") in
       make ~entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entries =
         field_map_exn json "entries" PutAssetPropertyValueEntries.of_json in
@@ -14629,6 +14829,7 @@ module BatchDisassociateProjectAssetsResponse =
         (Option.map ~f:BatchDisassociateProjectAssetsErrors.of_xml)
           (Xml.child xml_arg0 "errors") in
       make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map json "errors" BatchDisassociateProjectAssetsErrors.of_json in
@@ -14667,6 +14868,7 @@ module BatchDisassociateProjectAssetsRequest =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?clientToken ~assetIds ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let assetIds = field_map_exn json "assetIds" IDs.of_json in
@@ -14755,6 +14957,7 @@ module BatchAssociateProjectAssetsResponse =
         (Option.map ~f:BatchAssociateProjectAssetsErrors.of_xml)
           (Xml.child xml_arg0 "errors") in
       make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map json "errors" BatchAssociateProjectAssetsErrors.of_json in
@@ -14792,6 +14995,7 @@ module BatchAssociateProjectAssetsRequest =
       let projectId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?clientToken ~assetIds ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let assetIds = field_map_exn json "assetIds" IDs.of_json in
@@ -14837,6 +15041,7 @@ module AssociateTimeSeriesToAssetPropertyRequest =
         PropertyAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alias") in
       make ?clientToken ~propertyId ~assetId ~alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let propertyId = field_map_exn json "propertyId" ID.of_json in
@@ -14882,6 +15087,7 @@ module AssociateAssetsRequest =
       let assetId =
         ID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assetId") in
       make ?clientToken ~childAssetId ~hierarchyId ~assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let childAssetId = field_map_exn json "childAssetId" ID.of_json in

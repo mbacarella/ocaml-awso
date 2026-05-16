@@ -126,6 +126,7 @@ module KeyValuePair =
       let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" Value.of_json in
       let key = field_map json "key" Key.of_json in make ?value ?key ()
@@ -208,6 +209,7 @@ module ElasticInferenceAcceleratorHealth =
         (Option.map ~f:AcceleratorHealthStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" AcceleratorHealthStatus.of_json in
       make ?status ()
@@ -296,6 +298,7 @@ module MemoryInfo =
       let sizeInMiB =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "sizeInMiB") in
       make ?sizeInMiB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeInMiB = field_map json "sizeInMiB" Integer.of_json in
       make ?sizeInMiB ()
@@ -472,6 +475,7 @@ module ElasticInferenceAccelerator =
           (Xml.child xml_arg0 "acceleratorHealth") in
       make ?attachedResource ?availabilityZone ?acceleratorId
         ?acceleratorType ?acceleratorHealth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachedResource =
         field_map json "attachedResource" ResourceArn.of_json in
@@ -510,6 +514,7 @@ module Filter =
       let name =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" ValueStringList.of_json in
       let name = field_map json "name" FilterName.of_json in
@@ -551,6 +556,7 @@ module AcceleratorType =
         (Option.map ~f:AcceleratorTypeName.of_xml)
           (Xml.child xml_arg0 "acceleratorTypeName") in
       make ?throughputInfo ?memoryInfo ?acceleratorTypeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let throughputInfo =
         field_map json "throughputInfo" ThroughputInfoList.of_json in
@@ -594,6 +600,7 @@ module AcceleratorTypeOffering =
         (Option.map ~f:AcceleratorTypeName.of_xml)
           (Xml.child xml_arg0 "acceleratorType") in
       make ?location ?locationType ?acceleratorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "location" Location.of_json in
       let locationType = field_map json "locationType" LocationType.of_json in
@@ -615,6 +622,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -634,6 +642,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -653,6 +662,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1006,6 +1016,7 @@ module UntagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1035,6 +1046,7 @@ module UntagResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceARN.of_json in
@@ -1095,6 +1107,7 @@ module TagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1121,6 +1134,7 @@ module TagResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceARN.of_json in
@@ -1186,6 +1200,7 @@ module ListTagsForResourceResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1208,6 +1223,7 @@ module ListTagsForResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceARN.of_json in
       make ~resourceArn ()
@@ -1283,6 +1299,7 @@ module DescribeAcceleratorsResponse =
         (Option.map ~f:ElasticInferenceAcceleratorSet.of_xml)
           (Xml.child xml_arg0 "acceleratorSet") in
       make ?nextToken ?acceleratorSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let acceleratorSet =
@@ -1331,6 +1348,7 @@ module DescribeAcceleratorsRequest =
         (Option.map ~f:AcceleratorIdList.of_xml)
           (Xml.child xml_arg0 "acceleratorIds") in
       make ?nextToken ?maxResults ?filters ?acceleratorIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -1385,6 +1403,7 @@ module DescribeAcceleratorTypesResponse =
         (Option.map ~f:AcceleratorTypeList.of_xml)
           (Xml.child xml_arg0 "acceleratorTypes") in
       make ?acceleratorTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorTypes =
         field_map json "acceleratorTypes" AcceleratorTypeList.of_json in
@@ -1400,6 +1419,7 @@ module DescribeAcceleratorTypesRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1469,6 +1489,7 @@ module DescribeAcceleratorOfferingsResponse =
         (Option.map ~f:AcceleratorTypeOfferingList.of_xml)
           (Xml.child xml_arg0 "acceleratorTypeOfferings") in
       make ?acceleratorTypeOfferings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorTypeOfferings =
         field_map json "acceleratorTypeOfferings"
@@ -1503,6 +1524,7 @@ module DescribeAcceleratorOfferingsRequest =
         LocationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "locationType") in
       make ?acceleratorTypes ~locationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorTypes =
         field_map json "acceleratorTypes" AcceleratorTypeNameList.of_json in

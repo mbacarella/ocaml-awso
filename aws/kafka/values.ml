@@ -87,6 +87,7 @@ module ProvisionedThroughput =
       let enabled =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?volumeThroughput ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeThroughput =
         field_map json "VolumeThroughput" Zz__integer.of_json in
@@ -130,6 +131,7 @@ module PublicAccess =
       let type_ =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "type") in
       make ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" Zz__string.of_json in make ?type_ ()
     let to_json v = composed_to_json to_value v
@@ -161,6 +163,7 @@ module EBSStorageInfo =
         (Option.map ~f:ProvisionedThroughput.of_xml)
           (Xml.child xml_arg0 "provisionedThroughput") in
       make ?volumeSize ?provisionedThroughput ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeSize =
         field_map json "VolumeSize" Zz__integerMin1Max16384.of_json in
@@ -185,6 +188,7 @@ module Iam =
       let enabled =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Zz__boolean.of_json in
       make ?enabled ()
@@ -205,6 +209,7 @@ module Scram =
       let enabled =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Zz__boolean.of_json in
       make ?enabled ()
@@ -281,6 +286,7 @@ module CloudWatchLogs =
         Zz__boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
       make ?logGroup ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroup = field_map json "LogGroup" Zz__string.of_json in
       let enabled = field_map_exn json "Enabled" Zz__boolean.of_json in
@@ -310,6 +316,7 @@ module Firehose =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "deliveryStream") in
       make ~enabled ?deliveryStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Zz__boolean.of_json in
       let deliveryStream = field_map json "DeliveryStream" Zz__string.of_json in
@@ -341,6 +348,7 @@ module S3 =
       let bucket =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ~enabled ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" Zz__string.of_json in
       let enabled = field_map_exn json "Enabled" Zz__boolean.of_json in
@@ -366,6 +374,7 @@ module JmxExporterInfo =
         Zz__boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "enabledInBroker") in
       make ~enabledInBroker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabledInBroker =
         field_map_exn json "EnabledInBroker" Zz__boolean.of_json in
@@ -391,6 +400,7 @@ module NodeExporterInfo =
         Zz__boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "enabledInBroker") in
       make ~enabledInBroker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabledInBroker =
         field_map_exn json "EnabledInBroker" Zz__boolean.of_json in
@@ -416,6 +426,7 @@ module JmxExporter =
         Zz__boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "enabledInBroker") in
       make ~enabledInBroker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabledInBroker =
         field_map_exn json "EnabledInBroker" Zz__boolean.of_json in
@@ -441,6 +452,7 @@ module NodeExporter =
         Zz__boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "enabledInBroker") in
       make ~enabledInBroker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabledInBroker =
         field_map_exn json "EnabledInBroker" Zz__boolean.of_json in
@@ -495,6 +507,7 @@ module ConnectivityInfo =
         (Option.map ~f:PublicAccess.of_xml)
           (Xml.child xml_arg0 "publicAccess") in
       make ?publicAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicAccess = field_map json "PublicAccess" PublicAccess.of_json in
       make ?publicAccess ()
@@ -517,6 +530,7 @@ module StorageInfo =
         (Option.map ~f:EBSStorageInfo.of_xml)
           (Xml.child xml_arg0 "ebsStorageInfo") in
       make ?ebsStorageInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ebsStorageInfo =
         field_map json "EbsStorageInfo" EBSStorageInfo.of_json in
@@ -560,6 +574,7 @@ module Sasl =
       let iam = (Option.map ~f:Iam.of_xml) (Xml.child xml_arg0 "iam") in
       let scram = (Option.map ~f:Scram.of_xml) (Xml.child xml_arg0 "scram") in
       make ?iam ?scram ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iam = field_map json "Iam" Iam.of_json in
       let scram = field_map json "Scram" Scram.of_json in make ?iam ?scram ()
@@ -590,6 +605,7 @@ module Tls =
         (Option.map ~f:Zz__listOf__string.of_xml)
           (Xml.child xml_arg0 "certificateAuthorityArnList") in
       make ?enabled ?certificateAuthorityArnList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Zz__boolean.of_json in
       let certificateAuthorityArnList =
@@ -614,6 +630,7 @@ module Unauthenticated =
       let enabled =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Zz__boolean.of_json in
       make ?enabled ()
@@ -638,6 +655,7 @@ module EncryptionAtRest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataVolumeKMSKeyId") in
       make ~dataVolumeKMSKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataVolumeKMSKeyId =
         field_map_exn json "DataVolumeKMSKeyId" Zz__string.of_json in
@@ -669,6 +687,7 @@ module EncryptionInTransit =
         (Option.map ~f:ClientBroker.of_xml)
           (Xml.child xml_arg0 "clientBroker") in
       make ?inCluster ?clientBroker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inCluster = field_map json "InCluster" Zz__boolean.of_json in
       let clientBroker = field_map json "ClientBroker" ClientBroker.of_json in
@@ -699,6 +718,7 @@ module BrokerLogs =
         (Option.map ~f:CloudWatchLogs.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogs") in
       make ?s3 ?firehose ?cloudWatchLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "S3" S3.of_json in
       let firehose = field_map json "Firehose" Firehose.of_json in
@@ -734,6 +754,7 @@ module PrometheusInfo =
         (Option.map ~f:JmxExporterInfo.of_xml)
           (Xml.child xml_arg0 "jmxExporter") in
       make ?nodeExporter ?jmxExporter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeExporter =
         field_map json "NodeExporter" NodeExporterInfo.of_json in
@@ -754,6 +775,7 @@ module ServerlessSasl =
     let of_xml xml_arg0 =
       let iam = (Option.map ~f:Iam.of_xml) (Xml.child xml_arg0 "iam") in
       make ?iam ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iam = field_map json "Iam" Iam.of_json in make ?iam ()
     let to_json v = composed_to_json to_value v
@@ -784,6 +806,7 @@ module VpcConfig =
         Zz__listOf__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
       make ?securityGroupIds ~subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "SecurityGroupIds" Zz__listOf__string.of_json in
@@ -817,6 +840,7 @@ module Prometheus =
       let jmxExporter =
         (Option.map ~f:JmxExporter.of_xml) (Xml.child xml_arg0 "jmxExporter") in
       make ?nodeExporter ?jmxExporter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeExporter = field_map json "NodeExporter" NodeExporter.of_json in
       let jmxExporter = field_map json "JmxExporter" JmxExporter.of_json in
@@ -859,6 +883,7 @@ module BrokerEBSVolumeInfo =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "kafkaBrokerNodeId") in
       make ?volumeSizeGB ?provisionedThroughput ~kafkaBrokerNodeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeSizeGB = field_map json "VolumeSizeGB" Zz__integer.of_json in
       let provisionedThroughput =
@@ -884,6 +909,7 @@ module ClusterOperationStepInfo =
       let stepStatus =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "stepStatus") in
       make ?stepStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stepStatus = field_map json "StepStatus" Zz__string.of_json in
       make ?stepStatus ()
@@ -923,6 +949,7 @@ module BrokerSoftwareInfo =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "configurationArn") in
       make ?kafkaVersion ?configurationRevision ?configurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kafkaVersion = field_map json "KafkaVersion" Zz__string.of_json in
       let configurationRevision =
@@ -1030,6 +1057,7 @@ module BrokerNodeGroupInfo =
           (Xml.child xml_arg0 "brokerAZDistribution") in
       make ?connectivityInfo ?storageInfo ?securityGroups ~instanceType
         ~clientSubnets ?brokerAZDistribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectivityInfo =
         field_map json "ConnectivityInfo" ConnectivityInfo.of_json in
@@ -1075,6 +1103,7 @@ module ClientAuthentication =
       let tls = (Option.map ~f:Tls.of_xml) (Xml.child xml_arg0 "tls") in
       let sasl = (Option.map ~f:Sasl.of_xml) (Xml.child xml_arg0 "sasl") in
       make ?unauthenticated ?tls ?sasl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unauthenticated =
         field_map json "Unauthenticated" Unauthenticated.of_json in
@@ -1109,6 +1138,7 @@ module EncryptionInfo =
         (Option.map ~f:EncryptionAtRest.of_xml)
           (Xml.child xml_arg0 "encryptionAtRest") in
       make ?encryptionInTransit ?encryptionAtRest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionInTransit =
         field_map json "EncryptionInTransit" EncryptionInTransit.of_json in
@@ -1165,6 +1195,7 @@ module LoggingInfo =
         BrokerLogs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "brokerLogs") in
       make ~brokerLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let brokerLogs = field_map_exn json "BrokerLogs" BrokerLogs.of_json in
       make ~brokerLogs ()
@@ -1186,6 +1217,7 @@ module OpenMonitoringInfo =
         PrometheusInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "prometheus") in
       make ~prometheus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prometheus = field_map_exn json "Prometheus" PrometheusInfo.of_json in
       make ~prometheus ()
@@ -1224,6 +1256,7 @@ module ServerlessClientAuthentication =
       let sasl =
         (Option.map ~f:ServerlessSasl.of_xml) (Xml.child xml_arg0 "sasl") in
       make ?sasl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sasl = field_map json "Sasl" ServerlessSasl.of_json in
       make ?sasl ()
@@ -1273,6 +1306,7 @@ module ConfigurationInfo =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~revision ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "Revision" Zz__long.of_json in
       let arn = field_map_exn json "Arn" Zz__string.of_json in
@@ -1295,6 +1329,7 @@ module OpenMonitoring =
         Prometheus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "prometheus") in
       make ~prometheus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prometheus = field_map_exn json "Prometheus" Prometheus.of_json in
       make ~prometheus ()
@@ -1347,6 +1382,7 @@ module ClusterOperationStep =
         (Option.map ~f:ClusterOperationStepInfo.of_xml)
           (Xml.child xml_arg0 "stepInfo") in
       make ?stepName ?stepInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stepName = field_map json "StepName" Zz__string.of_json in
       let stepInfo =
@@ -1418,6 +1454,7 @@ module BrokerNodeInfo =
           (Xml.child xml_arg0 "attachedENIId") in
       make ?endpoints ?currentBrokerSoftwareInfo ?clientVpcIpAddress
         ?clientSubnet ?brokerId ?attachedENIId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoints = field_map json "Endpoints" Zz__listOf__string.of_json in
       let currentBrokerSoftwareInfo =
@@ -1504,6 +1541,7 @@ module ZookeeperNodeInfo =
           (Xml.child xml_arg0 "attachedENIId") in
       make ?zookeeperVersion ?zookeeperId ?endpoints ?clientVpcIpAddress
         ?attachedENIId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let zookeeperVersion =
         field_map json "ZookeeperVersion" Zz__string.of_json in
@@ -1571,6 +1609,7 @@ module ConfigurationRevision =
         Zz__timestampIso8601.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "creationTime") in
       make ~revision ?description ~creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "Revision" Zz__long.of_json in
       let description = field_map json "Description" Zz__string.of_json in
@@ -1785,6 +1824,7 @@ module Provisioned =
         ~numberOfBrokerNodes ?loggingInfo ?openMonitoring ?enhancedMonitoring
         ?encryptionInfo ?clientAuthentication ?currentBrokerSoftwareInfo
         ~brokerNodeGroupInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let zookeeperConnectStringTls =
         field_map json "ZookeeperConnectStringTls" Zz__string.of_json in
@@ -1837,6 +1877,7 @@ module Serverless =
         Zz__listOfVpcConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "vpcConfigs") in
       make ?clientAuthentication ~vpcConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientAuthentication =
         field_map json "ClientAuthentication"
@@ -1864,6 +1905,7 @@ module StateInfo =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let code = field_map json "Code" Zz__string.of_json in
@@ -1920,6 +1962,7 @@ module ErrorInfo =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?errorString ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorString = field_map json "ErrorString" Zz__string.of_json in
       let errorCode = field_map json "ErrorCode" Zz__string.of_json in
@@ -2041,6 +2084,7 @@ module MutableClusterInfo =
         ?instanceType ?loggingInfo ?kafkaVersion ?openMonitoring
         ?enhancedMonitoring ?numberOfBrokerNodes ?configurationInfo
         ?brokerEBSVolumeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectivityInfo =
         field_map json "ConnectivityInfo" ConnectivityInfo.of_json in
@@ -2154,6 +2198,7 @@ module NodeInfo =
           (Xml.child xml_arg0 "addedToClusterTime") in
       make ?zookeeperNodeInfo ?nodeType ?nodeARN ?instanceType
         ?brokerNodeInfo ?addedToClusterTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let zookeeperNodeInfo =
         field_map json "ZookeeperNodeInfo" ZookeeperNodeInfo.of_json in
@@ -2187,6 +2232,7 @@ module KafkaVersion =
       let version =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "version") in
       make ?status ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" KafkaVersionStatus.of_json in
       let version = field_map json "Version" Zz__string.of_json in
@@ -2265,6 +2311,7 @@ module Configuration =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~state ~name ~latestRevision ~kafkaVersions ~description
         ~creationTime ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map_exn json "State" ConfigurationState.of_json in
       let name = field_map_exn json "Name" Zz__string.of_json in
@@ -2379,6 +2426,7 @@ module Cluster =
       make ?serverless ?provisioned ?tags ?stateInfo ?state ?currentVersion
         ?creationTime ?clusterName ?clusterArn ?clusterType
         ?activeOperationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverless = field_map json "Serverless" Serverless.of_json in
       let provisioned = field_map json "Provisioned" Provisioned.of_json in
@@ -2569,6 +2617,7 @@ module ClusterInfo =
         ?enhancedMonitoring ?encryptionInfo ?currentVersion
         ?currentBrokerSoftwareInfo ?creationTime ?clusterName ?clusterArn
         ?clientAuthentication ?brokerNodeGroupInfo ?activeOperationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let zookeeperConnectStringTls =
         field_map json "ZookeeperConnectStringTls" Zz__string.of_json in
@@ -2715,6 +2764,7 @@ module ClusterOperationInfo =
       make ?targetClusterInfo ?sourceClusterInfo ?operationType
         ?operationSteps ?operationState ?operationArn ?errorInfo ?endTime
         ?creationTime ?clusterArn ?clientRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetClusterInfo =
         field_map json "TargetClusterInfo" MutableClusterInfo.of_json in
@@ -2763,6 +2813,7 @@ module CompatibleKafkaVersion =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "sourceVersion") in
       make ?targetVersions ?sourceVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetVersions =
         field_map json "TargetVersions" Zz__listOf__string.of_json in
@@ -2816,6 +2867,7 @@ module UnprocessedScramSecret =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?secretArn ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArn = field_map json "SecretArn" Zz__string.of_json in
       let errorMessage = field_map json "ErrorMessage" Zz__string.of_json in
@@ -2847,6 +2899,7 @@ module BadRequestException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -2877,6 +2930,7 @@ module ForbiddenException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -2907,6 +2961,7 @@ module InternalServerErrorException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -2937,6 +2992,7 @@ module NotFoundException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -2967,6 +3023,7 @@ module ServiceUnavailableException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -2997,6 +3054,7 @@ module TooManyRequestsException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -3027,6 +3085,7 @@ module UnauthorizedException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -3287,6 +3346,7 @@ module ConflictException =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -3391,6 +3451,7 @@ module ProvisionedRequest =
       make ~numberOfBrokerNodes ?loggingInfo ~kafkaVersion ?openMonitoring
         ?enhancedMonitoring ?encryptionInfo ?configurationInfo
         ?clientAuthentication ~brokerNodeGroupInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfBrokerNodes =
         field_map_exn json "NumberOfBrokerNodes" Zz__integerMin1Max15.of_json in
@@ -3440,6 +3501,7 @@ module ServerlessRequest =
         Zz__listOfVpcConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "vpcConfigs") in
       make ?clientAuthentication ~vpcConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientAuthentication =
         field_map json "ClientAuthentication"
@@ -3603,6 +3665,7 @@ module UpdateSecurityResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -3663,6 +3726,7 @@ module UpdateSecurityRequest =
           (Xml.child xml_arg0 "clientAuthentication") in
       make ?encryptionInfo ~currentVersion ~clusterArn ?clientAuthentication
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionInfo =
         field_map json "EncryptionInfo" EncryptionInfo.of_json in
@@ -3768,6 +3832,7 @@ module UpdateMonitoringResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -3833,6 +3898,7 @@ module UpdateMonitoringRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ?loggingInfo ?openMonitoring ?enhancedMonitoring ~currentVersion
         ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingInfo = field_map json "LoggingInfo" LoggingInfo.of_json in
       let openMonitoring =
@@ -3947,6 +4013,7 @@ module UpdateConnectivityResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -3988,6 +4055,7 @@ module UpdateConnectivityRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~currentVersion ~connectivityInfo ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentVersion =
         field_map_exn json "CurrentVersion" Zz__string.of_json in
@@ -4094,6 +4162,7 @@ module UpdateConfigurationResponse =
           (Xml.child xml_arg0 "latestRevision") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?latestRevision ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestRevision =
         field_map json "LatestRevision" ConfigurationRevision.of_json in
@@ -4132,6 +4201,7 @@ module UpdateConfigurationRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~serverProperties ?description ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverProperties =
         field_map_exn json "ServerProperties" Zz__blob.of_json in
@@ -4250,6 +4320,7 @@ module UpdateClusterKafkaVersionResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -4305,6 +4376,7 @@ module UpdateClusterKafkaVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~targetKafkaVersion ~currentVersion ?configurationInfo ~clusterArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetKafkaVersion =
         field_map_exn json "TargetKafkaVersion" Zz__string.of_json in
@@ -4418,6 +4490,7 @@ module UpdateClusterConfigurationResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -4461,6 +4534,7 @@ module UpdateClusterConfigurationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~currentVersion ~configurationInfo ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentVersion =
         field_map_exn json "CurrentVersion" Zz__string.of_json in
@@ -4581,6 +4655,7 @@ module UpdateBrokerTypeResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -4624,6 +4699,7 @@ module UpdateBrokerTypeRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~targetInstanceType ~currentVersion ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetInstanceType =
         field_map_exn json "TargetInstanceType" Zz__string.of_json in
@@ -4725,6 +4801,7 @@ module UpdateBrokerStorageResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -4771,6 +4848,7 @@ module UpdateBrokerStorageRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~targetBrokerEBSVolumeInfo ~currentVersion ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetBrokerEBSVolumeInfo =
         field_map_exn json "TargetBrokerEBSVolumeInfo"
@@ -4873,6 +4951,7 @@ module UpdateBrokerCountResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -4917,6 +4996,7 @@ module UpdateBrokerCountRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~targetNumberOfBrokerNodes ~currentVersion ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetNumberOfBrokerNodes =
         field_map_exn json "TargetNumberOfBrokerNodes"
@@ -4953,6 +5033,7 @@ module UntagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
@@ -4984,6 +5065,7 @@ module TagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
@@ -5100,6 +5182,7 @@ module RebootBrokerResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterOperationArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map json "ClusterOperationArn" Zz__string.of_json in
@@ -5133,6 +5216,7 @@ module RebootBrokerRequest =
         Zz__listOf__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "brokerIds") in
       make ~clusterArn ~brokerIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
       let brokerIds =
@@ -5202,6 +5286,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       make ?tags ()
@@ -5226,6 +5311,7 @@ module ListTagsForResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
@@ -5339,6 +5425,7 @@ module ListScramSecretsResponse =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?secretArnList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArnList =
         field_map json "SecretArnList" Zz__listOf__string.of_json in
@@ -5375,6 +5462,7 @@ module ListScramSecretsRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ?nextToken ?maxResults ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5463,6 +5551,7 @@ module ListNodesResponse =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nodeInfoList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeInfoList =
         field_map json "NodeInfoList" Zz__listOfNodeInfo.of_json in
@@ -5502,6 +5591,7 @@ module ListNodesRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ?nextToken ?maxResults ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5586,6 +5676,7 @@ module ListKafkaVersionsResponse =
         (Option.map ~f:Zz__listOfKafkaVersion.of_xml)
           (Xml.child xml_arg0 "kafkaVersions") in
       make ?nextToken ?kafkaVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let kafkaVersions =
@@ -5616,6 +5707,7 @@ module ListKafkaVersionsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5713,6 +5805,7 @@ module ListConfigurationsResponse =
         (Option.map ~f:Zz__listOfConfiguration.of_xml)
           (Xml.child xml_arg0 "configurations") in
       make ?nextToken ?configurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let configurations =
@@ -5744,6 +5837,7 @@ module ListConfigurationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5849,6 +5943,7 @@ module ListConfigurationRevisionsResponse =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?revisions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisions =
         field_map json "Revisions" Zz__listOfConfigurationRevision.of_json in
@@ -5887,6 +5982,7 @@ module ListConfigurationRevisionsRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ?maxResults ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5976,6 +6072,7 @@ module ListClustersV2Response =
         (Option.map ~f:Zz__listOfCluster.of_xml)
           (Xml.child xml_arg0 "clusterInfoList") in
       make ?nextToken ?clusterInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let clusterInfoList =
@@ -6026,6 +6123,7 @@ module ListClustersV2Request =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "clusterNameFilter") in
       make ?nextToken ?maxResults ?clusterTypeFilter ?clusterNameFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6118,6 +6216,7 @@ module ListClustersResponse =
         (Option.map ~f:Zz__listOfClusterInfo.of_xml)
           (Xml.child xml_arg0 "clusterInfoList") in
       make ?nextToken ?clusterInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let clusterInfoList =
@@ -6159,6 +6258,7 @@ module ListClustersRequest =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "clusterNameFilter") in
       make ?nextToken ?maxResults ?clusterNameFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6249,6 +6349,7 @@ module ListClusterOperationsResponse =
         (Option.map ~f:Zz__listOfClusterOperationInfo.of_xml)
           (Xml.child xml_arg0 "clusterOperationInfoList") in
       make ?nextToken ?clusterOperationInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let clusterOperationInfoList =
@@ -6290,6 +6391,7 @@ module ListClusterOperationsRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ?nextToken ?maxResults ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6401,6 +6503,7 @@ module GetCompatibleKafkaVersionsResponse =
         (Option.map ~f:Zz__listOfCompatibleKafkaVersion.of_xml)
           (Xml.child xml_arg0 "compatibleKafkaVersions") in
       make ?compatibleKafkaVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compatibleKafkaVersions =
         field_map json "CompatibleKafkaVersions"
@@ -6424,6 +6527,7 @@ module GetCompatibleKafkaVersionsRequest =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterArn = field_map json "ClusterArn" Zz__string.of_json in
       make ?clusterArn ()
@@ -6581,6 +6685,7 @@ module GetBootstrapBrokersResponse =
         ?bootstrapBrokerStringPublicSaslScram ?bootstrapBrokerStringPublicTls
         ?bootstrapBrokerStringSaslIam ?bootstrapBrokerStringSaslScram
         ?bootstrapBrokerStringTls ?bootstrapBrokerString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bootstrapBrokerStringPublicSaslIam =
         field_map json "BootstrapBrokerStringPublicSaslIam"
@@ -6623,6 +6728,7 @@ module GetBootstrapBrokersRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
       make ~clusterArn ()
@@ -6652,6 +6758,7 @@ module Error =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "invalidParameter") in
       make ?message ?invalidParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let invalidParameter =
@@ -6780,6 +6887,7 @@ module DescribeConfigurationRevisionResponse =
           (Xml.child xml_arg0 "creationTime") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?serverProperties ?revision ?description ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverProperties =
         field_map json "ServerProperties" Zz__blob.of_json in
@@ -6815,6 +6923,7 @@ module DescribeConfigurationRevisionRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~revision ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "Revision" Zz__long.of_json in
       let arn = field_map_exn json "Arn" Zz__string.of_json in
@@ -6967,6 +7076,7 @@ module DescribeConfigurationResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?state ?name ?latestRevision ?kafkaVersions ?description
         ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ConfigurationState.of_json in
       let name = field_map json "Name" Zz__string.of_json in
@@ -6998,6 +7108,7 @@ module DescribeConfigurationRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Zz__string.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -7081,6 +7192,7 @@ module DescribeClusterV2Response =
       let clusterInfo =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "clusterInfo") in
       make ?clusterInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterInfo = field_map json "ClusterInfo" Cluster.of_json in
       make ?clusterInfo ()
@@ -7105,6 +7217,7 @@ module DescribeClusterV2Request =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
       make ~clusterArn ()
@@ -7191,6 +7304,7 @@ module DescribeClusterResponse =
       let clusterInfo =
         (Option.map ~f:ClusterInfo.of_xml) (Xml.child xml_arg0 "clusterInfo") in
       make ?clusterInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterInfo = field_map json "ClusterInfo" ClusterInfo.of_json in
       make ?clusterInfo ()
@@ -7215,6 +7329,7 @@ module DescribeClusterRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
       make ~clusterArn ()
@@ -7304,6 +7419,7 @@ module DescribeClusterOperationResponse =
         (Option.map ~f:ClusterOperationInfo.of_xml)
           (Xml.child xml_arg0 "clusterOperationInfo") in
       make ?clusterOperationInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationInfo =
         field_map json "ClusterOperationInfo" ClusterOperationInfo.of_json in
@@ -7330,6 +7446,7 @@ module DescribeClusterOperationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterOperationArn") in
       make ~clusterOperationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterOperationArn =
         field_map_exn json "ClusterOperationArn" Zz__string.of_json in
@@ -7415,6 +7532,7 @@ module DeleteConfigurationResponse =
           (Xml.child xml_arg0 "state") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?state ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ConfigurationState.of_json in
       let arn = field_map json "Arn" Zz__string.of_json in
@@ -7437,6 +7555,7 @@ module DeleteConfigurationRequest =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Zz__string.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -7518,6 +7637,7 @@ module DeleteClusterResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?state ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ClusterState.of_json in
       let clusterArn = field_map json "ClusterArn" Zz__string.of_json in
@@ -7551,6 +7671,7 @@ module DeleteClusterRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ?currentVersion ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentVersion = field_map json "CurrentVersion" Zz__string.of_json in
       let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
@@ -7687,6 +7808,7 @@ module CreateConfigurationResponse =
           (Xml.child xml_arg0 "creationTime") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?state ?name ?latestRevision ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ConfigurationState.of_json in
       let name = field_map json "Name" Zz__string.of_json in
@@ -7737,6 +7859,7 @@ module CreateConfigurationRequest =
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       make ~serverProperties ~name ?kafkaVersions ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverProperties =
         field_map_exn json "ServerProperties" Zz__blob.of_json in
@@ -7868,6 +7991,7 @@ module CreateClusterV2Response =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?clusterType ?state ?clusterName ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterType = field_map json "ClusterType" ClusterType.of_json in
       let state = field_map json "State" ClusterState.of_json in
@@ -7916,6 +8040,7 @@ module CreateClusterV2Request =
         Zz__stringMin1Max64.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
       make ?serverless ?provisioned ?tags ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverless = field_map json "Serverless" ServerlessRequest.of_json in
       let provisioned =
@@ -8039,6 +8164,7 @@ module CreateClusterResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?state ?clusterName ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ClusterState.of_json in
       let clusterName = field_map json "ClusterName" Zz__string.of_json in
@@ -8158,6 +8284,7 @@ module CreateClusterRequest =
         ?openMonitoring ?enhancedMonitoring ?encryptionInfo
         ?configurationInfo ~clusterName ?clientAuthentication
         ~brokerNodeGroupInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let numberOfBrokerNodes =
@@ -8295,6 +8422,7 @@ module BatchDisassociateScramSecretResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?unprocessedScramSecrets ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedScramSecrets =
         field_map json "UnprocessedScramSecrets"
@@ -8330,6 +8458,7 @@ module BatchDisassociateScramSecretRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~secretArnList ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArnList =
         field_map_exn json "SecretArnList" Zz__listOf__string.of_json in
@@ -8447,6 +8576,7 @@ module BatchAssociateScramSecretResponse =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clusterArn") in
       make ?unprocessedScramSecrets ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedScramSecrets =
         field_map json "UnprocessedScramSecrets"
@@ -8482,6 +8612,7 @@ module BatchAssociateScramSecretRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clusterArn") in
       make ~secretArnList ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretArnList =
         field_map_exn json "SecretArnList" Zz__listOf__string.of_json in

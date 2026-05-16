@@ -233,6 +233,7 @@ module PortRange =
       let fromPort =
         (Option.map ~f:PortNumber.of_xml) (Xml.child xml_arg0 "FromPort") in
       make ?toPort ?fromPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let toPort = field_map json "ToPort" PortNumber.of_json in
       let fromPort = field_map json "FromPort" PortNumber.of_json in
@@ -296,6 +297,7 @@ module EndpointDescription =
           (Xml.child xml_arg0 "EndpointId") in
       make ?clientIPPreservationEnabled ?healthReason ?healthState ?weight
         ?endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientIPPreservationEnabled =
         field_map json "ClientIPPreservationEnabled" GenericBoolean.of_json in
@@ -331,6 +333,7 @@ module PortOverride =
       let listenerPort =
         (Option.map ~f:PortNumber.of_xml) (Xml.child xml_arg0 "ListenerPort") in
       make ?endpointPort ?listenerPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointPort = field_map json "EndpointPort" PortNumber.of_json in
       let listenerPort = field_map json "ListenerPort" PortNumber.of_json in
@@ -379,6 +382,7 @@ module SocketAddress =
       let ipAddress =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "IpAddress") in
       make ?port ?ipAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let port = field_map json "Port" PortNumber.of_json in
       let ipAddress = field_map json "IpAddress" GenericString.of_json in
@@ -415,6 +419,7 @@ module CustomRoutingDestinationDescription =
       let fromPort =
         (Option.map ~f:PortNumber.of_xml) (Xml.child xml_arg0 "FromPort") in
       make ?protocols ?toPort ?fromPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocols = field_map json "Protocols" Protocols.of_json in
       let toPort = field_map json "ToPort" PortNumber.of_json in
@@ -440,6 +445,7 @@ module CustomRoutingEndpointDescription =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "EndpointId") in
       make ?endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointId = field_map json "EndpointId" GenericString.of_json in
       make ?endpointId ()
@@ -468,6 +474,7 @@ module IpSet =
       let ipFamily =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "IpFamily") in
       make ?ipAddresses ?ipFamily ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddresses = field_map json "IpAddresses" IpAddresses.of_json in
       let ipFamily = field_map json "IpFamily" GenericString.of_json in
@@ -497,6 +504,7 @@ module ByoipCidrEvent =
       let message =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?timestamp ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
       let message = field_map json "Message" GenericString.of_json in
@@ -1117,6 +1125,7 @@ module EndpointConfiguration =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "EndpointId") in
       make ?clientIPPreservationEnabled ?weight ?endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientIPPreservationEnabled =
         field_map json "ClientIPPreservationEnabled" GenericBoolean.of_json in
@@ -1145,6 +1154,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1192,6 +1202,7 @@ module Listener =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "ListenerArn") in
       make ?clientAffinity ?protocol ?portRanges ?listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientAffinity =
         field_map json "ClientAffinity" ClientAffinity.of_json in
@@ -1315,6 +1326,7 @@ module EndpointGroup =
         ?healthCheckPath ?healthCheckProtocol ?healthCheckPort
         ?trafficDialPercentage ?endpointDescriptions ?endpointGroupRegion
         ?endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portOverrides =
         field_map json "PortOverrides" PortOverrides.of_json in
@@ -1413,6 +1425,7 @@ module PortMapping =
           (Xml.child xml_arg0 "AcceleratorPort") in
       make ?destinationTrafficState ?protocols ?destinationSocketAddress
         ?endpointId ?endpointGroupArn ?acceleratorPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationTrafficState =
         field_map json "DestinationTrafficState"
@@ -1522,6 +1535,7 @@ module DestinationPortMapping =
       make ?destinationTrafficState ?ipAddressType ?destinationSocketAddress
         ?endpointGroupRegion ?endpointId ?endpointGroupArn
         ?acceleratorSocketAddresses ?acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationTrafficState =
         field_map json "DestinationTrafficState"
@@ -1569,6 +1583,7 @@ module CustomRoutingListener =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "ListenerArn") in
       make ?portRanges ?listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portRanges = field_map json "PortRanges" PortRanges.of_json in
       let listenerArn = field_map json "ListenerArn" GenericString.of_json in
@@ -1629,6 +1644,7 @@ module CustomRoutingEndpointGroup =
           (Xml.child xml_arg0 "EndpointGroupArn") in
       make ?endpointDescriptions ?destinationDescriptions
         ?endpointGroupRegion ?endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointDescriptions =
         field_map json "EndpointDescriptions"
@@ -1735,6 +1751,7 @@ module CustomRoutingAccelerator =
           (Xml.child xml_arg0 "AcceleratorArn") in
       make ?lastModifiedTime ?createdTime ?status ?dnsName ?ipSets ?enabled
         ?ipAddressType ?name ?acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" Timestamp.of_json in
@@ -1780,6 +1797,7 @@ module ByoipCidr =
       let cidr =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Cidr") in
       make ?events ?state ?cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "Events" ByoipCidrEvents.of_json in
       let state = field_map json "State" ByoipCidrState.of_json in
@@ -1876,6 +1894,7 @@ module Accelerator =
           (Xml.child xml_arg0 "AcceleratorArn") in
       make ?lastModifiedTime ?createdTime ?status ?dnsName ?ipSets ?enabled
         ?ipAddressType ?name ?acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" Timestamp.of_json in
@@ -1927,6 +1946,7 @@ module CustomRoutingDestinationConfiguration =
         PortNumber.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FromPort") in
       make ~protocols ~toPort ~fromPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocols =
         field_map_exn json "Protocols" CustomRoutingProtocols.of_json in
@@ -1953,6 +1973,7 @@ module CustomRoutingEndpointConfiguration =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "EndpointId") in
       make ?endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointId = field_map json "EndpointId" GenericString.of_json in
       make ?endpointId ()
@@ -1972,6 +1993,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1990,6 +2012,7 @@ module ByoipCidrNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2009,6 +2032,7 @@ module IncorrectCidrStateException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2028,6 +2052,7 @@ module InternalServiceErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2046,6 +2071,7 @@ module InvalidArgumentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2064,6 +2090,7 @@ module InvalidPortRangeException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2083,6 +2110,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2102,6 +2130,7 @@ module ListenerNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2120,6 +2149,7 @@ module EndpointGroupNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2168,6 +2198,7 @@ module AcceleratorNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2210,6 +2241,7 @@ module CustomRoutingAcceleratorAttributes =
         (Option.map ~f:GenericBoolean.of_xml)
           (Xml.child xml_arg0 "FlowLogsEnabled") in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowLogsS3Prefix =
         field_map json "FlowLogsS3Prefix" GenericString.of_json in
@@ -2257,6 +2289,7 @@ module AcceleratorAttributes =
         (Option.map ~f:GenericBoolean.of_xml)
           (Xml.child xml_arg0 "FlowLogsEnabled") in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowLogsS3Prefix =
         field_map json "FlowLogsS3Prefix" GenericString.of_json in
@@ -2385,6 +2418,7 @@ module CidrAuthorizationContext =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~signature ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signature = field_map_exn json "Signature" GenericString.of_json in
       let message = field_map_exn json "Message" GenericString.of_json in
@@ -2405,6 +2439,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2558,6 +2593,7 @@ module EndpointNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2766,6 +2802,7 @@ module EndpointGroupAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2816,6 +2853,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2834,6 +2872,7 @@ module EndpointAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2953,6 +2992,7 @@ module WithdrawByoipCidrResponse =
       let byoipCidr =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
@@ -2975,6 +3015,7 @@ module WithdrawByoipCidrRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map_exn json "Cidr" GenericString.of_json in
       make ~cidr ()
@@ -3061,6 +3102,7 @@ module UpdateListenerResponse =
       let listener =
         (Option.map ~f:Listener.of_xml) (Xml.child xml_arg0 "Listener") in
       make ?listener ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listener = field_map json "Listener" Listener.of_json in
       make ?listener ()
@@ -3108,6 +3150,7 @@ module UpdateListenerRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ?clientAffinity ?protocol ?portRanges ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientAffinity =
         field_map json "ClientAffinity" ClientAffinity.of_json in
@@ -3203,6 +3246,7 @@ module UpdateEndpointGroupResponse =
         (Option.map ~f:EndpointGroup.of_xml)
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroup =
         field_map json "EndpointGroup" EndpointGroup.of_json in
@@ -3317,6 +3361,7 @@ module UpdateEndpointGroupRequest =
       make ?portOverrides ?thresholdCount ?healthCheckIntervalSeconds
         ?healthCheckPath ?healthCheckProtocol ?healthCheckPort
         ?trafficDialPercentage ?endpointConfigurations ~endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portOverrides =
         field_map json "PortOverrides" PortOverrides.of_json in
@@ -3427,6 +3472,7 @@ module UpdateCustomRoutingListenerResponse =
         (Option.map ~f:CustomRoutingListener.of_xml)
           (Xml.child xml_arg0 "Listener") in
       make ?listener ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listener = field_map json "Listener" CustomRoutingListener.of_json in
       make ?listener ()
@@ -3458,6 +3504,7 @@ module UpdateCustomRoutingListenerRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~portRanges ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portRanges = field_map_exn json "PortRanges" PortRanges.of_json in
       let listenerArn =
@@ -3532,6 +3579,7 @@ module UpdateCustomRoutingAcceleratorResponse =
         (Option.map ~f:CustomRoutingAccelerator.of_xml)
           (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accelerator =
         field_map json "Accelerator" CustomRoutingAccelerator.of_json in
@@ -3579,6 +3627,7 @@ module UpdateCustomRoutingAcceleratorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?enabled ?ipAddressType ?name ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" GenericBoolean.of_json in
       let ipAddressType =
@@ -3665,6 +3714,7 @@ module UpdateCustomRoutingAcceleratorAttributesResponse =
         (Option.map ~f:CustomRoutingAcceleratorAttributes.of_xml)
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorAttributes =
         field_map json "AcceleratorAttributes"
@@ -3725,6 +3775,7 @@ module UpdateCustomRoutingAcceleratorAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled
         ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowLogsS3Prefix =
         field_map json "FlowLogsS3Prefix" GenericString.of_json in
@@ -3802,6 +3853,7 @@ module UpdateAcceleratorResponse =
       let accelerator =
         (Option.map ~f:Accelerator.of_xml) (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accelerator = field_map json "Accelerator" Accelerator.of_json in
       make ?accelerator ()
@@ -3849,6 +3901,7 @@ module UpdateAcceleratorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?enabled ?ipAddressType ?name ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" GenericBoolean.of_json in
       let ipAddressType =
@@ -3936,6 +3989,7 @@ module UpdateAcceleratorAttributesResponse =
         (Option.map ~f:AcceleratorAttributes.of_xml)
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorAttributes =
         field_map json "AcceleratorAttributes" AcceleratorAttributes.of_json in
@@ -3995,6 +4049,7 @@ module UpdateAcceleratorAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?flowLogsS3Prefix ?flowLogsS3Bucket ?flowLogsEnabled
         ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowLogsS3Prefix =
         field_map json "FlowLogsS3Prefix" GenericString.of_json in
@@ -4065,6 +4120,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4094,6 +4150,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -4158,6 +4215,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4186,6 +4244,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -4220,6 +4279,7 @@ module RemoveCustomRoutingEndpointsRequest =
         EndpointIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointIds") in
       make ~endpointGroupArn ~endpointIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroupArn =
         field_map_exn json "EndpointGroupArn" GenericString.of_json in
@@ -4309,6 +4369,7 @@ module ProvisionByoipCidrResponse =
       let byoipCidr =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
@@ -4345,6 +4406,7 @@ module ProvisionByoipCidrRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidrAuthorizationContext ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidrAuthorizationContext =
         field_map_exn json "CidrAuthorizationContext"
@@ -4416,6 +4478,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4439,6 +4502,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -4525,6 +4589,7 @@ module ListListenersResponse =
       let listeners =
         (Option.map ~f:Listeners.of_xml) (Xml.child xml_arg0 "Listeners") in
       make ?nextToken ?listeners ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let listeners = field_map json "Listeners" Listeners.of_json in
@@ -4564,6 +4629,7 @@ module ListListenersRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?nextToken ?maxResults ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4653,6 +4719,7 @@ module ListEndpointGroupsResponse =
         (Option.map ~f:EndpointGroups.of_xml)
           (Xml.child xml_arg0 "EndpointGroups") in
       make ?nextToken ?endpointGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let endpointGroups =
@@ -4692,6 +4759,7 @@ module ListEndpointGroupsRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ?nextToken ?maxResults ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4794,6 +4862,7 @@ module ListCustomRoutingPortMappingsResponse =
         (Option.map ~f:PortMappings.of_xml)
           (Xml.child xml_arg0 "PortMappings") in
       make ?nextToken ?portMappings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let portMappings = field_map json "PortMappings" PortMappings.of_json in
@@ -4846,6 +4915,7 @@ module ListCustomRoutingPortMappingsRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?nextToken ?maxResults ?endpointGroupArn ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults =
@@ -4940,6 +5010,7 @@ module ListCustomRoutingPortMappingsByDestinationResponse =
         (Option.map ~f:DestinationPortMappings.of_xml)
           (Xml.child xml_arg0 "DestinationPortMappings") in
       make ?nextToken ?destinationPortMappings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let destinationPortMappings =
@@ -4993,6 +5064,7 @@ module ListCustomRoutingPortMappingsByDestinationRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointId") in
       make ?nextToken ?maxResults ~destinationAddress ~endpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults =
@@ -5087,6 +5159,7 @@ module ListCustomRoutingListenersResponse =
         (Option.map ~f:CustomRoutingListeners.of_xml)
           (Xml.child xml_arg0 "Listeners") in
       make ?nextToken ?listeners ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let listeners =
@@ -5127,6 +5200,7 @@ module ListCustomRoutingListenersRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ?nextToken ?maxResults ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5217,6 +5291,7 @@ module ListCustomRoutingEndpointGroupsResponse =
         (Option.map ~f:CustomRoutingEndpointGroups.of_xml)
           (Xml.child xml_arg0 "EndpointGroups") in
       make ?nextToken ?endpointGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let endpointGroups =
@@ -5257,6 +5332,7 @@ module ListCustomRoutingEndpointGroupsRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ?nextToken ?maxResults ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5338,6 +5414,7 @@ module ListCustomRoutingAcceleratorsResponse =
         (Option.map ~f:CustomRoutingAccelerators.of_xml)
           (Xml.child xml_arg0 "Accelerators") in
       make ?nextToken ?accelerators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let accelerators =
@@ -5368,6 +5445,7 @@ module ListCustomRoutingAcceleratorsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5451,6 +5529,7 @@ module ListByoipCidrsResponse =
       let byoipCidrs =
         (Option.map ~f:ByoipCidrs.of_xml) (Xml.child xml_arg0 "ByoipCidrs") in
       make ?nextToken ?byoipCidrs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let byoipCidrs = field_map json "ByoipCidrs" ByoipCidrs.of_json in
@@ -5480,6 +5559,7 @@ module ListByoipCidrsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5558,6 +5638,7 @@ module ListAcceleratorsResponse =
         (Option.map ~f:Accelerators.of_xml)
           (Xml.child xml_arg0 "Accelerators") in
       make ?nextToken ?accelerators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let accelerators = field_map json "Accelerators" Accelerators.of_json in
@@ -5587,6 +5668,7 @@ module ListAcceleratorsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5655,6 +5737,7 @@ module DescribeListenerResponse =
       let listener =
         (Option.map ~f:Listener.of_xml) (Xml.child xml_arg0 "Listener") in
       make ?listener ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listener = field_map json "Listener" Listener.of_json in
       make ?listener ()
@@ -5678,6 +5761,7 @@ module DescribeListenerRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listenerArn =
         field_map_exn json "ListenerArn" GenericString.of_json in
@@ -5750,6 +5834,7 @@ module DescribeEndpointGroupResponse =
         (Option.map ~f:EndpointGroup.of_xml)
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroup =
         field_map json "EndpointGroup" EndpointGroup.of_json in
@@ -5775,6 +5860,7 @@ module DescribeEndpointGroupRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroupArn =
         field_map_exn json "EndpointGroupArn" GenericString.of_json in
@@ -5846,6 +5932,7 @@ module DescribeCustomRoutingListenerResponse =
         (Option.map ~f:CustomRoutingListener.of_xml)
           (Xml.child xml_arg0 "Listener") in
       make ?listener ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listener = field_map json "Listener" CustomRoutingListener.of_json in
       make ?listener ()
@@ -5870,6 +5957,7 @@ module DescribeCustomRoutingListenerRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listenerArn =
         field_map_exn json "ListenerArn" GenericString.of_json in
@@ -5944,6 +6032,7 @@ module DescribeCustomRoutingEndpointGroupResponse =
         (Option.map ~f:CustomRoutingEndpointGroup.of_xml)
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroup =
         field_map json "EndpointGroup" CustomRoutingEndpointGroup.of_json in
@@ -5970,6 +6059,7 @@ module DescribeCustomRoutingEndpointGroupRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroupArn =
         field_map_exn json "EndpointGroupArn" GenericString.of_json in
@@ -6043,6 +6133,7 @@ module DescribeCustomRoutingAcceleratorResponse =
         (Option.map ~f:CustomRoutingAccelerator.of_xml)
           (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accelerator =
         field_map json "Accelerator" CustomRoutingAccelerator.of_json in
@@ -6067,6 +6158,7 @@ module DescribeCustomRoutingAcceleratorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorArn =
         field_map_exn json "AcceleratorArn" GenericString.of_json in
@@ -6140,6 +6232,7 @@ module DescribeCustomRoutingAcceleratorAttributesResponse =
         (Option.map ~f:CustomRoutingAcceleratorAttributes.of_xml)
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorAttributes =
         field_map json "AcceleratorAttributes"
@@ -6165,6 +6258,7 @@ module DescribeCustomRoutingAcceleratorAttributesRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorArn =
         field_map_exn json "AcceleratorArn" GenericString.of_json in
@@ -6235,6 +6329,7 @@ module DescribeAcceleratorResponse =
       let accelerator =
         (Option.map ~f:Accelerator.of_xml) (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accelerator = field_map json "Accelerator" Accelerator.of_json in
       make ?accelerator ()
@@ -6258,6 +6353,7 @@ module DescribeAcceleratorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorArn =
         field_map_exn json "AcceleratorArn" GenericString.of_json in
@@ -6331,6 +6427,7 @@ module DescribeAcceleratorAttributesResponse =
         (Option.map ~f:AcceleratorAttributes.of_xml)
           (Xml.child xml_arg0 "AcceleratorAttributes") in
       make ?acceleratorAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorAttributes =
         field_map json "AcceleratorAttributes" AcceleratorAttributes.of_json in
@@ -6355,6 +6452,7 @@ module DescribeAcceleratorAttributesRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorArn =
         field_map_exn json "AcceleratorArn" GenericString.of_json in
@@ -6444,6 +6542,7 @@ module DeprovisionByoipCidrResponse =
       let byoipCidr =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
@@ -6467,6 +6566,7 @@ module DeprovisionByoipCidrRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map_exn json "Cidr" GenericString.of_json in
       make ~cidr ()
@@ -6535,6 +6635,7 @@ module DenyCustomRoutingTrafficRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ?denyAllTrafficToEndpoint ?destinationPorts ?destinationAddresses
         ~endpointId ~endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let denyAllTrafficToEndpoint =
         field_map json "DenyAllTrafficToEndpoint" GenericBoolean.of_json in
@@ -6567,6 +6668,7 @@ module DeleteListenerRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listenerArn =
         field_map_exn json "ListenerArn" GenericString.of_json in
@@ -6592,6 +6694,7 @@ module DeleteEndpointGroupRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroupArn =
         field_map_exn json "EndpointGroupArn" GenericString.of_json in
@@ -6616,6 +6719,7 @@ module DeleteCustomRoutingListenerRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listenerArn =
         field_map_exn json "ListenerArn" GenericString.of_json in
@@ -6641,6 +6745,7 @@ module DeleteCustomRoutingEndpointGroupRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ~endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroupArn =
         field_map_exn json "EndpointGroupArn" GenericString.of_json in
@@ -6666,6 +6771,7 @@ module DeleteCustomRoutingAcceleratorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorArn =
         field_map_exn json "AcceleratorArn" GenericString.of_json in
@@ -6690,6 +6796,7 @@ module DeleteAcceleratorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorArn =
         field_map_exn json "AcceleratorArn" GenericString.of_json in
@@ -6779,6 +6886,7 @@ module CreateListenerResponse =
       let listener =
         (Option.map ~f:Listener.of_xml) (Xml.child xml_arg0 "Listener") in
       make ?listener ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listener = field_map json "Listener" Listener.of_json in
       make ?listener ()
@@ -6844,6 +6952,7 @@ module CreateListenerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~idempotencyToken ?clientAffinity ~protocol ~portRanges
         ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -6964,6 +7073,7 @@ module CreateEndpointGroupResponse =
         (Option.map ~f:EndpointGroup.of_xml)
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroup =
         field_map json "EndpointGroup" EndpointGroup.of_json in
@@ -7097,6 +7207,7 @@ module CreateEndpointGroupRequest =
         ?healthCheckIntervalSeconds ?healthCheckPath ?healthCheckProtocol
         ?healthCheckPort ?trafficDialPercentage ?endpointConfigurations
         ~endpointGroupRegion ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portOverrides =
         field_map json "PortOverrides" PortOverrides.of_json in
@@ -7214,6 +7325,7 @@ module CreateCustomRoutingListenerResponse =
         (Option.map ~f:CustomRoutingListener.of_xml)
           (Xml.child xml_arg0 "Listener") in
       make ?listener ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listener = field_map json "Listener" CustomRoutingListener.of_json in
       make ?listener ()
@@ -7256,6 +7368,7 @@ module CreateCustomRoutingListenerRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AcceleratorArn") in
       make ~idempotencyToken ~portRanges ~acceleratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -7381,6 +7494,7 @@ module CreateCustomRoutingEndpointGroupResponse =
         (Option.map ~f:CustomRoutingEndpointGroup.of_xml)
           (Xml.child xml_arg0 "EndpointGroup") in
       make ?endpointGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroup =
         field_map json "EndpointGroup" CustomRoutingEndpointGroup.of_json in
@@ -7444,6 +7558,7 @@ module CreateCustomRoutingEndpointGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~idempotencyToken ~destinationConfigurations ~endpointGroupRegion
         ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -7532,6 +7647,7 @@ module CreateCustomRoutingAcceleratorResponse =
         (Option.map ~f:CustomRoutingAccelerator.of_xml)
           (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accelerator =
         field_map json "Accelerator" CustomRoutingAccelerator.of_json in
@@ -7604,6 +7720,7 @@ module CreateCustomRoutingAcceleratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~idempotencyToken ?enabled ?ipAddresses ?ipAddressType ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let idempotencyToken =
@@ -7681,6 +7798,7 @@ module CreateAcceleratorResponse =
       let accelerator =
         (Option.map ~f:Accelerator.of_xml) (Xml.child xml_arg0 "Accelerator") in
       make ?accelerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accelerator = field_map json "Accelerator" Accelerator.of_json in
       make ?accelerator ()
@@ -7752,6 +7870,7 @@ module CreateAcceleratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~idempotencyToken ?enabled ?ipAddresses ?ipAddressType ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let idempotencyToken =
@@ -7779,6 +7898,7 @@ module AssociatedListenerFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -7798,6 +7918,7 @@ module AssociatedEndpointGroupFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -7866,6 +7987,7 @@ module AllowCustomRoutingTrafficRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointGroupArn") in
       make ?allowAllTrafficToEndpoint ?destinationPorts ?destinationAddresses
         ~endpointId ~endpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowAllTrafficToEndpoint =
         field_map json "AllowAllTrafficToEndpoint" GenericBoolean.of_json in
@@ -7964,6 +8086,7 @@ module AdvertiseByoipCidrResponse =
       let byoipCidr =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "ByoipCidr") in
       make ?byoipCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
@@ -7987,6 +8110,7 @@ module AdvertiseByoipCidrRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map_exn json "Cidr" GenericString.of_json in
       make ~cidr ()
@@ -8109,6 +8233,7 @@ module AddCustomRoutingEndpointsResponse =
         (Option.map ~f:CustomRoutingEndpointDescriptions.of_xml)
           (Xml.child xml_arg0 "EndpointDescriptions") in
       make ?endpointGroupArn ?endpointDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroupArn =
         field_map json "EndpointGroupArn" GenericString.of_json in
@@ -8150,6 +8275,7 @@ module AddCustomRoutingEndpointsRequest =
         CustomRoutingEndpointConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointConfigurations") in
       make ~endpointGroupArn ~endpointConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpointGroupArn =
         field_map_exn json "EndpointGroupArn" GenericString.of_json in
@@ -8173,6 +8299,7 @@ module AcceleratorNotDisabledException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()

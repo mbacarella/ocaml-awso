@@ -241,6 +241,7 @@ module ParameterDefinition =
       make ?type_ ~referencedByResources ?noEcho ~name ?minValue ?minLength
         ?maxValue ?maxLength ?description ?defaultValue
         ?constraintDescription ?allowedValues ?allowedPattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" Zz__string.of_json in
       let referencedByResources =
@@ -286,6 +287,7 @@ module RollbackTrigger =
       let arn =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~type_ ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" Zz__string.of_json in
       let arn = field_map_exn json "Arn" Zz__string.of_json in
@@ -385,6 +387,7 @@ module ApplicationPolicyStatement =
         Zz__listOf__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actions") in
       make ?statementId ~principals ?principalOrgIDs ~actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statementId = field_map json "StatementId" Zz__string.of_json in
       let principals =
@@ -475,6 +478,7 @@ module ApplicationSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?spdxLicenseId ~name ?labels ?homePageUrl ~description
         ?creationTime ~author ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
       let name = field_map_exn json "Name" Zz__string.of_json in
@@ -532,6 +536,7 @@ module VersionSummary =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?sourceCodeUrl ~semanticVersion ~creationTime ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
       let semanticVersion =
@@ -567,6 +572,7 @@ module ApplicationDependencySummary =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~semanticVersion ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let semanticVersion =
         field_map_exn json "SemanticVersion" Zz__string.of_json in
@@ -622,6 +628,7 @@ module ParameterValue =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" Zz__string.of_json in
       let name = field_map_exn json "Name" Zz__string.of_json in
@@ -651,6 +658,7 @@ module Tag =
       let key =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" Zz__string.of_json in
       let key = field_map_exn json "Key" Zz__string.of_json in
@@ -677,6 +685,7 @@ module BadRequestException =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let errorCode = field_map json "ErrorCode" Zz__string.of_json in
@@ -702,6 +711,7 @@ module ConflictException =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let errorCode = field_map json "ErrorCode" Zz__string.of_json in
@@ -727,6 +737,7 @@ module ForbiddenException =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let errorCode = field_map json "ErrorCode" Zz__string.of_json in
@@ -753,6 +764,7 @@ module InternalServerErrorException =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let errorCode = field_map json "ErrorCode" Zz__string.of_json in
@@ -780,6 +792,7 @@ module NotFoundException =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let errorCode = field_map json "ErrorCode" Zz__string.of_json in
@@ -807,6 +820,7 @@ module TooManyRequestsException =
       let errorCode =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       let errorCode = field_map json "ErrorCode" Zz__string.of_json in
@@ -914,6 +928,7 @@ module Version =
       make ~templateUrl ?sourceCodeUrl ?sourceCodeArchiveUrl ~semanticVersion
         ~resourcesSupported ~requiredCapabilities ~parameterDefinitions
         ~creationTime ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map_exn json "TemplateUrl" Zz__string.of_json in
       let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
@@ -1113,6 +1128,7 @@ module RollbackConfiguration =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "monitoringTimeInMinutes") in
       make ?rollbackTriggers ?monitoringTimeInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rollbackTriggers =
         field_map json "RollbackTriggers" Zz__listOfRollbackTrigger.of_json in
@@ -1393,6 +1409,7 @@ module UpdateApplicationResponse =
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ?name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" Version.of_json in
       let verifiedAuthorUrl =
@@ -1485,6 +1502,7 @@ module UpdateApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?readmeUrl ?readmeBody ?labels ?homePageUrl ?description ?author
         ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
       let readmeBody = field_map json "ReadmeBody" Zz__string.of_json in
@@ -1560,6 +1578,7 @@ module UpdateApplicationInput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "author") in
       make ?readmeUrl ?readmeBody ?labels ?homePageUrl ?description ?author
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
       let readmeBody = field_map json "ReadmeBody" Zz__string.of_json in
@@ -1596,6 +1615,7 @@ module UnshareApplicationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~organizationId ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationId =
         field_map_exn json "OrganizationId" Zz__string.of_json in
@@ -1623,6 +1643,7 @@ module UnshareApplicationInput =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "organizationId") in
       make ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationId =
         field_map_exn json "OrganizationId" Zz__string.of_json in
@@ -1703,6 +1724,7 @@ module TemplateDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~templateUrl ~templateId ~status ~semanticVersion ~expirationTime
         ~creationTime ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map_exn json "TemplateUrl" Zz__string.of_json in
       let templateId = field_map_exn json "TemplateId" Zz__string.of_json in
@@ -1802,6 +1824,7 @@ module PutApplicationPolicyResponse =
         (Option.map ~f:Zz__listOfApplicationPolicyStatement.of_xml)
           (Xml.child xml_arg0 "statements") in
       make ?statements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statements =
         field_map json "Statements"
@@ -1836,6 +1859,7 @@ module PutApplicationPolicyRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~statements ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statements =
         field_map_exn json "Statements"
@@ -1926,6 +1950,7 @@ module ListApplicationsResponse =
         (Option.map ~f:Zz__listOfApplicationSummary.of_xml)
           (Xml.child xml_arg0 "applications") in
       make ?nextToken ?applications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let applications =
@@ -1953,6 +1978,7 @@ module ListApplicationsRequest =
       let maxItems =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "maxItems") in
       make ?nextToken ?maxItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxItems = field_map json "MaxItems" MaxItems.of_json in
@@ -2046,6 +2072,7 @@ module ListApplicationVersionsResponse =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?versions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versions =
         field_map json "Versions" Zz__listOfVersionSummary.of_json in
@@ -2083,6 +2110,7 @@ module ListApplicationVersionsRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?nextToken ?maxItems ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxItems = field_map json "MaxItems" MaxItems.of_json in
@@ -2181,6 +2209,7 @@ module ListApplicationDependenciesResponse =
         (Option.map ~f:Zz__listOfApplicationDependencySummary.of_xml)
           (Xml.child xml_arg0 "dependencies") in
       make ?nextToken ?dependencies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let dependencies =
@@ -2228,6 +2257,7 @@ module ListApplicationDependenciesRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?semanticVersion ?nextToken ?maxItems ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let semanticVersion =
         field_map json "SemanticVersion" Zz__string.of_json in
@@ -2377,6 +2407,7 @@ module GetCloudFormationTemplateResponse =
           (Xml.child xml_arg0 "applicationId") in
       make ?templateUrl ?templateId ?status ?semanticVersion ?expirationTime
         ?creationTime ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
       let templateId = field_map json "TemplateId" Zz__string.of_json in
@@ -2415,6 +2446,7 @@ module GetCloudFormationTemplateRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~templateId ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateId = field_map_exn json "TemplateId" Zz__string.of_json in
       let applicationId =
@@ -2610,6 +2642,7 @@ module GetApplicationResponse =
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ?name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" Version.of_json in
       let verifiedAuthorUrl =
@@ -2656,6 +2689,7 @@ module GetApplicationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?semanticVersion ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let semanticVersion =
         field_map json "SemanticVersion" Zz__string.of_json in
@@ -2748,6 +2782,7 @@ module GetApplicationPolicyResponse =
         (Option.map ~f:Zz__listOfApplicationPolicyStatement.of_xml)
           (Xml.child xml_arg0 "statements") in
       make ?statements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statements =
         field_map json "Statements"
@@ -2772,6 +2807,7 @@ module GetApplicationPolicyRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationId =
         field_map_exn json "ApplicationId" Zz__string.of_json in
@@ -2795,6 +2831,7 @@ module DeleteApplicationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationId =
         field_map_exn json "ApplicationId" Zz__string.of_json in
@@ -2939,6 +2976,7 @@ module CreateCloudFormationTemplateResponse =
           (Xml.child xml_arg0 "applicationId") in
       make ?templateUrl ?templateId ?status ?semanticVersion ?expirationTime
         ?creationTime ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
       let templateId = field_map json "TemplateId" Zz__string.of_json in
@@ -2978,6 +3016,7 @@ module CreateCloudFormationTemplateRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?semanticVersion ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let semanticVersion =
         field_map json "SemanticVersion" Zz__string.of_json in
@@ -3082,6 +3121,7 @@ module CreateCloudFormationChangeSetResponse =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "applicationId") in
       make ?stackId ?semanticVersion ?changeSetId ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackId = field_map json "StackId" Zz__string.of_json in
       let semanticVersion =
@@ -3229,6 +3269,7 @@ module CreateCloudFormationChangeSetRequest =
         ?rollbackConfiguration ?resourceTypes ?parameterOverrides
         ?notificationArns ?description ?clientToken ?changeSetName
         ?capabilities ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateId = field_map json "TemplateId" Zz__string.of_json in
       let tags = field_map json "Tags" Zz__listOfTag.of_json in
@@ -3386,6 +3427,7 @@ module CreateCloudFormationChangeSetInput =
         ?rollbackConfiguration ?resourceTypes ?parameterOverrides
         ?notificationArns ?description ?clientToken ?changeSetName
         ?capabilities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateId = field_map json "TemplateId" Zz__string.of_json in
       let tags = field_map json "Tags" Zz__listOfTag.of_json in
@@ -3575,6 +3617,7 @@ module CreateApplicationVersionResponse =
       make ?templateUrl ?sourceCodeUrl ?sourceCodeArchiveUrl ?semanticVersion
         ?resourcesSupported ?requiredCapabilities ?parameterDefinitions
         ?creationTime ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
       let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
@@ -3661,6 +3704,7 @@ module CreateApplicationVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?templateUrl ?templateBody ?sourceCodeUrl ?sourceCodeArchiveUrl
         ~semanticVersion ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
       let templateBody = field_map json "TemplateBody" Zz__string.of_json in
@@ -3722,6 +3766,7 @@ module CreateApplicationVersionInput =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "sourceCodeArchiveUrl") in
       make ?templateUrl ?templateBody ?sourceCodeUrl ?sourceCodeArchiveUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
       let templateBody = field_map json "TemplateBody" Zz__string.of_json in
@@ -3919,6 +3964,7 @@ module CreateApplicationResponse =
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ?name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" Version.of_json in
       let verifiedAuthorUrl =
@@ -4085,6 +4131,7 @@ module CreateApplicationRequest =
       make ?templateUrl ?templateBody ?spdxLicenseId ?sourceCodeUrl
         ?sourceCodeArchiveUrl ?semanticVersion ?readmeUrl ?readmeBody ~name
         ?licenseUrl ?licenseBody ?labels ?homePageUrl ~description ~author ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
       let templateBody = field_map json "TemplateBody" Zz__string.of_json in
@@ -4253,6 +4300,7 @@ module CreateApplicationInput =
       make ?templateUrl ?templateBody ?spdxLicenseId ?sourceCodeUrl
         ?sourceCodeArchiveUrl ?semanticVersion ?readmeUrl ?readmeBody ~name
         ?licenseUrl ?licenseBody ?labels ?homePageUrl ~description ~author ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
       let templateBody = field_map json "TemplateBody" Zz__string.of_json in
@@ -4317,6 +4365,7 @@ module ChangeSetDetails =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~stackId ~semanticVersion ~changeSetId ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackId = field_map_exn json "StackId" Zz__string.of_json in
       let semanticVersion =
@@ -4349,6 +4398,7 @@ module ApplicationVersionPage =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~versions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versions =
         field_map_exn json "Versions" Zz__listOfVersionSummary.of_json in
@@ -4375,6 +4425,7 @@ module ApplicationPolicy =
         Zz__listOfApplicationPolicyStatement.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "statements") in
       make ~statements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statements =
         field_map_exn json "Statements"
@@ -4406,6 +4457,7 @@ module ApplicationPage =
         Zz__listOfApplicationSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applications") in
       make ?nextToken ~applications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let applications =
@@ -4440,6 +4492,7 @@ module ApplicationDependencyPage =
         Zz__listOfApplicationDependencySummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dependencies") in
       make ?nextToken ~dependencies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let dependencies =
@@ -4573,6 +4626,7 @@ module Application =
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ~name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ~description
         ?creationTime ~author ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" Version.of_json in
       let verifiedAuthorUrl =

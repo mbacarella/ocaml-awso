@@ -110,6 +110,7 @@ module InternalServerException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -152,6 +153,7 @@ module InvalidClientException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -180,6 +182,7 @@ module InvalidRequestException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -208,6 +211,7 @@ module SlowDownException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -249,6 +253,7 @@ module UnauthorizedClientException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -316,6 +321,7 @@ module InvalidClientMetadataException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -344,6 +350,7 @@ module InvalidScopeException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -434,6 +441,7 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -475,6 +483,7 @@ module AuthorizationPendingException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -503,6 +512,7 @@ module ExpiredTokenException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -544,6 +554,7 @@ module InvalidGrantException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -598,6 +609,7 @@ module UnsupportedGrantTypeException =
           (Xml.child xml_arg0 "error_description") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error_description =
         field_map json "error_description" ErrorDescription.of_json in
@@ -763,6 +775,7 @@ module StartDeviceAuthorizationResponse =
         (Option.map ~f:DeviceCode.of_xml) (Xml.child xml_arg0 "deviceCode") in
       make ?interval ?expiresIn ?verificationUriComplete ?verificationUri
         ?userCode ?deviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interval = field_map json "interval" IntervalInSeconds.of_json in
       let expiresIn = field_map json "expiresIn" ExpirationInSeconds.of_json in
@@ -808,6 +821,7 @@ module StartDeviceAuthorizationRequest =
       let clientId =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ~startUrl ~clientSecret ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startUrl = field_map_exn json "startUrl" URI.of_json in
       let clientSecret =
@@ -941,6 +955,7 @@ module RegisterClientResponse =
         (Option.map ~f:ClientId.of_xml) (Xml.child xml_arg0 "clientId") in
       make ?tokenEndpoint ?authorizationEndpoint ?clientSecretExpiresAt
         ?clientIdIssuedAt ?clientSecret ?clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tokenEndpoint = field_map json "tokenEndpoint" URI.of_json in
       let authorizationEndpoint =
@@ -988,6 +1003,7 @@ module RegisterClientRequest =
         ClientName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientName") in
       make ?scopes ~clientType ~clientName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scopes = field_map json "scopes" Scopes.of_json in
       let clientType = field_map_exn json "clientType" ClientType.of_json in
@@ -1169,6 +1185,7 @@ module CreateTokenResponse =
       let accessToken =
         (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
       make ?idToken ?refreshToken ?expiresIn ?tokenType ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idToken = field_map json "idToken" IdToken.of_json in
       let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
@@ -1260,6 +1277,7 @@ module CreateTokenRequest =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?redirectUri ?scope ?refreshToken ?code ~deviceCode ~grantType
         ~clientSecret ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redirectUri = field_map json "redirectUri" URI.of_json in
       let scope = field_map json "scope" Scopes.of_json in

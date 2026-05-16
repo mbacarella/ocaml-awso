@@ -570,6 +570,7 @@ module FastLaunchLaunchTemplateSpecification =
         (Option.map ~f:LaunchTemplateId.of_xml)
           (Xml.child xml_arg0 "launchTemplateId") in
       make ?launchTemplateVersion ?launchTemplateName ?launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchTemplateVersion =
         field_map json "launchTemplateVersion" NonEmptyString.of_json in
@@ -599,6 +600,7 @@ module FastLaunchSnapshotConfiguration =
         (Option.map ~f:TargetResourceCount.of_xml)
           (Xml.child xml_arg0 "targetResourceCount") in
       make ?targetResourceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetResourceCount =
         field_map json "targetResourceCount" TargetResourceCount.of_json in
@@ -644,6 +646,7 @@ module ImageState =
       let status =
         (Option.map ~f:ImageStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" NonEmptyString.of_json in
       let status = field_map json "status" ImageStatus.of_json in
@@ -674,6 +677,7 @@ module ComponentParameter =
         ComponentParameterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value =
         field_map_exn json "value" ComponentParameterValueList.of_json in
@@ -763,6 +767,7 @@ module EbsInstanceBlockDeviceSpecification =
           (Xml.child xml_arg0 "encrypted") in
       make ?throughput ?volumeType ?volumeSize ?snapshotId ?kmsKeyId ?iops
         ?deleteOnTermination ?encrypted ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let throughput =
         field_map json "throughput" EbsVolumeThroughput.of_json in
@@ -861,6 +866,7 @@ module LaunchPermissionConfiguration =
       let userIds =
         (Option.map ~f:AccountList.of_xml) (Xml.child xml_arg0 "userIds") in
       make ?organizationalUnitArns ?organizationArns ?userGroups ?userIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnitArns =
         field_map json "organizationalUnitArns"
@@ -931,6 +937,7 @@ module TargetContainerRepository =
         ContainerRepositoryService.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "service") in
       make ~repositoryName ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" NonEmptyString.of_json in
@@ -1002,6 +1009,7 @@ module FastLaunchConfiguration =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
       make ?accountId ?launchTemplate ?maxParallelLaunches
         ?snapshotConfiguration ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "accountId" AccountId.of_json in
       let launchTemplate =
@@ -1052,6 +1060,7 @@ module LaunchTemplateConfiguration =
         LaunchTemplateId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "launchTemplateId") in
       make ?setDefaultVersion ?accountId ~launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let setDefaultVersion =
         field_map json "setDefaultVersion" Boolean.of_json in
@@ -1158,6 +1167,7 @@ module Ami =
       let region =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "region") in
       make ?accountId ?state ?description ?name ?image ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "accountId" NonEmptyString.of_json in
       let state = field_map json "state" ImageState.of_json in
@@ -1190,6 +1200,7 @@ module Container =
       let region =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "region") in
       make ?imageUris ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageUris = field_map json "imageUris" StringList.of_json in
       let region = field_map json "region" NonEmptyString.of_json in
@@ -1282,6 +1293,7 @@ module InstanceBlockDeviceMapping =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "deviceName") in
       make ?noDevice ?virtualName ?ebs ?deviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let noDevice = field_map json "noDevice" EmptyString.of_json in
       let virtualName = field_map json "virtualName" NonEmptyString.of_json in
@@ -1357,6 +1369,7 @@ module AmiDistributionConfiguration =
         (Option.map ~f:AmiNameString.of_xml) (Xml.child xml_arg0 "name") in
       make ?launchPermission ?kmsKeyId ?amiTags ?targetAccountIds
         ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchPermission =
         field_map json "launchPermission"
@@ -1409,6 +1422,7 @@ module ContainerDistributionConfiguration =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "description") in
       make ~targetRepository ?containerTags ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetRepository =
         field_map_exn json "targetRepository"
@@ -1554,6 +1568,7 @@ module S3ExportConfiguration =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "roleName") in
       make ?s3Prefix ~s3Bucket ~diskImageFormat ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Prefix = field_map json "s3Prefix" NonEmptyString.of_json in
       let s3Bucket = field_map_exn json "s3Bucket" NonEmptyString.of_json in
@@ -1773,6 +1788,7 @@ module ComponentConfiguration =
         ComponentVersionArnOrBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentArn") in
       make ?parameters ~componentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "parameters" ComponentParameterList.of_json in
@@ -1898,6 +1914,7 @@ module Distribution =
         ?launchTemplateConfigurations ?licenseConfigurationArns
         ?containerDistributionConfiguration ?amiDistributionConfiguration
         ~region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fastLaunchConfigurations =
         field_map json "fastLaunchConfigurations"
@@ -1941,6 +1958,7 @@ module SystemsManagerAgent =
         (Option.map ~f:NullableBoolean.of_xml)
           (Xml.child xml_arg0 "uninstallAfterBuild") in
       make ?uninstallAfterBuild ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uninstallAfterBuild =
         field_map json "uninstallAfterBuild" NullableBoolean.of_json in
@@ -2030,6 +2048,7 @@ module S3Logs =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "s3BucketName") in
       make ?s3KeyPrefix ?s3BucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3KeyPrefix = field_map json "s3KeyPrefix" NonEmptyString.of_json in
       let s3BucketName = field_map json "s3BucketName" NonEmptyString.of_json in
@@ -2375,6 +2394,7 @@ module ImageTestsConfiguration =
         (Option.map ~f:NullableBoolean.of_xml)
           (Xml.child xml_arg0 "imageTestsEnabled") in
       make ?timeoutMinutes ?imageTestsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeoutMinutes =
         field_map json "timeoutMinutes" ImageTestsTimeoutMinutes.of_json in
@@ -2447,6 +2467,7 @@ module Schedule =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "scheduleExpression") in
       make ?pipelineExecutionStartCondition ?timezone ?scheduleExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipelineExecutionStartCondition =
         field_map json "pipelineExecutionStartCondition"
@@ -2479,6 +2500,7 @@ module OutputResources =
           (Xml.child xml_arg0 "containers") in
       let amis = (Option.map ~f:AmiList.of_xml) (Xml.child xml_arg0 "amis") in
       make ?containers ?amis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containers = field_map json "containers" ContainerList.of_json in
       let amis = field_map json "amis" AmiList.of_json in
@@ -2592,6 +2614,7 @@ module ComponentState =
       let status =
         (Option.map ~f:ComponentStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" NonEmptyString.of_json in
       let status = field_map json "status" ComponentStatus.of_json in
@@ -2665,6 +2688,7 @@ module InstanceConfiguration =
       let image =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "image") in
       make ?blockDeviceMappings ?image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blockDeviceMappings =
         field_map json "blockDeviceMappings"
@@ -2745,6 +2769,7 @@ module AdditionalInstanceConfiguration =
         (Option.map ~f:SystemsManagerAgent.of_xml)
           (Xml.child xml_arg0 "systemsManagerAgent") in
       make ?userDataOverride ?systemsManagerAgent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userDataOverride =
         field_map json "userDataOverride" UserDataOverride.of_json in
@@ -2781,6 +2806,7 @@ module InstanceMetadataOptions =
       let httpTokens =
         (Option.map ~f:HttpTokens.of_xml) (Xml.child xml_arg0 "httpTokens") in
       make ?httpPutResponseHopLimit ?httpTokens ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let httpPutResponseHopLimit =
         field_map json "httpPutResponseHopLimit"
@@ -2805,6 +2831,7 @@ module Logging =
       let s3Logs =
         (Option.map ~f:S3Logs.of_xml) (Xml.child xml_arg0 "s3Logs") in
       make ?s3Logs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Logs = field_map json "s3Logs" S3Logs.of_json in make ?s3Logs ()
     let to_json v = composed_to_json to_value v
@@ -2876,6 +2903,7 @@ module ComponentParameterDetail =
         ComponentParameterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?description ?defaultValue ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" ComponentParameterDescription.of_json in
@@ -2990,6 +3018,7 @@ module InfrastructureConfigurationSummary =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?instanceProfileName ?instanceTypes ?tags ?resourceTags
         ?dateUpdated ?dateCreated ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfileName =
         field_map json "instanceProfileName" InstanceProfileNameType.of_json in
@@ -3027,6 +3056,7 @@ module Filter =
       let name =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValues.of_json in
       let name = field_map json "name" FilterName.of_json in
@@ -3118,6 +3148,7 @@ module ImageVersion =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?buildType ?dateCreated ?owner ?osVersion ?platform ?version
         ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildType = field_map json "buildType" BuildType.of_json in
       let dateCreated = field_map json "dateCreated" DateTime.of_json in
@@ -3194,6 +3225,7 @@ module ImageRecipeSummary =
       let arn =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?dateCreated ?parentImage ?owner ?platform ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let dateCreated = field_map json "dateCreated" DateTime.of_json in
@@ -3357,6 +3389,7 @@ module ImagePipeline =
         ?schedule ?imageTestsConfiguration ?distributionConfigurationArn
         ?infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
         ?enhancedImageMetadataEnabled ?platform ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let dateNextRun = field_map json "dateNextRun" DateTime.of_json in
@@ -3483,6 +3516,7 @@ module ImageSummary =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?buildType ?tags ?outputResources ?dateCreated ?owner ?state
         ?osVersion ?platform ?version ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildType = field_map json "buildType" BuildType.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -3528,6 +3562,7 @@ module ImagePackage =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "packageName") in
       make ?packageVersion ?packageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let packageVersion =
         field_map json "packageVersion" NonEmptyString.of_json in
@@ -3604,6 +3639,7 @@ module DistributionConfigurationSummary =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?regions ?tags ?dateUpdated ?dateCreated ?description ?name ?arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regions = field_map json "regions" RegionList.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -3690,6 +3726,7 @@ module ContainerRecipeSummary =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?dateCreated ?parentImage ?owner ?platform ?name
         ?containerType ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let dateCreated = field_map json "dateCreated" DateTime.of_json in
@@ -3787,6 +3824,7 @@ module ComponentVersion =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?dateCreated ?owner ?type_ ?supportedOsVersions ?platform
         ?description ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dateCreated = field_map json "dateCreated" DateTime.of_json in
       let owner = field_map json "owner" NonEmptyString.of_json in
@@ -3906,6 +3944,7 @@ module ComponentSummary =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?dateCreated ?changeDescription ?description ?owner ?type_
         ?state ?supportedOsVersions ?platform ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let dateCreated = field_map json "dateCreated" DateTime.of_json in
@@ -4086,6 +4125,7 @@ module ContainerRecipe =
         ?parentImage ?encrypted ?kmsKeyId ?dockerfileTemplateData
         ?instanceConfiguration ?components ?version ?owner ?platform
         ?description ?name ?containerType ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetRepository =
         field_map json "targetRepository" TargetContainerRepository.of_json in
@@ -4196,6 +4236,7 @@ module DistributionConfiguration =
         (Option.map ~f:ImageBuilderArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?dateUpdated ?dateCreated ~timeoutMinutes ?distributions
         ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let dateUpdated = field_map json "dateUpdated" DateTime.of_json in
@@ -4341,6 +4382,7 @@ module ImageRecipe =
       make ?additionalInstanceConfiguration ?workingDirectory ?tags
         ?dateCreated ?blockDeviceMappings ?parentImage ?components ?version
         ?owner ?platform ?description ?name ?type_ ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalInstanceConfiguration =
         field_map json "additionalInstanceConfiguration"
@@ -4524,6 +4566,7 @@ module InfrastructureConfiguration =
         ?dateCreated ?snsTopicArn ?terminateInstanceOnFailure ?keyPair
         ?logging ?subnetId ?securityGroupIds ?instanceProfileName
         ?instanceTypes ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let instanceMetadataOptions =
@@ -4605,6 +4648,7 @@ module CallRateLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4624,6 +4668,7 @@ module ClientException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4661,6 +4706,7 @@ module ForbiddenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4680,6 +4726,7 @@ module IdempotentParameterMismatchException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4717,6 +4764,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4736,6 +4784,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4755,6 +4804,7 @@ module ServiceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4774,6 +4824,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4883,6 +4934,7 @@ module InvalidParameterCombinationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4902,6 +4954,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4921,6 +4974,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4985,6 +5039,7 @@ module InvalidParameterValueException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5067,6 +5122,7 @@ module InvalidPaginationTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5437,6 +5493,7 @@ module InvalidVersionNumberException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5646,6 +5703,7 @@ module Image =
         ?infrastructureConfiguration ?sourcePipelineArn ?sourcePipelineName
         ?containerRecipe ?imageRecipe ?state ?osVersion
         ?enhancedImageMetadataEnabled ?platform ?version ?name ?type_ ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildType = field_map json "buildType" BuildType.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -5840,6 +5898,7 @@ module Component =
       make ?tags ?dateCreated ?encrypted ?kmsKeyId ?data ?owner ?parameters
         ?state ?supportedOsVersions ?platform ?type_ ?changeDescription
         ?description ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let dateCreated = field_map json "dateCreated" DateTime.of_json in
@@ -5878,6 +5937,7 @@ module ResourceDependencyException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5897,6 +5957,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5916,6 +5977,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -6091,6 +6153,7 @@ module UpdateInfrastructureConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfigurationArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let infrastructureConfigurationArn =
         field_map json "infrastructureConfigurationArn"
@@ -6242,6 +6305,7 @@ module UpdateInfrastructureConfigurationRequest =
         ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
         ?securityGroupIds ~instanceProfileName ?instanceTypes ?description
         ~infrastructureConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceMetadataOptions =
         field_map json "instanceMetadataOptions"
@@ -6399,6 +6463,7 @@ module UpdateImagePipelineResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipelineArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePipelineArn =
         field_map json "imagePipelineArn" ImagePipelineArn.of_json in
@@ -6531,6 +6596,7 @@ module UpdateImagePipelineRequest =
         ?imageTestsConfiguration ?distributionConfigurationArn
         ~infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
         ?description ~imagePipelineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let status = field_map json "status" PipelineStatus.of_json in
@@ -6700,6 +6766,7 @@ module UpdateDistributionConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfigurationArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfigurationArn =
         field_map json "distributionConfigurationArn"
@@ -6763,6 +6830,7 @@ module UpdateDistributionConfigurationRequest =
              "distributionConfigurationArn") in
       make ~clientToken ~distributions ?description
         ~distributionConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let distributions =
@@ -6828,6 +6896,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -6856,6 +6925,7 @@ module UntagResourceRequest =
         ImageBuilderArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -6915,6 +6985,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to a resource."]
@@ -6940,6 +7011,7 @@ module TagResourceRequest =
         ImageBuilderArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn =
@@ -7083,6 +7155,7 @@ module StartImagePipelineExecutionResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageBuildVersionArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuildVersionArn =
         field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
@@ -7118,6 +7191,7 @@ module StartImagePipelineExecutionRequest =
         ImagePipelineArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
       make ~clientToken ~imagePipelineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let imagePipelineArn =
@@ -7243,6 +7317,7 @@ module PutImageRecipePolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageRecipeArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRecipeArn =
         field_map json "imageRecipeArn" ImageRecipeArn.of_json in
@@ -7276,6 +7351,7 @@ module PutImageRecipePolicyRequest =
         ImageRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~policy ~imageRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
       let imageRecipeArn =
@@ -7401,6 +7477,7 @@ module PutImagePolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageArn = field_map json "imageArn" ImageBuildVersionArn.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -7431,6 +7508,7 @@ module PutImagePolicyRequest =
         ImageBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageArn") in
       make ~policy ~imageArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
       let imageArn =
@@ -7557,6 +7635,7 @@ module PutContainerRecipePolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?containerRecipeArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerRecipeArn =
         field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
@@ -7591,6 +7670,7 @@ module PutContainerRecipePolicyRequest =
         ContainerRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~policy ~containerRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
       let containerRecipeArn =
@@ -7717,6 +7797,7 @@ module PutComponentPolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?componentArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentArn =
         field_map json "componentArn" ComponentBuildVersionArn.of_json in
@@ -7750,6 +7831,7 @@ module PutComponentPolicyRequest =
         ComponentBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentArn") in
       make ~policy ~componentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" ResourcePolicyDocument.of_json in
       let componentArn =
@@ -7815,6 +7897,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -7837,6 +7920,7 @@ module ListTagsForResourceRequest =
         ImageBuilderArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" ImageBuilderArn.of_json in
@@ -7963,6 +8047,7 @@ module ListInfrastructureConfigurationsResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?infrastructureConfigurationSummaryList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let infrastructureConfigurationSummaryList =
@@ -8003,6 +8088,7 @@ module ListInfrastructureConfigurationsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -8128,6 +8214,7 @@ module ListImagesResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageVersionList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let imageVersionList =
@@ -8199,6 +8286,7 @@ module ListImagesRequest =
         (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
       make ?includeDeprecated ?nextToken ?maxResults ?byName ?filters ?owner
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeDeprecated =
         field_map json "includeDeprecated" NullableBoolean.of_json in
@@ -8329,6 +8417,7 @@ module ListImageRecipesResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageRecipeSummaryList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let imageRecipeSummaryList =
@@ -8378,6 +8467,7 @@ module ListImageRecipesRequest =
       let owner =
         (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
       make ?nextToken ?maxResults ?filters ?owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -8503,6 +8593,7 @@ module ListImagePipelinesResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imagePipelineList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let imagePipelineList =
@@ -8543,6 +8634,7 @@ module ListImagePipelinesRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -8676,6 +8768,7 @@ module ListImagePipelineImagesResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageSummaryList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let imageSummaryList =
@@ -8728,6 +8821,7 @@ module ListImagePipelineImagesRequest =
         ImagePipelineArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
       make ?nextToken ?maxResults ?filters ~imagePipelineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -8864,6 +8958,7 @@ module ListImagePackagesResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imagePackageList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let imagePackageList =
@@ -8910,6 +9005,7 @@ module ListImagePackagesRequest =
         ImageBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ?nextToken ?maxResults ~imageBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -9037,6 +9133,7 @@ module ListImageBuildVersionsResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?imageSummaryList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let imageSummaryList =
@@ -9088,6 +9185,7 @@ module ListImageBuildVersionsRequest =
         ImageVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageVersionArn") in
       make ?nextToken ?maxResults ?filters ~imageVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -9217,6 +9315,7 @@ module ListDistributionConfigurationsResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?distributionConfigurationSummaryList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let distributionConfigurationSummaryList =
@@ -9257,6 +9356,7 @@ module ListDistributionConfigurationsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -9383,6 +9483,7 @@ module ListContainerRecipesResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?containerRecipeSummaryList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NonEmptyString.of_json in
       let containerRecipeSummaryList =
@@ -9432,6 +9533,7 @@ module ListContainerRecipesRequest =
       let owner =
         (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
       make ?nextToken ?maxResults ?filters ?owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NonEmptyString.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -9558,6 +9660,7 @@ module ListComponentsResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?componentVersionList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let componentVersionList =
@@ -9614,6 +9717,7 @@ module ListComponentsRequest =
       let owner =
         (Option.map ~f:Ownership.of_xml) (Xml.child xml_arg0 "owner") in
       make ?nextToken ?maxResults ?byName ?filters ?owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -9742,6 +9846,7 @@ module ListComponentBuildVersionsResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?nextToken ?componentSummaryList ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let componentSummaryList =
@@ -9787,6 +9892,7 @@ module ListComponentBuildVersionsRequest =
         ComponentVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentVersionArn") in
       make ?nextToken ?maxResults ~componentVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" RestrictedInteger.of_json in
@@ -9869,6 +9975,7 @@ module ImportVmImageResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?clientToken ?imageArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let imageArn = field_map json "imageArn" Arn.of_json in
@@ -9958,6 +10065,7 @@ module ImportVmImageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ~vmImportTaskId ?osVersion ~platform
         ?description ~semanticVersion ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -10125,6 +10233,7 @@ module ImportComponentResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?componentBuildVersionArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentBuildVersionArn =
         field_map json "componentBuildVersionArn"
@@ -10245,6 +10354,7 @@ module ImportComponentRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ?kmsKeyId ?uri ?data ~platform ~format ~type_
         ?changeDescription ?description ~semanticVersion ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -10364,6 +10474,7 @@ module GetInfrastructureConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfiguration ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let infrastructureConfiguration =
         field_map json "infrastructureConfiguration"
@@ -10395,6 +10506,7 @@ module GetInfrastructureConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "infrastructureConfigurationArn") in
       make ~infrastructureConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let infrastructureConfigurationArn =
         field_map_exn json "infrastructureConfigurationArn"
@@ -10494,6 +10606,7 @@ module GetImageResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?image ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let image = field_map json "image" Image.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -10521,6 +10634,7 @@ module GetImageRequest =
         ImageVersionArnOrBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ~imageBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuildVersionArn =
         field_map_exn json "imageBuildVersionArn"
@@ -10623,6 +10737,7 @@ module GetImageRecipeResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageRecipe ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRecipe = field_map json "imageRecipe" ImageRecipe.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -10648,6 +10763,7 @@ module GetImageRecipeRequest =
         ImageRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~imageRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRecipeArn =
         field_map_exn json "imageRecipeArn" ImageRecipeArn.of_json in
@@ -10751,6 +10867,7 @@ module GetImageRecipePolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicyDocument.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -10776,6 +10893,7 @@ module GetImageRecipePolicyRequest =
         ImageRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~imageRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRecipeArn =
         field_map_exn json "imageRecipeArn" ImageRecipeArn.of_json in
@@ -10879,6 +10997,7 @@ module GetImagePolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicyDocument.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -10903,6 +11022,7 @@ module GetImagePolicyRequest =
         ImageBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageArn") in
       make ~imageArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageArn =
         field_map_exn json "imageArn" ImageBuildVersionArn.of_json in
@@ -11006,6 +11126,7 @@ module GetImagePipelineResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipeline ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePipeline =
         field_map json "imagePipeline" ImagePipeline.of_json in
@@ -11032,6 +11153,7 @@ module GetImagePipelineRequest =
         ImagePipelineArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
       make ~imagePipelineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePipelineArn =
         field_map_exn json "imagePipelineArn" ImagePipelineArn.of_json in
@@ -11137,6 +11259,7 @@ module GetDistributionConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfiguration ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfiguration =
         field_map json "distributionConfiguration"
@@ -11168,6 +11291,7 @@ module GetDistributionConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "distributionConfigurationArn") in
       make ~distributionConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfigurationArn =
         field_map_exn json "distributionConfigurationArn"
@@ -11272,6 +11396,7 @@ module GetContainerRecipeResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?containerRecipe ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerRecipe =
         field_map json "containerRecipe" ContainerRecipe.of_json in
@@ -11298,6 +11423,7 @@ module GetContainerRecipeRequest =
         ContainerRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~containerRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerRecipeArn =
         field_map_exn json "containerRecipeArn" ContainerRecipeArn.of_json in
@@ -11401,6 +11527,7 @@ module GetContainerRecipePolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicyDocument.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -11426,6 +11553,7 @@ module GetContainerRecipePolicyRequest =
         ContainerRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~containerRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerRecipeArn =
         field_map_exn json "containerRecipeArn" ContainerRecipeArn.of_json in
@@ -11528,6 +11656,7 @@ module GetComponentResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?component ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let component = field_map json "component" Component.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -11557,6 +11686,7 @@ module GetComponentRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "componentBuildVersionArn") in
       make ~componentBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentBuildVersionArn =
         field_map_exn json "componentBuildVersionArn"
@@ -11661,6 +11791,7 @@ module GetComponentPolicyResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?policy ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicyDocument.of_json in
       let requestId = field_map json "requestId" NonEmptyString.of_json in
@@ -11686,6 +11817,7 @@ module GetComponentPolicyRequest =
         ComponentBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentArn") in
       make ~componentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentArn =
         field_map_exn json "componentArn" ComponentBuildVersionArn.of_json in
@@ -11803,6 +11935,7 @@ module DeleteInfrastructureConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfigurationArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let infrastructureConfigurationArn =
         field_map json "infrastructureConfigurationArn"
@@ -11834,6 +11967,7 @@ module DeleteInfrastructureConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "infrastructureConfigurationArn") in
       make ~infrastructureConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let infrastructureConfigurationArn =
         field_map_exn json "infrastructureConfigurationArn"
@@ -11951,6 +12085,7 @@ module DeleteImageResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageBuildVersionArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuildVersionArn =
         field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
@@ -11978,6 +12113,7 @@ module DeleteImageRequest =
         ImageBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ~imageBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuildVersionArn =
         field_map_exn json "imageBuildVersionArn"
@@ -12095,6 +12231,7 @@ module DeleteImageRecipeResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageRecipeArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRecipeArn =
         field_map json "imageRecipeArn" ImageRecipeArn.of_json in
@@ -12121,6 +12258,7 @@ module DeleteImageRecipeRequest =
         ImageRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageRecipeArn") in
       make ~imageRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRecipeArn =
         field_map_exn json "imageRecipeArn" ImageRecipeArn.of_json in
@@ -12236,6 +12374,7 @@ module DeleteImagePipelineResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipelineArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePipelineArn =
         field_map json "imagePipelineArn" ImagePipelineArn.of_json in
@@ -12262,6 +12401,7 @@ module DeleteImagePipelineRequest =
         ImagePipelineArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imagePipelineArn") in
       make ~imagePipelineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePipelineArn =
         field_map_exn json "imagePipelineArn" ImagePipelineArn.of_json in
@@ -12379,6 +12519,7 @@ module DeleteDistributionConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfigurationArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfigurationArn =
         field_map json "distributionConfigurationArn"
@@ -12410,6 +12551,7 @@ module DeleteDistributionConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "distributionConfigurationArn") in
       make ~distributionConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfigurationArn =
         field_map_exn json "distributionConfigurationArn"
@@ -12526,6 +12668,7 @@ module DeleteContainerRecipeResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?containerRecipeArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerRecipeArn =
         field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
@@ -12552,6 +12695,7 @@ module DeleteContainerRecipeRequest =
         ContainerRecipeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "containerRecipeArn") in
       make ~containerRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerRecipeArn =
         field_map_exn json "containerRecipeArn" ContainerRecipeArn.of_json in
@@ -12669,6 +12813,7 @@ module DeleteComponentResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?componentBuildVersionArn ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentBuildVersionArn =
         field_map json "componentBuildVersionArn"
@@ -12699,6 +12844,7 @@ module DeleteComponentRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "componentBuildVersionArn") in
       make ~componentBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentBuildVersionArn =
         field_map_exn json "componentBuildVersionArn"
@@ -12857,6 +13003,7 @@ module CreateInfrastructureConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?infrastructureConfigurationArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let infrastructureConfigurationArn =
         field_map json "infrastructureConfigurationArn"
@@ -13008,6 +13155,7 @@ module CreateInfrastructureConfigurationRequest =
         ?snsTopicArn ?terminateInstanceOnFailure ?keyPair ?logging ?subnetId
         ?securityGroupIds ~instanceProfileName ?instanceTypes ?description
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -13175,6 +13323,7 @@ module CreateImageResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageBuildVersionArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuildVersionArn =
         field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
@@ -13278,6 +13427,7 @@ module CreateImageRequest =
       make ~clientToken ?tags ?enhancedImageMetadataEnabled
         ?imageTestsConfiguration ~infrastructureConfigurationArn
         ?distributionConfigurationArn ?containerRecipeArn ?imageRecipeArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -13462,6 +13612,7 @@ module CreateImageRecipeResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageRecipeArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRecipeArn =
         field_map json "imageRecipeArn" ImageRecipeArn.of_json in
@@ -13575,6 +13726,7 @@ module CreateImageRecipeRequest =
       make ~clientToken ?additionalInstanceConfiguration ?workingDirectory
         ?tags ?blockDeviceMappings ~parentImage ~components ~semanticVersion
         ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let additionalInstanceConfiguration =
@@ -13749,6 +13901,7 @@ module CreateImagePipelineResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imagePipelineArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePipelineArn =
         field_map json "imagePipelineArn" ImagePipelineArn.of_json in
@@ -13882,6 +14035,7 @@ module CreateImagePipelineRequest =
         ?imageTestsConfiguration ?distributionConfigurationArn
         ~infrastructureConfigurationArn ?containerRecipeArn ?imageRecipeArn
         ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -14073,6 +14227,7 @@ module CreateDistributionConfigurationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?distributionConfigurationArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfigurationArn =
         field_map json "distributionConfigurationArn"
@@ -14129,6 +14284,7 @@ module CreateDistributionConfigurationRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ~distributions ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -14299,6 +14455,7 @@ module CreateContainerRecipeResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?containerRecipeArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let containerRecipeArn =
         field_map json "containerRecipeArn" ContainerRecipeArn.of_json in
@@ -14468,6 +14625,7 @@ module CreateContainerRecipeRequest =
         ~parentImage ?imageOsVersionOverride ?platformOverride
         ?dockerfileTemplateUri ?dockerfileTemplateData ?instanceConfiguration
         ~components ~semanticVersion ?description ~name ~containerType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
@@ -14667,6 +14825,7 @@ module CreateComponentResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?componentBuildVersionArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentBuildVersionArn =
         field_map json "componentBuildVersionArn"
@@ -14780,6 +14939,7 @@ module CreateComponentRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ?kmsKeyId ?uri ?data ?supportedOsVersions
         ~platform ?changeDescription ?description ~semanticVersion ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -14926,6 +15086,7 @@ module CancelImageCreationResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "requestId") in
       make ?imageBuildVersionArn ?clientToken ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageBuildVersionArn =
         field_map json "imageBuildVersionArn" ImageBuildVersionArn.of_json in
@@ -14962,6 +15123,7 @@ module CancelImageCreationRequest =
         ImageBuildVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageBuildVersionArn") in
       make ~clientToken ~imageBuildVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let imageBuildVersionArn =

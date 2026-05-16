@@ -190,6 +190,7 @@ module CodeCommitCodeDestination =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" RepositoryName.of_json in
       make ~name ()
@@ -275,6 +276,7 @@ module GitHubCodeDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~token ~issuesEnabled ~privateRepository ~owner ~type_
         ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let token = field_map_exn json "token" GitHubPersonalToken.of_json in
       let issuesEnabled =
@@ -314,6 +316,7 @@ module S3Location =
       let bucketName =
         (Option.map ~f:BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?bucketKey ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketKey = field_map json "bucketKey" BucketKey.of_json in
       let bucketName = field_map json "bucketName" BucketName.of_json in
@@ -513,6 +516,7 @@ module CodeDestination =
         (Option.map ~f:CodeCommitCodeDestination.of_xml)
           (Xml.child xml_arg0 "codeCommit") in
       make ?gitHub ?codeCommit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gitHub = field_map json "gitHub" GitHubCodeDestination.of_json in
       let codeCommit =
@@ -537,6 +541,7 @@ module CodeSource =
       let s3 =
         S3Location.of_xml (Xml.child_exn ~context:context_ xml_arg0 "s3") in
       make ~s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map_exn json "s3" S3Location.of_json in make ~s3 ()
     let to_json v = composed_to_json to_value v
@@ -664,6 +669,7 @@ module UserProfileSummary =
       let userArn =
         (Option.map ~f:UserArn.of_xml) (Xml.child xml_arg0 "userArn") in
       make ?sshPublicKey ?emailAddress ?displayName ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sshPublicKey = field_map json "sshPublicKey" SshPublicKey.of_json in
       let emailAddress = field_map json "emailAddress" Email.of_json in
@@ -706,6 +712,7 @@ module TeamMember =
       let userArn =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ?remoteAccessAllowed ~projectRole ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccessAllowed =
         field_map json "remoteAccessAllowed" RemoteAccessAllowed.of_json in
@@ -729,6 +736,7 @@ module Resource =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -753,6 +761,7 @@ module ProjectSummary =
       let projectId =
         (Option.map ~f:ProjectId.of_xml) (Xml.child xml_arg0 "projectId") in
       make ?projectArn ?projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map json "projectArn" ProjectArn.of_json in
       let projectId = field_map json "projectId" ProjectId.of_json in
@@ -819,6 +828,7 @@ module Code =
       let source =
         CodeSource.of_xml (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ~destination ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination =
         field_map_exn json "destination" CodeDestination.of_json in
@@ -892,6 +902,7 @@ module ToolchainSource =
       let s3 =
         S3Location.of_xml (Xml.child_exn ~context:context_ xml_arg0 "s3") in
       make ~s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map_exn json "s3" S3Location.of_json in make ~s3 ()
     let to_json v = composed_to_json to_value v
@@ -929,6 +940,7 @@ module UserProfileNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The user profile was not found."]
@@ -940,6 +952,7 @@ module ValidationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -952,6 +965,7 @@ module ConcurrentModificationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -964,6 +978,7 @@ module InvalidServiceRoleException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service role is not valid."]
@@ -975,6 +990,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource limit has been exceeded."]
@@ -986,6 +1002,7 @@ module ProjectConfigurationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -998,6 +1015,7 @@ module ProjectNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified AWS CodeStar project was not found."]
@@ -1009,6 +1027,7 @@ module TeamMemberNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified team member was not found."]
@@ -1109,6 +1128,7 @@ module InvalidNextTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The next token is not valid."]
@@ -1290,6 +1310,7 @@ module ProjectStatus =
       let state =
         State.of_xml (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ?reason ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" Reason.of_json in
       let state = field_map_exn json "state" State.of_json in
@@ -1356,6 +1377,7 @@ module UserProfileAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1368,6 +1390,7 @@ module ProjectAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1380,6 +1403,7 @@ module ProjectCreationFailedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1441,6 +1465,7 @@ module Toolchain =
         ToolchainSource.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?stackParameters ?roleArn ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackParameters =
         field_map json "stackParameters" TemplateParameterMap.of_json in
@@ -1458,6 +1483,7 @@ module TeamMemberAlreadyAssociatedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1570,6 +1596,7 @@ module UpdateUserProfileResult =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ?lastModifiedTimestamp ?createdTimestamp ?sshPublicKey
         ?emailAddress ?displayName ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTimestamp =
         field_map json "lastModifiedTimestamp" LastModifiedTimestamp.of_json in
@@ -1628,6 +1655,7 @@ module UpdateUserProfileRequest =
       let userArn =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ?sshPublicKey ?emailAddress ?displayName ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sshPublicKey = field_map json "sshPublicKey" SshPublicKey.of_json in
       let emailAddress = field_map json "emailAddress" Email.of_json in
@@ -1760,6 +1788,7 @@ module UpdateTeamMemberResult =
       let userArn =
         (Option.map ~f:UserArn.of_xml) (Xml.child xml_arg0 "userArn") in
       make ?remoteAccessAllowed ?projectRole ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccessAllowed =
         field_map json "remoteAccessAllowed" RemoteAccessAllowed.of_json in
@@ -1810,6 +1839,7 @@ module UpdateTeamMemberRequest =
         ProjectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?remoteAccessAllowed ?projectRole ~userArn ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccessAllowed =
         field_map json "remoteAccessAllowed" RemoteAccessAllowed.of_json in
@@ -1864,6 +1894,7 @@ module UpdateProjectResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a project in AWS CodeStar."]
@@ -1896,6 +1927,7 @@ module UpdateProjectRequest =
       let id =
         ProjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?description ?name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" ProjectDescription.of_json in
@@ -1969,6 +2001,7 @@ module UntagProjectResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a project."]
@@ -1992,6 +2025,7 @@ module UntagProjectRequest =
       let id =
         ProjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~tags ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagKeys.of_json in
       let id = field_map_exn json "id" ProjectId.of_json in make ~tags ~id ()
@@ -2066,6 +2100,7 @@ module TagProjectResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2090,6 +2125,7 @@ module TagProjectRequest =
       let id =
         ProjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~tags ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" Tags.of_json in
       let id = field_map_exn json "id" ProjectId.of_json in make ~tags ~id ()
@@ -2157,6 +2193,7 @@ module ListUserProfilesResult =
         UserProfilesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "userProfiles") in
       make ?nextToken ~userProfiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let userProfiles =
@@ -2188,6 +2225,7 @@ module ListUserProfilesRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -2265,6 +2303,7 @@ module ListTeamMembersResult =
         TeamMemberResult.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "teamMembers") in
       make ?nextToken ~teamMembers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let teamMembers =
@@ -2305,6 +2344,7 @@ module ListTeamMembersRequest =
         ProjectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?maxResults ?nextToken ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -2376,6 +2416,7 @@ module ListTagsForProjectResult =
           (Xml.child xml_arg0 "nextToken") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -2408,6 +2449,7 @@ module ListTagsForProjectRequest =
       let id =
         ProjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?maxResults ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -2484,6 +2526,7 @@ module ListResourcesResult =
         (Option.map ~f:ResourcesResult.of_xml)
           (Xml.child xml_arg0 "resources") in
       make ?nextToken ?resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let resources = field_map json "resources" ResourcesResult.of_json in
@@ -2522,6 +2565,7 @@ module ListResourcesRequest =
         ProjectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?maxResults ?nextToken ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -2589,6 +2633,7 @@ module ListProjectsResult =
         ProjectsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projects") in
       make ?nextToken ~projects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let projects = field_map_exn json "projects" ProjectsList.of_json in
@@ -2620,6 +2665,7 @@ module ListProjectsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -2694,6 +2740,7 @@ module DisassociateTeamMemberResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2722,6 +2769,7 @@ module DisassociateTeamMemberRequest =
         ProjectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ~userArn ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map_exn json "userArn" UserArn.of_json in
       let projectId = field_map_exn json "projectId" ProjectId.of_json in
@@ -2835,6 +2883,7 @@ module DescribeUserProfileResult =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ~lastModifiedTimestamp ~createdTimestamp ?sshPublicKey
         ?emailAddress ?displayName ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTimestamp =
         field_map_exn json "lastModifiedTimestamp"
@@ -2866,6 +2915,7 @@ module DescribeUserProfileRequest =
       let userArn =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map_exn json "userArn" UserArn.of_json in
       make ~userArn ()
@@ -3027,6 +3077,7 @@ module DescribeProjectResult =
         (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "name") in
       make ?status ?projectTemplateId ?stackId ?createdTimeStamp
         ?clientRequestToken ?description ?arn ?id ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" ProjectStatus.of_json in
       let projectTemplateId =
@@ -3058,6 +3109,7 @@ module DescribeProjectRequest =
       let id =
         ProjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ProjectId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -3105,6 +3157,7 @@ module DeleteUserProfileResult =
       let userArn =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map_exn json "userArn" UserArn.of_json in
       make ~userArn ()
@@ -3127,6 +3180,7 @@ module DeleteUserProfileRequest =
       let userArn =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map_exn json "userArn" UserArn.of_json in
       make ~userArn ()
@@ -3204,6 +3258,7 @@ module DeleteProjectResult =
       let stackId =
         (Option.map ~f:StackId.of_xml) (Xml.child xml_arg0 "stackId") in
       make ?projectArn ?stackId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map json "projectArn" ProjectArn.of_json in
       let stackId = field_map json "stackId" StackId.of_json in
@@ -3243,6 +3298,7 @@ module DeleteProjectRequest =
       let id =
         ProjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?deleteStack ?clientRequestToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteStack = field_map json "deleteStack" DeleteStack.of_json in
       let clientRequestToken =
@@ -3362,6 +3418,7 @@ module CreateUserProfileResult =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ?lastModifiedTimestamp ?createdTimestamp ?sshPublicKey
         ?emailAddress ?displayName ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTimestamp =
         field_map json "lastModifiedTimestamp" LastModifiedTimestamp.of_json in
@@ -3420,6 +3477,7 @@ module CreateUserProfileRequest =
       let userArn =
         UserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
       make ?sshPublicKey ~emailAddress ~displayName ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sshPublicKey = field_map json "sshPublicKey" SshPublicKey.of_json in
       let emailAddress = field_map_exn json "emailAddress" Email.of_json in
@@ -3561,6 +3619,7 @@ module CreateProjectResult =
       let id =
         ProjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?projectTemplateId ?clientRequestToken ~arn ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectTemplateId =
         field_map json "projectTemplateId" ProjectTemplateId.of_json in
@@ -3641,6 +3700,7 @@ module CreateProjectRequest =
         ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?toolchain ?sourceCode ?clientRequestToken ?description ~id
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let toolchain = field_map json "toolchain" Toolchain.of_json in
@@ -3765,6 +3825,7 @@ module AssociateTeamMemberResult =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
       make ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -3831,6 +3892,7 @@ module AssociateTeamMemberRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "projectId") in
       make ?remoteAccessAllowed ~projectRole ~userArn ?clientRequestToken
         ~projectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccessAllowed =
         field_map json "remoteAccessAllowed" RemoteAccessAllowed.of_json in

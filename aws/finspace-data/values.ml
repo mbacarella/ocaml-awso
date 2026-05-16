@@ -145,6 +145,7 @@ module ColumnDefinition =
       let dataType =
         (Option.map ~f:ColumnDataType.of_xml) (Xml.child xml_arg0 "dataType") in
       make ?columnDescription ?columnName ?dataType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let columnDescription =
         field_map json "columnDescription" ColumnDescription.of_json in
@@ -365,6 +366,7 @@ module SchemaDefinition =
       let columns =
         (Option.map ~f:ColumnList.of_xml) (Xml.child xml_arg0 "columns") in
       make ?primaryKeyColumns ?columns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let primaryKeyColumns =
         field_map json "primaryKeyColumns" ColumnNameList.of_json in
@@ -915,6 +917,7 @@ module DatasetOwnerInfo =
         (Option.map ~f:PhoneNumber.of_xml) (Xml.child xml_arg0 "phoneNumber") in
       let name = (Option.map ~f:OwnerName.of_xml) (Xml.child xml_arg0 "name") in
       make ?email ?phoneNumber ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let email = field_map json "email" Email.of_json in
       let phoneNumber = field_map json "phoneNumber" PhoneNumber.of_json in
@@ -959,6 +962,7 @@ module SchemaUnion =
         (Option.map ~f:SchemaDefinition.of_xml)
           (Xml.child xml_arg0 "tabularSchemaConfig") in
       make ?tabularSchemaConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tabularSchemaConfig =
         field_map json "tabularSchemaConfig" SchemaDefinition.of_json in
@@ -1038,6 +1042,7 @@ module DataViewDestinationTypeParams =
           (Xml.child_exn ~context:context_ xml_arg0 "destinationType") in
       make ?s3DestinationExportFileFormatOptions
         ?s3DestinationExportFileFormat ~destinationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3DestinationExportFileFormatOptions =
         field_map json "s3DestinationExportFileFormatOptions"
@@ -1077,6 +1082,7 @@ module DataViewErrorInfo =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "ErrorMessage__lc1") in
       make ?errorCategory ?errorMessage__lc1 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCategory =
         field_map json "errorCategory" ErrorCategory.of_json in
@@ -1265,6 +1271,7 @@ module ChangesetErrorInfo =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "ErrorMessage__lc1") in
       make ?errorCategory ?errorMessage__lc1 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCategory =
         field_map json "errorCategory" ErrorCategory.of_json in
@@ -1400,6 +1407,7 @@ module ResourcePermission =
         (Option.map ~f:StringValueLength1to250.of_xml)
           (Xml.child xml_arg0 "permission") in
       make ?permission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permission =
         field_map json "permission" StringValueLength1to250.of_json in
@@ -1544,6 +1552,7 @@ module User =
       make ?lastLoginTime ?lastModifiedTime ?lastDisabledTime
         ?lastEnabledTime ?createTime ?apiAccessPrincipalArn ?apiAccess ?type_
         ?emailAddress ?lastName ?firstName ?status ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastLoginTime =
         field_map json "lastLoginTime" TimestampEpoch.of_json in
@@ -1637,6 +1646,7 @@ module PermissionGroup =
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?lastModifiedTime ?createTime ?applicationPermissions ?description
         ?name ?permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "lastModifiedTime" TimestampEpoch.of_json in
@@ -1749,6 +1759,7 @@ module Dataset =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?alias ?schemaDefinition ?lastModifiedTime ?createTime ?ownerInfo
         ?datasetDescription ?kind ?datasetTitle ?datasetArn ?datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map json "alias" AliasString.of_json in
       let schemaDefinition =
@@ -1884,6 +1895,7 @@ module DataViewSummary =
         ?destinationTypeProperties ?errorInfo ?status ?sortColumns
         ?partitionColumns ?asOfTimestamp ?datasetId ?dataViewArn ?dataViewId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "lastModifiedTime" TimestampEpoch.of_json in
@@ -2039,6 +2051,7 @@ module ChangesetSummary =
       make ?updatedByChangesetId ?updatesChangesetId ?activeFromTimestamp
         ?activeUntilTimestamp ?errorInfo ?status ?createTime ?formatParams
         ?sourceParams ?changeType ?datasetId ?changesetArn ?changesetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedByChangesetId =
         field_map json "updatedByChangesetId" ChangesetId.of_json in
@@ -2133,6 +2146,7 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -2159,6 +2173,7 @@ module ConflictException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ErrorMessage__lc1.of_json in
       let message = field_map json "message" ErrorMessage__lc1.of_json in
@@ -2179,6 +2194,7 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -2205,6 +2221,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ErrorMessage__lc1.of_json in
       let message = field_map json "message" ErrorMessage__lc1.of_json in
@@ -2219,6 +2236,7 @@ module ThrottlingException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
@@ -2242,6 +2260,7 @@ module ValidationException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ErrorMessage__lc1.of_json in
       let message = field_map json "message" ErrorMessage__lc1.of_json in
@@ -2543,6 +2562,7 @@ module Credentials =
         (Option.map ~f:StringValueLength1to255__lc1.of_xml)
           (Xml.child xml_arg0 "accessKeyId") in
       make ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionToken =
         field_map json "sessionToken" StringValueMaxLength1000.of_json in
@@ -2634,6 +2654,7 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -2666,6 +2687,7 @@ module PermissionGroupParams =
         (Option.map ~f:PermissionGroupId.of_xml)
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?datasetPermissions ?permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetPermissions =
         field_map json "datasetPermissions" ResourcePermissionsList.of_json in
@@ -2762,6 +2784,7 @@ module UpdateUserResponse =
       let userId =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "userId" UserId.of_json in make ?userId ()
     let to_json v = composed_to_json to_value v
@@ -2834,6 +2857,7 @@ module UpdateUserRequest =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?clientToken ?apiAccessPrincipalArn ?apiAccess ?lastName
         ?firstName ?type_ ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let apiAccessPrincipalArn =
@@ -2938,6 +2962,7 @@ module UpdatePermissionGroupResponse =
         (Option.map ~f:PermissionGroupId.of_xml)
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionGroupId =
         field_map json "permissionGroupId" PermissionGroupId.of_json in
@@ -3005,6 +3030,7 @@ module UpdatePermissionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "permissionGroupId") in
       make ?clientToken ?applicationPermissions ?description ?name
         ~permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let applicationPermissions =
@@ -3107,6 +3133,7 @@ module UpdateDatasetResponse =
       let datasetId =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetId = field_map json "datasetId" DatasetId.of_json in
       make ?datasetId ()
@@ -3183,6 +3210,7 @@ module UpdateDatasetRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?schemaDefinition ?alias ?datasetDescription ~kind ~datasetTitle
         ~datasetId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schemaDefinition =
         field_map json "schemaDefinition" SchemaUnion.of_json in
@@ -3292,6 +3320,7 @@ module UpdateChangesetResponse =
       let changesetId =
         (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
       make ?datasetId ?changesetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetId = field_map json "datasetId" DatasetId.of_json in
       let changesetId = field_map json "changesetId" ChangesetId.of_json in
@@ -3355,6 +3384,7 @@ module UpdateChangesetRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~formatParams ~sourceParams ~changesetId ~datasetId ?clientToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let formatParams =
         field_map_exn json "formatParams" FormatParams.of_json in
@@ -3464,6 +3494,7 @@ module ResetUserPasswordResponse =
       let userId =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?temporaryPassword ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let temporaryPassword =
         field_map json "temporaryPassword" Password.of_json in
@@ -3495,6 +3526,7 @@ module ResetUserPasswordRequest =
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?clientToken ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let userId = field_map_exn json "userId" UserId.of_json in
@@ -3578,6 +3610,7 @@ module ListUsersResponse =
       let users =
         (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "users") in
       make ?nextToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let users = field_map json "users" UserList.of_json in
@@ -3609,6 +3642,7 @@ module ListUsersRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map_exn json "maxResults" ResultLimit.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3694,6 +3728,7 @@ module ListPermissionGroupsResponse =
         (Option.map ~f:PermissionGroupList.of_xml)
           (Xml.child xml_arg0 "permissionGroups") in
       make ?nextToken ?permissionGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let permissionGroups =
@@ -3726,6 +3761,7 @@ module ListPermissionGroupsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map_exn json "maxResults" ResultLimit.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3816,6 +3852,7 @@ module ListDatasetsResponse =
       let datasets =
         (Option.map ~f:DatasetList.of_xml) (Xml.child xml_arg0 "datasets") in
       make ?nextToken ?datasets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let datasets = field_map json "datasets" DatasetList.of_json in
@@ -3845,6 +3882,7 @@ module ListDatasetsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ResultLimit.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3936,6 +3974,7 @@ module ListDataViewsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?dataViews ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataViews = field_map json "dataViews" DataViewList.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3974,6 +4013,7 @@ module ListDataViewsRequest =
         DatasetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ?maxResults ?nextToken ~datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ResultLimit.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -4077,6 +4117,7 @@ module ListChangesetsResponse =
         (Option.map ~f:ChangesetList.of_xml)
           (Xml.child xml_arg0 "changesets") in
       make ?nextToken ?changesets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let changesets = field_map json "changesets" ChangesetList.of_json in
@@ -4116,6 +4157,7 @@ module ListChangesetsRequest =
         DatasetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ?nextToken ?maxResults ~datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" ResultLimit.of_json in
@@ -4210,6 +4252,7 @@ module GetWorkingLocationResponse =
         (Option.map ~f:StringValueLength1to1024.of_xml)
           (Xml.child xml_arg0 "s3Uri") in
       make ?s3Bucket ?s3Path ?s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Bucket = field_map json "s3Bucket" StringValueLength1to63.of_json in
       let s3Path = field_map json "s3Path" StringValueLength1to1024.of_json in
@@ -4236,6 +4279,7 @@ module GetWorkingLocationRequest =
         (Option.map ~f:LocationType.of_xml)
           (Xml.child xml_arg0 "locationType") in
       make ?locationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationType = field_map json "locationType" LocationType.of_json in
       make ?locationType ()
@@ -4429,6 +4473,7 @@ module GetUserResponse =
       make ?lastLoginTime ?lastModifiedTime ?lastDisabledTime
         ?lastEnabledTime ?createTime ?apiAccessPrincipalArn ?apiAccess ?type_
         ?emailAddress ?lastName ?firstName ?status ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastLoginTime =
         field_map json "lastLoginTime" TimestampEpoch.of_json in
@@ -4468,6 +4513,7 @@ module GetUserRequest =
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map_exn json "userId" UserId.of_json in
       make ~userId ()
@@ -4551,6 +4597,7 @@ module GetProgrammaticAccessCredentialsResponse =
       let credentials =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "credentials") in
       make ?durationInMinutes ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInMinutes =
         field_map json "durationInMinutes" SessionDuration.of_json in
@@ -4584,6 +4631,7 @@ module GetProgrammaticAccessCredentialsRequest =
         (Option.map ~f:SessionDuration.of_xml)
           (Xml.child xml_arg0 "durationInMinutes") in
       make ~environmentId ?durationInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentId = field_map_exn json "environmentId" IdType.of_json in
       let durationInMinutes =
@@ -4759,6 +4807,7 @@ module GetDatasetResponse =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?status ?alias ?schemaDefinition ?lastModifiedTime ?createTime
         ?datasetDescription ?kind ?datasetTitle ?datasetArn ?datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" DatasetStatus.of_json in
       let alias = field_map json "alias" AliasString.of_json in
@@ -4794,6 +4843,7 @@ module GetDatasetRequest =
         StringValueLength1to255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ~datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetId =
         field_map_exn json "datasetId" StringValueLength1to255.of_json in
@@ -4982,6 +5032,7 @@ module GetDataViewResponse =
       make ?status ?destinationTypeParams ?dataViewArn ?dataViewId
         ?sortColumns ?createTime ?lastModifiedTime ?errorInfo ?asOfTimestamp
         ?datasetId ?partitionColumns ?autoUpdate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" DataViewStatus.of_json in
       let destinationTypeParams =
@@ -5031,6 +5082,7 @@ module GetDataViewRequest =
         DataViewId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataviewId") in
       make ~datasetId ~dataViewId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
       let dataViewId = field_map_exn json "dataViewId" DataViewId.of_json in
@@ -5239,6 +5291,7 @@ module GetChangesetResponse =
       make ?updatedByChangesetId ?updatesChangesetId ?activeFromTimestamp
         ?activeUntilTimestamp ?errorInfo ?status ?createTime ?formatParams
         ?sourceParams ?changeType ?datasetId ?changesetArn ?changesetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedByChangesetId =
         field_map json "updatedByChangesetId" ChangesetId.of_json in
@@ -5288,6 +5341,7 @@ module GetChangesetRequest =
         DatasetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ~changesetId ~datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changesetId = field_map_exn json "changesetId" ChangesetId.of_json in
       let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
@@ -5390,6 +5444,7 @@ module EnableUserResponse =
       let userId =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "userId" UserId.of_json in make ?userId ()
     let to_json v = composed_to_json to_value v
@@ -5418,6 +5473,7 @@ module EnableUserRequest =
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?clientToken ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let userId = field_map_exn json "userId" UserId.of_json in
@@ -5512,6 +5568,7 @@ module DisableUserResponse =
       let userId =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "userId" UserId.of_json in make ?userId ()
     let to_json v = composed_to_json to_value v
@@ -5540,6 +5597,7 @@ module DisableUserRequest =
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?clientToken ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let userId = field_map_exn json "userId" UserId.of_json in
@@ -5646,6 +5704,7 @@ module DeletePermissionGroupResponse =
         (Option.map ~f:PermissionGroupId.of_xml)
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionGroupId =
         field_map json "permissionGroupId" PermissionGroupId.of_json in
@@ -5678,6 +5737,7 @@ module DeletePermissionGroupRequest =
         PermissionGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "permissionGroupId") in
       make ?clientToken ~permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let permissionGroupId =
@@ -5781,6 +5841,7 @@ module DeleteDatasetResponse =
       let datasetId =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetId = field_map json "datasetId" DatasetId.of_json in
       make ?datasetId ()
@@ -5810,6 +5871,7 @@ module DeleteDatasetRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~datasetId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -5903,6 +5965,7 @@ module CreateUserResponse =
       let userId =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "userId" UserId.of_json in make ?userId ()
     let to_json v = composed_to_json to_value v
@@ -5978,6 +6041,7 @@ module CreateUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "emailAddress") in
       make ?clientToken ?apiAccessPrincipalArn ?apiAccess ?lastName
         ?firstName ~type_ ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let apiAccessPrincipalArn =
@@ -6080,6 +6144,7 @@ module CreatePermissionGroupResponse =
         (Option.map ~f:PermissionGroupId.of_xml)
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionGroupId =
         field_map json "permissionGroupId" PermissionGroupId.of_json in
@@ -6130,6 +6195,7 @@ module CreatePermissionGroupRequest =
         PermissionGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?clientToken ~applicationPermissions ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let applicationPermissions =
@@ -6238,6 +6304,7 @@ module CreateDatasetResponse =
       let datasetId =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetId = field_map json "datasetId" DatasetId.of_json in
       make ?datasetId ()
@@ -6323,6 +6390,7 @@ module CreateDatasetRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?schemaDefinition ?alias ~permissionGroupParams ?ownerInfo
         ?datasetDescription ~kind ~datasetTitle ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schemaDefinition =
         field_map json "schemaDefinition" SchemaUnion.of_json in
@@ -6435,6 +6503,7 @@ module CreateDataViewResponse =
       let datasetId =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?dataViewId ?datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataViewId = field_map json "dataViewId" DataViewId.of_json in
       let datasetId = field_map json "datasetId" DatasetId.of_json in
@@ -6519,6 +6588,7 @@ module CreateDataViewRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~destinationTypeParams ?asOfTimestamp ?partitionColumns
         ?sortColumns ?autoUpdate ~datasetId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationTypeParams =
         field_map_exn json "destinationTypeParams"
@@ -6639,6 +6709,7 @@ module CreateChangesetResponse =
       let datasetId =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?changesetId ?datasetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changesetId = field_map json "changesetId" ChangesetId.of_json in
       let datasetId = field_map json "datasetId" DatasetId.of_json in
@@ -6702,6 +6773,7 @@ module CreateChangesetRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~formatParams ~sourceParams ~changeType ~datasetId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let formatParams =
         field_map_exn json "formatParams" FormatParams.of_json in

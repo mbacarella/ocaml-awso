@@ -424,6 +424,7 @@ module SpotFleetRequestConfigData =
         ?fulfilledCapacity ?excessCapacityTerminationPolicy ?clientToken
         ?spotMaintenanceStrategies ?onDemandAllocationStrategy
         ?allocationStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -520,6 +521,7 @@ module EventInformation =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "eventDescription") in
       make ?instanceId ?eventSubType ?eventDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map json "InstanceId" String_.of_json in
       let eventSubType = field_map json "EventSubType" String_.of_json in
@@ -762,6 +764,7 @@ module ReferencedSecurityGroup =
       let groupId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupId") in
       make ?vpcPeeringConnectionId ?vpcId ?userId ?peeringStatus ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnectionId =
         field_map json "VpcPeeringConnectionId" String_.of_json in
@@ -1437,6 +1440,7 @@ module NetworkInterfaceAttachment =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "attachTime") in
       make ?status ?instanceOwnerId ?instanceId ?networkCardIndex
         ?deviceIndex ?deleteOnTermination ?attachmentId ?attachTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" AttachmentStatus.of_json in
       let instanceOwnerId = field_map json "InstanceOwnerId" String_.of_json in
@@ -1629,6 +1633,7 @@ module NetworkInterfacePermissionState =
         (Option.map ~f:NetworkInterfacePermissionStateCode.of_xml)
           (Xml.child xml_arg0 "state") in
       make ?statusMessage ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage = field_map json "StatusMessage" String_.of_json in
       let state =
@@ -1973,6 +1978,7 @@ module ProvisionedBandwidth =
       let provisionTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "provisionTime") in
       make ?status ?requested ?requestTime ?provisioned ?provisionTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let requested = field_map json "Requested" String_.of_json in
@@ -2451,6 +2457,7 @@ module ResponseLaunchTemplateData =
         ?placement ?monitoring ?keyName ?instanceType ?imageId
         ?networkInterfaces ?blockDeviceMappings ?iamInstanceProfile
         ?ebsOptimized ?kernelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maintenanceOptions =
         field_map json "MaintenanceOptions"
@@ -3026,6 +3033,7 @@ module EbsInfo =
           (Xml.child xml_arg0 "ebsOptimizedSupport") in
       make ?nvmeSupport ?ebsOptimizedInfo ?encryptionSupport
         ?ebsOptimizedSupport ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nvmeSupport = field_map json "NvmeSupport" EbsNvmeSupport.of_json in
       let ebsOptimizedInfo =
@@ -3064,6 +3072,7 @@ module FpgaInfo =
         (Option.map ~f:FpgaDeviceInfoList.of_xml)
           (Xml.child xml_arg0 "fpgas") in
       make ?totalFpgaMemoryInMiB ?fpgas ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalFpgaMemoryInMiB =
         field_map json "TotalFpgaMemoryInMiB" TotalFpgaMemory.of_json in
@@ -3108,6 +3117,7 @@ module GpuInfo =
       let gpus =
         (Option.map ~f:GpuDeviceInfoList.of_xml) (Xml.child xml_arg0 "gpus") in
       make ?totalGpuMemoryInMiB ?gpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalGpuMemoryInMiB =
         field_map json "TotalGpuMemoryInMiB" TotalGpuMemory.of_json in
@@ -3146,6 +3156,7 @@ module InferenceAcceleratorInfo =
         (Option.map ~f:InferenceDeviceInfoList.of_xml)
           (Xml.child xml_arg0 "accelerators") in
       make ?accelerators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accelerators =
         field_map json "Accelerators" InferenceDeviceInfoList.of_json in
@@ -3208,6 +3219,7 @@ module InstanceStorageInfo =
       let totalSizeInGB =
         (Option.map ~f:DiskSize.of_xml) (Xml.child xml_arg0 "totalSizeInGB") in
       make ?encryptionSupport ?nvmeSupport ?disks ?totalSizeInGB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionSupport =
         field_map json "EncryptionSupport"
@@ -3256,6 +3268,7 @@ module MemoryInfo =
       let sizeInMiB =
         (Option.map ~f:MemorySize.of_xml) (Xml.child xml_arg0 "sizeInMiB") in
       make ?sizeInMiB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeInMiB = field_map json "SizeInMiB" MemorySize.of_json in
       make ?sizeInMiB ()
@@ -3391,6 +3404,7 @@ module NetworkInfo =
         ?ipv6Supported ?ipv6AddressesPerInterface ?ipv4AddressesPerInterface
         ?networkCards ?defaultNetworkCardIndex ?maximumNetworkCards
         ?maximumNetworkInterfaces ?networkPerformance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionInTransitSupported =
         field_map json "EncryptionInTransitSupported"
@@ -3442,6 +3456,7 @@ module PlacementGroupInfo =
         (Option.map ~f:PlacementGroupStrategyList.of_xml)
           (Xml.child xml_arg0 "supportedStrategies") in
       make ?supportedStrategies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedStrategies =
         field_map json "SupportedStrategies"
@@ -3478,6 +3493,7 @@ module ProcessorInfo =
         (Option.map ~f:ArchitectureTypeList.of_xml)
           (Xml.child xml_arg0 "supportedArchitectures") in
       make ?sustainedClockSpeedInGhz ?supportedArchitectures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sustainedClockSpeedInGhz =
         field_map json "SustainedClockSpeedInGhz"
@@ -3593,6 +3609,7 @@ module VCpuInfo =
         (Option.map ~f:VCpuCount.of_xml) (Xml.child xml_arg0 "defaultVCpus") in
       make ?validThreadsPerCore ?validCores ?defaultThreadsPerCore
         ?defaultCores ?defaultVCpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validThreadsPerCore =
         field_map json "ValidThreadsPerCore" ThreadsPerCoreList.of_json in
@@ -3719,6 +3736,7 @@ module InstanceStatusSummary =
         (Option.map ~f:InstanceStatusDetailsList.of_xml)
           (Xml.child xml_arg0 "details") in
       make ?status ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" SummaryStatus.of_json in
       let details =
@@ -3760,6 +3778,7 @@ module InstanceEventWindowAssociationTarget =
         (Option.map ~f:InstanceIdList.of_xml)
           (Xml.child xml_arg0 "instanceIdSet") in
       make ?dedicatedHostIds ?tags ?instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dedicatedHostIds =
         field_map json "DedicatedHostIds" DedicatedHostIdList.of_json in
@@ -3950,6 +3969,7 @@ module SnapshotTaskDetail =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       make ?userBucket ?url ?statusMessage ?status ?snapshotId ?progress
         ?kmsKeyId ?format ?encrypted ?diskImageSize ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userBucket = field_map json "UserBucket" UserBucketDetails.of_json in
       let url = field_map json "Url" String_.of_json in
@@ -4225,6 +4245,7 @@ module AvailableCapacity =
         (Option.map ~f:AvailableInstanceCapacityList.of_xml)
           (Xml.child xml_arg0 "availableInstanceCapacity") in
       make ?availableVCpus ?availableInstanceCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availableVCpus = field_map json "AvailableVCpus" Integer.of_json in
       let availableInstanceCapacity =
@@ -4300,6 +4321,7 @@ module HostProperties =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceType") in
       let cores = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "cores") in
       make ?totalVCpus ?sockets ?instanceFamily ?instanceType ?cores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalVCpus = field_map json "TotalVCpus" Integer.of_json in
       let sockets = field_map json "Sockets" Integer.of_json in
@@ -4393,6 +4415,7 @@ module FpgaImageState =
       let code =
         (Option.map ~f:FpgaImageStateCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" FpgaImageStateCode.of_json in
@@ -4433,6 +4456,7 @@ module PciId =
       let deviceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeviceId") in
       make ?subsystemVendorId ?subsystemId ?vendorId ?deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subsystemVendorId =
         field_map json "SubsystemVendorId" String_.of_json in
@@ -4479,6 +4503,7 @@ module DestinationOptionsResponse =
         (Option.map ~f:DestinationFileFormat.of_xml)
           (Xml.child xml_arg0 "fileFormat") in
       make ?perHourPartition ?hiveCompatiblePartitions ?fileFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let perHourPartition =
         field_map json "PerHourPartition" Boolean.of_json in
@@ -4808,6 +4833,7 @@ module OnDemandOptions =
       make ?maxTotalPrice ?minTargetCapacity ?singleAvailabilityZone
         ?singleInstanceType ?capacityReservationOptions ?allocationStrategy
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxTotalPrice = field_map json "MaxTotalPrice" String_.of_json in
       let minTargetCapacity =
@@ -4924,6 +4950,7 @@ module SpotOptions =
         ?singleInstanceType ?instancePoolsToUseCount
         ?instanceInterruptionBehavior ?maintenanceStrategies
         ?allocationStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxTotalPrice = field_map json "MaxTotalPrice" String_.of_json in
       let minTargetCapacity =
@@ -5014,6 +5041,7 @@ module TargetCapacitySpecification =
           (Xml.child xml_arg0 "totalTargetCapacity") in
       make ?targetCapacityUnitType ?defaultTargetCapacityType
         ?spotTargetCapacity ?onDemandTargetCapacity ?totalTargetCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetCapacityUnitType =
         field_map json "TargetCapacityUnitType"
@@ -5095,6 +5123,7 @@ module FastLaunchLaunchTemplateSpecificationResponse =
         (Option.map ~f:LaunchTemplateId.of_xml)
           (Xml.child xml_arg0 "launchTemplateId") in
       make ?version ?launchTemplateName ?launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let launchTemplateName =
@@ -5141,6 +5170,7 @@ module FastLaunchSnapshotConfigurationResponse =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "targetResourceCount") in
       make ?targetResourceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetResourceCount =
         field_map json "TargetResourceCount" Integer.of_json in
@@ -5256,6 +5286,7 @@ module ExportToS3Task =
         (Option.map ~f:ContainerFormat.of_xml)
           (Xml.child xml_arg0 "containerFormat") in
       make ?s3Key ?s3Bucket ?diskImageFormat ?containerFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Key = field_map json "S3Key" String_.of_json in
       let s3Bucket = field_map json "S3Bucket" String_.of_json in
@@ -5289,6 +5320,7 @@ module InstanceExportDetails =
       let instanceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?targetEnvironment ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetEnvironment =
         field_map json "TargetEnvironment" ExportEnvironment.of_json in
@@ -5316,6 +5348,7 @@ module ExportTaskS3Location =
       let s3Bucket =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       make ?s3Prefix ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Prefix = field_map json "S3Prefix" String_.of_json in
       let s3Bucket = field_map json "S3Bucket" String_.of_json in
@@ -5336,6 +5369,7 @@ module ElasticGpuHealth =
       let status =
         (Option.map ~f:ElasticGpuStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ElasticGpuStatus.of_json in
       make ?status ()
@@ -5461,6 +5495,7 @@ module ImportInstanceTaskDetails =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       make ?volumes ?platform ?instanceId ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumes =
         field_map json "Volumes" ImportInstanceVolumeDetailSet.of_json in
@@ -5522,6 +5557,7 @@ module ImportVolumeTaskDetails =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "availabilityZone") in
       make ?volume ?image ?description ?bytesConverted ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volume = field_map json "Volume" DiskImageVolumeDescription.of_json in
       let image = field_map json "Image" DiskImageDescription.of_json in
@@ -5567,6 +5603,7 @@ module AssociationStatus =
         (Option.map ~f:AssociationStatusCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" AssociationStatusCode.of_json in
@@ -5595,6 +5632,7 @@ module ClientVpnRouteStatus =
         (Option.map ~f:ClientVpnRouteStatusCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ClientVpnRouteStatusCode.of_json in
@@ -5660,6 +5698,7 @@ module ClientConnectResponseOptions =
       let enabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?status ?lambdaFunctionArn ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "Status" ClientVpnEndpointAttributeStatus.of_json in
@@ -5692,6 +5731,7 @@ module ClientLoginBannerResponseOptions =
       let enabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?bannerText ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bannerText = field_map json "BannerText" String_.of_json in
       let enabled = field_map json "Enabled" Boolean.of_json in
@@ -5748,6 +5788,7 @@ module ClientVpnEndpointStatus =
         (Option.map ~f:ClientVpnEndpointStatusCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" ClientVpnEndpointStatusCode.of_json in
@@ -5814,6 +5855,7 @@ module ConnectionLogResponseOptions =
       let enabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?cloudwatchLogStream ?cloudwatchLogGroup ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudwatchLogStream =
         field_map json "CloudwatchLogStream" String_.of_json in
@@ -5897,6 +5939,7 @@ module ClientVpnAuthorizationRuleStatus =
         (Option.map ~f:ClientVpnAuthorizationRuleStatusCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code =
@@ -6276,6 +6319,7 @@ module BundleTaskError =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" String_.of_json in
@@ -6334,6 +6378,7 @@ module Storage =
     let of_xml xml_arg0 =
       let s3 = (Option.map ~f:S3Storage.of_xml) (Xml.child xml_arg0 "S3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "S3" S3Storage.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
@@ -6486,6 +6531,7 @@ module PtrUpdateStatus =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       make ?reason ?status ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" String_.of_json in
       let status = field_map json "Status" String_.of_json in
@@ -6555,6 +6601,7 @@ module DeleteQueuedReservedInstancesError =
         (Option.map ~f:DeleteQueuedReservedInstancesErrorCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code =
@@ -6583,6 +6630,7 @@ module ResponseError =
         (Option.map ~f:LaunchTemplateErrorCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" LaunchTemplateErrorCode.of_json in
@@ -6610,6 +6658,7 @@ module DeleteFleetError =
         (Option.map ~f:DeleteFleetErrorCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" DeleteFleetErrorCode.of_json in
@@ -6820,6 +6869,7 @@ module VpnTunnelOptionsSpecification =
         ?replayWindowSize ?rekeyFuzzPercentage ?rekeyMarginTimeSeconds
         ?phase2LifetimeSeconds ?phase1LifetimeSeconds ?preSharedKey
         ?tunnelInsideIpv6Cidr ?tunnelInsideCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startupAction = field_map json "StartupAction" String_.of_json in
       let iKEVersions =
@@ -6898,6 +6948,7 @@ module PathStatementRequest =
         (Option.map ~f:PacketHeaderStatementRequest.of_xml)
           (Xml.child xml_arg0 "PacketHeaderStatement") in
       make ?resourceStatement ?packetHeaderStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceStatement =
         field_map json "ResourceStatement" ResourceStatementRequest.of_json in
@@ -6955,6 +7006,7 @@ module ValidationError =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" String_.of_json in
@@ -6978,6 +7030,7 @@ module ElasticGpuSpecification =
       let type_ =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" String_.of_json in make ~type_ ()
     let to_json v = composed_to_json to_value v
@@ -7021,6 +7074,7 @@ module LaunchTemplateBlockDeviceMappingRequest =
       let deviceName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeviceName") in
       make ?noDevice ?ebs ?virtualName ?deviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let noDevice = field_map json "NoDevice" String_.of_json in
       let ebs =
@@ -7061,6 +7115,7 @@ module CapacityReservationTarget =
         (Option.map ~f:CapacityReservationId.of_xml)
           (Xml.child xml_arg0 "CapacityReservationId") in
       make ?capacityReservationResourceGroupArn ?capacityReservationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capacityReservationResourceGroupArn =
         field_map json "CapacityReservationResourceGroupArn" String_.of_json in
@@ -7096,6 +7151,7 @@ module LaunchTemplateElasticInferenceAccelerator =
       let type_ =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?count ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count =
         field_map json "Count"
@@ -7163,6 +7219,7 @@ module LaunchTemplateSpotMarketOptionsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MaxPrice") in
       make ?instanceInterruptionBehavior ?validUntil ?blockDurationMinutes
         ?spotInstanceType ?maxPrice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceInterruptionBehavior =
         field_map json "InstanceInterruptionBehavior"
@@ -7370,6 +7427,7 @@ module LaunchTemplateInstanceNetworkInterfaceSpecificationRequest =
         ?ipv6Addresses ?ipv6AddressCount ?interfaceType ?groups ?deviceIndex
         ?description ?deleteOnTermination ?associatePublicIpAddress
         ?associateCarrierIpAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv6PrefixCount = field_map json "Ipv6PrefixCount" Integer.of_json in
       let ipv6Prefixes = field_map json "Ipv6Prefixes" Ipv6PrefixList.of_json in
@@ -7427,6 +7485,7 @@ module LaunchTemplateLicenseConfigurationRequest =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConfigurationArn =
         field_map json "LicenseConfigurationArn" String_.of_json in
@@ -7455,6 +7514,7 @@ module LaunchTemplateTagSpecificationRequest =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?tags ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -7490,6 +7550,7 @@ module FleetSpotCapacityRebalanceRequest =
         (Option.map ~f:FleetReplacementStrategy.of_xml)
           (Xml.child xml_arg0 "ReplacementStrategy") in
       make ?terminationDelay ?replacementStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminationDelay =
         field_map json "TerminationDelay" Integer.of_json in
@@ -7518,6 +7579,7 @@ module CertificateAuthenticationRequest =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ClientRootCertificateChainArn") in
       make ?clientRootCertificateChainArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRootCertificateChainArn =
         field_map json "ClientRootCertificateChainArn" String_.of_json in
@@ -7541,6 +7603,7 @@ module DirectoryServiceAuthenticationRequest =
       let directoryId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map json "DirectoryId" String_.of_json in
       make ?directoryId ()
@@ -7574,6 +7637,7 @@ module FederatedAuthenticationRequest =
       let sAMLProviderArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SAMLProviderArn") in
       make ?selfServiceSAMLProviderArn ?sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selfServiceSAMLProviderArn =
         field_map json "SelfServiceSAMLProviderArn" String_.of_json in
@@ -7639,6 +7703,7 @@ module CancelSpotFleetRequestsError =
         (Option.map ~f:CancelBatchErrorCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" CancelBatchErrorCode.of_json in
@@ -7671,6 +7736,7 @@ module CancelCapacityReservationFleetError =
         (Option.map ~f:CancelCapacityReservationFleetErrorCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "Message"
@@ -7704,6 +7770,7 @@ module SecurityGroupRuleDescription =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SecurityGroupRuleId") in
       make ?description ?securityGroupRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let securityGroupRuleId =
@@ -7732,6 +7799,7 @@ module InstanceMonitoring =
       let instanceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?monitoring ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitoring = field_map json "Monitoring" Monitoring.of_json in
       let instanceId = field_map json "InstanceId" String_.of_json in
@@ -7769,6 +7837,7 @@ module InstanceStateChange =
         (Option.map ~f:InstanceState.of_xml)
           (Xml.child xml_arg0 "currentState") in
       make ?previousState ?instanceId ?currentState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let previousState =
         field_map json "PreviousState" InstanceState.of_json in
@@ -7810,6 +7879,7 @@ module TerminateConnectionStatus =
       let connectionId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "connectionId") in
       make ?currentStatus ?previousStatus ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentStatus =
         field_map json "CurrentStatus" ClientVpnConnectionStatus.of_json in
@@ -7877,6 +7947,7 @@ module TransitGatewayRoute =
           (Xml.child xml_arg0 "destinationCidrBlock") in
       make ?state ?type_ ?transitGatewayAttachments ?prefixListId
         ?destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" TransitGatewayRouteState.of_json in
       let type_ = field_map json "Type" TransitGatewayRouteType.of_json in
@@ -7912,6 +7983,7 @@ module Filter =
         (Option.map ~f:ValueStringList.of_xml) (Xml.child xml_arg0 "Value") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" ValueStringList.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -8022,6 +8094,7 @@ module TransitGatewayMulticastGroup =
       make ?sourceType ?memberType ?groupSource ?groupMember
         ?networkInterfaceId ?resourceOwnerId ?resourceType ?resourceId
         ?subnetId ?transitGatewayAttachmentId ?groupIpAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceType = field_map json "SourceType" MembershipType.of_json in
       let memberType = field_map json "MemberType" MembershipType.of_json in
@@ -8120,6 +8193,7 @@ module LocalGatewayRoute =
       make ?ownerId ?localGatewayRouteTableArn ?localGatewayRouteTableId
         ?state ?type_ ?localGatewayVirtualInterfaceGroupId
         ?destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ownerId = field_map json "OwnerId" String_.of_json in
       let localGatewayRouteTableArn =
@@ -8208,6 +8282,7 @@ module ScheduledInstancesIamInstanceProfile =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" String_.of_json in
       let arn = field_map json "Arn" String_.of_json in make ?name ?arn ()
@@ -8229,6 +8304,7 @@ module ScheduledInstancesMonitoring =
       let enabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       make ?enabled ()
@@ -8287,6 +8363,7 @@ module ScheduledInstancesPlacement =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "AvailabilityZone") in
       make ?groupName ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupName = field_map json "GroupName" PlacementGroupName.of_json in
       let availabilityZone =
@@ -8319,6 +8396,7 @@ module ElasticInferenceAccelerator =
       let type_ =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?count ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count =
         field_map json "Count" ElasticInferenceAcceleratorCount.of_json in
@@ -8384,6 +8462,7 @@ module SpotMarketOptions =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MaxPrice") in
       make ?instanceInterruptionBehavior ?validUntil ?blockDurationMinutes
         ?spotInstanceType ?maxPrice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceInterruptionBehavior =
         field_map json "InstanceInterruptionBehavior"
@@ -8416,6 +8495,7 @@ module LicenseConfigurationRequest =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConfigurationArn =
         field_map json "LicenseConfigurationArn" String_.of_json in
@@ -8598,6 +8678,7 @@ module SpotInstanceRequest =
         ?launchedAvailabilityZone ?launchSpecification ?launchGroup
         ?instanceId ?fault ?createTime ?blockDurationMinutes
         ?availabilityZoneGroup ?actualBlockHourlyPrice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceInterruptionBehavior =
         field_map json "InstanceInterruptionBehavior"
@@ -8752,6 +8833,7 @@ module UnsuccessfulItem =
         (Option.map ~f:UnsuccessfulItemError.of_xml)
           (Xml.child xml_arg0 "error") in
       make ?resourceId ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map json "ResourceId" String_.of_json in
       let error = field_map json "Error" UnsuccessfulItemError.of_json in
@@ -8956,6 +9038,7 @@ module ScheduledInstance =
         ?previousSlotEndTime ?platform ?nextSlotStartTime ?networkPlatform
         ?instanceType ?instanceCount ?hourlyPrice ?createDate
         ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalScheduledInstanceHours =
         field_map json "TotalScheduledInstanceHours" Integer.of_json in
@@ -9008,6 +9091,7 @@ module PurchaseRequest =
         Integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceCount") in
       make ~purchaseToken ~instanceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let purchaseToken = field_map_exn json "PurchaseToken" String_.of_json in
       let instanceCount = field_map_exn json "InstanceCount" Integer.of_json in
@@ -9093,6 +9177,7 @@ module Purchase =
           (Xml.child xml_arg0 "currencyCode") in
       make ?upfrontPrice ?paymentOption ?instanceFamily ?hourlyPrice
         ?hostReservationId ?hostIdSet ?duration ?currencyCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let upfrontPrice = field_map json "UpfrontPrice" String_.of_json in
       let paymentOption =
@@ -9264,6 +9349,7 @@ module SecurityGroupRuleUpdate =
         (Option.map ~f:SecurityGroupRuleId.of_xml)
           (Xml.child xml_arg0 "SecurityGroupRuleId") in
       make ?securityGroupRule ?securityGroupRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupRule =
         field_map json "SecurityGroupRule" SecurityGroupRuleRequest.of_json in
@@ -9319,6 +9405,7 @@ module AddPrefixListEntry =
       let cidr =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ?description ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let cidr = field_map_exn json "Cidr" String_.of_json in
@@ -9338,6 +9425,7 @@ module RemovePrefixListEntry =
       let cidr =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map_exn json "Cidr" String_.of_json in make ~cidr ()
     let to_json v = composed_to_json to_value v
@@ -9357,6 +9445,7 @@ module AddIpamOperatingRegion =
       let regionName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regionName = field_map json "RegionName" String_.of_json in
       make ?regionName ()
@@ -9378,6 +9467,7 @@ module RemoveIpamOperatingRegion =
       let regionName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regionName = field_map json "RegionName" String_.of_json in
       make ?regionName ()
@@ -9402,6 +9492,7 @@ module RequestIpamResourceTag =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let key = field_map json "Key" String_.of_json in make ?value ?key ()
@@ -9441,6 +9532,7 @@ module InstanceEventWindowTimeRangeRequest =
       let startWeekDay =
         (Option.map ~f:WeekDay.of_xml) (Xml.child xml_arg0 "StartWeekDay") in
       make ?endHour ?endWeekDay ?startHour ?startWeekDay ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endHour = field_map json "EndHour" Hour.of_json in
       let endWeekDay = field_map json "EndWeekDay" WeekDay.of_json in
@@ -9464,6 +9556,7 @@ module SuccessfulInstanceCreditSpecificationItem =
       let instanceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map json "InstanceId" String_.of_json in
       make ?instanceId ()
@@ -9494,6 +9587,7 @@ module UnsuccessfulInstanceCreditSpecificationItem =
       let instanceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?error ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error =
         field_map json "Error"
@@ -9524,6 +9618,7 @@ module InstanceCreditSpecificationRequest =
       let instanceId =
         (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
       make ?cpuCredits ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuCredits = field_map json "CpuCredits" String_.of_json in
       let instanceId = field_map json "InstanceId" InstanceId.of_json in
@@ -9568,6 +9663,7 @@ module InstanceBlockDeviceMappingSpecification =
       let deviceName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deviceName") in
       make ?virtualName ?noDevice ?ebs ?deviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualName = field_map json "VirtualName" String_.of_json in
       let noDevice = field_map json "NoDevice" String_.of_json in
@@ -9683,6 +9779,7 @@ module FleetLaunchTemplateConfigRequest =
         (Option.map ~f:FleetLaunchTemplateSpecificationRequest.of_xml)
           (Xml.child xml_arg0 "LaunchTemplateSpecification") in
       make ?overrides ?launchTemplateSpecification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrides =
         field_map json "Overrides"
@@ -9781,6 +9878,7 @@ module SnapshotRecycleBinInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?volumeId ?description ?recycleBinExitTime ?recycleBinEnterTime
         ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeId = field_map json "VolumeId" String_.of_json in
       let description = field_map json "Description" String_.of_json in
@@ -9845,6 +9943,7 @@ module ImageRecycleBinInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageId") in
       make ?recycleBinExitTime ?recycleBinEnterTime ?description ?name
         ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recycleBinExitTime =
         field_map json "RecycleBinExitTime" MillisecondDateTime.of_json in
@@ -9884,6 +9983,7 @@ module DiskImage =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?volume ?image ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volume = field_map json "Volume" VolumeDetail.of_json in
       let image = field_map json "Image" DiskImageDetail.of_json in
@@ -9930,6 +10030,7 @@ module UserData =
     let of_xml xml_arg0 =
       let data = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "data") in
       make ?data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let data = field_map json "Data" String_.of_json in make ?data ()
     let to_json v = composed_to_json to_value v
@@ -9990,6 +10091,7 @@ module ImageDiskContainer =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?userBucket ?url ?snapshotId ?format ?deviceName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userBucket = field_map json "UserBucket" UserBucket.of_json in
       let url = field_map json "Url" String_.of_json in
@@ -10018,6 +10120,7 @@ module ImportImageLicenseConfigurationRequest =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConfigurationArn =
         field_map json "LicenseConfigurationArn" String_.of_json in
@@ -10060,6 +10163,7 @@ module VpnConnectionDeviceType =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "vpnConnectionDeviceTypeId") in
       make ?software ?platform ?vendor ?vpnConnectionDeviceTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let software = field_map json "Software" String_.of_json in
       let platform = field_map json "Platform" String_.of_json in
@@ -10112,6 +10216,7 @@ module TransitGatewayRouteTablePropagation =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State" TransitGatewayPropagationState.of_json in
@@ -10166,6 +10271,7 @@ module TransitGatewayRouteTableAssociation =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State" TransitGatewayAssociationState.of_json in
@@ -10248,6 +10354,7 @@ module TransitGatewayPrefixListReference =
           (Xml.child xml_arg0 "transitGatewayRouteTableId") in
       make ?transitGatewayAttachment ?blackhole ?state ?prefixListOwnerId
         ?prefixListId ?transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayAttachment =
         field_map json "TransitGatewayAttachment"
@@ -10322,6 +10429,7 @@ module TransitGatewayMulticastDomainAssociation =
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?subnet ?resourceOwnerId ?resourceType ?resourceId
         ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnet = field_map json "Subnet" SubnetAssociation.of_json in
       let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
@@ -10361,6 +10469,7 @@ module TransitGatewayAttachmentPropagation =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "transitGatewayRouteTableId") in
       make ?state ?transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State" TransitGatewayPropagationState.of_json in
@@ -10434,6 +10543,7 @@ module SubnetCidrReservation =
           (Xml.child xml_arg0 "subnetCidrReservationId") in
       make ?tags ?description ?ownerId ?reservationType ?cidr ?subnetId
         ?subnetCidrReservationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map json "Description" String_.of_json in
@@ -10477,6 +10587,7 @@ module SpotPlacementScore =
       let region =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
       make ?score ?availabilityZoneId ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Integer.of_json in
       let availabilityZoneId =
@@ -10572,6 +10683,7 @@ module ReservedInstanceReservationValue =
         (Option.map ~f:ReservationValue.of_xml)
           (Xml.child xml_arg0 "reservationValue") in
       make ?reservedInstanceId ?reservationValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstanceId =
         field_map json "ReservedInstanceId" String_.of_json in
@@ -10608,6 +10720,7 @@ module TargetReservationValue =
         (Option.map ~f:ReservationValue.of_xml)
           (Xml.child xml_arg0 "reservationValue") in
       make ?targetConfiguration ?reservationValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetConfiguration =
         field_map json "TargetConfiguration" TargetConfiguration.of_json in
@@ -10642,6 +10755,7 @@ module TargetConfigurationRequest =
       let instanceCount =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "InstanceCount") in
       make ~offeringId ?instanceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringId =
         field_map_exn json "OfferingId" ReservedInstancesOfferingId.of_json in
@@ -10723,6 +10837,7 @@ module AccessScopeAnalysisFinding =
           (Xml.child xml_arg0 "networkInsightsAccessScopeAnalysisId") in
       make ?findingComponents ?findingId ?networkInsightsAccessScopeId
         ?networkInsightsAccessScopeAnalysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingComponents =
         field_map json "FindingComponents" PathComponentList.of_json in
@@ -10754,6 +10869,7 @@ module PrefixListEntry =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidr") in
       make ?description ?cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let cidr = field_map json "Cidr" String_.of_json in
@@ -10780,6 +10896,7 @@ module PrefixListAssociation =
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       make ?resourceOwner ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceOwner = field_map json "ResourceOwner" String_.of_json in
       let resourceId = field_map json "ResourceId" String_.of_json in
@@ -10919,6 +11036,7 @@ module IpamResourceCidr =
       make ?vpcId ?overlapStatus ?managementState ?complianceStatus ?ipUsage
         ?resourceTags ?resourceType ?resourceCidr ?resourceName ?resourceId
         ?resourceOwnerId ?resourceRegion ?ipamPoolId ?ipamScopeId ?ipamId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" String_.of_json in
       let overlapStatus =
@@ -10974,6 +11092,7 @@ module IpamPoolCidr =
         (Option.map ~f:IpamPoolCidrState.of_xml) (Xml.child xml_arg0 "state") in
       let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidr") in
       make ?failureReason ?state ?cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason" IpamPoolCidrFailureReason.of_json in
@@ -11048,6 +11167,7 @@ module IpamPoolAllocation =
       let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidr") in
       make ?resourceOwner ?resourceRegion ?resourceType ?resourceId
         ?description ?ipamPoolAllocationId ?cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceOwner = field_map json "ResourceOwner" String_.of_json in
       let resourceRegion = field_map json "ResourceRegion" String_.of_json in
@@ -11166,6 +11286,7 @@ module IpamAddressHistoryRecord =
       make ?sampledEndTime ?sampledStartTime ?vpcId ?resourceOverlapStatus
         ?resourceComplianceStatus ?resourceName ?resourceCidr ?resourceId
         ?resourceType ?resourceRegion ?resourceOwnerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sampledEndTime =
         field_map json "SampledEndTime" MillisecondDateTime.of_json in
@@ -11205,6 +11326,7 @@ module InstanceTypeInfoFromInstanceRequirements =
       let instanceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceType") in
       make ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceType = field_map json "InstanceType" String_.of_json in
       make ?instanceType ()
@@ -11232,6 +11354,7 @@ module CapacityReservationGroup =
       let groupArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupArn") in
       make ?ownerId ?groupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ownerId = field_map json "OwnerId" String_.of_json in
       let groupArn = field_map json "GroupArn" String_.of_json in
@@ -11300,6 +11423,7 @@ module CoipAddressUsage =
       let allocationId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "allocationId") in
       make ?coIp ?awsService ?awsAccountId ?allocationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coIp = field_map json "CoIp" String_.of_json in
       let awsService = field_map json "AwsService" String_.of_json in
@@ -11334,6 +11458,7 @@ module InstanceUsage =
       let accountId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?usedInstanceCount ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usedInstanceCount =
         field_map json "UsedInstanceCount" Integer.of_json in
@@ -11364,6 +11489,7 @@ module Ipv6CidrAssociation =
       let ipv6Cidr =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipv6Cidr") in
       make ?associatedResource ?ipv6Cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associatedResource =
         field_map json "AssociatedResource" String_.of_json in
@@ -11423,6 +11549,7 @@ module AssociatedRole =
           (Xml.child xml_arg0 "associatedRoleArn") in
       make ?encryptionKmsKeyId ?certificateS3ObjectKey
         ?certificateS3BucketName ?associatedRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKmsKeyId =
         field_map json "EncryptionKmsKeyId" String_.of_json in
@@ -11491,6 +11618,7 @@ module EnableFastSnapshotRestoreErrorItem =
       let snapshotId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?fastSnapshotRestoreStateErrors ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fastSnapshotRestoreStateErrors =
         field_map json "FastSnapshotRestoreStateErrors"
@@ -11614,6 +11742,7 @@ module EnableFastSnapshotRestoreSuccessItem =
       make ?disabledTime ?disablingTime ?enabledTime ?optimizingTime
         ?enablingTime ?ownerAlias ?ownerId ?stateTransitionReason ?state
         ?availabilityZone ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disabledTime =
         field_map json "DisabledTime" MillisecondDateTime.of_json in
@@ -11664,6 +11793,7 @@ module DisableFastSnapshotRestoreErrorItem =
       let snapshotId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?fastSnapshotRestoreStateErrors ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fastSnapshotRestoreStateErrors =
         field_map json "FastSnapshotRestoreStateErrors"
@@ -11787,6 +11917,7 @@ module DisableFastSnapshotRestoreSuccessItem =
       make ?disabledTime ?disablingTime ?enabledTime ?optimizingTime
         ?enablingTime ?ownerAlias ?ownerId ?stateTransitionReason ?state
         ?availabilityZone ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disabledTime =
         field_map json "DisabledTime" MillisecondDateTime.of_json in
@@ -11880,6 +12011,7 @@ module VpnGateway =
           (Xml.child xml_arg0 "availabilityZone") in
       make ?tags ?amazonSideAsn ?vpnGatewayId ?vpcAttachments ?type_ ?state
         ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let amazonSideAsn = field_map json "AmazonSideAsn" Long.of_json in
@@ -12046,6 +12178,7 @@ module VpnConnection =
         ?coreNetworkAttachmentArn ?coreNetworkArn ?transitGatewayId
         ?vpnGatewayId ?vpnConnectionId ?type_ ?state ?category
         ?customerGatewayId ?customerGatewayConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vgwTelemetry =
         field_map json "VgwTelemetry" VgwTelemetryList.of_json in
@@ -12179,6 +12312,7 @@ module Vpc =
       make ?tags ?isDefault ?cidrBlockAssociationSet
         ?ipv6CidrBlockAssociationSet ?instanceTenancy ?ownerId ?vpcId ?state
         ?dhcpOptionsId ?cidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let isDefault = field_map json "IsDefault" Boolean.of_json in
@@ -12267,6 +12401,7 @@ module VpcPeeringConnection =
           (Xml.child xml_arg0 "accepterVpcInfo") in
       make ?vpcPeeringConnectionId ?tags ?status ?requesterVpcInfo
         ?expirationTime ?accepterVpcInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnectionId =
         field_map json "VpcPeeringConnectionId" String_.of_json in
@@ -12448,6 +12583,7 @@ module VpcEndpoint =
         ?networkInterfaceIds ?requesterManaged ?privateDnsEnabled ?groups
         ?subnetIds ?routeTableIds ?policyDocument ?state ?serviceName ?vpcId
         ?vpcEndpointType ?vpcEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastError = field_map json "LastError" LastError.of_json in
       let ownerId = field_map json "OwnerId" String_.of_json in
@@ -12614,6 +12750,7 @@ module ServiceDetail =
         ?managesVpcEndpoints ?acceptanceRequired ?vpcEndpointPolicySupported
         ?privateDnsNames ?privateDnsName ?baseEndpointDnsNames ?owner
         ?availabilityZones ?serviceType ?serviceId ?serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateDnsNameVerificationState =
         field_map json "PrivateDnsNameVerificationState" DnsNameState.of_json in
@@ -12667,6 +12804,7 @@ module AllowedPrincipal =
         (Option.map ~f:PrincipalType.of_xml)
           (Xml.child xml_arg0 "principalType") in
       make ?principal ?principalType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principal = field_map json "Principal" String_.of_json in
       let principalType =
@@ -12810,6 +12948,7 @@ module ServiceConfiguration =
         ?networkLoadBalancerArns ?managesVpcEndpoints ?acceptanceRequired
         ?availabilityZones ?serviceState ?serviceName ?serviceId ?serviceType
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let payerResponsibility =
@@ -12939,6 +13078,7 @@ module VpcEndpointConnection =
       make ?gatewayLoadBalancerArns ?networkLoadBalancerArns ?dnsEntries
         ?creationTimestamp ?vpcEndpointState ?vpcEndpointOwner ?vpcEndpointId
         ?serviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayLoadBalancerArns =
         field_map json "GatewayLoadBalancerArns" ValueStringList.of_json in
@@ -13033,6 +13173,7 @@ module ConnectionNotification =
       make ?connectionNotificationState ?connectionEvents
         ?connectionNotificationArn ?connectionNotificationType ?vpcEndpointId
         ?serviceId ?connectionNotificationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionNotificationState =
         field_map json "ConnectionNotificationState"
@@ -13079,6 +13220,7 @@ module VpcClassicLink =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "classicLinkEnabled") in
       make ?vpcId ?tags ?classicLinkEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" String_.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -13109,6 +13251,7 @@ module ClassicLinkDnsSupport =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "classicLinkDnsSupported") in
       make ?vpcId ?classicLinkDnsSupported ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" String_.of_json in
       let classicLinkDnsSupported =
@@ -13262,6 +13405,7 @@ module Volume =
       make ?throughput ?multiAttachEnabled ?fastRestored ?volumeType ?tags
         ?iops ?volumeId ?state ?snapshotId ?size ?outpostArn ?kmsKeyId
         ?encrypted ?createTime ?availabilityZone ?attachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let throughput = field_map json "Throughput" Integer.of_json in
       let multiAttachEnabled =
@@ -13431,6 +13575,7 @@ module VolumeModification =
         ?targetMultiAttachEnabled ?targetThroughput ?targetVolumeType
         ?targetIops ?targetSize ?statusMessage ?modificationState ?volumeId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map json "EndTime" DateTime.of_json in
       let startTime = field_map json "StartTime" DateTime.of_json in
@@ -13536,6 +13681,7 @@ module VolumeStatusItem =
           (Xml.child xml_arg0 "actionsSet") in
       make ?attachmentStatuses ?volumeStatus ?volumeId ?events ?outpostArn
         ?availabilityZone ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentStatuses =
         field_map json "AttachmentStatuses"
@@ -13622,6 +13768,7 @@ module TrunkInterfaceAssociation =
           (Xml.child xml_arg0 "associationId") in
       make ?tags ?greKey ?vlanId ?interfaceProtocol ?trunkInterfaceId
         ?branchInterfaceId ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let greKey = field_map json "GreKey" Integer.of_json in
@@ -13712,6 +13859,7 @@ module TransitGateway =
           (Xml.child xml_arg0 "transitGatewayId") in
       make ?tags ?options ?creationTime ?description ?ownerId ?state
         ?transitGatewayArn ?transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let options = field_map json "Options" TransitGatewayOptions.of_json in
@@ -13810,6 +13958,7 @@ module TransitGatewayVpcAttachment =
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?tags ?options ?creationTime ?subnetIds ?state ?vpcOwnerId ?vpcId
         ?transitGatewayId ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let options =
@@ -13901,6 +14050,7 @@ module TransitGatewayRouteTable =
       make ?tags ?creationTime ?defaultPropagationRouteTable
         ?defaultAssociationRouteTable ?state ?transitGatewayId
         ?transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let creationTime = field_map json "CreationTime" DateTime.of_json in
@@ -13991,6 +14141,7 @@ module TransitGatewayPeeringAttachment =
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?tags ?creationTime ?state ?status ?accepterTgwInfo
         ?requesterTgwInfo ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let creationTime = field_map json "CreationTime" DateTime.of_json in
@@ -14090,6 +14241,7 @@ module TransitGatewayMulticastDomain =
       make ?tags ?creationTime ?state ?options ?ownerId
         ?transitGatewayMulticastDomainArn ?transitGatewayId
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let creationTime = field_map json "CreationTime" DateTime.of_json in
@@ -14195,6 +14347,7 @@ module TransitGatewayConnect =
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?tags ?options ?creationTime ?state ?transitGatewayId
         ?transportTransitGatewayAttachmentId ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let options =
@@ -14278,6 +14431,7 @@ module TransitGatewayConnectPeer =
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?tags ?connectPeerConfiguration ?creationTime ?state
         ?transitGatewayConnectPeerId ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let connectPeerConfiguration =
@@ -14395,6 +14549,7 @@ module TransitGatewayAttachment =
       make ?tags ?creationTime ?association ?state ?resourceId ?resourceType
         ?resourceOwnerId ?transitGatewayOwnerId ?transitGatewayId
         ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let creationTime = field_map json "CreationTime" DateTime.of_json in

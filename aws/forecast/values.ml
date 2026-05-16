@@ -95,6 +95,7 @@ module ErrorMetric =
         (Option.map ~f:ForecastType.of_xml)
           (Xml.child xml_arg0 "ForecastType") in
       make ?mAPE ?mASE ?rMSE ?wAPE ?forecastType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mAPE = field_map json "MAPE" Double.of_json in
       let mASE = field_map json "MASE" Double.of_json in
@@ -127,6 +128,7 @@ module WeightedQuantileLoss =
       let quantile =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Quantile") in
       make ?lossValue ?quantile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lossValue = field_map json "LossValue" Double.of_json in
       let quantile = field_map json "Quantile" Double.of_json in
@@ -475,6 +477,7 @@ module Metrics =
       let rMSE = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "RMSE") in
       make ?averageWeightedQuantileLoss ?errorMetrics ?weightedQuantileLosses
         ?rMSE ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let averageWeightedQuantileLoss =
         field_map json "AverageWeightedQuantileLoss" Double.of_json in
@@ -518,6 +521,7 @@ module FeaturizationMethod =
         FeaturizationMethodName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeaturizationMethodName") in
       make ?featurizationMethodParameters ~featurizationMethodName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featurizationMethodParameters =
         field_map json "FeaturizationMethodParameters"
@@ -645,6 +649,7 @@ module TestWindowSummary =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "TestWindowStart") in
       make ?message ?status ?testWindowEnd ?testWindowStart ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let status = field_map json "Status" Status.of_json in
@@ -710,6 +715,7 @@ module S3Config =
       let path =
         S3Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ?kMSKeyArn ~roleArn ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSKeyArn = field_map json "KMSKeyArn" KMSKeyArn.of_json in
       let roleArn = field_map_exn json "RoleArn" Arn.of_json in
@@ -813,6 +819,7 @@ module WindowSummary =
           (Xml.child xml_arg0 "TestWindowStart") in
       make ?metrics ?evaluationType ?itemCount ?testWindowEnd
         ?testWindowStart ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metrics = field_map json "Metrics" Metrics.of_json in
       let evaluationType =
@@ -878,6 +885,7 @@ module CategoricalParameterRange =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "Values" Values.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -920,6 +928,7 @@ module ContinuousParameterRange =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?scalingType ~minValue ~maxValue ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingType = field_map json "ScalingType" ScalingType.of_json in
       let minValue = field_map_exn json "MinValue" Double.of_json in
@@ -964,6 +973,7 @@ module IntegerParameterRange =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?scalingType ~minValue ~maxValue ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingType = field_map json "ScalingType" ScalingType.of_json in
       let minValue = field_map_exn json "MinValue" Integer.of_json in
@@ -1165,6 +1175,7 @@ module ReferencePredictorSummary =
       let state = (Option.map ~f:State.of_xml) (Xml.child xml_arg0 "State") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?state ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" State.of_json in
       let arn = field_map json "Arn" Arn.of_json in make ?state ?arn ()
@@ -1227,6 +1238,7 @@ module DataDestination =
       let s3Config =
         S3Config.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Config") in
       make ~s3Config ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Config = field_map_exn json "S3Config" S3Config.of_json in
       make ~s3Config ()
@@ -1262,6 +1274,7 @@ module ExplainabilityConfig =
         TimeSeriesGranularity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimeSeriesGranularity") in
       make ~timePointGranularity ~timeSeriesGranularity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timePointGranularity =
         field_map_exn json "TimePointGranularity"
@@ -1371,6 +1384,7 @@ module DataSource =
       let s3Config =
         S3Config.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Config") in
       make ~s3Config ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Config = field_map_exn json "S3Config" S3Config.of_json in
       make ~s3Config ()
@@ -1430,6 +1444,7 @@ module Featurization =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ?featurizationPipeline ~attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featurizationPipeline =
         field_map json "FeaturizationPipeline" FeaturizationPipeline.of_json in
@@ -1551,6 +1566,7 @@ module SupplementaryFeature =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" Value.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -1582,6 +1598,7 @@ module PredictorExecution =
       let algorithmArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AlgorithmArn") in
       make ?testWindows ?algorithmArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testWindows =
         field_map json "TestWindows" TestWindowDetails.of_json in
@@ -1613,6 +1630,7 @@ module SchemaAttribute =
       let attributeName =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "AttributeName") in
       make ?attributeType ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeType =
         field_map json "AttributeType" AttributeType.of_json in
@@ -1659,6 +1677,7 @@ module AdditionalDataset =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?configuration ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "Configuration" Configuration.of_json in
@@ -1694,6 +1713,7 @@ module AttributeConfig =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ~transformations ~attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transformations =
         field_map_exn json "Transformations" Transformations.of_json in
@@ -1725,6 +1745,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1819,6 +1840,7 @@ module PredictorSummary =
       make ?lastModificationTime ?creationTime ?message ?status
         ?referencePredictorSummary ?isAutoPredictor ?datasetGroupArn
         ?predictorName ?predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -1865,6 +1887,7 @@ module Filter =
       let key =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~condition ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let condition =
         field_map_exn json "Condition" FilterConditionString.of_json in
@@ -1947,6 +1970,7 @@ module PredictorBacktestExportJobSummary =
           (Xml.child xml_arg0 "PredictorBacktestExportJobArn") in
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?predictorBacktestExportJobName ?predictorBacktestExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2049,6 +2073,7 @@ module ForecastSummary =
       make ?lastModificationTime ?creationTime ?message ?status
         ?datasetGroupArn ?createdUsingAutoPredictor ?predictorArn
         ?forecastName ?forecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2142,6 +2167,7 @@ module ForecastExportJobSummary =
           (Xml.child xml_arg0 "ForecastExportJobArn") in
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?forecastExportJobName ?forecastExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2231,6 +2257,7 @@ module ExplainabilityExportSummary =
           (Xml.child xml_arg0 "ExplainabilityExportArn") in
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?explainabilityExportName ?explainabilityExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2328,6 +2355,7 @@ module ExplainabilitySummary =
       make ?lastModificationTime ?creationTime ?message ?status
         ?explainabilityConfig ?resourceArn ?explainabilityName
         ?explainabilityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2402,6 +2430,7 @@ module DatasetSummary =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
       make ?lastModificationTime ?creationTime ?domain ?datasetType
         ?datasetName ?datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2487,6 +2516,7 @@ module DatasetImportJobSummary =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetImportJobArn") in
       make ?lastModificationTime ?creationTime ?message ?status ?dataSource
         ?datasetImportJobName ?datasetImportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2548,6 +2578,7 @@ module DatasetGroupSummary =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetGroupArn") in
       make ?lastModificationTime ?creationTime ?datasetGroupName
         ?datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -2582,6 +2613,7 @@ module EvaluationResult =
       let algorithmArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AlgorithmArn") in
       make ?testWindows ?algorithmArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testWindows = field_map json "TestWindows" TestWindows.of_json in
       let algorithmArn = field_map json "AlgorithmArn" Arn.of_json in
@@ -2713,6 +2745,7 @@ module ParameterRanges =
           (Xml.child xml_arg0 "CategoricalParameterRanges") in
       make ?integerParameterRanges ?continuousParameterRanges
         ?categoricalParameterRanges ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let integerParameterRanges =
         field_map json "IntegerParameterRanges"
@@ -2919,6 +2952,7 @@ module Statistics =
       let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Count") in
       make ?countNanLong ?countNullLong ?countDistinctLong ?countLong ?stddev
         ?avg ?max ?min ?countNan ?countNull ?countDistinct ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let countNanLong = field_map json "CountNanLong" Long.of_json in
       let countNullLong = field_map json "CountNullLong" Long.of_json in
@@ -3008,6 +3042,7 @@ module InvalidInputException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3027,6 +3062,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3045,6 +3081,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3115,6 +3152,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3162,6 +3200,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3567,6 +3606,7 @@ module EncryptionConfig =
       let roleArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~kMSKeyArn ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSKeyArn = field_map_exn json "KMSKeyArn" KMSKeyArn.of_json in
       let roleArn = field_map_exn json "RoleArn" Arn.of_json in
@@ -3602,6 +3642,7 @@ module EvaluationParameters =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "NumberOfBacktestWindows") in
       make ?backTestWindowOffset ?numberOfBacktestWindows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backTestWindowOffset =
         field_map json "BackTestWindowOffset" Integer.of_json in
@@ -3649,6 +3690,7 @@ module FeaturizationConfig =
         Frequency.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastFrequency") in
       make ?featurizations ?forecastDimensions ~forecastFrequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featurizations =
         field_map json "Featurizations" Featurizations.of_json in
@@ -3706,6 +3748,7 @@ module HyperParameterTuningJobConfig =
         (Option.map ~f:ParameterRanges.of_xml)
           (Xml.child xml_arg0 "ParameterRanges") in
       make ?parameterRanges ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterRanges =
         field_map json "ParameterRanges" ParameterRanges.of_json in
@@ -3741,6 +3784,7 @@ module InputDataConfig =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ?supplementaryFeatures ~datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supplementaryFeatures =
         field_map json "SupplementaryFeatures" SupplementaryFeatures.of_json in
@@ -3767,6 +3811,7 @@ module PredictorExecutionDetails =
         (Option.map ~f:PredictorExecutions.of_xml)
           (Xml.child xml_arg0 "PredictorExecutions") in
       make ?predictorExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorExecutions =
         field_map json "PredictorExecutions" PredictorExecutions.of_json in
@@ -3846,6 +3891,7 @@ module Schema =
         (Option.map ~f:SchemaAttributes.of_xml)
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" SchemaAttributes.of_json in
       make ?attributes ()
@@ -3986,6 +4032,7 @@ module DataConfig =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ?additionalDatasets ?attributeConfigs ~datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalDatasets =
         field_map json "AdditionalDatasets" AdditionalDatasets.of_json in
@@ -4019,6 +4066,7 @@ module ExplainabilityInfo =
       let explainabilityArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ExplainabilityArn") in
       make ?status ?explainabilityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let explainabilityArn = field_map json "ExplainabilityArn" Arn.of_json in
@@ -4038,6 +4086,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4097,6 +4146,7 @@ module UpdateDatasetGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4125,6 +4175,7 @@ module UpdateDatasetGroupRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ~datasetArns ~datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArns = field_map_exn json "DatasetArns" ArnList.of_json in
       let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
@@ -4176,6 +4227,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified tags from a resource."]
@@ -4201,6 +4253,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -4260,6 +4313,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4287,6 +4341,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -4311,6 +4366,7 @@ module StopResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -4365,6 +4421,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4386,6 +4443,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -4450,6 +4508,7 @@ module ListPredictorsResponse =
       let predictors =
         (Option.map ~f:Predictors.of_xml) (Xml.child xml_arg0 "Predictors") in
       make ?nextToken ?predictors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let predictors = field_map json "Predictors" Predictors.of_json in
@@ -4486,6 +4545,7 @@ module ListPredictorsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4556,6 +4616,7 @@ module ListPredictorBacktestExportJobsResponse =
         (Option.map ~f:PredictorBacktestExportJobs.of_xml)
           (Xml.child xml_arg0 "PredictorBacktestExportJobs") in
       make ?nextToken ?predictorBacktestExportJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let predictorBacktestExportJobs =
@@ -4594,6 +4655,7 @@ module ListPredictorBacktestExportJobsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4661,6 +4723,7 @@ module ListForecastsResponse =
       let forecasts =
         (Option.map ~f:Forecasts.of_xml) (Xml.child xml_arg0 "Forecasts") in
       make ?nextToken ?forecasts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let forecasts = field_map json "Forecasts" Forecasts.of_json in
@@ -4697,6 +4760,7 @@ module ListForecastsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4766,6 +4830,7 @@ module ListForecastExportJobsResponse =
         (Option.map ~f:ForecastExportJobs.of_xml)
           (Xml.child xml_arg0 "ForecastExportJobs") in
       make ?nextToken ?forecastExportJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let forecastExportJobs =
@@ -4803,6 +4868,7 @@ module ListForecastExportJobsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4873,6 +4939,7 @@ module ListExplainabilityExportsResponse =
         (Option.map ~f:ExplainabilityExports.of_xml)
           (Xml.child xml_arg0 "ExplainabilityExports") in
       make ?nextToken ?explainabilityExports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let explainabilityExports =
@@ -4910,6 +4977,7 @@ module ListExplainabilityExportsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4979,6 +5047,7 @@ module ListExplainabilitiesResponse =
         (Option.map ~f:Explainabilities.of_xml)
           (Xml.child xml_arg0 "Explainabilities") in
       make ?nextToken ?explainabilities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let explainabilities =
@@ -5016,6 +5085,7 @@ module ListExplainabilitiesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5073,6 +5143,7 @@ module ListDatasetsResponse =
       let datasets =
         (Option.map ~f:Datasets.of_xml) (Xml.child xml_arg0 "Datasets") in
       make ?nextToken ?datasets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let datasets = field_map json "Datasets" Datasets.of_json in
@@ -5102,6 +5173,7 @@ module ListDatasetsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5170,6 +5242,7 @@ module ListDatasetImportJobsResponse =
         (Option.map ~f:DatasetImportJobs.of_xml)
           (Xml.child xml_arg0 "DatasetImportJobs") in
       make ?nextToken ?datasetImportJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let datasetImportJobs =
@@ -5207,6 +5280,7 @@ module ListDatasetImportJobsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5267,6 +5341,7 @@ module ListDatasetGroupsResponse =
         (Option.map ~f:DatasetGroups.of_xml)
           (Xml.child xml_arg0 "DatasetGroups") in
       make ?nextToken ?datasetGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let datasetGroups =
@@ -5297,6 +5372,7 @@ module ListDatasetGroupsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5401,6 +5477,7 @@ module GetAccuracyMetricsResponse =
           (Xml.child xml_arg0 "PredictorEvaluationResults") in
       make ?optimizationMetric ?autoMLOverrideStrategy ?isAutoPredictor
         ?predictorEvaluationResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optimizationMetric =
         field_map json "OptimizationMetric" OptimizationMetric.of_json in
@@ -5433,6 +5510,7 @@ module GetAccuracyMetricsRequest =
       let predictorArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
       make ~predictorArn ()
@@ -5709,6 +5787,7 @@ module DescribePredictorResponse =
         ?autoMLOverrideStrategy ?performAutoML ?forecastTypes
         ?forecastHorizon ?autoMLAlgorithmArns ?algorithmArn ?predictorName
         ?predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optimizationMetric =
         field_map json "OptimizationMetric" OptimizationMetric.of_json in
@@ -5778,6 +5857,7 @@ module DescribePredictorRequest =
       let predictorArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
       make ~predictorArn ()
@@ -5901,6 +5981,7 @@ module DescribePredictorBacktestExportJobResponse =
       make ?lastModificationTime ?creationTime ?status ?message ?destination
         ?predictorArn ?predictorBacktestExportJobName
         ?predictorBacktestExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -5940,6 +6021,7 @@ module DescribePredictorBacktestExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "PredictorBacktestExportJobArn") in
       make ~predictorBacktestExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorBacktestExportJobArn =
         field_map_exn json "PredictorBacktestExportJobArn" Arn.of_json in
@@ -6079,6 +6161,7 @@ module DescribeForecastResponse =
       make ?lastModificationTime ?creationTime ?message ?status
         ?estimatedTimeRemainingInMinutes ?datasetGroupArn ?predictorArn
         ?forecastTypes ?forecastName ?forecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -6115,6 +6198,7 @@ module DescribeForecastRequest =
       let forecastArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastArn") in
       make ~forecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastArn = field_map_exn json "ForecastArn" Arn.of_json in
       make ~forecastArn ()
@@ -6239,6 +6323,7 @@ module DescribeForecastExportJobResponse =
           (Xml.child xml_arg0 "ForecastExportJobArn") in
       make ?lastModificationTime ?creationTime ?status ?message ?destination
         ?forecastArn ?forecastExportJobName ?forecastExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -6275,6 +6360,7 @@ module DescribeForecastExportJobRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastExportJobArn") in
       make ~forecastExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastExportJobArn =
         field_map_exn json "ForecastExportJobArn" Arn.of_json in
@@ -6450,6 +6536,7 @@ module DescribeExplainabilityResponse =
         ?estimatedTimeRemainingInMinutes ?endDateTime ?startDateTime ?schema
         ?dataSource ?enableVisualization ?explainabilityConfig ?resourceArn
         ?explainabilityName ?explainabilityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -6496,6 +6583,7 @@ module DescribeExplainabilityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityArn") in
       make ~explainabilityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explainabilityArn =
         field_map_exn json "ExplainabilityArn" Arn.of_json in
@@ -6621,6 +6709,7 @@ module DescribeExplainabilityExportResponse =
       make ?lastModificationTime ?creationTime ?status ?message ?destination
         ?explainabilityArn ?explainabilityExportName ?explainabilityExportArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -6658,6 +6747,7 @@ module DescribeExplainabilityExportRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityExportArn") in
       make ~explainabilityExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explainabilityExportArn =
         field_map_exn json "ExplainabilityExportArn" Arn.of_json in
@@ -6792,6 +6882,7 @@ module DescribeDatasetResponse =
       make ?lastModificationTime ?creationTime ?status ?encryptionConfig
         ?schema ?dataFrequency ?datasetType ?domain ?datasetName ?datasetArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -6826,6 +6917,7 @@ module DescribeDatasetRequest =
       let datasetArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArn = field_map_exn json "DatasetArn" Arn.of_json in
       make ~datasetArn ()
@@ -7017,6 +7109,7 @@ module DescribeDatasetImportJobResponse =
         ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
         ?timestampFormat ?datasetArn ?datasetImportJobArn
         ?datasetImportJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -7068,6 +7161,7 @@ module DescribeDatasetImportJobRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetImportJobArn") in
       make ~datasetImportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetImportJobArn =
         field_map_exn json "DatasetImportJobArn" Arn.of_json in
@@ -7179,6 +7273,7 @@ module DescribeDatasetGroupResponse =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "DatasetGroupName") in
       make ?lastModificationTime ?creationTime ?status ?domain ?datasetArns
         ?datasetGroupArn ?datasetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModificationTime =
         field_map json "LastModificationTime" Timestamp.of_json in
@@ -7210,6 +7305,7 @@ module DescribeDatasetGroupRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ~datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
       make ~datasetGroupArn ()
@@ -7419,6 +7515,7 @@ module DescribeAutoPredictorResponse =
         ?referencePredictorSummary ?encryptionConfig ?dataConfig
         ?datasetImportJobArns ?forecastDimensions ?forecastFrequency
         ?forecastTypes ?forecastHorizon ?predictorName ?predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explainabilityInfo =
         field_map json "ExplainabilityInfo" ExplainabilityInfo.of_json in
@@ -7472,6 +7569,7 @@ module DescribeAutoPredictorRequest =
       let predictorArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
       make ~predictorArn ()
@@ -7495,6 +7593,7 @@ module DeleteResourceTreeRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -7518,6 +7617,7 @@ module DeletePredictorRequest =
       let predictorArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
       make ~predictorArn ()
@@ -7545,6 +7645,7 @@ module DeletePredictorBacktestExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "PredictorBacktestExportJobArn") in
       make ~predictorBacktestExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorBacktestExportJobArn =
         field_map_exn json "PredictorBacktestExportJobArn" Arn.of_json in
@@ -7568,6 +7669,7 @@ module DeleteForecastRequest =
       let forecastArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastArn") in
       make ~forecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastArn = field_map_exn json "ForecastArn" Arn.of_json in
       make ~forecastArn ()
@@ -7593,6 +7695,7 @@ module DeleteForecastExportJobRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastExportJobArn") in
       make ~forecastExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastExportJobArn =
         field_map_exn json "ForecastExportJobArn" Arn.of_json in
@@ -7618,6 +7721,7 @@ module DeleteExplainabilityRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityArn") in
       make ~explainabilityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explainabilityArn =
         field_map_exn json "ExplainabilityArn" Arn.of_json in
@@ -7644,6 +7748,7 @@ module DeleteExplainabilityExportRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityExportArn") in
       make ~explainabilityExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explainabilityExportArn =
         field_map_exn json "ExplainabilityExportArn" Arn.of_json in
@@ -7666,6 +7771,7 @@ module DeleteDatasetRequest =
       let datasetArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArn = field_map_exn json "DatasetArn" Arn.of_json in
       make ~datasetArn ()
@@ -7690,6 +7796,7 @@ module DeleteDatasetImportJobRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetImportJobArn") in
       make ~datasetImportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetImportJobArn =
         field_map_exn json "DatasetImportJobArn" Arn.of_json in
@@ -7715,6 +7822,7 @@ module DeleteDatasetGroupRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ~datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
       make ~datasetGroupArn ()
@@ -7801,6 +7909,7 @@ module CreatePredictorResponse =
       let predictorArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "PredictorArn") in
       make ?predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorArn = field_map json "PredictorArn" Arn.of_json in
       make ?predictorArn ()
@@ -7959,6 +8068,7 @@ module CreatePredictorRequest =
         ~inputDataConfig ?hPOConfig ?evaluationParameters ?trainingParameters
         ?performHPO ?autoMLOverrideStrategy ?performAutoML ?forecastTypes
         ~forecastHorizon ?algorithmArn ~predictorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optimizationMetric =
         field_map json "OptimizationMetric" OptimizationMetric.of_json in
@@ -8077,6 +8187,7 @@ module CreatePredictorBacktestExportJobResponse =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "PredictorBacktestExportJobArn") in
       make ?predictorBacktestExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorBacktestExportJobArn =
         field_map json "PredictorBacktestExportJobArn" Arn.of_json in
@@ -8130,6 +8241,7 @@ module CreatePredictorBacktestExportJobRequest =
              "PredictorBacktestExportJobName") in
       make ?tags ~destination ~predictorArn ~predictorBacktestExportJobName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let destination =
@@ -8222,6 +8334,7 @@ module CreateForecastResponse =
       let forecastArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ForecastArn") in
       make ?forecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastArn = field_map json "ForecastArn" Arn.of_json in
       make ?forecastArn ()
@@ -8266,6 +8379,7 @@ module CreateForecastRequest =
       let forecastName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastName") in
       make ?tags ?forecastTypes ~predictorArn ~forecastName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let forecastTypes =
@@ -8358,6 +8472,7 @@ module CreateForecastExportJobResponse =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "ForecastExportJobArn") in
       make ?forecastExportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastExportJobArn =
         field_map json "ForecastExportJobArn" Arn.of_json in
@@ -8406,6 +8521,7 @@ module CreateForecastExportJobRequest =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastExportJobName") in
       make ?tags ~destination ~forecastArn ~forecastExportJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let destination =
@@ -8498,6 +8614,7 @@ module CreateExplainabilityResponse =
       let explainabilityArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ExplainabilityArn") in
       make ?explainabilityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explainabilityArn = field_map json "ExplainabilityArn" Arn.of_json in
       make ?explainabilityArn ()
@@ -8592,6 +8709,7 @@ module CreateExplainabilityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityName") in
       make ?tags ?endDateTime ?startDateTime ?enableVisualization ?schema
         ?dataSource ~explainabilityConfig ~resourceArn ~explainabilityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let endDateTime = field_map json "EndDateTime" LocalDateTime.of_json in
@@ -8694,6 +8812,7 @@ module CreateExplainabilityExportResponse =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "ExplainabilityExportArn") in
       make ?explainabilityExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explainabilityExportArn =
         field_map json "ExplainabilityExportArn" Arn.of_json in
@@ -8747,6 +8866,7 @@ module CreateExplainabilityExportRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ExplainabilityExportName") in
       make ?tags ~destination ~explainabilityArn ~explainabilityExportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let destination =
@@ -8821,6 +8941,7 @@ module CreateDatasetResponse =
       let datasetArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
       make ?datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArn = field_map json "DatasetArn" Arn.of_json in
       make ?datasetArn ()
@@ -8897,6 +9018,7 @@ module CreateDatasetRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ?tags ?encryptionConfig ~schema ?dataFrequency ~datasetType
         ~domain ~datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let encryptionConfig =
@@ -8993,6 +9115,7 @@ module CreateDatasetImportJobResponse =
       let datasetImportJobArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetImportJobArn") in
       make ?datasetImportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetImportJobArn =
         field_map json "DatasetImportJobArn" Arn.of_json in
@@ -9087,6 +9210,7 @@ module CreateDatasetImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetImportJobName") in
       make ?tags ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
         ?timestampFormat ~dataSource ~datasetArn ~datasetImportJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let geolocationFormat =
@@ -9186,6 +9310,7 @@ module CreateDatasetGroupResponse =
       let datasetGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetGroupArn") in
       make ?datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetGroupArn = field_map json "DatasetGroupArn" Arn.of_json in
       make ?datasetGroupArn ()
@@ -9229,6 +9354,7 @@ module CreateDatasetGroupRequest =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupName") in
       make ?tags ?datasetArns ~domain ~datasetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let datasetArns = field_map json "DatasetArns" ArnList.of_json in
@@ -9319,6 +9445,7 @@ module CreateAutoPredictorResponse =
       let predictorArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "PredictorArn") in
       make ?predictorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictorArn = field_map json "PredictorArn" Arn.of_json in
       make ?predictorArn ()
@@ -9437,6 +9564,7 @@ module CreateAutoPredictorRequest =
       make ?tags ?explainPredictor ?optimizationMetric ?referencePredictorArn
         ?encryptionConfig ?dataConfig ?forecastFrequency ?forecastDimensions
         ?forecastTypes ?forecastHorizon ~predictorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let explainPredictor =

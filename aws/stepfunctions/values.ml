@@ -72,6 +72,7 @@ module CloudWatchLogsLogGroup =
       let logGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "logGroupArn") in
       make ?logGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupArn = field_map json "logGroupArn" Arn.of_json in
       make ?logGroupArn ()
@@ -129,6 +130,7 @@ module HistoryEventExecutionDataDetails =
       let truncated =
         (Option.map ~f:Truncated.of_xml) (Xml.child xml_arg0 "truncated") in
       make ?truncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "truncated" Truncated.of_json in
       make ?truncated ()
@@ -246,6 +248,7 @@ module LogDestination =
         (Option.map ~f:CloudWatchLogsLogGroup.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogsLogGroup") in
       make ?cloudWatchLogsLogGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLogsLogGroup =
         field_map json "cloudWatchLogsLogGroup"
@@ -381,6 +384,7 @@ module ActivityFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -409,6 +413,7 @@ module ActivityScheduleFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -476,6 +481,7 @@ module ActivityScheduledEventDetails =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
       make ?heartbeatInSeconds ?timeoutInSeconds ?inputDetails ?input
         ~resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let heartbeatInSeconds =
         field_map json "heartbeatInSeconds" TimeoutInSeconds.of_json in
@@ -507,6 +513,7 @@ module ActivityStartedEventDetails =
       let workerName =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "workerName") in
       make ?workerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerName = field_map json "workerName" Identity.of_json in
       make ?workerName ()
@@ -539,6 +546,7 @@ module ActivitySucceededEventDetails =
       let output =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       make ?outputDetails ?output ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDetails =
         field_map json "outputDetails"
@@ -569,6 +577,7 @@ module ActivityTimedOutEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -610,6 +619,7 @@ module ExecutionAbortedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -637,6 +647,7 @@ module ExecutionFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -675,6 +686,7 @@ module ExecutionStartedEventDetails =
       let input =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "input") in
       make ?roleArn ?inputDetails ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "roleArn" Arn.of_json in
       let inputDetails =
@@ -710,6 +722,7 @@ module ExecutionSucceededEventDetails =
       let output =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       make ?outputDetails ?output ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDetails =
         field_map json "outputDetails"
@@ -740,6 +753,7 @@ module ExecutionTimedOutEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -952,6 +966,7 @@ module LambdaFunctionFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -980,6 +995,7 @@ module LambdaFunctionScheduleFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -1030,6 +1046,7 @@ module LambdaFunctionScheduledEventDetails =
       let resource =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resource") in
       make ?timeoutInSeconds ?inputDetails ?input ~resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeoutInSeconds =
         field_map json "timeoutInSeconds" TimeoutInSeconds.of_json in
@@ -1063,6 +1080,7 @@ module LambdaFunctionStartFailedEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -1096,6 +1114,7 @@ module LambdaFunctionSucceededEventDetails =
       let output =
         (Option.map ~f:SensitiveData.of_xml) (Xml.child xml_arg0 "output") in
       make ?outputDetails ?output ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDetails =
         field_map json "outputDetails"
@@ -1126,6 +1145,7 @@ module LambdaFunctionTimedOutEventDetails =
       let error =
         (Option.map ~f:SensitiveError.of_xml) (Xml.child xml_arg0 "error") in
       make ?cause ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -1154,6 +1174,7 @@ module MapIterationEventDetails =
         (Option.map ~f:UnsignedInteger.of_xml) (Xml.child xml_arg0 "index") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?index ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let index = field_map json "index" UnsignedInteger.of_json in
       let name = field_map json "name" Name.of_json in make ?index ?name ()
@@ -1174,6 +1195,7 @@ module MapStateStartedEventDetails =
       let length =
         (Option.map ~f:UnsignedInteger.of_xml) (Xml.child xml_arg0 "length") in
       make ?length ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let length = field_map json "length" UnsignedInteger.of_json in
       make ?length ()
@@ -1211,6 +1233,7 @@ module StateEnteredEventDetails =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?inputDetails ?input ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputDetails =
         field_map json "inputDetails"
@@ -1255,6 +1278,7 @@ module StateExitedEventDetails =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?outputDetails ?output ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDetails =
         field_map json "outputDetails"
@@ -1300,6 +1324,7 @@ module TaskFailedEventDetails =
       let resourceType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?cause ?error ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -1370,6 +1395,7 @@ module TaskScheduledEventDetails =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?heartbeatInSeconds ?timeoutInSeconds ~parameters ~region
         ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let heartbeatInSeconds =
         field_map json "heartbeatInSeconds" TimeoutInSeconds.of_json in
@@ -1420,6 +1446,7 @@ module TaskStartFailedEventDetails =
       let resourceType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?cause ?error ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -1451,6 +1478,7 @@ module TaskStartedEventDetails =
       let resourceType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map_exn json "resource" Name.of_json in
       let resourceType = field_map_exn json "resourceType" Name.of_json in
@@ -1493,6 +1521,7 @@ module TaskSubmitFailedEventDetails =
       let resourceType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?cause ?error ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -1542,6 +1571,7 @@ module TaskSubmittedEventDetails =
       let resourceType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?outputDetails ?output ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDetails =
         field_map json "outputDetails"
@@ -1592,6 +1622,7 @@ module TaskSucceededEventDetails =
       let resourceType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?outputDetails ?output ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputDetails =
         field_map json "outputDetails"
@@ -1638,6 +1669,7 @@ module TaskTimedOutEventDetails =
       let resourceType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?cause ?error ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -1759,6 +1791,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" TagValue.of_json in
       let key = field_map json "key" TagKey.of_json in make ?value ?key ()
@@ -1845,6 +1878,7 @@ module StateMachineListItem =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ~creationDate ~type_ ~name ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
       let type_ = field_map_exn json "type" StateMachineType.of_json in
@@ -1915,6 +1949,7 @@ module ExecutionListItem =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ?stopDate ~startDate ~status ~name ~stateMachineArn ~executionArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stopDate = field_map json "stopDate" Timestamp.of_json in
       let startDate = field_map_exn json "startDate" Timestamp.of_json in
@@ -1957,6 +1992,7 @@ module ActivityListItem =
       let activityArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ~creationDate ~name ~activityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -2374,6 +2410,7 @@ module HistoryEvent =
         ?activitySucceededEventDetails ?activityStartedEventDetails
         ?activityScheduledEventDetails ?activityScheduleFailedEventDetails
         ?activityFailedEventDetails ?previousEventId ~id ~type_ ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateExitedEventDetails =
         field_map json "stateExitedEventDetails"
@@ -2509,6 +2546,7 @@ module InvalidArn =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2527,6 +2565,7 @@ module InvalidDefinition =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2546,6 +2585,7 @@ module InvalidLoggingConfiguration =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2564,6 +2604,7 @@ module InvalidTracingConfiguration =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2583,6 +2624,7 @@ module MissingRequiredParameter =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2602,6 +2644,7 @@ module StateMachineDeleting =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2620,6 +2663,7 @@ module StateMachineDoesNotExist =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2678,6 +2722,7 @@ module LoggingConfiguration =
       let level =
         (Option.map ~f:LogLevel.of_xml) (Xml.child xml_arg0 "level") in
       make ?destinations ?includeExecutionData ?level ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinations =
         field_map json "destinations" LogDestinationList.of_json in
@@ -2703,6 +2748,7 @@ module TracingConfiguration =
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "enabled" Enabled.of_json in
       make ?enabled ()
@@ -2728,6 +2774,7 @@ module ResourceNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "resourceName" Arn.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2777,6 +2824,7 @@ module TooManyTags =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "resourceName" Arn.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2820,6 +2868,7 @@ module ExecutionDoesNotExist =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2852,6 +2901,7 @@ module BillingDetails =
         (Option.map ~f:BilledMemoryUsed.of_xml)
           (Xml.child xml_arg0 "billedMemoryUsedInMB") in
       make ?billedDurationInMilliseconds ?billedMemoryUsedInMB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billedDurationInMilliseconds =
         field_map json "billedDurationInMilliseconds" BilledDuration.of_json in
@@ -2877,6 +2927,7 @@ module CloudWatchEventsExecutionDataDetails =
         (Option.map ~f:IncludedDetails.of_xml)
           (Xml.child xml_arg0 "included") in
       make ?included ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let included = field_map json "included" IncludedDetails.of_json in
       make ?included ()
@@ -2895,6 +2946,7 @@ module InvalidExecutionInput =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2913,6 +2965,7 @@ module InvalidName =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2931,6 +2984,7 @@ module StateMachineTypeNotSupported =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2998,6 +3052,7 @@ module ExecutionAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3017,6 +3072,7 @@ module ExecutionLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3036,6 +3092,7 @@ module InvalidOutput =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3054,6 +3111,7 @@ module InvalidToken =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3072,6 +3130,7 @@ module TaskDoesNotExist =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3090,6 +3149,7 @@ module TaskTimedOut =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3303,6 +3363,7 @@ module ActivityDoesNotExist =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3321,6 +3382,7 @@ module ActivityWorkerLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3380,6 +3442,7 @@ module StateMachineAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3399,6 +3462,7 @@ module StateMachineLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3418,6 +3482,7 @@ module ActivityLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3524,6 +3589,7 @@ module UpdateStateMachineOutput =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "updateDate") in
       make ~updateDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateDate = field_map_exn json "updateDate" Timestamp.of_json in
       make ~updateDate ()
@@ -3586,6 +3652,7 @@ module UpdateStateMachineInput =
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ?tracingConfiguration ?loggingConfiguration ?roleArn ?definition
         ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tracingConfiguration =
         field_map json "tracingConfiguration" TracingConfiguration.of_json in
@@ -3640,6 +3707,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove a tag from a Step Functions resource"]
@@ -3667,6 +3735,7 @@ module UntagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -3721,6 +3790,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3748,6 +3818,7 @@ module TagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -3805,6 +3876,7 @@ module StopExecutionOutput =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stopDate") in
       make ~stopDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stopDate = field_map_exn json "stopDate" Timestamp.of_json in
       make ~stopDate ()
@@ -3841,6 +3913,7 @@ module StopExecutionInput =
       let executionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ?cause ?error ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -4047,6 +4120,7 @@ module StartSyncExecutionOutput =
       make ?billingDetails ?traceHeader ?outputDetails ?output ?inputDetails
         ?input ?cause ?error ~status ~stopDate ~startDate ?name
         ?stateMachineArn ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingDetails =
         field_map json "billingDetails" BillingDetails.of_json in
@@ -4109,6 +4183,7 @@ module StartSyncExecutionInput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ?traceHeader ?input ?name ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let traceHeader = field_map json "traceHeader" TraceHeader.of_json in
       let input = field_map json "input" SensitiveData.of_json in
@@ -4218,6 +4293,7 @@ module StartExecutionOutput =
       let executionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ~startDate ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startDate = field_map_exn json "startDate" Timestamp.of_json in
       let executionArn = field_map_exn json "executionArn" Arn.of_json in
@@ -4264,6 +4340,7 @@ module StartExecutionInput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ?traceHeader ?input ?name ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let traceHeader = field_map json "traceHeader" TraceHeader.of_json in
       let input = field_map json "input" SensitiveData.of_json in
@@ -4327,6 +4404,7 @@ module SendTaskSuccessOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4356,6 +4434,7 @@ module SendTaskSuccessInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ~output ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let output = field_map_exn json "output" SensitiveData.of_json in
       let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
@@ -4411,6 +4490,7 @@ module SendTaskHeartbeatOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4433,6 +4513,7 @@ module SendTaskHeartbeatInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
       make ~taskToken ()
@@ -4487,6 +4568,7 @@ module SendTaskFailureOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4521,6 +4603,7 @@ module SendTaskFailureInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?cause ?error ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause = field_map json "cause" SensitiveCause.of_json in
       let error = field_map json "error" SensitiveError.of_json in
@@ -4575,6 +4658,7 @@ module ListTagsForResourceOutput =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4597,6 +4681,7 @@ module ListTagsForResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -4652,6 +4737,7 @@ module ListStateMachinesOutput =
         StateMachineList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachines") in
       make ?nextToken ~stateMachines ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PageToken.of_json in
       let stateMachines =
@@ -4683,6 +4769,7 @@ module ListStateMachinesInput =
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PageToken.of_json in
       let maxResults = field_map json "maxResults" PageSize.of_json in
@@ -4767,6 +4854,7 @@ module ListExecutionsOutput =
         ExecutionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "executions") in
       make ?nextToken ~executions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "nextToken" ListExecutionsPageToken.of_json in
@@ -4820,6 +4908,7 @@ module ListExecutionsInput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ?nextToken ?maxResults ?statusFilter ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "nextToken" ListExecutionsPageToken.of_json in
@@ -4879,6 +4968,7 @@ module ListActivitiesOutput =
         ActivityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "activities") in
       make ?nextToken ~activities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PageToken.of_json in
       let activities = field_map_exn json "activities" ActivityList.of_json in
@@ -4909,6 +4999,7 @@ module ListActivitiesInput =
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PageToken.of_json in
       let maxResults = field_map json "maxResults" PageSize.of_json in
@@ -4979,6 +5070,7 @@ module GetExecutionHistoryOutput =
         HistoryEventList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "events") in
       make ?nextToken ~events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PageToken.of_json in
       let events = field_map_exn json "events" HistoryEventList.of_json in
@@ -5043,6 +5135,7 @@ module GetExecutionHistoryInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ?includeExecutionData ?nextToken ?reverseOrder ?maxResults
         ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeExecutionData =
         field_map json "includeExecutionData"
@@ -5124,6 +5217,7 @@ module GetActivityTaskOutput =
       let taskToken =
         (Option.map ~f:TaskToken.of_xml) (Xml.child xml_arg0 "taskToken") in
       make ?input ?taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let input = field_map json "input" SensitiveDataJobInput.of_json in
       let taskToken = field_map json "taskToken" TaskToken.of_json in
@@ -5155,6 +5249,7 @@ module GetActivityTaskInput =
       let activityArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ?workerName ~activityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerName = field_map json "workerName" Name.of_json in
       let activityArn = field_map_exn json "activityArn" Arn.of_json in
@@ -5285,6 +5380,7 @@ module DescribeStateMachineOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ?tracingConfiguration ?loggingConfiguration ~creationDate ~type_
         ~roleArn ~definition ?status ~name ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tracingConfiguration =
         field_map json "tracingConfiguration" TracingConfiguration.of_json in
@@ -5320,6 +5416,7 @@ module DescribeStateMachineInput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
       make ~stateMachineArn ()
@@ -5434,6 +5531,7 @@ module DescribeStateMachineForExecutionOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ?tracingConfiguration ?loggingConfiguration ~updateDate ~roleArn
         ~definition ~name ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tracingConfiguration =
         field_map json "tracingConfiguration" TracingConfiguration.of_json in
@@ -5466,6 +5564,7 @@ module DescribeStateMachineForExecutionInput =
       let executionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionArn = field_map_exn json "executionArn" Arn.of_json in
       make ~executionArn ()
@@ -5610,6 +5709,7 @@ module DescribeExecutionOutput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ?traceHeader ?outputDetails ?output ?inputDetails ?input ?stopDate
         ~startDate ~status ?name ~stateMachineArn ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let traceHeader = field_map json "traceHeader" TraceHeader.of_json in
       let outputDetails =
@@ -5648,6 +5748,7 @@ module DescribeExecutionInput =
       let executionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "executionArn") in
       make ~executionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionArn = field_map_exn json "executionArn" Arn.of_json in
       make ~executionArn ()
@@ -5719,6 +5820,7 @@ module DescribeActivityOutput =
       let activityArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ~creationDate ~name ~activityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -5744,6 +5846,7 @@ module DescribeActivityInput =
       let activityArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ~activityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activityArn = field_map_exn json "activityArn" Arn.of_json in
       make ~activityArn ()
@@ -5783,6 +5886,7 @@ module DeleteStateMachineOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5805,6 +5909,7 @@ module DeleteStateMachineInput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
       make ~stateMachineArn ()
@@ -5844,6 +5949,7 @@ module DeleteActivityOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an activity."]
@@ -5864,6 +5970,7 @@ module DeleteActivityInput =
       let activityArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ~activityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activityArn = field_map_exn json "activityArn" Arn.of_json in
       make ~activityArn ()
@@ -6002,6 +6109,7 @@ module CreateStateMachineOutput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateMachineArn") in
       make ~creationDate ~stateMachineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
       let stateMachineArn = field_map_exn json "stateMachineArn" Arn.of_json in
@@ -6082,6 +6190,7 @@ module CreateStateMachineInput =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tracingConfiguration ?tags ?loggingConfiguration ?type_ ~roleArn
         ~definition ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tracingConfiguration =
         field_map json "tracingConfiguration" TracingConfiguration.of_json in
@@ -6161,6 +6270,7 @@ module CreateActivityOutput =
       let activityArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "activityArn") in
       make ~creationDate ~activityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
       let activityArn = field_map_exn json "activityArn" Arn.of_json in
@@ -6190,6 +6300,7 @@ module CreateActivityInput =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let name = field_map_exn json "name" Name.of_json in

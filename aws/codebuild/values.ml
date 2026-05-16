@@ -91,6 +91,7 @@ module ResolvedArtifact =
       let type_ =
         (Option.map ~f:ArtifactsType.of_xml) (Xml.child xml_arg0 "type") in
       make ?identifier ?location ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map json "identifier" String_.of_json in
       let location = field_map json "location" String_.of_json in
@@ -273,6 +274,7 @@ module EnvironmentImage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?versions ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versions = field_map json "versions" ImageVersions.of_json in
       let description = field_map json "description" String_.of_json in
@@ -375,6 +377,7 @@ module WebhookFilter =
         WebhookFilterType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?excludeMatchedPattern ~pattern ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let excludeMatchedPattern =
         field_map json "excludeMatchedPattern" WrapperBoolean.of_json in
@@ -405,6 +408,7 @@ module PhaseContext =
       let statusCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusCode") in
       make ?message ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let statusCode = field_map json "statusCode" String_.of_json in
@@ -467,6 +471,7 @@ module BuildSummary =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       make ?secondaryArtifacts ?primaryArtifact ?buildStatus ?requestedOn
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secondaryArtifacts =
         field_map json "secondaryArtifacts"
@@ -817,6 +822,7 @@ module EnvironmentVariable =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?type_ ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" EnvironmentVariableType.of_json in
       let value = field_map_exn json "value" String_.of_json in
@@ -883,6 +889,7 @@ module BuildStatusConfig =
       let context =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "context") in
       make ?targetUrl ?context ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetUrl = field_map json "targetUrl" String_.of_json in
       let context = field_map json "context" String_.of_json in
@@ -924,6 +931,7 @@ module GitSubmodulesConfig =
         WrapperBoolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "fetchSubmodules") in
       make ~fetchSubmodules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fetchSubmodules =
         field_map_exn json "fetchSubmodules" WrapperBoolean.of_json in
@@ -955,6 +963,7 @@ module SourceAuth =
         SourceAuthType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?resource ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map json "resource" String_.of_json in
       let type_ = field_map_exn json "type" SourceAuthType.of_json in
@@ -1239,6 +1248,7 @@ module EnvironmentLanguage =
       let language =
         (Option.map ~f:LanguageType.of_xml) (Xml.child xml_arg0 "language") in
       make ?images ?language ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let images = field_map json "images" EnvironmentImages.of_json in
       let language = field_map json "language" LanguageType.of_json in
@@ -1365,6 +1375,7 @@ module S3ReportExportConfig =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?encryptionDisabled ?encryptionKey ?packaging ?path ?bucketOwner
         ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionDisabled =
         field_map json "encryptionDisabled" WrapperBoolean.of_json in
@@ -1424,6 +1435,7 @@ module Tag =
         (Option.map ~f:ValueInput.of_xml) (Xml.child xml_arg0 "value") in
       let key = (Option.map ~f:KeyInput.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" ValueInput.of_json in
       let key = field_map json "key" KeyInput.of_json in make ?value ?key ()
@@ -1462,6 +1474,7 @@ module CloudWatchLogsConfig =
         LogsConfigStatusType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ?streamName ?groupName ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamName = field_map json "streamName" String_.of_json in
       let groupName = field_map json "groupName" String_.of_json in
@@ -1512,6 +1525,7 @@ module S3LogsConfig =
         LogsConfigStatusType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ?bucketOwnerAccess ?encryptionDisabled ?location ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketOwnerAccess =
         field_map json "bucketOwnerAccess" BucketOwnerAccess.of_json in
@@ -1624,6 +1638,7 @@ module ProjectArtifacts =
       make ?bucketOwnerAccess ?artifactIdentifier ?encryptionDisabled
         ?overrideArtifactName ?packaging ?name ?namespaceType ?path ?location
         ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketOwnerAccess =
         field_map json "bucketOwnerAccess" BucketOwnerAccess.of_json in
@@ -1699,6 +1714,7 @@ module BatchRestrictions =
         (Option.map ~f:WrapperInt.of_xml)
           (Xml.child xml_arg0 "maximumBuildsAllowed") in
       make ?computeTypesAllowed ?maximumBuildsAllowed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeTypesAllowed =
         field_map json "computeTypesAllowed" ComputeTypesAllowed.of_json in
@@ -1904,6 +1920,7 @@ module RegistryCredential =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "credential") in
       make ~credentialProvider ~credential ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let credentialProvider =
         field_map_exn json "credentialProvider"
@@ -1959,6 +1976,7 @@ module ProjectFileSystemLocation =
       let type_ =
         (Option.map ~f:FileSystemType.of_xml) (Xml.child xml_arg0 "type") in
       make ?mountOptions ?identifier ?mountPoint ?location ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountOptions = field_map json "mountOptions" String_.of_json in
       let identifier = field_map json "identifier" String_.of_json in
@@ -1995,6 +2013,7 @@ module ProjectSourceVersion =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceIdentifier") in
       make ~sourceVersion ~sourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceVersion = field_map_exn json "sourceVersion" String_.of_json in
       let sourceIdentifier =
@@ -2109,6 +2128,7 @@ module ProjectSource =
       make ?sourceIdentifier ?insecureSsl ?buildStatusConfig
         ?reportBuildStatus ?auth ?buildspec ?gitSubmodulesConfig
         ?gitCloneDepth ?location ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceIdentifier =
         field_map json "sourceIdentifier" String_.of_json in
@@ -2303,6 +2323,7 @@ module BuildArtifacts =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
       make ?bucketOwnerAccess ?artifactIdentifier ?encryptionDisabled
         ?overrideArtifactName ?md5sum ?sha256sum ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketOwnerAccess =
         field_map json "bucketOwnerAccess" BucketOwnerAccess.of_json in
@@ -2383,6 +2404,7 @@ module BuildPhase =
           (Xml.child xml_arg0 "phaseType") in
       make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
         ?phaseType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contexts = field_map json "contexts" PhaseContexts.of_json in
       let durationInSeconds =
@@ -2415,6 +2437,7 @@ module ExportedEnvironmentVariable =
       let name =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" String_.of_json in
       let name = field_map json "name" NonEmptyString.of_json in
@@ -2487,6 +2510,7 @@ module BuildBatchPhase =
           (Xml.child xml_arg0 "phaseType") in
       make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
         ?phaseType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contexts = field_map json "contexts" PhaseContexts.of_json in
       let durationInSeconds =
@@ -2555,6 +2579,7 @@ module BuildGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "identifier") in
       make ?priorBuildSummaryList ?currentBuildSummary ?ignoreFailure
         ?dependsOn ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let priorBuildSummaryList =
         field_map json "priorBuildSummaryList" BuildSummaries.of_json in
@@ -2753,6 +2778,7 @@ module CodeCoverageReportSummary =
           (Xml.child xml_arg0 "lineCoveragePercentage") in
       make ?branchesMissed ?branchesCovered ?branchCoveragePercentage
         ?linesMissed ?linesCovered ?lineCoveragePercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchesMissed =
         field_map json "branchesMissed" NonNegativeInt.of_json in
@@ -2796,6 +2822,7 @@ module ReportExportConfig =
         (Option.map ~f:ReportExportConfigType.of_xml)
           (Xml.child xml_arg0 "exportConfigType") in
       make ?s3Destination ?exportConfigType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Destination =
         field_map json "s3Destination" S3ReportExportConfig.of_json in
@@ -2899,6 +2926,7 @@ module TestReportSummary =
       let total =
         WrapperInt.of_xml (Xml.child_exn ~context:context_ xml_arg0 "total") in
       make ~durationInNanoSeconds ~statusCounts ~total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInNanoSeconds =
         field_map_exn json "durationInNanoSeconds" WrapperLong.of_json in
@@ -3005,6 +3033,7 @@ module LogsConfig =
         (Option.map ~f:CloudWatchLogsConfig.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogs") in
       make ?s3Logs ?cloudWatchLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Logs = field_map json "s3Logs" S3LogsConfig.of_json in
       let cloudWatchLogs =
@@ -3066,6 +3095,7 @@ module ProjectBadge =
       let badgeEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "badgeEnabled") in
       make ?badgeRequestUrl ?badgeEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let badgeRequestUrl = field_map json "badgeRequestUrl" String_.of_json in
       let badgeEnabled = field_map json "badgeEnabled" Boolean.of_json in
@@ -3135,6 +3165,7 @@ module ProjectBuildBatchConfig =
           (Xml.child xml_arg0 "serviceRole") in
       make ?batchReportMode ?timeoutInMins ?restrictions ?combineArtifacts
         ?serviceRole ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchReportMode =
         field_map json "batchReportMode" BatchReportModeType.of_json in
@@ -3179,6 +3210,7 @@ module ProjectCache =
       let type_ =
         CacheType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?modes ?location ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modes = field_map json "modes" ProjectCacheModes.of_json in
       let location = field_map json "location" String_.of_json in
@@ -3293,6 +3325,7 @@ module ProjectEnvironment =
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?imagePullCredentialsType ?registryCredential ?certificate
         ?privilegedMode ?environmentVariables ~computeType ~image ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imagePullCredentialsType =
         field_map json "imagePullCredentialsType"
@@ -3492,6 +3525,7 @@ module VpcConfig =
       let vpcId =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "vpcId") in
       make ?securityGroupIds ?subnets ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "securityGroupIds" SecurityGroupIds.of_json in
@@ -3572,6 +3606,7 @@ module Webhook =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "url") in
       make ?lastModifiedSecret ?buildType ?filterGroups ?branchFilter ?secret
         ?payloadUrl ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedSecret =
         field_map json "lastModifiedSecret" Timestamp.of_json in
@@ -3690,6 +3725,7 @@ module DebugSession =
         (Option.map ~f:WrapperBoolean.of_xml)
           (Xml.child xml_arg0 "sessionEnabled") in
       make ?sessionTarget ?sessionEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionTarget =
         field_map json "sessionTarget" NonEmptyString.of_json in
@@ -3802,6 +3838,7 @@ module LogsLocation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
       make ?s3Logs ?cloudWatchLogs ?s3LogsArn ?cloudWatchLogsArn ?s3DeepLink
         ?deepLink ?streamName ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Logs = field_map json "s3Logs" S3LogsConfig.of_json in
       let cloudWatchLogs =
@@ -3839,6 +3876,7 @@ module NetworkInterface =
       let subnetId =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "subnetId") in
       make ?networkInterfaceId ?subnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaceId =
         field_map json "networkInterfaceId" NonEmptyString.of_json in
@@ -3924,6 +3962,7 @@ module SourceCredentialsInfo =
       let arn =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       make ?authType ?serverType ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authType = field_map json "authType" AuthType.of_json in
       let serverType = field_map json "serverType" ServerType.of_json in
@@ -3954,6 +3993,7 @@ module EnvironmentPlatform =
       let platform =
         (Option.map ~f:PlatformType.of_xml) (Xml.child xml_arg0 "platform") in
       make ?languages ?platform ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languages = field_map json "languages" EnvironmentLanguages.of_json in
       let platform = field_map json "platform" PlatformType.of_json in
@@ -3981,6 +4021,7 @@ module ReportWithRawData =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "reportArn") in
       make ?data ?reportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let data = field_map json "data" String_.of_json in
       let reportArn = field_map json "reportArn" NonEmptyString.of_json in
@@ -4065,6 +4106,7 @@ module TestCase =
           (Xml.child xml_arg0 "reportArn") in
       make ?expired ?message ?durationInNanoSeconds ?status ?name ?prefix
         ?testRawDataPath ?reportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expired = field_map json "expired" Timestamp.of_json in
       let message = field_map json "message" String_.of_json in
@@ -4182,6 +4224,7 @@ module CodeCoverage =
       make ?expired ?branchesMissed ?branchesCovered
         ?branchCoveragePercentage ?linesMissed ?linesCovered
         ?lineCoveragePercentage ?filePath ?reportARN ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expired = field_map json "expired" Timestamp.of_json in
       let branchesMissed =
@@ -4225,6 +4268,7 @@ module BuildNotDeleted =
       let id =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
       make ?statusCode ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusCode = field_map json "statusCode" String_.of_json in
       let id = field_map json "id" NonEmptyString.of_json in
@@ -4345,6 +4389,7 @@ module Report =
       make ?codeCoverageSummary ?testSummary ?truncated ?exportConfig
         ?expired ?created ?status ?executionId ?reportGroupArn ?name ?type_
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeCoverageSummary =
         field_map json "codeCoverageSummary"
@@ -4443,6 +4488,7 @@ module ReportGroup =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       make ?status ?tags ?lastModified ?created ?exportConfig ?type_ ?name
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" ReportGroupStatusType.of_json in
       let tags = field_map json "tags" TagList.of_json in
@@ -4730,6 +4776,7 @@ module Project =
         ?environment ?cache ?secondaryArtifacts ?artifacts
         ?secondarySourceVersions ?sourceVersion ?secondarySources ?source
         ?description ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceAccessRole =
         field_map json "resourceAccessRole" NonEmptyString.of_json in
@@ -5090,6 +5137,7 @@ module Build =
         ?secondarySources ?source ?phases ?projectName ?resolvedSourceVersion
         ?sourceVersion ?buildStatus ?currentPhase ?endTime ?startTime
         ?buildNumber ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildBatchArn = field_map json "buildBatchArn" String_.of_json in
       let debugSession = field_map json "debugSession" DebugSession.of_json in
@@ -5428,6 +5476,7 @@ module BuildBatch =
         ?artifacts ?secondarySourceVersions ?secondarySources ?source ?phases
         ?projectName ?resolvedSourceVersion ?sourceVersion ?buildBatchStatus
         ?currentPhase ?endTime ?startTime ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let debugSessionEnabled =
         field_map json "debugSessionEnabled" WrapperBoolean.of_json in
@@ -5492,6 +5541,7 @@ module InvalidInputException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input value that was provided is not valid."]
@@ -5503,6 +5553,7 @@ module OAuthProviderException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There was a problem with the underlying OAuth provider."]
@@ -5514,6 +5565,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5526,6 +5578,7 @@ module AccountLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5754,6 +5807,7 @@ module ReportFilter =
       let status =
         (Option.map ~f:ReportStatusType.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" ReportStatusType.of_json in
       make ?status ()
@@ -5948,6 +6002,7 @@ module BuildBatchFilter =
       let status =
         (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" StatusType.of_json in
       make ?status ()
@@ -5961,6 +6016,7 @@ module ResourceAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6028,6 +6084,7 @@ module ReportGroupTrendStats =
       let average =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "average") in
       make ?min ?max ?average ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let min = field_map json "min" String_.of_json in
       let max = field_map json "max" String_.of_json in
@@ -6130,6 +6187,7 @@ module TestCaseFilter =
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       make ?keyword ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyword = field_map json "keyword" String_.of_json in
       let status = field_map json "status" String_.of_json in
@@ -6407,6 +6465,7 @@ module UpdateWebhookOutput =
       let webhook =
         (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
       make ?webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhook = field_map json "webhook" Webhook.of_json in
       make ?webhook ()
@@ -6469,6 +6528,7 @@ module UpdateWebhookInput =
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ?buildType ?filterGroups ?rotateSecret ?branchFilter ~projectName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildType = field_map json "buildType" WebhookBuildType.of_json in
       let filterGroups = field_map json "filterGroups" FilterGroups.of_json in
@@ -6531,6 +6591,7 @@ module UpdateReportGroupOutput =
       let reportGroup =
         (Option.map ~f:ReportGroup.of_xml) (Xml.child xml_arg0 "reportGroup") in
       make ?reportGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportGroup = field_map json "reportGroup" ReportGroup.of_json in
       make ?reportGroup ()
@@ -6567,6 +6628,7 @@ module UpdateReportGroupInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tags ?exportConfig ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let exportConfig =
@@ -6644,6 +6706,7 @@ module UpdateProjectVisibilityOutput =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "projectArn") in
       make ?projectVisibility ?publicProjectAlias ?projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectVisibility =
         field_map json "projectVisibility" ProjectVisibilityType.of_json in
@@ -6688,6 +6751,7 @@ module UpdateProjectVisibilityInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ?resourceAccessRole ~projectVisibility ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceAccessRole =
         field_map json "resourceAccessRole" NonEmptyString.of_json in
@@ -6749,6 +6813,7 @@ module UpdateProjectOutput =
       let project =
         (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "project") in
       make ?project ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let project = field_map json "project" Project.of_json in
       make ?project ()
@@ -6963,6 +7028,7 @@ module UpdateProjectInput =
         ?queuedTimeoutInMinutes ?timeoutInMinutes ?serviceRole ?environment
         ?cache ?secondaryArtifacts ?artifacts ?secondarySourceVersions
         ?sourceVersion ?secondarySources ?source ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let concurrentBuildLimit =
         field_map json "concurrentBuildLimit" WrapperInt.of_json in
@@ -7053,6 +7119,7 @@ module StopBuildOutput =
     let of_xml xml_arg0 =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "build") in
       make ?build ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let build = field_map json "build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
@@ -7071,6 +7138,7 @@ module StopBuildInput =
       let id =
         NonEmptyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" NonEmptyString.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -7124,6 +7192,7 @@ module StopBuildBatchOutput =
       let buildBatch =
         (Option.map ~f:BuildBatch.of_xml) (Xml.child xml_arg0 "buildBatch") in
       make ?buildBatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildBatch = field_map json "buildBatch" BuildBatch.of_json in
       make ?buildBatch ()
@@ -7144,6 +7213,7 @@ module StopBuildBatchInput =
       let id =
         NonEmptyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" NonEmptyString.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -7208,6 +7278,7 @@ module StartBuildOutput =
     let of_xml xml_arg0 =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "build") in
       make ?build ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let build = field_map json "build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
@@ -7565,6 +7636,7 @@ module StartBuildInput =
         ?secondaryArtifactsOverride ?artifactsOverride ?sourceVersion
         ?secondarySourcesVersionOverride ?secondarySourcesOverride
         ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let debugSessionEnabled =
         field_map json "debugSessionEnabled" WrapperBoolean.of_json in
@@ -7699,6 +7771,7 @@ module StartBuildBatchOutput =
       let buildBatch =
         (Option.map ~f:BuildBatch.of_xml) (Xml.child xml_arg0 "buildBatch") in
       make ?buildBatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildBatch = field_map json "buildBatch" BuildBatch.of_json in
       make ?buildBatch ()
@@ -8058,6 +8131,7 @@ module StartBuildBatchInput =
         ?secondaryArtifactsOverride ?artifactsOverride ?sourceVersion
         ?secondarySourcesVersionOverride ?secondarySourcesOverride
         ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let debugSessionEnabled =
         field_map json "debugSessionEnabled" WrapperBoolean.of_json in
@@ -8200,6 +8274,7 @@ module RetryBuildOutput =
     let of_xml xml_arg0 =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "build") in
       make ?build ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let build = field_map json "build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
@@ -8228,6 +8303,7 @@ module RetryBuildInput =
       let id =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
       make ?idempotencyToken ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "idempotencyToken" String_.of_json in
@@ -8284,6 +8360,7 @@ module RetryBuildBatchOutput =
       let buildBatch =
         (Option.map ~f:BuildBatch.of_xml) (Xml.child xml_arg0 "buildBatch") in
       make ?buildBatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildBatch = field_map json "buildBatch" BuildBatch.of_json in
       make ?buildBatch ()
@@ -8323,6 +8400,7 @@ module RetryBuildBatchInput =
       let id =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
       make ?retryType ?idempotencyToken ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryType = field_map json "retryType" RetryBuildBatchType.of_json in
       let idempotencyToken =
@@ -8386,6 +8464,7 @@ module PutResourcePolicyOutput =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "resourceArn") in
       make ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "resourceArn" NonEmptyString.of_json in
       make ?resourceArn ()
@@ -8417,6 +8496,7 @@ module PutResourcePolicyInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~resourceArn ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" NonEmptyString.of_json in
@@ -8471,6 +8551,7 @@ module ListSourceCredentialsOutput =
         (Option.map ~f:SourceCredentialsInfos.of_xml)
           (Xml.child xml_arg0 "sourceCredentialsInfos") in
       make ?sourceCredentialsInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceCredentialsInfos =
         field_map json "sourceCredentialsInfos"
@@ -8486,6 +8567,7 @@ module ListSourceCredentialsInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of SourceCredentialsInfo objects."]
@@ -8541,6 +8623,7 @@ module ListSharedReportGroupsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reportGroups ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportGroups =
         field_map json "reportGroups" ReportGroupArns.of_json in
@@ -8589,6 +8672,7 @@ module ListSharedReportGroupsInput =
       let sortOrder =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?maxResults ?nextToken ?sortBy ?sortOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" PageSize.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -8647,6 +8731,7 @@ module ListSharedProjectsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?projects ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projects = field_map json "projects" ProjectArns.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -8695,6 +8780,7 @@ module ListSharedProjectsInput =
         (Option.map ~f:SharedResourceSortByType.of_xml)
           (Xml.child xml_arg0 "sortBy") in
       make ?nextToken ?maxResults ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NonEmptyString.of_json in
       let maxResults = field_map json "maxResults" PageSize.of_json in
@@ -8753,6 +8839,7 @@ module ListReportsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reports ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reports = field_map json "reports" ReportArns.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -8798,6 +8885,7 @@ module ListReportsInput =
       let sortOrder =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?filter ?maxResults ?nextToken ?sortOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "filter" ReportFilter.of_json in
       let maxResults = field_map json "maxResults" PageSize.of_json in
@@ -8863,6 +8951,7 @@ module ListReportsForReportGroupOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reports ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reports = field_map json "reports" ReportArns.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -8918,6 +9007,7 @@ module ListReportsForReportGroupInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportGroupArn") in
       make ?filter ?maxResults ?sortOrder ?nextToken ~reportGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "filter" ReportFilter.of_json in
       let maxResults = field_map json "maxResults" PageSize.of_json in
@@ -8981,6 +9071,7 @@ module ListReportGroupsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reportGroups ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportGroups =
         field_map json "reportGroups" ReportGroupArns.of_json in
@@ -9028,6 +9119,7 @@ module ListReportGroupsInput =
       let sortOrder =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?maxResults ?nextToken ?sortBy ?sortOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" PageSize.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -9086,6 +9178,7 @@ module ListProjectsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?projects ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projects = field_map json "projects" ProjectNames.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -9125,6 +9218,7 @@ module ListProjectsInput =
         (Option.map ~f:ProjectSortByType.of_xml)
           (Xml.child xml_arg0 "sortBy") in
       make ?nextToken ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NonEmptyString.of_json in
       let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
@@ -9169,6 +9263,7 @@ module ListCuratedEnvironmentImagesOutput =
         (Option.map ~f:EnvironmentPlatforms.of_xml)
           (Xml.child xml_arg0 "platforms") in
       make ?platforms ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platforms = field_map json "platforms" EnvironmentPlatforms.of_json in
       make ?platforms ()
@@ -9183,6 +9278,7 @@ module ListCuratedEnvironmentImagesInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9235,6 +9331,7 @@ module ListBuildsOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let ids = (Option.map ~f:BuildIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let ids = field_map json "ids" BuildIds.of_json in
@@ -9265,6 +9362,7 @@ module ListBuildsInput =
       let sortOrder =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?nextToken ?sortOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
@@ -9329,6 +9427,7 @@ module ListBuildsForProjectOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let ids = (Option.map ~f:BuildIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let ids = field_map json "ids" BuildIds.of_json in
@@ -9367,6 +9466,7 @@ module ListBuildsForProjectInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ?nextToken ?sortOrder ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
@@ -9425,6 +9525,7 @@ module ListBuildBatchesOutput =
       let ids =
         (Option.map ~f:BuildBatchIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let ids = field_map json "ids" BuildBatchIds.of_json in
@@ -9469,6 +9570,7 @@ module ListBuildBatchesInput =
       let filter =
         (Option.map ~f:BuildBatchFilter.of_xml) (Xml.child xml_arg0 "filter") in
       make ?nextToken ?sortOrder ?maxResults ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
@@ -9536,6 +9638,7 @@ module ListBuildBatchesForProjectOutput =
       let ids =
         (Option.map ~f:BuildBatchIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let ids = field_map json "ids" BuildBatchIds.of_json in
@@ -9589,6 +9692,7 @@ module ListBuildBatchesForProjectInput =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "projectName") in
       make ?nextToken ?sortOrder ?maxResults ?filter ?projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
@@ -9643,6 +9747,7 @@ module InvalidateProjectCacheOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resets the cache for a project."]
@@ -9664,6 +9769,7 @@ module InvalidateProjectCacheInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectName =
         field_map_exn json "projectName" NonEmptyString.of_json in
@@ -9734,6 +9840,7 @@ module ImportSourceCredentialsOutput =
       let arn =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" NonEmptyString.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -9789,6 +9896,7 @@ module ImportSourceCredentialsInput =
       let username =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "username") in
       make ?shouldOverwrite ~authType ~serverType ~token ?username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shouldOverwrite =
         field_map json "shouldOverwrite" WrapperBoolean.of_json in
@@ -9852,6 +9960,7 @@ module GetResourcePolicyOutput =
       let policy =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" NonEmptyString.of_json in
       make ?policy ()
@@ -9876,6 +9985,7 @@ module GetResourcePolicyInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" NonEmptyString.of_json in
@@ -9942,6 +10052,7 @@ module GetReportGroupTrendOutput =
         (Option.map ~f:ReportGroupTrendStats.of_xml)
           (Xml.child xml_arg0 "stats") in
       make ?rawData ?stats ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rawData =
         field_map json "rawData" ReportGroupTrendRawDataList.of_json in
@@ -9986,6 +10097,7 @@ module GetReportGroupTrendInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportGroupArn") in
       make ~trendField ?numOfReports ~reportGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trendField =
         field_map_exn json "trendField" ReportGroupTrendFieldType.of_json in
@@ -10054,6 +10166,7 @@ module DescribeTestCasesOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?testCases ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testCases = field_map json "testCases" TestCases.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -10099,6 +10212,7 @@ module DescribeTestCasesInput =
       let reportArn =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportArn") in
       make ?filter ?maxResults ?nextToken ~reportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "filter" TestCaseFilter.of_json in
       let maxResults = field_map json "maxResults" PageSize.of_json in
@@ -10159,6 +10273,7 @@ module DescribeCodeCoveragesOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?codeCoverages ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeCoverages =
         field_map json "codeCoverages" CodeCoverages.of_json in
@@ -10240,6 +10355,7 @@ module DescribeCodeCoveragesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "reportArn") in
       make ?maxLineCoveragePercentage ?minLineCoveragePercentage ?sortBy
         ?sortOrder ?maxResults ?nextToken ~reportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxLineCoveragePercentage =
         field_map json "maxLineCoveragePercentage" Percentage.of_json in
@@ -10308,6 +10424,7 @@ module DeleteWebhookOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10329,6 +10446,7 @@ module DeleteWebhookInput =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectName = field_map_exn json "projectName" ProjectName.of_json in
       make ~projectName ()
@@ -10386,6 +10504,7 @@ module DeleteSourceCredentialsOutput =
       let arn =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" NonEmptyString.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -10407,6 +10526,7 @@ module DeleteSourceCredentialsInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" NonEmptyString.of_json in
       make ~arn ()
@@ -10448,6 +10568,7 @@ module DeleteResourcePolicyOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10470,6 +10591,7 @@ module DeleteResourcePolicyInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" NonEmptyString.of_json in
@@ -10512,6 +10634,7 @@ module DeleteReportOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a report."]
@@ -10530,6 +10653,7 @@ module DeleteReportInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" NonEmptyString.of_json in
       make ~arn ()
@@ -10570,6 +10694,7 @@ module DeleteReportGroupOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10597,6 +10722,7 @@ module DeleteReportGroupInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?deleteReports ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteReports = field_map json "deleteReports" Boolean.of_json in
       let arn = field_map_exn json "arn" NonEmptyString.of_json in
@@ -10639,6 +10765,7 @@ module DeleteProjectOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10658,6 +10785,7 @@ module DeleteProjectInput =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" NonEmptyString.of_json in
       make ~name ()
@@ -10722,6 +10850,7 @@ module DeleteBuildBatchOutput =
       let statusCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusCode") in
       make ?buildsNotDeleted ?buildsDeleted ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildsNotDeleted =
         field_map json "buildsNotDeleted" BuildsNotDeleted.of_json in
@@ -10745,6 +10874,7 @@ module DeleteBuildBatchInput =
       let id =
         NonEmptyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" NonEmptyString.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -10821,6 +10951,7 @@ module CreateWebhookOutput =
       let webhook =
         (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
       make ?webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhook = field_map json "webhook" Webhook.of_json in
       make ?webhook ()
@@ -10868,6 +10999,7 @@ module CreateWebhookInput =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ?buildType ?filterGroups ?branchFilter ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildType = field_map json "buildType" WebhookBuildType.of_json in
       let filterGroups = field_map json "filterGroups" FilterGroups.of_json in
@@ -10941,6 +11073,7 @@ module CreateReportGroupOutput =
       let reportGroup =
         (Option.map ~f:ReportGroup.of_xml) (Xml.child xml_arg0 "reportGroup") in
       make ?reportGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportGroup = field_map json "reportGroup" ReportGroup.of_json in
       make ?reportGroup ()
@@ -10982,6 +11115,7 @@ module CreateReportGroupInput =
         ReportGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~exportConfig ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let exportConfig =
@@ -11056,6 +11190,7 @@ module CreateProjectOutput =
       let project =
         (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "project") in
       make ?project ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let project = field_map json "project" Project.of_json in
       make ?project ()
@@ -11269,6 +11404,7 @@ module CreateProjectInput =
         ?queuedTimeoutInMinutes ?timeoutInMinutes ~serviceRole ~environment
         ?cache ?secondaryArtifacts ~artifacts ?secondarySourceVersions
         ?sourceVersion ?secondarySources ~source ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let concurrentBuildLimit =
         field_map json "concurrentBuildLimit" WrapperInt.of_json in
@@ -11364,6 +11500,7 @@ module BatchGetReportsOutput =
       let reports =
         (Option.map ~f:Reports.of_xml) (Xml.child xml_arg0 "reports") in
       make ?reportsNotFound ?reports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportsNotFound =
         field_map json "reportsNotFound" ReportArns.of_json in
@@ -11389,6 +11526,7 @@ module BatchGetReportsInput =
         ReportArns.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportArns") in
       make ~reportArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportArns = field_map_exn json "reportArns" ReportArns.of_json in
       make ~reportArns ()
@@ -11449,6 +11587,7 @@ module BatchGetReportGroupsOutput =
         (Option.map ~f:ReportGroups.of_xml)
           (Xml.child xml_arg0 "reportGroups") in
       make ?reportGroupsNotFound ?reportGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportGroupsNotFound =
         field_map json "reportGroupsNotFound" ReportGroupArns.of_json in
@@ -11475,6 +11614,7 @@ module BatchGetReportGroupsInput =
         ReportGroupArns.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportGroupArns") in
       make ~reportGroupArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportGroupArns =
         field_map_exn json "reportGroupArns" ReportGroupArns.of_json in
@@ -11532,6 +11672,7 @@ module BatchGetProjectsOutput =
       let projects =
         (Option.map ~f:Projects.of_xml) (Xml.child xml_arg0 "projects") in
       make ?projectsNotFound ?projects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectsNotFound =
         field_map json "projectsNotFound" ProjectNames.of_json in
@@ -11556,6 +11697,7 @@ module BatchGetProjectsInput =
         ProjectNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "names") in
       make ~names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let names = field_map_exn json "names" ProjectNames.of_json in
       make ~names ()
@@ -11611,6 +11753,7 @@ module BatchGetBuildsOutput =
       let builds =
         (Option.map ~f:Builds.of_xml) (Xml.child xml_arg0 "builds") in
       make ?buildsNotFound ?builds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildsNotFound = field_map json "buildsNotFound" BuildIds.of_json in
       let builds = field_map json "builds" Builds.of_json in
@@ -11630,6 +11773,7 @@ module BatchGetBuildsInput =
       let ids =
         BuildIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
       make ~ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ids = field_map_exn json "ids" BuildIds.of_json in make ~ids ()
     let to_json v = composed_to_json to_value v
@@ -11689,6 +11833,7 @@ module BatchGetBuildBatchesOutput =
         (Option.map ~f:BuildBatches.of_xml)
           (Xml.child xml_arg0 "buildBatches") in
       make ?buildBatchesNotFound ?buildBatches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildBatchesNotFound =
         field_map json "buildBatchesNotFound" BuildBatchIds.of_json in
@@ -11712,6 +11857,7 @@ module BatchGetBuildBatchesInput =
       let ids =
         BuildBatchIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
       make ~ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ids = field_map_exn json "ids" BuildBatchIds.of_json in
       make ~ids ()
@@ -11768,6 +11914,7 @@ module BatchDeleteBuildsOutput =
       let buildsDeleted =
         (Option.map ~f:BuildIds.of_xml) (Xml.child xml_arg0 "buildsDeleted") in
       make ?buildsNotDeleted ?buildsDeleted ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildsNotDeleted =
         field_map json "buildsNotDeleted" BuildsNotDeleted.of_json in
@@ -11789,6 +11936,7 @@ module BatchDeleteBuildsInput =
       let ids =
         BuildIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
       make ~ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ids = field_map_exn json "ids" BuildIds.of_json in make ~ids ()
     let to_json v = composed_to_json to_value v

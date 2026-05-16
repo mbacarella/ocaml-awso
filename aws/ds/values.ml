@@ -469,6 +469,7 @@ module DirectoryVpcSettingsDescription =
         (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       make ?availabilityZones ?securityGroupId ?subnetIds ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availabilityZones =
         field_map json "AvailabilityZones" AvailabilityZones.of_json in
@@ -589,6 +590,7 @@ module RadiusSettings =
       make ?useSameUsername ?displayLabel ?authenticationProtocol
         ?sharedSecret ?radiusRetries ?radiusTimeout ?radiusPort
         ?radiusServers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useSameUsername =
         field_map json "UseSameUsername" UseSameUsername.of_json in
@@ -1555,6 +1557,7 @@ module DirectoryVpcSettings =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ~subnetIds ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
@@ -1881,6 +1884,7 @@ module DirectoryConnectSettingsDescription =
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       make ?connectIps ?availabilityZones ?securityGroupId ?customerUserName
         ?subnetIds ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectIps = field_map json "ConnectIps" IpAddrs.of_json in
       let availabilityZones =
@@ -2069,6 +2073,7 @@ module OwnerDirectoryDescription =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?radiusStatus ?radiusSettings ?vpcSettings ?dnsIpAddrs ?accountId
         ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let radiusStatus = field_map json "RadiusStatus" RadiusStatus.of_json in
       let radiusSettings =
@@ -2111,6 +2116,7 @@ module RegionsInfo =
         (Option.map ~f:RegionName.of_xml)
           (Xml.child xml_arg0 "PrimaryRegion") in
       make ?additionalRegions ?primaryRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalRegions =
         field_map json "AdditionalRegions" AdditionalRegions.of_json in
@@ -2250,6 +2256,7 @@ module Attribute =
       let name =
         (Option.map ~f:AttributeName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" AttributeValue.of_json in
       let name = field_map json "Name" AttributeName.of_json in
@@ -2346,6 +2353,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -2429,6 +2437,7 @@ module SchemaExtensionInfo =
       make ?endDateTime ?startDateTime ?schemaExtensionStatusReason
         ?schemaExtensionStatus ?description ?schemaExtensionId ?directoryId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endDateTime = field_map json "EndDateTime" EndDateTime.of_json in
       let startDateTime =
@@ -2483,6 +2492,7 @@ module LogSubscription =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?subscriptionCreatedDateTime ?logGroupName ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionCreatedDateTime =
         field_map json "SubscriptionCreatedDateTime"
@@ -2555,6 +2565,7 @@ module IpRouteInfo =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?description ?ipRouteStatusReason ?addedDateTime ?ipRouteStatusMsg
         ?cidrIp ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let ipRouteStatusReason =
@@ -2616,6 +2627,7 @@ module CertificateInfo =
         (Option.map ~f:CertificateId.of_xml)
           (Xml.child xml_arg0 "CertificateId") in
       make ?type_ ?expiryDateTime ?state ?commonName ?certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" CertificateType.of_json in
       let expiryDateTime =
@@ -2792,6 +2804,7 @@ module Trust =
       make ?selectiveAuth ?trustStateReason ?stateLastUpdatedDateTime
         ?lastUpdatedDateTime ?createdDateTime ?trustState ?trustDirection
         ?trustType ?remoteDomainName ?trustId ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectiveAuth =
         field_map json "SelectiveAuth" SelectiveAuth.of_json in
@@ -2862,6 +2875,7 @@ module Snapshot =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?startTime ?status ?name ?type_ ?snapshotId ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" StartTime.of_json in
       let status = field_map json "Status" SnapshotStatus.of_json in
@@ -2970,6 +2984,7 @@ module SharedDirectory =
       make ?lastUpdatedDateTime ?createdDateTime ?shareNotes ?shareStatus
         ?sharedDirectoryId ?sharedAccountId ?shareMethod ?ownerDirectoryId
         ?ownerAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedDateTime =
         field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
@@ -3083,6 +3098,7 @@ module RegionDescription =
       make ?lastUpdatedDateTime ?statusLastUpdatedDateTime ?launchTime
         ?desiredNumberOfDomainControllers ?vpcSettings ?status ?regionType
         ?regionName ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedDateTime =
         field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
@@ -3137,6 +3153,7 @@ module LDAPSSettingInfo =
       let lDAPSStatus =
         (Option.map ~f:LDAPSStatus.of_xml) (Xml.child xml_arg0 "LDAPSStatus") in
       make ?lastUpdatedDateTime ?lDAPSStatusReason ?lDAPSStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedDateTime =
         field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
@@ -3192,6 +3209,7 @@ module EventTopic =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?status ?createdDateTime ?topicArn ?topicName ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" TopicStatus.of_json in
       let createdDateTime =
@@ -3301,6 +3319,7 @@ module DomainController =
       make ?statusLastUpdatedDateTime ?launchTime ?statusReason ?status
         ?availabilityZone ?subnetId ?vpcId ?dnsIpAddr ?domainControllerId
         ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusLastUpdatedDateTime =
         field_map json "StatusLastUpdatedDateTime"
@@ -3552,6 +3571,7 @@ module DirectoryDescription =
         ?stageLastUpdatedDateTime ?launchTime ?shareNotes ?shareMethod
         ?shareStatus ?stage ?dnsIpAddrs ?description ?accessUrl ?alias
         ?edition ?size ?shortName ?name ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regionsInfo = field_map json "RegionsInfo" RegionsInfo.of_json in
       let ownerDirectoryDescription =
@@ -3631,6 +3651,7 @@ module ConditionalForwarder =
         (Option.map ~f:RemoteDomainName.of_xml)
           (Xml.child xml_arg0 "RemoteDomainName") in
       make ?replicationScope ?dnsIpAddrs ?remoteDomainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationScope =
         field_map json "ReplicationScope" ReplicationScope.of_json in
@@ -3677,6 +3698,7 @@ module ClientAuthenticationSettingInfo =
         (Option.map ~f:ClientAuthenticationType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?lastUpdatedDateTime ?status ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedDateTime =
         field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
@@ -3727,6 +3749,7 @@ module ClientCertAuthSettings =
       let oCSPUrl =
         (Option.map ~f:OCSPUrl.of_xml) (Xml.child xml_arg0 "OCSPUrl") in
       make ?oCSPUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oCSPUrl = field_map json "OCSPUrl" OCSPUrl.of_json in
       make ?oCSPUrl ()
@@ -3816,6 +3839,7 @@ module IpRoute =
       let cidrIp =
         (Option.map ~f:CidrIp.of_xml) (Xml.child xml_arg0 "CidrIp") in
       make ?description ?cidrIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let cidrIp = field_map json "CidrIp" CidrIp.of_json in
@@ -3842,6 +3866,7 @@ module ClientException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -3867,6 +3892,7 @@ module EntityDoesNotExistException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -3892,6 +3918,7 @@ module InvalidParameterException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -3917,6 +3944,7 @@ module ServiceException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -3942,6 +3970,7 @@ module UnsupportedOperationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -3967,6 +3996,7 @@ module DirectoryUnavailableException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -3993,6 +4023,7 @@ module DomainControllerLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4019,6 +4050,7 @@ module DirectoryNotSharedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4045,6 +4077,7 @@ module InvalidTargetException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4072,6 +4105,7 @@ module UnshareTarget =
       let id =
         TargetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~type_ ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" TargetType.of_json in
       let id = field_map_exn json "Id" TargetId.of_json in make ~type_ ~id ()
@@ -4097,6 +4131,7 @@ module SnapshotLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4154,6 +4189,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4180,6 +4216,7 @@ module DirectoryAlreadySharedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4206,6 +4243,7 @@ module OrganizationsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4232,6 +4270,7 @@ module ShareLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4260,6 +4299,7 @@ module ShareTarget =
       let id =
         TargetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~type_ ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" TargetType.of_json in
       let id = field_map_exn json "Id" TargetId.of_json in make ~type_ ~id ()
@@ -4285,6 +4325,7 @@ module InvalidPasswordException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4311,6 +4352,7 @@ module UserDoesNotExistException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4415,6 +4457,7 @@ module DirectoryDoesNotExistException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4463,6 +4506,7 @@ module CertificateAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4489,6 +4533,7 @@ module CertificateLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4515,6 +4560,7 @@ module InvalidCertificateException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4559,6 +4605,7 @@ module InvalidNextTokenException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4761,6 +4808,7 @@ module SnapshotLimits =
           (Xml.child xml_arg0 "ManualSnapshotsLimit") in
       make ?manualSnapshotsLimitReached ?manualSnapshotsCurrentCount
         ?manualSnapshotsLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let manualSnapshotsLimitReached =
         field_map json "ManualSnapshotsLimitReached"
@@ -4885,6 +4933,7 @@ module DirectoryLimits =
         ?cloudOnlyMicrosoftADLimitReached ?cloudOnlyMicrosoftADCurrentCount
         ?cloudOnlyMicrosoftADLimit ?cloudOnlyDirectoriesLimitReached
         ?cloudOnlyDirectoriesCurrentCount ?cloudOnlyDirectoriesLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectedDirectoriesLimitReached =
         field_map json "ConnectedDirectoriesLimitReached"
@@ -4936,6 +4985,7 @@ module AuthenticationFailedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -4961,6 +5011,7 @@ module InsufficientPermissionsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5005,6 +5056,7 @@ module EntityAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5030,6 +5082,7 @@ module InvalidLDAPSStatusException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5056,6 +5109,7 @@ module NoAvailableCertificateException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5098,6 +5152,7 @@ module InvalidClientAuthStatusException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5582,6 +5637,7 @@ module Certificate =
           (Xml.child xml_arg0 "CertificateId") in
       make ?clientCertAuthSettings ?type_ ?expiryDateTime ?registeredDateTime
         ?commonName ?stateReason ?state ?certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientCertAuthSettings =
         field_map json "ClientCertAuthSettings"
@@ -5621,6 +5677,7 @@ module CertificateDoesNotExistException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5647,6 +5704,7 @@ module CertificateInUseException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5706,6 +5764,7 @@ module DirectoryLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5762,6 +5821,7 @@ module Computer =
       let computerId =
         (Option.map ~f:SID.of_xml) (Xml.child xml_arg0 "ComputerId") in
       make ?computerAttributes ?computerName ?computerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computerAttributes =
         field_map json "ComputerAttributes" Attributes.of_json in
@@ -5851,6 +5911,7 @@ module DirectoryConnectSettings =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ~customerUserName ~customerDnsIps ~subnetIds ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerUserName =
         field_map_exn json "CustomerUserName" UserName.of_json in
@@ -5881,6 +5942,7 @@ module TagLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5906,6 +5968,7 @@ module DirectoryAlreadyInRegionException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5932,6 +5995,7 @@ module RegionLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -5958,6 +6022,7 @@ module IpRouteLimitExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" RequestId.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -6081,6 +6146,7 @@ module VerifyTrustResult =
       let trustId =
         (Option.map ~f:TrustId.of_xml) (Xml.child xml_arg0 "TrustId") in
       make ?trustId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustId = field_map json "TrustId" TrustId.of_json in
       make ?trustId ()
@@ -6102,6 +6168,7 @@ module VerifyTrustRequest =
       let trustId =
         TrustId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrustId") in
       make ~trustId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustId = field_map_exn json "TrustId" TrustId.of_json in
       make ~trustId ()
@@ -6180,6 +6247,7 @@ module UpdateTrustResult =
       let requestId =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       make ?trustId ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustId = field_map json "TrustId" TrustId.of_json in
       let requestId = field_map json "RequestId" RequestId.of_json in
@@ -6210,6 +6278,7 @@ module UpdateTrustRequest =
       let trustId =
         TrustId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrustId") in
       make ?selectiveAuth ~trustId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectiveAuth =
         field_map json "SelectiveAuth" SelectiveAuth.of_json in
@@ -6279,6 +6348,7 @@ module UpdateRadiusResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the UpdateRadius operation."]
@@ -6308,6 +6378,7 @@ module UpdateRadiusRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~radiusSettings ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let radiusSettings =
         field_map_exn json "RadiusSettings" RadiusSettings.of_json in
@@ -6410,6 +6481,7 @@ module UpdateNumberOfDomainControllersResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6441,6 +6513,7 @@ module UpdateNumberOfDomainControllersRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~desiredNumber ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredNumber =
         field_map_exn json "DesiredNumber"
@@ -6533,6 +6606,7 @@ module UpdateConditionalForwarderResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of an UpdateConditionalForwarder request."]
@@ -6572,6 +6646,7 @@ module UpdateConditionalForwarderRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~dnsIpAddrs ~remoteDomainName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsIpAddrs = field_map_exn json "DnsIpAddrs" DnsIpAddrs.of_json in
       let remoteDomainName =
@@ -6662,6 +6737,7 @@ module UnshareDirectoryResult =
         (Option.map ~f:DirectoryId.of_xml)
           (Xml.child xml_arg0 "SharedDirectoryId") in
       make ?sharedDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedDirectoryId =
         field_map json "SharedDirectoryId" DirectoryId.of_json in
@@ -6695,6 +6771,7 @@ module UnshareDirectoryRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~unshareTarget ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unshareTarget =
         field_map_exn json "UnshareTarget" UnshareTarget.of_json in
@@ -6796,6 +6873,7 @@ module StartSchemaExtensionResult =
         (Option.map ~f:SchemaExtensionId.of_xml)
           (Xml.child xml_arg0 "SchemaExtensionId") in
       make ?schemaExtensionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schemaExtensionId =
         field_map json "SchemaExtensionId" SchemaExtensionId.of_json in
@@ -6856,6 +6934,7 @@ module StartSchemaExtensionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~description ~ldifContent ~createSnapshotBeforeSchemaExtension
         ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map_exn json "Description" Description.of_json in
       let ldifContent = field_map_exn json "LdifContent" LdifContent.of_json in
@@ -6998,6 +7077,7 @@ module ShareDirectoryResult =
         (Option.map ~f:DirectoryId.of_xml)
           (Xml.child xml_arg0 "SharedDirectoryId") in
       make ?sharedDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedDirectoryId =
         field_map json "SharedDirectoryId" DirectoryId.of_json in
@@ -7047,6 +7127,7 @@ module ShareDirectoryRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~shareMethod ~shareTarget ?shareNotes ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareMethod = field_map_exn json "ShareMethod" ShareMethod.of_json in
       let shareTarget = field_map_exn json "ShareTarget" ShareTarget.of_json in
@@ -7117,6 +7198,7 @@ module RestoreFromSnapshotResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7138,6 +7220,7 @@ module RestoreFromSnapshotRequest =
         SnapshotId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotId") in
       make ~snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       make ~snapshotId ()
@@ -7236,6 +7319,7 @@ module ResetUserPasswordResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7273,6 +7357,7 @@ module ResetUserPasswordRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~newPassword ~userName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newPassword = field_map_exn json "NewPassword" UserPassword.of_json in
       let userName = field_map_exn json "UserName" CustomerUserName.of_json in
@@ -7342,6 +7427,7 @@ module RemoveTagsFromResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a directory."]
@@ -7368,6 +7454,7 @@ module RemoveTagsFromResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeys ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -7457,6 +7544,7 @@ module RemoveRegionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7479,6 +7567,7 @@ module RemoveRegionRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
@@ -7557,6 +7646,7 @@ module RemoveIpRoutesResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes IP address blocks from a directory."]
@@ -7584,6 +7674,7 @@ module RemoveIpRoutesRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~cidrIps ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidrIps = field_map_exn json "CidrIps" CidrIps.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -7672,6 +7763,7 @@ module RejectSharedDirectoryResult =
         (Option.map ~f:DirectoryId.of_xml)
           (Xml.child xml_arg0 "SharedDirectoryId") in
       make ?sharedDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedDirectoryId =
         field_map json "SharedDirectoryId" DirectoryId.of_json in
@@ -7698,6 +7790,7 @@ module RejectSharedDirectoryRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SharedDirectoryId") in
       make ~sharedDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedDirectoryId =
         field_map_exn json "SharedDirectoryId" DirectoryId.of_json in
@@ -7766,6 +7859,7 @@ module RegisterEventTopicResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a RegisterEventTopic request."]
@@ -7795,6 +7889,7 @@ module RegisterEventTopicRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~topicName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicName = field_map_exn json "TopicName" TopicName.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -7929,6 +8024,7 @@ module RegisterCertificateResult =
         (Option.map ~f:CertificateId.of_xml)
           (Xml.child xml_arg0 "CertificateId") in
       make ?certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateId =
         field_map json "CertificateId" CertificateId.of_json in
@@ -7981,6 +8077,7 @@ module RegisterCertificateRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?clientCertAuthSettings ?type_ ~certificateData ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientCertAuthSettings =
         field_map json "ClientCertAuthSettings"
@@ -8074,6 +8171,7 @@ module ListTagsForResourceResult =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -8107,6 +8205,7 @@ module ListTagsForResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?limit ?nextToken ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8193,6 +8292,7 @@ module ListSchemaExtensionsResult =
         (Option.map ~f:SchemaExtensionsInfo.of_xml)
           (Xml.child xml_arg0 "SchemaExtensionsInfo") in
       make ?nextToken ?schemaExtensionsInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let schemaExtensionsInfo =
@@ -8231,6 +8331,7 @@ module ListSchemaExtensionsRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8316,6 +8417,7 @@ module ListLogSubscriptionsResult =
         (Option.map ~f:LogSubscriptions.of_xml)
           (Xml.child xml_arg0 "LogSubscriptions") in
       make ?nextToken ?logSubscriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let logSubscriptions =
@@ -8351,6 +8453,7 @@ module ListLogSubscriptionsRequest =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8444,6 +8547,7 @@ module ListIpRoutesResult =
         (Option.map ~f:IpRoutesInfo.of_xml)
           (Xml.child xml_arg0 "IpRoutesInfo") in
       make ?nextToken ?ipRoutesInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let ipRoutesInfo = field_map json "IpRoutesInfo" IpRoutesInfo.of_json in
@@ -8482,6 +8586,7 @@ module ListIpRoutesRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8588,6 +8693,7 @@ module ListCertificatesResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?certificatesInfo ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificatesInfo =
         field_map json "CertificatesInfo" CertificatesInfo.of_json in
@@ -8626,6 +8732,7 @@ module ListCertificatesRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PageLimit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8696,6 +8803,7 @@ module GetSnapshotLimitsResult =
         (Option.map ~f:SnapshotLimits.of_xml)
           (Xml.child xml_arg0 "SnapshotLimits") in
       make ?snapshotLimits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotLimits =
         field_map json "SnapshotLimits" SnapshotLimits.of_json in
@@ -8720,6 +8828,7 @@ module GetSnapshotLimitsRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
@@ -8787,6 +8896,7 @@ module GetDirectoryLimitsResult =
         (Option.map ~f:DirectoryLimits.of_xml)
           (Xml.child xml_arg0 "DirectoryLimits") in
       make ?directoryLimits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryLimits =
         field_map json "DirectoryLimits" DirectoryLimits.of_json in
@@ -8802,6 +8912,7 @@ module GetDirectoryLimitsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8881,6 +8992,7 @@ module EnableSsoResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the EnableSso operation."]
@@ -8917,6 +9029,7 @@ module EnableSsoRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?password ?userName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map json "Password" ConnectPassword.of_json in
       let userName = field_map json "UserName" UserName.of_json in
@@ -8996,6 +9109,7 @@ module EnableRadiusResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the EnableRadius operation."]
@@ -9025,6 +9139,7 @@ module EnableRadiusRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~radiusSettings ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let radiusSettings =
         field_map_exn json "RadiusSettings" RadiusSettings.of_json in
@@ -9137,6 +9252,7 @@ module EnableLDAPSResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9164,6 +9280,7 @@ module EnableLDAPSRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" LDAPSType.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -9266,6 +9383,7 @@ module EnableClientAuthenticationResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9294,6 +9412,7 @@ module EnableClientAuthenticationRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" ClientAuthenticationType.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -9376,6 +9495,7 @@ module DisableSsoResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the DisableSso operation."]
@@ -9412,6 +9532,7 @@ module DisableSsoRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?password ?userName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map json "Password" ConnectPassword.of_json in
       let userName = field_map json "UserName" UserName.of_json in
@@ -9471,6 +9592,7 @@ module DisableRadiusResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the DisableRadius operation."]
@@ -9492,6 +9614,7 @@ module DisableRadiusRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
@@ -9591,6 +9714,7 @@ module DisableLDAPSResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9618,6 +9742,7 @@ module DisableLDAPSRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" LDAPSType.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -9709,6 +9834,7 @@ module DisableClientAuthenticationResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9737,6 +9863,7 @@ module DisableClientAuthenticationRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" ClientAuthenticationType.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -9839,6 +9966,7 @@ module DescribeTrustsResult =
       let trusts =
         (Option.map ~f:Trusts.of_xml) (Xml.child xml_arg0 "Trusts") in
       make ?nextToken ?trusts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let trusts = field_map json "Trusts" Trusts.of_json in
@@ -9880,6 +10008,7 @@ module DescribeTrustsRequest =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?trustIds ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9974,6 +10103,7 @@ module DescribeSnapshotsResult =
       let snapshots =
         (Option.map ~f:Snapshots.of_xml) (Xml.child xml_arg0 "Snapshots") in
       make ?nextToken ?snapshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let snapshots = field_map json "Snapshots" Snapshots.of_json in
@@ -10016,6 +10146,7 @@ module DescribeSnapshotsRequest =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?snapshotIds ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10121,6 +10252,7 @@ module DescribeSharedDirectoriesResult =
         (Option.map ~f:SharedDirectories.of_xml)
           (Xml.child xml_arg0 "SharedDirectories") in
       make ?nextToken ?sharedDirectories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let sharedDirectories =
@@ -10171,6 +10303,7 @@ module DescribeSharedDirectoriesRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OwnerDirectoryId") in
       make ?limit ?nextToken ?sharedDirectoryIds ~ownerDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10288,6 +10421,7 @@ module DescribeRegionsResult =
         (Option.map ~f:RegionsDescription.of_xml)
           (Xml.child xml_arg0 "RegionsDescription") in
       make ?nextToken ?regionsDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let regionsDescription =
@@ -10326,6 +10460,7 @@ module DescribeRegionsRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?nextToken ?regionName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let regionName = field_map json "RegionName" RegionName.of_json in
@@ -10432,6 +10567,7 @@ module DescribeLDAPSSettingsResult =
         (Option.map ~f:LDAPSSettingsInfo.of_xml)
           (Xml.child xml_arg0 "LDAPSSettingsInfo") in
       make ?nextToken ?lDAPSSettingsInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lDAPSSettingsInfo =
@@ -10478,6 +10614,7 @@ module DescribeLDAPSSettingsRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?type_ ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PageLimit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10556,6 +10693,7 @@ module DescribeEventTopicsResult =
       let eventTopics =
         (Option.map ~f:EventTopics.of_xml) (Xml.child xml_arg0 "EventTopics") in
       make ?eventTopics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventTopics = field_map json "EventTopics" EventTopics.of_json in
       make ?eventTopics ()
@@ -10584,6 +10722,7 @@ module DescribeEventTopicsRequest =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?topicNames ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicNames = field_map json "TopicNames" TopicNames.of_json in
       let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
@@ -10688,6 +10827,7 @@ module DescribeDomainControllersResult =
         (Option.map ~f:DomainControllers.of_xml)
           (Xml.child xml_arg0 "DomainControllers") in
       make ?nextToken ?domainControllers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let domainControllers =
@@ -10736,6 +10876,7 @@ module DescribeDomainControllersRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?domainControllerIds ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10834,6 +10975,7 @@ module DescribeDirectoriesResult =
         (Option.map ~f:DirectoryDescriptions.of_xml)
           (Xml.child xml_arg0 "DirectoryDescriptions") in
       make ?nextToken ?directoryDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let directoryDescriptions =
@@ -10873,6 +11015,7 @@ module DescribeDirectoriesRequest =
         (Option.map ~f:DirectoryIds.of_xml)
           (Xml.child xml_arg0 "DirectoryIds") in
       make ?limit ?nextToken ?directoryIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10975,6 +11118,7 @@ module DescribeConditionalForwardersResult =
         (Option.map ~f:ConditionalForwarders.of_xml)
           (Xml.child xml_arg0 "ConditionalForwarders") in
       make ?conditionalForwarders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conditionalForwarders =
         field_map json "ConditionalForwarders" ConditionalForwarders.of_json in
@@ -11008,6 +11152,7 @@ module DescribeConditionalForwardersRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?remoteDomainNames ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteDomainNames =
         field_map json "RemoteDomainNames" RemoteDomainNames.of_json in
@@ -11116,6 +11261,7 @@ module DescribeClientAuthenticationSettingsResult =
         (Option.map ~f:ClientAuthenticationSettingsInfo.of_xml)
           (Xml.child xml_arg0 "ClientAuthenticationSettingsInfo") in
       make ?nextToken ?clientAuthenticationSettingsInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let clientAuthenticationSettingsInfo =
@@ -11166,6 +11312,7 @@ module DescribeClientAuthenticationSettingsRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?type_ ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PageLimit.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11268,6 +11415,7 @@ module DescribeCertificateResult =
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
       make ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificate = field_map json "Certificate" Certificate.of_json in
       make ?certificate ()
@@ -11298,6 +11446,7 @@ module DescribeCertificateRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~certificateId ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateId =
         field_map_exn json "CertificateId" CertificateId.of_json in
@@ -11367,6 +11516,7 @@ module DeregisterEventTopicResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a DeregisterEventTopic request."]
@@ -11396,6 +11546,7 @@ module DeregisterEventTopicRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~topicName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicName = field_map_exn json "TopicName" TopicName.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -11508,6 +11659,7 @@ module DeregisterCertificateResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11536,6 +11688,7 @@ module DeregisterCertificateRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~certificateId ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateId =
         field_map_exn json "CertificateId" CertificateId.of_json in
@@ -11624,6 +11777,7 @@ module DeleteTrustResult =
       let trustId =
         (Option.map ~f:TrustId.of_xml) (Xml.child xml_arg0 "TrustId") in
       make ?trustId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustId = field_map json "TrustId" TrustId.of_json in
       make ?trustId ()
@@ -11657,6 +11811,7 @@ module DeleteTrustRequest =
       let trustId =
         TrustId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrustId") in
       make ?deleteAssociatedConditionalForwarder ~trustId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteAssociatedConditionalForwarder =
         field_map json "DeleteAssociatedConditionalForwarder"
@@ -11735,6 +11890,7 @@ module DeleteSnapshotResult =
       let snapshotId =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
       make ?snapshotId ()
@@ -11758,6 +11914,7 @@ module DeleteSnapshotRequest =
         SnapshotId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotId") in
       make ~snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
       make ~snapshotId ()
@@ -11826,6 +11983,7 @@ module DeleteLogSubscriptionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified log subscription."]
@@ -11847,6 +12005,7 @@ module DeleteLogSubscriptionRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
@@ -11911,6 +12070,7 @@ module DeleteDirectoryResult =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
@@ -11933,6 +12093,7 @@ module DeleteDirectoryRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
@@ -12021,6 +12182,7 @@ module DeleteConditionalForwarderResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a DeleteConditionalForwarder request."]
@@ -12051,6 +12213,7 @@ module DeleteConditionalForwarderRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~remoteDomainName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteDomainName =
         field_map_exn json "RemoteDomainName" RemoteDomainName.of_json in
@@ -12149,6 +12312,7 @@ module CreateTrustResult =
       let trustId =
         (Option.map ~f:TrustId.of_xml) (Xml.child xml_arg0 "TrustId") in
       make ?trustId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustId = field_map json "TrustId" TrustId.of_json in
       make ?trustId ()
@@ -12231,6 +12395,7 @@ module CreateTrustRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?selectiveAuth ?conditionalForwarderIpAddrs ?trustType
         ~trustDirection ~trustPassword ~remoteDomainName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectiveAuth =
         field_map json "SelectiveAuth" SelectiveAuth.of_json in
@@ -12328,6 +12493,7 @@ module CreateSnapshotResult =
       let snapshotId =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
       make ?snapshotId ()
@@ -12356,6 +12522,7 @@ module CreateSnapshotRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?name ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" SnapshotName.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -12441,6 +12608,7 @@ module CreateMicrosoftADResult =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
@@ -12520,6 +12688,7 @@ module CreateMicrosoftADRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?edition ~vpcSettings ?description ~password ?shortName
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let edition = field_map json "Edition" DirectoryEdition.of_json in
@@ -12619,6 +12788,7 @@ module CreateLogSubscriptionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12649,6 +12819,7 @@ module CreateLogSubscriptionRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~logGroupName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName =
         field_map_exn json "LogGroupName" LogGroupName.of_json in
@@ -12725,6 +12896,7 @@ module CreateDirectoryResult =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
@@ -12800,6 +12972,7 @@ module CreateDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?vpcSettings ~size ?description ~password ?shortName ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let vpcSettings =
@@ -12907,6 +13080,7 @@ module CreateConditionalForwarderResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a CreateConditinalForwarder request."]
@@ -12946,6 +13120,7 @@ module CreateConditionalForwarderRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~dnsIpAddrs ~remoteDomainName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsIpAddrs = field_map_exn json "DnsIpAddrs" DnsIpAddrs.of_json in
       let remoteDomainName =
@@ -13068,6 +13243,7 @@ module CreateComputerResult =
       let computer =
         (Option.map ~f:Computer.of_xml) (Xml.child xml_arg0 "Computer") in
       make ?computer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computer = field_map json "Computer" Computer.of_json in
       make ?computer ()
@@ -13134,6 +13310,7 @@ module CreateComputerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?computerAttributes ?organizationalUnitDistinguishedName ~password
         ~computerName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computerAttributes =
         field_map json "ComputerAttributes" Attributes.of_json in
@@ -13231,6 +13408,7 @@ module CreateAliasResult =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?alias ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map json "Alias" AliasName.of_json in
       let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
@@ -13261,6 +13439,7 @@ module CreateAliasRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~alias ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map_exn json "Alias" AliasName.of_json in
       let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
@@ -13335,6 +13514,7 @@ module ConnectDirectoryResult =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
@@ -13411,6 +13591,7 @@ module ConnectDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~connectSettings ~size ?description ~password ?shortName
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let connectSettings =
@@ -13476,6 +13657,7 @@ module CancelSchemaExtensionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13507,6 +13689,7 @@ module CancelSchemaExtensionRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~schemaExtensionId ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schemaExtensionId =
         field_map_exn json "SchemaExtensionId" SchemaExtensionId.of_json in
@@ -13585,6 +13768,7 @@ module AddTagsToResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13611,6 +13795,7 @@ module AddTagsToResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tags ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -13744,6 +13929,7 @@ module AddRegionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13781,6 +13967,7 @@ module AddRegionRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~vPCSettings ~regionName ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPCSettings =
         field_map_exn json "VPCSettings" DirectoryVpcSettings.of_json in
@@ -13884,6 +14071,7 @@ module AddIpRoutesResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13931,6 +14119,7 @@ module AddIpRoutesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?updateSecurityGroupForDirectoryControllers ~ipRoutes ~directoryId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateSecurityGroupForDirectoryControllers =
         field_map json "UpdateSecurityGroupForDirectoryControllers"
@@ -14024,6 +14213,7 @@ module AcceptSharedDirectoryResult =
         (Option.map ~f:SharedDirectory.of_xml)
           (Xml.child xml_arg0 "SharedDirectory") in
       make ?sharedDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedDirectory =
         field_map json "SharedDirectory" SharedDirectory.of_json in
@@ -14050,6 +14240,7 @@ module AcceptSharedDirectoryRequest =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SharedDirectoryId") in
       make ~sharedDirectoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedDirectoryId =
         field_map_exn json "SharedDirectoryId" DirectoryId.of_json in

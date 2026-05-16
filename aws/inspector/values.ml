@@ -64,6 +64,7 @@ module PrivateIp =
       let privateDnsName =
         (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "privateDnsName") in
       make ?privateIpAddress ?privateDnsName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateIpAddress = field_map json "privateIpAddress" Text.of_json in
       let privateDnsName = field_map json "privateDnsName" Text.of_json in
@@ -89,6 +90,7 @@ module SecurityGroup =
       let groupName =
         (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "groupName") in
       make ?groupId ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupId = field_map json "groupId" Text.of_json in
       let groupName = field_map json "groupName" Text.of_json in
@@ -472,6 +474,7 @@ module NetworkInterface =
       make ?securityGroups ?ipv6Addresses ?publicIp ?publicDnsName
         ?privateIpAddresses ?privateIpAddress ?privateDnsName ?vpcId
         ?subnetId ?networkInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroups =
         field_map json "securityGroups" SecurityGroups.of_json in
@@ -512,6 +515,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -707,6 +711,7 @@ module EventSubscription =
         InspectorEvent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "event") in
       make ~subscribedAt ~event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscribedAt = field_map_exn json "subscribedAt" Timestamp.of_json in
       let event = field_map_exn json "event" InspectorEvent.of_json in
@@ -745,6 +750,7 @@ module TelemetryMetadata =
         MessageType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "messageType") in
       make ?dataSize ~count ~messageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSize = field_map json "dataSize" Long.of_json in
       let count = field_map_exn json "count" Long.of_json in
@@ -773,6 +779,7 @@ module Attribute =
       let key =
         AttributeKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" AttributeValue.of_json in
       let key = field_map_exn json "key" AttributeKey.of_json in
@@ -798,6 +805,7 @@ module Scope =
         (Option.map ~f:ScopeValue.of_xml) (Xml.child xml_arg0 "value") in
       let key = (Option.map ~f:ScopeType.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" ScopeValue.of_json in
       let key = field_map json "key" ScopeType.of_json in make ?value ?key ()
@@ -824,6 +832,7 @@ module ResourceGroupTag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -1083,6 +1092,7 @@ module AssessmentRunNotification =
       let date =
         Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "date") in
       make ?snsPublishStatusCode ?snsTopicArn ~error ?message ~event ~date ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsPublishStatusCode =
         field_map json "snsPublishStatusCode"
@@ -1119,6 +1129,7 @@ module AssessmentRunStateChange =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateChangedAt") in
       make ~state ~stateChangedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map_exn json "state" AssessmentRunState.of_json in
       let stateChangedAt =
@@ -1152,6 +1163,7 @@ module AgentAlreadyRunningAssessment =
       let agentId =
         AgentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
       make ~assessmentRunArn ~agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentRunArn =
         field_map_exn json "assessmentRunArn" Arn.of_json in
@@ -1626,6 +1638,7 @@ module AssetAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "schemaVersion") in
       make ?networkInterfaces ?tags ?ipv4Addresses ?hostname ?amiId
         ?autoScalingGroup ?agentId ~schemaVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaces =
         field_map json "networkInterfaces" NetworkInterfaces.of_json in
@@ -1712,6 +1725,7 @@ module InspectorServiceAttributes =
         NumericVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "schemaVersion") in
       make ?rulesPackageArn ?assessmentRunArn ~schemaVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rulesPackageArn = field_map json "rulesPackageArn" Arn.of_json in
       let assessmentRunArn = field_map json "assessmentRunArn" Arn.of_json in
@@ -2484,6 +2498,7 @@ module FailedItemDetails =
         FailedItemErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "failureCode") in
       make ~retryable ~failureCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryable = field_map_exn json "retryable" Bool.of_json in
       let failureCode =
@@ -2575,6 +2590,7 @@ module AgentPreview =
         (Option.map ~f:Hostname.of_xml) (Xml.child xml_arg0 "hostname") in
       make ?ipv4Address ?kernelVersion ?operatingSystem ?agentVersion
         ?agentHealth ?autoScalingGroup ~agentId ?hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv4Address = field_map json "ipv4Address" Ipv4Address.of_json in
       let kernelVersion =
@@ -2752,6 +2768,7 @@ module TimestampRange =
       let beginDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "beginDate") in
       make ?endDate ?beginDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endDate = field_map json "endDate" Timestamp.of_json in
       let beginDate = field_map json "beginDate" Timestamp.of_json in
@@ -2792,6 +2809,7 @@ module Subscription =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~eventSubscriptions ~topicArn ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscriptions =
         field_map_exn json "eventSubscriptions" EventSubscriptionList.of_json in
@@ -2828,6 +2846,7 @@ module DurationRange =
         (Option.map ~f:AssessmentRunDuration.of_xml)
           (Xml.child xml_arg0 "minSeconds") in
       make ?maxSeconds ?minSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxSeconds =
         field_map json "maxSeconds" AssessmentRunDuration.of_json in
@@ -2961,6 +2980,7 @@ module AssessmentRunAgent =
         AgentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
       make ~telemetryMetadata ?autoScalingGroup ?agentHealthDetails
         ~agentHealthCode ~agentHealth ~assessmentRunArn ~agentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let telemetryMetadata =
         field_map_exn json "telemetryMetadata" TelemetryMetadataList.of_json in
@@ -3081,6 +3101,7 @@ module ExclusionPreview =
       let title =
         Text.of_xml (Xml.child_exn ~context:context_ xml_arg0 "title") in
       make ?attributes ~scopes ~recommendation ~description ~title ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "attributes" AttributeList.of_json in
       let scopes = field_map_exn json "scopes" ScopeList.of_json in
@@ -3159,6 +3180,7 @@ module RulesPackage =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?description ~provider ~version ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" Text.of_json in
       let provider = field_map_exn json "provider" ProviderName.of_json in
@@ -3197,6 +3219,7 @@ module ResourceGroup =
           (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~createdAt ~tags ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
       let tags = field_map_exn json "tags" ResourceGroupTags.of_json in
@@ -3362,6 +3385,7 @@ module Finding =
         ?indicatorOfCompromise ?confidence ?numericSeverity ?severity
         ?recommendation ?description ?title ?id ?assetAttributes ?assetType
         ?serviceAttributes ?service ?schemaVersion ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
       let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
@@ -3447,6 +3471,7 @@ module Exclusion =
         Text.of_xml (Xml.child_exn ~context:context_ xml_arg0 "title") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?attributes ~scopes ~recommendation ~description ~title ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "attributes" AttributeList.of_json in
       let scopes = field_map_exn json "scopes" ScopeList.of_json in
@@ -3556,6 +3581,7 @@ module AssessmentTemplate =
       make ~createdAt ~assessmentRunCount ?lastAssessmentRunArn
         ~userAttributesForFindings ~rulesPackageArns ~durationInSeconds
         ~assessmentTargetArn ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
       let assessmentRunCount =
@@ -3625,6 +3651,7 @@ module AssessmentTarget =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~updatedAt ~createdAt ?resourceGroupArn ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
       let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
@@ -3780,6 +3807,7 @@ module AssessmentRun =
         ~stateChangedAt ?completedAt ?startedAt ~createdAt
         ~userAttributesForFindings ~rulesPackageArns ~durationInSeconds
         ~state ~assessmentTemplateArn ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingCounts =
         field_map_exn json "findingCounts" AssessmentRunFindingCounts.of_json in
@@ -3869,6 +3897,7 @@ module AccessDeniedException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~errorCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let errorCode =
@@ -3913,6 +3942,7 @@ module AgentsAlreadyRunningAssessmentException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~agentsTruncated ~agents ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let agentsTruncated = field_map_exn json "agentsTruncated" Bool.of_json in
@@ -3943,6 +3973,7 @@ module InternalException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let message = field_map_exn json "message" ErrorMessage.of_json in
@@ -3979,6 +4010,7 @@ module InvalidCrossAccountRoleException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~errorCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let errorCode =
@@ -4018,6 +4050,7 @@ module InvalidInputException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~errorCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let errorCode =
@@ -4056,6 +4089,7 @@ module LimitExceededException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~errorCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let errorCode =
@@ -4094,6 +4128,7 @@ module NoSuchEntityException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~errorCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let errorCode =
@@ -4124,6 +4159,7 @@ module ServiceTemporarilyUnavailableException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let message = field_map_exn json "message" ErrorMessage.of_json in
@@ -4437,6 +4473,7 @@ module FindingFilter =
         (Option.map ~f:AgentIdList.of_xml) (Xml.child xml_arg0 "agentIds") in
       make ?creationTimeRange ?userAttributes ?attributes ?rulesPackageArns
         ?severities ?ruleNames ?autoScalingGroups ?agentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTimeRange =
         field_map json "creationTimeRange" TimestampRange.of_json in
@@ -4562,6 +4599,7 @@ module AssessmentTemplateFilter =
       let namePattern =
         (Option.map ~f:NamePattern.of_xml) (Xml.child xml_arg0 "namePattern") in
       make ?rulesPackageArns ?durationRange ?namePattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rulesPackageArns =
         field_map json "rulesPackageArns" FilterRulesPackageArnList.of_json in
@@ -4591,6 +4629,7 @@ module AssessmentTargetFilter =
         (Option.map ~f:NamePattern.of_xml)
           (Xml.child xml_arg0 "assessmentTargetNamePattern") in
       make ?assessmentTargetNamePattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTargetNamePattern =
         field_map json "assessmentTargetNamePattern" NamePattern.of_json in
@@ -4679,6 +4718,7 @@ module AssessmentRunFilter =
         (Option.map ~f:NamePattern.of_xml) (Xml.child xml_arg0 "namePattern") in
       make ?stateChangeTimeRange ?completionTimeRange ?startTimeRange
         ?rulesPackageArns ?durationRange ?states ?namePattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateChangeTimeRange =
         field_map json "stateChangeTimeRange" TimestampRange.of_json in
@@ -4754,6 +4794,7 @@ module AgentFilter =
         AgentHealthList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "agentHealths") in
       make ~agentHealthCodes ~agentHealths ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentHealthCodes =
         field_map_exn json "agentHealthCodes" AgentHealthCodeList.of_json in
@@ -4900,6 +4941,7 @@ module AssessmentRunInProgressException =
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~assessmentRunArnsTruncated ~assessmentRunArns ~message
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let assessmentRunArnsTruncated =
@@ -4960,6 +5002,7 @@ module UnsupportedFeatureException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~canRetry ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canRetry = field_map_exn json "canRetry" Bool.of_json in
       let message = field_map_exn json "message" ErrorMessage.of_json in
@@ -5298,6 +5341,7 @@ module PreviewGenerationInProgressException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -5340,6 +5384,7 @@ module UpdateAssessmentTargetRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
       make ?resourceGroupArn ~assessmentTargetName ~assessmentTargetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroupArn = field_map json "resourceGroupArn" Arn.of_json in
       let assessmentTargetName =
@@ -5383,6 +5428,7 @@ module UnsubscribeFromEventRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~topicArn ~event ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicArn = field_map_exn json "topicArn" Arn.of_json in
       let event = field_map_exn json "event" InspectorEvent.of_json in
@@ -5423,6 +5469,7 @@ module SubscribeToEventRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~topicArn ~event ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicArn = field_map_exn json "topicArn" Arn.of_json in
       let event = field_map_exn json "event" InspectorEvent.of_json in
@@ -5455,6 +5502,7 @@ module StopAssessmentRunRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ?stopAction ~assessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stopAction = field_map json "stopAction" StopAction.of_json in
       let assessmentRunArn =
@@ -5579,6 +5627,7 @@ module StartAssessmentRunResponse =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ~assessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentRunArn =
         field_map_exn json "assessmentRunArn" Arn.of_json in
@@ -5615,6 +5664,7 @@ module StartAssessmentRunRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ?assessmentRunName ~assessmentTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentRunName =
         field_map json "assessmentRunName" AssessmentRunName.of_json in
@@ -5646,6 +5696,7 @@ module SetTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -5737,6 +5788,7 @@ module RemoveAttributesFromFindingsResponse =
         FailedItems.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
       make ~failedItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       make ~failedItems ()
@@ -5771,6 +5823,7 @@ module RemoveAttributesFromFindingsRequest =
         AddRemoveAttributesFindingArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
       make ~attributeKeys ~findingArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeKeys =
         field_map_exn json "attributeKeys" UserAttributeKeyList.of_json in
@@ -5797,6 +5850,7 @@ module RegisterCrossAccountAccessRoleRequest =
       let roleArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" Arn.of_json in
       make ~roleArn ()
@@ -5895,6 +5949,7 @@ module PreviewAgentsResponse =
         AgentPreviewList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "agentPreviews") in
       make ?nextToken ~agentPreviews ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let agentPreviews =
@@ -5939,6 +5994,7 @@ module PreviewAgentsRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "previewAgentsArn") in
       make ?maxResults ?nextToken ~previewAgentsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "maxResults" PreviewAgentsMaxResults.of_json in
@@ -6017,6 +6073,7 @@ module ListTagsForResourceResponse =
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
@@ -6038,6 +6095,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -6115,6 +6173,7 @@ module ListRulesPackagesResponse =
         ListReturnedArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "rulesPackageArns") in
       make ?nextToken ~rulesPackageArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let rulesPackageArns =
@@ -6147,6 +6206,7 @@ module ListRulesPackagesRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -6233,6 +6293,7 @@ module ListFindingsResponse =
         ListReturnedArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
       make ?nextToken ~findingArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let findingArns =
@@ -6283,6 +6344,7 @@ module ListFindingsRequest =
         (Option.map ~f:ListParentArnList.of_xml)
           (Xml.child xml_arg0 "assessmentRunArns") in
       make ?maxResults ?nextToken ?filter ?assessmentRunArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -6373,6 +6435,7 @@ module ListExclusionsResponse =
         ListReturnedArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "exclusionArns") in
       make ?nextToken ~exclusionArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let exclusionArns =
@@ -6416,6 +6479,7 @@ module ListExclusionsRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ?maxResults ?nextToken ~assessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -6505,6 +6569,7 @@ module ListEventSubscriptionsResponse =
         SubscriptionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "subscriptions") in
       make ?nextToken ~subscriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let subscriptions =
@@ -6547,6 +6612,7 @@ module ListEventSubscriptionsRequest =
       let resourceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "maxResults" ListEventSubscriptionsMaxResults.of_json in
@@ -6638,6 +6704,7 @@ module ListAssessmentTemplatesResponse =
         ListReturnedArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArns") in
       make ?nextToken ~assessmentTemplateArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let assessmentTemplateArns =
@@ -6691,6 +6758,7 @@ module ListAssessmentTemplatesRequest =
         (Option.map ~f:ListParentArnList.of_xml)
           (Xml.child xml_arg0 "assessmentTargetArns") in
       make ?maxResults ?nextToken ?filter ?assessmentTargetArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -6774,6 +6842,7 @@ module ListAssessmentTargetsResponse =
         ListReturnedArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArns") in
       make ?nextToken ~assessmentTargetArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let assessmentTargetArns =
@@ -6815,6 +6884,7 @@ module ListAssessmentTargetsRequest =
         (Option.map ~f:AssessmentTargetFilter.of_xml)
           (Xml.child xml_arg0 "filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -6904,6 +6974,7 @@ module ListAssessmentRunsResponse =
         ListReturnedArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArns") in
       make ?nextToken ~assessmentRunArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let assessmentRunArns =
@@ -6956,6 +7027,7 @@ module ListAssessmentRunsRequest =
         (Option.map ~f:ListParentArnList.of_xml)
           (Xml.child xml_arg0 "assessmentTemplateArns") in
       make ?maxResults ?nextToken ?filter ?assessmentTemplateArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -7048,6 +7120,7 @@ module ListAssessmentRunAgentsResponse =
         AssessmentRunAgentList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunAgents") in
       make ?nextToken ~assessmentRunAgents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let assessmentRunAgents =
@@ -7099,6 +7172,7 @@ module ListAssessmentRunAgentsRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ?maxResults ?nextToken ?filter ~assessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -7181,6 +7255,7 @@ module GetTelemetryMetadataResponse =
         TelemetryMetadataList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "telemetryMetadata") in
       make ~telemetryMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let telemetryMetadata =
         field_map_exn json "telemetryMetadata" TelemetryMetadataList.of_json in
@@ -7206,6 +7281,7 @@ module GetTelemetryMetadataRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ~assessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentRunArn =
         field_map_exn json "assessmentRunArn" Arn.of_json in
@@ -7303,6 +7379,7 @@ module GetExclusionsPreviewResponse =
         PreviewStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "previewStatus") in
       make ?nextToken ?exclusionPreviews ~previewStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let exclusionPreviews =
@@ -7371,6 +7448,7 @@ module GetExclusionsPreviewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ?locale ?maxResults ?nextToken ~previewToken
         ~assessmentTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locale = field_map json "locale" Locale.of_json in
       let maxResults = field_map json "maxResults" ListMaxResults.of_json in
@@ -7495,6 +7573,7 @@ module GetAssessmentReportResponse =
         ReportStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ?url ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" Url.of_json in
       let status = field_map_exn json "status" ReportStatus.of_json in
@@ -7538,6 +7617,7 @@ module GetAssessmentReportRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ~reportType ~reportFileFormat ~assessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportType = field_map_exn json "reportType" ReportType.of_json in
       let reportFileFormat =
@@ -7610,6 +7690,7 @@ module DescribeRulesPackagesResponse =
         RulesPackageList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "rulesPackages") in
       make ~failedItems ~rulesPackages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       let rulesPackages =
@@ -7644,6 +7725,7 @@ module DescribeRulesPackagesRequest =
         BatchDescribeArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "rulesPackageArns") in
       make ?locale ~rulesPackageArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locale = field_map json "locale" Locale.of_json in
       let rulesPackageArns =
@@ -7714,6 +7796,7 @@ module DescribeResourceGroupsResponse =
         ResourceGroupList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceGroups") in
       make ~failedItems ~resourceGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       let resourceGroups =
@@ -7741,6 +7824,7 @@ module DescribeResourceGroupsRequest =
         BatchDescribeArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceGroupArns") in
       make ~resourceGroupArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroupArns =
         field_map_exn json "resourceGroupArns" BatchDescribeArnList.of_json in
@@ -7808,6 +7892,7 @@ module DescribeFindingsResponse =
         FindingList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findings") in
       make ~failedItems ~findings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       let findings = field_map_exn json "findings" FindingList.of_json in
@@ -7840,6 +7925,7 @@ module DescribeFindingsRequest =
         BatchDescribeArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
       make ?locale ~findingArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locale = field_map json "locale" Locale.of_json in
       let findingArns =
@@ -7909,6 +7995,7 @@ module DescribeExclusionsResponse =
         ExclusionMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "exclusions") in
       make ~failedItems ~exclusions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       let exclusions = field_map_exn json "exclusions" ExclusionMap.of_json in
@@ -7942,6 +8029,7 @@ module DescribeExclusionsRequest =
         BatchDescribeExclusionsArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "exclusionArns") in
       make ?locale ~exclusionArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locale = field_map json "locale" Locale.of_json in
       let exclusionArns =
@@ -8010,6 +8098,7 @@ module DescribeCrossAccountAccessRoleResponse =
       let roleArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~registeredAt ~valid ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registeredAt = field_map_exn json "registeredAt" Timestamp.of_json in
       let valid = field_map_exn json "valid" Bool.of_json in
@@ -8080,6 +8169,7 @@ module DescribeAssessmentTemplatesResponse =
         AssessmentTemplateList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplates") in
       make ~failedItems ~assessmentTemplates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       let assessmentTemplates =
@@ -8105,6 +8195,7 @@ module DescribeAssessmentTemplatesRequest =
         BatchDescribeArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArns") in
       make ~assessmentTemplateArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTemplateArns =
         field_map_exn json "assessmentTemplateArns"
@@ -8175,6 +8266,7 @@ module DescribeAssessmentTargetsResponse =
         AssessmentTargetList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargets") in
       make ~failedItems ~assessmentTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       let assessmentTargets =
@@ -8202,6 +8294,7 @@ module DescribeAssessmentTargetsRequest =
         BatchDescribeArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArns") in
       make ~assessmentTargetArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTargetArns =
         field_map_exn json "assessmentTargetArns"
@@ -8272,6 +8365,7 @@ module DescribeAssessmentRunsResponse =
         AssessmentRunList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRuns") in
       make ~failedItems ~assessmentRuns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       let assessmentRuns =
@@ -8299,6 +8393,7 @@ module DescribeAssessmentRunsRequest =
         BatchDescribeArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArns") in
       make ~assessmentRunArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentRunArns =
         field_map_exn json "assessmentRunArns" BatchDescribeArnList.of_json in
@@ -8325,6 +8420,7 @@ module DeleteAssessmentTemplateRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ~assessmentTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTemplateArn =
         field_map_exn json "assessmentTemplateArn" Arn.of_json in
@@ -8350,6 +8446,7 @@ module DeleteAssessmentTargetRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
       make ~assessmentTargetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTargetArn =
         field_map_exn json "assessmentTargetArn" Arn.of_json in
@@ -8375,6 +8472,7 @@ module DeleteAssessmentRunRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ~assessmentRunArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentRunArn =
         field_map_exn json "assessmentRunArn" Arn.of_json in
@@ -8466,6 +8564,7 @@ module CreateResourceGroupResponse =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceGroupArn") in
       make ~resourceGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroupArn =
         field_map_exn json "resourceGroupArn" Arn.of_json in
@@ -8492,6 +8591,7 @@ module CreateResourceGroupRequest =
         ResourceGroupTags.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceGroupTags") in
       make ~resourceGroupTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroupTags =
         field_map_exn json "resourceGroupTags" ResourceGroupTags.of_json in
@@ -8594,6 +8694,7 @@ module CreateExclusionsPreviewResponse =
       let previewToken =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "previewToken") in
       make ~previewToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let previewToken = field_map_exn json "previewToken" UUID.of_json in
       make ~previewToken ()
@@ -8619,6 +8720,7 @@ module CreateExclusionsPreviewRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ~assessmentTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTemplateArn =
         field_map_exn json "assessmentTemplateArn" Arn.of_json in
@@ -8720,6 +8822,7 @@ module CreateAssessmentTemplateResponse =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ~assessmentTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTemplateArn =
         field_map_exn json "assessmentTemplateArn" Arn.of_json in
@@ -8792,6 +8895,7 @@ module CreateAssessmentTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
       make ?userAttributesForFindings ~rulesPackageArns ~durationInSeconds
         ~assessmentTemplateName ~assessmentTargetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userAttributesForFindings =
         field_map json "userAttributesForFindings" UserAttributeList.of_json in
@@ -8915,6 +9019,7 @@ module CreateAssessmentTargetResponse =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
       make ~assessmentTargetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentTargetArn =
         field_map_exn json "assessmentTargetArn" Arn.of_json in
@@ -8949,6 +9054,7 @@ module CreateAssessmentTargetRequest =
         AssessmentTargetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetName") in
       make ?resourceGroupArn ~assessmentTargetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroupArn = field_map json "resourceGroupArn" Arn.of_json in
       let assessmentTargetName =
@@ -9042,6 +9148,7 @@ module AddAttributesToFindingsResponse =
         FailedItems.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
       make ~failedItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
       make ~failedItems ()
@@ -9075,6 +9182,7 @@ module AddAttributesToFindingsRequest =
         AddRemoveAttributesFindingArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
       make ~attributes ~findingArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map_exn json "attributes" UserAttributeList.of_json in

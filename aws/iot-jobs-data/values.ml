@@ -358,6 +358,7 @@ module JobExecutionSummary =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?executionNumber ?versionNumber ?lastUpdatedAt ?startedAt
         ?queuedAt ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionNumber =
         field_map json "executionNumber" ExecutionNumber.of_json in
@@ -387,6 +388,7 @@ module CertificateValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -407,6 +409,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -426,6 +429,7 @@ module InvalidStateTransitionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -468,6 +472,7 @@ module JobExecutionState =
         (Option.map ~f:JobExecutionStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?versionNumber ?statusDetails ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionNumber =
         field_map json "versionNumber" VersionNumber.of_json in
@@ -491,6 +496,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -511,6 +517,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -536,6 +543,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?payload ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" BinaryBlob.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -706,6 +714,7 @@ module JobExecution =
       make ?jobDocument ?executionNumber ?versionNumber
         ?approximateSecondsBeforeTimedOut ?lastUpdatedAt ?startedAt ?queuedAt
         ?statusDetails ?status ?thingName ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobDocument = field_map json "jobDocument" JobDocument.of_json in
       let executionNumber =
@@ -767,6 +776,7 @@ module TerminalStateException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -889,6 +899,7 @@ module UpdateJobExecutionResponse =
         (Option.map ~f:JobExecutionState.of_xml)
           (Xml.child xml_arg0 "executionState") in
       make ?jobDocument ?executionState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobDocument = field_map json "jobDocument" JobDocument.of_json in
       let executionState =
@@ -997,6 +1008,7 @@ module UpdateJobExecutionRequest =
       make ?executionNumber ?includeJobDocument ?includeJobExecutionState
         ?expectedVersion ?stepTimeoutInMinutes ?statusDetails ~status
         ~thingName ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionNumber =
         field_map json "executionNumber" ExecutionNumber.of_json in
@@ -1099,6 +1111,7 @@ module StartNextPendingJobExecutionResponse =
       let execution =
         (Option.map ~f:JobExecution.of_xml) (Xml.child xml_arg0 "execution") in
       make ?execution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let execution = field_map json "execution" JobExecution.of_json in
       make ?execution ()
@@ -1141,6 +1154,7 @@ module StartNextPendingJobExecutionRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?stepTimeoutInMinutes ?statusDetails ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stepTimeoutInMinutes =
         field_map json "stepTimeoutInMinutes" StepTimeoutInMinutes.of_json in
@@ -1244,6 +1258,7 @@ module GetPendingJobExecutionsResponse =
         (Option.map ~f:JobExecutionSummaryList.of_xml)
           (Xml.child xml_arg0 "inProgressJobs") in
       make ?queuedJobs ?inProgressJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queuedJobs =
         field_map json "queuedJobs" JobExecutionSummaryList.of_json in
@@ -1270,6 +1285,7 @@ module GetPendingJobExecutionsRequest =
         ThingName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thingName = field_map_exn json "thingName" ThingName.of_json in
       make ~thingName ()
@@ -1367,6 +1383,7 @@ module DescribeJobExecutionResponse =
       let execution =
         (Option.map ~f:JobExecution.of_xml) (Xml.child xml_arg0 "execution") in
       make ?execution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let execution = field_map json "execution" JobExecution.of_json in
       make ?execution ()
@@ -1418,6 +1435,7 @@ module DescribeJobExecutionRequest =
         DescribeJobExecutionJobId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ?executionNumber ?includeJobDocument ~thingName ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionNumber =
         field_map json "executionNumber" ExecutionNumber.of_json in

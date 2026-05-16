@@ -74,6 +74,7 @@ module DBSecurityGroupMembership =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBSecurityGroupName") in
       make ?status ?dBSecurityGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let dBSecurityGroupName =
@@ -159,6 +160,7 @@ module OptionSetting =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?isCollection ?isModifiable ?allowedValues ?dataType ?applyType
         ?description ?defaultValue ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isCollection = field_map json "IsCollection" Boolean.of_json in
       let isModifiable = field_map json "IsModifiable" Boolean.of_json in
@@ -197,6 +199,7 @@ module VpcSecurityGroupMembership =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "VpcSecurityGroupId") in
       make ?status ?vpcSecurityGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let vpcSecurityGroupId =
@@ -230,6 +233,7 @@ module MinimumEngineVersionPerAllowedValue =
       let allowedValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AllowedValue") in
       make ?minimumEngineVersion ?allowedValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minimumEngineVersion =
         field_map json "MinimumEngineVersion" String_.of_json in
@@ -291,6 +295,7 @@ module AvailabilityZone =
     let of_xml xml_arg0 =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
@@ -309,6 +314,7 @@ module Outpost =
     let of_xml xml_arg0 =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" String_.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -506,6 +512,7 @@ module DoubleRange =
       let to_ = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "To") in
       let from = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "From") in
       make ?to_ ?from ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let to_ = field_map json "To" Double.of_json in
       let from = field_map json "From" Double.of_json in make ?to_ ?from ()
@@ -533,6 +540,7 @@ module Range =
       let to_ = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "To") in
       let from = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "From") in
       make ?step ?to_ ?from ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let step = field_map json "Step" IntegerOptional.of_json in
       let to_ = field_map json "To" Integer.of_json in
@@ -625,6 +633,7 @@ module Subnet =
           (Xml.child xml_arg0 "SubnetIdentifier") in
       make ?subnetStatus ?subnetOutpost ?subnetAvailabilityZone
         ?subnetIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetStatus = field_map json "SubnetStatus" String_.of_json in
       let subnetOutpost = field_map json "SubnetOutpost" Outpost.of_json in
@@ -680,6 +689,7 @@ module ProcessorFeature =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -750,6 +760,7 @@ module RecurringCharge =
         (Option.map ~f:Double.of_xml)
           (Xml.child xml_arg0 "RecurringChargeAmount") in
       make ?recurringChargeFrequency ?recurringChargeAmount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recurringChargeFrequency =
         field_map json "RecurringChargeFrequency" String_.of_json in
@@ -887,6 +898,7 @@ module PendingMaintenanceAction =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Action") in
       make ?description ?currentApplyDate ?optInStatus ?forcedApplyDate
         ?autoAppliedAfterDate ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let currentApplyDate = field_map json "CurrentApplyDate" TStamp.of_json in
@@ -929,6 +941,7 @@ module AvailableProcessorFeature =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?allowedValues ?defaultValue ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowedValues = field_map json "AllowedValues" String_.of_json in
       let defaultValue = field_map json "DefaultValue" String_.of_json in
@@ -1027,6 +1040,7 @@ module Option_ =
       make ?vpcSecurityGroupMemberships ?dBSecurityGroupMemberships
         ?optionSettings ?optionVersion ?port ?permanent ?persistent
         ?optionDescription ?optionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcSecurityGroupMemberships =
         field_map json "VpcSecurityGroupMemberships"
@@ -1130,6 +1144,7 @@ module OptionGroupOptionSetting =
       make ?minimumEngineVersionPerAllowedValue ?isRequired ?isModifiable
         ?allowedValues ?applyType ?defaultValue ?settingDescription
         ?settingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minimumEngineVersionPerAllowedValue =
         field_map json "MinimumEngineVersionPerAllowedValue"
@@ -1168,6 +1183,7 @@ module OptionVersion =
       let version =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Version") in
       make ?isDefault ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isDefault = field_map json "IsDefault" Boolean.of_json in
       let version = field_map json "Version" String_.of_json in
@@ -1270,6 +1286,7 @@ module GlobalClusterMember =
       let dBClusterArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DBClusterArn") in
       make ?globalWriteForwardingStatus ?isWriter ?readers ?dBClusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalWriteForwardingStatus =
         field_map json "GlobalWriteForwardingStatus"
@@ -1423,6 +1440,7 @@ module UserAuthConfigInfo =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?iAMAuth ?secretArn ?authScheme ?userName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iAMAuth = field_map json "IAMAuth" IAMAuthMode.of_json in
       let secretArn = field_map json "SecretArn" String_.of_json in
@@ -1453,6 +1471,7 @@ module Tag =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let key = field_map json "Key" String_.of_json in make ?value ?key ()
@@ -1508,6 +1527,7 @@ module EC2SecurityGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupId ?eC2SecurityGroupName
         ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2SecurityGroupOwnerId =
         field_map json "EC2SecurityGroupOwnerId" String_.of_json in
@@ -1541,6 +1561,7 @@ module IPRange =
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       make ?cIDRIP ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cIDRIP = field_map json "CIDRIP" String_.of_json in
       let status = field_map json "Status" String_.of_json in
@@ -1567,6 +1588,7 @@ module DBInstanceAutomatedBackupsReplication =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBInstanceAutomatedBackupsArn") in
       make ?dBInstanceAutomatedBackupsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceAutomatedBackupsArn =
         field_map json "DBInstanceAutomatedBackupsArn" String_.of_json in
@@ -1604,6 +1626,7 @@ module DBInstanceRole =
       let roleArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?status ?featureName ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let featureName = field_map json "FeatureName" String_.of_json in
@@ -1648,6 +1671,7 @@ module DBInstanceStatusInfo =
       let statusType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatusType") in
       make ?message ?status ?normal ?statusType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let status = field_map json "Status" String_.of_json in
@@ -1682,6 +1706,7 @@ module DBParameterGroupStatus =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBParameterGroupName") in
       make ?parameterApplyStatus ?dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterApplyStatus =
         field_map json "ParameterApplyStatus" String_.of_json in
@@ -1749,6 +1774,7 @@ module DomainMembership =
       let domain =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?iAMRoleName ?fQDN ?status ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iAMRoleName = field_map json "IAMRoleName" String_.of_json in
       let fQDN = field_map json "FQDN" String_.of_json in
@@ -1782,6 +1808,7 @@ module OptionGroupMembership =
       let optionGroupName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OptionGroupName") in
       make ?status ?optionGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let optionGroupName = field_map json "OptionGroupName" String_.of_json in
@@ -1842,6 +1869,7 @@ module PendingCloudwatchLogsExports =
         (Option.map ~f:LogTypeList.of_xml)
           (Xml.child xml_arg0 "LogTypesToEnable") in
       make ?logTypesToDisable ?logTypesToEnable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logTypesToDisable =
         field_map json "LogTypesToDisable" LogTypeList.of_json in
@@ -1902,6 +1930,7 @@ module CharacterSet =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CharacterSetName") in
       make ?characterSetDescription ?characterSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let characterSetDescription =
         field_map json "CharacterSetDescription" String_.of_json in
@@ -1926,6 +1955,7 @@ module Timezone =
       let timezoneName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TimezoneName") in
       make ?timezoneName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timezoneName = field_map json "TimezoneName" String_.of_json in
       make ?timezoneName ()
@@ -2027,6 +2057,7 @@ module UpgradeTarget =
       make ?supportsBabelfish ?supportsGlobalDatabases ?supportsParallelQuery
         ?supportedEngineModes ?isMajorVersionUpgrade ?autoUpgrade
         ?description ?engineVersion ?engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportsBabelfish =
         field_map json "SupportsBabelfish" BooleanOptional.of_json in
@@ -2100,6 +2131,7 @@ module DBClusterMember =
           (Xml.child xml_arg0 "DBInstanceIdentifier") in
       make ?promotionTier ?dBClusterParameterGroupStatus ?isClusterWriter
         ?dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let promotionTier =
         field_map json "PromotionTier" IntegerOptional.of_json in
@@ -2136,6 +2168,7 @@ module DBClusterOptionGroupStatus =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBClusterOptionGroupName") in
       make ?status ?dBClusterOptionGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let dBClusterOptionGroupName =
@@ -2174,6 +2207,7 @@ module DBClusterRole =
       let roleArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?featureName ?status ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureName = field_map json "FeatureName" String_.of_json in
       let status = field_map json "Status" String_.of_json in
@@ -2251,6 +2285,7 @@ module TargetHealth =
       let state =
         (Option.map ~f:TargetState.of_xml) (Xml.child xml_arg0 "State") in
       make ?description ?reason ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let reason = field_map json "Reason" TargetHealthReason.of_json in
@@ -2650,6 +2685,7 @@ module DBSnapshotAttribute =
       let attributeName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AttributeName") in
       make ?attributeValues ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeValues =
         field_map json "AttributeValues" AttributeValueList.of_json in
@@ -2683,6 +2719,7 @@ module DBClusterSnapshotAttribute =
       let attributeName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AttributeName") in
       make ?attributeValues ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeValues =
         field_map json "AttributeValues" AttributeValueList.of_json in
@@ -2723,6 +2760,7 @@ module CustomAvailabilityZoneNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2735,6 +2773,7 @@ module InstallationMediaAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2754,6 +2793,7 @@ module InstallationMediaFailureCause =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2768,6 +2808,7 @@ module InstallationMediaNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2805,6 +2846,7 @@ module FailoverState =
       let status =
         (Option.map ~f:FailoverStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?toDbClusterArn ?fromDbClusterArn ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let toDbClusterArn = field_map json "ToDbClusterArn" String_.of_json in
       let fromDbClusterArn =
@@ -2848,6 +2890,7 @@ module DBClusterSnapshotNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2860,6 +2903,7 @@ module DBSnapshotNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2872,6 +2916,7 @@ module ExportTaskAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You can't start an export task that's already running."]
@@ -2883,6 +2928,7 @@ module ExportTaskNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The export task doesn't exist."]
@@ -2894,6 +2940,7 @@ module IamRoleMissingPermissionsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2906,6 +2953,7 @@ module IamRoleNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2918,6 +2966,7 @@ module InvalidExportOnlyFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2930,6 +2979,7 @@ module InvalidExportSourceStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2942,6 +2992,7 @@ module InvalidExportTaskStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You can't cancel an export task that has completed."]
@@ -2953,6 +3004,7 @@ module InvalidS3BucketFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2965,6 +3017,7 @@ module KMSKeyNotAccessibleFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3119,6 +3172,7 @@ module ValidStorageOptions =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
       make ?supportsStorageAutoscaling ?iopsToStorageRatio ?provisionedIops
         ?storageSize ?storageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportsStorageAutoscaling =
         field_map json "SupportsStorageAutoscaling" Boolean.of_json in
@@ -3230,6 +3284,7 @@ module Parameter =
       make ?supportedEngineModes ?applyMethod ?minimumEngineVersion
         ?isModifiable ?allowedValues ?dataType ?applyType ?source
         ?description ?parameterValue ?parameterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedEngineModes =
         field_map json "SupportedEngineModes" EngineModeList.of_json in
@@ -3311,6 +3366,7 @@ module ConnectionPoolConfigurationInfo =
           (Xml.child xml_arg0 "MaxConnectionsPercent") in
       make ?initQuery ?sessionPinningFilters ?connectionBorrowTimeout
         ?maxIdleConnectionsPercent ?maxConnectionsPercent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initQuery = field_map json "InitQuery" String_.of_json in
       let sessionPinningFilters =
@@ -3766,6 +3822,7 @@ module DBSubnetGroup =
           (Xml.child xml_arg0 "DBSubnetGroupName") in
       make ?dBSubnetGroupArn ?subnets ?subnetGroupStatus ?vpcId
         ?dBSubnetGroupDescription ?dBSubnetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSubnetGroupArn =
         field_map json "DBSubnetGroupArn" String_.of_json in
@@ -3835,6 +3892,7 @@ module Endpoint =
       let address =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
       make ?hostedZoneId ?port ?address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZoneId = field_map json "HostedZoneId" String_.of_json in
       let port = field_map json "Port" Integer.of_json in
@@ -4046,6 +4104,7 @@ module PendingModifiedValues =
         ?cACertificateIdentifier ?storageType ?dBInstanceIdentifier ?iops
         ?licenseModel ?engineVersion ?multiAZ ?backupRetentionPeriod ?port
         ?masterUserPassword ?allocatedStorage ?dBInstanceClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resumeFullAutomationModeTime =
         field_map json "ResumeFullAutomationModeTime" TStamp.of_json in
@@ -4183,6 +4242,7 @@ module RestoreWindow =
       let earliestTime =
         (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "EarliestTime") in
       make ?latestTime ?earliestTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestTime = field_map json "LatestTime" TStamp.of_json in
       let earliestTime = field_map json "EarliestTime" TStamp.of_json in
@@ -4197,6 +4257,7 @@ module CustomDBEngineVersionAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A CEV with the specified name already exists."]
@@ -4208,6 +4269,7 @@ module CustomDBEngineVersionNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified CEV was not found."]
@@ -4219,6 +4281,7 @@ module CustomDBEngineVersionQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You have exceeded your CEV quota."]
@@ -4254,6 +4317,7 @@ module InvalidCustomDBEngineVersionStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You can't delete the CEV."]
@@ -4414,6 +4478,7 @@ module ClusterPendingModifiedValues =
       make ?engineVersion ?iAMDatabaseAuthenticationEnabled
         ?masterUserPassword ?dBClusterIdentifier
         ?pendingCloudwatchLogsExports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineVersion = field_map json "EngineVersion" String_.of_json in
       let iAMDatabaseAuthenticationEnabled =
@@ -4615,6 +4680,7 @@ module ScalingConfigurationInfo =
           (Xml.child xml_arg0 "MinCapacity") in
       make ?secondsBeforeTimeout ?timeoutAction ?secondsUntilAutoPause
         ?autoPause ?maxCapacity ?minCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secondsBeforeTimeout =
         field_map json "SecondsBeforeTimeout" IntegerOptional.of_json in
@@ -4637,6 +4703,7 @@ module DBClusterEndpointAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4649,6 +4716,7 @@ module DBClusterEndpointNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified custom endpoint doesn't exist."]
@@ -4660,6 +4728,7 @@ module DBClusterEndpointQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4672,6 +4741,7 @@ module DBClusterNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4684,6 +4754,7 @@ module DBInstanceNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4696,6 +4767,7 @@ module InvalidDBClusterEndpointStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4708,6 +4780,7 @@ module InvalidDBClusterStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4720,6 +4793,7 @@ module InvalidDBInstanceStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The DB instance isn't in a valid state."]
@@ -4778,6 +4852,7 @@ module VpnDetails =
       let vpnId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VpnId") in
       make ?vpnState ?vpnName ?vpnPSK ?vpnGatewayIp ?vpnTunnelOriginatorIP
         ?vpnId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnState = field_map json "VpnState" String_.of_json in
       let vpnName = field_map json "VpnName" String_.of_json in
@@ -4837,6 +4912,7 @@ module SourceRegion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?supportsDBInstanceAutomatedBackupsReplication ?status ?endpoint
         ?regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportsDBInstanceAutomatedBackupsReplication =
         field_map json "SupportsDBInstanceAutomatedBackupsReplication"
@@ -4942,6 +5018,7 @@ module ReservedDBInstancesOffering =
       make ?recurringCharges ?multiAZ ?offeringType ?productDescription
         ?currencyCode ?usagePrice ?fixedPrice ?duration ?dBInstanceClass
         ?reservedDBInstancesOfferingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recurringCharges =
         field_map json "RecurringCharges" RecurringChargeList.of_json in
@@ -5105,6 +5182,7 @@ module ReservedDBInstance =
         ?offeringType ?productDescription ?dBInstanceCount ?currencyCode
         ?usagePrice ?fixedPrice ?duration ?startTime ?dBInstanceClass
         ?reservedDBInstancesOfferingId ?reservedDBInstanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let leaseId = field_map json "LeaseId" String_.of_json in
       let reservedDBInstanceArn =
@@ -5214,6 +5292,7 @@ module DBProxyTarget =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TargetArn") in
       make ?targetHealth ?role ?type_ ?port ?rdsResourceId ?trackedClusterId
         ?endpoint ?targetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetHealth = field_map json "TargetHealth" TargetHealth.of_json in
       let role = field_map json "Role" TargetRole.of_json in
@@ -5259,6 +5338,7 @@ module ResourcePendingMaintenanceActions =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ResourceIdentifier") in
       make ?pendingMaintenanceActionDetails ?resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pendingMaintenanceActionDetails =
         field_map json "PendingMaintenanceActionDetails"
@@ -5562,6 +5642,7 @@ module OrderableDBInstanceOption =
         ?readReplicaCapable ?multiAZCapable ?availabilityZones
         ?availabilityZoneGroup ?licenseModel ?dBInstanceClass ?engineVersion
         ?engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportsClusters =
         field_map json "SupportsClusters" Boolean.of_json in
@@ -5711,6 +5792,7 @@ module OptionGroup =
       make ?optionGroupArn ?vpcId ?allowsVpcAndNonVpcInstanceMemberships
         ?options ?majorEngineVersion ?engineName ?optionGroupDescription
         ?optionGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionGroupArn = field_map json "OptionGroupArn" String_.of_json in
       let vpcId = field_map json "VpcId" String_.of_json in
@@ -5888,6 +5970,7 @@ module OptionGroupOption =
         ?optionsConflictsWith ?optionsDependedOn ?defaultPort ?portRequired
         ?minimumRequiredMinorEngineVersion ?majorEngineVersion ?engineName
         ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionGroupOptionVersions =
         field_map json "OptionGroupOptionVersions"
@@ -5992,6 +6075,7 @@ module OptionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "OptionName") in
       make ?optionSettings ?vpcSecurityGroupMemberships
         ?dBSecurityGroupMemberships ?optionVersion ?port ~optionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionSettings =
         field_map json "OptionSettings" OptionSettingsList.of_json in
@@ -6080,6 +6164,7 @@ module UserAuthConfig =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?iAMAuth ?secretArn ?authScheme ?userName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iAMAuth = field_map json "IAMAuth" IAMAuthMode.of_json in
       let secretArn = field_map json "SecretArn" String_.of_json in
@@ -6140,6 +6225,7 @@ module Filter =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "Values" FilterValueList.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -6273,6 +6359,7 @@ module InstallationMedia =
       make ?failureCause ?status ?oSInstallationMediaPath
         ?engineInstallationMediaPath ?engineVersion ?engine
         ?customAvailabilityZoneId ?installationMediaId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureCause =
         field_map json "FailureCause" InstallationMediaFailureCause.of_json in
@@ -6410,6 +6497,7 @@ module GlobalCluster =
         ?storageEncrypted ?databaseName ?engineVersion ?engine ?status
         ?globalClusterArn ?globalClusterResourceId ?globalClusterIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failoverState =
         field_map json "FailoverState" FailoverState.of_json in
@@ -6619,6 +6707,7 @@ module ExportTask =
         ?percentProgress ?status ?kmsKeyId ?iamRoleArn ?s3Prefix ?s3Bucket
         ?taskEndTime ?taskStartTime ?snapshotTime ?exportOnly ?sourceArn
         ?exportTaskIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warningMessage = field_map json "WarningMessage" String_.of_json in
       let failureCause = field_map json "FailureCause" String_.of_json in
@@ -6702,6 +6791,7 @@ module Event =
           (Xml.child xml_arg0 "SourceIdentifier") in
       make ?sourceArn ?date ?eventCategories ?message ?sourceType
         ?sourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceArn = field_map json "SourceArn" String_.of_json in
       let date = field_map json "Date" TStamp.of_json in
@@ -6819,6 +6909,7 @@ module EventSubscription =
       make ?eventSubscriptionArn ?enabled ?eventCategoriesList ?sourceIdsList
         ?sourceType ?subscriptionCreationTime ?status ?snsTopicArn
         ?custSubscriptionId ?customerAwsId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscriptionArn =
         field_map json "EventSubscriptionArn" String_.of_json in
@@ -6864,6 +6955,7 @@ module EventCategoriesMap =
       let sourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?eventCategories ?sourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventCategories =
         field_map json "EventCategories" EventCategoriesList.of_json in
@@ -7003,6 +7095,7 @@ module DBProxyTargetGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DBProxyName") in
       make ?updatedDate ?createdDate ?connectionPoolConfig ?status ?isDefault
         ?targetGroupArn ?targetGroupName ?dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedDate = field_map json "UpdatedDate" TStamp.of_json in
       let createdDate = field_map json "CreatedDate" TStamp.of_json in
@@ -7127,6 +7220,7 @@ module DBProxyEndpoint =
       make ?isDefault ?targetRole ?createdDate ?endpoint ?vpcSubnetIds
         ?vpcSecurityGroupIds ?vpcId ?status ?dBProxyName ?dBProxyEndpointArn
         ?dBProxyEndpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isDefault = field_map json "IsDefault" Boolean.of_json in
       let targetRole =
@@ -7283,6 +7377,7 @@ module DBProxy =
         ?requireTLS ?endpoint ?roleArn ?auth ?vpcSubnetIds
         ?vpcSecurityGroupIds ?vpcId ?engineFamily ?status ?dBProxyArn
         ?dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedDate = field_map json "UpdatedDate" TStamp.of_json in
       let createdDate = field_map json "CreatedDate" TStamp.of_json in
@@ -7336,6 +7431,7 @@ module DescribeDBLogFilesDetails =
       let logFileName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LogFileName") in
       make ?size ?lastWritten ?logFileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let size = field_map json "Size" Long.of_json in
       let lastWritten = field_map json "LastWritten" Long.of_json in
@@ -7630,6 +7726,7 @@ module DBSnapshot =
         ?engineVersion ?masterUsername ?instanceCreateTime ?vpcId
         ?availabilityZone ?port ?status ?allocatedStorage ?engine
         ?snapshotCreateTime ?dBInstanceIdentifier ?dBSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshotTarget = field_map json "SnapshotTarget" String_.of_json in
       let originalSnapshotCreateTime =
@@ -7755,6 +7852,7 @@ module DBSecurityGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OwnerId") in
       make ?dBSecurityGroupArn ?iPRanges ?eC2SecurityGroups ?vpcId
         ?dBSecurityGroupDescription ?dBSecurityGroupName ?ownerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSecurityGroupArn =
         field_map json "DBSecurityGroupArn" String_.of_json in
@@ -7822,6 +7920,7 @@ module DBParameterGroup =
           (Xml.child xml_arg0 "DBParameterGroupName") in
       make ?dBParameterGroupArn ?description ?dBParameterGroupFamily
         ?dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBParameterGroupArn =
         field_map json "DBParameterGroupArn" String_.of_json in
@@ -8684,6 +8783,7 @@ module DBInstance =
         ?allocatedStorage ?endpoint ?dBName ?masterUsername
         ?automaticRestartTime ?dBInstanceStatus ?engine ?dBInstanceClass
         ?dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupTarget = field_map json "BackupTarget" String_.of_json in
       let customIamInstanceProfile =
@@ -9111,6 +9211,7 @@ module DBInstanceAutomatedBackup =
         ?engineVersion ?engine ?masterUsername ?instanceCreateTime ?vpcId
         ?availabilityZone ?port ?status ?allocatedStorage ?restoreWindow
         ?dBInstanceIdentifier ?region ?dbiResourceId ?dBInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupTarget = field_map json "BackupTarget" String_.of_json in
       let dBInstanceAutomatedBackupsReplications =
@@ -9497,6 +9598,7 @@ module DBEngineVersion =
         ?supportedCharacterSets ?defaultCharacterSet
         ?dBEngineVersionDescription ?dBEngineDescription
         ?dBParameterGroupFamily ?engineVersion ?engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportsBabelfish =
         field_map json "SupportsBabelfish" Boolean.of_json in
@@ -9771,6 +9873,7 @@ module DBClusterSnapshot =
         ?status ?allocatedStorage ?engineMode ?engine ?snapshotCreateTime
         ?dBClusterIdentifier ?dBClusterSnapshotIdentifier ?availabilityZones
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       let iAMDatabaseAuthenticationEnabled =
@@ -9864,6 +9967,7 @@ module DBClusterParameterGroup =
           (Xml.child xml_arg0 "DBClusterParameterGroupName") in
       make ?dBClusterParameterGroupArn ?description ?dBParameterGroupFamily
         ?dBClusterParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterParameterGroupArn =
         field_map json "DBClusterParameterGroupArn" String_.of_json in
@@ -10630,6 +10734,7 @@ module DBCluster =
         ?dBClusterParameterGroup ?dBClusterIdentifier ?databaseName
         ?characterSetName ?backupRetentionPeriod ?availabilityZones
         ?allocatedStorage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let performanceInsightsRetentionPeriod =
         field_map json "PerformanceInsightsRetentionPeriod"
@@ -10984,6 +11089,7 @@ module DBClusterEndpoint =
         ?customEndpointType ?endpointType ?status ?endpoint
         ?dBClusterEndpointResourceIdentifier ?dBClusterIdentifier
         ?dBClusterEndpointIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterEndpointArn =
         field_map json "DBClusterEndpointArn" String_.of_json in
@@ -11126,6 +11232,7 @@ module DBClusterBacktrack =
           (Xml.child xml_arg0 "DBClusterIdentifier") in
       make ?status ?backtrackRequestCreationTime ?backtrackedFrom
         ?backtrackTo ?backtrackIdentifier ?dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let backtrackRequestCreationTime =
@@ -11190,6 +11297,7 @@ module CustomAvailabilityZone =
           (Xml.child xml_arg0 "CustomAvailabilityZoneId") in
       make ?vpnDetails ?customAvailabilityZoneStatus
         ?customAvailabilityZoneName ?customAvailabilityZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnDetails = field_map json "VpnDetails" VpnDetails.of_json in
       let customAvailabilityZoneStatus =
@@ -11283,6 +11391,7 @@ module Certificate =
       make ?customerOverrideValidTill ?customerOverride ?certificateArn
         ?validTill ?validFrom ?thumbprint ?certificateType
         ?certificateIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerOverrideValidTill =
         field_map json "CustomerOverrideValidTill" TStamp.of_json in
@@ -11327,6 +11436,7 @@ module AccountQuota =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "AccountQuotaName") in
       make ?max ?used ?accountQuotaName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" Long.of_json in
       let used = field_map json "Used" Long.of_json in
@@ -11344,6 +11454,7 @@ module DBProxyNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11356,6 +11467,7 @@ module DBProxyTargetGroupNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11368,6 +11480,7 @@ module DBSnapshotAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11380,6 +11493,7 @@ module SnapshotQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11392,6 +11506,7 @@ module ResourceNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource ID was not found."]
@@ -11403,6 +11518,7 @@ module AuthorizationNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11415,6 +11531,7 @@ module DBSubnetGroupDoesNotCoverEnoughAZs =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11427,6 +11544,7 @@ module DBSubnetGroupNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11439,6 +11557,7 @@ module InsufficientDBInstanceCapacityFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11451,6 +11570,7 @@ module InvalidSubnet =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11463,6 +11583,7 @@ module InvalidVPCNetworkStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11475,6 +11596,7 @@ module DBInstanceAutomatedBackupQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11487,6 +11609,7 @@ module StorageTypeNotSupportedFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11523,6 +11646,7 @@ module DBSecurityGroupNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11535,6 +11659,7 @@ module InvalidDBSecurityGroupStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11547,6 +11672,7 @@ module BackupPolicyNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -11558,6 +11684,7 @@ module DBInstanceAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11570,6 +11697,7 @@ module DBInstanceAutomatedBackupNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No automated backup for this DB instance was found."]
@@ -11581,6 +11709,7 @@ module DBParameterGroupNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11593,6 +11722,7 @@ module DomainNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11605,6 +11735,7 @@ module InstanceQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11617,6 +11748,7 @@ module InvalidRestoreFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cannot restore from VPC backup to non-VPC DB instance."]
@@ -11628,6 +11760,7 @@ module OptionGroupNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified option group could not be found."]
@@ -11639,6 +11772,7 @@ module PointInTimeRestoreNotEnabledFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11651,6 +11785,7 @@ module ProvisionedIopsNotAvailableInAZFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11663,6 +11798,7 @@ module StorageQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11675,6 +11811,7 @@ module InvalidDBSnapshotStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The state of the DB snapshot doesn't allow deletion."]
@@ -11686,6 +11823,7 @@ module DBClusterAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11698,6 +11836,7 @@ module DBClusterParameterGroupNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11710,6 +11849,7 @@ module DBClusterQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11722,6 +11862,7 @@ module InsufficientDBClusterCapacityFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11734,6 +11875,7 @@ module InsufficientStorageClusterCapacityFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11746,6 +11888,7 @@ module InvalidDBClusterSnapshotStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11820,6 +11963,7 @@ module ScalingConfiguration =
           (Xml.child xml_arg0 "MinCapacity") in
       make ?secondsBeforeTimeout ?timeoutAction ?secondsUntilAutoPause
         ?autoPause ?maxCapacity ?minCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secondsBeforeTimeout =
         field_map json "SecondsBeforeTimeout" IntegerOptional.of_json in
@@ -11842,6 +11986,7 @@ module InvalidDBSubnetGroupStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11880,6 +12025,7 @@ module ReservedDBInstancesOfferingNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specified offering does not exist."]
@@ -11916,6 +12062,7 @@ module ReservedDBInstanceNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified reserved DB Instance not found."]
@@ -11950,6 +12097,7 @@ module SourceNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested source could not be found."]
@@ -11961,6 +12109,7 @@ module SubscriptionNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The subscription name does not exist."]
@@ -11972,6 +12121,7 @@ module GlobalClusterNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11984,6 +12134,7 @@ module InvalidGlobalClusterStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11996,6 +12147,7 @@ module DBProxyTargetAlreadyRegisteredFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12008,6 +12160,7 @@ module InsufficientAvailableIPsInSubnetFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12020,6 +12173,7 @@ module InvalidDBProxyStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12056,6 +12210,7 @@ module ReservedDBInstanceAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12068,6 +12223,7 @@ module ReservedDBInstanceQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request would exceed the user's DB Instance quota."]
@@ -12181,6 +12337,7 @@ module InvalidOptionGroupStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The option group isn't in the available state."]
@@ -12242,6 +12399,7 @@ module EventSubscriptionQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12254,6 +12412,7 @@ module SNSInvalidTopicFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12266,6 +12425,7 @@ module SNSNoAuthorizationFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12278,6 +12438,7 @@ module SNSTopicArnNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The SNS topic ARN does not exist."]
@@ -12289,6 +12450,7 @@ module SubscriptionCategoryNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The supplied category does not exist."]
@@ -12300,6 +12462,7 @@ module DBSubnetQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12312,6 +12475,7 @@ module SubnetAlreadyInUse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12369,6 +12533,7 @@ module DBSnapshotAttributesResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBSnapshotIdentifier") in
       make ?dBSnapshotAttributes ?dBSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshotAttributes =
         field_map json "DBSnapshotAttributes" DBSnapshotAttributeList.of_json in
@@ -12386,6 +12551,7 @@ module SharedSnapshotQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12451,6 +12617,7 @@ module ConnectionPoolConfiguration =
           (Xml.child xml_arg0 "MaxConnectionsPercent") in
       make ?initQuery ?sessionPinningFilters ?connectionBorrowTimeout
         ?maxIdleConnectionsPercent ?maxConnectionsPercent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initQuery = field_map json "InitQuery" String_.of_json in
       let sessionPinningFilters =
@@ -12474,6 +12641,7 @@ module DBProxyAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12511,6 +12679,7 @@ module DBProxyEndpointAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12523,6 +12692,7 @@ module DBProxyEndpointNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The DB proxy endpoint doesn't exist."]
@@ -12534,6 +12704,7 @@ module InvalidDBProxyEndpointStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12568,6 +12739,7 @@ module CertificateNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12580,6 +12752,7 @@ module DBUpgradeDependencyFailureFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12631,6 +12804,7 @@ module CloudwatchLogsExportConfiguration =
         (Option.map ~f:LogTypeList.of_xml)
           (Xml.child xml_arg0 "EnableLogTypes") in
       make ?disableLogTypes ?enableLogTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disableLogTypes =
         field_map json "DisableLogTypes" LogTypeList.of_json in
@@ -12670,6 +12844,7 @@ module DBClusterSnapshotAttributesResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBClusterSnapshotIdentifier") in
       make ?dBClusterSnapshotAttributes ?dBClusterSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshotAttributes =
         field_map json "DBClusterSnapshotAttributes"
@@ -12991,6 +13166,7 @@ module DBLogFileNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LogFileName doesn't refer to an existing DB log file."]
@@ -13021,6 +13197,7 @@ module ValidDBInstanceModificationsMessage =
         (Option.map ~f:ValidStorageOptionsList.of_xml)
           (Xml.child xml_arg0 "Storage") in
       make ?validProcessorFeatures ?storage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validProcessorFeatures =
         field_map json "ValidProcessorFeatures"
@@ -13081,6 +13258,7 @@ module EngineDefaults =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBParameterGroupFamily") in
       make ?parameters ?marker ?dBParameterGroupFamily ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "Parameters" ParametersList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -13098,6 +13276,7 @@ module DBProxyTargetNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13232,6 +13411,7 @@ module InvalidEventSubscriptionStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13244,6 +13424,7 @@ module InvalidDBInstanceAutomatedBackupStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13256,6 +13437,7 @@ module DBClusterSnapshotAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13366,6 +13548,7 @@ module InvalidDBParameterGroupStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

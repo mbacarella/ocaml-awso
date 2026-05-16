@@ -123,6 +123,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -221,6 +222,7 @@ module ComplianceDetails =
         (Option.map ~f:TagKeyList.of_xml)
           (Xml.child xml_arg0 "NoncompliantKeys") in
       make ?complianceStatus ?keysWithNoncompliantValues ?noncompliantKeys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let complianceStatus =
         field_map json "ComplianceStatus" ComplianceStatus.of_json in
@@ -448,6 +450,7 @@ module FailureInfo =
       let statusCode =
         (Option.map ~f:StatusCode.of_xml) (Xml.child xml_arg0 "StatusCode") in
       make ?errorMessage ?errorCode ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -505,6 +508,7 @@ module ResourceTagMapping =
       let resourceARN =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?complianceDetails ?tags ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let complianceDetails =
         field_map json "ComplianceDetails" ComplianceDetails.of_json in
@@ -535,6 +539,7 @@ module TagFilter =
         (Option.map ~f:TagValueList.of_xml) (Xml.child xml_arg0 "Values") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" TagValueList.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?values ?key ()
@@ -607,6 +612,7 @@ module Summary =
         (Option.map ~f:LastUpdated.of_xml) (Xml.child xml_arg0 "LastUpdated") in
       make ?nonCompliantResources ?resourceType ?region ?targetIdType
         ?targetId ?lastUpdated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nonCompliantResources =
         field_map json "NonCompliantResources" NonCompliantResources.of_json in
@@ -692,6 +698,7 @@ module InternalServiceException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -712,6 +719,7 @@ module InvalidParameterException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -732,6 +740,7 @@ module ThrottledException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -841,6 +850,7 @@ module ConcurrentModificationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -861,6 +871,7 @@ module ConstraintViolationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -921,6 +932,7 @@ module PaginationTokenExpiredException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1355,6 +1367,7 @@ module UntagResourcesOutput =
         (Option.map ~f:FailedResourcesMap.of_xml)
           (Xml.child xml_arg0 "FailedResourcesMap") in
       make ?failedResourcesMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedResourcesMap =
         field_map json "FailedResourcesMap" FailedResourcesMap.of_json in
@@ -1389,6 +1402,7 @@ module UntagResourcesInput =
         ResourceARNListForTagUntag.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNList") in
       make ~tagKeys ~resourceARNList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListForUntag.of_json in
       let resourceARNList =
@@ -1461,6 +1475,7 @@ module TagResourcesOutput =
         (Option.map ~f:FailedResourcesMap.of_xml)
           (Xml.child xml_arg0 "FailedResourcesMap") in
       make ?failedResourcesMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedResourcesMap =
         field_map json "FailedResourcesMap" FailedResourcesMap.of_json in
@@ -1494,6 +1509,7 @@ module TagResourcesInput =
         ResourceARNListForTagUntag.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNList") in
       make ~tags ~resourceARNList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceARNList =
@@ -1579,6 +1595,7 @@ module StartReportCreationOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1600,6 +1617,7 @@ module StartReportCreationInput =
       let s3Bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
       make ~s3Bucket ()
@@ -1689,6 +1707,7 @@ module GetTagValuesOutput =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "PaginationToken") in
       make ?tagValues ?paginationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagValues = field_map json "TagValues" TagValuesOutputList.of_json in
       let paginationToken =
@@ -1723,6 +1742,7 @@ module GetTagValuesInput =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "PaginationToken") in
       make ~key ?paginationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map_exn json "Key" TagKey.of_json in
       let paginationToken =
@@ -1812,6 +1832,7 @@ module GetTagKeysOutput =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "PaginationToken") in
       make ?tagKeys ?paginationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
       let paginationToken =
@@ -1838,6 +1859,7 @@ module GetTagKeysInput =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "PaginationToken") in
       make ?paginationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" PaginationToken.of_json in
@@ -1930,6 +1952,7 @@ module GetResourcesOutput =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "PaginationToken") in
       make ?resourceTagMappingList ?paginationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTagMappingList =
         field_map json "ResourceTagMappingList"
@@ -2034,6 +2057,7 @@ module GetResourcesInput =
       make ?resourceARNList ?excludeCompliantResources
         ?includeComplianceDetails ?resourceTypeFilters ?tagsPerPage
         ?resourcesPerPage ?tagFilters ?paginationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARNList =
         field_map json "ResourceARNList" ResourceARNListForGet.of_json in
@@ -2137,6 +2161,7 @@ module GetComplianceSummaryOutput =
       let summaryList =
         (Option.map ~f:SummaryList.of_xml) (Xml.child xml_arg0 "SummaryList") in
       make ?paginationToken ?summaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" PaginationToken.of_json in
@@ -2227,6 +2252,7 @@ module GetComplianceSummaryInput =
           (Xml.child xml_arg0 "TargetIdFilters") in
       make ?paginationToken ?maxResults ?groupBy ?tagKeyFilters
         ?resourceTypeFilters ?regionFilters ?targetIdFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" PaginationToken.of_json in
@@ -2334,6 +2360,7 @@ module DescribeReportCreationOutput =
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       make ?errorMessage ?s3Location ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let s3Location = field_map json "S3Location" S3Location.of_json in
@@ -2350,6 +2377,7 @@ module DescribeReportCreationInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

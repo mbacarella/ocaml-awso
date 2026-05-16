@@ -147,6 +147,7 @@ module AssetPropertyTimestamp =
         AssetPropertyTimeInSeconds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timeInSeconds") in
       make ?offsetInNanos ~timeInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offsetInNanos =
         field_map json "offsetInNanos" AssetPropertyOffsetInNanos.of_json in
@@ -203,6 +204,7 @@ module AssetPropertyVariant =
         (Option.map ~f:AssetPropertyStringValue.of_xml)
           (Xml.child xml_arg0 "stringValue") in
       make ?booleanValue ?doubleValue ?integerValue ?stringValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let booleanValue =
         field_map json "booleanValue" AssetPropertyBooleanValue.of_json in
@@ -246,6 +248,7 @@ module AssetPropertyValue =
         AssetPropertyVariant.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "value") in
       make ?quality ~timestamp ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quality = field_map json "quality" AssetPropertyQuality.of_json in
       let timestamp =
@@ -813,6 +816,7 @@ module S3Destination =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" Prefix.of_json in
       let bucket = field_map json "bucket" S3Bucket.of_json in
@@ -877,6 +881,7 @@ module Policy =
       let policyName =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "policyName") in
       make ?policyArn ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map json "policyArn" PolicyArn.of_json in
       let policyName = field_map json "policyName" PolicyName.of_json in
@@ -917,6 +922,7 @@ module HttpActionHeader =
       let key =
         HeaderKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" HeaderValue.of_json in
       let key = field_map_exn json "key" HeaderKey.of_json in
@@ -951,6 +957,7 @@ module SigV4Authorization =
         SigningRegion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "signingRegion") in
       make ~roleArn ~serviceName ~signingRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" AwsArn.of_json in
       let serviceName = field_map_exn json "serviceName" ServiceName.of_json in
@@ -1014,6 +1021,7 @@ module PutAssetPropertyValueEntry =
         (Option.map ~f:AssetPropertyEntryId.of_xml)
           (Xml.child xml_arg0 "entryId") in
       make ~propertyValues ?propertyAlias ?propertyId ?assetId ?entryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyValues =
         field_map_exn json "propertyValues" AssetPropertyValueList.of_json in
@@ -1064,6 +1072,7 @@ module TimestreamDimension =
         TimestreamDimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TimestreamDimensionValue.of_json in
       let name = field_map_exn json "name" TimestreamDimensionName.of_json in
@@ -1279,6 +1288,7 @@ module AddThingsToThingGroupParams =
         ThingGroupNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingGroupNames") in
       make ?overrideDynamicGroups ~thingGroupNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrideDynamicGroups =
         field_map json "overrideDynamicGroups" NullableBoolean.of_json in
@@ -1312,6 +1322,7 @@ module EnableIoTLoggingParams =
         RoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "roleArnForLogging") in
       make ~logLevel ~roleArnForLogging ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map_exn json "logLevel" LogLevel.of_json in
       let roleArnForLogging =
@@ -1338,6 +1349,7 @@ module PublishFindingToSnsParams =
         SnsTopicArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "topicArn") in
       make ~topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicArn = field_map_exn json "topicArn" SnsTopicArn.of_json in
       make ~topicArn ()
@@ -1363,6 +1375,7 @@ module ReplaceDefaultPolicyVersionParams =
         PolicyTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "templateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "templateName" PolicyTemplateName.of_json in
@@ -1388,6 +1401,7 @@ module UpdateCACertificateParams =
         CACertificateUpdateAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action =
         field_map_exn json "action" CACertificateUpdateAction.of_json in
@@ -1413,6 +1427,7 @@ module UpdateDeviceCertificateParams =
         DeviceCertificateUpdateAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action =
         field_map_exn json "action" DeviceCertificateUpdateAction.of_json in
@@ -1509,6 +1524,7 @@ module PolicyVersionIdentifier =
       let policyName =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "policyName") in
       make ?policyVersionId ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyVersionId =
         field_map json "policyVersionId" PolicyVersionId.of_json in
@@ -1561,6 +1577,7 @@ module CodeSigningCertificateChain =
         (Option.map ~f:CertificateName.of_xml)
           (Xml.child xml_arg0 "certificateName") in
       make ?inlineDocument ?certificateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inlineDocument =
         field_map json "inlineDocument" InlineDocument.of_json in
@@ -1591,6 +1608,7 @@ module CodeSigningSignature =
         (Option.map ~f:Signature.of_xml)
           (Xml.child xml_arg0 "inlineDocument") in
       make ?inlineDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inlineDocument = field_map json "inlineDocument" Signature.of_json in
       make ?inlineDocument ()
@@ -1639,6 +1657,7 @@ module Destination =
         (Option.map ~f:S3Destination.of_xml)
           (Xml.child xml_arg0 "s3Destination") in
       make ?s3Destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Destination =
         field_map json "s3Destination" S3Destination.of_json in
@@ -1691,6 +1710,7 @@ module SigningProfileParameter =
         (Option.map ~f:CertificateArn.of_xml)
           (Xml.child xml_arg0 "certificateArn") in
       make ?certificatePathOnDevice ?platform ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificatePathOnDevice =
         field_map json "certificatePathOnDevice"
@@ -1978,6 +1998,7 @@ module PutItemInput =
         TableName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "tableName") in
       make ~tableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map_exn json "tableName" TableName.of_json in
       make ~tableName ()
@@ -2126,6 +2147,7 @@ module HttpAuthorization =
         (Option.map ~f:SigV4Authorization.of_xml)
           (Xml.child xml_arg0 "sigv4") in
       make ?sigv4 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sigv4 = field_map json "sigv4" SigV4Authorization.of_json in
       make ?sigv4 ()
@@ -2571,6 +2593,7 @@ module TimestreamTimestamp =
         TimestreamTimestampValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "value") in
       make ~unit ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map_exn json "unit" TimestreamTimestampUnit.of_json in
       let value = field_map_exn json "value" TimestreamTimestampValue.of_json in
@@ -2699,6 +2722,7 @@ module MachineLearningDetectionConfig =
         ConfidenceLevel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "confidenceLevel") in
       make ~confidenceLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidenceLevel =
         field_map_exn json "confidenceLevel" ConfidenceLevel.of_json in
@@ -2751,6 +2775,7 @@ module MetricValue =
       let count =
         (Option.map ~f:UnsignedLong.of_xml) (Xml.child xml_arg0 "count") in
       make ?strings ?numbers ?number ?ports ?cidrs ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strings = field_map json "strings" StringList.of_json in
       let numbers = field_map json "numbers" NumberList.of_json in
@@ -2779,6 +2804,7 @@ module StatisticalThreshold =
         (Option.map ~f:EvaluationStatistic.of_xml)
           (Xml.child xml_arg0 "statistic") in
       make ?statistic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statistic = field_map json "statistic" EvaluationStatistic.of_json in
       make ?statistic ()
@@ -3002,6 +3028,7 @@ module MitigationActionParams =
       make ?publishFindingToSnsParams ?enableIoTLoggingParams
         ?replaceDefaultPolicyVersionParams ?addThingsToThingGroupParams
         ?updateCACertificateParams ?updateDeviceCertificateParams ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publishFindingToSnsParams =
         field_map json "publishFindingToSnsParams"
@@ -3112,6 +3139,7 @@ module ResourceIdentifier =
       make ?roleAliasArn ?iamRoleArn ?account ?policyVersionIdentifier
         ?clientId ?cognitoIdentityPoolId ?caCertificateId
         ?deviceCertificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleAliasArn = field_map json "roleAliasArn" RoleAliasArn.of_json in
       let iamRoleArn = field_map json "iamRoleArn" RoleArn.of_json in
@@ -3301,6 +3329,7 @@ module CustomCodeSigning =
         (Option.map ~f:CodeSigningSignature.of_xml)
           (Xml.child xml_arg0 "signature") in
       make ?signatureAlgorithm ?hashAlgorithm ?certificateChain ?signature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signatureAlgorithm =
         field_map json "signatureAlgorithm" SignatureAlgorithm.of_json in
@@ -3359,6 +3388,7 @@ module StartSigningJobParameter =
         (Option.map ~f:SigningProfileParameter.of_xml)
           (Xml.child xml_arg0 "signingProfileParameter") in
       make ?destination ?signingProfileName ?signingProfileParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination = field_map json "destination" Destination.of_json in
       let signingProfileName =
@@ -3391,6 +3421,7 @@ module S3Location =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?version ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" S3Version.of_json in
       let key = field_map json "key" S3Key.of_json in
@@ -3417,6 +3448,7 @@ module Stream =
       let streamId =
         (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
       make ?fileId ?streamId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileId = field_map json "fileId" FileId.of_json in
       let streamId = field_map json "streamId" StreamId.of_json in
@@ -3693,6 +3725,7 @@ module ExplicitDeny =
       let policies =
         (Option.map ~f:Policies.of_xml) (Xml.child xml_arg0 "policies") in
       make ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policies = field_map json "policies" Policies.of_json in
       make ?policies ()
@@ -3714,6 +3747,7 @@ module ImplicitDeny =
       let policies =
         (Option.map ~f:Policies.of_xml) (Xml.child xml_arg0 "policies") in
       make ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policies = field_map json "policies" Policies.of_json in
       make ?policies ()
@@ -3824,6 +3858,7 @@ module CloudwatchAlarmAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~stateValue ~stateReason ~alarmName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateValue = field_map_exn json "stateValue" StateValue.of_json in
       let stateReason = field_map_exn json "stateReason" StateReason.of_json in
@@ -3856,6 +3891,7 @@ module CloudwatchLogsAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~logGroupName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName =
         field_map_exn json "logGroupName" LogGroupName.of_json in
@@ -3923,6 +3959,7 @@ module CloudwatchMetricAction =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?metricTimestamp ~metricUnit ~metricValue ~metricName
         ~metricNamespace ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricTimestamp = field_map json "metricTimestamp" String_.of_json in
       let metricUnit = field_map_exn json "metricUnit" String_.of_json in
@@ -4034,6 +4071,7 @@ module DynamoDBAction =
       make ?payloadField ?rangeKeyType ?rangeKeyValue ?rangeKeyField
         ?hashKeyType ~hashKeyValue ~hashKeyField ?operation ~roleArn
         ~tableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payloadField = field_map json "payloadField" PayloadField.of_json in
       let rangeKeyType = field_map json "rangeKeyType" DynamoKeyType.of_json in
@@ -4079,6 +4117,7 @@ module DynamoDBv2Action =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~putItem ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let putItem = field_map_exn json "putItem" PutItemInput.of_json in
       let roleArn = field_map_exn json "roleArn" AwsArn.of_json in
@@ -4131,6 +4170,7 @@ module ElasticsearchAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~id ~type_ ~index ~endpoint ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ElasticsearchId.of_json in
       let type_ = field_map_exn json "type" ElasticsearchType.of_json in
@@ -4183,6 +4223,7 @@ module FirehoseAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?batchMode ?separator ~deliveryStreamName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batchMode = field_map json "batchMode" BatchMode.of_json in
       let separator = field_map json "separator" FirehoseSeparator.of_json in
@@ -4229,6 +4270,7 @@ module HttpAction =
         (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "confirmationUrl") in
       let url = Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "url") in
       make ?auth ?headers ?confirmationUrl ~url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auth = field_map json "auth" HttpAuthorization.of_json in
       let headers = field_map json "headers" HeaderList.of_json in
@@ -4275,6 +4317,7 @@ module IotAnalyticsAction =
       let channelArn =
         (Option.map ~f:AwsArn.of_xml) (Xml.child xml_arg0 "channelArn") in
       make ?roleArn ?batchMode ?channelName ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "roleArn" AwsArn.of_json in
       let batchMode = field_map json "batchMode" BatchMode.of_json in
@@ -4321,6 +4364,7 @@ module IotEventsAction =
         InputName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ~roleArn ?batchMode ?messageId ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" AwsArn.of_json in
       let batchMode = field_map json "batchMode" BatchMode.of_json in
@@ -4357,6 +4401,7 @@ module IotSiteWiseAction =
           (Xml.child_exn ~context:context_ xml_arg0
              "putAssetPropertyValueEntries") in
       make ~roleArn ~putAssetPropertyValueEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" AwsArn.of_json in
       let putAssetPropertyValueEntries =
@@ -4409,6 +4454,7 @@ module KafkaAction =
         AwsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "destinationArn") in
       make ~clientProperties ?partition ?key ~topic ~destinationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientProperties =
         field_map_exn json "clientProperties" ClientProperties.of_json in
@@ -4451,6 +4497,7 @@ module KinesisAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?partitionKey ~streamName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partitionKey = field_map json "partitionKey" PartitionKey.of_json in
       let streamName = field_map_exn json "streamName" StreamName.of_json in
@@ -4476,6 +4523,7 @@ module LambdaAction =
         FunctionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "functionArn") in
       make ~functionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionArn = field_map_exn json "functionArn" FunctionArn.of_json in
       make ~functionArn ()
@@ -4527,6 +4575,7 @@ module OpenSearchAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~id ~type_ ~index ~endpoint ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ElasticsearchId.of_json in
       let type_ = field_map_exn json "type" ElasticsearchType.of_json in
@@ -4565,6 +4614,7 @@ module RepublishAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?qos ~topic ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qos = field_map json "qos" Qos.of_json in
       let topic = field_map_exn json "topic" TopicPattern.of_json in
@@ -4609,6 +4659,7 @@ module S3Action =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?cannedAcl ~key ~bucketName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cannedAcl =
         field_map json "cannedAcl" CannedAccessControlList.of_json in
@@ -4644,6 +4695,7 @@ module SalesforceAction =
         SalesforceToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "token") in
       make ~url ~token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map_exn json "url" SalesforceEndpoint.of_json in
       let token = field_map_exn json "token" SalesforceToken.of_json in
@@ -4681,6 +4733,7 @@ module SnsAction =
       let targetArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "targetArn") in
       make ?messageFormat ~roleArn ~targetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageFormat =
         field_map json "messageFormat" MessageFormat.of_json in
@@ -4716,6 +4769,7 @@ module SqsAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?useBase64 ~queueUrl ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useBase64 = field_map json "useBase64" UseBase64.of_json in
       let queueUrl = field_map_exn json "queueUrl" QueueUrl.of_json in
@@ -4760,6 +4814,7 @@ module StepFunctionsAction =
         (Option.map ~f:ExecutionNamePrefix.of_xml)
           (Xml.child xml_arg0 "executionNamePrefix") in
       make ~roleArn ~stateMachineName ?executionNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" AwsArn.of_json in
       let stateMachineName =
@@ -4822,6 +4877,7 @@ module TimestreamAction =
       let roleArn =
         AwsArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?timestamp ~dimensions ~tableName ~databaseName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "timestamp" TimestreamTimestamp.of_json in
       let dimensions =
@@ -4918,6 +4974,7 @@ module BehaviorCriteria =
       make ?mlDetectionConfig ?statisticalThreshold
         ?consecutiveDatapointsToClear ?consecutiveDatapointsToAlarm
         ?durationSeconds ?value ?comparisonOperator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mlDetectionConfig =
         field_map json "mlDetectionConfig"
@@ -5000,6 +5057,7 @@ module MetricDimension =
         DimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dimensionName") in
       make ?operator ~dimensionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operator = field_map json "operator" DimensionValueOperator.of_json in
       let dimensionName =
@@ -5419,6 +5477,7 @@ module MitigationAction =
         (Option.map ~f:MitigationActionName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?actionParams ?roleArn ?id ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionParams =
         field_map json "actionParams" MitigationActionParams.of_json in
@@ -5475,6 +5534,7 @@ module RelatedResource =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "resourceType") in
       make ?additionalInfo ?resourceIdentifier ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalInfo = field_map json "additionalInfo" StringMap.of_json in
       let resourceIdentifier =
@@ -5515,6 +5575,7 @@ module AwsJobRateIncreaseCriteria =
         (Option.map ~f:AwsJobRateIncreaseCriteriaNumberOfThings.of_xml)
           (Xml.child xml_arg0 "numberOfNotifiedThings") in
       make ?numberOfSucceededThings ?numberOfNotifiedThings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfSucceededThings =
         field_map json "numberOfSucceededThings"
@@ -5623,6 +5684,7 @@ module CodeSigning =
         (Option.map ~f:SigningJobId.of_xml)
           (Xml.child xml_arg0 "awsSignerJobId") in
       make ?customCodeSigning ?startSigningJobParameter ?awsSignerJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customCodeSigning =
         field_map json "customCodeSigning" CustomCodeSigning.of_json in
@@ -5654,6 +5716,7 @@ module FileLocation =
       let stream =
         (Option.map ~f:Stream.of_xml) (Xml.child xml_arg0 "stream") in
       make ?s3Location ?stream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Location = field_map json "s3Location" S3Location.of_json in
       let stream = field_map json "stream" Stream.of_json in
@@ -5772,6 +5835,7 @@ module AbortCriteria =
           (Xml.child_exn ~context:context_ xml_arg0 "failureType") in
       make ~minNumberOfExecutedThings ~thresholdPercentage ~action
         ~failureType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minNumberOfExecutedThings =
         field_map_exn json "minNumberOfExecutedThings"
@@ -5815,6 +5879,7 @@ module RetryCriteria =
         RetryableFailureType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "failureType") in
       make ~numberOfRetries ~failureType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfRetries =
         field_map_exn json "numberOfRetries" NumberOfRetries.of_json in
@@ -5870,6 +5935,7 @@ module RateIncreaseCriteria =
         (Option.map ~f:NumberOfThings.of_xml)
           (Xml.child xml_arg0 "numberOfNotifiedThings") in
       make ?numberOfSucceededThings ?numberOfNotifiedThings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfSucceededThings =
         field_map json "numberOfSucceededThings" NumberOfThings.of_json in
@@ -6118,6 +6184,7 @@ module Field =
         (Option.map ~f:FieldType.of_xml) (Xml.child xml_arg0 "type") in
       let name = (Option.map ~f:FieldName.of_xml) (Xml.child xml_arg0 "name") in
       make ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" FieldType.of_json in
       let name = field_map json "name" FieldName.of_json in
@@ -6226,6 +6293,7 @@ module Allowed =
       let policies =
         (Option.map ~f:Policies.of_xml) (Xml.child xml_arg0 "policies") in
       make ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policies = field_map json "policies" Policies.of_json in
       make ?policies ()
@@ -6284,6 +6352,7 @@ module AuthInfo =
       let actionType =
         (Option.map ~f:ActionType.of_xml) (Xml.child xml_arg0 "actionType") in
       make ~resources ?actionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resources = field_map_exn json "resources" Resources.of_json in
       let actionType = field_map json "actionType" ActionType.of_json in
@@ -6316,6 +6385,7 @@ module Denied =
         (Option.map ~f:ImplicitDeny.of_xml)
           (Xml.child xml_arg0 "implicitDeny") in
       make ?explicitDeny ?implicitDeny ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let explicitDeny = field_map json "explicitDeny" ExplicitDeny.of_json in
       let implicitDeny = field_map json "implicitDeny" ImplicitDeny.of_json in
@@ -6501,6 +6571,7 @@ module ThingConnectivity =
       let connected =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "connected") in
       make ?disconnectReason ?timestamp ?connected ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disconnectReason =
         field_map json "disconnectReason" DisconnectReason.of_json in
@@ -6817,6 +6888,7 @@ module Action =
         ?iotEvents ?iotAnalytics ?salesforce ?elasticsearch ?cloudwatchLogs
         ?cloudwatchAlarm ?cloudwatchMetric ?firehose ?s3 ?republish ?kinesis
         ?sqs ?sns ?lambda ?dynamoDBv2 ?dynamoDB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openSearch = field_map json "openSearch" OpenSearchAction.of_json in
       let kafka = field_map json "kafka" KafkaAction.of_json in
@@ -6902,6 +6974,7 @@ module Behavior =
       let name =
         BehaviorName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?suppressAlerts ?criteria ?metricDimension ?metric ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressAlerts =
         field_map json "suppressAlerts" SuppressAlerts.of_json in
@@ -6999,6 +7072,7 @@ module ViolationEventAdditionalInfo =
         (Option.map ~f:ConfidenceLevel.of_xml)
           (Xml.child xml_arg0 "confidenceLevel") in
       make ?confidenceLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidenceLevel =
         field_map json "confidenceLevel" ConfidenceLevel.of_json in
@@ -7056,6 +7130,7 @@ module LogTarget =
         LogTargetType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetType") in
       make ?targetName ~targetType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetName = field_map json "targetName" LogTargetName.of_json in
       let targetType = field_map_exn json "targetType" LogTargetType.of_json in
@@ -7136,6 +7211,7 @@ module HttpUrlDestinationSummary =
       let confirmationUrl =
         (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "confirmationUrl") in
       make ?confirmationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confirmationUrl = field_map json "confirmationUrl" Url.of_json in
       make ?confirmationUrl ()
@@ -7225,6 +7301,7 @@ module VpcDestinationSummary =
       let subnetIds =
         (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "subnetIds") in
       make ?roleArn ?vpcId ?securityGroups ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "roleArn" AwsArn.of_json in
       let vpcId = field_map json "vpcId" VpcId.of_json in
@@ -7307,6 +7384,7 @@ module ThingTypeMetadata =
       let deprecated =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "deprecated") in
       make ?creationDate ?deprecationDate ?deprecated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "creationDate" CreationDate.of_json in
       let deprecationDate =
@@ -7343,6 +7421,7 @@ module ThingTypeProperties =
         (Option.map ~f:ThingTypeDescription.of_xml)
           (Xml.child xml_arg0 "thingTypeDescription") in
       make ?searchableAttributes ?thingTypeDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let searchableAttributes =
         field_map json "searchableAttributes" SearchableAttributes.of_json in
@@ -7425,6 +7504,7 @@ module SecurityProfileIdentifier =
         SecurityProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~arn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" SecurityProfileArn.of_json in
       let name = field_map_exn json "name" SecurityProfileName.of_json in
@@ -7449,6 +7529,7 @@ module SecurityProfileTarget =
         SecurityProfileTargetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" SecurityProfileTargetArn.of_json in
       make ~arn ()
@@ -7989,6 +8070,7 @@ module JobExecutionSummary =
           (Xml.child xml_arg0 "status") in
       make ?retryAttempt ?executionNumber ?lastUpdatedAt ?startedAt ?queuedAt
         ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAttempt = field_map json "retryAttempt" RetryAttempt.of_json in
       let executionNumber =
@@ -8129,6 +8211,7 @@ module DetectMitigationActionsTaskStatistics =
         (Option.map ~f:GenericLongValue.of_xml)
           (Xml.child xml_arg0 "actionsExecuted") in
       make ?actionsFailed ?actionsSkipped ?actionsExecuted ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionsFailed =
         field_map json "actionsFailed" GenericLongValue.of_json in
@@ -8208,6 +8291,7 @@ module DetectMitigationActionsTaskTarget =
         (Option.map ~f:TargetViolationIdsForDetectMitigationActions.of_xml)
           (Xml.child xml_arg0 "violationIds") in
       make ?behaviorName ?securityProfileName ?violationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let behaviorName = field_map json "behaviorName" BehaviorName.of_json in
       let securityProfileName =
@@ -8300,6 +8384,7 @@ module ViolationEventOccurrenceRange =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
       make ~endTime ~startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map_exn json "endTime" Timestamp.of_json in
       let startTime = field_map_exn json "startTime" Timestamp.of_json in
@@ -8753,6 +8838,7 @@ module NonCompliantResource =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "resourceType") in
       make ?additionalInfo ?resourceIdentifier ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalInfo = field_map json "additionalInfo" StringMap.of_json in
       let resourceIdentifier =
@@ -8870,6 +8956,7 @@ module AwsJobExponentialRolloutRate =
         AwsJobRolloutRatePerMinute.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "baseRatePerMinute") in
       make ~rateIncreaseCriteria ~incrementFactor ~baseRatePerMinute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rateIncreaseCriteria =
         field_map_exn json "rateIncreaseCriteria"
@@ -9001,6 +9088,7 @@ module OTAUpdateFile =
         (Option.map ~f:FileName.of_xml) (Xml.child xml_arg0 "fileName") in
       make ?attributes ?codeSigning ?fileLocation ?fileVersion ?fileType
         ?fileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "attributes" AttributesMap.of_json in
       let codeSigning = field_map json "codeSigning" CodeSigning.of_json in
@@ -9175,6 +9263,7 @@ module GroupNameAndArn =
         (Option.map ~f:ThingGroupName.of_xml)
           (Xml.child xml_arg0 "groupName") in
       make ?groupArn ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupArn = field_map json "groupArn" ThingGroupArn.of_json in
       let groupName = field_map json "groupName" ThingGroupName.of_json in
@@ -9200,6 +9289,7 @@ module StreamFile =
       let fileId =
         (Option.map ~f:FileId.of_xml) (Xml.child xml_arg0 "fileId") in
       make ?s3Location ?fileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Location = field_map json "s3Location" S3Location.of_json in
       let fileId = field_map json "fileId" FileId.of_json in
@@ -9359,6 +9449,7 @@ module ExponentialRolloutRate =
         RolloutRatePerMinute.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "baseRatePerMinute") in
       make ~rateIncreaseCriteria ~incrementFactor ~baseRatePerMinute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rateIncreaseCriteria =
         field_map_exn json "rateIncreaseCriteria"
@@ -9917,6 +10008,7 @@ module AwsJobAbortCriteria =
           (Xml.child_exn ~context:context_ xml_arg0 "failureType") in
       make ~minNumberOfExecutedThings ~thresholdPercentage ~action
         ~failureType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minNumberOfExecutedThings =
         field_map_exn json "minNumberOfExecutedThings"
@@ -9964,6 +10056,7 @@ module ValidationError =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "ErrorMessage__lc1") in
       make ?errorMessage__lc1 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage__lc1 =
         field_map json "ErrorMessage__lc1" ErrorMessage.of_json in
@@ -9992,6 +10085,7 @@ module AttributePayload =
       let attributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "attributes") in
       make ?merge ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let merge = field_map json "merge" Flag.of_json in
       let attributes = field_map json "attributes" Attributes.of_json in
@@ -10024,6 +10118,7 @@ module MetricToRetain =
         BehaviorMetric.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "metric") in
       make ?metricDimension ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricDimension =
         field_map json "metricDimension" MetricDimension.of_json in
@@ -10057,6 +10152,7 @@ module AlertTarget =
         AlertTargetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alertTargetArn") in
       make ~roleArn ~alertTargetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
       let alertTargetArn =
@@ -10315,6 +10411,7 @@ module Configuration =
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Enabled.of_json in
       make ?enabled ()
@@ -10456,6 +10553,7 @@ module AuditCheckConfiguration =
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "enabled" Enabled.of_json in
       make ?enabled ()
@@ -10491,6 +10589,7 @@ module AuditNotificationTarget =
       let targetArn =
         (Option.map ~f:TargetArn.of_xml) (Xml.child xml_arg0 "targetArn") in
       make ?enabled ?roleArn ?targetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "enabled" Enabled.of_json in
       let roleArn = field_map json "roleArn" RoleArn.of_json in
@@ -10692,6 +10791,7 @@ module AuthResult =
       let authInfo =
         (Option.map ~f:AuthInfo.of_xml) (Xml.child xml_arg0 "authInfo") in
       make ?missingContextValues ?authDecision ?denied ?allowed ?authInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let missingContextValues =
         field_map json "missingContextValues" MissingContextValues.of_json in
@@ -10721,6 +10821,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -10921,6 +11022,7 @@ module ThingDocument =
         (Option.map ~f:ThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ?connectivity ?deviceDefender ?shadow ?attributes ?thingGroupNames
         ?thingTypeName ?thingId ?thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectivity =
         field_map json "connectivity" ThingConnectivity.of_json in
@@ -10994,6 +11096,7 @@ module ThingGroupDocument =
           (Xml.child xml_arg0 "thingGroupName") in
       make ?parentGroupNames ?attributes ?thingGroupDescription ?thingGroupId
         ?thingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parentGroupNames =
         field_map json "parentGroupNames" ThingGroupNameList.of_json in
@@ -11224,6 +11327,7 @@ module ViolationEvent =
         ?verificationState ?violationEventType ?violationEventAdditionalInfo
         ?metricValue ?behavior ?securityProfileName ?thingName ?violationId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let violationEventTime =
         field_map json "violationEventTime" Timestamp.of_json in
@@ -11269,6 +11373,7 @@ module LogTargetConfiguration =
       let logTarget =
         (Option.map ~f:LogTarget.of_xml) (Xml.child xml_arg0 "logTarget") in
       make ?logLevel ?logTarget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map json "logLevel" LogLevel.of_json in
       let logTarget = field_map json "logTarget" LogTarget.of_json in
@@ -11316,6 +11421,7 @@ module TopicRuleListItem =
       let ruleArn =
         (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "ruleArn") in
       make ?ruleDisabled ?createdAt ?topicPattern ?ruleName ?ruleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleDisabled = field_map json "ruleDisabled" IsDisabled.of_json in
       let createdAt = field_map json "createdAt" CreatedAtDate.of_json in
@@ -11399,6 +11505,7 @@ module TopicRuleDestinationSummary =
       let arn = (Option.map ~f:AwsArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?vpcDestinationSummary ?httpUrlSummary ?statusReason
         ?lastUpdatedAt ?createdAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcDestinationSummary =
         field_map json "vpcDestinationSummary" VpcDestinationSummary.of_json in
@@ -11456,6 +11563,7 @@ module ThingAttribute =
       let thingName =
         (Option.map ~f:ThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ?version ?attributes ?thingArn ?thingTypeName ?thingName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" Version.of_json in
       let attributes = field_map json "attributes" Attributes.of_json in
@@ -11516,6 +11624,7 @@ module ThingTypeDefinition =
           (Xml.child xml_arg0 "thingTypeName") in
       make ?thingTypeMetadata ?thingTypeProperties ?thingTypeArn
         ?thingTypeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thingTypeMetadata =
         field_map json "thingTypeMetadata" ThingTypeMetadata.of_json in
@@ -11619,6 +11728,7 @@ module StreamSummary =
       let streamId =
         (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
       make ?description ?streamVersion ?streamArn ?streamId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" StreamDescription.of_json in
@@ -11655,6 +11765,7 @@ module SecurityProfileTargetMapping =
         (Option.map ~f:SecurityProfileIdentifier.of_xml)
           (Xml.child xml_arg0 "securityProfileIdentifier") in
       make ?target ?securityProfileIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let target = field_map json "target" SecurityProfileTarget.of_json in
       let securityProfileIdentifier =
@@ -11719,6 +11830,7 @@ module ScheduledAuditMetadata =
           (Xml.child xml_arg0 "scheduledAuditName") in
       make ?dayOfWeek ?dayOfMonth ?frequency ?scheduledAuditArn
         ?scheduledAuditName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dayOfWeek = field_map json "dayOfWeek" DayOfWeek.of_json in
       let dayOfMonth = field_map json "dayOfMonth" DayOfMonth.of_json in
@@ -11815,6 +11927,7 @@ module ProvisioningTemplateSummary =
         (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "templateArn") in
       make ?enabled ?lastModifiedDate ?creationDate ?description
         ?templateName ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "enabled" Enabled.of_json in
       let lastModifiedDate =
@@ -11863,6 +11976,7 @@ module ProvisioningTemplateVersionSummary =
         (Option.map ~f:TemplateVersionId.of_xml)
           (Xml.child xml_arg0 "versionId") in
       make ?isDefaultVersion ?creationDate ?versionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isDefaultVersion =
         field_map json "isDefaultVersion" IsDefaultVersion.of_json in
@@ -11903,6 +12017,7 @@ module PolicyVersion =
         (Option.map ~f:PolicyVersionId.of_xml)
           (Xml.child xml_arg0 "versionId") in
       make ?createDate ?isDefaultVersion ?versionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createDate = field_map json "createDate" DateType.of_json in
       let isDefaultVersion =
@@ -11973,6 +12088,7 @@ module OutgoingCertificate =
           (Xml.child xml_arg0 "certificateArn") in
       make ?creationDate ?transferMessage ?transferDate ?transferredTo
         ?certificateId ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "creationDate" DateType.of_json in
       let transferMessage = field_map json "transferMessage" Message.of_json in
@@ -12015,6 +12131,7 @@ module OTAUpdateSummary =
       let otaUpdateId =
         (Option.map ~f:OTAUpdateId.of_xml) (Xml.child xml_arg0 "otaUpdateId") in
       make ?creationDate ?otaUpdateArn ?otaUpdateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "creationDate" DateType.of_json in
       let otaUpdateArn = field_map json "otaUpdateArn" OTAUpdateArn.of_json in
@@ -12054,6 +12171,7 @@ module MitigationActionIdentifier =
         (Option.map ~f:MitigationActionName.of_xml)
           (Xml.child xml_arg0 "actionName") in
       make ?creationDate ?actionArn ?actionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "creationDate" Timestamp.of_json in
       let actionArn = field_map json "actionArn" MitigationActionArn.of_json in
@@ -12083,6 +12201,7 @@ module MetricDatum =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "timestamp") in
       make ?value ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" MetricValue.of_json in
       let timestamp = field_map json "timestamp" Timestamp.of_json in
@@ -12148,6 +12267,7 @@ module ManagedJobTemplateSummary =
           (Xml.child xml_arg0 "templateArn") in
       make ?templateVersion ?environments ?description ?templateName
         ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateVersion =
         field_map json "templateVersion" ManagedTemplateVersion.of_json in
@@ -12236,6 +12356,7 @@ module JobSummary =
         (Option.map ~f:JobArn.of_xml) (Xml.child xml_arg0 "jobArn") in
       make ?completedAt ?lastUpdatedAt ?createdAt ?status ?targetSelection
         ?thingGroupId ?jobId ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let completedAt = field_map json "completedAt" DateType.of_json in
       let lastUpdatedAt = field_map json "lastUpdatedAt" DateType.of_json in
@@ -12292,6 +12413,7 @@ module JobTemplateSummary =
         (Option.map ~f:JobTemplateArn.of_xml)
           (Xml.child xml_arg0 "jobTemplateArn") in
       make ?createdAt ?description ?jobTemplateId ?jobTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" DateType.of_json in
       let description = field_map json "description" JobDescription.of_json in
@@ -12327,6 +12449,7 @@ module JobExecutionSummaryForThing =
           (Xml.child xml_arg0 "jobExecutionSummary") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?jobExecutionSummary ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobExecutionSummary =
         field_map json "jobExecutionSummary" JobExecutionSummary.of_json in
@@ -12359,6 +12482,7 @@ module JobExecutionSummaryForJob =
       let thingArn =
         (Option.map ~f:ThingArn.of_xml) (Xml.child xml_arg0 "thingArn") in
       make ?jobExecutionSummary ?thingArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobExecutionSummary =
         field_map json "jobExecutionSummary" JobExecutionSummary.of_json in
@@ -12410,6 +12534,7 @@ module FleetMetricNameAndArn =
         (Option.map ~f:FleetMetricName.of_xml)
           (Xml.child xml_arg0 "metricName") in
       make ?metricArn ?metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricArn = field_map json "metricArn" FleetMetricArn.of_json in
       let metricName = field_map json "metricName" FleetMetricName.of_json in
@@ -12452,6 +12577,7 @@ module DomainConfigurationSummary =
         (Option.map ~f:ReservedDomainConfigurationName.of_xml)
           (Xml.child xml_arg0 "domainConfigurationName") in
       make ?serviceType ?domainConfigurationArn ?domainConfigurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceType = field_map json "serviceType" ServiceType.of_json in
       let domainConfigurationArn =
@@ -12569,6 +12695,7 @@ module DetectMitigationActionsTaskSummary =
       make ?taskStatistics ?actionsDefinition ?suppressedAlertsIncluded
         ?onlyActiveViolationsIncluded ?violationEventOccurrenceRange ?target
         ?taskEndTime ?taskStartTime ?taskStatus ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskStatistics =
         field_map json "taskStatistics"
@@ -12688,6 +12815,7 @@ module DetectMitigationActionExecution =
           (Xml.child xml_arg0 "taskId") in
       make ?message ?errorCode ?status ?executionEndDate ?executionStartDate
         ?thingName ?actionName ?violationId ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let errorCode =
@@ -12786,6 +12914,7 @@ module Certificate =
           (Xml.child xml_arg0 "certificateArn") in
       make ?creationDate ?certificateMode ?status ?certificateId
         ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "creationDate" DateType.of_json in
       let certificateMode =
@@ -12839,6 +12968,7 @@ module CACertificate =
         (Option.map ~f:CertificateArn.of_xml)
           (Xml.child xml_arg0 "certificateArn") in
       make ?creationDate ?status ?certificateId ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "creationDate" DateType.of_json in
       let status = field_map json "status" CACertificateStatus.of_json in
@@ -12874,6 +13004,7 @@ module AuthorizerSummary =
         (Option.map ~f:AuthorizerName.of_xml)
           (Xml.child xml_arg0 "authorizerName") in
       make ?authorizerArn ?authorizerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authorizerArn =
         field_map json "authorizerArn" AuthorizerArn.of_json in
@@ -12911,6 +13042,7 @@ module AuditTaskMetadata =
       let taskId =
         (Option.map ~f:AuditTaskId.of_xml) (Xml.child xml_arg0 "taskId") in
       make ?taskType ?taskStatus ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskType = field_map json "taskType" AuditTaskType.of_json in
       let taskStatus = field_map json "taskStatus" AuditTaskStatus.of_json in
@@ -12976,6 +13108,7 @@ module AuditSuppression =
           (Xml.child_exn ~context:context_ xml_arg0 "checkName") in
       make ?description ?suppressIndefinitely ?expirationDate
         ~resourceIdentifier ~checkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" AuditDescription.of_json in
       let suppressIndefinitely =
@@ -13023,6 +13156,7 @@ module AuditMitigationActionsTaskMetadata =
         (Option.map ~f:MitigationActionsTaskId.of_xml)
           (Xml.child xml_arg0 "taskId") in
       make ?taskStatus ?startTime ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskStatus =
         field_map json "taskStatus" AuditMitigationActionsTaskStatus.of_json in
@@ -13123,6 +13257,7 @@ module AuditMitigationActionExecutionMetadata =
           (Xml.child xml_arg0 "taskId") in
       make ?message ?errorCode ?endTime ?startTime ?status ?actionId
         ?actionName ?findingId ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
@@ -13251,6 +13386,7 @@ module AuditFinding =
       make ?isSuppressed ?reasonForNonComplianceCode ?reasonForNonCompliance
         ?relatedResources ?nonCompliantResource ?severity ?findingTime
         ?taskStartTime ?checkName ?taskId ?findingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isSuppressed = field_map json "isSuppressed" IsSuppressed.of_json in
       let reasonForNonComplianceCode =
@@ -13382,6 +13518,7 @@ module ActiveViolation =
         ?verificationStateDescription ?verificationState
         ?violationEventAdditionalInfo ?lastViolationValue ?behavior
         ?securityProfileName ?thingName ?violationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let violationStartTime =
         field_map json "violationStartTime" Timestamp.of_json in
@@ -13426,6 +13563,7 @@ module HttpUrlDestinationProperties =
       let confirmationUrl =
         (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "confirmationUrl") in
       make ?confirmationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confirmationUrl = field_map json "confirmationUrl" Url.of_json in
       make ?confirmationUrl ()
@@ -13466,6 +13604,7 @@ module VpcDestinationProperties =
       let subnetIds =
         (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "subnetIds") in
       make ?roleArn ?vpcId ?securityGroups ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "roleArn" AwsArn.of_json in
       let vpcId = field_map json "vpcId" VpcId.of_json in
@@ -13586,6 +13725,7 @@ module PercentPair =
       let percent =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "percent") in
       make ?value ?percent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" PercentValue.of_json in
       let percent = field_map json "percent" Percent.of_json in
@@ -13674,6 +13814,7 @@ module AwsJobExecutionsRolloutConfig =
         (Option.map ~f:MaximumPerMinute.of_xml)
           (Xml.child xml_arg0 "maximumPerMinute") in
       make ?exponentialRate ?maximumPerMinute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exponentialRate =
         field_map json "exponentialRate" AwsJobExponentialRolloutRate.of_json in
@@ -13700,6 +13841,7 @@ module AwsJobPresignedUrlConfig =
         (Option.map ~f:ExpiresInSeconds.of_xml)
           (Xml.child xml_arg0 "expiresInSec") in
       make ?expiresInSec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiresInSec =
         field_map json "expiresInSec" ExpiresInSeconds.of_json in
@@ -13726,6 +13868,7 @@ module ErrorInfo =
           (Xml.child xml_arg0 "message") in
       let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" OTAUpdateErrorMessage.of_json in
       let code = field_map json "code" Code.of_json in make ?message ?code ()
@@ -13888,6 +14031,7 @@ module EffectivePolicy =
       let policyName =
         (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "policyName") in
       make ?policyDocument ?policyArn ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map json "policyDocument" PolicyDocument.of_json in
@@ -13917,6 +14061,7 @@ module Bucket =
       let keyValue =
         (Option.map ~f:BucketKeyValue.of_xml) (Xml.child xml_arg0 "keyValue") in
       make ?count ?keyValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map json "count" Count.of_json in
       let keyValue = field_map json "keyValue" BucketKeyValue.of_json in
@@ -13940,6 +14085,7 @@ module TermsAggregation =
       let maxBuckets =
         (Option.map ~f:MaxBuckets.of_xml) (Xml.child xml_arg0 "maxBuckets") in
       make ?maxBuckets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxBuckets = field_map json "maxBuckets" MaxBuckets.of_json in
       make ?maxBuckets ()
@@ -14013,6 +14159,7 @@ module BehaviorModelTrainingSummary =
       make ?lastModelRefreshDate ?datapointsCollectionPercentage ?modelStatus
         ?trainingDataCollectionStartDate ?behaviorName ?securityProfileName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModelRefreshDate =
         field_map json "lastModelRefreshDate" Timestamp.of_json in
@@ -14149,6 +14296,7 @@ module DocumentParameter =
       let key =
         (Option.map ~f:ParameterKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?optional ?example ?regex ?description ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optional = field_map json "optional" Optional.of_json in
       let example = field_map json "example" Example.of_json in
@@ -14177,6 +14325,7 @@ module AbortConfig =
         AbortCriteriaList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "criteriaList") in
       make ~criteriaList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let criteriaList =
         field_map_exn json "criteriaList" AbortCriteriaList.of_json in
@@ -14233,6 +14382,7 @@ module JobExecutionsRetryConfig =
         RetryCriteriaList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "criteriaList") in
       make ~criteriaList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let criteriaList =
         field_map_exn json "criteriaList" RetryCriteriaList.of_json in
@@ -14267,6 +14417,7 @@ module JobExecutionsRolloutConfig =
         (Option.map ~f:MaxJobExecutionsPerMin.of_xml)
           (Xml.child xml_arg0 "maximumPerMinute") in
       make ?exponentialRate ?maximumPerMinute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exponentialRate =
         field_map json "exponentialRate" ExponentialRolloutRate.of_json in
@@ -14378,6 +14529,7 @@ module JobProcessDetails =
         ?numberOfRejectedThings ?numberOfFailedThings
         ?numberOfSucceededThings ?numberOfCanceledThings ?processingTargets
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfTimedOutThings =
         field_map json "numberOfTimedOutThings" TimedOutThings.of_json in
@@ -14503,6 +14655,7 @@ module PresignedUrlConfig =
       let roleArn =
         (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
       make ?expiresInSec ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiresInSec = field_map json "expiresInSec" ExpiresInSec.of_json in
       let roleArn = field_map json "roleArn" RoleArn.of_json in
@@ -14547,6 +14700,7 @@ module TimeoutConfig =
         (Option.map ~f:InProgressTimeoutInMinutes.of_xml)
           (Xml.child xml_arg0 "inProgressTimeoutInMinutes") in
       make ?inProgressTimeoutInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inProgressTimeoutInMinutes =
         field_map json "inProgressTimeoutInMinutes"
@@ -14583,6 +14737,7 @@ module JobExecutionStatusDetails =
       let detailsMap =
         (Option.map ~f:DetailsMap.of_xml) (Xml.child xml_arg0 "detailsMap") in
       make ?detailsMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detailsMap = field_map json "detailsMap" DetailsMap.of_json in
       make ?detailsMap ()
@@ -14644,6 +14799,7 @@ module ServerCertificateSummary =
           (Xml.child xml_arg0 "serverCertificateArn") in
       make ?serverCertificateStatusDetail ?serverCertificateStatus
         ?serverCertificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverCertificateStatusDetail =
         field_map json "serverCertificateStatusDetail"
@@ -14815,6 +14971,7 @@ module CertificateValidity =
       let notBefore =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "notBefore") in
       make ?notAfter ?notBefore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notAfter = field_map json "notAfter" DateType.of_json in
       let notBefore = field_map json "notBefore" DateType.of_json in
@@ -14897,6 +15054,7 @@ module TransferData =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "transferMessage") in
       make ?rejectDate ?acceptDate ?transferDate ?rejectReason
         ?transferMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rejectDate = field_map json "rejectDate" DateType.of_json in
       let acceptDate = field_map json "acceptDate" DateType.of_json in
@@ -15018,6 +15176,7 @@ module AuditCheckDetails =
       make ?message ?errorCode ?suppressedNonCompliantResourcesCount
         ?nonCompliantResourcesCount ?totalResourcesCount ?checkCompliant
         ?checkRunStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
@@ -15204,6 +15363,7 @@ module TaskStatisticsForAuditCheck =
           (Xml.child xml_arg0 "totalFindingsCount") in
       make ?canceledFindingsCount ?skippedFindingsCount
         ?succeededFindingsCount ?failedFindingsCount ?totalFindingsCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canceledFindingsCount =
         field_map json "canceledFindingsCount" CanceledFindingsCount.of_json in
@@ -15239,6 +15399,7 @@ module HttpUrlDestinationConfiguration =
         Url.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "confirmationUrl") in
       make ~confirmationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confirmationUrl = field_map_exn json "confirmationUrl" Url.of_json in
       make ~confirmationUrl ()
@@ -15283,6 +15444,7 @@ module VpcDestinationConfiguration =
         SubnetIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
       make ~roleArn ~vpcId ?securityGroups ~subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" AwsArn.of_json in
       let vpcId = field_map_exn json "vpcId" VpcId.of_json in
@@ -15377,6 +15539,7 @@ module InternalFailureException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15398,6 +15561,7 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15419,6 +15583,7 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15503,6 +15668,7 @@ module ConflictingResourceUpdateException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15525,6 +15691,7 @@ module InternalException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15546,6 +15713,7 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15567,6 +15735,7 @@ module UnauthorizedException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15588,6 +15757,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15609,6 +15779,7 @@ module VersionConflictException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -15705,6 +15876,7 @@ module ThingGroupProperties =
         (Option.map ~f:ThingGroupDescription.of_xml)
           (Xml.child xml_arg0 "thingGroupDescription") in
       make ?attributePayload ?thingGroupDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributePayload =
         field_map json "attributePayload" AttributePayload.of_json in
@@ -15902,6 +16074,7 @@ module ProvisioningHook =
         (Option.map ~f:PayloadVersion.of_xml)
           (Xml.child xml_arg0 "payloadVersion") in
       make ~targetArn ?payloadVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetArn = field_map_exn json "targetArn" TargetArn.of_json in
       let payloadVersion =
@@ -15955,6 +16128,7 @@ module ThingGroupIndexingConfiguration =
         ThingGroupIndexingMode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thingGroupIndexingMode") in
       make ?customFields ?managedFields ~thingGroupIndexingMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customFields = field_map json "customFields" Fields.of_json in
       let managedFields = field_map json "managedFields" Fields.of_json in
@@ -16037,6 +16211,7 @@ module ThingIndexingConfiguration =
       make ?customFields ?managedFields ?namedShadowIndexingMode
         ?deviceDefenderIndexingMode ?thingConnectivityIndexingMode
         ~thingIndexingMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customFields = field_map json "customFields" Fields.of_json in
       let managedFields = field_map json "managedFields" Fields.of_json in
@@ -16094,6 +16269,7 @@ module AggregationType =
         AggregationTypeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" AggregationTypeValues.of_json in
       let name = field_map_exn json "name" AggregationTypeName.of_json in
@@ -16310,6 +16486,7 @@ module InvalidQueryException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -16331,6 +16508,7 @@ module CertificateValidationException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -16365,6 +16543,7 @@ module AuthorizerConfig =
         (Option.map ~f:AuthorizerName.of_xml)
           (Xml.child xml_arg0 "defaultAuthorizerName") in
       make ?allowAuthorizerOverride ?defaultAuthorizerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowAuthorizerOverride =
         field_map json "allowAuthorizerOverride"
@@ -16560,6 +16739,7 @@ module RegistrationConfig =
         (Option.map ~f:TemplateBody.of_xml)
           (Xml.child xml_arg0 "templateBody") in
       make ?roleArn ?templateBody ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "roleArn" RoleArn.of_json in
       let templateBody = field_map json "templateBody" TemplateBody.of_json in

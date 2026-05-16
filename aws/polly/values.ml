@@ -783,6 +783,7 @@ module LexiconAttributes =
         (Option.map ~f:Alphabet.of_xml) (Xml.child xml_arg0 "Alphabet") in
       make ?size ?lexemesCount ?lexiconArn ?lastModified ?languageCode
         ?alphabet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let size = field_map json "Size" Size.of_json in
       let lexemesCount = field_map json "LexemesCount" LexemesCount.of_json in
@@ -1042,6 +1043,7 @@ module SynthesisTask =
         ?outputFormat ?lexiconNames ?snsTopicArn ?requestCharacters
         ?creationTime ?outputUri ?taskStatusReason ?taskStatus ?taskId
         ?engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
       let voiceId = field_map json "VoiceId" VoiceId.of_json in
@@ -1090,6 +1092,7 @@ module LexiconDescription =
       let name =
         (Option.map ~f:LexiconName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?attributes ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" LexiconAttributes.of_json in
       let name = field_map json "Name" LexiconName.of_json in
@@ -1180,6 +1183,7 @@ module Voice =
         (Option.map ~f:Gender.of_xml) (Xml.child xml_arg0 "Gender") in
       make ?supportedEngines ?additionalLanguageCodes ?name ?languageName
         ?languageCode ?id ?gender ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedEngines =
         field_map json "SupportedEngines" EngineList.of_json in
@@ -1232,6 +1236,7 @@ module EngineNotSupportedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1251,6 +1256,7 @@ module InvalidSampleRateException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1269,6 +1275,7 @@ module InvalidSsmlException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1288,6 +1295,7 @@ module LanguageNotSupportedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1307,6 +1315,7 @@ module LexiconNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1326,6 +1335,7 @@ module MarksNotSupportedForFormatException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1345,6 +1355,7 @@ module ServiceFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1363,6 +1374,7 @@ module SsmlMarksNotSupportedForTextTypeException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1382,6 +1394,7 @@ module TextLengthExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1414,6 +1427,7 @@ module InvalidS3BucketException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1433,6 +1447,7 @@ module InvalidS3KeyException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1452,6 +1467,7 @@ module InvalidSnsTopicArnException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1506,6 +1522,7 @@ module InvalidLexiconException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1525,6 +1542,7 @@ module LexiconSizeExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1544,6 +1562,7 @@ module MaxLexemeLengthExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1563,6 +1582,7 @@ module MaxLexiconsNumberExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1582,6 +1602,7 @@ module UnsupportedPlsAlphabetException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1601,6 +1622,7 @@ module UnsupportedPlsLanguageException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1620,6 +1642,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1724,6 +1747,7 @@ module InvalidTaskIdException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1743,6 +1767,7 @@ module SynthesisTaskNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1769,6 +1794,7 @@ module Lexicon =
       let content =
         (Option.map ~f:LexiconContent.of_xml) (Xml.child xml_arg0 "Content") in
       make ?name ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" LexiconName.of_json in
       let content = field_map json "Content" LexiconContent.of_json in
@@ -1969,6 +1995,7 @@ module SynthesizeSpeechOutput =
       let audioStream =
         (Option.map ~f:AudioStream.of_xml) (Xml.child xml_arg0 "AudioStream") in
       make ?requestCharacters ?contentType ?audioStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharacters =
         field_map json "RequestCharacters" RequestCharacters.of_json in
@@ -2070,6 +2097,7 @@ module SynthesizeSpeechInput =
         (Option.map ~f:Engine.of_xml) (Xml.child xml_arg0 "Engine") in
       make ~voiceId ?textType ~text ?speechMarkTypes ?sampleRate
         ~outputFormat ?lexiconNames ?languageCode ?engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let voiceId = field_map_exn json "VoiceId" VoiceId.of_json in
       let textType = field_map json "TextType" TextType.of_json in
@@ -2248,6 +2276,7 @@ module StartSpeechSynthesisTaskOutput =
         (Option.map ~f:SynthesisTask.of_xml)
           (Xml.child xml_arg0 "SynthesisTask") in
       make ?synthesisTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let synthesisTask =
         field_map json "SynthesisTask" SynthesisTask.of_json in
@@ -2373,6 +2402,7 @@ module StartSpeechSynthesisTaskInput =
       make ~voiceId ?textType ~text ?speechMarkTypes ?snsTopicArn ?sampleRate
         ?outputS3KeyPrefix ~outputS3BucketName ~outputFormat ?lexiconNames
         ?languageCode ?engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let voiceId = field_map_exn json "VoiceId" VoiceId.of_json in
       let textType = field_map json "TextType" TextType.of_json in
@@ -2498,6 +2528,7 @@ module PutLexiconOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2526,6 +2557,7 @@ module PutLexiconInput =
         LexiconName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LexiconName") in
       make ~content ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map_exn json "Content" LexiconContent.of_json in
       let name = field_map_exn json "Name" LexiconName.of_json in
@@ -2594,6 +2626,7 @@ module ListSpeechSynthesisTasksOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?synthesisTasks ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let synthesisTasks =
         field_map json "SynthesisTasks" SynthesisTasks.of_json in
@@ -2632,6 +2665,7 @@ module ListSpeechSynthesisTasksInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?status ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" TaskStatus.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2699,6 +2733,7 @@ module ListLexiconsOutput =
         (Option.map ~f:LexiconDescriptionList.of_xml)
           (Xml.child xml_arg0 "Lexicons") in
       make ?nextToken ?lexicons ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lexicons = field_map json "Lexicons" LexiconDescriptionList.of_json in
@@ -2722,6 +2757,7 @@ module ListLexiconsInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       make ?nextToken ()
@@ -2793,6 +2829,7 @@ module GetSpeechSynthesisTaskOutput =
         (Option.map ~f:SynthesisTask.of_xml)
           (Xml.child xml_arg0 "SynthesisTask") in
       make ?synthesisTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let synthesisTask =
         field_map json "SynthesisTask" SynthesisTask.of_json in
@@ -2816,6 +2853,7 @@ module GetSpeechSynthesisTaskInput =
       let taskId =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
       make ~taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskId = field_map_exn json "TaskId" TaskId.of_json in
       make ~taskId ()
@@ -2883,6 +2921,7 @@ module GetLexiconOutput =
       let lexicon =
         (Option.map ~f:Lexicon.of_xml) (Xml.child xml_arg0 "Lexicon") in
       make ?lexiconAttributes ?lexicon ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexiconAttributes =
         field_map json "LexiconAttributes" LexiconAttributes.of_json in
@@ -2906,6 +2945,7 @@ module GetLexiconInput =
         LexiconName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LexiconName") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" LexiconName.of_json in
       make ~name ()
@@ -2969,6 +3009,7 @@ module DescribeVoicesOutput =
       let voices =
         (Option.map ~f:VoiceList.of_xml) (Xml.child xml_arg0 "Voices") in
       make ?nextToken ?voices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let voices = field_map json "Voices" VoiceList.of_json in
@@ -3026,6 +3067,7 @@ module DescribeVoicesInput =
         (Option.map ~f:Engine.of_xml) (Xml.child xml_arg0 "Engine") in
       make ?nextToken ?includeAdditionalLanguageCodes ?languageCode ?engine
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let includeAdditionalLanguageCodes =
@@ -3082,6 +3124,7 @@ module DeleteLexiconOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3104,6 +3147,7 @@ module DeleteLexiconInput =
         LexiconName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LexiconName") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" LexiconName.of_json in
       make ~name ()

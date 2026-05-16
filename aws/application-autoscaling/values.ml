@@ -99,6 +99,7 @@ module MetricDimension =
         MetricDimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" MetricDimensionValue.of_json in
       let name = field_map_exn json "Name" MetricDimensionName.of_json in
@@ -168,6 +169,7 @@ module StepAdjustment =
           (Xml.child xml_arg0 "MetricIntervalLowerBound") in
       make ~scalingAdjustment ?metricIntervalUpperBound
         ?metricIntervalLowerBound ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingAdjustment =
         field_map_exn json "ScalingAdjustment" ScalingAdjustment.of_json in
@@ -444,6 +446,7 @@ module Alarm =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmName") in
       make ~alarmARN ~alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmARN = field_map_exn json "AlarmARN" ResourceId.of_json in
       let alarmName = field_map_exn json "AlarmName" ResourceId.of_json in
@@ -606,6 +609,7 @@ module CustomizedMetricSpecification =
         MetricName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
       make ?unit ~statistic ?dimensions ~namespace ~metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" MetricUnit.of_json in
       let statistic = field_map_exn json "Statistic" MetricStatistic.of_json in
@@ -658,6 +662,7 @@ module PredefinedMetricSpecification =
         MetricType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceLabel =
         field_map json "ResourceLabel" ResourceLabel.of_json in
@@ -841,6 +846,7 @@ module ScalableTargetAction =
         (Option.map ~f:ResourceCapacity.of_xml)
           (Xml.child xml_arg0 "MinCapacity") in
       make ?maxCapacity ?minCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxCapacity = field_map json "MaxCapacity" ResourceCapacity.of_json in
       let minCapacity = field_map json "MinCapacity" ResourceCapacity.of_json in
@@ -1074,6 +1080,7 @@ module StepScalingPolicyConfiguration =
           (Xml.child xml_arg0 "AdjustmentType") in
       make ?metricAggregationType ?cooldown ?minAdjustmentMagnitude
         ?stepAdjustments ?adjustmentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricAggregationType =
         field_map json "MetricAggregationType" MetricAggregationType.of_json in
@@ -1166,6 +1173,7 @@ module TargetTrackingScalingPolicyConfiguration =
       make ?disableScaleIn ?scaleInCooldown ?scaleOutCooldown
         ?customizedMetricSpecification ?predefinedMetricSpecification
         ~targetValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disableScaleIn =
         field_map json "DisableScaleIn" DisableScaleIn.of_json in
@@ -1288,6 +1296,7 @@ module SuspendedState =
           (Xml.child xml_arg0 "DynamicScalingInSuspended") in
       make ?scheduledScalingSuspended ?dynamicScalingOutSuspended
         ?dynamicScalingInSuspended ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledScalingSuspended =
         field_map json "ScheduledScalingSuspended" ScalingSuspended.of_json in
@@ -1430,6 +1439,7 @@ module ScheduledAction =
       make ~creationTime ?scalableTargetAction ?endTime ?startTime
         ?scalableDimension ~resourceId ?timezone ~schedule ~serviceNamespace
         ~scheduledActionARN ~scheduledActionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime =
         field_map_exn json "CreationTime" TimestampType.of_json in
@@ -1559,6 +1569,7 @@ module ScalingPolicy =
       make ~creationTime ?alarms ?targetTrackingScalingPolicyConfiguration
         ?stepScalingPolicyConfiguration ~policyType ~scalableDimension
         ~resourceId ~serviceNamespace ~policyName ~policyARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime =
         field_map_exn json "CreationTime" TimestampType.of_json in
@@ -1695,6 +1706,7 @@ module ScalingActivity =
       make ?details ?statusMessage ~statusCode ?endTime ~startTime ~cause
         ~description ~scalableDimension ~resourceId ~serviceNamespace
         ~activityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "Details" XmlString.of_json in
       let statusMessage = field_map json "StatusMessage" XmlString.of_json in
@@ -1803,6 +1815,7 @@ module ScalableTarget =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
       make ?suspendedState ~creationTime ~roleARN ~maxCapacity ~minCapacity
         ~scalableDimension ~resourceId ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suspendedState =
         field_map json "SuspendedState" SuspendedState.of_json in
@@ -1836,6 +1849,7 @@ module ConcurrentUpdateException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1855,6 +1869,7 @@ module InternalServiceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1873,6 +1888,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1892,6 +1908,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1911,6 +1928,7 @@ module ObjectNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1930,6 +1948,7 @@ module FailedResourceAccessException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1949,6 +1968,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2155,6 +2175,7 @@ module RegisterScalableTargetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2241,6 +2262,7 @@ module RegisterScalableTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
       make ?suspendedState ?roleARN ?maxCapacity ?minCapacity
         ~scalableDimension ~resourceId ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suspendedState =
         field_map json "SuspendedState" SuspendedState.of_json in
@@ -2329,6 +2351,7 @@ module PutScheduledActionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2433,6 +2456,7 @@ module PutScheduledActionRequest =
       make ?scalableTargetAction ?endTime ?startTime ~scalableDimension
         ~resourceId ~scheduledActionName ?timezone ?schedule
         ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalableTargetAction =
         field_map json "ScalableTargetAction" ScalableTargetAction.of_json in
@@ -2552,6 +2576,7 @@ module PutScalingPolicyResponse =
         ResourceIdMaxLen1600.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyARN") in
       make ?alarms ~policyARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarms = field_map json "Alarms" Alarms.of_json in
       let policyARN =
@@ -2642,6 +2667,7 @@ module PutScalingPolicyRequest =
       make ?targetTrackingScalingPolicyConfiguration
         ?stepScalingPolicyConfiguration ?policyType ~scalableDimension
         ~resourceId ~serviceNamespace ~policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetTrackingScalingPolicyConfiguration =
         field_map json "TargetTrackingScalingPolicyConfiguration"
@@ -2741,6 +2767,7 @@ module DescribeScheduledActionsResponse =
         (Option.map ~f:ScheduledActions.of_xml)
           (Xml.child xml_arg0 "ScheduledActions") in
       make ?nextToken ?scheduledActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let scheduledActions =
@@ -2818,6 +2845,7 @@ module DescribeScheduledActionsRequest =
           (Xml.child xml_arg0 "ScheduledActionNames") in
       make ?nextToken ?maxResults ?scalableDimension ?resourceId
         ~serviceNamespace ?scheduledActionNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2923,6 +2951,7 @@ module DescribeScalingPoliciesResponse =
         (Option.map ~f:ScalingPolicies.of_xml)
           (Xml.child xml_arg0 "ScalingPolicies") in
       make ?nextToken ?scalingPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let scalingPolicies =
@@ -2999,6 +3028,7 @@ module DescribeScalingPoliciesRequest =
           (Xml.child xml_arg0 "PolicyNames") in
       make ?nextToken ?maxResults ?scalableDimension ?resourceId
         ~serviceNamespace ?policyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3093,6 +3123,7 @@ module DescribeScalingActivitiesResponse =
         (Option.map ~f:ScalingActivities.of_xml)
           (Xml.child xml_arg0 "ScalingActivities") in
       make ?nextToken ?scalingActivities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let scalingActivities =
@@ -3160,6 +3191,7 @@ module DescribeScalingActivitiesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
       make ?nextToken ?maxResults ?scalableDimension ?resourceId
         ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3253,6 +3285,7 @@ module DescribeScalableTargetsResponse =
         (Option.map ~f:ScalableTargets.of_xml)
           (Xml.child xml_arg0 "ScalableTargets") in
       make ?nextToken ?scalableTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let scalableTargets =
@@ -3320,6 +3353,7 @@ module DescribeScalableTargetsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
       make ?nextToken ?maxResults ?scalableDimension ?resourceIds
         ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3396,6 +3430,7 @@ module DeregisterScalableTargetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3437,6 +3472,7 @@ module DeregisterScalableTargetRequest =
         ServiceNamespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
       make ~scalableDimension ~resourceId ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalableDimension =
         field_map_exn json "ScalableDimension" ScalableDimension.of_json in
@@ -3510,6 +3546,7 @@ module DeleteScheduledActionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3566,6 +3603,7 @@ module DeleteScheduledActionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
       make ~scalableDimension ~resourceId ~scheduledActionName
         ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalableDimension =
         field_map_exn json "ScalableDimension" ScalableDimension.of_json in
@@ -3642,6 +3680,7 @@ module DeleteScalingPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3691,6 +3730,7 @@ module DeleteScalingPolicyRequest =
         ResourceIdMaxLen1600.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       make ~scalableDimension ~resourceId ~serviceNamespace ~policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalableDimension =
         field_map_exn json "ScalableDimension" ScalableDimension.of_json in

@@ -67,6 +67,7 @@ module PointOfInterest =
         OffsetMillis.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BeginOffsetMillis") in
       make ~endOffsetMillis ~beginOffsetMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endOffsetMillis =
         field_map_exn json "EndOffsetMillis" OffsetMillis.of_json in
@@ -144,6 +145,7 @@ module CharacterOffsets =
         CharacterOffset.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BeginOffsetChar") in
       make ~endOffsetChar ~beginOffsetChar ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endOffsetChar =
         field_map_exn json "EndOffsetChar" CharacterOffset.of_json in
@@ -192,6 +194,7 @@ module CategoryDetails =
         PointsOfInterest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PointsOfInterest") in
       make ~pointsOfInterest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pointsOfInterest =
         field_map_exn json "PointsOfInterest" PointsOfInterest.of_json in
@@ -218,6 +221,7 @@ module IssueDetected =
         CharacterOffsets.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CharacterOffsets") in
       make ~characterOffsets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let characterOffsets =
         field_map_exn json "CharacterOffsets" CharacterOffsets.of_json in
@@ -451,6 +455,7 @@ module Categories =
         MatchedCategories.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MatchedCategories") in
       make ~matchedDetails ~matchedCategories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchedDetails =
         field_map_exn json "MatchedDetails" MatchedDetails.of_json in
@@ -543,6 +548,7 @@ module Transcript =
         TranscriptId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?issuesDetected ~sentiment ~endOffsetMillis ~beginOffsetMillis
         ~content ~participantRole ~participantId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let issuesDetected =
         field_map json "IssuesDetected" IssuesDetected.of_json in
@@ -594,6 +600,7 @@ module RealtimeContactAnalysisSegment =
       let transcript =
         (Option.map ~f:Transcript.of_xml) (Xml.child xml_arg0 "Transcript") in
       make ?categories ?transcript ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categories = field_map json "Categories" Categories.of_json in
       let transcript = field_map json "Transcript" Transcript.of_json in
@@ -613,6 +620,7 @@ module AccessDeniedException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -632,6 +640,7 @@ module InternalServiceException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -651,6 +660,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -720,6 +730,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -738,6 +749,7 @@ module ThrottlingException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -888,6 +900,7 @@ module ListRealtimeContactAnalysisSegmentsResponse =
         RealtimeContactAnalysisSegments.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Segments") in
       make ?nextToken ~segments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let segments =
@@ -933,6 +946,7 @@ module ListRealtimeContactAnalysisSegmentsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?nextToken ?maxResults ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in

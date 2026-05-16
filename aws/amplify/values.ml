@@ -99,6 +99,7 @@ module SubDomainSetting =
         DomainPrefix.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "prefix") in
       make ~branchName ~prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchName = field_map_exn json "branchName" BranchName.of_json in
       let prefix = field_map_exn json "prefix" DomainPrefix.of_json in
@@ -316,6 +317,7 @@ module SubDomain =
         SubDomainSetting.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "subDomainSetting") in
       make ~dnsRecord ~verified ~subDomainSetting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsRecord = field_map_exn json "dnsRecord" DNSRecord.of_json in
       let verified = field_map_exn json "verified" Verified.of_json in
@@ -643,6 +645,7 @@ module CustomRule =
       let source =
         Source.of_xml (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?condition ?status ~target ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let condition = field_map json "condition" Condition.of_json in
       let status = field_map json "status" Status.of_json in
@@ -1658,6 +1661,7 @@ module AutoBranchCreationConfig =
       make ?pullRequestEnvironmentName ?enablePullRequestPreview ?buildSpec
         ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
         ?environmentVariables ?enableAutoBuild ?framework ?stage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pullRequestEnvironmentName =
         field_map json "pullRequestEnvironmentName"
@@ -1893,6 +1897,7 @@ module ProductionBranch =
         (Option.map ~f:LastDeployTime.of_xml)
           (Xml.child xml_arg0 "lastDeployTime") in
       make ?branchName ?thumbnailUrl ?status ?lastDeployTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchName = field_map json "branchName" BranchName.of_json in
       let thumbnailUrl = field_map json "thumbnailUrl" ThumbnailUrl.of_json in
@@ -2073,6 +2078,7 @@ module Step =
       make ?context ?statusReason ?screenshots ?testConfigUrl
         ?testArtifactsUrl ?artifactsUrl ?logUrl ~endTime ~status ~startTime
         ~stepName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "context" Context.of_json in
       let statusReason = field_map json "statusReason" StatusReason.of_json in
@@ -2188,6 +2194,7 @@ module Webhook =
           (Xml.child_exn ~context:context_ xml_arg0 "webhookArn") in
       make ~updateTime ~createTime ~description ~branchName ~webhookUrl
         ~webhookId ~webhookArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "updateTime" UpdateTime.of_json in
       let createTime = field_map_exn json "createTime" CreateTime.of_json in
@@ -2282,6 +2289,7 @@ module JobSummary =
         JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
       make ~jobType ?endTime ~status ~startTime ~commitTime ~commitMessage
         ~commitId ~jobId ~jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobType = field_map_exn json "jobType" JobType.of_json in
       let endTime = field_map json "endTime" EndTime.of_json in
@@ -2396,6 +2404,7 @@ module DomainAssociation =
       make ~subDomains ?certificateVerificationDNSRecord ~statusReason
         ~domainStatus ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
         ~enableAutoSubDomain ~domainName ~domainAssociationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subDomains = field_map_exn json "subDomains" SubDomains.of_json in
       let certificateVerificationDNSRecord =
@@ -2692,6 +2701,7 @@ module Branch =
         ~enableAutoBuild ~environmentVariables ~updateTime ~createTime
         ~enableNotification ~displayName ~stage ?tags ~description
         ~branchName ~branchArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backendEnvironmentArn =
         field_map json "backendEnvironmentArn" BackendEnvironmentArn.of_json in
@@ -2816,6 +2826,7 @@ module BackendEnvironment =
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironmentArn") in
       make ~updateTime ~createTime ?deploymentArtifacts ?stackName
         ~environmentName ~backendEnvironmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "updateTime" UpdateTime.of_json in
       let createTime = field_map_exn json "createTime" CreateTime.of_json in
@@ -2855,6 +2866,7 @@ module Artifact =
         ArtifactFileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "artifactFileName") in
       make ~artifactId ~artifactFileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactId = field_map_exn json "artifactId" ArtifactId.of_json in
       let artifactFileName =
@@ -3089,6 +3101,7 @@ module App =
         ~defaultDomain ~environmentVariables ?iamServiceRoleArn ~updateTime
         ~createTime ~platform ~repository ~description ?tags ~name ~appArn
         ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryCloneMethod =
         field_map json "repositoryCloneMethod" RepositoryCloneMethod.of_json in
@@ -3229,6 +3242,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3247,6 +3261,7 @@ module DependentServiceFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3266,6 +3281,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3285,6 +3301,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3303,6 +3320,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3391,6 +3409,7 @@ module ResourceNotFoundException =
       let code =
         Code.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       let code = field_map_exn json "code" Code.of_json in
@@ -3457,6 +3476,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3728,6 +3748,7 @@ module Job =
         JobSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "summary") in
       make ~steps ~summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let steps = field_map_exn json "steps" Steps.of_json in
       let summary = field_map_exn json "summary" JobSummary.of_json in
@@ -3886,6 +3907,7 @@ module UpdateWebhookResult =
       let webhook =
         Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
       make ~webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhook = field_map_exn json "webhook" Webhook.of_json in
       make ~webhook ()
@@ -3919,6 +3941,7 @@ module UpdateWebhookRequest =
         WebhookId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "webhookId") in
       make ?description ?branchName ~webhookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" Description.of_json in
       let branchName = field_map json "branchName" BranchName.of_json in
@@ -4011,6 +4034,7 @@ module UpdateDomainAssociationResult =
         DomainAssociation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
       make ~domainAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainAssociation =
         field_map_exn json "domainAssociation" DomainAssociation.of_json in
@@ -4085,6 +4109,7 @@ module UpdateDomainAssociationRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
         ?subDomainSettings ?enableAutoSubDomain ~domainName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoSubDomainIAMRole =
         field_map json "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
@@ -4184,6 +4209,7 @@ module UpdateBranchResult =
       let branch =
         Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
       make ~branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branch = field_map_exn json "branch" Branch.of_json in
       make ~branch ()
@@ -4349,6 +4375,7 @@ module UpdateBranchRequest =
         ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
         ?environmentVariables ?enableAutoBuild ?enableNotification ?stage
         ?framework ?description ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backendEnvironmentArn =
         field_map json "backendEnvironmentArn" BackendEnvironmentArn.of_json in
@@ -4452,6 +4479,7 @@ module UpdateAppResult =
     let of_xml xml_arg0 =
       let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
       make ~app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let app = field_map_exn json "app" App.of_json in make ~app ()
     let to_json v = composed_to_json to_value v
@@ -4637,6 +4665,7 @@ module UpdateAppRequest =
         ?enableBranchAutoDeletion ?enableBranchAutoBuild
         ?environmentVariables ?iamServiceRoleArn ?platform ?description ?name
         ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken = field_map json "accessToken" AccessToken.of_json in
       let oauthToken = field_map json "oauthToken" OauthToken.of_json in
@@ -4732,6 +4761,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response for the untag resource request."]
@@ -4760,6 +4790,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -4819,6 +4850,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response for the tag resource request."]
@@ -4844,6 +4876,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -4930,6 +4963,7 @@ module StopJobResult =
         JobSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
       make ~jobSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
       make ~jobSummary ()
@@ -4961,6 +4995,7 @@ module StopJobRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~jobId ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in
       let branchName = field_map_exn json "branchName" BranchName.of_json in
@@ -5047,6 +5082,7 @@ module StartJobResult =
         JobSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
       make ~jobSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
       make ~jobSummary ()
@@ -5126,6 +5162,7 @@ module StartJobRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?commitTime ?commitMessage ?commitId ?jobReason ~jobType ?jobId
         ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commitTime = field_map json "commitTime" CommitTime.of_json in
       let commitMessage =
@@ -5219,6 +5256,7 @@ module StartDeploymentResult =
         JobSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
       make ~jobSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
       make ~jobSummary ()
@@ -5260,6 +5298,7 @@ module StartDeploymentRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?sourceUrl ?jobId ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceUrl = field_map json "sourceUrl" SourceUrl.of_json in
       let jobId = field_map json "jobId" JobId.of_json in
@@ -5344,6 +5383,7 @@ module ListWebhooksResult =
       let webhooks =
         Webhooks.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhooks") in
       make ?nextToken ~webhooks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let webhooks = field_map_exn json "webhooks" Webhooks.of_json in
@@ -5379,6 +5419,7 @@ module ListWebhooksRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5445,6 +5486,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5466,6 +5508,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -5550,6 +5593,7 @@ module ListJobsResult =
         JobSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobSummaries") in
       make ?nextToken ~jobSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let jobSummaries =
@@ -5594,6 +5638,7 @@ module ListJobsRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5672,6 +5717,7 @@ module ListDomainAssociationsResult =
         DomainAssociations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainAssociations") in
       make ?nextToken ~domainAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let domainAssociations =
@@ -5709,6 +5755,7 @@ module ListDomainAssociationsRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5784,6 +5831,7 @@ module ListBranchesResult =
       let branches =
         Branches.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branches") in
       make ?nextToken ~branches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let branches = field_map_exn json "branches" Branches.of_json in
@@ -5819,6 +5867,7 @@ module ListBranchesRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5897,6 +5946,7 @@ module ListBackendEnvironmentsResult =
         BackendEnvironments.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironments") in
       make ?nextToken ~backendEnvironments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let backendEnvironments =
@@ -5943,6 +5993,7 @@ module ListBackendEnvironmentsRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ?environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6030,6 +6081,7 @@ module ListArtifactsResult =
         Artifacts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "artifacts") in
       make ?nextToken ~artifacts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let artifacts = field_map_exn json "artifacts" Artifacts.of_json in
@@ -6078,6 +6130,7 @@ module ListArtifactsRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?maxResults ?nextToken ~jobId ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6154,6 +6207,7 @@ module ListAppsResult =
       let apps =
         Apps.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apps") in
       make ?nextToken ~apps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let apps = field_map_exn json "apps" Apps.of_json in
@@ -6183,6 +6237,7 @@ module ListAppsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6266,6 +6321,7 @@ module GetWebhookResult =
       let webhook =
         Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
       make ~webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhook = field_map_exn json "webhook" Webhook.of_json in
       make ~webhook ()
@@ -6287,6 +6343,7 @@ module GetWebhookRequest =
         WebhookId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "webhookId") in
       make ~webhookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhookId = field_map_exn json "webhookId" WebhookId.of_json in
       make ~webhookId ()
@@ -6367,6 +6424,7 @@ module GetJobResult =
     let of_xml xml_arg0 =
       let job = Job.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Job.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -6396,6 +6454,7 @@ module GetJobRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~jobId ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in
       let branchName = field_map_exn json "branchName" BranchName.of_json in
@@ -6476,6 +6535,7 @@ module GetDomainAssociationResult =
         DomainAssociation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
       make ~domainAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainAssociation =
         field_map_exn json "domainAssociation" DomainAssociation.of_json in
@@ -6503,6 +6563,7 @@ module GetDomainAssociationRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~domainName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "domainName" DomainName.of_json in
       let appId = field_map_exn json "appId" AppId.of_json in
@@ -6577,6 +6638,7 @@ module GetBranchResult =
       let branch =
         Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
       make ~branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branch = field_map_exn json "branch" Branch.of_json in
       make ~branch ()
@@ -6602,6 +6664,7 @@ module GetBranchRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchName = field_map_exn json "branchName" BranchName.of_json in
       let appId = field_map_exn json "appId" AppId.of_json in
@@ -6680,6 +6743,7 @@ module GetBackendEnvironmentResult =
         BackendEnvironment.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironment") in
       make ~backendEnvironment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backendEnvironment =
         field_map_exn json "backendEnvironment" BackendEnvironment.of_json in
@@ -6710,6 +6774,7 @@ module GetBackendEnvironmentRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentName =
         field_map_exn json "environmentName" EnvironmentName.of_json in
@@ -6804,6 +6869,7 @@ module GetArtifactUrlResult =
         ArtifactId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "artifactId") in
       make ~artifactUrl ~artifactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactUrl = field_map_exn json "artifactUrl" ArtifactUrl.of_json in
       let artifactId = field_map_exn json "artifactId" ArtifactId.of_json in
@@ -6827,6 +6893,7 @@ module GetArtifactUrlRequest =
         ArtifactId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "artifactId") in
       make ~artifactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactId = field_map_exn json "artifactId" ArtifactId.of_json in
       make ~artifactId ()
@@ -6899,6 +6966,7 @@ module GetAppResult =
     let of_xml xml_arg0 =
       let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
       make ~app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let app = field_map_exn json "app" App.of_json in make ~app ()
     let to_json v = composed_to_json to_value v
@@ -6917,6 +6985,7 @@ module GetAppRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appId = field_map_exn json "appId" AppId.of_json in make ~appId ()
     let to_json v = composed_to_json to_value v
@@ -6990,6 +7059,7 @@ module GenerateAccessLogsResult =
       let logUrl =
         (Option.map ~f:LogUrl.of_xml) (Xml.child xml_arg0 "logUrl") in
       make ?logUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logUrl = field_map json "logUrl" LogUrl.of_json in make ?logUrl ()
     let to_json v = composed_to_json to_value v
@@ -7030,6 +7100,7 @@ module GenerateAccessLogsRequest =
       let startTime =
         (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "startTime") in
       make ~appId ~domainName ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appId = field_map_exn json "appId" AppId.of_json in
       let domainName = field_map_exn json "domainName" DomainName.of_json in
@@ -7118,6 +7189,7 @@ module DeleteWebhookResult =
       let webhook =
         Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
       make ~webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhook = field_map_exn json "webhook" Webhook.of_json in
       make ~webhook ()
@@ -7139,6 +7211,7 @@ module DeleteWebhookRequest =
         WebhookId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "webhookId") in
       make ~webhookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhookId = field_map_exn json "webhookId" WebhookId.of_json in
       make ~webhookId ()
@@ -7222,6 +7295,7 @@ module DeleteJobResult =
         JobSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobSummary") in
       make ~jobSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobSummary = field_map_exn json "jobSummary" JobSummary.of_json in
       make ~jobSummary ()
@@ -7253,6 +7327,7 @@ module DeleteJobRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~jobId ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in
       let branchName = field_map_exn json "branchName" BranchName.of_json in
@@ -7342,6 +7417,7 @@ module DeleteDomainAssociationResult =
         DomainAssociation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
       make ~domainAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainAssociation =
         field_map_exn json "domainAssociation" DomainAssociation.of_json in
@@ -7368,6 +7444,7 @@ module DeleteDomainAssociationRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~domainName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "domainName" DomainName.of_json in
       let appId = field_map_exn json "appId" AppId.of_json in
@@ -7457,6 +7534,7 @@ module DeleteBranchResult =
       let branch =
         Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
       make ~branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branch = field_map_exn json "branch" Branch.of_json in
       make ~branch ()
@@ -7482,6 +7560,7 @@ module DeleteBranchRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchName = field_map_exn json "branchName" BranchName.of_json in
       let appId = field_map_exn json "appId" AppId.of_json in
@@ -7572,6 +7651,7 @@ module DeleteBackendEnvironmentResult =
         BackendEnvironment.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironment") in
       make ~backendEnvironment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backendEnvironment =
         field_map_exn json "backendEnvironment" BackendEnvironment.of_json in
@@ -7602,6 +7682,7 @@ module DeleteBackendEnvironmentRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentName =
         field_map_exn json "environmentName" EnvironmentName.of_json in
@@ -7688,6 +7769,7 @@ module DeleteAppResult =
     let of_xml xml_arg0 =
       let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
       make ~app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let app = field_map_exn json "app" App.of_json in make ~app ()
     let to_json v = composed_to_json to_value v
@@ -7706,6 +7788,7 @@ module DeleteAppRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appId = field_map_exn json "appId" AppId.of_json in make ~appId ()
     let to_json v = composed_to_json to_value v
@@ -7802,6 +7885,7 @@ module CreateWebhookResult =
       let webhook =
         Webhook.of_xml (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
       make ~webhook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webhook = field_map_exn json "webhook" Webhook.of_json in
       make ~webhook ()
@@ -7835,6 +7919,7 @@ module CreateWebhookRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?description ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" Description.of_json in
       let branchName = field_map_exn json "branchName" BranchName.of_json in
@@ -7936,6 +8021,7 @@ module CreateDomainAssociationResult =
         DomainAssociation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainAssociation") in
       make ~domainAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainAssociation =
         field_map_exn json "domainAssociation" DomainAssociation.of_json in
@@ -8011,6 +8097,7 @@ module CreateDomainAssociationRequest =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?autoSubDomainIAMRole ?autoSubDomainCreationPatterns
         ~subDomainSettings ?enableAutoSubDomain ~domainName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoSubDomainIAMRole =
         field_map json "autoSubDomainIAMRole" AutoSubDomainIAMRole.of_json in
@@ -8115,6 +8202,7 @@ module CreateDeploymentResult =
           (Xml.child_exn ~context:context_ xml_arg0 "fileUploadUrls") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ~zipUploadUrl ~fileUploadUrls ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let zipUploadUrl = field_map_exn json "zipUploadUrl" UploadUrl.of_json in
       let fileUploadUrls =
@@ -8153,6 +8241,7 @@ module CreateDeploymentRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?fileMap ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileMap = field_map json "fileMap" FileMap.of_json in
       let branchName = field_map_exn json "branchName" BranchName.of_json in
@@ -8252,6 +8341,7 @@ module CreateBranchResult =
       let branch =
         Branch.of_xml (Xml.child_exn ~context:context_ xml_arg0 "branch") in
       make ~branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branch = field_map_exn json "branch" Branch.of_json in
       make ~branch ()
@@ -8422,6 +8512,7 @@ module CreateBranchRequest =
         ?enablePerformanceMode ?enableBasicAuth ?basicAuthCredentials
         ?environmentVariables ?enableAutoBuild ?enableNotification ?framework
         ?stage ?description ~branchName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backendEnvironmentArn =
         field_map json "backendEnvironmentArn" BackendEnvironmentArn.of_json in
@@ -8540,6 +8631,7 @@ module CreateBackendEnvironmentResult =
         BackendEnvironment.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backendEnvironment") in
       make ~backendEnvironment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backendEnvironment =
         field_map_exn json "backendEnvironment" BackendEnvironment.of_json in
@@ -8587,6 +8679,7 @@ module CreateBackendEnvironmentRequest =
       let appId =
         AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?deploymentArtifacts ?stackName ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentArtifacts =
         field_map json "deploymentArtifacts" DeploymentArtifacts.of_json in
@@ -8676,6 +8769,7 @@ module CreateAppResult =
     let of_xml xml_arg0 =
       let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
       make ~app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let app = field_map_exn json "app" App.of_json in make ~app ()
     let to_json v = composed_to_json to_value v
@@ -8864,6 +8958,7 @@ module CreateAppRequest =
         ?enableBranchAutoDeletion ?enableBranchAutoBuild
         ?environmentVariables ?accessToken ?oauthToken ?iamServiceRoleArn
         ?platform ?repository ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoBranchCreationConfig =
         field_map json "autoBranchCreationConfig"

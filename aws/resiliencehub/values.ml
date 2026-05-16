@@ -184,6 +184,7 @@ module DisruptionCompliance =
       make ?rtoReferenceId ?rtoDescription ?rpoReferenceId ?rpoDescription
         ?message ?currentRtoInSecs ?currentRpoInSecs ~complianceStatus
         ?achievableRtoInSecs ?achievableRpoInSecs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rtoReferenceId = field_map json "rtoReferenceId" String500.of_json in
       let rtoDescription = field_map json "rtoDescription" String500.of_json in
@@ -364,6 +365,7 @@ module RecommendationDisruptionCompliance =
              "expectedComplianceStatus") in
       make ?expectedRtoInSecs ?expectedRtoDescription ?expectedRpoInSecs
         ?expectedRpoDescription ~expectedComplianceStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedRtoInSecs =
         field_map json "expectedRtoInSecs" Seconds.of_json in
@@ -559,6 +561,7 @@ module Cost =
       let amount =
         Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "amount") in
       make ~frequency ~currency ~amount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frequency = field_map_exn json "frequency" CostFrequency.of_json in
       let currency = field_map_exn json "currency" CurrencyCode.of_json in
@@ -730,6 +733,7 @@ module FailurePolicy =
       let rpoInSecs =
         Seconds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "rpoInSecs") in
       make ~rtoInSecs ~rpoInSecs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rtoInSecs = field_map_exn json "rtoInSecs" Seconds.of_json in
       let rpoInSecs = field_map_exn json "rpoInSecs" Seconds.of_json in
@@ -834,6 +838,7 @@ module RecommendationItem =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "alreadyImplemented") in
       make ?targetRegion ?targetAccountId ?resourceId ?alreadyImplemented ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetRegion = field_map json "targetRegion" AwsRegion.of_json in
       let targetAccountId =
@@ -911,6 +916,7 @@ module AppComponent =
       let name =
         String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" String255.of_json in
       let name = field_map_exn json "name" String255.of_json in
@@ -1021,6 +1027,7 @@ module ConfigRecommendation =
       make ?suggestedChanges ~referenceId ?recommendationCompliance
         ~optimizationType ~name ?haArchitecture ?description ?cost
         ?compliance ?appComponentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggestedChanges =
         field_map json "suggestedChanges" SuggestedChangesList.of_json in
@@ -1299,6 +1306,7 @@ module LogicalResourceId =
         String255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
       make ?resourceGroupName ?logicalStackName ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroupName =
         field_map json "resourceGroupName" EntityName.of_json in
@@ -1348,6 +1356,7 @@ module PhysicalResourceId =
       let awsAccountId =
         (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
       make ~type_ ~identifier ?awsRegion ?awsAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" PhysicalIdentifierType.of_json in
       let identifier = field_map_exn json "identifier" String255.of_json in
@@ -1587,6 +1596,7 @@ module S3Location =
       let bucket =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" String500.of_json in
       let bucket = field_map json "bucket" String500.of_json in
@@ -1802,6 +1812,7 @@ module ResiliencyScore =
         DisruptionResiliencyScore.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "disruptionScore") in
       make ~score ~disruptionScore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map_exn json "score" Double.of_json in
       let disruptionScore =
@@ -2050,6 +2061,7 @@ module ResiliencyPolicy =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       make ?tier ?tags ?policyName ?policyDescription ?policyArn ?policy
         ?estimatedCostTier ?dataLocationConstraint ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tier = field_map json "tier" ResiliencyPolicyTier.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -2103,6 +2115,7 @@ module UnsupportedResource =
         LogicalResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logicalResourceId") in
       make ~resourceType ~physicalResourceId ~logicalResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String255.of_json in
       let physicalResourceId =
@@ -2201,6 +2214,7 @@ module TestRecommendation =
           (Xml.child xml_arg0 "appComponentName") in
       make ?type_ ?risk ~referenceId ?recommendationId ?prerequisite ?name
         ?items ?intent ?description ?appComponentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" TestType.of_json in
       let risk = field_map json "risk" TestRisk.of_json in
@@ -2293,6 +2307,7 @@ module SopRecommendation =
           (Xml.child xml_arg0 "appComponentName") in
       make ~serviceType ~referenceId ~recommendationId ?prerequisite ?name
         ?items ?description ?appComponentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceType =
         field_map_exn json "serviceType" SopServiceType.of_json in
@@ -2441,6 +2456,7 @@ module RecommendationTemplate =
       make ?templatesLocation ?tags ~status ?startTime ~recommendationTypes
         ~recommendationTemplateArn ?recommendationIds ?needsReplacements
         ~name ?message ~format ?endTime ~assessmentArn ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templatesLocation =
         field_map json "templatesLocation" S3Location.of_json in
@@ -2532,6 +2548,7 @@ module AppSummary =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resiliencyScore ~name ?description ~creationTime
         ?complianceStatus ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resiliencyScore = field_map json "resiliencyScore" Double.of_json in
       let name = field_map_exn json "name" EntityName.of_json in
@@ -2562,6 +2579,7 @@ module AppVersionSummary =
         EntityVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
       make ~appVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
       make ~appVersion ()
@@ -2623,6 +2641,7 @@ module PhysicalResource =
           (Xml.child xml_arg0 "appComponents") in
       make ~resourceType ?resourceName ~physicalResourceId ~logicalResourceId
         ?appComponents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String255.of_json in
       let resourceName = field_map json "resourceName" EntityName.of_json in
@@ -2706,6 +2725,7 @@ module ResourceMapping =
           (Xml.child xml_arg0 "appRegistryAppName") in
       make ?resourceName ?resourceGroupName ~physicalResourceId ~mappingType
         ?logicalStackName ?appRegistryAppName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "resourceName" EntityName.of_json in
       let resourceGroupName =
@@ -2758,6 +2778,7 @@ module ComponentRecommendation =
         EntityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appComponentName") in
       make ~recommendationStatus ~configRecommendations ~appComponentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationStatus =
         field_map_exn json "recommendationStatus"
@@ -2830,6 +2851,7 @@ module AppComponentCompliance =
           (Xml.child xml_arg0 "appComponentName") in
       make ?status ?resiliencyScore ?message ?cost ?compliance
         ?appComponentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" ComplianceStatus.of_json in
       let resiliencyScore =
@@ -2953,6 +2975,7 @@ module AppAssessmentSummary =
       make ?startTime ?resiliencyScore ?message ?invoker ?endTime ?cost
         ?complianceStatus ~assessmentStatus ?assessmentName ~assessmentArn
         ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "startTime" TimeStamp.of_json in
       let resiliencyScore = field_map json "resiliencyScore" Double.of_json in
@@ -3049,6 +3072,7 @@ module AlarmRecommendation =
           (Xml.child xml_arg0 "appComponentName") in
       make ~type_ ~referenceId ~recommendationId ?prerequisite ~name ?items
         ?description ?appComponentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" AlarmType.of_json in
       let referenceId =
@@ -3079,6 +3103,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String500.of_json in
       make ?message ()
@@ -3115,6 +3140,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceId = field_map json "resourceId" ResourceId.of_json in
@@ -3136,6 +3162,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String500.of_json in
       make ?message ()
@@ -3172,6 +3199,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceId = field_map json "resourceId" ResourceId.of_json in
@@ -3202,6 +3230,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?retryAfterSeconds ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
@@ -3223,6 +3252,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String500.of_json in
       make ?message ()
@@ -3334,6 +3364,7 @@ module App =
       make ?tags ?status ?resiliencyScore ?policyArn ~name
         ?lastResiliencyScoreEvaluationTime ?lastAppComplianceEvaluationTime
         ?description ~creationTime ?complianceStatus ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let status = field_map json "status" AppStatusType.of_json in
@@ -3514,6 +3545,7 @@ module AppAssessment =
       make ?tags ?startTime ?resiliencyScore ?policy ?message ~invoker
         ?endTime ?cost ?complianceStatus ?compliance ~assessmentStatus
         ?assessmentName ~assessmentArn ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let startTime = field_map json "startTime" TimeStamp.of_json in
@@ -3552,6 +3584,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String500.of_json in
       make ?message ()
@@ -4250,6 +4283,7 @@ module UpdateResiliencyPolicyResponse =
         ResiliencyPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" ResiliencyPolicy.of_json in
       make ~policy ()
@@ -4320,6 +4354,7 @@ module UpdateResiliencyPolicyRequest =
           (Xml.child xml_arg0 "dataLocationConstraint") in
       make ?tier ?policyName ?policyDescription ~policyArn ?policy
         ?dataLocationConstraint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tier = field_map json "tier" ResiliencyPolicyTier.of_json in
       let policyName = field_map json "policyName" EntityName.of_json in
@@ -4421,6 +4456,7 @@ module UpdateAppResponse =
     let of_xml xml_arg0 =
       let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
       make ~app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let app = field_map_exn json "app" App.of_json in make ~app ()
     let to_json v = composed_to_json to_value v
@@ -4468,6 +4504,7 @@ module UpdateAppRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?policyArn ?description ?clearResiliencyPolicyArn ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map json "policyArn" Arn.of_json in
       let description =
@@ -4549,6 +4586,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from a resource."]
@@ -4574,6 +4612,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -4651,6 +4690,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies one or more tags to a resource."]
@@ -4676,6 +4716,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -4781,6 +4822,7 @@ module StartAppAssessmentResponse =
         AppAssessment.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessment") in
       make ~assessment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessment = field_map_exn json "assessment" AppAssessment.of_json in
       make ~assessment ()
@@ -4832,6 +4874,7 @@ module StartAppAssessmentRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?tags ?clientToken ~assessmentName ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -4953,6 +4996,7 @@ module ResolveAppVersionResourcesResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~status ~resolutionId ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" ResourceResolutionStatusType.of_json in
@@ -4985,6 +5029,7 @@ module ResolveAppVersionResourcesRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
       let appArn = field_map_exn json "appArn" Arn.of_json in
@@ -5084,6 +5129,7 @@ module RemoveDraftAppVersionResourceMappingsResponse =
           (Xml.child xml_arg0 "appVersion") in
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
       make ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appVersion = field_map json "appVersion" EntityVersion.of_json in
       let appArn = field_map json "appArn" Arn.of_json in
@@ -5153,6 +5199,7 @@ module RemoveDraftAppVersionResourceMappingsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resourceNames ?resourceGroupNames ?logicalStackNames
         ?appRegistryAppNames ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceNames =
         field_map json "resourceNames" EntityNameList.of_json in
@@ -5261,6 +5308,7 @@ module PutDraftAppVersionTemplateResponse =
           (Xml.child xml_arg0 "appVersion") in
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
       make ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appVersion = field_map json "appVersion" EntityVersion.of_json in
       let appArn = field_map json "appArn" Arn.of_json in
@@ -5294,6 +5342,7 @@ module PutDraftAppVersionTemplateRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appTemplateBody ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appTemplateBody =
         field_map_exn json "appTemplateBody" AppTemplateBody.of_json in
@@ -5397,6 +5446,7 @@ module PublishAppVersionResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appVersion = field_map json "appVersion" EntityVersion.of_json in
       let appArn = field_map_exn json "appArn" Arn.of_json in
@@ -5420,6 +5470,7 @@ module PublishAppVersionRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
     let to_json v = composed_to_json to_value v
@@ -5530,6 +5581,7 @@ module ListUnsupportedAppVersionResourcesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~unsupportedResources ~resolutionId ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsupportedResources =
         field_map_exn json "unsupportedResources"
@@ -5586,6 +5638,7 @@ module ListUnsupportedAppVersionResourcesRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resolutionId ?nextToken ?maxResults ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolutionId = field_map json "resolutionId" String255.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5695,6 +5748,7 @@ module ListTestRecommendationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~testRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testRecommendations =
         field_map_exn json "testRecommendations"
@@ -5736,6 +5790,7 @@ module ListTestRecommendationsRequest =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -5821,6 +5876,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5843,6 +5899,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -5938,6 +5995,7 @@ module ListSuggestedResiliencyPoliciesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~resiliencyPolicies ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resiliencyPolicies =
         field_map_exn json "resiliencyPolicies" ResiliencyPolicies.of_json in
@@ -5969,6 +6027,7 @@ module ListSuggestedResiliencyPoliciesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -6074,6 +6133,7 @@ module ListSopRecommendationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~sopRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sopRecommendations =
         field_map_exn json "sopRecommendations" SopRecommendationList.of_json in
@@ -6114,6 +6174,7 @@ module ListSopRecommendationsRequest =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -6211,6 +6272,7 @@ module ListResiliencyPoliciesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~resiliencyPolicies ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resiliencyPolicies =
         field_map_exn json "resiliencyPolicies" ResiliencyPolicies.of_json in
@@ -6247,6 +6309,7 @@ module ListResiliencyPoliciesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?policyName ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map json "policyName" EntityName.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6336,6 +6399,7 @@ module ListRecommendationTemplatesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?recommendationTemplates ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationTemplates =
         field_map json "recommendationTemplates"
@@ -6420,6 +6484,7 @@ module ListRecommendationTemplatesRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?status ?reverseOrder ?recommendationTemplateArn ?nextToken ?name
         ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "status" RecommendationTemplateStatusList.of_json in
@@ -6514,6 +6579,7 @@ module ListAppsResponse =
         AppSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appSummaries") in
       make ?nextToken ~appSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let appSummaries =
@@ -6556,6 +6622,7 @@ module ListAppsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
       make ?nextToken ?name ?maxResults ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let name = field_map json "name" EntityName.of_json in
@@ -6642,6 +6709,7 @@ module ListAppVersionsResponse =
         AppVersionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appVersions") in
       make ?nextToken ~appVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let appVersions =
@@ -6681,6 +6749,7 @@ module ListAppVersionsRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?nextToken ?maxResults ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -6794,6 +6863,7 @@ module ListAppVersionResourcesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~resolutionId ~physicalResources ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolutionId = field_map_exn json "resolutionId" String255.of_json in
       let physicalResources =
@@ -6848,6 +6918,7 @@ module ListAppVersionResourcesRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resolutionId ?nextToken ?maxResults ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolutionId = field_map json "resolutionId" String255.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6946,6 +7017,7 @@ module ListAppVersionResourceMappingsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~resourceMappings ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceMappings =
         field_map_exn json "resourceMappings" ResourceMappingList.of_json in
@@ -6993,6 +7065,7 @@ module ListAppVersionResourceMappingsRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?nextToken ?maxResults ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7095,6 +7168,7 @@ module ListAppComponentRecommendationsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "componentRecommendations") in
       make ?nextToken ~componentRecommendations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let componentRecommendations =
@@ -7136,6 +7210,7 @@ module ListAppComponentRecommendationsRequest =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7234,6 +7309,7 @@ module ListAppComponentCompliancesResponse =
         ComponentCompliancesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentCompliances") in
       make ?nextToken ~componentCompliances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let componentCompliances =
@@ -7275,6 +7351,7 @@ module ListAppComponentCompliancesRequest =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7373,6 +7450,7 @@ module ListAppAssessmentsResponse =
         AppAssessmentSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentSummaries") in
       make ?nextToken ~assessmentSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assessmentSummaries =
@@ -7466,6 +7544,7 @@ module ListAppAssessmentsRequest =
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
       make ?reverseOrder ?nextToken ?maxResults ?invoker ?complianceStatus
         ?assessmentStatus ?assessmentName ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverseOrder =
         field_map json "reverseOrder" BooleanOptional.of_json in
@@ -7573,6 +7652,7 @@ module ListAlarmRecommendationsResponse =
         AlarmRecommendationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alarmRecommendations") in
       make ?nextToken ~alarmRecommendations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let alarmRecommendations =
@@ -7614,6 +7694,7 @@ module ListAlarmRecommendationsRequest =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7733,6 +7814,7 @@ module ImportResourcesToDraftAppVersionResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~status ~sourceArns ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" ResourceImportStatusType.of_json in
@@ -7767,6 +7849,7 @@ module ImportResourcesToDraftAppVersionRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~sourceArns ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceArns = field_map_exn json "sourceArns" ArnList.of_json in
       let appArn = field_map_exn json "appArn" Arn.of_json in
@@ -7855,6 +7938,7 @@ module DescribeResiliencyPolicyResponse =
         ResiliencyPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" ResiliencyPolicy.of_json in
       make ~policy ()
@@ -7877,6 +7961,7 @@ module DescribeResiliencyPolicyRequest =
       let policyArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyArn") in
       make ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "policyArn" Arn.of_json in
       make ~policyArn ()
@@ -7993,6 +8078,7 @@ module DescribeDraftAppVersionResourcesImportStatusResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~statusChangeTime ~status ?errorMessage ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusChangeTime =
         field_map_exn json "statusChangeTime" TimeStamp.of_json in
@@ -8021,6 +8107,7 @@ module DescribeDraftAppVersionResourcesImportStatusRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
     let to_json v = composed_to_json to_value v
@@ -8121,6 +8208,7 @@ module DescribeAppVersionTemplateResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appVersion ~appTemplateBody ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
       let appTemplateBody =
@@ -8152,6 +8240,7 @@ module DescribeAppVersionTemplateRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
       let appArn = field_map_exn json "appArn" Arn.of_json in
@@ -8267,6 +8356,7 @@ module DescribeAppVersionResourcesResolutionStatusResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~status ~resolutionId ?errorMessage ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" ResourceResolutionStatusType.of_json in
@@ -8308,6 +8398,7 @@ module DescribeAppVersionResourcesResolutionStatusRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resolutionId ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolutionId = field_map json "resolutionId" String255.of_json in
       let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
@@ -8394,6 +8485,7 @@ module DescribeAppResponse =
     let of_xml xml_arg0 =
       let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
       make ~app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let app = field_map_exn json "app" App.of_json in make ~app ()
     let to_json v = composed_to_json to_value v
@@ -8414,6 +8506,7 @@ module DescribeAppRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
     let to_json v = composed_to_json to_value v
@@ -8499,6 +8592,7 @@ module DescribeAppAssessmentResponse =
         AppAssessment.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assessment") in
       make ~assessment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessment = field_map_exn json "assessment" AppAssessment.of_json in
       make ~assessment ()
@@ -8522,6 +8616,7 @@ module DescribeAppAssessmentRequest =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
       make ~assessmentArn ()
@@ -8616,6 +8711,7 @@ module DeleteResiliencyPolicyResponse =
       let policyArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyArn") in
       make ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "policyArn" Arn.of_json in
       make ~policyArn ()
@@ -8646,6 +8742,7 @@ module DeleteResiliencyPolicyRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~policyArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "policyArn" Arn.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -8743,6 +8840,7 @@ module DeleteRecommendationTemplateResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "recommendationTemplateArn") in
       make ~status ~recommendationTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" RecommendationTemplateStatus.of_json in
@@ -8780,6 +8878,7 @@ module DeleteRecommendationTemplateRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~recommendationTemplateArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationTemplateArn =
         field_map_exn json "recommendationTemplateArn" Arn.of_json in
@@ -8867,6 +8966,7 @@ module DeleteAppResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
     let to_json v = composed_to_json to_value v
@@ -8905,6 +9005,7 @@ module DeleteAppRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?forceDelete ?clientToken ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "forceDelete" BooleanOptional.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -9011,6 +9112,7 @@ module DeleteAppAssessmentResponse =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ~assessmentStatus ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assessmentStatus =
         field_map_exn json "assessmentStatus" AssessmentStatus.of_json in
@@ -9043,6 +9145,7 @@ module DeleteAppAssessmentRequest =
       let assessmentArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?clientToken ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
@@ -9142,6 +9245,7 @@ module CreateResiliencyPolicyResponse =
         ResiliencyPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" ResiliencyPolicy.of_json in
       make ~policy ()
@@ -9221,6 +9325,7 @@ module CreateResiliencyPolicyRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~tier ?tags ~policyName ?policyDescription ~policy
         ?dataLocationConstraint ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tier = field_map_exn json "tier" ResiliencyPolicyTier.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -9327,6 +9432,7 @@ module CreateRecommendationTemplateResponse =
         (Option.map ~f:RecommendationTemplate.of_xml)
           (Xml.child xml_arg0 "recommendationTemplate") in
       make ?recommendationTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationTemplate =
         field_map json "recommendationTemplate"
@@ -9415,6 +9521,7 @@ module CreateRecommendationTemplateRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?tags ?recommendationTypes ?recommendationIds ~name ?format
         ?clientToken ?bucketName ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let recommendationTypes =
@@ -9529,6 +9636,7 @@ module CreateAppResponse =
     let of_xml xml_arg0 =
       let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
       make ~app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let app = field_map_exn json "app" App.of_json in make ~app ()
     let to_json v = composed_to_json to_value v
@@ -9578,6 +9686,7 @@ module CreateAppRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?tags ?policyArn ~name ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let policyArn = field_map json "policyArn" Arn.of_json in
@@ -9695,6 +9804,7 @@ module AddDraftAppVersionResourceMappingsResponse =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~resourceMappings ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceMappings =
         field_map_exn json "resourceMappings" ResourceMappingList.of_json in
@@ -9730,6 +9840,7 @@ module AddDraftAppVersionResourceMappingsRequest =
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~resourceMappings ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceMappings =
         field_map_exn json "resourceMappings" ResourceMappingList.of_json in

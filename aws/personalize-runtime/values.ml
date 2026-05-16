@@ -82,6 +82,7 @@ module PredictedItem =
       let itemId =
         (Option.map ~f:ItemID.of_xml) (Xml.child xml_arg0 "itemId") in
       make ?score ?itemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "score" Score.of_json in
       let itemId = field_map json "itemId" ItemID.of_json in
@@ -166,6 +167,7 @@ module InvalidInputException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -221,6 +223,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -418,6 +421,7 @@ module GetRecommendationsResponse =
       let itemList =
         (Option.map ~f:ItemList.of_xml) (Xml.child xml_arg0 "itemList") in
       make ?recommendationId ?itemList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationId =
         field_map json "recommendationId" RecommendationID.of_json in
@@ -505,6 +509,7 @@ module GetRecommendationsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "campaignArn") in
       make ?recommenderArn ?filterValues ?filterArn ?context ?numResults
         ?userId ?itemId ?campaignArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommenderArn = field_map json "recommenderArn" Arn.of_json in
       let filterValues = field_map json "filterValues" FilterValues.of_json in
@@ -582,6 +587,7 @@ module GetPersonalizedRankingResponse =
         (Option.map ~f:ItemList.of_xml)
           (Xml.child xml_arg0 "personalizedRanking") in
       make ?recommendationId ?personalizedRanking ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationId =
         field_map json "recommendationId" RecommendationID.of_json in
@@ -656,6 +662,7 @@ module GetPersonalizedRankingRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "campaignArn") in
       make ?filterValues ?filterArn ?context ~userId ~inputList ~campaignArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterValues = field_map json "filterValues" FilterValues.of_json in
       let filterArn = field_map json "filterArn" Arn.of_json in

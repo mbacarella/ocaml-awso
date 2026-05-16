@@ -52,6 +52,7 @@ module AWSOrganizationsNotInUseException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -94,6 +95,7 @@ module AcceptHandshakeRequest =
         HandshakeId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
@@ -132,6 +134,7 @@ module TooManyRequestsException =
       let type_ =
         (Option.map ~f:ExceptionType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?message ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       let type_ = field_map json "Type" ExceptionType.of_json in
@@ -153,6 +156,7 @@ module ServiceException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -276,6 +280,7 @@ module InvalidInputException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" InvalidInputExceptionReason.of_json in
@@ -298,6 +303,7 @@ module InvalidHandshakeTransitionException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -318,6 +324,7 @@ module HandshakeNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -412,6 +419,7 @@ module HandshakeConstraintViolationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason"
@@ -435,6 +443,7 @@ module HandshakeAlreadyInStateException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -603,6 +612,7 @@ module rec
         (Option.map ~f:HandshakeResourceValue.of_xml)
           (Xml.child xml_arg0 "Value") in
       make ?resources ?type_ ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resources = field_map json "Resources" HandshakeResources.of_json in
       let type_ = field_map json "Type" HandshakeResourceType.of_json in
@@ -718,6 +728,7 @@ module HandshakeParty =
         HandshakePartyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~type_ ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" HandshakePartyType.of_json in
       let id = field_map_exn json "Id" HandshakePartyId.of_json in
@@ -881,6 +892,7 @@ module Handshake =
       let id = (Option.map ~f:HandshakeId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?resources ?action ?expirationTimestamp ?requestedTimestamp ?state
         ?parties ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resources = field_map json "Resources" HandshakeResources.of_json in
       let action = field_map json "Action" ActionType.of_json in
@@ -911,6 +923,7 @@ module ConcurrentModificationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -968,6 +981,7 @@ module AccessDeniedForDependencyException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason"
@@ -991,6 +1005,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1148,6 +1163,7 @@ module AcceptHandshakeResponse =
       let handshake =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshake = field_map json "Handshake" Handshake.of_json in
       make ?handshake ()
@@ -1353,6 +1369,7 @@ module Account =
       let arn = (Option.map ~f:AccountArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?joinedTimestamp ?joinedMethod ?status ?name ?email ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let joinedTimestamp =
         field_map json "JoinedTimestamp" Timestamp.of_json in
@@ -1381,6 +1398,7 @@ module AccountAlreadyClosedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1401,6 +1419,7 @@ module AccountAlreadyRegisteredException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1421,6 +1440,7 @@ module AccountNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1441,6 +1461,7 @@ module AccountNotRegisteredException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1461,6 +1482,7 @@ module AccountOwnerNotVerifiedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1504,6 +1526,7 @@ module AlreadyInOrganizationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1572,6 +1595,7 @@ module AttachPolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~targetId ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetId = field_map_exn json "TargetId" PolicyTargetId.of_json in
       let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
@@ -1610,6 +1634,7 @@ module CancelHandshakeRequest =
         HandshakeId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
@@ -1730,6 +1755,7 @@ module CancelHandshakeResponse =
       let handshake =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshake = field_map json "Handshake" Handshake.of_json in
       make ?handshake ()
@@ -1800,6 +1826,7 @@ module Child =
         (Option.map ~f:ChildType.of_xml) (Xml.child xml_arg0 "Type") in
       let id = (Option.map ~f:ChildId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" ChildType.of_json in
       let id = field_map json "Id" ChildId.of_json in make ?type_ ?id ()
@@ -1820,6 +1847,7 @@ module ChildNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1867,6 +1895,7 @@ module CloseAccountRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
       make ~accountId ()
@@ -1887,6 +1916,7 @@ module ConflictException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2070,6 +2100,7 @@ module ConstraintViolationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" ConstraintViolationExceptionReason.of_json in
@@ -2226,6 +2257,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -2345,6 +2377,7 @@ module CreateAccountRequest =
       let email =
         Email.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Email") in
       make ?tags ?iamUserAccessToBilling ?roleName ~accountName ~email ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let iamUserAccessToBilling =
@@ -2390,6 +2423,7 @@ module UnsupportedAPIEndpointException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2410,6 +2444,7 @@ module FinalizingOrganizationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2534,6 +2569,7 @@ module CreateAccountStatus =
           (Xml.child xml_arg0 "Id") in
       make ?failureReason ?govCloudAccountId ?accountId ?completedTimestamp
         ?requestedTimestamp ?state ?accountName ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason" CreateAccountFailureReason.of_json in
@@ -2681,6 +2717,7 @@ module CreateAccountResponse =
         (Option.map ~f:CreateAccountStatus.of_xml)
           (Xml.child xml_arg0 "CreateAccountStatus") in
       make ?createAccountStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createAccountStatus =
         field_map json "CreateAccountStatus" CreateAccountStatus.of_json in
@@ -2727,6 +2764,7 @@ module CreateAccountStatusNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2809,6 +2847,7 @@ module CreateGovCloudAccountRequest =
       let email =
         Email.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Email") in
       make ?tags ?iamUserAccessToBilling ?roleName ~accountName ~email ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let iamUserAccessToBilling =
@@ -2947,6 +2986,7 @@ module CreateGovCloudAccountResponse =
         (Option.map ~f:CreateAccountStatus.of_xml)
           (Xml.child xml_arg0 "CreateAccountStatus") in
       make ?createAccountStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createAccountStatus =
         field_map json "CreateAccountStatus" CreateAccountStatus.of_json in
@@ -2999,6 +3039,7 @@ module CreateOrganizationRequest =
         (Option.map ~f:OrganizationFeatureSet.of_xml)
           (Xml.child xml_arg0 "FeatureSet") in
       make ?featureSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureSet =
         field_map json "FeatureSet" OrganizationFeatureSet.of_json in
@@ -3085,6 +3126,7 @@ module PolicyTypeSummary =
       let type_ =
         (Option.map ~f:PolicyType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?status ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" PolicyTypeStatus.of_json in
       let type_ = field_map json "Type" PolicyType.of_json in
@@ -3228,6 +3270,7 @@ module Organization =
         (Option.map ~f:OrganizationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?availablePolicyTypes ?masterAccountEmail ?masterAccountId
         ?masterAccountArn ?featureSet ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availablePolicyTypes =
         field_map json "AvailablePolicyTypes" PolicyTypes.of_json in
@@ -3362,6 +3405,7 @@ module CreateOrganizationResponse =
         (Option.map ~f:Organization.of_xml)
           (Xml.child xml_arg0 "Organization") in
       make ?organization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organization = field_map json "Organization" Organization.of_json in
       make ?organization ()
@@ -3437,6 +3481,7 @@ module CreateOrganizationalUnitRequest =
       let parentId =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?tags ~name ~parentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let name = field_map_exn json "Name" OrganizationalUnitName.of_json in
@@ -3459,6 +3504,7 @@ module ParentNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -3532,6 +3578,7 @@ module OrganizationalUnit =
       let id =
         (Option.map ~f:OrganizationalUnitId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" OrganizationalUnitName.of_json in
       let arn = field_map json "Arn" OrganizationalUnitArn.of_json in
@@ -3554,6 +3601,7 @@ module DuplicateOrganizationalUnitException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -3686,6 +3734,7 @@ module CreateOrganizationalUnitResponse =
         (Option.map ~f:OrganizationalUnit.of_xml)
           (Xml.child xml_arg0 "OrganizationalUnit") in
       make ?organizationalUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnit =
         field_map json "OrganizationalUnit" OrganizationalUnit.of_json in
@@ -3797,6 +3846,7 @@ module CreatePolicyRequest =
         PolicyContent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Content") in
       make ?tags ~type_ ~name ~description ~content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let type_ = field_map_exn json "Type" PolicyType.of_json in
@@ -3822,6 +3872,7 @@ module PolicyTypeNotAvailableForOrganizationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -3897,6 +3948,7 @@ module PolicySummary =
       let arn = (Option.map ~f:PolicyArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?awsManaged ?type_ ?description ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let awsManaged = field_map json "AwsManaged" AwsManagedPolicy.of_json in
       let type_ = field_map json "Type" PolicyType.of_json in
@@ -3933,6 +3985,7 @@ module Policy =
         (Option.map ~f:PolicySummary.of_xml)
           (Xml.child xml_arg0 "PolicySummary") in
       make ?content ?policySummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map json "Content" PolicyContent.of_json in
       let policySummary =
@@ -3955,6 +4008,7 @@ module MalformedPolicyDocumentException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -3975,6 +4029,7 @@ module DuplicatePolicyException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -4130,6 +4185,7 @@ module CreatePolicyResponse =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -4153,6 +4209,7 @@ module DeclineHandshakeRequest =
         HandshakeId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
@@ -4273,6 +4330,7 @@ module DeclineHandshakeResponse =
       let handshake =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshake = field_map json "Handshake" Handshake.of_json in
       make ?handshake ()
@@ -4359,6 +4417,7 @@ module DelegatedAdministrator =
       let id = (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?delegationEnabledDate ?joinedTimestamp ?joinedMethod ?status
         ?name ?email ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegationEnabledDate =
         field_map json "DelegationEnabledDate" Timestamp.of_json in
@@ -4449,6 +4508,7 @@ module DelegatedService =
         (Option.map ~f:ServicePrincipal.of_xml)
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?delegationEnabledDate ?servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegationEnabledDate =
         field_map json "DelegationEnabledDate" Timestamp.of_json in
@@ -4502,6 +4562,7 @@ module DeleteOrganizationalUnitRequest =
         OrganizationalUnitId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationalUnitId") in
       make ~organizationalUnitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnitId =
         field_map_exn json "OrganizationalUnitId"
@@ -4527,6 +4588,7 @@ module DeletePolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
       make ~policyId ()
@@ -4560,6 +4622,7 @@ module DeregisterDelegatedAdministratorRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~servicePrincipal ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let servicePrincipal =
         field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
@@ -4586,6 +4649,7 @@ module DescribeAccountRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
       make ~accountId ()
@@ -4683,6 +4747,7 @@ module DescribeAccountResponse =
       let account =
         (Option.map ~f:Account.of_xml) (Xml.child xml_arg0 "Account") in
       make ?account ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let account = field_map json "Account" Account.of_json in
       make ?account ()
@@ -4708,6 +4773,7 @@ module DescribeCreateAccountStatusRequest =
         CreateAccountRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreateAccountRequestId") in
       make ~createAccountRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createAccountRequestId =
         field_map_exn json "CreateAccountRequestId"
@@ -4823,6 +4889,7 @@ module DescribeCreateAccountStatusResponse =
         (Option.map ~f:CreateAccountStatus.of_xml)
           (Xml.child xml_arg0 "CreateAccountStatus") in
       make ?createAccountStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createAccountStatus =
         field_map json "CreateAccountStatus" CreateAccountStatus.of_json in
@@ -4884,6 +4951,7 @@ module DescribeEffectivePolicyRequest =
         EffectivePolicyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyType") in
       make ?targetId ~policyType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetId = field_map json "TargetId" PolicyTargetId.of_json in
       let policyType =
@@ -4906,6 +4974,7 @@ module TargetNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -4926,6 +4995,7 @@ module EffectivePolicyNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -4973,6 +5043,7 @@ module EffectivePolicy =
         (Option.map ~f:PolicyContent.of_xml)
           (Xml.child xml_arg0 "PolicyContent") in
       make ?policyType ?targetId ?lastUpdatedTimestamp ?policyContent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyType =
         field_map json "PolicyType" EffectivePolicyType.of_json in
@@ -5111,6 +5182,7 @@ module DescribeEffectivePolicyResponse =
         (Option.map ~f:EffectivePolicy.of_xml)
           (Xml.child xml_arg0 "EffectivePolicy") in
       make ?effectivePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectivePolicy =
         field_map json "EffectivePolicy" EffectivePolicy.of_json in
@@ -5136,6 +5208,7 @@ module DescribeHandshakeRequest =
         HandshakeId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
@@ -5232,6 +5305,7 @@ module DescribeHandshakeResponse =
       let handshake =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshake = field_map json "Handshake" Handshake.of_json in
       make ?handshake ()
@@ -5324,6 +5398,7 @@ module DescribeOrganizationResponse =
         (Option.map ~f:Organization.of_xml)
           (Xml.child xml_arg0 "Organization") in
       make ?organization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organization = field_map json "Organization" Organization.of_json in
       make ?organization ()
@@ -5349,6 +5424,7 @@ module DescribeOrganizationalUnitRequest =
         OrganizationalUnitId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationalUnitId") in
       make ~organizationalUnitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnitId =
         field_map_exn json "OrganizationalUnitId"
@@ -5371,6 +5447,7 @@ module OrganizationalUnitNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -5473,6 +5550,7 @@ module DescribeOrganizationalUnitResponse =
         (Option.map ~f:OrganizationalUnit.of_xml)
           (Xml.child xml_arg0 "OrganizationalUnit") in
       make ?organizationalUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnit =
         field_map json "OrganizationalUnit" OrganizationalUnit.of_json in
@@ -5497,6 +5575,7 @@ module DescribePolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
       make ~policyId ()
@@ -5517,6 +5596,7 @@ module PolicyNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -5625,6 +5705,7 @@ module DescribePolicyResponse =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -5644,6 +5725,7 @@ module DestinationParentNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -5674,6 +5756,7 @@ module DetachPolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~targetId ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetId = field_map_exn json "TargetId" PolicyTargetId.of_json in
       let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
@@ -5700,6 +5783,7 @@ module DisableAWSServiceAccessRequest =
         ServicePrincipal.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServicePrincipal") in
       make ~servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let servicePrincipal =
         field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
@@ -5749,6 +5833,7 @@ module DisablePolicyTypeRequest =
       let rootId =
         RootId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RootId") in
       make ~policyType ~rootId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyType = field_map_exn json "PolicyType" PolicyType.of_json in
       let rootId = field_map_exn json "RootId" RootId.of_json in
@@ -5770,6 +5855,7 @@ module RootNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -5845,6 +5931,7 @@ module Root =
       let arn = (Option.map ~f:RootArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:RootId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?policyTypes ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyTypes = field_map json "PolicyTypes" PolicyTypes.of_json in
       let name = field_map json "Name" RootName.of_json in
@@ -5868,6 +5955,7 @@ module PolicyTypeNotEnabledException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -5888,6 +5976,7 @@ module PolicyChangesInProgressException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -6039,6 +6128,7 @@ module DisablePolicyTypeResponse =
     let of_xml xml_arg0 =
       let root = (Option.map ~f:Root.of_xml) (Xml.child xml_arg0 "Root") in
       make ?root ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let root = field_map json "Root" Root.of_json in make ?root ()
     let to_json v = composed_to_json to_value v
@@ -6058,6 +6148,7 @@ module DuplicateAccountException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -6078,6 +6169,7 @@ module DuplicateHandshakeException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -6098,6 +6190,7 @@ module DuplicatePolicyAttachmentException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -6123,6 +6216,7 @@ module EnableAWSServiceAccessRequest =
         ServicePrincipal.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServicePrincipal") in
       make ~servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let servicePrincipal =
         field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
@@ -6138,6 +6232,7 @@ module EnableAllFeaturesRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6247,6 +6342,7 @@ module EnableAllFeaturesResponse =
       let handshake =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshake = field_map json "Handshake" Handshake.of_json in
       make ?handshake ()
@@ -6277,6 +6373,7 @@ module EnablePolicyTypeRequest =
       let rootId =
         RootId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RootId") in
       make ~policyType ~rootId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyType = field_map_exn json "PolicyType" PolicyType.of_json in
       let rootId = field_map_exn json "RootId" RootId.of_json in
@@ -6298,6 +6395,7 @@ module PolicyTypeAlreadyEnabledException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -6464,6 +6562,7 @@ module EnablePolicyTypeResponse =
     let of_xml xml_arg0 =
       let root = (Option.map ~f:Root.of_xml) (Xml.child xml_arg0 "Root") in
       make ?root ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let root = field_map json "Root" Root.of_json in make ?root ()
     let to_json v = composed_to_json to_value v
@@ -6494,6 +6593,7 @@ module EnabledServicePrincipal =
         (Option.map ~f:ServicePrincipal.of_xml)
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?dateEnabled ?servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dateEnabled = field_map json "DateEnabled" Timestamp.of_json in
       let servicePrincipal =
@@ -6570,6 +6670,7 @@ module HandshakeFilter =
       let actionType =
         (Option.map ~f:ActionType.of_xml) (Xml.child xml_arg0 "ActionType") in
       make ?parentHandshakeId ?actionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parentHandshakeId =
         field_map json "ParentHandshakeId" HandshakeId.of_json in
@@ -6650,6 +6751,7 @@ module InviteAccountToOrganizationRequest =
         HandshakeParty.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Target") in
       make ?tags ?notes ~target ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let notes = field_map json "Notes" HandshakeNotes.of_json in
@@ -6808,6 +6910,7 @@ module InviteAccountToOrganizationResponse =
       let handshake =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let handshake = field_map json "Handshake" Handshake.of_json in
       make ?handshake ()
@@ -6873,6 +6976,7 @@ module ListAWSServiceAccessForOrganizationRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6994,6 +7098,7 @@ module ListAWSServiceAccessForOrganizationResponse =
         (Option.map ~f:EnabledServicePrincipals.of_xml)
           (Xml.child xml_arg0 "EnabledServicePrincipals") in
       make ?nextToken ?enabledServicePrincipals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let enabledServicePrincipals =
@@ -7034,6 +7139,7 @@ module ListAccountsForParentRequest =
       let parentId =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?maxResults ?nextToken ~parentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7138,6 +7244,7 @@ module ListAccountsForParentResponse =
       let accounts =
         (Option.map ~f:Accounts.of_xml) (Xml.child xml_arg0 "Accounts") in
       make ?nextToken ?accounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let accounts = field_map json "Accounts" Accounts.of_json in
@@ -7168,6 +7275,7 @@ module ListAccountsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7262,6 +7370,7 @@ module ListAccountsResponse =
       let accounts =
         (Option.map ~f:Accounts.of_xml) (Xml.child xml_arg0 "Accounts") in
       make ?nextToken ?accounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let accounts = field_map json "Accounts" Accounts.of_json in
@@ -7309,6 +7418,7 @@ module ListChildrenRequest =
       let parentId =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?maxResults ?nextToken ~childType ~parentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7415,6 +7525,7 @@ module ListChildrenResponse =
       let children =
         (Option.map ~f:Children.of_xml) (Xml.child xml_arg0 "Children") in
       make ?nextToken ?children ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let children = field_map json "Children" Children.of_json in
@@ -7453,6 +7564,7 @@ module ListCreateAccountStatusRequest =
         (Option.map ~f:CreateAccountStates.of_xml)
           (Xml.child xml_arg0 "States") in
       make ?maxResults ?nextToken ?states ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7564,6 +7676,7 @@ module ListCreateAccountStatusResponse =
         (Option.map ~f:CreateAccountStatuses.of_xml)
           (Xml.child xml_arg0 "CreateAccountStatuses") in
       make ?nextToken ?createAccountStatuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let createAccountStatuses =
@@ -7605,6 +7718,7 @@ module ListDelegatedAdministratorsRequest =
         (Option.map ~f:ServicePrincipal.of_xml)
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?maxResults ?nextToken ?servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7728,6 +7842,7 @@ module ListDelegatedAdministratorsResponse =
         (Option.map ~f:DelegatedAdministrators.of_xml)
           (Xml.child xml_arg0 "DelegatedAdministrators") in
       make ?nextToken ?delegatedAdministrators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let delegatedAdministrators =
@@ -7769,6 +7884,7 @@ module ListDelegatedServicesForAccountRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?maxResults ?nextToken ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7910,6 +8026,7 @@ module ListDelegatedServicesForAccountResponse =
         (Option.map ~f:DelegatedServices.of_xml)
           (Xml.child xml_arg0 "DelegatedServices") in
       make ?nextToken ?delegatedServices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let delegatedServices =
@@ -7948,6 +8065,7 @@ module ListHandshakesForAccountRequest =
       let filter =
         (Option.map ~f:HandshakeFilter.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8043,6 +8161,7 @@ module ListHandshakesForAccountResponse =
       let handshakes =
         (Option.map ~f:Handshakes.of_xml) (Xml.child xml_arg0 "Handshakes") in
       make ?nextToken ?handshakes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let handshakes = field_map json "Handshakes" Handshakes.of_json in
@@ -8080,6 +8199,7 @@ module ListHandshakesForOrganizationRequest =
       let filter =
         (Option.map ~f:HandshakeFilter.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8188,6 +8308,7 @@ module ListHandshakesForOrganizationResponse =
       let handshakes =
         (Option.map ~f:Handshakes.of_xml) (Xml.child xml_arg0 "Handshakes") in
       make ?nextToken ?handshakes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let handshakes = field_map json "Handshakes" Handshakes.of_json in
@@ -8226,6 +8347,7 @@ module ListOrganizationalUnitsForParentRequest =
       let parentId =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?maxResults ?nextToken ~parentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8358,6 +8480,7 @@ module ListOrganizationalUnitsForParentResponse =
         (Option.map ~f:OrganizationalUnits.of_xml)
           (Xml.child xml_arg0 "OrganizationalUnits") in
       make ?nextToken ?organizationalUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let organizationalUnits =
@@ -8397,6 +8520,7 @@ module ListParentsRequest =
       let childId =
         ChildId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ChildId") in
       make ?maxResults ?nextToken ~childId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8450,6 +8574,7 @@ module Parent =
         (Option.map ~f:ParentType.of_xml) (Xml.child xml_arg0 "Type") in
       let id = (Option.map ~f:ParentId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" ParentType.of_json in
       let id = field_map json "Id" ParentId.of_json in make ?type_ ?id ()
@@ -8576,6 +8701,7 @@ module ListParentsResponse =
       let parents =
         (Option.map ~f:Parents.of_xml) (Xml.child xml_arg0 "Parents") in
       make ?nextToken ?parents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let parents = field_map json "Parents" Parents.of_json in
@@ -8623,6 +8749,7 @@ module ListPoliciesForTargetRequest =
         PolicyTargetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetId") in
       make ?maxResults ?nextToken ~filter ~targetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8764,6 +8891,7 @@ module ListPoliciesForTargetResponse =
       let policies =
         (Option.map ~f:Policies.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?nextToken ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let policies = field_map json "Policies" Policies.of_json in
@@ -8802,6 +8930,7 @@ module ListPoliciesRequest =
       let filter =
         PolicyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Filter") in
       make ?maxResults ?nextToken ~filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8909,6 +9038,7 @@ module ListPoliciesResponse =
       let policies =
         (Option.map ~f:Policies.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?nextToken ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let policies = field_map json "Policies" Policies.of_json in
@@ -8939,6 +9069,7 @@ module ListRootsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9055,6 +9186,7 @@ module ListRootsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let roots = (Option.map ~f:Roots.of_xml) (Xml.child xml_arg0 "Roots") in
       make ?nextToken ?roots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let roots = field_map json "Roots" Roots.of_json in
@@ -9107,6 +9239,7 @@ module ListTagsForResourceRequest =
         TaggableResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?nextToken ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let resourceId =
@@ -9210,6 +9343,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -9248,6 +9382,7 @@ module ListTargetsForPolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ?maxResults ?nextToken ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9336,6 +9471,7 @@ module PolicyTargetSummary =
       let targetId =
         (Option.map ~f:PolicyTargetId.of_xml) (Xml.child xml_arg0 "TargetId") in
       make ?type_ ?name ?arn ?targetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" TargetType.of_json in
       let name = field_map json "Name" TargetName.of_json in
@@ -9479,6 +9615,7 @@ module ListTargetsForPolicyResponse =
       let targets =
         (Option.map ~f:PolicyTargets.of_xml) (Xml.child xml_arg0 "Targets") in
       make ?nextToken ?targets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let targets = field_map json "Targets" PolicyTargets.of_json in
@@ -9500,6 +9637,7 @@ module MasterCannotLeaveOrganizationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -9542,6 +9680,7 @@ module MoveAccountRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~destinationParentId ~sourceParentId ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationParentId =
         field_map_exn json "DestinationParentId" ParentId.of_json in
@@ -9566,6 +9705,7 @@ module OrganizationNotEmptyException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -9586,6 +9726,7 @@ module OrganizationalUnitNotEmptyException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -9606,6 +9747,7 @@ module PolicyInUseException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -9626,6 +9768,7 @@ module PolicyNotAttachedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -9659,6 +9802,7 @@ module RegisterDelegatedAdministratorRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~servicePrincipal ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let servicePrincipal =
         field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
@@ -9685,6 +9829,7 @@ module RemoveAccountFromOrganizationRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
       make ~accountId ()
@@ -9705,6 +9850,7 @@ module SourceParentNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -9758,6 +9904,7 @@ module TagResourceRequest =
         TaggableResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tags ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceId =
@@ -9790,6 +9937,7 @@ module UntagResourceRequest =
         TaggableResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeys ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceId =
@@ -9825,6 +9973,7 @@ module UpdateOrganizationalUnitRequest =
         OrganizationalUnitId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationalUnitId") in
       make ?name ~organizationalUnitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" OrganizationalUnitName.of_json in
       let organizationalUnitId =
@@ -9953,6 +10102,7 @@ module UpdateOrganizationalUnitResponse =
         (Option.map ~f:OrganizationalUnit.of_xml)
           (Xml.child xml_arg0 "OrganizationalUnit") in
       make ?organizationalUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnit =
         field_map json "OrganizationalUnit" OrganizationalUnit.of_json in
@@ -9999,6 +10149,7 @@ module UpdatePolicyRequest =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ?content ?description ?name ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map json "Content" PolicyContent.of_json in
       let description =
@@ -10166,6 +10317,7 @@ module UpdatePolicyResponse =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v

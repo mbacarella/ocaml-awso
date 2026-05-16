@@ -168,6 +168,7 @@ module ErrorDetail =
         (Option.map ~f:ErrorCodeString.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage =
         field_map json "ErrorMessage" ExceptionMessageContent.of_json in
@@ -235,6 +236,7 @@ module Entity =
       let type_ =
         EntityType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?identifier ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map json "Identifier" Identifier.of_json in
       let type_ = field_map_exn json "Type" EntityType.of_json in
@@ -557,6 +559,7 @@ module Change =
         ChangeType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeType") in
       make ?changeName ~details ~entity ~changeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeName = field_map json "ChangeName" ChangeName.of_json in
       let details = field_map_exn json "Details" Json.of_json in
@@ -627,6 +630,7 @@ module EntitySummary =
         (Option.map ~f:EntityNameString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?visibility ?lastModifiedDate ?entityArn ?entityId ?entityType
         ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let visibility = field_map json "Visibility" VisibilityValue.of_json in
       let lastModifiedDate =
@@ -662,6 +666,7 @@ module Filter =
       let name =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?valueList ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valueList = field_map json "ValueList" ValueList.of_json in
       let name = field_map json "Name" FilterName.of_json in
@@ -793,6 +798,7 @@ module ChangeSetSummaryListItem =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ChangeSetId") in
       make ?failureCode ?entityIdList ?status ?endTime ?startTime
         ?changeSetName ?changeSetArn ?changeSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureCode = field_map json "FailureCode" FailureCode.of_json in
       let entityIdList = field_map json "EntityIdList" ResourceIdList.of_json in
@@ -851,6 +857,7 @@ module ChangeSummary =
       let changeType =
         (Option.map ~f:ChangeType.of_xml) (Xml.child xml_arg0 "ChangeType") in
       make ?changeName ?errorDetailList ?details ?entity ?changeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeName = field_map json "ChangeName" ChangeName.of_json in
       let errorDetailList =
@@ -877,6 +884,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -897,6 +905,7 @@ module InternalServiceException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -917,6 +926,7 @@ module ResourceInUseException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -937,6 +947,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -957,6 +968,7 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -978,6 +990,7 @@ module ThrottlingException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -998,6 +1011,7 @@ module ValidationException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -1182,6 +1196,7 @@ module Sort =
       let sortBy =
         (Option.map ~f:SortBy.of_xml) (Xml.child xml_arg0 "SortBy") in
       make ?sortOrder ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortOrder = field_map json "SortOrder" SortOrder.of_json in
       let sortBy = field_map json "SortBy" SortBy.of_json in
@@ -1230,6 +1245,7 @@ module ResourceNotSupportedException =
         (Option.map ~f:ExceptionMessageContent.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessageContent.of_json in
       make ?message ()
@@ -1365,6 +1381,7 @@ module StartChangeSetResponse =
       let changeSetId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ChangeSetId") in
       make ?changeSetArn ?changeSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeSetArn = field_map json "ChangeSetArn" ARN.of_json in
       let changeSetId = field_map json "ChangeSetId" ResourceId.of_json in
@@ -1415,6 +1432,7 @@ module StartChangeSetRequest =
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Catalog") in
       make ?clientRequestToken ?changeSetName ~changeSet ~catalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -1514,6 +1532,7 @@ module ListEntitiesResponse =
         (Option.map ~f:EntitySummaryList.of_xml)
           (Xml.child xml_arg0 "EntitySummaryList") in
       make ?nextToken ?entitySummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let entitySummaryList =
@@ -1583,6 +1602,7 @@ module ListEntitiesRequest =
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Catalog") in
       make ?maxResults ?nextToken ?sort ?filterList ~entityType ~catalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultInteger.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -1672,6 +1692,7 @@ module ListChangeSetsResponse =
         (Option.map ~f:ChangeSetSummaryList.of_xml)
           (Xml.child xml_arg0 "ChangeSetSummaryList") in
       make ?nextToken ?changeSetSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let changeSetSummaryList =
@@ -1726,6 +1747,7 @@ module ListChangeSetsRequest =
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Catalog") in
       make ?nextToken ?maxResults ?sort ?filterList ~catalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResultInteger.of_json in
@@ -1867,6 +1889,7 @@ module DescribeEntityResponse =
         (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "EntityType") in
       make ?details ?lastModifiedDate ?entityArn ?entityIdentifier
         ?entityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "Details" Json.of_json in
       let lastModifiedDate =
@@ -1902,6 +1925,7 @@ module DescribeEntityRequest =
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "catalog") in
       make ~entityId ~catalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entityId = field_map_exn json "EntityId" ResourceId.of_json in
       let catalog = field_map_exn json "Catalog" Catalog.of_json in
@@ -2062,6 +2086,7 @@ module DescribeChangeSetResponse =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ChangeSetId") in
       make ?changeSet ?failureDescription ?failureCode ?status ?endTime
         ?startTime ?changeSetName ?changeSetArn ?changeSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeSet = field_map json "ChangeSet" ChangeSetDescription.of_json in
       let failureDescription =
@@ -2103,6 +2128,7 @@ module DescribeChangeSetRequest =
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "catalog") in
       make ~changeSetId ~catalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeSetId = field_map_exn json "ChangeSetId" ResourceId.of_json in
       let catalog = field_map_exn json "Catalog" Catalog.of_json in
@@ -2204,6 +2230,7 @@ module CancelChangeSetResponse =
       let changeSetId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ChangeSetId") in
       make ?changeSetArn ?changeSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeSetArn = field_map json "ChangeSetArn" ARN.of_json in
       let changeSetId = field_map json "ChangeSetId" ResourceId.of_json in
@@ -2236,6 +2263,7 @@ module CancelChangeSetRequest =
       let catalog =
         Catalog.of_xml (Xml.child_exn ~context:context_ xml_arg0 "catalog") in
       make ~changeSetId ~catalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeSetId = field_map_exn json "ChangeSetId" ResourceId.of_json in
       let catalog = field_map_exn json "Catalog" Catalog.of_json in

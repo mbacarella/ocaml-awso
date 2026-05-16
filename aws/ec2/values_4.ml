@@ -140,6 +140,7 @@ module IntegrateServices =
         (Option.map ~f:AthenaIntegrationsSet.of_xml)
           (Xml.child xml_arg0 "AthenaIntegration") in
       make ?athenaIntegrations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let athenaIntegrations =
         field_map json "AthenaIntegrations" AthenaIntegrationsSet.of_json in
@@ -322,6 +323,7 @@ module ExportTaskS3LocationRequest =
       let s3Bucket =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Prefix ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Prefix = field_map json "S3Prefix" String_.of_json in
       let s3Bucket = field_map_exn json "S3Bucket" String_.of_json in
@@ -352,6 +354,7 @@ module ClientCertificateRevocationListStatus =
         (Option.map ~f:ClientCertificateRevocationListStatusCode.of_xml)
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code =
@@ -419,6 +422,7 @@ module TransitGatewayPropagation =
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?state ?transitGatewayRouteTableId ?resourceType ?resourceId
         ?transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State" TransitGatewayPropagationState.of_json in
@@ -550,6 +554,7 @@ module FastLaunchLaunchTemplateSpecificationRequest =
         (Option.map ~f:LaunchTemplateId.of_xml)
           (Xml.child xml_arg0 "LaunchTemplateId") in
       make ~version ?launchTemplateName ?launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "Version" String_.of_json in
       let launchTemplateName =
@@ -578,6 +583,7 @@ module FastLaunchSnapshotConfigurationRequest =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "TargetResourceCount") in
       make ?targetResourceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetResourceCount =
         field_map json "TargetResourceCount" Integer.of_json in
@@ -657,6 +663,7 @@ module TransitGatewayAssociation =
           (Xml.child xml_arg0 "transitGatewayRouteTableId") in
       make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId
         ?transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State" TransitGatewayAssociationState.of_json in
@@ -710,6 +717,7 @@ module InstanceEventWindowDisassociationRequest =
         (Option.map ~f:InstanceIdList.of_xml)
           (Xml.child xml_arg0 "InstanceId") in
       make ?dedicatedHostIds ?instanceTags ?instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dedicatedHostIds =
         field_map json "DedicatedHostIds" DedicatedHostIdList.of_json in
@@ -2561,6 +2569,7 @@ module SpotDatafeedSubscription =
       let bucket =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?state ?prefix ?ownerId ?fault ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" DatafeedSubscriptionState.of_json in
       let prefix = field_map json "Prefix" String_.of_json in
@@ -2895,6 +2904,7 @@ module SlotStartTimeRangeRequest =
       let earliestTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EarliestTime") in
       make ?latestTime ?earliestTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestTime = field_map json "LatestTime" DateTime.of_json in
       let earliestTime = field_map json "EarliestTime" DateTime.of_json in
@@ -3004,6 +3014,7 @@ module ScheduledInstanceRecurrenceRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Frequency") in
       make ?occurrenceUnit ?occurrenceRelativeToEnd ?occurrenceDays ?interval
         ?frequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let occurrenceUnit = field_map json "OccurrenceUnit" String_.of_json in
       let occurrenceRelativeToEnd =
@@ -3043,6 +3054,7 @@ module SlotDateTimeRangeRequest =
         DateTime.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EarliestTime") in
       make ~latestTime ~earliestTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestTime = field_map_exn json "LatestTime" DateTime.of_json in
       let earliestTime = field_map_exn json "EarliestTime" DateTime.of_json in
@@ -7326,6 +7338,7 @@ module TransitGatewayMulticastDeregisteredGroupSources =
           (Xml.child xml_arg0 "transitGatewayMulticastDomainId") in
       make ?groupIpAddress ?deregisteredNetworkInterfaceIds
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupIpAddress = field_map json "GroupIpAddress" String_.of_json in
       let deregisteredNetworkInterfaceIds =
@@ -7378,6 +7391,7 @@ module TransitGatewayMulticastDeregisteredGroupMembers =
           (Xml.child xml_arg0 "transitGatewayMulticastDomainId") in
       make ?groupIpAddress ?deregisteredNetworkInterfaceIds
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupIpAddress = field_map json "GroupIpAddress" String_.of_json in
       let deregisteredNetworkInterfaceIds =
@@ -7417,6 +7431,7 @@ module DeregisterInstanceTagAttributeRequest =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "IncludeAllTagsOfInstance") in
       make ?instanceTagKeys ?includeAllTagsOfInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceTagKeys =
         field_map json "InstanceTagKeys" InstanceTagKeySet.of_json in
@@ -7666,6 +7681,7 @@ module InstanceEventWindowStateChange =
         (Option.map ~f:InstanceEventWindowId.of_xml)
           (Xml.child xml_arg0 "instanceEventWindowId") in
       make ?state ?instanceEventWindowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" InstanceEventWindowState.of_json in
       let instanceEventWindowId =
@@ -7820,6 +7836,7 @@ module VpnConnectionOptionsSpecification =
       make ?remoteIpv6NetworkCidr ?localIpv6NetworkCidr
         ?remoteIpv4NetworkCidr ?localIpv4NetworkCidr ?tunnelOptions
         ?tunnelInsideIpVersion ?staticRoutesOnly ?enableAcceleration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteIpv6NetworkCidr =
         field_map json "RemoteIpv6NetworkCidr" String_.of_json in
@@ -7894,6 +7911,7 @@ module CreateTransitGatewayVpcAttachmentRequestOptions =
         (Option.map ~f:DnsSupportValue.of_xml)
           (Xml.child xml_arg0 "DnsSupport") in
       make ?applianceModeSupport ?ipv6Support ?dnsSupport ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applianceModeSupport =
         field_map json "ApplianceModeSupport"
@@ -8000,6 +8018,7 @@ module TransitGatewayRequestOptions =
         ?vpnEcmpSupport ?defaultRouteTablePropagation
         ?defaultRouteTableAssociation ?autoAcceptSharedAttachments
         ?amazonSideAsn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayCidrBlocks =
         field_map json "TransitGatewayCidrBlocks"
@@ -8084,6 +8103,7 @@ module CreateTransitGatewayMulticastDomainRequestOptions =
           (Xml.child xml_arg0 "Igmpv2Support") in
       make ?autoAcceptSharedAssociations ?staticSourcesSupport ?igmpv2Support
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoAcceptSharedAssociations =
         field_map json "AutoAcceptSharedAssociations"
@@ -8113,6 +8133,7 @@ module CreateTransitGatewayConnectRequestOptions =
         ProtocolValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Protocol") in
       make ~protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol = field_map_exn json "Protocol" ProtocolValue.of_json in
       make ~protocol ()
@@ -8133,6 +8154,7 @@ module TransitGatewayConnectRequestBgpOptions =
       let peerAsn =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "PeerAsn") in
       make ?peerAsn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerAsn = field_map json "PeerAsn" Long.of_json in make ?peerAsn ()
     let to_json v = composed_to_json to_value v
@@ -8226,6 +8248,7 @@ module InstanceSpecification =
       let instanceId =
         (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
       make ?excludeBootVolume ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let excludeBootVolume =
         field_map json "ExcludeBootVolume" Boolean.of_json in
@@ -8345,6 +8368,7 @@ module ValidationWarning =
       let errors =
         (Option.map ~f:ErrorSet.of_xml) (Xml.child xml_arg0 "errorSet") in
       make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "Errors" ErrorSet.of_json in
       make ?errors ()
@@ -8694,6 +8718,7 @@ module RequestLaunchTemplateData =
         ?placement ?monitoring ?keyName ?instanceType ?imageId
         ?networkInterfaces ?blockDeviceMappings ?iamInstanceProfile
         ?ebsOptimized ?kernelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maintenanceOptions =
         field_map json "MaintenanceOptions"
@@ -8819,6 +8844,7 @@ module ExportToS3TaskSpecification =
         (Option.map ~f:ContainerFormat.of_xml)
           (Xml.child xml_arg0 "containerFormat") in
       make ?s3Prefix ?s3Bucket ?diskImageFormat ?containerFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Prefix = field_map json "S3Prefix" String_.of_json in
       let s3Bucket = field_map json "S3Bucket" String_.of_json in
@@ -8846,6 +8872,7 @@ module StorageLocation =
       let bucket =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map json "Key" String_.of_json in
       let bucket = field_map json "Bucket" String_.of_json in
@@ -8890,6 +8917,7 @@ module DestinationOptionsRequest =
         (Option.map ~f:DestinationFileFormat.of_xml)
           (Xml.child xml_arg0 "FileFormat") in
       make ?perHourPartition ?hiveCompatiblePartitions ?fileFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let perHourPartition =
         field_map json "PerHourPartition" Boolean.of_json in
@@ -9079,6 +9107,7 @@ module OnDemandOptionsRequest =
       make ?maxTotalPrice ?minTargetCapacity ?singleAvailabilityZone
         ?singleInstanceType ?capacityReservationOptions ?allocationStrategy
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxTotalPrice = field_map json "MaxTotalPrice" String_.of_json in
       let minTargetCapacity =

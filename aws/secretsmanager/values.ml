@@ -205,6 +205,7 @@ module Tag =
         (Option.map ~f:TagValueType.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKeyType.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValueType.of_json in
       let key = field_map json "Key" TagKeyType.of_json in
@@ -493,6 +494,7 @@ module RotationRulesType =
         (Option.map ~f:AutomaticallyRotateAfterDaysType.of_xml)
           (Xml.child xml_arg0 "AutomaticallyAfterDays") in
       make ?scheduleExpression ?duration ?automaticallyAfterDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduleExpression =
         field_map json "ScheduleExpression" ScheduleExpressionType.of_json in
@@ -735,6 +737,7 @@ module ValidationErrorsEntry =
       let checkName =
         (Option.map ~f:NameType.of_xml) (Xml.child xml_arg0 "CheckName") in
       make ?errorMessage ?checkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let checkName = field_map json "CheckName" NameType.of_json in
@@ -789,6 +792,7 @@ module ReplicationStatusType =
       let region =
         (Option.map ~f:RegionType.of_xml) (Xml.child xml_arg0 "Region") in
       make ?lastAccessedDate ?statusMessage ?status ?kmsKeyId ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastAccessedDate =
         field_map json "LastAccessedDate" LastAccessedDateType.of_json in
@@ -823,6 +827,7 @@ module ReplicaRegionType =
       let region =
         (Option.map ~f:RegionType.of_xml) (Xml.child xml_arg0 "Region") in
       make ?kmsKeyId ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "KmsKeyId" KmsKeyIdType.of_json in
       let region = field_map json "Region" RegionType.of_json in
@@ -994,6 +999,7 @@ module SecretListEntry =
         ?tags ?deletedDate ?lastAccessedDate ?lastChangedDate
         ?lastRotatedDate ?rotationRules ?rotationLambdaARN ?rotationEnabled
         ?kmsKeyId ?description ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let primaryRegion = field_map json "PrimaryRegion" RegionType.of_json in
       let createdDate = field_map json "CreatedDate" TimestampType.of_json in
@@ -1051,6 +1057,7 @@ module Filter =
         (Option.map ~f:FilterNameStringType.of_xml)
           (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" FilterValuesStringList.of_json in
       let key = field_map json "Key" FilterNameStringType.of_json in
@@ -1119,6 +1126,7 @@ module SecretVersionsListEntry =
           (Xml.child xml_arg0 "VersionId") in
       make ?kmsKeyIds ?createdDate ?lastAccessedDate ?versionStages
         ?versionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyIds = field_map json "KmsKeyIds" KmsKeyIdListType.of_json in
       let createdDate = field_map json "CreatedDate" CreatedDateType.of_json in
@@ -1158,6 +1166,7 @@ module InternalServiceError =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1176,6 +1185,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1194,6 +1204,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1213,6 +1224,7 @@ module MalformedPolicyDocumentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1231,6 +1243,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1312,6 +1325,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1331,6 +1345,7 @@ module DecryptionFailure =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1350,6 +1365,7 @@ module EncryptionFailure =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1369,6 +1385,7 @@ module PreconditionNotMetException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1388,6 +1405,7 @@ module ResourceExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1556,6 +1574,7 @@ module PublicPolicyException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1575,6 +1594,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1961,6 +1981,7 @@ module ValidateResourcePolicyResponse =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "PolicyValidationPassed") in
       make ?validationErrors ?policyValidationPassed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validationErrors =
         field_map json "ValidationErrors" ValidationErrorsType.of_json in
@@ -1995,6 +2016,7 @@ module ValidateResourcePolicyRequest =
       let secretId =
         (Option.map ~f:SecretIdType.of_xml) (Xml.child xml_arg0 "SecretId") in
       make ~resourcePolicy ?secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcePolicy =
         field_map_exn json "ResourcePolicy"
@@ -2087,6 +2109,7 @@ module UpdateSecretVersionStageResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" SecretNameType.of_json in
       let aRN = field_map json "ARN" SecretARNType.of_json in
@@ -2141,6 +2164,7 @@ module UpdateSecretVersionStageRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?moveToVersionId ?removeFromVersionId ~versionStage ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let moveToVersionId =
         field_map json "MoveToVersionId" SecretVersionIdType.of_json in
@@ -2295,6 +2319,7 @@ module UpdateSecretResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionId ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
       let name = field_map json "Name" SecretNameType.of_json in
@@ -2373,6 +2398,7 @@ module UpdateSecretRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?secretString ?secretBinary ?kmsKeyId ?description
         ?clientRequestToken ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretString =
         field_map json "SecretString" SecretStringType.of_json in
@@ -2413,6 +2439,7 @@ module UntagResourceRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~tagKeys ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
@@ -2444,6 +2471,7 @@ module TagResourceRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~tags ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
@@ -2521,6 +2549,7 @@ module StopReplicationToReplicaResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aRN = field_map json "ARN" SecretARNType.of_json in make ?aRN ()
     let to_json v = composed_to_json to_value v
@@ -2542,6 +2571,7 @@ module StopReplicationToReplicaRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
       make ~secretId ()
@@ -2628,6 +2658,7 @@ module RotateSecretResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionId ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
       let name = field_map json "Name" SecretNameType.of_json in
@@ -2699,6 +2730,7 @@ module RotateSecretRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?rotateImmediately ?rotationRules ?rotationLambdaARN
         ?clientRequestToken ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rotateImmediately =
         field_map json "RotateImmediately" BooleanType.of_json in
@@ -2788,6 +2820,7 @@ module RestoreSecretResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" SecretNameType.of_json in
       let aRN = field_map json "ARN" SecretARNType.of_json in
@@ -2813,6 +2846,7 @@ module RestoreSecretRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
       make ~secretId ()
@@ -2897,6 +2931,7 @@ module ReplicateSecretToRegionsResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?replicationStatus ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationStatus =
         field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
@@ -2941,6 +2976,7 @@ module ReplicateSecretToRegionsRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?forceOverwriteReplicaSecret ~addReplicaRegions ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceOverwriteReplicaSecret =
         field_map json "ForceOverwriteReplicaSecret" BooleanType.of_json in
@@ -3031,6 +3067,7 @@ module RemoveRegionsFromReplicationResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?replicationStatus ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationStatus =
         field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
@@ -3064,6 +3101,7 @@ module RemoveRegionsFromReplicationRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~removeReplicaRegions ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeReplicaRegions =
         field_map_exn json "RemoveReplicaRegions"
@@ -3200,6 +3238,7 @@ module PutSecretValueResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionStages ?versionId ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionStages =
         field_map json "VersionStages" SecretVersionStagesType.of_json in
@@ -3273,6 +3312,7 @@ module PutSecretValueRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?versionStages ?secretString ?secretBinary ?clientRequestToken
         ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionStages =
         field_map json "VersionStages" SecretVersionStagesType.of_json in
@@ -3380,6 +3420,7 @@ module PutResourcePolicyResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" NameType.of_json in
       let aRN = field_map json "ARN" SecretARNType.of_json in
@@ -3424,6 +3465,7 @@ module PutResourcePolicyRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?blockPublicPolicy ~resourcePolicy ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blockPublicPolicy =
         field_map json "BlockPublicPolicy" BooleanType.of_json in
@@ -3503,6 +3545,7 @@ module ListSecretsResponse =
         (Option.map ~f:SecretListType.of_xml)
           (Xml.child xml_arg0 "SecretList") in
       make ?nextToken ?secretList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextTokenType.of_json in
       let secretList = field_map json "SecretList" SecretListType.of_json in
@@ -3547,6 +3590,7 @@ module ListSecretsRequest =
         (Option.map ~f:MaxResultsType.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?sortOrder ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortOrder = field_map json "SortOrder" SortOrderType.of_json in
       let filters = field_map json "Filters" FiltersListType.of_json in
@@ -3643,6 +3687,7 @@ module ListSecretVersionIdsResponse =
         (Option.map ~f:SecretVersionsListType.of_xml)
           (Xml.child xml_arg0 "Versions") in
       make ?name ?aRN ?nextToken ?versions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" SecretNameType.of_json in
       let aRN = field_map json "ARN" SecretARNType.of_json in
@@ -3695,6 +3740,7 @@ module ListSecretVersionIdsRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?includeDeprecated ?nextToken ?maxResults ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeDeprecated =
         field_map json "IncludeDeprecated" BooleanType.of_json in
@@ -3843,6 +3889,7 @@ module GetSecretValueResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?createdDate ?versionStages ?secretString ?secretBinary ?versionId
         ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdDate = field_map json "CreatedDate" CreatedDateType.of_json in
       let versionStages =
@@ -3895,6 +3942,7 @@ module GetSecretValueRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?versionStage ?versionId ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionStage =
         field_map json "VersionStage" SecretVersionStageType.of_json in
@@ -3989,6 +4037,7 @@ module GetResourcePolicyResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?resourcePolicy ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcePolicy =
         field_map json "ResourcePolicy" NonEmptyResourcePolicyType.of_json in
@@ -4016,6 +4065,7 @@ module GetResourcePolicyRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
       make ~secretId ()
@@ -4084,6 +4134,7 @@ module GetRandomPasswordResponse =
         (Option.map ~f:RandomPasswordType.of_xml)
           (Xml.child xml_arg0 "RandomPassword") in
       make ?randomPassword ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let randomPassword =
         field_map json "RandomPassword" RandomPasswordType.of_json in
@@ -4186,6 +4237,7 @@ module GetRandomPasswordRequest =
       make ?requireEachIncludedType ?includeSpace ?excludeLowercase
         ?excludeUppercase ?excludePunctuation ?excludeNumbers
         ?excludeCharacters ?passwordLength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requireEachIncludedType =
         field_map json "RequireEachIncludedType"
@@ -4426,6 +4478,7 @@ module DescribeSecretResponse =
         ?versionIdsToStages ?tags ?deletedDate ?lastAccessedDate
         ?lastChangedDate ?lastRotatedDate ?rotationRules ?rotationLambdaARN
         ?rotationEnabled ?kmsKeyId ?description ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationStatus =
         field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
@@ -4479,6 +4532,7 @@ module DescribeSecretRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
       make ~secretId ()
@@ -4566,6 +4620,7 @@ module DeleteSecretResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?deletionDate ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletionDate =
         field_map json "DeletionDate" DeletionDateType.of_json in
@@ -4614,6 +4669,7 @@ module DeleteSecretRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?forceDeleteWithoutRecovery ?recoveryWindowInDays ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDeleteWithoutRecovery =
         field_map json "ForceDeleteWithoutRecovery" BooleanType.of_json in
@@ -4700,6 +4756,7 @@ module DeleteResourcePolicyResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" NameType.of_json in
       let aRN = field_map json "ARN" SecretARNType.of_json in
@@ -4725,6 +4782,7 @@ module DeleteResourcePolicyRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
       make ~secretId ()
@@ -4886,6 +4944,7 @@ module CreateSecretResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?replicationStatus ?versionId ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationStatus =
         field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
@@ -4994,6 +5053,7 @@ module CreateSecretRequest =
       make ?forceOverwriteReplicaSecret ?addReplicaRegions ?tags
         ?secretString ?secretBinary ?kmsKeyId ?description
         ?clientRequestToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceOverwriteReplicaSecret =
         field_map json "ForceOverwriteReplicaSecret" BooleanType.of_json in
@@ -5096,6 +5156,7 @@ module CancelRotateSecretResponse =
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionId ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
       let name = field_map json "Name" SecretNameType.of_json in
@@ -5122,6 +5183,7 @@ module CancelRotateSecretRequest =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
       make ~secretId ()

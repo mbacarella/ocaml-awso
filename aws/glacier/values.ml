@@ -101,6 +101,7 @@ module Grantee =
       let type_ =
         Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?emailAddress ?iD ?uRI ?displayName ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress = field_map json "EmailAddress" String_.of_json in
       let iD = field_map json "ID" String_.of_json in
@@ -163,6 +164,7 @@ module Grant =
       let grantee =
         (Option.map ~f:Grantee.of_xml) (Xml.child xml_arg0 "Grantee") in
       make ?permission ?grantee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permission = field_map json "Permission" Permission.of_json in
       let grantee = field_map json "Grantee" Grantee.of_json in
@@ -343,6 +345,7 @@ module Encryption =
         (Option.map ~f:EncryptionType.of_xml)
           (Xml.child xml_arg0 "EncryptionType") in
       make ?kMSContext ?kMSKeyId ?encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSContext = field_map json "KMSContext" String_.of_json in
       let kMSKeyId = field_map json "KMSKeyId" String_.of_json in
@@ -474,6 +477,7 @@ module CSVInput =
           (Xml.child xml_arg0 "FileHeaderInfo") in
       make ?quoteCharacter ?fieldDelimiter ?recordDelimiter
         ?quoteEscapeCharacter ?comments ?fileHeaderInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quoteCharacter = field_map json "QuoteCharacter" String_.of_json in
       let fieldDelimiter = field_map json "FieldDelimiter" String_.of_json in
@@ -544,6 +548,7 @@ module CSVOutput =
         (Option.map ~f:QuoteFields.of_xml) (Xml.child xml_arg0 "QuoteFields") in
       make ?quoteCharacter ?fieldDelimiter ?recordDelimiter
         ?quoteEscapeCharacter ?quoteFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quoteCharacter = field_map json "QuoteCharacter" String_.of_json in
       let fieldDelimiter = field_map json "FieldDelimiter" String_.of_json in
@@ -661,6 +666,7 @@ module S3Location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BucketName") in
       make ?storageClass ?userMetadata ?tagging ?accessControlList ?cannedACL
         ?encryption ?prefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageClass = field_map json "StorageClass" StorageClass.of_json in
       let userMetadata = field_map json "UserMetadata" Hashmap.of_json in
@@ -705,6 +711,7 @@ module InputSerialization =
     let of_xml xml_arg0 =
       let csv = (Option.map ~f:CSVInput.of_xml) (Xml.child xml_arg0 "csv") in
       make ?csv ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let csv = field_map json "csv" CSVInput.of_json in make ?csv ()
     let to_json v = composed_to_json to_value v
@@ -723,6 +730,7 @@ module OutputSerialization =
     let of_xml xml_arg0 =
       let csv = (Option.map ~f:CSVOutput.of_xml) (Xml.child xml_arg0 "csv") in
       make ?csv ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let csv = field_map json "csv" CSVOutput.of_json in make ?csv ()
     let to_json v = composed_to_json to_value v
@@ -752,6 +760,7 @@ module DataRetrievalRule =
       let strategy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Strategy") in
       make ?bytesPerHour ?strategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bytesPerHour = field_map json "BytesPerHour" NullableLong.of_json in
       let strategy = field_map json "Strategy" String_.of_json in
@@ -781,6 +790,7 @@ module InvalidParameterValueException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -812,6 +822,7 @@ module MissingParameterValueException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -843,6 +854,7 @@ module ResourceNotFoundException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -873,6 +885,7 @@ module ServiceUnavailableException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -965,6 +978,7 @@ module InventoryRetrievalJobDescription =
       let format =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Format") in
       make ?marker ?limit ?endDate ?startDate ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let limit = field_map json "Limit" String_.of_json in
@@ -989,6 +1003,7 @@ module OutputLocation =
     let of_xml xml_arg0 =
       let s3 = (Option.map ~f:S3Location.of_xml) (Xml.child xml_arg0 "S3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "S3" S3Location.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
@@ -1042,6 +1057,7 @@ module SelectParameters =
           (Xml.child xml_arg0 "InputSerialization") in
       make ?outputSerialization ?expression ?expressionType
         ?inputSerialization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputSerialization =
         field_map json "OutputSerialization" OutputSerialization.of_json in
@@ -1279,6 +1295,7 @@ module DescribeVaultOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VaultARN") in
       make ?sizeInBytes ?numberOfArchives ?lastInventoryDate ?creationDate
         ?vaultName ?vaultARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeInBytes = field_map json "SizeInBytes" Long.of_json in
       let numberOfArchives = field_map json "NumberOfArchives" Long.of_json in
@@ -1347,6 +1364,7 @@ module ProvisionedCapacityDescription =
       let capacityId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CapacityId") in
       make ?expirationDate ?startDate ?capacityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expirationDate = field_map json "ExpirationDate" String_.of_json in
       let startDate = field_map json "StartDate" String_.of_json in
@@ -1377,6 +1395,7 @@ module PartListElement =
       let rangeInBytes =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RangeInBytes") in
       make ?sHA256TreeHash ?rangeInBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sHA256TreeHash = field_map json "SHA256TreeHash" String_.of_json in
       let rangeInBytes = field_map json "RangeInBytes" String_.of_json in
@@ -1439,6 +1458,7 @@ module UploadListElement =
           (Xml.child xml_arg0 "MultipartUploadId") in
       make ?creationDate ?partSizeInBytes ?archiveDescription ?vaultARN
         ?multipartUploadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" String_.of_json in
       let partSizeInBytes = field_map json "PartSizeInBytes" Long.of_json in
@@ -1702,6 +1722,7 @@ module GlacierJobDescription =
         ?inventorySizeInBytes ?archiveSizeInBytes ?statusMessage ?statusCode
         ?completed ?creationDate ?vaultARN ?archiveId ?action ?jobDescription
         ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputLocation =
         field_map json "OutputLocation" OutputLocation.of_json in
@@ -1776,6 +1797,7 @@ module InventoryRetrievalJobInput =
       let startDate =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StartDate") in
       make ?marker ?limit ?endDate ?startDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let limit = field_map json "Limit" String_.of_json in
@@ -1808,6 +1830,7 @@ module RequestTimeoutException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -1851,6 +1874,7 @@ module VaultNotificationConfig =
       let sNSTopic =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SNSTopic") in
       make ?events ?sNSTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "Events" NotificationEventList.of_json in
       let sNSTopic = field_map json "SNSTopic" String_.of_json in
@@ -1871,6 +1895,7 @@ module VaultAccessPolicy =
       let policy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" String_.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -1892,6 +1917,7 @@ module DataRetrievalPolicy =
         (Option.map ~f:DataRetrievalRulesList.of_xml)
           (Xml.child xml_arg0 "Rules") in
       make ?rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map json "Rules" DataRetrievalRulesList.of_json in
       make ?rules ()
@@ -1944,6 +1970,7 @@ module LimitExceededException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -2118,6 +2145,7 @@ module VaultLockPolicy =
       let policy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" String_.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -2143,6 +2171,7 @@ module InsufficientCapacityException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -2174,6 +2203,7 @@ module PolicyEnforcedException =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let code = field_map json "code" String_.of_json in
@@ -2281,6 +2311,7 @@ module JobParameters =
       make ?outputLocation ?selectParameters ?inventoryRetrievalParameters
         ?tier ?retrievalByteRange ?sNSTopic ?description ?archiveId ?type_
         ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputLocation =
         field_map json "OutputLocation" OutputLocation.of_json in
@@ -2411,6 +2442,7 @@ module UploadMultipartPartOutput =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "x-amz-sha256-tree-hash") in
       make ?checksum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksum = field_map json "checksum" String_.of_json in
       make ?checksum ()
@@ -2441,6 +2473,26 @@ module UploadMultipartPartInput =
               fun ~uploadId ->
                 fun () ->
                   { checksum; range; body; accountId; vaultName; uploadId }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~accountId:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "accountId"))
+            ~vaultName:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "vaultName"))
+            ~uploadId:(String_.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "uploadId"))
+            ?checksum:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "x-amz-sha256-tree-hash") ~f:String_.of_string)
+            ?range:(Option.map
+                      ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                         "Content-Range") ~f:String_.of_string)
+            ?body:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("accountId", (Some (String_.to_value x.accountId)));
@@ -2465,6 +2517,7 @@ module UploadMultipartPartInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?body ?range ?checksum ~uploadId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let body = field_map json "body" Stream.of_json in
       let range = field_map json "range" String_.of_json in
@@ -2498,6 +2551,25 @@ module UploadArchiveInput =
             fun ~accountId ->
               fun () ->
                 { archiveDescription; checksum; body; vaultName; accountId }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~vaultName:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "vaultName"))
+            ~accountId:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "accountId"))
+            ?archiveDescription:(Option.map
+                                   ((List.Assoc.find
+                                       ~equal:String.Caseless.equal) xs
+                                      "x-amz-archive-description")
+                                   ~f:String_.of_string)
+            ?checksum:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "x-amz-sha256-tree-hash") ~f:String_.of_string)
+            ?body:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("vaultName", (Some (String_.to_value x.vaultName)));
@@ -2521,6 +2593,7 @@ module UploadArchiveInput =
       let vaultName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vaultName") in
       make ?body ?checksum ?archiveDescription ~accountId ~vaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let body = field_map json "body" Stream.of_json in
       let checksum = field_map json "checksum" String_.of_json in
@@ -2547,6 +2620,17 @@ module SetVaultNotificationsInput =
       fun ~accountId ->
         fun ~vaultName ->
           fun () -> { vaultNotificationConfig; accountId; vaultName }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~accountId:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "accountId"))
+            ~vaultName:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "vaultName"))
+            ?vaultNotificationConfig:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("accountId", (Some (String_.to_value x.accountId)));
@@ -2564,6 +2648,7 @@ module SetVaultNotificationsInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?vaultNotificationConfig ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultNotificationConfig =
         field_map json "vaultNotificationConfig"
@@ -2588,6 +2673,16 @@ module SetVaultAccessPolicyInput =
     let make ?policy =
       fun ~accountId ->
         fun ~vaultName -> fun () -> { policy; accountId; vaultName }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~accountId:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "accountId"))
+            ~vaultName:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "vaultName")) ?policy:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("accountId", (Some (String_.to_value x.accountId)));
@@ -2603,6 +2698,7 @@ module SetVaultAccessPolicyInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?policy ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" VaultAccessPolicy.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in
@@ -2633,6 +2729,7 @@ module SetDataRetrievalPolicyInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?policy ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" DataRetrievalPolicy.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -2668,6 +2765,7 @@ module RemoveTagsFromVaultInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?tagKeys ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in
@@ -2758,6 +2856,7 @@ module PurchaseProvisionedCapacityOutput =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "x-amz-capacity-id") in
       make ?capacityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capacityId = field_map json "capacityId" String_.of_json in
       make ?capacityId ()
@@ -2781,6 +2880,7 @@ module PurchaseProvisionedCapacityInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "accountId" String_.of_json in
       make ~accountId ()
@@ -2867,6 +2967,7 @@ module ListVaultsOutput =
       let vaultList =
         (Option.map ~f:VaultList.of_xml) (Xml.child xml_arg0 "VaultList") in
       make ?marker ?vaultList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let vaultList = field_map json "VaultList" VaultList.of_json in
@@ -2902,6 +3003,7 @@ module ListVaultsInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?limit ?marker ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" String_.of_json in
       let marker = field_map json "marker" String_.of_json in
@@ -2984,6 +3086,7 @@ module ListTagsForVaultOutput =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3010,6 +3113,7 @@ module ListTagsForVaultInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -3085,6 +3189,7 @@ module ListProvisionedCapacityOutput =
         (Option.map ~f:ProvisionedCapacityList.of_xml)
           (Xml.child xml_arg0 "ProvisionedCapacityList") in
       make ?provisionedCapacityList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisionedCapacityList =
         field_map json "ProvisionedCapacityList"
@@ -3110,6 +3215,7 @@ module ListProvisionedCapacityInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "accountId" String_.of_json in
       make ~accountId ()
@@ -3249,6 +3355,7 @@ module ListPartsOutput =
           (Xml.child xml_arg0 "MultipartUploadId") in
       make ?marker ?parts ?creationDate ?partSizeInBytes ?archiveDescription
         ?vaultARN ?multipartUploadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let parts = field_map json "Parts" PartList.of_json in
@@ -3305,6 +3412,7 @@ module ListPartsInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?limit ?marker ~uploadId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" String_.of_json in
       let marker = field_map json "marker" String_.of_json in
@@ -3396,6 +3504,7 @@ module ListMultipartUploadsOutput =
       let uploadsList =
         (Option.map ~f:UploadsList.of_xml) (Xml.child xml_arg0 "UploadsList") in
       make ?marker ?uploadsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let uploadsList = field_map json "UploadsList" UploadsList.of_json in
@@ -3437,6 +3546,7 @@ module ListMultipartUploadsInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?limit ?marker ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "limit" String_.of_json in
       let marker = field_map json "marker" String_.of_json in
@@ -3528,6 +3638,7 @@ module ListJobsOutput =
       let jobList =
         (Option.map ~f:JobList.of_xml) (Xml.child xml_arg0 "JobList") in
       make ?marker ?jobList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let jobList = field_map json "JobList" JobList.of_json in
@@ -3592,6 +3703,7 @@ module ListJobsInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?completed ?statuscode ?marker ?limit ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let completed = field_map json "completed" String_.of_json in
       let statuscode = field_map json "statuscode" String_.of_json in
@@ -3686,6 +3798,7 @@ module InitiateVaultLockOutput =
       let lockId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "x-amz-lock-id") in
       make ?lockId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lockId = field_map json "lockId" String_.of_json in make ?lockId ()
     let to_json v = composed_to_json to_value v
@@ -3705,6 +3818,16 @@ module InitiateVaultLockInput =
     let make ?policy =
       fun ~accountId ->
         fun ~vaultName -> fun () -> { policy; accountId; vaultName }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~accountId:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "accountId"))
+            ~vaultName:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "vaultName")) ?policy:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("accountId", (Some (String_.to_value x.accountId)));
@@ -3719,6 +3842,7 @@ module InitiateVaultLockInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?policy ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" VaultLockPolicy.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in
@@ -3821,6 +3945,7 @@ module InitiateMultipartUploadOutput =
       let location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?uploadId ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadId = field_map json "uploadId" String_.of_json in
       let location = field_map json "location" String_.of_json in
@@ -3866,6 +3991,7 @@ module InitiateMultipartUploadInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?partSize ?archiveDescription ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partSize = field_map json "partSize" String_.of_json in
       let archiveDescription =
@@ -3999,6 +4125,7 @@ module InitiateJobOutput =
       let location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?jobOutputPath ?jobId ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobOutputPath = field_map json "jobOutputPath" String_.of_json in
       let jobId = field_map json "jobId" String_.of_json in
@@ -4020,6 +4147,16 @@ module InitiateJobInput =
     let make ?jobParameters =
       fun ~accountId ->
         fun ~vaultName -> fun () -> { jobParameters; accountId; vaultName }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~accountId:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "accountId"))
+            ~vaultName:(String_.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "vaultName")) ?jobParameters:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("accountId", (Some (String_.to_value x.accountId)));
@@ -4036,6 +4173,7 @@ module InitiateJobInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?jobParameters ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobParameters =
         field_map json "jobParameters" JobParameters.of_json in
@@ -4113,6 +4251,9 @@ module GetVaultNotificationsOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?vaultNotificationConfig:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("vaultNotificationConfig",
@@ -4124,6 +4265,7 @@ module GetVaultNotificationsOutput =
         (Option.map ~f:VaultNotificationConfig.of_xml)
           (Xml.child xml_arg0 "vaultNotificationConfig") in
       make ?vaultNotificationConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultNotificationConfig =
         field_map json "vaultNotificationConfig"
@@ -4153,6 +4295,7 @@ module GetVaultNotificationsInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -4256,6 +4399,7 @@ module GetVaultLockOutput =
       let policy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?creationDate ?expirationDate ?state ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" String_.of_json in
       let expirationDate = field_map json "ExpirationDate" String_.of_json in
@@ -4286,6 +4430,7 @@ module GetVaultLockInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -4360,6 +4505,8 @@ module GetVaultAccessPolicyOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?policy:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("policy", (Option.map x.policy ~f:VaultAccessPolicy.to_value))]
@@ -4369,6 +4516,7 @@ module GetVaultAccessPolicyOutput =
         (Option.map ~f:VaultAccessPolicy.of_xml)
           (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" VaultAccessPolicy.of_json in
       make ?policy ()
@@ -4396,6 +4544,7 @@ module GetVaultAccessPolicyInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -4502,6 +4651,30 @@ module GetJobOutputOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?body:(Some pipe)
+            ?checksum:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "x-amz-sha256-tree-hash") ~f:String_.of_string)
+            ?status:(Option.map
+                       ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                          "status") ~f:Httpstatus.of_string)
+            ?contentRange:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "Content-Range") ~f:String_.of_string)
+            ?acceptRanges:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "Accept-Ranges") ~f:String_.of_string)
+            ?contentType:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "Content-Type") ~f:String_.of_string)
+            ?archiveDescription:(Option.map
+                                   ((List.Assoc.find
+                                       ~equal:String.Caseless.equal) xs
+                                      "x-amz-archive-description")
+                                   ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("body", (Option.map x.body ~f:Stream.to_value));
@@ -4532,6 +4705,7 @@ module GetJobOutputOutput =
       let body = (Option.map ~f:Stream.of_xml) (Xml.child xml_arg0 "body") in
       make ?archiveDescription ?contentType ?acceptRanges ?contentRange
         ?status ?checksum ?body ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let archiveDescription =
         field_map json "archiveDescription" String_.of_json in
@@ -4578,6 +4752,7 @@ module GetJobOutputInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?range ~jobId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let range = field_map json "range" String_.of_json in
       let jobId = field_map_exn json "jobId" String_.of_json in
@@ -4655,6 +4830,7 @@ module GetDataRetrievalPolicyOutput =
         (Option.map ~f:DataRetrievalPolicy.of_xml)
           (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" DataRetrievalPolicy.of_json in
       make ?policy ()
@@ -4678,6 +4854,7 @@ module GetDataRetrievalPolicyInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "accountId" String_.of_json in
       make ~accountId ()
@@ -4705,6 +4882,7 @@ module DescribeVaultInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -4739,6 +4917,7 @@ module DescribeJobInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~jobId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" String_.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in
@@ -4768,6 +4947,7 @@ module DeleteVaultNotificationsInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -4797,6 +4977,7 @@ module DeleteVaultInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -4826,6 +5007,7 @@ module DeleteVaultAccessPolicyInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -4859,6 +5041,7 @@ module DeleteArchiveInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~archiveId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let archiveId = field_map_exn json "archiveId" String_.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in
@@ -4949,6 +5132,7 @@ module CreateVaultOutput =
       let location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "location" String_.of_json in
       make ?location ()
@@ -4976,6 +5160,7 @@ module CreateVaultInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -5011,6 +5196,7 @@ module CompleteVaultLockInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~lockId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lockId = field_map_exn json "lockId" String_.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in
@@ -5066,6 +5252,7 @@ module CompleteMultipartUploadInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?checksum ?archiveSize ~uploadId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksum = field_map json "checksum" String_.of_json in
       let archiveSize = field_map json "archiveSize" String_.of_json in
@@ -5182,6 +5369,7 @@ module ArchiveCreationOutput =
       let location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?archiveId ?checksum ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let archiveId = field_map json "archiveId" String_.of_json in
       let checksum = field_map json "checksum" String_.of_json in
@@ -5218,6 +5406,7 @@ module AddTagsToVaultInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?tags ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in
@@ -5247,6 +5436,7 @@ module AbortVaultLockInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vaultName = field_map_exn json "vaultName" String_.of_json in
       let accountId = field_map_exn json "accountId" String_.of_json in
@@ -5281,6 +5471,7 @@ module AbortMultipartUploadInput =
       let accountId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~uploadId ~vaultName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadId = field_map_exn json "uploadId" String_.of_json in
       let vaultName = field_map_exn json "vaultName" String_.of_json in

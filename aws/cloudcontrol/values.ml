@@ -301,6 +301,7 @@ module ResourceDescription =
       let identifier =
         (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "Identifier") in
       make ?properties ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties = field_map json "Properties" Properties.of_json in
       let identifier = field_map json "Identifier" Identifier.of_json in
@@ -405,6 +406,7 @@ module ProgressEvent =
         (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "TypeName") in
       make ?retryAfter ?errorCode ?statusMessage ?resourceModel ?eventTime
         ?operationStatus ?operation ?requestToken ?identifier ?typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfter = field_map json "RetryAfter" Timestamp.of_json in
       let errorCode = field_map json "ErrorCode" HandlerErrorCode.of_json in
@@ -485,6 +487,7 @@ module AlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -503,6 +506,7 @@ module ClientTokenConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -522,6 +526,7 @@ module ConcurrentOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -541,6 +546,7 @@ module GeneralServiceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -560,6 +566,7 @@ module HandlerFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -579,6 +586,7 @@ module HandlerInternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -598,6 +606,7 @@ module InvalidCredentialsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -617,6 +626,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -636,6 +646,7 @@ module NetworkFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -655,6 +666,7 @@ module NotStabilizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -674,6 +686,7 @@ module NotUpdatableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -693,6 +706,7 @@ module PrivateTypeException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -712,6 +726,7 @@ module ResourceConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -731,6 +746,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -749,6 +765,7 @@ module ServiceInternalErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -768,6 +785,7 @@ module ServiceLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -787,6 +805,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -805,6 +824,7 @@ module TypeNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -824,6 +844,7 @@ module UnsupportedActionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1042,6 +1063,7 @@ module ResourceRequestStatusFilter =
       let operations =
         (Option.map ~f:Operations.of_xml) (Xml.child xml_arg0 "Operations") in
       make ?operationStatuses ?operations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationStatuses =
         field_map json "OperationStatuses" OperationStatuses.of_json in
@@ -1063,6 +1085,7 @@ module RequestTokenNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1082,6 +1105,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1308,6 +1332,7 @@ module UpdateResourceOutput =
         (Option.map ~f:ProgressEvent.of_xml)
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let progressEvent =
         field_map json "ProgressEvent" ProgressEvent.of_json in
@@ -1379,6 +1404,7 @@ module UpdateResourceInput =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~patchDocument ~identifier ?clientToken ?roleArn ?typeVersionId
         ~typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let patchDocument =
         field_map_exn json "PatchDocument" PatchDocument.of_json in
@@ -1606,6 +1632,7 @@ module ListResourcesOutput =
       let typeName =
         (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "TypeName") in
       make ?nextToken ?resourceDescriptions ?typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" HandlerNextToken.of_json in
       let resourceDescriptions =
@@ -1678,6 +1705,7 @@ module ListResourcesInput =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ?resourceModel ?maxResults ?nextToken ?roleArn ?typeVersionId
         ~typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceModel = field_map json "ResourceModel" Properties.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1735,6 +1763,7 @@ module ListResourceRequestsOutput =
         (Option.map ~f:ResourceRequestStatusSummaries.of_xml)
           (Xml.child xml_arg0 "ResourceRequestStatusSummaries") in
       make ?nextToken ?resourceRequestStatusSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let resourceRequestStatusSummaries =
@@ -1777,6 +1806,7 @@ module ListResourceRequestsInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?resourceRequestStatusFilter ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRequestStatusFilter =
         field_map json "ResourceRequestStatusFilter"
@@ -1834,6 +1864,7 @@ module GetResourceRequestStatusOutput =
         (Option.map ~f:ProgressEvent.of_xml)
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let progressEvent =
         field_map json "ProgressEvent" ProgressEvent.of_json in
@@ -1859,6 +1890,7 @@ module GetResourceRequestStatusInput =
         RequestToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RequestToken") in
       make ~requestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestToken =
         field_map_exn json "RequestToken" RequestToken.of_json in
@@ -2068,6 +2100,7 @@ module GetResourceOutput =
       let typeName =
         (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "TypeName") in
       make ?resourceDescription ?typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceDescription =
         field_map json "ResourceDescription" ResourceDescription.of_json in
@@ -2116,6 +2149,7 @@ module GetResourceInput =
       let typeName =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~identifier ?roleArn ?typeVersionId ~typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map_exn json "Identifier" Identifier.of_json in
       let roleArn = field_map json "RoleArn" RoleArn.of_json in
@@ -2346,6 +2380,7 @@ module DeleteResourceOutput =
         (Option.map ~f:ProgressEvent.of_xml)
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let progressEvent =
         field_map json "ProgressEvent" ProgressEvent.of_json in
@@ -2401,6 +2436,7 @@ module DeleteResourceInput =
       let typeName =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~identifier ?clientToken ?roleArn ?typeVersionId ~typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map_exn json "Identifier" Identifier.of_json in
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
@@ -2632,6 +2668,7 @@ module CreateResourceOutput =
         (Option.map ~f:ProgressEvent.of_xml)
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let progressEvent =
         field_map json "ProgressEvent" ProgressEvent.of_json in
@@ -2688,6 +2725,7 @@ module CreateResourceInput =
       let typeName =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~desiredState ?clientToken ?roleArn ?typeVersionId ~typeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredState = field_map_exn json "DesiredState" Properties.of_json in
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
@@ -2755,6 +2793,7 @@ module CancelResourceRequestOutput =
         (Option.map ~f:ProgressEvent.of_xml)
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let progressEvent =
         field_map json "ProgressEvent" ProgressEvent.of_json in
@@ -2780,6 +2819,7 @@ module CancelResourceRequestInput =
         RequestToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RequestToken") in
       make ~requestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestToken =
         field_map_exn json "RequestToken" RequestToken.of_json in

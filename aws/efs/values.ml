@@ -300,6 +300,7 @@ module Destination =
         ReplicationStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?lastReplicatedTimestamp ~region ~fileSystemId ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastReplicatedTimestamp =
         field_map json "LastReplicatedTimestamp" Timestamp.of_json in
@@ -359,6 +360,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -463,6 +465,7 @@ module CreationInfo =
       let ownerUid =
         OwnerUid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OwnerUid") in
       make ~permissions ~ownerGid ~ownerUid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissions = field_map_exn json "Permissions" Permissions.of_json in
       let ownerGid = field_map_exn json "OwnerGid" OwnerGid.of_json in
@@ -594,6 +597,7 @@ module BadRequest =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -657,6 +661,7 @@ module FileSystemLimitExceeded =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -683,6 +688,7 @@ module FileSystemNotFound =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -709,6 +715,7 @@ module IncorrectFileSystemLifeCycleState =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -735,6 +742,7 @@ module InsufficientThroughputCapacity =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -761,6 +769,7 @@ module InternalServerError =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -785,6 +794,7 @@ module ReplicationNotFound =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -811,6 +821,7 @@ module ThroughputLimitExceeded =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -837,6 +848,7 @@ module UnsupportedAvailabilityZone =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -863,6 +875,7 @@ module ValidationException =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -921,6 +934,7 @@ module AvailabilityZonesMismatch =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -988,6 +1002,7 @@ module IpAddressInUse =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1051,6 +1066,7 @@ module MountTargetConflict =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1110,6 +1126,7 @@ module NetworkInterfaceLimitExceeded =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1136,6 +1153,7 @@ module NoFreeAddressesInSubnet =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1162,6 +1180,7 @@ module SecurityGroupLimitExceeded =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1188,6 +1207,7 @@ module SecurityGroupNotFound =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1235,6 +1255,7 @@ module SubnetNotFound =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1315,6 +1336,7 @@ module FileSystemAlreadyExists =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ~fileSystemId ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId =
         field_map_exn json "FileSystemId" FileSystemId.of_json in
@@ -1369,6 +1391,7 @@ module FileSystemSize =
         FileSystemSizeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ?valueInStandard ?valueInIA ?timestamp ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valueInStandard =
         field_map json "ValueInStandard" FileSystemNullableSizeValue.of_json in
@@ -1521,6 +1544,7 @@ module TooManyRequests =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1555,6 +1579,7 @@ module AccessPointAlreadyExists =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ~accessPointId ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPointId =
         field_map_exn json "AccessPointId" AccessPointId.of_json in
@@ -1603,6 +1628,7 @@ module AccessPointLimitExceeded =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -1673,6 +1699,7 @@ module PosixUser =
       let gid = Gid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Gid") in
       let uid = Uid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uid") in
       make ?secondaryGids ~gid ~uid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secondaryGids =
         field_map json "SecondaryGids" SecondaryGids.of_json in
@@ -1705,6 +1732,7 @@ module RootDirectory =
           (Xml.child xml_arg0 "CreationInfo") in
       let path = (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "Path") in
       make ?creationInfo ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationInfo = field_map json "CreationInfo" CreationInfo.of_json in
       let path = field_map json "Path" Path.of_json in
@@ -1730,6 +1758,7 @@ module ThrottlingException =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -1767,6 +1796,7 @@ module LifecyclePolicy =
         (Option.map ~f:TransitionToIARules.of_xml)
           (Xml.child xml_arg0 "TransitionToIA") in
       make ?transitionToPrimaryStorageClass ?transitionToIA ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitionToPrimaryStorageClass =
         field_map json "TransitionToPrimaryStorageClass"
@@ -2063,6 +2093,7 @@ module ReplicationConfigurationDescription =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemId") in
       make ~destinations ~creationTime ~originalSourceFileSystemArn
         ~sourceFileSystemArn ~sourceFileSystemRegion ~sourceFileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinations =
         field_map_exn json "Destinations" Destinations.of_json in
@@ -2317,6 +2348,7 @@ module MountTargetDescription =
       make ?vpcId ?availabilityZoneName ?availabilityZoneId
         ?networkInterfaceId ?ipAddress ~lifeCycleState ~subnetId
         ~fileSystemId ~mountTargetId ?ownerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let availabilityZoneName =
@@ -2591,6 +2623,7 @@ module FileSystemDescription =
         ~performanceMode ~sizeInBytes ~numberOfMountTargets ?name
         ~lifeCycleState ~creationTime ?fileSystemArn ~fileSystemId
         ~creationToken ~ownerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let availabilityZoneId =
@@ -2809,6 +2842,7 @@ module AccessPointDescription =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?lifeCycleState ?ownerId ?rootDirectory ?posixUser ?fileSystemId
         ?accessPointArn ?accessPointId ?tags ?name ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifeCycleState =
         field_map json "LifeCycleState" LifeCycleState.of_json in
@@ -2861,6 +2895,7 @@ module DestinationToCreate =
       let region =
         (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "Region") in
       make ?kmsKeyId ?availabilityZoneName ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
       let availabilityZoneName =
@@ -2992,6 +3027,7 @@ module BackupPolicy =
       let status =
         Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" Status.of_json in
       make ~status ()
@@ -3023,6 +3059,7 @@ module ResourceIdPreference =
         (Option.map ~f:ResourceIdType.of_xml)
           (Xml.child xml_arg0 "ResourceIdType") in
       make ?resources ?resourceIdType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resources = field_map json "Resources" Resources.of_json in
       let resourceIdType =
@@ -3075,6 +3112,7 @@ module AccessPointNotFound =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -3135,6 +3173,7 @@ module InvalidPolicyException =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -3160,6 +3199,7 @@ module PolicyNotFound =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -3273,6 +3313,7 @@ module MountTargetNotFound =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -3299,6 +3340,7 @@ module IncorrectMountTargetState =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -3435,6 +3477,7 @@ module UpdateFileSystemRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?provisionedThroughputInMibps ?throughputMode ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisionedThroughputInMibps =
         field_map json "ProvisionedThroughputInMibps"
@@ -3471,6 +3514,7 @@ module UntagResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeys ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -3502,6 +3546,7 @@ module TagResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tags ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -3536,6 +3581,7 @@ module PutLifecycleConfigurationRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~lifecyclePolicies ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecyclePolicies =
         field_map_exn json "LifecyclePolicies" LifecyclePolicies.of_json in
@@ -3581,6 +3627,7 @@ module PutFileSystemPolicyRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?bypassPolicyLockoutSafetyCheck ~policy ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bypassPolicyLockoutSafetyCheck =
         field_map json "BypassPolicyLockoutSafetyCheck"
@@ -3618,6 +3665,7 @@ module PutBackupPolicyRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~backupPolicy ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPolicy =
         field_map_exn json "BackupPolicy" BackupPolicy.of_json in
@@ -3677,6 +3725,7 @@ module PutAccountPreferencesResponse =
         (Option.map ~f:ResourceIdPreference.of_xml)
           (Xml.child xml_arg0 "ResourceIdPreference") in
       make ?resourceIdPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceIdPreference =
         field_map json "ResourceIdPreference" ResourceIdPreference.of_json in
@@ -3703,6 +3752,7 @@ module PutAccountPreferencesRequest =
         ResourceIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdType") in
       make ~resourceIdType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceIdType =
         field_map_exn json "ResourceIdType" ResourceIdType.of_json in
@@ -3736,6 +3786,7 @@ module ModifyMountTargetSecurityGroupsRequest =
         MountTargetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MountTargetId") in
       make ?securityGroups ~mountTargetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroups =
         field_map json "SecurityGroups" SecurityGroups.of_json in
@@ -3816,6 +3867,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -3855,6 +3907,7 @@ module ListTagsForResourceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?nextToken ?maxResults ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3924,6 +3977,7 @@ module LifecycleConfigurationDescription =
         (Option.map ~f:LifecyclePolicies.of_xml)
           (Xml.child xml_arg0 "LifecyclePolicies") in
       make ?lifecyclePolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecyclePolicies =
         field_map json "LifecyclePolicies" LifecyclePolicies.of_json in
@@ -4006,6 +4060,7 @@ module FileSystemPolicyDescription =
         (Option.map ~f:FileSystemId.of_xml)
           (Xml.child xml_arg0 "FileSystemId") in
       make ?policy ?fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in
       let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
@@ -4032,6 +4087,7 @@ module FileSystemInUse =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -4111,6 +4167,7 @@ module DescribeTagsResponse =
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?nextMarker ~tags ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextMarker = field_map json "NextMarker" Marker.of_json in
       let tags = field_map_exn json "Tags" Tags.of_json in
@@ -4150,6 +4207,7 @@ module DescribeTagsRequest =
       let maxItems =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       make ~fileSystemId ?marker ?maxItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId =
         field_map_exn json "FileSystemId" FileSystemId.of_json in
@@ -4245,6 +4303,7 @@ module DescribeReplicationConfigurationsResponse =
         (Option.map ~f:ReplicationConfigurationDescriptions.of_xml)
           (Xml.child xml_arg0 "Replications") in
       make ?nextToken ?replications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let replications =
@@ -4286,6 +4345,7 @@ module DescribeReplicationConfigurationsRequest =
         (Option.map ~f:FileSystemId.of_xml)
           (Xml.child xml_arg0 "FileSystemId") in
       make ?maxResults ?nextToken ?fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -4387,6 +4447,7 @@ module DescribeMountTargetsResponse =
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?nextMarker ?mountTargets ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextMarker = field_map json "NextMarker" Marker.of_json in
       let mountTargets =
@@ -4453,6 +4514,7 @@ module DescribeMountTargetsRequest =
       let maxItems =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       make ?accessPointId ?mountTargetId ?fileSystemId ?marker ?maxItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPointId =
         field_map json "AccessPointId" AccessPointId.of_json in
@@ -4534,6 +4596,7 @@ module DescribeMountTargetSecurityGroupsResponse =
         SecurityGroups.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroups") in
       make ~securityGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroups =
         field_map_exn json "SecurityGroups" SecurityGroups.of_json in
@@ -4559,6 +4622,7 @@ module DescribeMountTargetSecurityGroupsRequest =
         MountTargetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MountTargetId") in
       make ~mountTargetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountTargetId =
         field_map_exn json "MountTargetId" MountTargetId.of_json in
@@ -4583,6 +4647,7 @@ module DescribeLifecycleConfigurationRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId =
         field_map_exn json "FileSystemId" FileSystemId.of_json in
@@ -4663,6 +4728,7 @@ module DescribeFileSystemsResponse =
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?nextMarker ?fileSystems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextMarker = field_map json "NextMarker" Marker.of_json in
       let fileSystems =
@@ -4714,6 +4780,7 @@ module DescribeFileSystemsRequest =
       let maxItems =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       make ?fileSystemId ?creationToken ?marker ?maxItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
       let creationToken =
@@ -4741,6 +4808,7 @@ module DescribeFileSystemPolicyRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId =
         field_map_exn json "FileSystemId" FileSystemId.of_json in
@@ -4766,6 +4834,7 @@ module DescribeBackupPolicyRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId =
         field_map_exn json "FileSystemId" FileSystemId.of_json in
@@ -4826,6 +4895,7 @@ module DescribeAccountPreferencesResponse =
         (Option.map ~f:ResourceIdPreference.of_xml)
           (Xml.child xml_arg0 "ResourceIdPreference") in
       make ?nextToken ?resourceIdPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let resourceIdPreference =
@@ -4857,6 +4927,7 @@ module DescribeAccountPreferencesRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -4940,6 +5011,7 @@ module DescribeAccessPointsResponse =
         (Option.map ~f:AccessPointDescriptions.of_xml)
           (Xml.child xml_arg0 "AccessPoints") in
       make ?nextToken ?accessPoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let accessPoints =
@@ -4990,6 +5062,7 @@ module DescribeAccessPointsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?fileSystemId ?accessPointId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
       let accessPointId =
@@ -5019,6 +5092,7 @@ module DependencyTimeout =
         ErrorCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
@@ -5049,6 +5123,7 @@ module DeleteTagsRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~tagKeys ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let fileSystemId =
@@ -5075,6 +5150,7 @@ module DeleteReplicationConfigurationRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemId") in
       make ~sourceFileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceFileSystemId =
         field_map_exn json "SourceFileSystemId" FileSystemId.of_json in
@@ -5099,6 +5175,7 @@ module DeleteMountTargetRequest =
         MountTargetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MountTargetId") in
       make ~mountTargetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountTargetId =
         field_map_exn json "MountTargetId" MountTargetId.of_json in
@@ -5122,6 +5199,7 @@ module DeleteFileSystemRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId =
         field_map_exn json "FileSystemId" FileSystemId.of_json in
@@ -5146,6 +5224,7 @@ module DeleteFileSystemPolicyRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSystemId =
         field_map_exn json "FileSystemId" FileSystemId.of_json in
@@ -5170,6 +5249,7 @@ module DeleteAccessPointRequest =
         AccessPointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessPointId") in
       make ~accessPointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPointId =
         field_map_exn json "AccessPointId" AccessPointId.of_json in
@@ -5201,6 +5281,7 @@ module CreateTagsRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~tags ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let fileSystemId =
@@ -5236,6 +5317,7 @@ module CreateReplicationConfigurationRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemId") in
       make ~destinations ~sourceFileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinations =
         field_map_exn json "Destinations" DestinationsToCreate.of_json in
@@ -5287,6 +5369,7 @@ module CreateMountTargetRequest =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?securityGroups ?ipAddress ~subnetId ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroups =
         field_map json "SecurityGroups" SecurityGroups.of_json in
@@ -5393,6 +5476,7 @@ module CreateFileSystemRequest =
       make ?tags ?backup ?availabilityZoneName ?provisionedThroughputInMibps
         ?throughputMode ?kmsKeyId ?encrypted ?performanceMode ~creationToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let backup = field_map json "Backup" Backup.of_json in
@@ -5465,6 +5549,7 @@ module CreateAccessPointRequest =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
       make ?rootDirectory ?posixUser ~fileSystemId ?tags ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rootDirectory =
         field_map json "RootDirectory" RootDirectory.of_json in
@@ -5554,6 +5639,7 @@ module BackupPolicyDescription =
         (Option.map ~f:BackupPolicy.of_xml)
           (Xml.child xml_arg0 "BackupPolicy") in
       make ?backupPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPolicy = field_map json "BackupPolicy" BackupPolicy.of_json in
       make ?backupPolicy ()

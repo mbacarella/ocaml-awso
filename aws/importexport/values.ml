@@ -134,6 +134,7 @@ module Artifact =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       make ?uRL ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uRL = field_map json "URL" URL.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -186,6 +187,7 @@ module Job =
           (Xml.child xml_arg0 "CreationDate") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobType ?isCanceled ?creationDate ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobType = field_map json "JobType" JobType.of_json in
       let isCanceled = field_map json "IsCanceled" IsCanceled.of_json in
@@ -245,6 +247,7 @@ module BucketPermissionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -264,6 +267,7 @@ module CanceledJobIdException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -283,6 +287,7 @@ module ExpiredJobIdException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -302,6 +307,7 @@ module InvalidAccessKeyIdException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -321,6 +327,7 @@ module InvalidAddressException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -339,6 +346,7 @@ module InvalidCustomsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -358,6 +366,7 @@ module InvalidFileSystemException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -376,6 +385,7 @@ module InvalidJobIdException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -395,6 +405,7 @@ module InvalidManifestFieldException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -414,6 +425,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -432,6 +444,7 @@ module InvalidVersionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -450,6 +463,7 @@ module MalformedManifestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -468,6 +482,7 @@ module MissingCustomsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -487,6 +502,7 @@ module MissingManifestFieldException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -506,6 +522,7 @@ module MissingParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -525,6 +542,7 @@ module MultipleRegionsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -544,6 +562,7 @@ module NoSuchBucketException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -578,6 +597,7 @@ module UnableToUpdateJobIdException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1056,6 +1076,7 @@ module CreateJobQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1103,6 +1124,7 @@ module UnableToCancelJobIdException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1340,6 +1362,7 @@ module UpdateJobOutput =
       let success =
         (Option.map ~f:Success.of_xml) (Xml.child xml_arg0 "Success") in
       make ?artifactList ?warningMessage ?success ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactList = field_map json "ArtifactList" ArtifactList.of_json in
       let warningMessage =
@@ -1386,6 +1409,7 @@ module UpdateJobInput =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?aPIVersion ~validateOnly ~jobType ~manifest ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aPIVersion = field_map json "APIVersion" APIVersion.of_json in
       let validateOnly =
@@ -1472,6 +1496,7 @@ module ListJobsOutput =
         (Option.map ~f:IsTruncated.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let jobs = (Option.map ~f:JobsList.of_xml) (Xml.child xml_arg0 "Jobs") in
       make ?isTruncated ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isTruncated = field_map json "IsTruncated" IsTruncated.of_json in
       let jobs = field_map json "Jobs" JobsList.of_json in
@@ -1502,6 +1527,7 @@ module ListJobsInput =
       let maxJobs =
         (Option.map ~f:MaxJobs.of_xml) (Xml.child xml_arg0 "MaxJobs") in
       make ?aPIVersion ?marker ?maxJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aPIVersion = field_map json "APIVersion" APIVersion.of_json in
       let marker = field_map json "Marker" Marker.of_json in
@@ -1715,6 +1741,7 @@ module GetStatusOutput =
         ?signatureFileContents ?signature ?errorCount ?logKey ?logBucket
         ?trackingNumber ?carrier ?progressMessage ?progressCode
         ?locationMessage ?locationCode ?jobType ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactList = field_map json "ArtifactList" ArtifactList.of_json in
       let creationDate = field_map json "CreationDate" CreationDate.of_json in
@@ -1761,6 +1788,7 @@ module GetStatusInput =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?aPIVersion ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aPIVersion = field_map json "APIVersion" APIVersion.of_json in
       let jobId = field_map_exn json "JobId" JobId.of_json in
@@ -1886,6 +1914,7 @@ module GetShippingLabelOutput =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "ShippingLabelURL") in
       make ?warning ?shippingLabelURL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warning = field_map json "Warning" GenericString.of_json in
       let shippingLabelURL =
@@ -1980,6 +2009,7 @@ module GetShippingLabelInput =
         JobIdList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobIds") in
       make ?aPIVersion ?street3 ?street2 ?street1 ?postalCode ?city
         ?stateOrProvince ?country ?phoneNumber ?company ?name ~jobIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aPIVersion = field_map json "APIVersion" APIVersion.of_json in
       let street3 = field_map json "street3" Street3.of_json in
@@ -2239,6 +2269,7 @@ module CreateJobOutput =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?artifactList ?warningMessage ?signatureFileContents ?signature
         ?jobType ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artifactList = field_map json "ArtifactList" ArtifactList.of_json in
       let warningMessage =
@@ -2298,6 +2329,7 @@ module CreateJobInput =
       let jobType =
         JobType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobType") in
       make ?aPIVersion ~validateOnly ?manifestAddendum ~manifest ~jobType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aPIVersion = field_map json "APIVersion" APIVersion.of_json in
       let validateOnly =
@@ -2408,6 +2440,7 @@ module CancelJobOutput =
       let success =
         (Option.map ~f:Success.of_xml) (Xml.child xml_arg0 "Success") in
       make ?success ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let success = field_map json "Success" Success.of_json in
       make ?success ()
@@ -2431,6 +2464,7 @@ module CancelJobInput =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?aPIVersion ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aPIVersion = field_map json "APIVersion" APIVersion.of_json in
       let jobId = field_map_exn json "JobId" JobId.of_json in

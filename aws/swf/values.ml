@@ -244,6 +244,7 @@ module TaskList =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -348,6 +349,7 @@ module ActivityType =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -449,6 +451,7 @@ module WorkflowType =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -627,6 +630,7 @@ module WorkflowExecution =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ~runId ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runId = field_map_exn json "runId" WorkflowRunId.of_json in
       let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
@@ -1410,6 +1414,7 @@ module CancelTimerDecisionAttributes =
       let timerId =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~timerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timerId = field_map_exn json "timerId" TimerId.of_json in
       make ~timerId ()
@@ -1430,6 +1435,7 @@ module CancelWorkflowExecutionDecisionAttributes =
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       make ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" Data.of_json in make ?details ()
     let to_json v = composed_to_json to_value v
@@ -1449,6 +1455,7 @@ module CompleteWorkflowExecutionDecisionAttributes =
     let of_xml xml_arg0 =
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
       make ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map json "result" Data.of_json in make ?result ()
     let to_json v = composed_to_json to_value v
@@ -1547,6 +1554,7 @@ module ContinueAsNewWorkflowExecutionDecisionAttributes =
       make ?lambdaRole ?workflowTypeVersion ?tagList ?childPolicy
         ?taskStartToCloseTimeout ?taskPriority ?taskList
         ?executionStartToCloseTimeout ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaRole = field_map json "lambdaRole" Arn.of_json in
       let workflowTypeVersion =
@@ -1648,6 +1656,7 @@ module FailWorkflowExecutionDecisionAttributes =
       let reason =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
       make ?details ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" Data.of_json in
       let reason = field_map json "reason" FailureReason.of_json in
@@ -1675,6 +1684,7 @@ module RecordMarkerDecisionAttributes =
         MarkerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "markerName") in
       make ?details ~markerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" Data.of_json in
       let markerName = field_map_exn json "markerName" MarkerName.of_json in
@@ -1699,6 +1709,7 @@ module RequestCancelActivityTaskDecisionAttributes =
         ActivityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
       make ~activityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activityId = field_map_exn json "activityId" ActivityId.of_json in
       make ~activityId ()
@@ -1738,6 +1749,7 @@ module RequestCancelExternalWorkflowExecutionDecisionAttributes =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ?runId ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let control = field_map json "control" Data.of_json in
       let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
@@ -1854,6 +1866,7 @@ module ScheduleActivityTaskDecisionAttributes =
       make ?heartbeatTimeout ?startToCloseTimeout ?scheduleToStartTimeout
         ?taskPriority ?taskList ?scheduleToCloseTimeout ?input ?control
         ~activityId ~activityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let heartbeatTimeout =
         field_map json "heartbeatTimeout" DurationInSecondsOptional.of_json in
@@ -1927,6 +1940,7 @@ module ScheduleLambdaFunctionDecisionAttributes =
       let id =
         FunctionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?startToCloseTimeout ?input ?control ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startToCloseTimeout =
         field_map json "startToCloseTimeout"
@@ -1986,6 +2000,7 @@ module SignalExternalWorkflowExecutionDecisionAttributes =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ?input ~signalName ?runId ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let control = field_map json "control" Data.of_json in
       let input = field_map json "input" Data.of_json in
@@ -2105,6 +2120,7 @@ module StartChildWorkflowExecutionDecisionAttributes =
       make ?lambdaRole ?tagList ?childPolicy ?taskStartToCloseTimeout
         ?taskPriority ?taskList ?executionStartToCloseTimeout ?input ?control
         ~workflowId ~workflowType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaRole = field_map json "lambdaRole" Arn.of_json in
       let tagList = field_map json "tagList" TagList.of_json in
@@ -2162,6 +2178,7 @@ module StartTimerDecisionAttributes =
       let timerId =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~startToFireTimeout ?control ~timerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startToFireTimeout =
         field_map_exn json "startToFireTimeout" DurationInSeconds.of_json in
@@ -2198,6 +2215,7 @@ module ActivityTaskCancelRequestedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0
              "decisionTaskCompletedEventId") in
       make ~activityId ~decisionTaskCompletedEventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activityId = field_map_exn json "activityId" ActivityId.of_json in
       let decisionTaskCompletedEventId =
@@ -2254,6 +2272,7 @@ module ActivityTaskCanceledEventAttributes =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       make ?latestCancelRequestedEventId ~startedEventId ~scheduledEventId
         ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestCancelRequestedEventId =
         field_map json "latestCancelRequestedEventId" EventId.of_json in
@@ -2297,6 +2316,7 @@ module ActivityTaskCompletedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
       make ~startedEventId ~scheduledEventId ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -2344,6 +2364,7 @@ module ActivityTaskFailedEventAttributes =
       let reason =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
       make ~startedEventId ~scheduledEventId ?details ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -2471,6 +2492,7 @@ module ActivityTaskScheduledEventAttributes =
       make ?heartbeatTimeout ~decisionTaskCompletedEventId ?taskPriority
         ~taskList ?startToCloseTimeout ?scheduleToCloseTimeout
         ?scheduleToStartTimeout ?control ?input ~activityId ~activityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let heartbeatTimeout =
         field_map json "heartbeatTimeout" DurationInSecondsOptional.of_json in
@@ -2522,6 +2544,7 @@ module ActivityTaskStartedEventAttributes =
       let identity =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "identity") in
       make ~scheduledEventId ?identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledEventId =
         field_map_exn json "scheduledEventId" EventId.of_json in
@@ -2572,6 +2595,7 @@ module ActivityTaskTimedOutEventAttributes =
         ActivityTaskTimeoutType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timeoutType") in
       make ?details ~startedEventId ~scheduledEventId ~timeoutType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" LimitedData.of_json in
       let startedEventId =
@@ -2619,6 +2643,7 @@ module CancelTimerFailedEventAttributes =
       let timerId =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~decisionTaskCompletedEventId ~cause ~timerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -2657,6 +2682,7 @@ module CancelWorkflowExecutionFailedEventAttributes =
         CancelWorkflowExecutionFailedCause.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cause") in
       make ~decisionTaskCompletedEventId ~cause ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -2722,6 +2748,7 @@ module ChildWorkflowExecutionCanceledEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~startedEventId ~initiatedEventId ?details ~workflowType
         ~workflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -2792,6 +2819,7 @@ module ChildWorkflowExecutionCompletedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~startedEventId ~initiatedEventId ?result ~workflowType
         ~workflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -2870,6 +2898,7 @@ module ChildWorkflowExecutionFailedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~startedEventId ~initiatedEventId ?details ?reason ~workflowType
         ~workflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -2920,6 +2949,7 @@ module ChildWorkflowExecutionStartedEventAttributes =
         WorkflowExecution.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~initiatedEventId ~workflowType ~workflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initiatedEventId =
         field_map_exn json "initiatedEventId" EventId.of_json in
@@ -2980,6 +3010,7 @@ module ChildWorkflowExecutionTerminatedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~startedEventId ~initiatedEventId ~workflowType ~workflowExecution
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -3053,6 +3084,7 @@ module ChildWorkflowExecutionTimedOutEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~startedEventId ~initiatedEventId ~timeoutType ~workflowType
         ~workflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -3099,6 +3131,7 @@ module CompleteWorkflowExecutionFailedEventAttributes =
         CompleteWorkflowExecutionFailedCause.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cause") in
       make ~decisionTaskCompletedEventId ~cause ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -3139,6 +3172,7 @@ module ContinueAsNewWorkflowExecutionFailedEventAttributes =
         ContinueAsNewWorkflowExecutionFailedCause.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cause") in
       make ~decisionTaskCompletedEventId ~cause ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -3183,6 +3217,7 @@ module DecisionTaskCompletedEventAttributes =
       let executionContext =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "executionContext") in
       make ~startedEventId ~scheduledEventId ?executionContext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -3229,6 +3264,7 @@ module DecisionTaskScheduledEventAttributes =
       let taskList =
         TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
       make ?startToCloseTimeout ?taskPriority ~taskList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startToCloseTimeout =
         field_map json "startToCloseTimeout"
@@ -3263,6 +3299,7 @@ module DecisionTaskStartedEventAttributes =
       let identity =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "identity") in
       make ~scheduledEventId ?identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledEventId =
         field_map_exn json "scheduledEventId" EventId.of_json in
@@ -3306,6 +3343,7 @@ module DecisionTaskTimedOutEventAttributes =
         DecisionTaskTimeoutType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timeoutType") in
       make ~startedEventId ~scheduledEventId ~timeoutType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -3547,6 +3585,7 @@ module ExternalWorkflowExecutionCancelRequestedEventAttributes =
         WorkflowExecution.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~initiatedEventId ~workflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initiatedEventId =
         field_map_exn json "initiatedEventId" EventId.of_json in
@@ -3584,6 +3623,7 @@ module ExternalWorkflowExecutionSignaledEventAttributes =
         WorkflowExecution.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
       make ~initiatedEventId ~workflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initiatedEventId =
         field_map_exn json "initiatedEventId" EventId.of_json in
@@ -3623,6 +3663,7 @@ module FailWorkflowExecutionFailedEventAttributes =
         FailWorkflowExecutionFailedCause.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cause") in
       make ~decisionTaskCompletedEventId ~cause ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -3663,6 +3704,7 @@ module LambdaFunctionCompletedEventAttributes =
         EventId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
       make ?result ~startedEventId ~scheduledEventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map json "result" Data.of_json in
       let startedEventId =
@@ -3711,6 +3753,7 @@ module LambdaFunctionFailedEventAttributes =
         EventId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
       make ?details ?reason ~startedEventId ~scheduledEventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" Data.of_json in
       let reason = field_map json "reason" FailureReason.of_json in
@@ -3785,6 +3828,7 @@ module LambdaFunctionScheduledEventAttributes =
         FunctionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~decisionTaskCompletedEventId ?startToCloseTimeout ?input ?control
         ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -3818,6 +3862,7 @@ module LambdaFunctionStartedEventAttributes =
         EventId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
       make ~scheduledEventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledEventId =
         field_map_exn json "scheduledEventId" EventId.of_json in
@@ -3860,6 +3905,7 @@ module LambdaFunctionTimedOutEventAttributes =
         EventId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
       make ?timeoutType ~startedEventId ~scheduledEventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeoutType =
         field_map json "timeoutType" LambdaFunctionTimeoutType.of_json in
@@ -3902,6 +3948,7 @@ module MarkerRecordedEventAttributes =
         MarkerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "markerName") in
       make ~decisionTaskCompletedEventId ?details ~markerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -3945,6 +3992,7 @@ module RecordMarkerFailedEventAttributes =
         MarkerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "markerName") in
       make ~decisionTaskCompletedEventId ~cause ~markerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -3991,6 +4039,7 @@ module RequestCancelActivityTaskFailedEventAttributes =
         ActivityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
       make ~decisionTaskCompletedEventId ~cause ~activityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -4074,6 +4123,7 @@ module RequestCancelExternalWorkflowExecutionFailedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ~decisionTaskCompletedEventId ~initiatedEventId ~cause
         ?runId ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let control = field_map json "control" Data.of_json in
       let decisionTaskCompletedEventId =
@@ -4136,6 +4186,7 @@ module RequestCancelExternalWorkflowExecutionInitiatedEventAttributes =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ~decisionTaskCompletedEventId ?runId ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let control = field_map json "control" Data.of_json in
       let decisionTaskCompletedEventId =
@@ -4193,6 +4244,7 @@ module ScheduleActivityTaskFailedEventAttributes =
         ActivityType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "activityType") in
       make ~decisionTaskCompletedEventId ~cause ~activityId ~activityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -4247,6 +4299,7 @@ module ScheduleLambdaFunctionFailedEventAttributes =
       let id =
         FunctionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~decisionTaskCompletedEventId ~cause ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -4328,6 +4381,7 @@ module SignalExternalWorkflowExecutionFailedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ~decisionTaskCompletedEventId ~initiatedEventId ~cause
         ?runId ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let control = field_map json "control" Data.of_json in
       let decisionTaskCompletedEventId =
@@ -4406,6 +4460,7 @@ module SignalExternalWorkflowExecutionInitiatedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ~decisionTaskCompletedEventId ?input ~signalName ?runId
         ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let control = field_map json "control" Data.of_json in
       let decisionTaskCompletedEventId =
@@ -4488,6 +4543,7 @@ module StartChildWorkflowExecutionFailedEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
       make ?control ~decisionTaskCompletedEventId ~initiatedEventId
         ~workflowId ~cause ~workflowType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let control = field_map json "control" Data.of_json in
       let decisionTaskCompletedEventId =
@@ -4627,6 +4683,7 @@ module StartChildWorkflowExecutionInitiatedEventAttributes =
         ~decisionTaskCompletedEventId ?taskPriority ~taskList
         ?executionStartToCloseTimeout ?input ?control ~workflowType
         ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaRole = field_map json "lambdaRole" Arn.of_json in
       let tagList = field_map json "tagList" TagList.of_json in
@@ -4687,6 +4744,7 @@ module StartLambdaFunctionFailedEventAttributes =
         (Option.map ~f:EventId.of_xml)
           (Xml.child xml_arg0 "scheduledEventId") in
       make ?message ?cause ?scheduledEventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" CauseMessage.of_json in
       let cause =
@@ -4733,6 +4791,7 @@ module StartTimerFailedEventAttributes =
       let timerId =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~decisionTaskCompletedEventId ~cause ~timerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -4776,6 +4835,7 @@ module TimerCanceledEventAttributes =
       let timerId =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~decisionTaskCompletedEventId ~startedEventId ~timerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -4809,6 +4869,7 @@ module TimerFiredEventAttributes =
       let timerId =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~startedEventId ~timerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startedEventId =
         field_map_exn json "startedEventId" EventId.of_json in
@@ -4866,6 +4927,7 @@ module TimerStartedEventAttributes =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~decisionTaskCompletedEventId ~startToFireTimeout ?control
         ~timerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -4917,6 +4979,7 @@ module WorkflowExecutionCancelRequestedEventAttributes =
         (Option.map ~f:WorkflowExecution.of_xml)
           (Xml.child xml_arg0 "externalWorkflowExecution") in
       make ?cause ?externalInitiatedEventId ?externalWorkflowExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause =
         field_map json "cause" WorkflowExecutionCancelRequestedCause.of_json in
@@ -4954,6 +5017,7 @@ module WorkflowExecutionCanceledEventAttributes =
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       make ~decisionTaskCompletedEventId ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -4989,6 +5053,7 @@ module WorkflowExecutionCompletedEventAttributes =
              "decisionTaskCompletedEventId") in
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
       make ~decisionTaskCompletedEventId ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -5112,6 +5177,7 @@ module WorkflowExecutionContinuedAsNewEventAttributes =
         ?taskStartToCloseTimeout ?taskPriority ~taskList
         ?executionStartToCloseTimeout ~newExecutionRunId
         ~decisionTaskCompletedEventId ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaRole = field_map json "lambdaRole" Arn.of_json in
       let workflowType =
@@ -5170,6 +5236,7 @@ module WorkflowExecutionFailedEventAttributes =
       let reason =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
       make ~decisionTaskCompletedEventId ?details ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let decisionTaskCompletedEventId =
         field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
@@ -5230,6 +5297,7 @@ module WorkflowExecutionSignaledEventAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "signalName") in
       make ?externalInitiatedEventId ?externalWorkflowExecution ?input
         ~signalName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalInitiatedEventId =
         field_map json "externalInitiatedEventId" EventId.of_json in
@@ -5367,6 +5435,7 @@ module WorkflowExecutionStartedEventAttributes =
         ?continuedExecutionRunId ?tagList ~workflowType ?taskPriority
         ~taskList ~childPolicy ?taskStartToCloseTimeout
         ?executionStartToCloseTimeout ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaRole = field_map json "lambdaRole" Arn.of_json in
       let parentInitiatedEventId =
@@ -5435,6 +5504,7 @@ module WorkflowExecutionTerminatedEventAttributes =
       let reason =
         (Option.map ~f:TerminateReason.of_xml) (Xml.child xml_arg0 "reason") in
       make ?cause ~childPolicy ?details ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cause =
         field_map json "cause" WorkflowExecutionTerminatedCause.of_json in
@@ -5471,6 +5541,7 @@ module WorkflowExecutionTimedOutEventAttributes =
         WorkflowExecutionTimeoutType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timeoutType") in
       make ~childPolicy ~timeoutType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
       let timeoutType =
@@ -5566,6 +5637,7 @@ module WorkflowTypeInfo =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
       make ?deprecationDate ~creationDate ?description ~status ~workflowType
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deprecationDate =
         field_map json "deprecationDate" Timestamp.of_json in
@@ -5670,6 +5742,7 @@ module WorkflowExecutionInfo =
           (Xml.child_exn ~context:context_ xml_arg0 "execution") in
       make ?cancelRequested ?tagList ?parent ?closeStatus ~executionStatus
         ?closeTimestamp ~startTimestamp ~workflowType ~execution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cancelRequested = field_map json "cancelRequested" Canceled.of_json in
       let tagList = field_map json "tagList" TagList.of_json in
@@ -5740,6 +5813,7 @@ module ResourceTag =
         ResourceTagKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" ResourceTagValue.of_json in
       let key = field_map_exn json "key" ResourceTagKey.of_json in
@@ -5943,6 +6017,7 @@ module Decision =
         ?completeWorkflowExecutionDecisionAttributes
         ?requestCancelActivityTaskDecisionAttributes
         ?scheduleActivityTaskDecisionAttributes ~decisionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduleLambdaFunctionDecisionAttributes =
         field_map json "scheduleLambdaFunctionDecisionAttributes"
@@ -6859,6 +6934,7 @@ module HistoryEvent =
         ?workflowExecutionCompletedEventAttributes
         ?workflowExecutionStartedEventAttributes ~eventId ~eventType
         ~eventTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startLambdaFunctionFailedEventAttributes =
         field_map json "startLambdaFunctionFailedEventAttributes"
@@ -7121,6 +7197,7 @@ module DomainInfo =
       let name =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?arn ?description ~status ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" Arn.of_json in
       let description = field_map json "description" Description.of_json in
@@ -7205,6 +7282,7 @@ module ActivityTypeInfo =
           (Xml.child_exn ~context:context_ xml_arg0 "activityType") in
       make ?deprecationDate ~creationDate ?description ~status ~activityType
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deprecationDate =
         field_map json "deprecationDate" Timestamp.of_json in
@@ -7233,6 +7311,7 @@ module OperationNotPermittedFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -7269,6 +7348,7 @@ module UnknownResourceFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -7375,6 +7455,7 @@ module WorkflowTypeConfiguration =
       make ?defaultLambdaRole ?defaultChildPolicy ?defaultTaskPriority
         ?defaultTaskList ?defaultExecutionStartToCloseTimeout
         ?defaultTaskStartToCloseTimeout ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultLambdaRole = field_map json "defaultLambdaRole" Arn.of_json in
       let defaultChildPolicy =
@@ -7488,6 +7569,7 @@ module WorkflowExecutionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "taskStartToCloseTimeout") in
       make ?lambdaRole ~childPolicy ?taskPriority ~taskList
         ~executionStartToCloseTimeout ~taskStartToCloseTimeout ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaRole = field_map json "lambdaRole" Arn.of_json in
       let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
@@ -7564,6 +7646,7 @@ module WorkflowExecutionOpenCounts =
           (Xml.child_exn ~context:context_ xml_arg0 "openActivityTasks") in
       make ?openLambdaFunctions ~openChildWorkflowExecutions ~openTimers
         ~openDecisionTasks ~openActivityTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openLambdaFunctions =
         field_map json "openLambdaFunctions" Count.of_json in
@@ -7654,6 +7737,7 @@ module DefaultUndefinedFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -7676,6 +7760,7 @@ module LimitExceededFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -7698,6 +7783,7 @@ module TypeDeprecatedFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -7720,6 +7806,7 @@ module WorkflowExecutionAlreadyStartedFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -7823,6 +7910,7 @@ module ExecutionTimeFilter =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "oldestDate") in
       make ?latestDate ~oldestDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestDate = field_map json "latestDate" Timestamp.of_json in
       let oldestDate = field_map_exn json "oldestDate" Timestamp.of_json in
@@ -7845,6 +7933,7 @@ module TagFilter =
     let of_xml xml_arg0 =
       let tag = Tag.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tag") in
       make ~tag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tag = field_map_exn json "tag" Tag.of_json in make ~tag ()
     let to_json v = composed_to_json to_value v
@@ -7868,6 +7957,7 @@ module WorkflowExecutionFilter =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
       make ~workflowId ()
@@ -7894,6 +7984,7 @@ module WorkflowTypeFilter =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?version ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" VersionOptional.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -7918,6 +8009,7 @@ module CloseStatusFilter =
         CloseStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" CloseStatus.of_json in
       make ~status ()
@@ -7995,6 +8087,7 @@ module DomainConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0
              "workflowExecutionRetentionPeriodInDays") in
       make ~workflowExecutionRetentionPeriodInDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowExecutionRetentionPeriodInDays =
         field_map_exn json "workflowExecutionRetentionPeriodInDays"
@@ -8106,6 +8199,7 @@ module ActivityTypeConfiguration =
         ?defaultTaskScheduleToStartTimeout ?defaultTaskPriority
         ?defaultTaskList ?defaultTaskHeartbeatTimeout
         ?defaultTaskStartToCloseTimeout ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultTaskScheduleToCloseTimeout =
         field_map json "defaultTaskScheduleToCloseTimeout"
@@ -8190,6 +8284,7 @@ module WorkflowTypeInfos =
         WorkflowTypeInfoList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "typeInfos") in
       make ?nextPageToken ~typeInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
       let typeInfos =
@@ -8262,6 +8357,7 @@ module WorkflowTypeDetail =
         WorkflowTypeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "typeInfo") in
       make ~configuration ~typeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map_exn json "configuration" WorkflowTypeConfiguration.of_json in
@@ -8331,6 +8427,7 @@ module WorkflowExecutionInfos =
         WorkflowExecutionInfoList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "executionInfos") in
       make ?nextPageToken ~executionInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
       let executionInfos =
@@ -8441,6 +8538,7 @@ module WorkflowExecutionDetail =
           (Xml.child_exn ~context:context_ xml_arg0 "executionInfo") in
       make ?latestExecutionContext ?latestActivityTaskTimestamp ~openCounts
         ~executionConfiguration ~executionInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestExecutionContext =
         field_map json "latestExecutionContext" Data.of_json in
@@ -8515,6 +8613,7 @@ module WorkflowExecutionCount =
       let count =
         Count.of_xml (Xml.child_exn ~context:context_ xml_arg0 "count") in
       make ?truncated ~count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "truncated" Truncated.of_json in
       let count = field_map_exn json "count" Count.of_json in
@@ -8546,6 +8645,7 @@ module UntagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" ResourceTagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -8577,6 +8677,7 @@ module UndeprecateWorkflowTypeInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~workflowType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowType =
         field_map_exn json "workflowType" WorkflowType.of_json in
@@ -8601,6 +8702,7 @@ module UndeprecateDomainInput =
       let name =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" DomainName.of_json in
       make ~name ()
@@ -8631,6 +8733,7 @@ module UndeprecateActivityTypeInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~activityType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activityType =
         field_map_exn json "activityType" ActivityType.of_json in
@@ -8655,6 +8758,7 @@ module TypeAlreadyExistsFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -8674,6 +8778,7 @@ module TooManyTagsFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -8731,6 +8836,7 @@ module TerminateWorkflowExecutionInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?childPolicy ?details ?reason ?runId ~workflowId ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let childPolicy = field_map json "childPolicy" ChildPolicy.of_json in
       let details = field_map json "details" Data.of_json in
@@ -8766,6 +8872,7 @@ module TagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" ResourceTagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -8884,6 +8991,7 @@ module StartWorkflowExecutionInput =
       make ?lambdaRole ?childPolicy ?taskStartToCloseTimeout ?tagList
         ?executionStartToCloseTimeout ?input ?taskPriority ?taskList
         ~workflowType ~workflowId ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaRole = field_map json "lambdaRole" Arn.of_json in
       let childPolicy = field_map json "childPolicy" ChildPolicy.of_json in
@@ -8953,6 +9061,7 @@ module SignalWorkflowExecutionInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?input ~signalName ?runId ~workflowId ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let input = field_map json "input" Data.of_json in
       let signalName = field_map_exn json "signalName" SignalName.of_json in
@@ -9055,6 +9164,7 @@ module Run =
       let runId =
         (Option.map ~f:WorkflowRunId.of_xml) (Xml.child xml_arg0 "runId") in
       make ?runId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runId = field_map json "runId" WorkflowRunId.of_json in
       make ?runId ()
@@ -9093,6 +9203,7 @@ module RespondDecisionTaskCompletedInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?executionContext ?decisions ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionContext = field_map json "executionContext" Data.of_json in
       let decisions = field_map json "decisions" DecisionList.of_json in
@@ -9132,6 +9243,7 @@ module RespondActivityTaskFailedInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?details ?reason ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" Data.of_json in
       let reason = field_map json "reason" FailureReason.of_json in
@@ -9163,6 +9275,7 @@ module RespondActivityTaskCompletedInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?result ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map json "result" Data.of_json in
       let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
@@ -9193,6 +9306,7 @@ module RespondActivityTaskCanceledInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?details ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" Data.of_json in
       let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
@@ -9231,6 +9345,7 @@ module RequestCancelWorkflowExecutionInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?runId ~workflowId ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
       let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
@@ -9347,6 +9462,7 @@ module RegisterWorkflowTypeInput =
         ?defaultTaskList ?defaultExecutionStartToCloseTimeout
         ?defaultTaskStartToCloseTimeout ?description ~version ~name ~domain
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultLambdaRole = field_map json "defaultLambdaRole" Arn.of_json in
       let defaultChildPolicy =
@@ -9421,6 +9537,7 @@ module RegisterDomainInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~workflowExecutionRetentionPeriodInDays ?description ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" ResourceTagList.of_json in
       let workflowExecutionRetentionPeriodInDays =
@@ -9545,6 +9662,7 @@ module RegisterActivityTypeInput =
         ?defaultTaskList ?defaultTaskHeartbeatTimeout
         ?defaultTaskStartToCloseTimeout ?description ~version ~name ~domain
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultTaskScheduleToCloseTimeout =
         field_map json "defaultTaskScheduleToCloseTimeout"
@@ -9597,6 +9715,7 @@ module RecordActivityTaskHeartbeatInput =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?details ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "details" LimitedData.of_json in
       let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
@@ -9670,6 +9789,7 @@ module PollForDecisionTaskInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ?identity ~taskList
         ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
       let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
@@ -9713,6 +9833,7 @@ module PollForActivityTaskInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?identity ~taskList ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identity = field_map json "identity" Identity.of_json in
       let taskList = field_map_exn json "taskList" TaskList.of_json in
@@ -9779,6 +9900,7 @@ module PendingTaskCount =
       let count =
         Count.of_xml (Xml.child_exn ~context:context_ xml_arg0 "count") in
       make ?truncated ~count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "truncated" Truncated.of_json in
       let count = field_map_exn json "count" Count.of_json in
@@ -9851,6 +9973,7 @@ module ListWorkflowTypesInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~registrationStatus
         ?name ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
       let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
@@ -9925,6 +10048,7 @@ module ListTagsForResourceOutput =
       let tags =
         (Option.map ~f:ResourceTagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" ResourceTagList.of_json in
       make ?tags ()
@@ -9947,6 +10071,7 @@ module ListTagsForResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -10040,6 +10165,7 @@ module ListOpenWorkflowExecutionsInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?executionFilter ?reverseOrder ?maximumPageSize ?nextPageToken
         ?tagFilter ?typeFilter ~startTimeFilter ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionFilter =
         field_map json "executionFilter" WorkflowExecutionFilter.of_json in
@@ -10109,6 +10235,7 @@ module ListDomainsInput =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextPageToken") in
       make ?reverseOrder ?maximumPageSize ~registrationStatus ?nextPageToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
       let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
@@ -10229,6 +10356,7 @@ module ListClosedWorkflowExecutionsInput =
       make ?reverseOrder ?maximumPageSize ?nextPageToken ?tagFilter
         ?typeFilter ?closeStatusFilter ?executionFilter ?closeTimeFilter
         ?startTimeFilter ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
       let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
@@ -10317,6 +10445,7 @@ module ListActivityTypesInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~registrationStatus
         ?name ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
       let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
@@ -10390,6 +10519,7 @@ module History =
         HistoryEventList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "events") in
       make ?nextPageToken ~events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
       let events = field_map_exn json "events" HistoryEventList.of_json in
@@ -10456,6 +10586,7 @@ module GetWorkflowExecutionHistoryInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~execution ~domain
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
       let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
@@ -10520,6 +10651,7 @@ module DomainInfos =
         DomainInfoList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainInfos") in
       make ?nextPageToken ~domainInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
       let domainInfos =
@@ -10592,6 +10724,7 @@ module DomainDetail =
         DomainInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainInfo") in
       make ~configuration ~domainInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map_exn json "configuration" DomainConfiguration.of_json in
@@ -10615,6 +10748,7 @@ module DomainDeprecatedFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -10636,6 +10770,7 @@ module DomainAlreadyExistsFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -10666,6 +10801,7 @@ module DescribeWorkflowTypeInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~workflowType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowType =
         field_map_exn json "workflowType" WorkflowType.of_json in
@@ -10697,6 +10833,7 @@ module DescribeWorkflowExecutionInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~execution ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let execution =
         field_map_exn json "execution" WorkflowExecution.of_json in
@@ -10719,6 +10856,7 @@ module DescribeDomainInput =
       let name =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" DomainName.of_json in
       make ~name ()
@@ -10750,6 +10888,7 @@ module DescribeActivityTypeInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~activityType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activityType =
         field_map_exn json "activityType" ActivityType.of_json in
@@ -10782,6 +10921,7 @@ module DeprecateWorkflowTypeInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~workflowType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowType =
         field_map_exn json "workflowType" WorkflowType.of_json in
@@ -10804,6 +10944,7 @@ module DeprecateDomainInput =
       let name =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" DomainName.of_json in
       make ~name ()
@@ -10834,6 +10975,7 @@ module DeprecateActivityTypeInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~activityType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activityType =
         field_map_exn json "activityType" ActivityType.of_json in
@@ -10966,6 +11108,7 @@ module DecisionTask =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?previousStartedEventId ?nextPageToken ~events ~workflowType
         ~workflowExecution ~startedEventId ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let previousStartedEventId =
         field_map json "previousStartedEventId" EventId.of_json in
@@ -11003,6 +11146,7 @@ module CountPendingDecisionTasksInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~taskList ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskList = field_map_exn json "taskList" TaskList.of_json in
       let domain = field_map_exn json "domain" DomainName.of_json in
@@ -11030,6 +11174,7 @@ module CountPendingActivityTasksInput =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~taskList ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskList = field_map_exn json "taskList" TaskList.of_json in
       let domain = field_map_exn json "domain" DomainName.of_json in
@@ -11097,6 +11242,7 @@ module CountOpenWorkflowExecutionsInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?executionFilter ?tagFilter ?typeFilter ~startTimeFilter ~domain
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionFilter =
         field_map json "executionFilter" WorkflowExecutionFilter.of_json in
@@ -11190,6 +11336,7 @@ module CountClosedWorkflowExecutionsInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?closeStatusFilter ?tagFilter ?typeFilter ?executionFilter
         ?closeTimeFilter ?startTimeFilter ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let closeStatusFilter =
         field_map json "closeStatusFilter" CloseStatusFilter.of_json in
@@ -11268,6 +11415,7 @@ module ActivityTypeInfos =
         ActivityTypeInfoList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "typeInfos") in
       make ?nextPageToken ~typeInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
       let typeInfos =
@@ -11340,6 +11488,7 @@ module ActivityTypeDetail =
         ActivityTypeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "typeInfo") in
       make ~configuration ~typeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map_exn json "configuration" ActivityTypeConfiguration.of_json in
@@ -11401,6 +11550,7 @@ module ActivityTaskStatus =
         Canceled.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cancelRequested") in
       make ~cancelRequested ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cancelRequested =
         field_map_exn json "cancelRequested" Canceled.of_json in
@@ -11517,6 +11667,7 @@ module ActivityTask =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?input ~activityType ~workflowExecution ~startedEventId
         ~activityId ~taskToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let input = field_map json "input" Data.of_json in
       let activityType =

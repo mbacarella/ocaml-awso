@@ -102,6 +102,7 @@ module MarketplaceCommerceAnalyticsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -426,6 +427,7 @@ module StartSupportDataExportResult =
         (Option.map ~f:DataSetRequestId.of_xml)
           (Xml.child xml_arg0 "dataSetRequestId") in
       make ?dataSetRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSetRequestId =
         field_map json "dataSetRequestId" DataSetRequestId.of_json in
@@ -513,6 +515,7 @@ module StartSupportDataExportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "dataSetType") in
       make ?customerDefinedValues ~snsTopicArn ?destinationS3Prefix
         ~destinationS3BucketName ~roleNameArn ~fromDate ~dataSetType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerDefinedValues =
         field_map json "customerDefinedValues" CustomerDefinedValues.of_json in
@@ -580,6 +583,7 @@ module GenerateDataSetResult =
         (Option.map ~f:DataSetRequestId.of_xml)
           (Xml.child xml_arg0 "dataSetRequestId") in
       make ?dataSetRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSetRequestId =
         field_map json "dataSetRequestId" DataSetRequestId.of_json in
@@ -670,6 +674,7 @@ module GenerateDataSetRequest =
       make ?customerDefinedValues ~snsTopicArn ?destinationS3Prefix
         ~destinationS3BucketName ~roleNameArn ~dataSetPublicationDate
         ~dataSetType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerDefinedValues =
         field_map json "customerDefinedValues" CustomerDefinedValues.of_json in

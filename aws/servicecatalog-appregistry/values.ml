@@ -325,6 +325,7 @@ module ResourceGroup =
         (Option.map ~f:ResourceGroupState.of_xml)
           (Xml.child xml_arg0 "state") in
       make ?errorMessage ?arn ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" String_.of_json in
       let arn = field_map json "arn" Arn.of_json in
@@ -417,6 +418,7 @@ module AttributeGroupSummary =
       let id =
         (Option.map ~f:AttributeGroupId.of_xml) (Xml.child xml_arg0 "id") in
       make ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
       let creationTime = field_map json "creationTime" Timestamp.of_json in
@@ -448,6 +450,7 @@ module ResourceInfo =
       let name =
         (Option.map ~f:ResourceSpecifier.of_xml) (Xml.child xml_arg0 "name") in
       make ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" StackArn.of_json in
       let name = field_map json "name" ResourceSpecifier.of_json in
@@ -506,6 +509,7 @@ module ApplicationSummary =
         (Option.map ~f:ApplicationArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ApplicationId.of_xml) (Xml.child xml_arg0 "id") in
       make ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
       let creationTime = field_map json "creationTime" Timestamp.of_json in
@@ -535,6 +539,7 @@ module ResourceIntegrations =
         (Option.map ~f:ResourceGroup.of_xml)
           (Xml.child xml_arg0 "resourceGroup") in
       make ?resourceGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroup =
         field_map json "resourceGroup" ResourceGroup.of_json in
@@ -607,6 +612,7 @@ module AttributeGroup =
       let id =
         (Option.map ~f:AttributeGroupId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
@@ -632,6 +638,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -651,6 +658,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -669,6 +677,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -687,6 +696,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -799,6 +809,7 @@ module Application =
         (Option.map ~f:ApplicationArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ApplicationId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?lastUpdateTime ?creationTime ?description ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
@@ -1078,6 +1089,7 @@ module Resource =
       let name =
         (Option.map ~f:ResourceSpecifier.of_xml) (Xml.child xml_arg0 "name") in
       make ?integrations ?associationTime ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let integrations =
         field_map json "integrations" ResourceIntegrations.of_json in
@@ -1120,6 +1132,7 @@ module Integrations =
         (Option.map ~f:ResourceGroup.of_xml)
           (Xml.child xml_arg0 "resourceGroup") in
       make ?resourceGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceGroup =
         field_map json "resourceGroup" ResourceGroup.of_json in
@@ -1139,6 +1152,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1237,6 +1251,7 @@ module UpdateAttributeGroupResponse =
         (Option.map ~f:AttributeGroup.of_xml)
           (Xml.child xml_arg0 "attributeGroup") in
       make ?attributeGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroup =
         field_map json "attributeGroup" AttributeGroup.of_json in
@@ -1283,6 +1298,7 @@ module UpdateAttributeGroupRequest =
         AttributeGroupSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attributeGroup") in
       make ?attributes ?description ?name ~attributeGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "attributes" Attributes.of_json in
       let description = field_map json "description" Description.of_json in
@@ -1352,6 +1368,7 @@ module UpdateApplicationResponse =
       let application =
         (Option.map ~f:Application.of_xml) (Xml.child xml_arg0 "application") in
       make ?application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application = field_map json "application" Application.of_json in
       make ?application ()
@@ -1388,6 +1405,7 @@ module UpdateApplicationRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?description ?name ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" Description.of_json in
       let name = field_map json "name" Name.of_json in
@@ -1449,6 +1467,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1477,6 +1496,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -1537,6 +1557,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1562,6 +1583,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" Tags.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -1647,6 +1669,7 @@ module SyncResourceResponse =
         (Option.map ~f:ApplicationArn.of_xml)
           (Xml.child xml_arg0 "applicationArn") in
       make ?actionTaken ?resourceArn ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionTaken = field_map json "actionTaken" SyncAction.of_json in
       let resourceArn = field_map json "resourceArn" Arn.of_json in
@@ -1682,6 +1705,7 @@ module SyncResourceRequest =
         ResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~resource ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
       let resourceType =
@@ -1747,6 +1771,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1768,6 +1793,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -1833,6 +1859,7 @@ module ListAttributeGroupsResponse =
         (Option.map ~f:AttributeGroupSummaries.of_xml)
           (Xml.child xml_arg0 "attributeGroups") in
       make ?nextToken ?attributeGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let attributeGroups =
@@ -1864,6 +1891,7 @@ module ListAttributeGroupsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -1938,6 +1966,7 @@ module ListAssociatedResourcesResponse =
       let resources =
         (Option.map ~f:Resources.of_xml) (Xml.child xml_arg0 "resources") in
       make ?nextToken ?resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let resources = field_map json "resources" Resources.of_json in
@@ -1977,6 +2006,7 @@ module ListAssociatedResourcesRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?maxResults ?nextToken ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -2055,6 +2085,7 @@ module ListAssociatedAttributeGroupsResponse =
         (Option.map ~f:AttributeGroupIds.of_xml)
           (Xml.child xml_arg0 "attributeGroups") in
       make ?nextToken ?attributeGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let attributeGroups =
@@ -2095,6 +2126,7 @@ module ListAssociatedAttributeGroupsRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?maxResults ?nextToken ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -2164,6 +2196,7 @@ module ListApplicationsResponse =
         (Option.map ~f:ApplicationSummaries.of_xml)
           (Xml.child xml_arg0 "applications") in
       make ?nextToken ?applications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let applications =
@@ -2195,6 +2228,7 @@ module ListApplicationsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -2320,6 +2354,7 @@ module GetAttributeGroupResponse =
         (Option.map ~f:AttributeGroupId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?lastUpdateTime ?creationTime ?attributes ?description ?name
         ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
@@ -2353,6 +2388,7 @@ module GetAttributeGroupRequest =
         AttributeGroupSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attributeGroup") in
       make ~attributeGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroup =
         field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
@@ -2420,6 +2456,7 @@ module GetAssociatedResourceResponse =
       let resource =
         (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "resource") in
       make ?resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map json "resource" Resource.of_json in
       make ?resource ()
@@ -2458,6 +2495,7 @@ module GetAssociatedResourceRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~resource ~resourceType ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
       let resourceType =
@@ -2597,6 +2635,7 @@ module GetApplicationResponse =
       let id = (Option.map ~f:ApplicationId.of_xml) (Xml.child xml_arg0 "id") in
       make ?integrations ?tags ?associatedResourceCount ?lastUpdateTime
         ?creationTime ?description ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let integrations = field_map json "integrations" Integrations.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -2631,6 +2670,7 @@ module GetApplicationRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application =
         field_map_exn json "application" ApplicationSpecifier.of_json in
@@ -2699,6 +2739,7 @@ module DisassociateResourceResponse =
         (Option.map ~f:ApplicationArn.of_xml)
           (Xml.child xml_arg0 "applicationArn") in
       make ?resourceArn ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "resourceArn" Arn.of_json in
       let applicationArn =
@@ -2739,6 +2780,7 @@ module DisassociateResourceRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~resource ~resourceType ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
       let resourceType =
@@ -2822,6 +2864,7 @@ module DisassociateAttributeGroupResponse =
         (Option.map ~f:ApplicationArn.of_xml)
           (Xml.child xml_arg0 "applicationArn") in
       make ?attributeGroupArn ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroupArn =
         field_map json "attributeGroupArn" AttributeGroupArn.of_json in
@@ -2858,6 +2901,7 @@ module DisassociateAttributeGroupRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~attributeGroup ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroup =
         field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
@@ -2929,6 +2973,7 @@ module DeleteAttributeGroupResponse =
         (Option.map ~f:AttributeGroupSummary.of_xml)
           (Xml.child xml_arg0 "attributeGroup") in
       make ?attributeGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroup =
         field_map json "attributeGroup" AttributeGroupSummary.of_json in
@@ -2955,6 +3000,7 @@ module DeleteAttributeGroupRequest =
         AttributeGroupSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attributeGroup") in
       make ~attributeGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroup =
         field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in
@@ -3024,6 +3070,7 @@ module DeleteApplicationResponse =
         (Option.map ~f:ApplicationSummary.of_xml)
           (Xml.child xml_arg0 "application") in
       make ?application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application =
         field_map json "application" ApplicationSummary.of_json in
@@ -3049,6 +3096,7 @@ module DeleteApplicationRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application =
         field_map_exn json "application" ApplicationSpecifier.of_json in
@@ -3129,6 +3177,7 @@ module CreateAttributeGroupResponse =
         (Option.map ~f:AttributeGroup.of_xml)
           (Xml.child xml_arg0 "attributeGroup") in
       make ?attributeGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroup =
         field_map json "attributeGroup" AttributeGroup.of_json in
@@ -3181,6 +3230,7 @@ module CreateAttributeGroupRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ~attributes ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -3253,6 +3303,7 @@ module CreateApplicationResponse =
       let application =
         (Option.map ~f:Application.of_xml) (Xml.child xml_arg0 "application") in
       make ?application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application = field_map json "application" Application.of_json in
       make ?application ()
@@ -3297,6 +3348,7 @@ module CreateApplicationRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~clientToken ?tags ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -3387,6 +3439,7 @@ module AssociateResourceResponse =
         (Option.map ~f:ApplicationArn.of_xml)
           (Xml.child xml_arg0 "applicationArn") in
       make ?resourceArn ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "resourceArn" Arn.of_json in
       let applicationArn =
@@ -3429,6 +3482,7 @@ module AssociateResourceRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~resource ~resourceType ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map_exn json "resource" ResourceSpecifier.of_json in
       let resourceType =
@@ -3523,6 +3577,7 @@ module AssociateAttributeGroupResponse =
         (Option.map ~f:ApplicationArn.of_xml)
           (Xml.child xml_arg0 "applicationArn") in
       make ?attributeGroupArn ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroupArn =
         field_map json "attributeGroupArn" AttributeGroupArn.of_json in
@@ -3559,6 +3614,7 @@ module AssociateAttributeGroupRequest =
         ApplicationSpecifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~attributeGroup ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeGroup =
         field_map_exn json "attributeGroup" AttributeGroupSpecifier.of_json in

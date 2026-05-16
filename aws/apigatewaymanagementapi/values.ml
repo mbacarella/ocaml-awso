@@ -58,6 +58,7 @@ module ForbiddenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The caller is not authorized to invoke this operation."]
@@ -69,6 +70,7 @@ module GoneException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connection with the provided id no longer exists."]
@@ -96,6 +98,7 @@ module Identity =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceIp") in
       make ~userAgent ~sourceIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userAgent = field_map_exn json "UserAgent" Zz__string.of_json in
       let sourceIp = field_map_exn json "SourceIp" Zz__string.of_json in
@@ -110,6 +113,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -138,6 +142,14 @@ module PostToConnectionRequest =
           "The identifier of the connection that a specific client is using."]}
     let context_ = "PostToConnectionRequest"
     let make ~data = fun ~connectionId -> fun () -> { data; connectionId }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~data:pipe
+            ~connectionId:(Zz__string.of_string
+                             ((List.Assoc.find_exn
+                                 ~equal:String.Caseless.equal) xs
+                                "connectionId")) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Data", (Some (Data.to_value x.data)));
@@ -150,6 +162,7 @@ module PostToConnectionRequest =
       let data =
         Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~connectionId ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId = field_map_exn json "ConnectionId" Zz__string.of_json in
       let data = field_map_exn json "Data" Data.of_json in
@@ -169,6 +182,7 @@ module PayloadTooLargeException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -250,6 +264,7 @@ module GetConnectionResponse =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "connectedAt") in
       make ?lastActiveAt ?identity ?connectedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastActiveAt =
         field_map json "LastActiveAt" Zz__timestampIso8601.of_json in
@@ -275,6 +290,7 @@ module GetConnectionRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId = field_map_exn json "ConnectionId" Zz__string.of_json in
       make ~connectionId ()
@@ -296,6 +312,7 @@ module DeleteConnectionRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId = field_map_exn json "ConnectionId" Zz__string.of_json in
       make ~connectionId ()

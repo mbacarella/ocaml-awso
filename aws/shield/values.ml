@@ -105,6 +105,7 @@ module SummarizedCounter =
       let max = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Max") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?unit ?n ?sum ?average ?max ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" String_.of_json in
       let n = field_map json "N" Integer.of_json in
@@ -161,6 +162,7 @@ module BlockAction =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -173,6 +175,7 @@ module CountAction =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -194,6 +197,7 @@ module ProtectionGroupArbitraryPatternLimits =
       let maxMembers =
         Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MaxMembers") in
       make ~maxMembers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxMembers = field_map_exn json "MaxMembers" Long.of_json in
       make ~maxMembers ()
@@ -218,6 +222,7 @@ module Limit =
       let max = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Max") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
       make ?max ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" Long.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -245,6 +250,7 @@ module Contributor =
       let value = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Value") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Long.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -278,6 +284,7 @@ module SummarizedAttackVector =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VectorType") in
       make ?vectorCounters ~vectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vectorCounters =
         field_map json "VectorCounters" SummarizedCounterList.of_json in
@@ -337,6 +344,7 @@ module ResponseAction =
       let block =
         (Option.map ~f:BlockAction.of_xml) (Xml.child xml_arg0 "Block") in
       make ?count ?block ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map json "Count" CountAction.of_json in
       let block = field_map json "Block" BlockAction.of_json in
@@ -395,6 +403,7 @@ module AttackVectorDescription =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VectorType") in
       make ~vectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vectorType = field_map_exn json "VectorType" String_.of_json in
       make ~vectorType ()
@@ -421,6 +430,7 @@ module ProtectionGroupPatternTypeLimits =
         ProtectionGroupArbitraryPatternLimits.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ArbitraryPatternLimits") in
       make ~arbitraryPatternLimits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arbitraryPatternLimits =
         field_map_exn json "ArbitraryPatternLimits"
@@ -467,6 +477,7 @@ module AttackVolumeStatistics =
       let max =
         Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Max") in
       make ~max ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map_exn json "Max" Double.of_json in make ~max ()
     let to_json v = composed_to_json to_value v
@@ -664,6 +675,7 @@ module ValidationExceptionField =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~message ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       let name = field_map_exn json "name" String_.of_json in
@@ -792,6 +804,7 @@ module ApplicationLayerAutomaticResponseConfiguration =
         ApplicationLayerAutomaticResponseStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~action ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map_exn json "Action" ResponseAction.of_json in
       let status =
@@ -1084,6 +1097,7 @@ module ProtectionGroupLimits =
         Long.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MaxProtectionGroups") in
       make ~patternTypeLimits ~maxProtectionGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let patternTypeLimits =
         field_map_exn json "PatternTypeLimits"
@@ -1115,6 +1129,7 @@ module ProtectionLimits =
           (Xml.child_exn ~context:context_ xml_arg0
              "ProtectedResourceTypeLimits") in
       make ~protectedResourceTypeLimits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectedResourceTypeLimits =
         field_map_exn json "ProtectedResourceTypeLimits" Limits.of_json in
@@ -1158,6 +1173,7 @@ module AttackVolume =
         (Option.map ~f:AttackVolumeStatistics.of_xml)
           (Xml.child xml_arg0 "BitsPerSecond") in
       make ?requestsPerSecond ?packetsPerSecond ?bitsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestsPerSecond =
         field_map json "RequestsPerSecond" AttackVolumeStatistics.of_json in
@@ -1224,6 +1240,7 @@ module AttackProperty =
         (Option.map ~f:AttackLayer.of_xml) (Xml.child xml_arg0 "AttackLayer") in
       make ?total ?unit ?topContributors ?attackPropertyIdentifier
         ?attackLayer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total = field_map json "Total" Long.of_json in
       let unit = field_map json "Unit" Unit.of_json in
@@ -1254,6 +1271,7 @@ module Mitigation =
       let mitigationName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MitigationName") in
       make ?mitigationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mitigationName = field_map json "MitigationName" String_.of_json in
       make ?mitigationName ()
@@ -1294,6 +1312,7 @@ module SubResourceSummary =
       let type_ =
         (Option.map ~f:SubResourceType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?counters ?attackVectors ?id ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let counters = field_map json "Counters" SummarizedCounterList.of_json in
       let attackVectors =
@@ -1401,6 +1420,7 @@ module EmergencyContact =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ?contactNotes ?phoneNumber ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactNotes = field_map json "ContactNotes" ContactNotes.of_json in
       let phoneNumber = field_map json "PhoneNumber" PhoneNumber.of_json in
@@ -1431,6 +1451,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -1504,6 +1525,7 @@ module Protection =
       let id = (Option.map ~f:ProtectionId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?applicationLayerAutomaticResponseConfiguration ?protectionArn
         ?healthCheckIds ?resourceArn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationLayerAutomaticResponseConfiguration =
         field_map json "ApplicationLayerAutomaticResponseConfiguration"
@@ -1591,6 +1613,7 @@ module ProtectionGroup =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ?protectionGroupArn ~members ?resourceType ~pattern ~aggregation
         ~protectionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionGroupArn =
         field_map json "ProtectionGroupArn" ResourceArn.of_json in
@@ -1654,6 +1677,7 @@ module AttackSummary =
       let attackId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AttackId") in
       make ?attackVectors ?endTime ?startTime ?resourceArn ?attackId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attackVectors =
         field_map json "AttackVectors" AttackVectorDescriptionList.of_json in
@@ -1799,6 +1823,7 @@ module SubscriptionLimits =
         ProtectionLimits.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionLimits") in
       make ~protectionGroupLimits ~protectionLimits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionGroupLimits =
         field_map_exn json "ProtectionGroupLimits"
@@ -1856,6 +1881,7 @@ module AttackStatisticsDataItem =
         (Option.map ~f:AttackVolume.of_xml)
           (Xml.child xml_arg0 "AttackVolume") in
       make ~attackCount ?attackVolume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attackCount = field_map_exn json "AttackCount" Long.of_json in
       let attackVolume = field_map json "AttackVolume" AttackVolume.of_json in
@@ -1969,6 +1995,7 @@ module InternalErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2004,6 +2031,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?fields ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields =
         field_map json "fields" ValidationExceptionFieldList.of_json in
@@ -2026,6 +2054,7 @@ module LockedSubscriptionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2045,6 +2074,7 @@ module OptimisticLockException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2070,6 +2100,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" String_.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2119,6 +2150,7 @@ module InvalidOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2138,6 +2170,7 @@ module InvalidResourceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2213,6 +2246,7 @@ module InvalidPaginationTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2402,6 +2436,7 @@ module TimeRange =
       let fromInclusive =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "FromInclusive") in
       make ?toExclusive ?fromInclusive ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let toExclusive = field_map json "ToExclusive" Timestamp.of_json in
       let fromInclusive = field_map json "FromInclusive" Timestamp.of_json in
@@ -2459,6 +2494,7 @@ module LimitsExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?limit ?type_ ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" LimitNumber.of_json in
       let type_ = field_map json "Type" LimitType.of_json in
@@ -2502,6 +2538,7 @@ module AccessDeniedForDependencyException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2521,6 +2558,7 @@ module NoAssociatedRoleException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2610,6 +2648,7 @@ module Subscription =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?subscriptionArn ~subscriptionLimits ?proactiveEngagementStatus
         ?limits ?autoRenew ?timeCommitmentInSeconds ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionArn =
         field_map json "SubscriptionArn" ResourceArn.of_json in
@@ -2718,6 +2757,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2806,6 +2846,7 @@ module AttackDetail =
         (Option.map ~f:AttackId.of_xml) (Xml.child xml_arg0 "AttackId") in
       make ?mitigations ?attackProperties ?attackCounters ?endTime ?startTime
         ?subResources ?resourceArn ?attackId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mitigations = field_map json "Mitigations" MitigationList.of_json in
       let attackProperties =
@@ -2842,6 +2883,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" String_.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2922,6 +2964,7 @@ module UpdateSubscriptionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2942,6 +2985,7 @@ module UpdateSubscriptionRequest =
       let autoRenew =
         (Option.map ~f:AutoRenew.of_xml) (Xml.child xml_arg0 "AutoRenew") in
       make ?autoRenew ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoRenew = field_map json "AutoRenew" AutoRenew.of_json in
       make ?autoRenew ()
@@ -3010,6 +3054,7 @@ module UpdateProtectionGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3076,6 +3121,7 @@ module UpdateProtectionGroupRequest =
         ProtectionGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ?members ?resourceType ~pattern ~aggregation ~protectionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let members = field_map json "Members" ProtectionGroupMembers.of_json in
       let resourceType =
@@ -3152,6 +3198,7 @@ module UpdateEmergencyContactSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3175,6 +3222,7 @@ module UpdateEmergencyContactSettingsRequest =
         (Option.map ~f:EmergencyContactList.of_xml)
           (Xml.child xml_arg0 "EmergencyContactList") in
       make ?emergencyContactList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emergencyContactList =
         field_map json "EmergencyContactList" EmergencyContactList.of_json in
@@ -3253,6 +3301,7 @@ module UpdateApplicationLayerAutomaticResponseResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3281,6 +3330,7 @@ module UpdateApplicationLayerAutomaticResponseRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~action ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map_exn json "Action" ResponseAction.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -3350,6 +3400,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a resource in Shield."]
@@ -3379,6 +3430,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
@@ -3447,6 +3499,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds or updates tags for a resource in Shield."]
@@ -3474,6 +3527,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
@@ -3539,6 +3593,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3562,6 +3617,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
       make ~resourceARN ()
@@ -3640,6 +3696,7 @@ module ListResourcesInProtectionGroupResponse =
         ResourceArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArns") in
       make ?nextToken ~resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let resourceArns =
@@ -3682,6 +3739,7 @@ module ListResourcesInProtectionGroupRequest =
         ProtectionGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ?maxResults ?nextToken ~protectionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -3760,6 +3818,7 @@ module ListProtectionsResponse =
       let protections =
         (Option.map ~f:Protections.of_xml) (Xml.child xml_arg0 "Protections") in
       make ?nextToken ?protections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let protections = field_map json "Protections" Protections.of_json in
@@ -3789,6 +3848,7 @@ module ListProtectionsRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -3866,6 +3926,7 @@ module ListProtectionGroupsResponse =
         ProtectionGroups.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroups") in
       make ?nextToken ~protectionGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let protectionGroups =
@@ -3896,6 +3957,7 @@ module ListProtectionGroupsRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -3971,6 +4033,7 @@ module ListAttacksResponse =
         (Option.map ~f:AttackSummaries.of_xml)
           (Xml.child xml_arg0 "AttackSummaries") in
       make ?nextToken ?attackSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let attackSummaries =
@@ -4027,6 +4090,7 @@ module ListAttacksRequest =
         (Option.map ~f:ResourceArnFilterList.of_xml)
           (Xml.child xml_arg0 "ResourceArns") in
       make ?maxResults ?nextToken ?endTime ?startTime ?resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -4083,6 +4147,7 @@ module GetSubscriptionStateResponse =
         SubscriptionState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionState") in
       make ~subscriptionState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionState =
         field_map_exn json "SubscriptionState" SubscriptionState.of_json in
@@ -4098,6 +4163,7 @@ module GetSubscriptionStateRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4173,6 +4239,7 @@ module EnableProactiveEngagementResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4185,6 +4252,7 @@ module EnableProactiveEngagementRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4269,6 +4337,7 @@ module EnableApplicationLayerAutomaticResponseResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4297,6 +4366,7 @@ module EnableApplicationLayerAutomaticResponseRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~action ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map_exn json "Action" ResponseAction.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -4375,6 +4445,7 @@ module DisassociateHealthCheckResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4405,6 +4476,7 @@ module DisassociateHealthCheckRequest =
         ProtectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionId") in
       make ~healthCheckArn ~protectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckArn =
         field_map_exn json "HealthCheckArn" HealthCheckArn.of_json in
@@ -4476,6 +4548,7 @@ module DisassociateDRTRoleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4488,6 +4561,7 @@ module DisassociateDRTRoleRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4576,6 +4650,7 @@ module DisassociateDRTLogBucketResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4598,6 +4673,7 @@ module DisassociateDRTLogBucketRequest =
         LogBucket.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LogBucket") in
       make ~logBucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logBucket = field_map_exn json "LogBucket" LogBucket.of_json in
       make ~logBucket ()
@@ -4675,6 +4751,7 @@ module DisableProactiveEngagementResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4687,6 +4764,7 @@ module DisableProactiveEngagementRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4762,6 +4840,7 @@ module DisableApplicationLayerAutomaticResponseResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4783,6 +4862,7 @@ module DisableApplicationLayerAutomaticResponseRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -4843,6 +4923,7 @@ module DescribeSubscriptionResponse =
         (Option.map ~f:Subscription.of_xml)
           (Xml.child xml_arg0 "Subscription") in
       make ?subscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscription = field_map json "Subscription" Subscription.of_json in
       make ?subscription ()
@@ -4857,6 +4938,7 @@ module DescribeSubscriptionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4921,6 +5003,7 @@ module DescribeProtectionResponse =
       let protection =
         (Option.map ~f:Protection.of_xml) (Xml.child xml_arg0 "Protection") in
       make ?protection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protection = field_map json "Protection" Protection.of_json in
       make ?protection ()
@@ -4951,6 +5034,7 @@ module DescribeProtectionRequest =
         (Option.map ~f:ProtectionId.of_xml)
           (Xml.child xml_arg0 "ProtectionId") in
       make ?resourceArn ?protectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
       let protectionId = field_map json "ProtectionId" ProtectionId.of_json in
@@ -5012,6 +5096,7 @@ module DescribeProtectionGroupResponse =
         ProtectionGroup.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroup") in
       make ~protectionGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionGroup =
         field_map_exn json "ProtectionGroup" ProtectionGroup.of_json in
@@ -5038,6 +5123,7 @@ module DescribeProtectionGroupRequest =
         ProtectionGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ~protectionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionGroupId =
         field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
@@ -5100,6 +5186,7 @@ module DescribeEmergencyContactSettingsResponse =
         (Option.map ~f:EmergencyContactList.of_xml)
           (Xml.child xml_arg0 "EmergencyContactList") in
       make ?emergencyContactList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emergencyContactList =
         field_map json "EmergencyContactList" EmergencyContactList.of_json in
@@ -5115,6 +5202,7 @@ module DescribeEmergencyContactSettingsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5179,6 +5267,7 @@ module DescribeDRTAccessResponse =
       let roleArn =
         (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?logBucketList ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logBucketList =
         field_map json "LogBucketList" LogBucketList.of_json in
@@ -5195,6 +5284,7 @@ module DescribeDRTAccessRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5250,6 +5340,7 @@ module DescribeAttackStatisticsResponse =
         TimeRange.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimeRange") in
       make ~dataItems ~timeRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataItems =
         field_map_exn json "DataItems" AttackStatisticsDataList.of_json in
@@ -5266,6 +5357,7 @@ module DescribeAttackStatisticsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5321,6 +5413,7 @@ module DescribeAttackResponse =
       let attack =
         (Option.map ~f:AttackDetail.of_xml) (Xml.child xml_arg0 "Attack") in
       make ?attack ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attack = field_map json "Attack" AttackDetail.of_json in
       make ?attack ()
@@ -5342,6 +5435,7 @@ module DescribeAttackRequest =
       let attackId =
         AttackId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AttackId") in
       make ~attackId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attackId = field_map_exn json "AttackId" AttackId.of_json in
       make ~attackId ()
@@ -5402,6 +5496,7 @@ module DeleteSubscriptionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5414,6 +5509,7 @@ module DeleteSubscriptionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5471,6 +5567,7 @@ module DeleteProtectionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an Shield Advanced Protection."]
@@ -5492,6 +5589,7 @@ module DeleteProtectionRequest =
         ProtectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionId") in
       make ~protectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionId =
         field_map_exn json "ProtectionId" ProtectionId.of_json in
@@ -5551,6 +5649,7 @@ module DeleteProtectionGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified protection group."]
@@ -5573,6 +5672,7 @@ module DeleteProtectionGroupRequest =
         ProtectionGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ~protectionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionGroupId =
         field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
@@ -5625,6 +5725,7 @@ module CreateSubscriptionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5637,6 +5738,7 @@ module CreateSubscriptionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5751,6 +5853,7 @@ module CreateProtectionResponse =
         (Option.map ~f:ProtectionId.of_xml)
           (Xml.child xml_arg0 "ProtectionId") in
       make ?protectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionId = field_map json "ProtectionId" ProtectionId.of_json in
       make ?protectionId ()
@@ -5787,6 +5890,7 @@ module CreateProtectionRequest =
         ProtectionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~resourceArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -5877,6 +5981,7 @@ module CreateProtectionGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5951,6 +6056,7 @@ module CreateProtectionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ?tags ?members ?resourceType ~pattern ~aggregation
         ~protectionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let members = field_map json "Members" ProtectionGroupMembers.of_json in
@@ -6038,6 +6144,7 @@ module AssociateProactiveEngagementDetailsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6061,6 +6168,7 @@ module AssociateProactiveEngagementDetailsRequest =
         EmergencyContactList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmergencyContactList") in
       make ~emergencyContactList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emergencyContactList =
         field_map_exn json "EmergencyContactList"
@@ -6149,6 +6257,7 @@ module AssociateHealthCheckResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6179,6 +6288,7 @@ module AssociateHealthCheckRequest =
         ProtectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionId") in
       make ~healthCheckArn ~protectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckArn =
         field_map_exn json "HealthCheckArn" HealthCheckArn.of_json in
@@ -6272,6 +6382,7 @@ module AssociateDRTRoleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6292,6 +6403,7 @@ module AssociateDRTRoleRequest =
       let roleArn =
         RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
       make ~roleArn ()
@@ -6400,6 +6512,7 @@ module AssociateDRTLogBucketResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6422,6 +6535,7 @@ module AssociateDRTLogBucketRequest =
         LogBucket.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LogBucket") in
       make ~logBucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logBucket = field_map_exn json "LogBucket" LogBucket.of_json in
       make ~logBucket ()

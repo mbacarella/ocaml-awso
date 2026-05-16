@@ -283,6 +283,7 @@ module AuthParameter =
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "key") in
       make ?connectorSuppliedValues ?isSensitiveField ?description ?label
         ?isRequired ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorSuppliedValues =
         field_map json "connectorSuppliedValues"
@@ -427,6 +428,7 @@ module AggregationConfig =
         (Option.map ~f:AggregationType.of_xml)
           (Xml.child xml_arg0 "aggregationType") in
       make ?aggregationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aggregationType =
         field_map json "aggregationType" AggregationType.of_json in
@@ -487,6 +489,7 @@ module PrefixConfig =
       let prefixType =
         (Option.map ~f:PrefixType.of_xml) (Xml.child xml_arg0 "prefixType") in
       make ?prefixFormat ?prefixType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixFormat = field_map json "prefixFormat" PrefixFormat.of_json in
       let prefixType = field_map json "prefixType" PrefixType.of_json in
@@ -952,6 +955,7 @@ module ErrorHandlingConfig =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "failOnFirstDestinationError") in
       make ?bucketName ?bucketPrefix ?failOnFirstDestinationError ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketName = field_map json "bucketName" BucketName.of_json in
       let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
@@ -1105,6 +1109,7 @@ module S3OutputFormatConfig =
       let fileType =
         (Option.map ~f:FileType.of_xml) (Xml.child xml_arg0 "fileType") in
       make ?aggregationConfig ?prefixConfig ?fileType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aggregationConfig =
         field_map json "aggregationConfig" AggregationConfig.of_json in
@@ -1137,6 +1142,7 @@ module SuccessResponseHandlingConfig =
         (Option.map ~f:BucketPrefix.of_xml)
           (Xml.child xml_arg0 "bucketPrefix") in
       make ?bucketName ?bucketPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketName = field_map json "bucketName" BucketName.of_json in
       let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
@@ -1196,6 +1202,7 @@ module UpsolverS3OutputFormatConfig =
       let fileType =
         (Option.map ~f:FileType.of_xml) (Xml.child xml_arg0 "fileType") in
       make ?aggregationConfig ~prefixConfig ?fileType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aggregationConfig =
         field_map json "aggregationConfig" AggregationConfig.of_json in
@@ -1407,6 +1414,7 @@ module ConnectorOAuthRequest =
       let authCode =
         (Option.map ~f:AuthCode.of_xml) (Xml.child xml_arg0 "authCode") in
       make ?redirectUri ?authCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redirectUri = field_map json "redirectUri" RedirectUri.of_json in
       let authCode = field_map json "authCode" AuthCode.of_json in
@@ -1492,6 +1500,7 @@ module CustomAuthConfig =
         (Option.map ~f:CustomAuthenticationType.of_xml)
           (Xml.child xml_arg0 "customAuthenticationType") in
       make ?authParameters ?customAuthenticationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authParameters =
         field_map json "authParameters" AuthParameterList.of_json in
@@ -1703,6 +1712,7 @@ module OAuth2Properties =
       let tokenUrl =
         TokenUrl.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tokenUrl") in
       make ~oAuth2GrantType ~tokenUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuth2GrantType =
         field_map_exn json "oAuth2GrantType" OAuth2GrantType.of_json in
@@ -1907,6 +1917,7 @@ module OAuthProperties =
       let tokenUrl =
         TokenUrl.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tokenUrl") in
       make ~oAuthScopes ~authCodeUrl ~tokenUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthScopes =
         field_map_exn json "oAuthScopes" OAuthScopeList.of_json in
@@ -2066,6 +2077,7 @@ module Range =
       let maximum =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "maximum") in
       make ?minimum ?maximum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minimum = field_map json "minimum" Double.of_json in
       let maximum = field_map json "maximum" Double.of_json in
@@ -2177,6 +2189,7 @@ module CustomConnectorDestinationProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "entityName") in
       make ?customProperties ?idFieldNames ?writeOperationType
         ?errorHandlingConfig ~entityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customProperties =
         field_map json "customProperties" CustomProperties.of_json in
@@ -2219,6 +2232,7 @@ module CustomerProfilesDestinationProperties =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "domainName") in
       make ?objectTypeName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectTypeName =
         field_map json "objectTypeName" ObjectTypeName.of_json in
@@ -2251,6 +2265,7 @@ module EventBridgeDestinationProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorHandlingConfig =
         field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
@@ -2283,6 +2298,7 @@ module HoneycodeDestinationProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorHandlingConfig =
         field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
@@ -2299,6 +2315,7 @@ module LookoutMetricsDestinationProperties =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2326,6 +2343,7 @@ module MarketoDestinationProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorHandlingConfig =
         field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
@@ -2386,6 +2404,7 @@ module RedshiftDestinationProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ?bucketPrefix ~intermediateBucketName
         ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorHandlingConfig =
         field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
@@ -2433,6 +2452,7 @@ module S3DestinationProperties =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ?s3OutputFormatConfig ?bucketPrefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3OutputFormatConfig =
         field_map json "s3OutputFormatConfig" S3OutputFormatConfig.of_json in
@@ -2499,6 +2519,7 @@ module SAPODataDestinationProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "objectPath") in
       make ?writeOperationType ?errorHandlingConfig ?idFieldNames
         ?successResponseHandlingConfig ~objectPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeOperationType =
         field_map json "writeOperationType" WriteOperationType.of_json in
@@ -2566,6 +2587,7 @@ module SalesforceDestinationProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?writeOperationType ?errorHandlingConfig ?idFieldNames ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeOperationType =
         field_map json "writeOperationType" WriteOperationType.of_json in
@@ -2630,6 +2652,7 @@ module SnowflakeDestinationProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ?bucketPrefix ~intermediateBucketName
         ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorHandlingConfig =
         field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
@@ -2680,6 +2703,7 @@ module UpsolverDestinationProperties =
         UpsolverBucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~s3OutputFormatConfig ?bucketPrefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3OutputFormatConfig =
         field_map_exn json "s3OutputFormatConfig"
@@ -2735,6 +2759,7 @@ module ZendeskDestinationProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?writeOperationType ?errorHandlingConfig ?idFieldNames ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeOperationType =
         field_map json "writeOperationType" WriteOperationType.of_json in
@@ -2765,6 +2790,7 @@ module S3InputFormatConfig =
         (Option.map ~f:S3InputFileType.of_xml)
           (Xml.child xml_arg0 "s3InputFileType") in
       make ?s3InputFileType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3InputFileType =
         field_map json "s3InputFileType" S3InputFileType.of_json in
@@ -4010,6 +4036,7 @@ module ApiKeyCredentials =
       let apiKey =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ?apiSecretKey ~apiKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiSecretKey = field_map json "apiSecretKey" ApiSecretKey.of_json in
       let apiKey = field_map_exn json "apiKey" ApiKey.of_json in
@@ -4070,6 +4097,7 @@ module BasicAuthCredentials =
       let username =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "password" Password.of_json in
       let username = field_map_exn json "username" Username.of_json in
@@ -4107,6 +4135,7 @@ module CustomAuthCredentials =
           (Xml.child_exn ~context:context_ xml_arg0
              "customAuthenticationType") in
       make ?credentialsMap ~customAuthenticationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let credentialsMap =
         field_map json "credentialsMap" CredentialsMap.of_json in
@@ -4173,6 +4202,7 @@ module OAuth2Credentials =
         (Option.map ~f:ClientId.of_xml) (Xml.child xml_arg0 "clientId") in
       make ?oAuthRequest ?refreshToken ?accessToken ?clientSecret ?clientId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthRequest =
         field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
@@ -4297,6 +4327,7 @@ module OAuthCredentials =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?refreshToken ?accessToken ~clientSecret ~clientId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthRequest =
         field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
@@ -4461,6 +4492,7 @@ module ErrorInfo =
       let putFailuresCount =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "putFailuresCount") in
       make ?executionMessage ?putFailuresCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionMessage =
         field_map json "executionMessage" ExecutionMessage.of_json in
@@ -4544,6 +4576,7 @@ module OAuth2Defaults =
           (Xml.child xml_arg0 "oauthScopes") in
       make ?oauth2GrantTypesSupported ?authCodeUrls ?tokenUrls ?oauthScopes
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oauth2GrantTypesSupported =
         field_map json "oauth2GrantTypesSupported"
@@ -4565,6 +4598,7 @@ module AmplitudeMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Amplitude."]
@@ -4576,6 +4610,7 @@ module CustomerProfilesMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4588,6 +4623,7 @@ module DatadogMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Datadog."]
@@ -4599,6 +4635,7 @@ module DynatraceMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Dynatrace."]
@@ -4610,6 +4647,7 @@ module EventBridgeMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Amazon EventBridge."]
@@ -4631,6 +4669,7 @@ module GoogleAnalyticsMetadata =
         (Option.map ~f:OAuthScopeList.of_xml)
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
@@ -4654,6 +4693,7 @@ module HoneycodeMetadata =
         (Option.map ~f:OAuthScopeList.of_xml)
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
@@ -4667,6 +4707,7 @@ module InforNexusMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Infor Nexus."]
@@ -4678,6 +4719,7 @@ module MarketoMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Marketo."]
@@ -4689,6 +4731,7 @@ module RedshiftMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Amazon Redshift."]
@@ -4700,6 +4743,7 @@ module S3Metadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Amazon S3."]
@@ -4711,6 +4755,7 @@ module SAPODataMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to SAPOData."]
@@ -4732,6 +4777,7 @@ module SalesforceMetadata =
         (Option.map ~f:OAuthScopeList.of_xml)
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
@@ -4745,6 +4791,7 @@ module ServiceNowMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to ServiceNow."]
@@ -4756,6 +4803,7 @@ module SingularMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Singular."]
@@ -4776,6 +4824,7 @@ module SlackMetadata =
         (Option.map ~f:OAuthScopeList.of_xml)
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
@@ -4799,6 +4848,7 @@ module SnowflakeMetadata =
         (Option.map ~f:RegionList.of_xml)
           (Xml.child xml_arg0 "supportedRegions") in
       make ?supportedRegions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedRegions =
         field_map json "supportedRegions" RegionList.of_json in
@@ -4813,6 +4863,7 @@ module TrendmicroMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Trend Micro."]
@@ -4824,6 +4875,7 @@ module UpsolverMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Upsolver."]
@@ -4835,6 +4887,7 @@ module VeevaMetadata =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Veeva."]
@@ -4856,6 +4909,7 @@ module ZendeskMetadata =
         (Option.map ~f:OAuthScopeList.of_xml)
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
@@ -4876,6 +4930,7 @@ module LambdaConnectorProvisioningConfig =
       let lambdaArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "lambdaArn") in
       make ~lambdaArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaArn = field_map_exn json "lambdaArn" ARN.of_json in
       make ~lambdaArn ()
@@ -4953,6 +5008,7 @@ module ConnectorRuntimeSetting =
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "key") in
       make ?connectorSuppliedValueOptions ?scope ?description ?label
         ?isRequired ?dataType ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorSuppliedValueOptions =
         field_map json "connectorSuppliedValueOptions"
@@ -5232,6 +5288,7 @@ module AmplitudeConnectorProfileProperties =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5262,6 +5319,7 @@ module CustomConnectorProfileProperties =
         (Option.map ~f:ProfilePropertiesMap.of_xml)
           (Xml.child xml_arg0 "profileProperties") in
       make ?oAuth2Properties ?profileProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuth2Properties =
         field_map json "oAuth2Properties" OAuth2Properties.of_json in
@@ -5287,6 +5345,7 @@ module DatadogConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5310,6 +5369,7 @@ module DynatraceConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5324,6 +5384,7 @@ module GoogleAnalyticsConnectorProfileProperties =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5336,6 +5397,7 @@ module HoneycodeConnectorProfileProperties =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5357,6 +5419,7 @@ module InforNexusConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5380,6 +5443,7 @@ module MarketoConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5426,6 +5490,7 @@ module RedshiftConnectorProfileProperties =
         DatabaseUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "databaseUrl") in
       make ~roleArn ?bucketPrefix ~bucketName ~databaseUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
       let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
@@ -5515,6 +5580,7 @@ module SAPODataConnectorProfileProperties =
       make ?oAuthProperties ?privateLinkServiceName ?logonLanguage
         ~clientNumber ~portNumber ~applicationServicePath ~applicationHostUrl
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthProperties =
         field_map json "oAuthProperties" OAuthProperties.of_json in
@@ -5562,6 +5628,7 @@ module SalesforceConnectorProfileProperties =
       let instanceUrl =
         (Option.map ~f:InstanceUrl.of_xml) (Xml.child xml_arg0 "instanceUrl") in
       make ?isSandboxEnvironment ?instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isSandboxEnvironment =
         field_map json "isSandboxEnvironment" Boolean.of_json in
@@ -5587,6 +5654,7 @@ module ServiceNowConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5601,6 +5669,7 @@ module SingularConnectorProfileProperties =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5622,6 +5691,7 @@ module SlackConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5703,6 +5773,7 @@ module SnowflakeConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "warehouse") in
       make ?region ?accountName ?privateLinkServiceName ?bucketPrefix
         ~bucketName ~stage ~warehouse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map json "region" Region.of_json in
       let accountName = field_map json "accountName" AccountName.of_json in
@@ -5726,6 +5797,7 @@ module TrendmicroConnectorProfileProperties =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5747,6 +5819,7 @@ module VeevaConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5770,6 +5843,7 @@ module ZendeskConnectorProfileProperties =
         InstanceUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
@@ -5967,6 +6041,7 @@ module FieldTypeDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "fieldType") in
       make ?fieldLengthRange ?fieldValueRange ?supportedDateFormat
         ?valueRegexPattern ?supportedValues ~filterOperators ~fieldType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldLengthRange = field_map json "fieldLengthRange" Range.of_json in
       let fieldValueRange = field_map json "fieldValueRange" Range.of_json in
@@ -6158,6 +6233,7 @@ module DestinationConnectorProperties =
       make ?sAPOData ?customConnector ?marketo ?zendesk ?customerProfiles
         ?honeycode ?upsolver ?lookoutMetrics ?eventBridge ?snowflake
         ?salesforce ?s3 ?redshift ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sAPOData =
         field_map json "SAPOData" SAPODataDestinationProperties.of_json in
@@ -6226,6 +6302,7 @@ module AmplitudeSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6259,6 +6336,7 @@ module CustomConnectorSourceProperties =
         EntityName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entityName") in
       make ?customProperties ~entityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customProperties =
         field_map json "customProperties" CustomProperties.of_json in
@@ -6282,6 +6360,7 @@ module DatadogSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6303,6 +6382,7 @@ module DynatraceSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6325,6 +6405,7 @@ module GoogleAnalyticsSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6346,6 +6427,7 @@ module InforNexusSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6367,6 +6449,7 @@ module MarketoSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6408,6 +6491,7 @@ module S3SourceProperties =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ?s3InputFormatConfig ?bucketPrefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3InputFormatConfig =
         field_map json "s3InputFormatConfig" S3InputFormatConfig.of_json in
@@ -6432,6 +6516,7 @@ module SAPODataSourceProperties =
       let objectPath =
         (Option.map ~f:Object.of_xml) (Xml.child xml_arg0 "objectPath") in
       make ?objectPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectPath = field_map json "objectPath" Object.of_json in
       make ?objectPath ()
@@ -6474,6 +6559,7 @@ module SalesforceSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?includeDeletedRecords ?enableDynamicFieldUpdate ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeDeletedRecords =
         field_map json "includeDeletedRecords" Boolean.of_json in
@@ -6499,6 +6585,7 @@ module ServiceNowSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6520,6 +6607,7 @@ module SingularSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6541,6 +6629,7 @@ module SlackSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6562,6 +6651,7 @@ module TrendmicroSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6629,6 +6719,7 @@ module VeevaSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?includeAllVersions ?includeRenditions ?includeSourceFiles
         ?documentType ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeAllVersions =
         field_map json "includeAllVersions" Boolean.of_json in
@@ -6658,6 +6749,7 @@ module ZendeskSourceProperties =
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let object_ = field_map_exn json "object" Object.of_json in
       make ~object_ ()
@@ -6834,6 +6926,7 @@ module ConnectorOperator =
       make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?slack
         ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
         ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customConnector = field_map json "CustomConnector" Operator.of_json in
       let sAPOData =
@@ -7061,6 +7154,7 @@ module ScheduledTriggerProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "scheduleExpression") in
       make ?firstExecutionFrom ?scheduleOffset ?timezone ?scheduleEndTime
         ?scheduleStartTime ?dataPullMode ~scheduleExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firstExecutionFrom =
         field_map json "firstExecutionFrom" Date.of_json in
@@ -7100,6 +7194,7 @@ module AmplitudeConnectorProfileCredentials =
       let apiKey =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ~secretKey ~apiKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretKey = field_map_exn json "secretKey" SecretKey.of_json in
       let apiKey = field_map_exn json "apiKey" ApiKey.of_json in
@@ -7159,6 +7254,7 @@ module CustomConnectorProfileCredentials =
         AuthenticationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "authenticationType") in
       make ?custom ?apiKey ?oauth2 ?basic ~authenticationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let custom = field_map json "custom" CustomAuthCredentials.of_json in
       let apiKey = field_map json "apiKey" ApiKeyCredentials.of_json in
@@ -7195,6 +7291,7 @@ module DatadogConnectorProfileCredentials =
       let apiKey =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ~applicationKey ~apiKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationKey =
         field_map_exn json "applicationKey" ApplicationKey.of_json in
@@ -7219,6 +7316,7 @@ module DynatraceConnectorProfileCredentials =
       let apiToken =
         ApiToken.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiToken") in
       make ~apiToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiToken = field_map_exn json "apiToken" ApiToken.of_json in
       make ~apiToken ()
@@ -7283,6 +7381,7 @@ module GoogleAnalyticsConnectorProfileCredentials =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?refreshToken ?accessToken ~clientSecret ~clientId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthRequest =
         field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
@@ -7328,6 +7427,7 @@ module HoneycodeConnectorProfileCredentials =
       let accessToken =
         (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
       make ?oAuthRequest ?refreshToken ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthRequest =
         field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
@@ -7372,6 +7472,7 @@ module InforNexusConnectorProfileCredentials =
         AccessKeyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessKeyId") in
       make ~datakey ~secretAccessKey ~userId ~accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datakey = field_map_exn json "datakey" Key.of_json in
       let secretAccessKey = field_map_exn json "secretAccessKey" Key.of_json in
@@ -7422,6 +7523,7 @@ module MarketoConnectorProfileCredentials =
       let clientId =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthRequest =
         field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
@@ -7453,6 +7555,7 @@ module RedshiftConnectorProfileCredentials =
       let username =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "password" Password.of_json in
       let username = field_map_exn json "username" Username.of_json in
@@ -7487,6 +7590,7 @@ module SAPODataConnectorProfileCredentials =
         (Option.map ~f:BasicAuthCredentials.of_xml)
           (Xml.child xml_arg0 "basicAuthCredentials") in
       make ?oAuthCredentials ?basicAuthCredentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthCredentials =
         field_map json "oAuthCredentials" OAuthCredentials.of_json in
@@ -7541,6 +7645,7 @@ module SalesforceConnectorProfileCredentials =
       let accessToken =
         (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
       make ?clientCredentialsArn ?oAuthRequest ?refreshToken ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientCredentialsArn =
         field_map json "clientCredentialsArn" ClientCredentialsArn.of_json in
@@ -7572,6 +7677,7 @@ module ServiceNowConnectorProfileCredentials =
       let username =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "password" Password.of_json in
       let username = field_map_exn json "username" Username.of_json in
@@ -7595,6 +7701,7 @@ module SingularConnectorProfileCredentials =
       let apiKey =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ~apiKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiKey = field_map_exn json "apiKey" ApiKey.of_json in
       make ~apiKey ()
@@ -7641,6 +7748,7 @@ module SlackConnectorProfileCredentials =
       let clientId =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthRequest =
         field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
@@ -7672,6 +7780,7 @@ module SnowflakeConnectorProfileCredentials =
       let username =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "password" Password.of_json in
       let username = field_map_exn json "username" Username.of_json in
@@ -7696,6 +7805,7 @@ module TrendmicroConnectorProfileCredentials =
         ApiSecretKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "apiSecretKey") in
       make ~apiSecretKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiSecretKey =
         field_map_exn json "apiSecretKey" ApiSecretKey.of_json in
@@ -7723,6 +7833,7 @@ module VeevaConnectorProfileCredentials =
       let username =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "password" Password.of_json in
       let username = field_map_exn json "username" Username.of_json in
@@ -7771,6 +7882,7 @@ module ZendeskConnectorProfileCredentials =
       let clientId =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oAuthRequest =
         field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
@@ -7859,6 +7971,7 @@ module ExecutionDetails =
           (Xml.child xml_arg0 "mostRecentExecutionMessage") in
       make ?mostRecentExecutionStatus ?mostRecentExecutionTime
         ?mostRecentExecutionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mostRecentExecutionStatus =
         field_map json "mostRecentExecutionStatus" ExecutionStatus.of_json in
@@ -8193,6 +8306,7 @@ module ConnectorEntity =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?hasNestedEntities ?label ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hasNestedEntities =
         field_map json "hasNestedEntities" Boolean.of_json in
@@ -8258,6 +8372,7 @@ module ExecutionResult =
       let errorInfo =
         (Option.map ~f:ErrorInfo.of_xml) (Xml.child xml_arg0 "errorInfo") in
       make ?recordsProcessed ?bytesWritten ?bytesProcessed ?errorInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordsProcessed = field_map json "recordsProcessed" Long.of_json in
       let bytesWritten = field_map json "bytesWritten" Long.of_json in
@@ -8339,6 +8454,7 @@ module AuthenticationConfig =
           (Xml.child xml_arg0 "isBasicAuthSupported") in
       make ?customAuthConfigs ?oAuth2Defaults ?isCustomAuthSupported
         ?isOAuth2Supported ?isApiKeyAuthSupported ?isBasicAuthSupported ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customAuthConfigs =
         field_map json "customAuthConfigs" CustomAuthConfigList.of_json in
@@ -8541,6 +8657,7 @@ module ConnectorMetadata =
         ?zendesk ?veeva ?trendmicro ?snowflake ?slack ?singular ?serviceNow
         ?salesforce ?s3 ?redshift ?marketo ?inforNexus ?googleAnalytics
         ?dynatrace ?datadog ?amplitude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sAPOData = field_map json "SAPOData" SAPODataMetadata.of_json in
       let honeycode = field_map json "Honeycode" HoneycodeMetadata.of_json in
@@ -8591,6 +8708,7 @@ module ConnectorProvisioningConfig =
         (Option.map ~f:LambdaConnectorProvisioningConfig.of_xml)
           (Xml.child xml_arg0 "lambda") in
       make ?lambda ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambda =
         field_map json "lambda" LambdaConnectorProvisioningConfig.of_json in
@@ -9017,6 +9135,7 @@ module ConnectorProfileProperties =
         ?slack ?singular ?serviceNow ?salesforce ?redshift ?marketo
         ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
         ?amplitude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customConnector =
         field_map json "CustomConnector"
@@ -9110,6 +9229,7 @@ module PrivateConnectionProvisioningState =
         (Option.map ~f:PrivateConnectionProvisioningStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?failureCause ?failureMessage ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureCause =
         field_map json "failureCause"
@@ -9188,6 +9308,7 @@ module DestinationFieldProperties =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isCreatable") in
       make ?supportedWriteOperations ?isDefaultedOnCreate ?isUpdatable
         ?isUpsertable ?isNullable ?isCreatable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedWriteOperations =
         field_map json "supportedWriteOperations"
@@ -9260,6 +9381,7 @@ module SourceFieldProperties =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isRetrievable") in
       make ?isTimestampFieldForIncrementalQueries ?isQueryable ?isRetrievable
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isTimestampFieldForIncrementalQueries =
         field_map json "isTimestampFieldForIncrementalQueries"
@@ -9288,6 +9410,7 @@ module SupportedFieldTypeDetails =
         FieldTypeDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "v1") in
       make ~v1 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let v1 = field_map_exn json "v1" FieldTypeDetails.of_json in
       make ~v1 ()
@@ -9365,6 +9488,7 @@ module DestinationFlowConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorType") in
       make ~destinationConnectorProperties ?connectorProfileName ?apiVersion
         ~connectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationConnectorProperties =
         field_map_exn json "destinationConnectorProperties"
@@ -9398,6 +9522,7 @@ module IncrementalPullConfig =
         (Option.map ~f:DatetimeTypeFieldName.of_xml)
           (Xml.child xml_arg0 "datetimeTypeFieldName") in
       make ?datetimeTypeFieldName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datetimeTypeFieldName =
         field_map json "datetimeTypeFieldName" DatetimeTypeFieldName.of_json in
@@ -9573,6 +9698,7 @@ module SourceConnectorProperties =
       make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?slack
         ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
         ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customConnector =
         field_map json "CustomConnector"
@@ -9669,6 +9795,7 @@ module Task =
           (Xml.child_exn ~context:context_ xml_arg0 "sourceFields") in
       make ?taskProperties ~taskType ?destinationField ?connectorOperator
         ~sourceFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskProperties =
         field_map json "taskProperties" TaskPropertiesMap.of_json in
@@ -9702,6 +9829,7 @@ module TriggerProperties =
         (Option.map ~f:ScheduledTriggerProperties.of_xml)
           (Xml.child xml_arg0 "Scheduled") in
       make ?scheduled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduled =
         field_map json "Scheduled" ScheduledTriggerProperties.of_json in
@@ -9916,6 +10044,7 @@ module ConnectorProfileCredentials =
         ?slack ?singular ?serviceNow ?salesforce ?redshift ?marketo
         ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
         ?amplitude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customConnector =
         field_map json "CustomConnector"
@@ -10107,6 +10236,7 @@ module FlowDefinition =
         ?lastUpdatedAt ?createdAt ?triggerType ?destinationConnectorLabel
         ?destinationConnectorType ?sourceConnectorLabel ?sourceConnectorType
         ?flowStatus ?flowName ?description ?flowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastRunExecutionDetails =
         field_map json "lastRunExecutionDetails" ExecutionDetails.of_json in
@@ -10249,6 +10379,7 @@ module ConnectorDetail =
         ?registeredAt ?connectorLabel ?connectorType ?applicationType
         ?connectorVersion ?connectorOwner ?connectorName
         ?connectorDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorModes =
         field_map json "connectorModes" ConnectorModeList.of_json in
@@ -10390,6 +10521,7 @@ module ExecutionRecord =
         (Option.map ~f:ExecutionId.of_xml) (Xml.child xml_arg0 "executionId") in
       make ?dataPullEndTime ?dataPullStartTime ?lastUpdatedAt ?startedAt
         ?executionResult ?executionStatus ?executionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataPullEndTime = field_map json "dataPullEndTime" Date.of_json in
       let dataPullStartTime = field_map json "dataPullStartTime" Date.of_json in
@@ -10670,6 +10802,7 @@ module ConnectorConfiguration =
         ?isPrivateLinkEndpointUrlRequired ?isPrivateLinkEnabled
         ?supportedSchedulingFrequencies ?supportedDestinationConnectors
         ?canUseAsDestination ?canUseAsSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registeredBy = field_map json "registeredBy" RegisteredBy.of_json in
       let registeredAt = field_map json "registeredAt" Date.of_json in
@@ -10843,6 +10976,7 @@ module ConnectorProfile =
         ?connectorProfileProperties ?credentialsArn ?connectionMode
         ?connectorLabel ?connectorType ?connectorProfileName
         ?connectorProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateConnectionProvisioningState =
         field_map json "privateConnectionProvisioningState"
@@ -10980,6 +11114,7 @@ module ConnectorEntityField =
       make ?customProperties ?destinationProperties ?sourceProperties
         ?description ?supportedFieldTypeDetails ?isDeprecated ?defaultValue
         ?isPrimaryKey ?label ?parentIdentifier ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customProperties =
         field_map json "customProperties" CustomProperties.of_json in
@@ -11018,6 +11153,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11037,6 +11173,7 @@ module ConnectorAuthenticationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11056,6 +11193,7 @@ module ConnectorServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11075,6 +11213,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11094,6 +11233,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11113,6 +11253,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11132,6 +11273,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11227,6 +11369,7 @@ module SourceFlowConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorType") in
       make ?incrementalPullConfig ~sourceConnectorProperties
         ?connectorProfileName ?apiVersion ~connectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incrementalPullConfig =
         field_map json "incrementalPullConfig" IncrementalPullConfig.of_json in
@@ -11293,6 +11436,7 @@ module TriggerConfig =
         TriggerType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "triggerType") in
       make ?triggerProperties ~triggerType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggerProperties =
         field_map json "triggerProperties" TriggerProperties.of_json in
@@ -11336,6 +11480,7 @@ module ConnectorProfileConfig =
           (Xml.child_exn ~context:context_ xml_arg0
              "connectorProfileProperties") in
       make ~connectorProfileCredentials ~connectorProfileProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorProfileCredentials =
         field_map_exn json "connectorProfileCredentials"
@@ -11387,6 +11532,7 @@ module UnsupportedOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11406,6 +11552,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11424,6 +11571,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -11842,6 +11990,7 @@ module UpdateFlowResponse =
       let flowStatus =
         (Option.map ~f:FlowStatus.of_xml) (Xml.child xml_arg0 "flowStatus") in
       make ?flowStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
       make ?flowStatus ()
@@ -11915,6 +12064,7 @@ module UpdateFlowRequest =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ~tasks ~destinationFlowConfigList ~sourceFlowConfig ~triggerConfig
         ?description ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tasks = field_map_exn json "tasks" Tasks.of_json in
       let destinationFlowConfigList =
@@ -12014,6 +12164,7 @@ module UpdateConnectorProfileResponse =
         (Option.map ~f:ConnectorProfileArn.of_xml)
           (Xml.child xml_arg0 "connectorProfileArn") in
       make ?connectorProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorProfileArn =
         field_map json "connectorProfileArn" ConnectorProfileArn.of_json in
@@ -12059,6 +12210,7 @@ module UpdateConnectorProfileRequest =
         ConnectorProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileName") in
       make ~connectorProfileConfig ~connectionMode ~connectorProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorProfileConfig =
         field_map_exn json "connectorProfileConfig"
@@ -12125,6 +12277,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from the specified flow."]
@@ -12153,6 +12306,7 @@ module UntagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -12212,6 +12366,7 @@ module UnregisterConnectorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12242,6 +12397,7 @@ module UnregisterConnectorRequest =
         ConnectorLabel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorLabel") in
       make ?forceDelete ~connectorLabel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "forceDelete" Boolean.of_json in
       let connectorLabel =
@@ -12303,6 +12459,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies a tag to the specified flow."]
@@ -12329,6 +12486,7 @@ module TagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -12411,6 +12569,7 @@ module StopFlowResponse =
       let flowArn =
         (Option.map ~f:FlowArn.of_xml) (Xml.child xml_arg0 "flowArn") in
       make ?flowStatus ?flowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
       let flowArn = field_map json "flowArn" FlowArn.of_json in
@@ -12435,6 +12594,7 @@ module StopFlowRequest =
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowName = field_map_exn json "flowName" FlowName.of_json in
       make ~flowName ()
@@ -12525,6 +12685,7 @@ module StartFlowResponse =
       let flowArn =
         (Option.map ~f:FlowArn.of_xml) (Xml.child xml_arg0 "flowArn") in
       make ?executionId ?flowStatus ?flowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionId = field_map json "executionId" ExecutionId.of_json in
       let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
@@ -12550,6 +12711,7 @@ module StartFlowRequest =
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowName = field_map_exn json "flowName" FlowName.of_json in
       make ~flowName ()
@@ -12675,6 +12837,7 @@ module RegisterConnectorResponse =
       let connectorArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "connectorArn") in
       make ?connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorArn = field_map json "connectorArn" ARN.of_json in
       make ?connectorArn ()
@@ -12734,6 +12897,7 @@ module RegisterConnectorRequest =
           (Xml.child xml_arg0 "connectorLabel") in
       make ?connectorProvisioningConfig ?connectorProvisioningType
         ?description ?connectorLabel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorProvisioningConfig =
         field_map json "connectorProvisioningConfig"
@@ -12808,6 +12972,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -12829,6 +12994,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -12891,6 +13057,7 @@ module ListFlowsResponse =
       let flows =
         (Option.map ~f:FlowList.of_xml) (Xml.child xml_arg0 "flows") in
       make ?nextToken ?flows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let flows = field_map json "flows" FlowList.of_json in
@@ -12919,6 +13086,7 @@ module ListFlowsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -12985,6 +13153,7 @@ module ListConnectorsResponse =
         (Option.map ~f:ConnectorList.of_xml)
           (Xml.child xml_arg0 "connectors") in
       make ?nextToken ?connectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let connectors = field_map json "connectors" ConnectorList.of_json in
@@ -13014,6 +13183,7 @@ module ListConnectorsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -13107,6 +13277,7 @@ module ListConnectorEntitiesResponse =
         ConnectorEntityMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorEntityMap") in
       make ~connectorEntityMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorEntityMap =
         field_map_exn json "connectorEntityMap" ConnectorEntityMap.of_json in
@@ -13160,6 +13331,7 @@ module ListConnectorEntitiesRequest =
         (Option.map ~f:ConnectorProfileName.of_xml)
           (Xml.child xml_arg0 "connectorProfileName") in
       make ?apiVersion ?entitiesPath ?connectorType ?connectorProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiVersion = field_map json "apiVersion" ApiVersion.of_json in
       let entitiesPath = field_map json "entitiesPath" EntitiesPath.of_json in
@@ -13354,6 +13526,7 @@ module DescribeFlowResponse =
         ?triggerConfig ?lastRunExecutionDetails ?destinationFlowConfigList
         ?sourceFlowConfig ?flowStatusMessage ?flowStatus ?kmsArn ?flowName
         ?description ?flowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let lastUpdatedBy = field_map json "lastUpdatedBy" UpdatedBy.of_json in
@@ -13400,6 +13573,7 @@ module DescribeFlowRequest =
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowName = field_map_exn json "flowName" FlowName.of_json in
       make ~flowName ()
@@ -13474,6 +13648,7 @@ module DescribeFlowExecutionRecordsResponse =
         (Option.map ~f:FlowExecutionList.of_xml)
           (Xml.child xml_arg0 "flowExecutions") in
       make ?nextToken ?flowExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let flowExecutions =
@@ -13511,6 +13686,7 @@ module DescribeFlowExecutionRecordsRequest =
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ?nextToken ?maxResults ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -13588,6 +13764,7 @@ module DescribeConnectorsResponse =
         (Option.map ~f:ConnectorConfigurationsMap.of_xml)
           (Xml.child xml_arg0 "connectorConfigurations") in
       make ?nextToken ?connectors ?connectorConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let connectors = field_map json "connectors" ConnectorList.of_json in
@@ -13629,6 +13806,7 @@ module DescribeConnectorsRequest =
         (Option.map ~f:ConnectorTypeList.of_xml)
           (Xml.child xml_arg0 "connectorTypes") in
       make ?nextToken ?maxResults ?connectorTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -13702,6 +13880,7 @@ module DescribeConnectorResponse =
         (Option.map ~f:ConnectorConfiguration.of_xml)
           (Xml.child xml_arg0 "connectorConfiguration") in
       make ?connectorConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorConfiguration =
         field_map json "connectorConfiguration"
@@ -13737,6 +13916,7 @@ module DescribeConnectorRequest =
         ConnectorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorType") in
       make ?connectorLabel ~connectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorLabel =
         field_map json "connectorLabel" ConnectorLabel.of_json in
@@ -13808,6 +13988,7 @@ module DescribeConnectorProfilesResponse =
         (Option.map ~f:ConnectorProfileDetailList.of_xml)
           (Xml.child xml_arg0 "connectorProfileDetails") in
       make ?nextToken ?connectorProfileDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let connectorProfileDetails =
@@ -13876,6 +14057,7 @@ module DescribeConnectorProfilesRequest =
           (Xml.child xml_arg0 "connectorProfileNames") in
       make ?nextToken ?maxResults ?connectorLabel ?connectorType
         ?connectorProfileNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -13977,6 +14159,7 @@ module DescribeConnectorEntityResponse =
         ConnectorEntityFieldList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorEntityFields") in
       make ~connectorEntityFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorEntityFields =
         field_map_exn json "connectorEntityFields"
@@ -14035,6 +14218,7 @@ module DescribeConnectorEntityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorEntityName") in
       make ?apiVersion ?connectorProfileName ?connectorType
         ~connectorEntityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apiVersion = field_map json "apiVersion" ApiVersion.of_json in
       let connectorProfileName =
@@ -14101,6 +14285,7 @@ module DeleteFlowResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14129,6 +14314,7 @@ module DeleteFlowRequest =
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ?forceDelete ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "forceDelete" Boolean.of_json in
       let flowName = field_map_exn json "flowName" FlowName.of_json in
@@ -14189,6 +14375,7 @@ module DeleteConnectorProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Enables you to delete an existing connector profile."]
@@ -14219,6 +14406,7 @@ module DeleteConnectorProfileRequest =
         ConnectorProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileName") in
       make ?forceDelete ~connectorProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "forceDelete" Boolean.of_json in
       let connectorProfileName =
@@ -14333,6 +14521,7 @@ module CreateFlowResponse =
       let flowArn =
         (Option.map ~f:FlowArn.of_xml) (Xml.child xml_arg0 "flowArn") in
       make ?flowStatus ?flowArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
       let flowArn = field_map json "flowArn" FlowArn.of_json in
@@ -14425,6 +14614,7 @@ module CreateFlowRequest =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ?tags ~tasks ~destinationFlowConfigList ~sourceFlowConfig
         ~triggerConfig ?kmsArn ?description ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let tasks = field_map_exn json "tasks" Tasks.of_json in
@@ -14529,6 +14719,7 @@ module CreateConnectorProfileResponse =
         (Option.map ~f:ConnectorProfileArn.of_xml)
           (Xml.child xml_arg0 "connectorProfileArn") in
       make ?connectorProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorProfileArn =
         field_map json "connectorProfileArn" ConnectorProfileArn.of_json in
@@ -14606,6 +14797,7 @@ module CreateConnectorProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileName") in
       make ~connectorProfileConfig ~connectionMode ?connectorLabel
         ~connectorType ?kmsArn ~connectorProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorProfileConfig =
         field_map_exn json "connectorProfileConfig"

@@ -344,6 +344,7 @@ module CloudWatchDimensionConfiguration =
         DimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionName") in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultDimensionValue =
         field_map_exn json "DefaultDimensionValue"
@@ -378,6 +379,7 @@ module Content =
       let data =
         MessageData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ?charset ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let charset = field_map json "Charset" Charset.of_json in
       let data = field_map_exn json "Data" MessageData.of_json in
@@ -434,6 +436,7 @@ module MessageTag =
         MessageTagName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" MessageTagValue.of_json in
       let name = field_map_exn json "Name" MessageTagName.of_json in
@@ -460,6 +463,7 @@ module ReplacementTemplate =
         (Option.map ~f:EmailTemplateData.of_xml)
           (Xml.child xml_arg0 "ReplacementTemplateData") in
       make ?replacementTemplateData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replacementTemplateData =
         field_map json "ReplacementTemplateData" EmailTemplateData.of_json in
@@ -532,6 +536,7 @@ module ContactListDestination =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~contactListImportAction ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactListImportAction =
         field_map_exn json "ContactListImportAction"
@@ -565,6 +570,7 @@ module SuppressionListDestination =
           (Xml.child_exn ~context:context_ xml_arg0
              "SuppressionListImportAction") in
       make ~suppressionListImportAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressionListImportAction =
         field_map_exn json "SuppressionListImportAction"
@@ -624,6 +630,7 @@ module TopicPreference =
         TopicName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TopicName") in
       make ~subscriptionStatus ~topicName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionStatus =
         field_map_exn json "SubscriptionStatus" SubscriptionStatus.of_json in
@@ -689,6 +696,7 @@ module DomainIspPlacement =
         (Option.map ~f:IspName.of_xml) (Xml.child xml_arg0 "IspName") in
       make ?spamPercentage ?inboxPercentage ?spamRawCount ?inboxRawCount
         ?ispName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spamPercentage = field_map json "SpamPercentage" Percentage.of_json in
       let inboxPercentage =
@@ -902,6 +910,7 @@ module Body =
       let html = (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Html") in
       let text = (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Text") in
       make ?html ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let html = field_map json "Html" Content.of_json in
       let text = field_map json "Text" Content.of_json in make ?html ?text ()
@@ -1063,6 +1072,7 @@ module Destination =
         (Option.map ~f:EmailAddressList.of_xml)
           (Xml.child xml_arg0 "ToAddresses") in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bccAddresses =
         field_map json "BccAddresses" EmailAddressList.of_json in
@@ -1114,6 +1124,7 @@ module ReplacementEmailContent =
         (Option.map ~f:ReplacementTemplate.of_xml)
           (Xml.child xml_arg0 "ReplacementTemplate") in
       make ?replacementTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replacementTemplate =
         field_map json "ReplacementTemplate" ReplacementTemplate.of_json in
@@ -1156,6 +1167,7 @@ module InboxPlacementTrackingOption =
       let global =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Global") in
       make ?trackedIsps ?global ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackedIsps = field_map json "TrackedIsps" IspNameList.of_json in
       let global = field_map json "Global" Enabled.of_json in
@@ -1220,6 +1232,7 @@ module ImportDestination =
         (Option.map ~f:SuppressionListDestination.of_xml)
           (Xml.child xml_arg0 "SuppressionListDestination") in
       make ?contactListDestination ?suppressionListDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactListDestination =
         field_map json "ContactListDestination"
@@ -1659,6 +1672,7 @@ module VolumeStatistics =
       let inboxRawCount =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "InboxRawCount") in
       make ?projectedSpam ?projectedInbox ?spamRawCount ?inboxRawCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectedSpam = field_map json "ProjectedSpam" Volume.of_json in
       let projectedInbox = field_map json "ProjectedInbox" Volume.of_json in
@@ -1731,6 +1745,7 @@ module PlacementStatistics =
           (Xml.child xml_arg0 "InboxPercentage") in
       make ?dkimPercentage ?spfPercentage ?missingPercentage ?spamPercentage
         ?inboxPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dkimPercentage = field_map json "DkimPercentage" Percentage.of_json in
       let spfPercentage = field_map json "SpfPercentage" Percentage.of_json in
@@ -1817,6 +1832,7 @@ module CloudWatchDestination =
         CloudWatchDimensionConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionConfigurations") in
       make ~dimensionConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionConfigurations =
         field_map_exn json "DimensionConfigurations"
@@ -1891,6 +1907,7 @@ module KinesisFirehoseDestination =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IamRoleArn") in
       make ~deliveryStreamArn ~iamRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryStreamArn =
         field_map_exn json "DeliveryStreamArn" AmazonResourceName.of_json in
@@ -1918,6 +1935,7 @@ module PinpointDestination =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "ApplicationArn") in
       make ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationArn =
         field_map json "ApplicationArn" AmazonResourceName.of_json in
@@ -1943,6 +1961,7 @@ module SnsDestination =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicArn = field_map_exn json "TopicArn" AmazonResourceName.of_json in
       make ~topicArn ()
@@ -1981,6 +2000,7 @@ module BlacklistEntry =
       let rblName =
         (Option.map ~f:RblName.of_xml) (Xml.child xml_arg0 "RblName") in
       make ?description ?listingTime ?rblName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" BlacklistingDescription.of_json in
@@ -2129,6 +2149,7 @@ module Topic =
         TopicName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TopicName") in
       make ~defaultSubscriptionStatus ?description ~displayName ~topicName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultSubscriptionStatus =
         field_map_exn json "DefaultSubscriptionStatus"
@@ -2163,6 +2184,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -2193,6 +2215,7 @@ module Message =
       let subject =
         Content.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
       make ~body ~subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let body = field_map_exn json "Body" Body.of_json in
       let subject = field_map_exn json "Subject" Content.of_json in
@@ -2219,6 +2242,7 @@ module RawMessage =
         RawMessageData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let data = field_map_exn json "Data" RawMessageData.of_json in
       make ~data ()
@@ -2260,6 +2284,7 @@ module Template =
         (Option.map ~f:EmailTemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateData ?templateArn ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateData =
         field_map json "TemplateData" EmailTemplateData.of_json in
@@ -2301,6 +2326,7 @@ module BulkEmailEntryResult =
       let status =
         (Option.map ~f:BulkEmailStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?messageId ?error ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" OutboundMessageId.of_json in
       let error = field_map json "Error" ErrorMessage.of_json in
@@ -2347,6 +2373,7 @@ module BulkEmailEntry =
         Destination.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
       make ?replacementEmailContent ?replacementTags ~destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replacementEmailContent =
         field_map json "ReplacementEmailContent"
@@ -2463,6 +2490,7 @@ module DomainDeliverabilityTrackingOption =
       let domain =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?inboxPlacementTrackingOption ?subscriptionStartDate ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inboxPlacementTrackingOption =
         field_map json "InboxPlacementTrackingOption"
@@ -2509,6 +2537,7 @@ module SuppressedDestinationSummary =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~lastUpdateTime ~reason ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateTime =
         field_map_exn json "LastUpdateTime" Timestamp.of_json in
@@ -2553,6 +2582,7 @@ module ImportJobSummary =
           (Xml.child xml_arg0 "ImportDestination") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?createdTimestamp ?jobStatus ?importDestination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTimestamp =
         field_map json "CreatedTimestamp" Timestamp.of_json in
@@ -2588,6 +2618,7 @@ module EmailTemplateMetadata =
         (Option.map ~f:EmailTemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
       make ?createdTimestamp ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTimestamp =
         field_map json "CreatedTimestamp" Timestamp.of_json in
@@ -2628,6 +2659,7 @@ module IdentityInfo =
         (Option.map ~f:IdentityType.of_xml)
           (Xml.child xml_arg0 "IdentityType") in
       make ?sendingEnabled ?identityName ?identityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
       let identityName = field_map json "IdentityName" Identity.of_json in
@@ -2766,6 +2798,7 @@ module DomainDeliverabilityCampaign =
       make ?esps ?projectedVolume ?readDeleteRate ?deleteRate ?readRate
         ?spamCount ?inboxCount ?lastSeenDateTime ?firstSeenDateTime
         ?sendingIps ?fromAddress ?subject ?imageUrl ?campaignId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let esps = field_map json "Esps" Esps.of_json in
       let projectedVolume = field_map json "ProjectedVolume" Volume.of_json in
@@ -2857,6 +2890,7 @@ module DeliverabilityTestReport =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "ReportId") in
       make ?deliverabilityTestStatus ?createDate ?fromEmailAddress ?subject
         ?reportName ?reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliverabilityTestStatus =
         field_map json "DeliverabilityTestStatus"
@@ -2936,6 +2970,7 @@ module CustomVerificationEmailTemplateMetadata =
           (Xml.child xml_arg0 "TemplateName") in
       make ?failureRedirectionURL ?successRedirectionURL ?templateSubject
         ?fromEmailAddress ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
@@ -3014,6 +3049,7 @@ module Contact =
           (Xml.child xml_arg0 "EmailAddress") in
       make ?lastUpdatedTimestamp ?unsubscribeAll ?topicDefaultPreferences
         ?topicPreferences ?emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTimestamp =
         field_map json "LastUpdatedTimestamp" Timestamp.of_json in
@@ -3056,6 +3092,7 @@ module TopicFilter =
       let topicName =
         (Option.map ~f:TopicName.of_xml) (Xml.child xml_arg0 "TopicName") in
       make ?useDefaultIfPreferenceUnavailable ?topicName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDefaultIfPreferenceUnavailable =
         field_map json "UseDefaultIfPreferenceUnavailable"
@@ -3091,6 +3128,7 @@ module ContactList =
         (Option.map ~f:ContactListName.of_xml)
           (Xml.child xml_arg0 "ContactListName") in
       make ?lastUpdatedTimestamp ?contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTimestamp =
         field_map json "LastUpdatedTimestamp" Timestamp.of_json in
@@ -3140,6 +3178,7 @@ module SuppressedDestinationAttributes =
         (Option.map ~f:OutboundMessageId.of_xml)
           (Xml.child xml_arg0 "MessageId") in
       make ?feedbackId ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let feedbackId = field_map json "FeedbackId" FeedbackId.of_json in
       let messageId = field_map json "MessageId" OutboundMessageId.of_json in
@@ -3428,6 +3467,7 @@ module DailyVolume =
       let startDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartDate") in
       make ?domainIspPlacements ?volumeStatistics ?startDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainIspPlacements =
         field_map json "DomainIspPlacements" DomainIspPlacements.of_json in
@@ -3463,6 +3503,7 @@ module IspPlacement =
       let ispName =
         (Option.map ~f:IspName.of_xml) (Xml.child xml_arg0 "IspName") in
       make ?placementStatistics ?ispName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementStatistics =
         field_map json "PlacementStatistics" PlacementStatistics.of_json in
@@ -3510,6 +3551,7 @@ module DedicatedIp =
           (Xml.child_exn ~context:context_ xml_arg0 "WarmupStatus") in
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Ip") in
       make ?poolName ~warmupPercentage ~warmupStatus ~ip ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolName = field_map json "PoolName" PoolName.of_json in
       let warmupPercentage =
@@ -3682,6 +3724,7 @@ module EventDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?pinpointDestination ?snsDestination ?cloudWatchDestination
         ?kinesisFirehoseDestination ~matchingEventTypes ?enabled ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pinpointDestination =
         field_map json "PinpointDestination" PinpointDestination.of_json in
@@ -3833,6 +3876,7 @@ module ReviewDetails =
       let status =
         (Option.map ~f:ReviewStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?caseId ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let caseId = field_map json "CaseId" CaseId.of_json in
       let status = field_map json "Status" ReviewStatus.of_json in
@@ -3927,6 +3971,7 @@ module BadRequestException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input you provided is invalid."]
@@ -3938,6 +3983,7 @@ module NotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource you attempted to access doesn't exist."]
@@ -3949,6 +3995,7 @@ module TooManyRequestsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many requests have been made to the operation."]
@@ -3980,6 +4027,7 @@ module EmailTemplateContent =
         (Option.map ~f:EmailTemplateSubject.of_xml)
           (Xml.child xml_arg0 "Subject") in
       make ?html ?text ?subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let html = field_map json "Html" EmailTemplateHtml.of_json in
       let text = field_map json "Text" EmailTemplateText.of_json in
@@ -4010,6 +4058,7 @@ module ConcurrentModificationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4123,6 +4172,7 @@ module EventDestinationDefinition =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?pinpointDestination ?snsDestination ?cloudWatchDestination
         ?kinesisFirehoseDestination ?matchingEventTypes ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pinpointDestination =
         field_map json "PinpointDestination" PinpointDestination.of_json in
@@ -4210,6 +4260,7 @@ module AccountSuspendedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4222,6 +4273,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4234,6 +4286,7 @@ module MailFromDomainNotVerifiedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4246,6 +4299,7 @@ module MessageRejected =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4258,6 +4312,7 @@ module SendingPausedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4289,6 +4344,7 @@ module EmailContent =
       let simple =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Simple") in
       make ?template ?raw ?simple ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map json "Template" Template.of_json in
       let raw = field_map json "Raw" RawMessage.of_json in
@@ -4320,6 +4376,7 @@ module ListManagementOptions =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?topicName ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicName = field_map json "TopicName" TopicName.of_json in
       let contactListName =
@@ -4369,6 +4426,7 @@ module BulkEmailContent =
       let template =
         (Option.map ~f:Template.of_xml) (Xml.child xml_arg0 "Template") in
       make ?template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map json "Template" Template.of_json in
       make ?template ()
@@ -4443,6 +4501,7 @@ module DkimSigningAttributes =
           (Xml.child xml_arg0 "DomainSigningSelector") in
       make ?nextSigningKeyLength ?domainSigningPrivateKey
         ?domainSigningSelector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextSigningKeyLength =
         field_map json "NextSigningKeyLength" DkimSigningKeyLength.of_json in
@@ -4463,6 +4522,7 @@ module AlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource specified in your request already exists."]
@@ -4516,6 +4576,7 @@ module ConflictException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4541,6 +4602,7 @@ module InvalidNextTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4850,6 +4912,7 @@ module ListContactsFilter =
         (Option.map ~f:SubscriptionStatus.of_xml)
           (Xml.child xml_arg0 "FilteredStatus") in
       make ?topicFilter ?filteredStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicFilter = field_map json "TopicFilter" TopicFilter.of_json in
       let filteredStatus =
@@ -4952,6 +5015,7 @@ module SuppressedDestination =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ?attributes ~lastUpdateTime ~reason ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map json "Attributes" SuppressedDestinationAttributes.of_json in
@@ -5004,6 +5068,7 @@ module FailureInfo =
         (Option.map ~f:FailedRecordsS3Url.of_xml)
           (Xml.child xml_arg0 "FailedRecordsS3Url") in
       make ?errorMessage ?failedRecordsS3Url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let failedRecordsS3Url =
@@ -5035,6 +5100,7 @@ module ImportDataSource =
       let s3Url =
         S3Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Url") in
       make ~dataFormat ~s3Url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataFormat = field_map_exn json "DataFormat" DataFormat.of_json in
       let s3Url = field_map_exn json "S3Url" S3Url.of_json in
@@ -5137,6 +5203,7 @@ module DkimAttributes =
       make ?lastKeyGenerationTimestamp ?currentSigningKeyLength
         ?nextSigningKeyLength ?signingAttributesOrigin ?tokens ?status
         ?signingEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastKeyGenerationTimestamp =
         field_map json "LastKeyGenerationTimestamp" Timestamp.of_json in
@@ -5195,6 +5262,7 @@ module MailFromAttributes =
         MailFromDomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomain") in
       make ~behaviorOnMxFailure ~mailFromDomainStatus ~mailFromDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let behaviorOnMxFailure =
         field_map_exn json "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
@@ -5297,6 +5365,7 @@ module OverallVolume =
         (Option.map ~f:VolumeStatistics.of_xml)
           (Xml.child xml_arg0 "VolumeStatistics") in
       make ?domainIspPlacements ?readRatePercent ?volumeStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainIspPlacements =
         field_map json "DomainIspPlacements" DomainIspPlacements.of_json in
@@ -5426,6 +5495,7 @@ module DeliveryOptions =
       let tlsPolicy =
         (Option.map ~f:TlsPolicy.of_xml) (Xml.child xml_arg0 "TlsPolicy") in
       make ?sendingPoolName ?tlsPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendingPoolName = field_map json "SendingPoolName" PoolName.of_json in
       let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
@@ -5461,6 +5531,7 @@ module ReputationOptions =
         (Option.map ~f:Enabled.of_xml)
           (Xml.child xml_arg0 "ReputationMetricsEnabled") in
       make ?lastFreshStart ?reputationMetricsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastFreshStart =
         field_map json "LastFreshStart" LastFreshStart.of_json in
@@ -5487,6 +5558,7 @@ module SendingOptions =
       let sendingEnabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?sendingEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
       make ?sendingEnabled ()
@@ -5511,6 +5583,7 @@ module SuppressionOptions =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "SuppressedReasons") in
       make ?suppressedReasons ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressedReasons =
         field_map json "SuppressedReasons" SuppressionListReasons.of_json in
@@ -5536,6 +5609,7 @@ module TrackingOptions =
         CustomRedirectDomain.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomRedirectDomain") in
       make ~customRedirectDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customRedirectDomain =
         field_map_exn json "CustomRedirectDomain"
@@ -5696,6 +5770,7 @@ module AccountDetails =
         (Option.map ~f:MailType.of_xml) (Xml.child xml_arg0 "MailType") in
       make ?reviewDetails ?additionalContactEmailAddresses
         ?useCaseDescription ?contactLanguage ?websiteURL ?mailType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reviewDetails =
         field_map json "ReviewDetails" ReviewDetails.of_json in
@@ -5761,6 +5836,7 @@ module SendQuota =
         (Option.map ~f:Max24HourSend.of_xml)
           (Xml.child xml_arg0 "Max24HourSend") in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sentLast24Hours =
         field_map json "SentLast24Hours" SentLast24Hours.of_json in
@@ -5789,6 +5865,7 @@ module SuppressionAttributes =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "SuppressedReasons") in
       make ?suppressedReasons ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressedReasons =
         field_map json "SuppressedReasons" SuppressionListReasons.of_json in
@@ -5849,6 +5926,7 @@ module UpdateEmailTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5879,6 +5957,7 @@ module UpdateEmailTemplateRequest =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateContent ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateContent =
         field_map_exn json "TemplateContent" EmailTemplateContent.of_json in
@@ -5941,6 +6020,7 @@ module UpdateEmailIdentityPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5976,6 +6056,7 @@ module UpdateEmailIdentityPolicyRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~policy ~policyName ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" Policy.of_json in
       let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
@@ -6037,6 +6118,7 @@ module UpdateCustomVerificationEmailTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6113,6 +6195,7 @@ module UpdateCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~failureRedirectionURL ~successRedirectionURL ~templateContent
         ~templateSubject ~fromEmailAddress ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map_exn json "FailureRedirectionURL"
@@ -6197,6 +6280,7 @@ module UpdateContactResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6260,6 +6344,7 @@ module UpdateContactRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?attributesData ?unsubscribeAll ?topicPreferences ~emailAddress
         ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributesData =
         field_map json "AttributesData" AttributesData.of_json in
@@ -6340,6 +6425,7 @@ module UpdateContactListResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6376,6 +6462,7 @@ module UpdateContactListRequest =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?description ?topics ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let topics = field_map json "Topics" Topics.of_json in
@@ -6438,6 +6525,7 @@ module UpdateConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6479,6 +6567,7 @@ module UpdateConfigurationSetEventDestinationRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestination =
         field_map_exn json "EventDestination"
@@ -6557,6 +6646,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6587,6 +6677,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -6659,6 +6750,7 @@ module TestRenderEmailTemplateResponse =
         RenderedEmailTemplate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RenderedTemplate") in
       make ~renderedTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let renderedTemplate =
         field_map_exn json "RenderedTemplate" RenderedEmailTemplate.of_json in
@@ -6690,6 +6782,7 @@ module TestRenderEmailTemplateRequest =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateData ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateData =
         field_map_exn json "TemplateData" EmailTemplateData.of_json in
@@ -6763,6 +6856,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6791,6 +6885,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -6908,6 +7003,7 @@ module SendEmailResponse =
         (Option.map ~f:OutboundMessageId.of_xml)
           (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" OutboundMessageId.of_json in
       make ?messageId ()
@@ -7030,6 +7126,7 @@ module SendEmailRequest =
         ?feedbackForwardingEmailAddressIdentityArn
         ?feedbackForwardingEmailAddress ?replyToAddresses ?destination
         ?fromEmailAddressIdentityArn ?fromEmailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listManagementOptions =
         field_map json "ListManagementOptions" ListManagementOptions.of_json in
@@ -7157,6 +7254,7 @@ module SendCustomVerificationEmailResponse =
         (Option.map ~f:OutboundMessageId.of_xml)
           (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" OutboundMessageId.of_json in
       make ?messageId ()
@@ -7197,6 +7295,7 @@ module SendCustomVerificationEmailRequest =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ?configurationSetName ~templateName ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -7318,6 +7417,7 @@ module SendBulkEmailResponse =
         BulkEmailEntryResultList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BulkEmailEntryResults") in
       make ~bulkEmailEntryResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bulkEmailEntryResults =
         field_map_exn json "BulkEmailEntryResults"
@@ -7434,6 +7534,7 @@ module SendBulkEmailRequest =
         ?defaultEmailTags ?feedbackForwardingEmailAddressIdentityArn
         ?feedbackForwardingEmailAddress ?replyToAddresses
         ?fromEmailAddressIdentityArn ?fromEmailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -7506,6 +7607,7 @@ module PutSuppressedDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7536,6 +7638,7 @@ module PutSuppressedDestinationRequest =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~reason ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map_exn json "Reason" SuppressionListReason.of_json in
       let emailAddress =
@@ -7597,6 +7700,7 @@ module PutEmailIdentityMailFromAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7636,6 +7740,7 @@ module PutEmailIdentityMailFromAttributesRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?behaviorOnMxFailure ?mailFromDomain ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let behaviorOnMxFailure =
         field_map json "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
@@ -7699,6 +7804,7 @@ module PutEmailIdentityFeedbackAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7729,6 +7835,7 @@ module PutEmailIdentityFeedbackAttributesRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?emailForwardingEnabled ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailForwardingEnabled =
         field_map json "EmailForwardingEnabled" Enabled.of_json in
@@ -7805,6 +7912,7 @@ module PutEmailIdentityDkimSigningAttributesResponse =
       let dkimStatus =
         (Option.map ~f:DkimStatus.of_xml) (Xml.child xml_arg0 "DkimStatus") in
       make ?dkimTokens ?dkimStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dkimTokens = field_map json "DkimTokens" DnsTokenList.of_json in
       let dkimStatus = field_map json "DkimStatus" DkimStatus.of_json in
@@ -7849,6 +7957,7 @@ module PutEmailIdentityDkimSigningAttributesRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?signingAttributes ~signingAttributesOrigin ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signingAttributes =
         field_map json "SigningAttributes" DkimSigningAttributes.of_json in
@@ -7913,6 +8022,7 @@ module PutEmailIdentityDkimAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7940,6 +8050,7 @@ module PutEmailIdentityDkimAttributesRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?signingEnabled ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signingEnabled = field_map json "SigningEnabled" Enabled.of_json in
       let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
@@ -8000,6 +8111,7 @@ module PutEmailIdentityConfigurationSetAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8031,6 +8143,7 @@ module PutEmailIdentityConfigurationSetAttributesRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?configurationSetName ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -8110,6 +8223,7 @@ module PutDeliverabilityDashboardOptionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8143,6 +8257,7 @@ module PutDeliverabilityDashboardOptionRequest =
         Enabled.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardEnabled") in
       make ?subscribedDomains ~dashboardEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscribedDomains =
         field_map json "SubscribedDomains"
@@ -8206,6 +8321,7 @@ module PutDedicatedIpWarmupAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8235,6 +8351,7 @@ module PutDedicatedIpWarmupAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WarmupPercentage") in
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~warmupPercentage ~ip ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warmupPercentage =
         field_map_exn json "WarmupPercentage" Percentage100Wrapper.of_json in
@@ -8296,6 +8413,7 @@ module PutDedicatedIpInPoolResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8325,6 +8443,7 @@ module PutDedicatedIpInPoolRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationPoolName") in
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~destinationPoolName ~ip ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationPoolName =
         field_map_exn json "DestinationPoolName" PoolName.of_json in
@@ -8386,6 +8505,7 @@ module PutConfigurationSetTrackingOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8417,6 +8537,7 @@ module PutConfigurationSetTrackingOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?customRedirectDomain ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customRedirectDomain =
         field_map json "CustomRedirectDomain" CustomRedirectDomain.of_json in
@@ -8480,6 +8601,7 @@ module PutConfigurationSetSuppressionOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8513,6 +8635,7 @@ module PutConfigurationSetSuppressionOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?suppressedReasons ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressedReasons =
         field_map json "SuppressedReasons" SuppressionListReasons.of_json in
@@ -8576,6 +8699,7 @@ module PutConfigurationSetSendingOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8607,6 +8731,7 @@ module PutConfigurationSetSendingOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?sendingEnabled ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
       let configurationSetName =
@@ -8669,6 +8794,7 @@ module PutConfigurationSetReputationOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8701,6 +8827,7 @@ module PutConfigurationSetReputationOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?reputationMetricsEnabled ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reputationMetricsEnabled =
         field_map json "ReputationMetricsEnabled" Enabled.of_json in
@@ -8764,6 +8891,7 @@ module PutConfigurationSetDeliveryOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8804,6 +8932,7 @@ module PutConfigurationSetDeliveryOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?sendingPoolName ?tlsPolicy ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendingPoolName =
         field_map json "SendingPoolName" SendingPoolName.of_json in
@@ -8859,6 +8988,7 @@ module PutAccountSuppressionAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8881,6 +9011,7 @@ module PutAccountSuppressionAttributesRequest =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "SuppressedReasons") in
       make ?suppressedReasons ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressedReasons =
         field_map json "SuppressedReasons" SuppressionListReasons.of_json in
@@ -8932,6 +9063,7 @@ module PutAccountSendingAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8953,6 +9085,7 @@ module PutAccountSendingAttributesRequest =
       let sendingEnabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?sendingEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
       make ?sendingEnabled ()
@@ -9012,6 +9145,7 @@ module PutAccountDetailsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9087,6 +9221,7 @@ module PutAccountDetailsRequest =
         MailType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MailType") in
       make ?productionAccessEnabled ?additionalContactEmailAddresses
         ~useCaseDescription ?contactLanguage ~websiteURL ~mailType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productionAccessEnabled =
         field_map json "ProductionAccessEnabled" EnabledWrapper.of_json in
@@ -9147,6 +9282,7 @@ module PutAccountDedicatedIpWarmupAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9169,6 +9305,7 @@ module PutAccountDedicatedIpWarmupAttributesRequest =
         (Option.map ~f:Enabled.of_xml)
           (Xml.child xml_arg0 "AutoWarmupEnabled") in
       make ?autoWarmupEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoWarmupEnabled =
         field_map json "AutoWarmupEnabled" Enabled.of_json in
@@ -9237,6 +9374,7 @@ module ListTagsForResourceResponse =
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
@@ -9260,6 +9398,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" AmazonResourceName.of_json in
@@ -9339,6 +9478,7 @@ module ListSuppressedDestinationsResponse =
         (Option.map ~f:SuppressedDestinationSummaries.of_xml)
           (Xml.child xml_arg0 "SuppressedDestinationSummaries") in
       make ?nextToken ?suppressedDestinationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let suppressedDestinationSummaries =
@@ -9394,6 +9534,7 @@ module ListSuppressedDestinationsRequest =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "Reason") in
       make ?pageSize ?nextToken ?endDate ?startDate ?reasons ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9464,6 +9605,7 @@ module ListImportJobsResponse =
         (Option.map ~f:ImportJobSummaryList.of_xml)
           (Xml.child xml_arg0 "ImportJobs") in
       make ?nextToken ?importJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let importJobs =
@@ -9506,6 +9648,7 @@ module ListImportJobsRequest =
         (Option.map ~f:ImportDestinationType.of_xml)
           (Xml.child xml_arg0 "ImportDestinationType") in
       make ?pageSize ?nextToken ?importDestinationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9577,6 +9720,7 @@ module ListEmailTemplatesResponse =
         (Option.map ~f:EmailTemplateMetadataList.of_xml)
           (Xml.child xml_arg0 "TemplatesMetadata") in
       make ?nextToken ?templatesMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let templatesMetadata =
@@ -9606,6 +9750,7 @@ module ListEmailTemplatesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9674,6 +9819,7 @@ module ListEmailIdentitiesResponse =
         (Option.map ~f:IdentityInfoList.of_xml)
           (Xml.child xml_arg0 "EmailIdentities") in
       make ?nextToken ?emailIdentities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let emailIdentities =
@@ -9704,6 +9850,7 @@ module ListEmailIdentitiesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9786,6 +9933,7 @@ module ListDomainDeliverabilityCampaignsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "DomainDeliverabilityCampaigns") in
       make ?nextToken ~domainDeliverabilityCampaigns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let domainDeliverabilityCampaigns =
@@ -9843,6 +9991,7 @@ module ListDomainDeliverabilityCampaignsRequest =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
       make ?pageSize ?nextToken ~subscribedDomain ~endDate ~startDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9928,6 +10077,7 @@ module ListDeliverabilityTestReportsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "DeliverabilityTestReports") in
       make ?nextToken ~deliverabilityTestReports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let deliverabilityTestReports =
@@ -9959,6 +10109,7 @@ module ListDeliverabilityTestReportsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10027,6 +10178,7 @@ module ListDedicatedIpPoolsResponse =
         (Option.map ~f:ListOfDedicatedIpPools.of_xml)
           (Xml.child xml_arg0 "DedicatedIpPools") in
       make ?nextToken ?dedicatedIpPools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dedicatedIpPools =
@@ -10056,6 +10208,7 @@ module ListDedicatedIpPoolsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10126,6 +10279,7 @@ module ListCustomVerificationEmailTemplatesResponse =
         (Option.map ~f:CustomVerificationEmailTemplatesList.of_xml)
           (Xml.child xml_arg0 "CustomVerificationEmailTemplates") in
       make ?nextToken ?customVerificationEmailTemplates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let customVerificationEmailTemplates =
@@ -10156,6 +10310,7 @@ module ListCustomVerificationEmailTemplatesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10229,6 +10384,7 @@ module ListContactsResponse =
       let contacts =
         (Option.map ~f:ListOfContacts.of_xml) (Xml.child xml_arg0 "Contacts") in
       make ?nextToken ?contacts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let contacts = field_map json "Contacts" ListOfContacts.of_json in
@@ -10275,6 +10431,7 @@ module ListContactsRequest =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?nextToken ?pageSize ?filter ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let pageSize = field_map json "PageSize" MaxItems.of_json in
@@ -10344,6 +10501,7 @@ module ListContactListsResponse =
         (Option.map ~f:ListOfContactLists.of_xml)
           (Xml.child xml_arg0 "ContactLists") in
       make ?nextToken ?contactLists ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let contactLists =
@@ -10373,6 +10531,7 @@ module ListContactListsRequest =
       let pageSize =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
       make ?nextToken ?pageSize ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let pageSize = field_map json "PageSize" MaxItems.of_json in
@@ -10441,6 +10600,7 @@ module ListConfigurationSetsResponse =
         (Option.map ~f:ConfigurationSetNameList.of_xml)
           (Xml.child xml_arg0 "ConfigurationSets") in
       make ?nextToken ?configurationSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let configurationSets =
@@ -10471,6 +10631,7 @@ module ListConfigurationSetsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10542,6 +10703,7 @@ module GetSuppressedDestinationResponse =
         SuppressedDestination.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SuppressedDestination") in
       make ~suppressedDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressedDestination =
         field_map_exn json "SuppressedDestination"
@@ -10567,6 +10729,7 @@ module GetSuppressedDestinationRequest =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress =
         field_map_exn json "EmailAddress" EmailAddress.of_json in
@@ -10709,6 +10872,7 @@ module GetImportJobResponse =
       make ?failedRecordsCount ?processedRecordsCount ?completedTimestamp
         ?createdTimestamp ?jobStatus ?failureInfo ?importDataSource
         ?importDestination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedRecordsCount =
         field_map json "FailedRecordsCount" FailedRecordsCount.of_json in
@@ -10744,6 +10908,7 @@ module GetImportJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -10820,6 +10985,7 @@ module GetEmailTemplateResponse =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateContent ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateContent =
         field_map_exn json "TemplateContent" EmailTemplateContent.of_json in
@@ -10845,6 +11011,7 @@ module GetEmailTemplateRequest =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" EmailTemplateName.of_json in
@@ -10985,6 +11152,7 @@ module GetEmailIdentityResponse =
       make ?configurationSetName ?tags ?policies ?mailFromAttributes
         ?dkimAttributes ?verifiedForSendingStatus ?feedbackForwardingStatus
         ?identityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -11020,6 +11188,7 @@ module GetEmailIdentityRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
@@ -11085,6 +11254,7 @@ module GetEmailIdentityPoliciesResponse =
       let policies =
         (Option.map ~f:PolicyMap.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policies = field_map json "Policies" PolicyMap.of_json in
       make ?policies ()
@@ -11106,6 +11276,7 @@ module GetEmailIdentityPoliciesRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
@@ -11182,6 +11353,7 @@ module GetDomainStatisticsReportResponse =
         OverallVolume.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OverallVolume") in
       make ~dailyVolumes ~overallVolume ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dailyVolumes =
         field_map_exn json "DailyVolumes" DailyVolumes.of_json in
@@ -11223,6 +11395,7 @@ module GetDomainStatisticsReportRequest =
       let domain =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~endDate ~startDate ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endDate = field_map_exn json "EndDate" Timestamp.of_json in
       let startDate = field_map_exn json "StartDate" Timestamp.of_json in
@@ -11298,6 +11471,7 @@ module GetDomainDeliverabilityCampaignResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "DomainDeliverabilityCampaign") in
       make ~domainDeliverabilityCampaign ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainDeliverabilityCampaign =
         field_map_exn json "DomainDeliverabilityCampaign"
@@ -11324,6 +11498,7 @@ module GetDomainDeliverabilityCampaignRequest =
         CampaignId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CampaignId") in
       make ~campaignId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let campaignId = field_map_exn json "CampaignId" CampaignId.of_json in
       make ~campaignId ()
@@ -11435,6 +11610,7 @@ module GetDeliverabilityTestReportResponse =
              "DeliverabilityTestReport") in
       make ?tags ?message ~ispPlacements ~overallPlacement
         ~deliverabilityTestReport ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let message = field_map json "Message" MessageContent.of_json in
@@ -11466,6 +11642,7 @@ module GetDeliverabilityTestReportRequest =
       let reportId =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReportId") in
       make ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportId = field_map_exn json "ReportId" ReportId.of_json in
       make ~reportId ()
@@ -11584,6 +11761,7 @@ module GetDeliverabilityDashboardOptionsResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardEnabled") in
       make ?pendingExpirationSubscribedDomains ?activeSubscribedDomains
         ?accountStatus ?subscriptionExpiryDate ~dashboardEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pendingExpirationSubscribedDomains =
         field_map json "PendingExpirationSubscribedDomains"
@@ -11611,6 +11789,7 @@ module GetDeliverabilityDashboardOptionsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11685,6 +11864,7 @@ module GetDedicatedIpsResponse =
         (Option.map ~f:DedicatedIpList.of_xml)
           (Xml.child xml_arg0 "DedicatedIps") in
       make ?nextToken ?dedicatedIps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dedicatedIps =
@@ -11723,6 +11903,7 @@ module GetDedicatedIpsRequest =
       let poolName =
         (Option.map ~f:PoolName.of_xml) (Xml.child xml_arg0 "PoolName") in
       make ?pageSize ?nextToken ?poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11792,6 +11973,7 @@ module GetDedicatedIpResponse =
       let dedicatedIp =
         (Option.map ~f:DedicatedIp.of_xml) (Xml.child xml_arg0 "DedicatedIp") in
       make ?dedicatedIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dedicatedIp = field_map json "DedicatedIp" DedicatedIp.of_json in
       make ?dedicatedIp ()
@@ -11811,6 +11993,7 @@ module GetDedicatedIpRequest =
     let of_xml xml_arg0 =
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~ip ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ip = field_map_exn json "Ip" Ip.of_json in make ~ip ()
     let to_json v = composed_to_json to_value v
@@ -11933,6 +12116,7 @@ module GetCustomVerificationEmailTemplateResponse =
           (Xml.child xml_arg0 "TemplateName") in
       make ?failureRedirectionURL ?successRedirectionURL ?templateContent
         ?templateSubject ?fromEmailAddress ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
@@ -11968,6 +12152,7 @@ module GetCustomVerificationEmailTemplateRequest =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" EmailTemplateName.of_json in
@@ -12111,6 +12296,7 @@ module GetContactResponse =
       make ?lastUpdatedTimestamp ?createdTimestamp ?attributesData
         ?unsubscribeAll ?topicDefaultPreferences ?topicPreferences
         ?emailAddress ?contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTimestamp =
         field_map json "LastUpdatedTimestamp" Timestamp.of_json in
@@ -12157,6 +12343,7 @@ module GetContactRequest =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~emailAddress ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress =
         field_map_exn json "EmailAddress" EmailAddress.of_json in
@@ -12272,6 +12459,7 @@ module GetContactListResponse =
           (Xml.child xml_arg0 "ContactListName") in
       make ?tags ?lastUpdatedTimestamp ?createdTimestamp ?description ?topics
         ?contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let lastUpdatedTimestamp =
@@ -12305,6 +12493,7 @@ module GetContactListRequest =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactListName =
         field_map_exn json "ContactListName" ContactListName.of_json in
@@ -12437,6 +12626,7 @@ module GetConfigurationSetResponse =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?suppressionOptions ?tags ?sendingOptions ?reputationOptions
         ?deliveryOptions ?trackingOptions ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressionOptions =
         field_map json "SuppressionOptions" SuppressionOptions.of_json in
@@ -12473,6 +12663,7 @@ module GetConfigurationSetRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map_exn json "ConfigurationSetName"
@@ -12544,6 +12735,7 @@ module GetConfigurationSetEventDestinationsResponse =
         (Option.map ~f:EventDestinations.of_xml)
           (Xml.child xml_arg0 "EventDestinations") in
       make ?eventDestinations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinations =
         field_map json "EventDestinations" EventDestinations.of_json in
@@ -12570,6 +12762,7 @@ module GetConfigurationSetEventDestinationsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map_exn json "ConfigurationSetName"
@@ -12642,6 +12835,7 @@ module GetBlacklistReportsResponse =
         BlacklistReport.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BlacklistReport") in
       make ~blacklistReport ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blacklistReport =
         field_map_exn json "BlacklistReport" BlacklistReport.of_json in
@@ -12668,6 +12862,7 @@ module GetBlacklistReportsRequest =
         BlacklistItemNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BlacklistItemNames") in
       make ~blacklistItemNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blacklistItemNames =
         field_map_exn json "BlacklistItemNames" BlacklistItemNames.of_json in
@@ -12790,6 +12985,7 @@ module GetAccountResponse =
       make ?details ?suppressionAttributes ?sendingEnabled ?sendQuota
         ?productionAccessEnabled ?enforcementStatus
         ?dedicatedIpAutoWarmupEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "Details" AccountDetails.of_json in
       let suppressionAttributes =
@@ -12816,6 +13012,7 @@ module GetAccountRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12873,6 +13070,7 @@ module DeleteSuppressedDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12895,6 +13093,7 @@ module DeleteSuppressedDestinationRequest =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress =
         field_map_exn json "EmailAddress" EmailAddress.of_json in
@@ -12955,6 +13154,7 @@ module DeleteEmailTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12976,6 +13176,7 @@ module DeleteEmailTemplateRequest =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" EmailTemplateName.of_json in
@@ -13047,6 +13248,7 @@ module DeleteEmailIdentityResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13069,6 +13271,7 @@ module DeleteEmailIdentityRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
@@ -13128,6 +13331,7 @@ module DeleteEmailIdentityPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13156,6 +13360,7 @@ module DeleteEmailIdentityPolicyRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~policyName ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
       let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
@@ -13227,6 +13432,7 @@ module DeleteDedicatedIpPoolResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13248,6 +13454,7 @@ module DeleteDedicatedIpPoolRequest =
       let poolName =
         PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
       make ~poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolName = field_map_exn json "PoolName" PoolName.of_json in
       make ~poolName ()
@@ -13306,6 +13513,7 @@ module DeleteCustomVerificationEmailTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13328,6 +13536,7 @@ module DeleteCustomVerificationEmailTemplateRequest =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" EmailTemplateName.of_json in
@@ -13388,6 +13597,7 @@ module DeleteContactResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a contact from a contact list."]
@@ -13417,6 +13627,7 @@ module DeleteContactRequest =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~emailAddress ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress =
         field_map_exn json "EmailAddress" EmailAddress.of_json in
@@ -13489,6 +13700,7 @@ module DeleteContactListResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13511,6 +13723,7 @@ module DeleteContactListRequest =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactListName =
         field_map_exn json "ContactListName" ContactListName.of_json in
@@ -13582,6 +13795,7 @@ module DeleteConfigurationSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13604,6 +13818,7 @@ module DeleteConfigurationSetRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map_exn json "ConfigurationSetName"
@@ -13664,6 +13879,7 @@ module DeleteConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13696,6 +13912,7 @@ module DeleteConfigurationSetEventDestinationRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestinationName ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map_exn json "EventDestinationName"
@@ -13765,6 +13982,7 @@ module CreateImportJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -13797,6 +14015,7 @@ module CreateImportJobRequest =
         ImportDestination.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ImportDestination") in
       make ~importDataSource ~importDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let importDataSource =
         field_map_exn json "ImportDataSource" ImportDataSource.of_json in
@@ -13868,6 +14087,7 @@ module CreateEmailTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13898,6 +14118,7 @@ module CreateEmailTemplateRequest =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateContent ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateContent =
         field_map_exn json "TemplateContent" EmailTemplateContent.of_json in
@@ -14019,6 +14240,7 @@ module CreateEmailIdentityResponse =
         (Option.map ~f:IdentityType.of_xml)
           (Xml.child xml_arg0 "IdentityType") in
       make ?dkimAttributes ?verifiedForSendingStatus ?identityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dkimAttributes =
         field_map json "DkimAttributes" DkimAttributes.of_json in
@@ -14079,6 +14301,7 @@ module CreateEmailIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?configurationSetName ?dkimSigningAttributes ?tags ~emailIdentity
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -14162,6 +14385,7 @@ module CreateEmailIdentityPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14197,6 +14421,7 @@ module CreateEmailIdentityPolicyRequest =
         Identity.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~policy ~policyName ~emailIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" Policy.of_json in
       let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
@@ -14336,6 +14561,7 @@ module CreateDeliverabilityTestReportResponse =
       let reportId =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReportId") in
       make ~deliverabilityTestStatus ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliverabilityTestStatus =
         field_map_exn json "DeliverabilityTestStatus"
@@ -14386,6 +14612,7 @@ module CreateDeliverabilityTestReportRequest =
       let reportName =
         (Option.map ~f:ReportName.of_xml) (Xml.child xml_arg0 "ReportName") in
       make ?tags ~content ~fromEmailAddress ?reportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let content = field_map_exn json "Content" EmailContent.of_json in
@@ -14469,6 +14696,7 @@ module CreateDedicatedIpPoolResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14493,6 +14721,7 @@ module CreateDedicatedIpPoolRequest =
       let poolName =
         PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
       make ?tags ~poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let poolName = field_map_exn json "PoolName" PoolName.of_json in
@@ -14570,6 +14799,7 @@ module CreateCustomVerificationEmailTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14645,6 +14875,7 @@ module CreateCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~failureRedirectionURL ~successRedirectionURL ~templateContent
         ~templateSubject ~fromEmailAddress ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map_exn json "FailureRedirectionURL"
@@ -14727,6 +14958,7 @@ module CreateContactResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14792,6 +15024,7 @@ module CreateContactRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?attributesData ?unsubscribeAll ?topicPreferences ~emailAddress
         ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributesData =
         field_map json "AttributesData" AttributesData.of_json in
@@ -14870,6 +15103,7 @@ module CreateContactListResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a contact list."]
@@ -14910,6 +15144,7 @@ module CreateContactListRequest =
         ContactListName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?tags ?description ?topics ~contactListName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -15001,6 +15236,7 @@ module CreateConfigurationSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15084,6 +15320,7 @@ module CreateConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?suppressionOptions ?tags ?sendingOptions ?reputationOptions
         ?deliveryOptions ?trackingOptions ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suppressionOptions =
         field_map json "SuppressionOptions" SuppressionOptions.of_json in
@@ -15174,6 +15411,7 @@ module CreateConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15215,6 +15453,7 @@ module CreateConfigurationSetEventDestinationRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestination =
         field_map_exn json "EventDestination"

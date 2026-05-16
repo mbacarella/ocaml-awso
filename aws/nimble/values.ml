@@ -87,6 +87,7 @@ module ActiveDirectoryComputerAttribute =
         (Option.map ~f:ActiveDirectoryComputerAttributeName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value =
         field_map json "value" ActiveDirectoryComputerAttributeValue.of_json in
@@ -512,6 +513,7 @@ module StreamingSessionStorageRoot =
         (Option.map ~f:StreamingSessionStorageRootPathLinux.of_xml)
           (Xml.child xml_arg0 "linux") in
       make ?windows ?linux ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let windows =
         field_map json "windows"
@@ -828,6 +830,7 @@ module ActiveDirectoryConfiguration =
           (Xml.child xml_arg0 "computerAttributes") in
       make ?organizationalUnitDistinguishedName ?directoryId
         ?computerAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationalUnitDistinguishedName =
         field_map json "organizationalUnitDistinguishedName"
@@ -869,6 +872,7 @@ module ComputeFarmConfiguration =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "activeDirectoryUser") in
       make ?endpoint ?activeDirectoryUser ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint =
         field_map json "endpoint"
@@ -898,6 +902,7 @@ module LicenseServiceConfiguration =
         (Option.map ~f:SyntheticLicenseServiceConfigurationString.of_xml)
           (Xml.child xml_arg0 "endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint =
         field_map json "endpoint"
@@ -967,6 +972,7 @@ module SharedFileSystemConfiguration =
           (Xml.child xml_arg0 "endpoint") in
       make ?windowsMountDrive ?shareName ?linuxMountPoint ?fileSystemId
         ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let windowsMountDrive =
         field_map json "windowsMountDrive" WindowsMountDrive.of_json in
@@ -1033,6 +1039,7 @@ module StudioComponentInitializationScript =
         (Option.map ~f:LaunchProfileProtocolVersion.of_xml)
           (Xml.child xml_arg0 "launchProfileProtocolVersion") in
       make ?script ?runContext ?platform ?launchProfileProtocolVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let script =
         field_map json "script"
@@ -1067,6 +1074,7 @@ module ScriptParameterKeyValue =
       let key =
         (Option.map ~f:ScriptParameterKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" ScriptParameterValue.of_json in
       let key = field_map json "key" ScriptParameterKey.of_json in
@@ -1213,6 +1221,7 @@ module StreamConfigurationSessionStorage =
         StreamingSessionStorageModeList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mode") in
       make ?root ~mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let root = field_map json "root" StreamingSessionStorageRoot.of_json in
       let mode =
@@ -1348,6 +1357,7 @@ module ValidationResult =
         LaunchProfileValidationState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "state") in
       make ~type_ ~statusMessage ~statusCode ~state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ =
         field_map_exn json "type" LaunchProfileValidationType.of_json in
@@ -1498,6 +1508,7 @@ module StudioEncryptionConfiguration =
         (Option.map ~f:StudioEncryptionConfigurationKeyArn.of_xml)
           (Xml.child xml_arg0 "keyArn") in
       make ~keyType ?keyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyType =
         field_map_exn json "keyType"
@@ -1767,6 +1778,7 @@ module StudioComponentConfiguration =
           (Xml.child xml_arg0 "activeDirectoryConfiguration") in
       make ?sharedFileSystemConfiguration ?licenseServiceConfiguration
         ?computeFarmConfiguration ?activeDirectoryConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedFileSystemConfiguration =
         field_map json "sharedFileSystemConfiguration"
@@ -2273,6 +2285,7 @@ module StreamingImageEncryptionConfiguration =
         (Option.map ~f:StreamingImageEncryptionConfigurationKeyArn.of_xml)
           (Xml.child xml_arg0 "keyArn") in
       make ~keyType ?keyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyType =
         field_map_exn json "keyType"
@@ -2780,6 +2793,7 @@ module StreamConfiguration =
       make ~streamingImageIds ?sessionStorage
         ?maxStoppedSessionLengthInMinutes ?maxSessionLengthInMinutes
         ~ec2InstanceTypes ~clipboardMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingImageIds =
         field_map_exn json "streamingImageIds" StreamingImageIdList.of_json in
@@ -2950,6 +2964,7 @@ module LaunchProfileInitializationScript =
         (Option.map ~f:StudioComponentInitializationScriptContent.of_xml)
           (Xml.child xml_arg0 "script") in
       make ?studioComponentName ?studioComponentId ?script ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponentName =
         field_map json "studioComponentName" StudioComponentName.of_json in
@@ -3012,6 +3027,7 @@ module NewStudioMember =
         StudioPersona.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "persona") in
       make ~principalId ~persona ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalId = field_map_exn json "principalId" String_.of_json in
       let persona = field_map_exn json "persona" StudioPersona.of_json in
@@ -3040,6 +3056,7 @@ module NewLaunchProfileMember =
         LaunchProfilePersona.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "persona") in
       make ~principalId ~persona ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalId = field_map_exn json "principalId" String_.of_json in
       let persona = field_map_exn json "persona" LaunchProfilePersona.of_json in
@@ -3191,6 +3208,7 @@ module Studio =
         ?studioEncryptionConfiguration ?statusMessage ?statusCode ?state
         ?ssoClientId ?homeRegion ?displayName ?createdAt ?arn ?adminRoleArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userRoleArn = field_map json "userRoleArn" String_.of_json in
       let updatedAt = field_map json "updatedAt" Timestamp.of_json in
@@ -3251,6 +3269,7 @@ module StudioMembership =
       let identityStoreId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "identityStoreId") in
       make ?sid ?principalId ?persona ?identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sid = field_map json "sid" String_.of_json in
       let principalId = field_map json "principalId" String_.of_json in
@@ -3428,6 +3447,7 @@ module StudioComponent =
         ?statusMessage ?statusCode ?state ?scriptParameters ?name
         ?initializationScripts ?ec2SecurityGroupIds ?description ?createdBy
         ?createdAt ?configuration ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedBy = field_map json "updatedBy" String_.of_json in
       let updatedAt = field_map json "updatedAt" Timestamp.of_json in
@@ -3634,6 +3654,7 @@ module StreamingSession =
         ?stoppedBy ?stoppedAt ?stopAt ?statusMessage ?statusCode ?state
         ?startedBy ?startedAt ?sessionId ?ownedBy ?launchProfileId
         ?ec2InstanceType ?createdBy ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedBy = field_map json "updatedBy" String_.of_json in
       let updatedAt = field_map json "updatedAt" Timestamp.of_json in
@@ -3788,6 +3809,7 @@ module StreamingImage =
       make ?tags ?streamingImageId ?statusMessage ?statusCode ?state
         ?platform ?owner ?name ?eulaIds ?encryptionConfiguration ?ec2ImageId
         ?description ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let streamingImageId =
@@ -3973,6 +3995,7 @@ module LaunchProfile =
         ?streamConfiguration ?statusMessage ?statusCode ?state ?name
         ?launchProfileProtocolVersions ?launchProfileId ?ec2SubnetIds
         ?description ?createdBy ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validationResults =
         field_map json "validationResults" ValidationResults.of_json in
@@ -4042,6 +4065,7 @@ module LaunchProfileMembership =
       let identityStoreId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "identityStoreId") in
       make ?sid ?principalId ?persona ?identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sid = field_map json "sid" String_.of_json in
       let principalId = field_map json "principalId" String_.of_json in
@@ -4089,6 +4113,7 @@ module Eula =
       let content =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "content") in
       make ?updatedAt ?name ?eulaId ?createdAt ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "updatedAt" Timestamp.of_json in
       let name = field_map json "name" EulaName.of_json in
@@ -4146,6 +4171,7 @@ module EulaAcceptance =
       let acceptedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "acceptedAt") in
       make ?eulaId ?eulaAcceptanceId ?accepteeId ?acceptedBy ?acceptedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eulaId = field_map json "eulaId" EulaId.of_json in
       let eulaAcceptanceId =
@@ -4331,6 +4357,7 @@ module LaunchProfileInitializationActiveDirectory =
       make ?studioComponentName ?studioComponentId
         ?organizationalUnitDistinguishedName ?dnsIpAddresses ?directoryName
         ?directoryId ?computerAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponentName =
         field_map json "studioComponentName" StudioComponentName.of_json in
@@ -4514,6 +4541,7 @@ module StudioComponentSummary =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       make ?updatedBy ?updatedAt ?type_ ?subtype ?studioComponentId ?name
         ?description ?createdBy ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedBy = field_map json "updatedBy" String_.of_json in
       let updatedAt = field_map json "updatedAt" Timestamp.of_json in
@@ -4555,6 +4583,7 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "context") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?context ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let context = field_map json "context" ExceptionContext.of_json in
@@ -4588,6 +4617,7 @@ module ConflictException =
           (Xml.child xml_arg0 "context") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?context ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let context = field_map json "context" ExceptionContext.of_json in
@@ -4620,6 +4650,7 @@ module InternalServerErrorException =
           (Xml.child xml_arg0 "context") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?context ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let context = field_map json "context" ExceptionContext.of_json in
@@ -4653,6 +4684,7 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "context") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?context ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let context = field_map json "context" ExceptionContext.of_json in
@@ -4685,6 +4717,7 @@ module ServiceQuotaExceededException =
           (Xml.child xml_arg0 "context") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?context ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let context = field_map json "context" ExceptionContext.of_json in
@@ -4718,6 +4751,7 @@ module ThrottlingException =
           (Xml.child xml_arg0 "context") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?context ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let context = field_map json "context" ExceptionContext.of_json in
@@ -4750,6 +4784,7 @@ module ValidationException =
           (Xml.child xml_arg0 "context") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?context ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let context = field_map json "context" ExceptionContext.of_json in
@@ -4918,6 +4953,7 @@ module StreamConfigurationCreate =
       make ~streamingImageIds ?sessionStorage
         ?maxStoppedSessionLengthInMinutes ?maxSessionLengthInMinutes
         ~ec2InstanceTypes ~clipboardMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingImageIds =
         field_map_exn json "streamingImageIds" StreamingImageIdList.of_json in
@@ -5432,6 +5468,7 @@ module StreamingSessionStream =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       make ?url ?streamId ?statusCode ?state ?ownedBy ?expiresAt ?createdBy
         ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url =
         field_map json "url" SyntheticStreamingSessionStreamString.of_json in
@@ -5551,6 +5588,7 @@ module LaunchProfileInitialization =
       make ?userInitializationScripts ?systemInitializationScripts ?platform
         ?name ?launchPurpose ?launchProfileProtocolVersion ?launchProfileId
         ?ec2SecurityGroupIds ?activeDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userInitializationScripts =
         field_map json "userInitializationScripts"
@@ -5787,6 +5825,7 @@ module UpdateStudioResponse =
       let studio =
         Studio.of_xml (Xml.child_exn ~context:context_ xml_arg0 "studio") in
       make ~studio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studio = field_map_exn json "studio" Studio.of_json in
       make ~studio ()
@@ -5848,6 +5887,7 @@ module UpdateStudioRequest =
       let adminRoleArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "adminRoleArn") in
       make ?userRoleArn ~studioId ?displayName ?clientToken ?adminRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userRoleArn = field_map json "userRoleArn" String_.of_json in
       let studioId = field_map_exn json "studioId" String_.of_json in
@@ -5962,6 +6002,7 @@ module UpdateStudioComponentResponse =
         (Option.map ~f:StudioComponent.of_xml)
           (Xml.child xml_arg0 "studioComponent") in
       make ?studioComponent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponent =
         field_map json "studioComponent" StudioComponent.of_json in
@@ -6082,6 +6123,7 @@ module UpdateStudioComponentRequest =
       make ?type_ ?subtype ~studioId ~studioComponentId ?scriptParameters
         ?name ?initializationScripts ?ec2SecurityGroupIds ?description
         ?configuration ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" StudioComponentType.of_json in
       let subtype = field_map json "subtype" StudioComponentSubtype.of_json in
@@ -6208,6 +6250,7 @@ module UpdateStreamingImageResponse =
         (Option.map ~f:StreamingImage.of_xml)
           (Xml.child xml_arg0 "streamingImage") in
       make ?streamingImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingImage =
         field_map json "streamingImage" StreamingImage.of_json in
@@ -6269,6 +6312,7 @@ module UpdateStreamingImageRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~streamingImageId ?name ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let streamingImageId =
@@ -6385,6 +6429,7 @@ module UpdateLaunchProfileResponse =
         (Option.map ~f:LaunchProfile.of_xml)
           (Xml.child xml_arg0 "launchProfile") in
       make ?launchProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchProfile =
         field_map json "launchProfile" LaunchProfile.of_json in
@@ -6478,6 +6523,7 @@ module UpdateLaunchProfileRequest =
       make ~studioId ?studioComponentIds ?streamConfiguration ?name
         ?launchProfileProtocolVersions ~launchProfileId ?description
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let studioComponentIds =
@@ -6602,6 +6648,7 @@ module UpdateLaunchProfileMemberResponse =
         (Option.map ~f:LaunchProfileMembership.of_xml)
           (Xml.child xml_arg0 "member") in
       make ?member ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "member" LaunchProfileMembership.of_json in
       make ?member ()
@@ -6659,6 +6706,7 @@ module UpdateLaunchProfileMemberRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~principalId ~persona ~launchProfileId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let principalId = field_map_exn json "principalId" String_.of_json in
@@ -6762,6 +6810,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the tags for a resource."]
@@ -6791,6 +6840,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" StringList.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -6890,6 +6940,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates tags for a resource, given its ARN."]
@@ -6916,6 +6967,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -7021,6 +7073,7 @@ module StopStreamingSessionResponse =
         (Option.map ~f:StreamingSession.of_xml)
           (Xml.child xml_arg0 "session") in
       make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "session" StreamingSession.of_json in
       make ?session ()
@@ -7059,6 +7112,7 @@ module StopStreamingSessionRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~sessionId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let sessionId = field_map_exn json "sessionId" String_.of_json in
@@ -7166,6 +7220,7 @@ module StartStudioSSOConfigurationRepairResponse =
       let studio =
         Studio.of_xml (Xml.child_exn ~context:context_ xml_arg0 "studio") in
       make ~studio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studio = field_map_exn json "studio" Studio.of_json in
       make ~studio ()
@@ -7196,6 +7251,7 @@ module StartStudioSSOConfigurationRepairRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -7302,6 +7358,7 @@ module StartStreamingSessionResponse =
         (Option.map ~f:StreamingSession.of_xml)
           (Xml.child xml_arg0 "session") in
       make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "session" StreamingSession.of_json in
       make ?session ()
@@ -7340,6 +7397,7 @@ module StartStreamingSessionRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~sessionId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let sessionId = field_map_exn json "sessionId" String_.of_json in
@@ -7441,6 +7499,7 @@ module PutStudioMembersResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7482,6 +7541,7 @@ module PutStudioMembersRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~members ~identityStoreId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let members = field_map_exn json "members" NewStudioMemberList.of_json in
@@ -7585,6 +7645,7 @@ module PutLaunchProfileMembersResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7640,6 +7701,7 @@ module PutLaunchProfileMembersRequest =
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~members ~launchProfileId ~identityStoreId ?clientToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let members =
@@ -7753,6 +7815,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -7776,6 +7839,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -7889,6 +7953,7 @@ module ListStudiosResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~studios ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studios = field_map_exn json "studios" StudioList.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -7911,6 +7976,7 @@ module ListStudiosRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       make ?nextToken ()
@@ -8024,6 +8090,7 @@ module ListStudioMembersResponse =
         (Option.map ~f:StudioMembershipList.of_xml)
           (Xml.child xml_arg0 "members") in
       make ?nextToken ?members ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let members = field_map json "members" StudioMembershipList.of_json in
@@ -8058,6 +8125,7 @@ module ListStudioMembersRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~studioId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -8175,6 +8243,7 @@ module ListStudioComponentsResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?studioComponents ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponents =
         field_map json "studioComponents" StudioComponentList.of_json in
@@ -8227,6 +8296,7 @@ module ListStudioComponentsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?types ~studioId ?states ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let types = field_map json "types" StudioComponentTypeList.of_json in
       let studioId = field_map_exn json "studioId" String_.of_json in
@@ -8344,6 +8414,7 @@ module ListStreamingSessionsResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?sessions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessions = field_map json "sessions" StreamingSessionList.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -8393,6 +8464,7 @@ module ListStreamingSessionsRequest =
       let createdBy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "createdBy") in
       make ~studioId ?sessionIds ?ownedBy ?nextToken ?createdBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let sessionIds = field_map json "sessionIds" String_.of_json in
@@ -8511,6 +8583,7 @@ module ListStreamingImagesResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?streamingImages ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingImages =
         field_map json "streamingImages" StreamingImageList.of_json in
@@ -8545,6 +8618,7 @@ module ListStreamingImagesRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~studioId ?owner ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let owner = field_map json "owner" String_.of_json in
@@ -8662,6 +8736,7 @@ module ListLaunchProfilesResponse =
         (Option.map ~f:LaunchProfileList.of_xml)
           (Xml.child xml_arg0 "launchProfiles") in
       make ?nextToken ?launchProfiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let launchProfiles =
@@ -8713,6 +8788,7 @@ module ListLaunchProfilesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~studioId ?states ?principalId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let states = field_map json "states" LaunchProfileStateList.of_json in
@@ -8830,6 +8906,7 @@ module ListLaunchProfileMembersResponse =
         (Option.map ~f:LaunchProfileMembershipList.of_xml)
           (Xml.child xml_arg0 "members") in
       make ?nextToken ?members ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let members =
@@ -8871,6 +8948,7 @@ module ListLaunchProfileMembersRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "launchProfileId") in
       make ~studioId ?nextToken ?maxResults ~launchProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -8985,6 +9063,7 @@ module ListEulasResponse =
       let eulas =
         (Option.map ~f:EulaList.of_xml) (Xml.child xml_arg0 "eulas") in
       make ?nextToken ?eulas ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let eulas = field_map json "eulas" EulaList.of_json in
@@ -9011,6 +9090,7 @@ module ListEulasRequest =
       let eulaIds =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "eulaIds") in
       make ?nextToken ?eulaIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let eulaIds = field_map json "eulaIds" StringList.of_json in
@@ -9126,6 +9206,7 @@ module ListEulaAcceptancesResponse =
         (Option.map ~f:EulaAcceptanceList.of_xml)
           (Xml.child xml_arg0 "eulaAcceptances") in
       make ?nextToken ?eulaAcceptances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let eulaAcceptances =
@@ -9161,6 +9242,7 @@ module ListEulaAcceptancesRequest =
       let eulaIds =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "eulaIds") in
       make ~studioId ?nextToken ?eulaIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -9267,6 +9349,7 @@ module GetStudioResponse =
       let studio =
         Studio.of_xml (Xml.child_exn ~context:context_ xml_arg0 "studio") in
       make ~studio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studio = field_map_exn json "studio" Studio.of_json in
       make ~studio ()
@@ -9285,6 +9368,7 @@ module GetStudioRequest =
       let studioId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "studioId") in
       make ~studioId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       make ~studioId ()
@@ -9389,6 +9473,7 @@ module GetStudioMemberResponse =
       let member =
         (Option.map ~f:StudioMembership.of_xml) (Xml.child xml_arg0 "member") in
       make ?member ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "member" StudioMembership.of_json in
       make ?member ()
@@ -9417,6 +9502,7 @@ module GetStudioMemberRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "principalId") in
       make ~studioId ~principalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let principalId = field_map_exn json "principalId" String_.of_json in
@@ -9525,6 +9611,7 @@ module GetStudioComponentResponse =
         (Option.map ~f:StudioComponent.of_xml)
           (Xml.child xml_arg0 "studioComponent") in
       make ?studioComponent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponent =
         field_map json "studioComponent" StudioComponent.of_json in
@@ -9552,6 +9639,7 @@ module GetStudioComponentRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "studioComponentId") in
       make ~studioId ~studioComponentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let studioComponentId =
@@ -9659,6 +9747,7 @@ module GetStreamingSessionStreamResponse =
         (Option.map ~f:StreamingSessionStream.of_xml)
           (Xml.child xml_arg0 "stream") in
       make ?stream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stream = field_map json "stream" StreamingSessionStream.of_json in
       make ?stream ()
@@ -9690,6 +9779,7 @@ module GetStreamingSessionStreamRequest =
       let sessionId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sessionId") in
       make ~studioId ~streamId ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let streamId = field_map_exn json "streamId" String_.of_json in
@@ -9798,6 +9888,7 @@ module GetStreamingSessionResponse =
         (Option.map ~f:StreamingSession.of_xml)
           (Xml.child xml_arg0 "session") in
       make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "session" StreamingSession.of_json in
       make ?session ()
@@ -9823,6 +9914,7 @@ module GetStreamingSessionRequest =
       let sessionId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sessionId") in
       make ~studioId ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let sessionId = field_map_exn json "sessionId" String_.of_json in
@@ -9932,6 +10024,7 @@ module GetStreamingImageResponse =
         (Option.map ~f:StreamingImage.of_xml)
           (Xml.child xml_arg0 "streamingImage") in
       make ?streamingImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingImage =
         field_map json "streamingImage" StreamingImage.of_json in
@@ -9959,6 +10052,7 @@ module GetStreamingImageRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "streamingImageId") in
       make ~studioId ~streamingImageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let streamingImageId =
@@ -10068,6 +10162,7 @@ module GetLaunchProfileResponse =
         (Option.map ~f:LaunchProfile.of_xml)
           (Xml.child xml_arg0 "launchProfile") in
       make ?launchProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchProfile =
         field_map json "launchProfile" LaunchProfile.of_json in
@@ -10095,6 +10190,7 @@ module GetLaunchProfileRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "launchProfileId") in
       make ~studioId ~launchProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let launchProfileId =
@@ -10203,6 +10299,7 @@ module GetLaunchProfileMemberResponse =
         (Option.map ~f:LaunchProfileMembership.of_xml)
           (Xml.child xml_arg0 "member") in
       make ?member ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "member" LaunchProfileMembership.of_json in
       make ?member ()
@@ -10237,6 +10334,7 @@ module GetLaunchProfileMemberRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "launchProfileId") in
       make ~studioId ~principalId ~launchProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let principalId = field_map_exn json "principalId" String_.of_json in
@@ -10349,6 +10447,7 @@ module GetLaunchProfileInitializationResponse =
         (Option.map ~f:LaunchProfileInitialization.of_xml)
           (Xml.child xml_arg0 "launchProfileInitialization") in
       make ?launchProfileInitialization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchProfileInitialization =
         field_map json "launchProfileInitialization"
@@ -10409,6 +10508,7 @@ module GetLaunchProfileInitializationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "launchProfileId") in
       make ~studioId ~platform ~launchPurpose ~launchProfileProtocolVersions
         ~launchProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let platform = field_map_exn json "platform" String_.of_json in
@@ -10542,6 +10642,7 @@ module GetLaunchProfileDetailsResponse =
         (Option.map ~f:LaunchProfile.of_xml)
           (Xml.child xml_arg0 "launchProfile") in
       make ?studioComponentSummaries ?streamingImages ?launchProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponentSummaries =
         field_map json "studioComponentSummaries"
@@ -10575,6 +10676,7 @@ module GetLaunchProfileDetailsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "launchProfileId") in
       make ~studioId ~launchProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let launchProfileId =
@@ -10679,6 +10781,7 @@ module GetEulaResponse =
     let of_xml xml_arg0 =
       let eula = (Option.map ~f:Eula.of_xml) (Xml.child xml_arg0 "eula") in
       make ?eula ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eula = field_map json "eula" Eula.of_json in make ?eula ()
     let to_json v = composed_to_json to_value v
@@ -10696,6 +10799,7 @@ module GetEulaRequest =
       let eulaId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eulaId") in
       make ~eulaId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eulaId = field_map_exn json "eulaId" String_.of_json in
       make ~eulaId ()
@@ -10800,6 +10904,7 @@ module DeleteStudioResponse =
       let studio =
         Studio.of_xml (Xml.child_exn ~context:context_ xml_arg0 "studio") in
       make ~studio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studio = field_map_exn json "studio" Studio.of_json in
       make ~studio ()
@@ -10829,6 +10934,7 @@ module DeleteStudioRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in
@@ -10928,6 +11034,7 @@ module DeleteStudioMemberResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a user from studio membership."]
@@ -10963,6 +11070,7 @@ module DeleteStudioMemberRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~principalId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let principalId = field_map_exn json "principalId" String_.of_json in
@@ -11072,6 +11180,7 @@ module DeleteStudioComponentResponse =
         (Option.map ~f:StudioComponent.of_xml)
           (Xml.child xml_arg0 "studioComponent") in
       make ?studioComponent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponent =
         field_map json "studioComponent" StudioComponent.of_json in
@@ -11109,6 +11218,7 @@ module DeleteStudioComponentRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~studioComponentId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let studioComponentId =
@@ -11217,6 +11327,7 @@ module DeleteStreamingSessionResponse =
         (Option.map ~f:StreamingSession.of_xml)
           (Xml.child xml_arg0 "session") in
       make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "session" StreamingSession.of_json in
       make ?session ()
@@ -11252,6 +11363,7 @@ module DeleteStreamingSessionRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~sessionId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let sessionId = field_map_exn json "sessionId" String_.of_json in
@@ -11362,6 +11474,7 @@ module DeleteStreamingImageResponse =
         (Option.map ~f:StreamingImage.of_xml)
           (Xml.child xml_arg0 "streamingImage") in
       make ?streamingImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingImage =
         field_map json "streamingImage" StreamingImage.of_json in
@@ -11399,6 +11512,7 @@ module DeleteStreamingImageRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~streamingImageId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let streamingImageId =
@@ -11509,6 +11623,7 @@ module DeleteLaunchProfileResponse =
         (Option.map ~f:LaunchProfile.of_xml)
           (Xml.child xml_arg0 "launchProfile") in
       make ?launchProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchProfile =
         field_map json "launchProfile" LaunchProfile.of_json in
@@ -11545,6 +11660,7 @@ module DeleteLaunchProfileRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~launchProfileId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let launchProfileId =
@@ -11646,6 +11762,7 @@ module DeleteLaunchProfileMemberResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a user from launch profile membership."]
@@ -11688,6 +11805,7 @@ module DeleteLaunchProfileMemberRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~principalId ~launchProfileId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let principalId = field_map_exn json "principalId" String_.of_json in
@@ -11796,6 +11914,7 @@ module CreateStudioResponse =
       let studio =
         (Option.map ~f:Studio.of_xml) (Xml.child xml_arg0 "studio") in
       make ?studio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studio = field_map json "studio" Studio.of_json in make ?studio ()
     let to_json v = composed_to_json to_value v
@@ -11880,6 +11999,7 @@ module CreateStudioRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "adminRoleArn") in
       make ~userRoleArn ?tags ~studioName ?studioEncryptionConfiguration
         ~displayName ?clientToken ~adminRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userRoleArn = field_map_exn json "userRoleArn" String_.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -11999,6 +12119,7 @@ module CreateStudioComponentResponse =
         (Option.map ~f:StudioComponent.of_xml)
           (Xml.child xml_arg0 "studioComponent") in
       make ?studioComponent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioComponent =
         field_map json "studioComponent" StudioComponent.of_json in
@@ -12119,6 +12240,7 @@ module CreateStudioComponentRequest =
       make ~type_ ?tags ?subtype ~studioId ?scriptParameters ~name
         ?initializationScripts ?ec2SecurityGroupIds ?description
         ?configuration ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" StudioComponentType.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -12244,6 +12366,7 @@ module CreateStreamingSessionStreamResponse =
         (Option.map ~f:StreamingSessionStream.of_xml)
           (Xml.child xml_arg0 "stream") in
       make ?stream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stream = field_map json "stream" StreamingSessionStream.of_json in
       make ?stream ()
@@ -12290,6 +12413,7 @@ module CreateStreamingSessionStreamRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ~sessionId ?expirationInSeconds ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let sessionId = field_map_exn json "sessionId" String_.of_json in
@@ -12401,6 +12525,7 @@ module CreateStreamingSessionResponse =
         (Option.map ~f:StreamingSession.of_xml)
           (Xml.child xml_arg0 "session") in
       make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "session" StreamingSession.of_json in
       make ?session ()
@@ -12477,6 +12602,7 @@ module CreateStreamingSessionRequest =
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ?tags ~studioId ?streamingImageId ?ownedBy ?launchProfileId
         ?ec2InstanceType ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let studioId = field_map_exn json "studioId" String_.of_json in
@@ -12594,6 +12720,7 @@ module CreateStreamingImageResponse =
         (Option.map ~f:StreamingImage.of_xml)
           (Xml.child xml_arg0 "streamingImage") in
       make ?streamingImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingImage =
         field_map json "streamingImage" StreamingImage.of_json in
@@ -12669,6 +12796,7 @@ module CreateStreamingImageRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ?tags ~studioId ~name ~ec2ImageId ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let studioId = field_map_exn json "studioId" String_.of_json in
@@ -12785,6 +12913,7 @@ module CreateLaunchProfileResponse =
         (Option.map ~f:LaunchProfile.of_xml)
           (Xml.child xml_arg0 "launchProfile") in
       make ?launchProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchProfile =
         field_map json "launchProfile" LaunchProfile.of_json in
@@ -12889,6 +13018,7 @@ module CreateLaunchProfileRequest =
       make ?tags ~studioId ~studioComponentIds ~streamConfiguration ~name
         ~launchProfileProtocolVersions ~ec2SubnetIds ?description
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let studioId = field_map_exn json "studioId" String_.of_json in
@@ -13014,6 +13144,7 @@ module AcceptEulasResponse =
         (Option.map ~f:EulaAcceptanceList.of_xml)
           (Xml.child xml_arg0 "eulaAcceptances") in
       make ?eulaAcceptances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eulaAcceptances =
         field_map json "eulaAcceptances" EulaAcceptanceList.of_json in
@@ -13049,6 +13180,7 @@ module AcceptEulasRequest =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amz-Client-Token") in
       make ~studioId ?eulaIds ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let studioId = field_map_exn json "studioId" String_.of_json in
       let eulaIds = field_map json "eulaIds" EulaIdList.of_json in

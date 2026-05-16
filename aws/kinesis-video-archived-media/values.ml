@@ -145,6 +145,7 @@ module Fragment =
           (Xml.child xml_arg0 "FragmentNumber") in
       make ?fragmentLengthInMilliseconds ?serverTimestamp ?producerTimestamp
         ?fragmentSizeInBytes ?fragmentNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fragmentLengthInMilliseconds =
         field_map json "FragmentLengthInMilliseconds" Long.of_json in
@@ -213,6 +214,7 @@ module TimestampRange =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartTimestamp") in
       make ~endTimestamp ~startTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTimestamp = field_map_exn json "EndTimestamp" Timestamp.of_json in
       let startTimestamp =
@@ -272,6 +274,7 @@ module HLSTimestampRange =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "StartTimestamp") in
       make ?endTimestamp ?startTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTimestamp = field_map json "EndTimestamp" Timestamp.of_json in
       let startTimestamp = field_map json "StartTimestamp" Timestamp.of_json in
@@ -331,6 +334,7 @@ module DASHTimestampRange =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "StartTimestamp") in
       make ?endTimestamp ?startTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTimestamp = field_map json "EndTimestamp" Timestamp.of_json in
       let startTimestamp = field_map json "StartTimestamp" Timestamp.of_json in
@@ -391,6 +395,7 @@ module ClipTimestampRange =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartTimestamp") in
       make ~endTimestamp ~startTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTimestamp = field_map_exn json "EndTimestamp" Timestamp.of_json in
       let startTimestamp =
@@ -411,6 +416,7 @@ module ClientLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -454,6 +460,7 @@ module InvalidArgumentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -493,6 +500,7 @@ module NotAuthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -512,6 +520,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -545,6 +554,7 @@ module FragmentSelector =
         FragmentSelectorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FragmentSelectorType") in
       make ~timestampRange ~fragmentSelectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestampRange =
         field_map_exn json "TimestampRange" TimestampRange.of_json in
@@ -704,6 +714,7 @@ module InvalidCodecPrivateDataException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -723,6 +734,7 @@ module MissingCodecPrivateDataException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -742,6 +754,7 @@ module NoDataRetentionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -761,6 +774,7 @@ module UnsupportedStreamMediaTypeException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -890,6 +904,7 @@ module HLSFragmentSelector =
         (Option.map ~f:HLSFragmentSelectorType.of_xml)
           (Xml.child xml_arg0 "FragmentSelectorType") in
       make ?timestampRange ?fragmentSelectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestampRange =
         field_map json "TimestampRange" HLSTimestampRange.of_json in
@@ -1030,6 +1045,7 @@ module DASHFragmentSelector =
         (Option.map ~f:DASHFragmentSelectorType.of_xml)
           (Xml.child xml_arg0 "FragmentSelectorType") in
       make ?timestampRange ?fragmentSelectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestampRange =
         field_map json "TimestampRange" DASHTimestampRange.of_json in
@@ -1099,6 +1115,7 @@ module InvalidMediaFrameException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1133,6 +1150,7 @@ module ClipFragmentSelector =
         ClipFragmentSelectorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FragmentSelectorType") in
       make ~timestampRange ~fragmentSelectorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestampRange =
         field_map_exn json "TimestampRange" ClipTimestampRange.of_json in
@@ -1222,6 +1240,7 @@ module ListFragmentsOutput =
       let fragments =
         (Option.map ~f:FragmentList.of_xml) (Xml.child xml_arg0 "Fragments") in
       make ?nextToken ?fragments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let fragments = field_map json "Fragments" FragmentList.of_json in
@@ -1285,6 +1304,7 @@ module ListFragmentsInput =
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?fragmentSelector ?nextToken ?maxResults ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fragmentSelector =
         field_map json "FragmentSelector" FragmentSelector.of_json in
@@ -1384,6 +1404,7 @@ module GetMediaForFragmentListOutput =
         (Option.map ~f:ContentType.of_xml)
           (Xml.child xml_arg0 "Content-Type") in
       make ?payload ?contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "Payload" Payload.of_json in
       let contentType = field_map json "ContentType" ContentType.of_json in
@@ -1423,6 +1444,7 @@ module GetMediaForFragmentListInput =
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ~fragments ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fragments =
         field_map_exn json "Fragments" FragmentNumberList.of_json in
@@ -1552,6 +1574,7 @@ module GetHLSStreamingSessionURLOutput =
         (Option.map ~f:HLSStreamingSessionURL.of_xml)
           (Xml.child xml_arg0 "HLSStreamingSessionURL") in
       make ?hLSStreamingSessionURL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hLSStreamingSessionURL =
         field_map json "HLSStreamingSessionURL"
@@ -1660,6 +1683,7 @@ module GetHLSStreamingSessionURLInput =
       make ?maxMediaPlaylistFragmentResults ?expires
         ?displayFragmentTimestamp ?discontinuityMode ?containerFormat
         ?hLSFragmentSelector ?playbackMode ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxMediaPlaylistFragmentResults =
         field_map json "MaxMediaPlaylistFragmentResults"
@@ -1804,6 +1828,7 @@ module GetDASHStreamingSessionURLOutput =
         (Option.map ~f:DASHStreamingSessionURL.of_xml)
           (Xml.child xml_arg0 "DASHStreamingSessionURL") in
       make ?dASHStreamingSessionURL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dASHStreamingSessionURL =
         field_map json "DASHStreamingSessionURL"
@@ -1902,6 +1927,7 @@ module GetDASHStreamingSessionURLInput =
       make ?maxManifestFragmentResults ?expires ?dASHFragmentSelector
         ?displayFragmentNumber ?displayFragmentTimestamp ?playbackMode
         ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxManifestFragmentResults =
         field_map json "MaxManifestFragmentResults" DASHMaxResults.of_json in
@@ -2066,6 +2092,7 @@ module GetClipOutput =
         (Option.map ~f:ContentType.of_xml)
           (Xml.child xml_arg0 "Content-Type") in
       make ?payload ?contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "Payload" Payload.of_json in
       let contentType = field_map json "ContentType" ContentType.of_json in
@@ -2107,6 +2134,7 @@ module GetClipInput =
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ~clipFragmentSelector ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clipFragmentSelector =
         field_map_exn json "ClipFragmentSelector"

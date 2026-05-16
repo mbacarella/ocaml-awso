@@ -175,6 +175,7 @@ module AssetPropertyTimestamp =
         AssetPropertyTimeInSeconds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timeInSeconds") in
       make ?offsetInNanos ~timeInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offsetInNanos =
         field_map json "offsetInNanos" AssetPropertyOffsetInNanos.of_json in
@@ -231,6 +232,7 @@ module AssetPropertyVariant =
         (Option.map ~f:AssetPropertyStringValue.of_xml)
           (Xml.child xml_arg0 "stringValue") in
       make ?booleanValue ?doubleValue ?integerValue ?stringValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let booleanValue =
         field_map json "booleanValue" AssetPropertyBooleanValue.of_json in
@@ -353,6 +355,7 @@ module Payload =
         ContentExpression.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentExpression") in
       make ~type_ ~contentExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" PayloadType.of_json in
       let contentExpression =
@@ -496,6 +499,7 @@ module AssetPropertyValue =
         (Option.map ~f:AssetPropertyVariant.of_xml)
           (Xml.child xml_arg0 "value") in
       make ?quality ?timestamp ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quality = field_map json "quality" AssetPropertyQuality.of_json in
       let timestamp =
@@ -666,6 +670,7 @@ module ClearTimerAction =
         TimerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timerName") in
       make ~timerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timerName = field_map_exn json "timerName" TimerName.of_json in
       make ~timerName ()
@@ -777,6 +782,7 @@ module DynamoDBAction =
       make ?payload ~tableName ?payloadField ?operation ?rangeKeyValue
         ?rangeKeyField ?rangeKeyType ~hashKeyValue ~hashKeyField ?hashKeyType
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let tableName = field_map_exn json "tableName" DynamoTableName.of_json in
@@ -819,6 +825,7 @@ module DynamoDBv2Action =
         DynamoTableName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "tableName") in
       make ?payload ~tableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let tableName = field_map_exn json "tableName" DynamoTableName.of_json in
@@ -861,6 +868,7 @@ module FirehoseAction =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deliveryStreamName") in
       make ?payload ?separator ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let separator = field_map json "separator" FirehoseSeparator.of_json in
@@ -894,6 +902,7 @@ module IotEventsAction =
         InputName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ?payload ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let inputName = field_map_exn json "inputName" InputName.of_json in
@@ -951,6 +960,7 @@ module IotSiteWiseAction =
         (Option.map ~f:AssetPropertyEntryId.of_xml)
           (Xml.child xml_arg0 "entryId") in
       make ?propertyValue ?propertyAlias ?propertyId ?assetId ?entryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyValue =
         field_map json "propertyValue" AssetPropertyValue.of_json in
@@ -987,6 +997,7 @@ module IotTopicPublishAction =
         MQTTTopic.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mqttTopic") in
       make ?payload ~mqttTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let mqttTopic = field_map_exn json "mqttTopic" MQTTTopic.of_json in
@@ -1018,6 +1029,7 @@ module LambdaAction =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "functionArn") in
       make ?payload ~functionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let functionArn =
@@ -1042,6 +1054,7 @@ module ResetTimerAction =
         TimerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timerName") in
       make ~timerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timerName = field_map_exn json "timerName" TimerName.of_json in
       make ~timerName ()
@@ -1072,6 +1085,7 @@ module SNSTopicPublishAction =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetArn") in
       make ?payload ~targetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let targetArn =
@@ -1112,6 +1126,7 @@ module SetTimerAction =
         TimerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timerName") in
       make ?durationExpression ?seconds ~timerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationExpression =
         field_map json "durationExpression" VariableValue.of_json in
@@ -1141,6 +1156,7 @@ module SetVariableAction =
         VariableName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "variableName") in
       make ~value ~variableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" VariableValue.of_json in
       let variableName =
@@ -1178,6 +1194,7 @@ module SqsAction =
       let queueUrl =
         QueueUrl.of_xml (Xml.child_exn ~context:context_ xml_arg0 "queueUrl") in
       make ?payload ?useBase64 ~queueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "payload" Payload.of_json in
       let useBase64 = field_map json "useBase64" UseBase64.of_json in
@@ -1209,6 +1226,7 @@ module SSOIdentity =
         IdentityStoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityStoreId") in
       make ?userId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "userId" SSOReferenceId.of_json in
       let identityStoreId =
@@ -1343,6 +1361,7 @@ module Action =
       make ?iotSiteWise ?dynamoDBv2 ?dynamoDB ?firehose ?sqs ?iotEvents
         ?lambda ?resetTimer ?clearTimer ?setTimer ?iotTopicPublish ?sns
         ?setVariable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iotSiteWise =
         field_map json "iotSiteWise" IotSiteWiseAction.of_json in
@@ -1381,6 +1400,7 @@ module RecipientDetail =
       let ssoIdentity =
         (Option.map ~f:SSOIdentity.of_xml) (Xml.child xml_arg0 "ssoIdentity") in
       make ?ssoIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ssoIdentity = field_map json "ssoIdentity" SSOIdentity.of_json in
       make ?ssoIdentity ()
@@ -1535,6 +1555,7 @@ module Event =
         EventName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "eventName") in
       make ?actions ?condition ~eventName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions = field_map json "actions" Actions.of_json in
       let condition = field_map json "condition" Condition.of_json in
@@ -1579,6 +1600,7 @@ module TransitionEvent =
         EventName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "eventName") in
       make ~nextState ?actions ~condition ~eventName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextState = field_map_exn json "nextState" StateName.of_json in
       let actions = field_map json "actions" Actions.of_json in
@@ -1612,6 +1634,7 @@ module EmailContent =
       let subject =
         (Option.map ~f:EmailSubject.of_xml) (Xml.child xml_arg0 "subject") in
       make ?additionalMessage ?subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalMessage =
         field_map json "additionalMessage"
@@ -1636,6 +1659,7 @@ module EmailRecipients =
       let to_ =
         (Option.map ~f:RecipientDetails.of_xml) (Xml.child xml_arg0 "to") in
       make ?to_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let to_ = field_map json "to" RecipientDetails.of_json in make ?to_ ()
     let to_json v = composed_to_json to_value v
@@ -1745,6 +1769,7 @@ module EmailConfiguration =
       let from =
         FromEmail.of_xml (Xml.child_exn ~context:context_ xml_arg0 "from") in
       make ~recipients ?content ~from ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recipients =
         field_map_exn json "recipients" EmailRecipients.of_json in
@@ -1788,6 +1813,7 @@ module SMSConfiguration =
       let senderId =
         (Option.map ~f:SMSSenderId.of_xml) (Xml.child xml_arg0 "senderId") in
       make ~recipients ?additionalMessage ?senderId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recipients =
         field_map_exn json "recipients" RecipientDetails.of_json in
@@ -1850,6 +1876,7 @@ module OnEnterLifecycle =
       let events =
         (Option.map ~f:Events.of_xml) (Xml.child xml_arg0 "events") in
       make ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "events" Events.of_json in make ?events ()
     let to_json v = composed_to_json to_value v
@@ -1871,6 +1898,7 @@ module OnExitLifecycle =
       let events =
         (Option.map ~f:Events.of_xml) (Xml.child xml_arg0 "events") in
       make ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "events" Events.of_json in make ?events ()
     let to_json v = composed_to_json to_value v
@@ -1901,6 +1929,7 @@ module OnInputLifecycle =
       let events =
         (Option.map ~f:Events.of_xml) (Xml.child xml_arg0 "events") in
       make ?transitionEvents ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitionEvents =
         field_map json "transitionEvents" TransitionEvents.of_json in
@@ -1950,6 +1979,7 @@ module NotificationTargetActions =
         (Option.map ~f:LambdaAction.of_xml)
           (Xml.child xml_arg0 "lambdaAction") in
       make ?lambdaAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaAction = field_map json "lambdaAction" LambdaAction.of_json in
       make ?lambdaAction ()
@@ -2052,6 +2082,7 @@ module AnalysisResultLocation =
         (Option.map ~f:AnalysisResultLocationPath.of_xml)
           (Xml.child xml_arg0 "path") in
       make ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "path" AnalysisResultLocationPath.of_json in
       make ?path ()
@@ -2076,6 +2107,7 @@ module Attribute =
         AttributeJsonPath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jsonPath") in
       make ~jsonPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jsonPath = field_map_exn json "jsonPath" AttributeJsonPath.of_json in
       make ~jsonPath ()
@@ -2121,6 +2153,7 @@ module State =
         StateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "stateName") in
       make ?onExit ?onEnter ?onInput ~stateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onExit = field_map json "onExit" OnExitLifecycle.of_json in
       let onEnter = field_map json "onEnter" OnEnterLifecycle.of_json in
@@ -2229,6 +2262,7 @@ module AlarmAction =
           (Xml.child xml_arg0 "sns") in
       make ?iotSiteWise ?dynamoDBv2 ?dynamoDB ?firehose ?sqs ?iotEvents
         ?lambda ?iotTopicPublish ?sns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iotSiteWise =
         field_map json "iotSiteWise" IotSiteWiseAction.of_json in
@@ -2283,6 +2317,7 @@ module NotificationAction =
         NotificationTargetActions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ?emailConfigurations ?smsConfigurations ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailConfigurations =
         field_map json "emailConfigurations" EmailConfigurations.of_json in
@@ -2429,6 +2464,7 @@ module DetectorDebugOption =
         DetectorModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ?keyValue ~detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyValue = field_map json "keyValue" KeyValue.of_json in
       let detectorModelName =
@@ -2544,6 +2580,7 @@ module IotSiteWiseAssetModelPropertyIdentifier =
         AssetModelId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assetModelId") in
       make ~propertyId ~assetModelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertyId =
         field_map_exn json "propertyId" AssetPropertyId.of_json in
@@ -2936,6 +2973,7 @@ module AcknowledgeFlow =
         AcknowledgeFlowEnabled.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
       make ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled =
         field_map_exn json "enabled" AcknowledgeFlowEnabled.of_json in
@@ -2965,6 +3003,7 @@ module InitializationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0
              "disabledOnInitialization") in
       make ~disabledOnInitialization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disabledOnInitialization =
         field_map_exn json "disabledOnInitialization"
@@ -3058,6 +3097,7 @@ module SimpleRule =
         InputProperty.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputProperty") in
       make ~threshold ~comparisonOperator ~inputProperty ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let threshold = field_map_exn json "threshold" Threshold.of_json in
       let comparisonOperator =
@@ -3087,6 +3127,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -3217,6 +3258,7 @@ module InputSummary =
         (Option.map ~f:InputName.of_xml) (Xml.child xml_arg0 "inputName") in
       make ?status ?lastUpdateTime ?creationTime ?inputArn ?inputDescription
         ?inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" InputStatus.of_json in
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
@@ -3250,6 +3292,7 @@ module RoutedResource =
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "name") in
       make ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" AmazonResourceName.of_json in
       let name = field_map json "name" ResourceName.of_json in
@@ -3273,6 +3316,7 @@ module IotEventsInputIdentifier =
         InputName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputName = field_map_exn json "inputName" InputName.of_json in
       make ~inputName ()
@@ -3299,6 +3343,7 @@ module IotSiteWiseInputIdentifier =
         (Option.map ~f:IotSiteWiseAssetModelPropertyIdentifier.of_xml)
           (Xml.child xml_arg0 "iotSiteWiseAssetModelPropertyIdentifier") in
       make ?iotSiteWiseAssetModelPropertyIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iotSiteWiseAssetModelPropertyIdentifier =
         field_map json "iotSiteWiseAssetModelPropertyIdentifier"
@@ -3340,6 +3385,7 @@ module DetectorModelSummary =
         (Option.map ~f:DetectorModelName.of_xml)
           (Xml.child xml_arg0 "detectorModelName") in
       make ?creationTime ?detectorModelDescription ?detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "creationTime" Timestamp.of_json in
       let detectorModelDescription =
@@ -3434,6 +3480,7 @@ module DetectorModelVersionSummary =
           (Xml.child xml_arg0 "detectorModelName") in
       make ?evaluationMethod ?status ?lastUpdateTime ?creationTime ?roleArn
         ?detectorModelArn ?detectorModelVersion ?detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationMethod =
         field_map json "evaluationMethod" EvaluationMethod.of_json in
@@ -3485,6 +3532,7 @@ module AlarmModelSummary =
       let creationTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       make ?alarmModelName ?alarmModelDescription ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmModelName =
         field_map json "alarmModelName" AlarmModelName.of_json in
@@ -3581,6 +3629,7 @@ module AlarmModelVersionSummary =
           (Xml.child xml_arg0 "alarmModelName") in
       make ?statusMessage ?status ?lastUpdateTime ?creationTime ?roleArn
         ?alarmModelVersion ?alarmModelArn ?alarmModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "statusMessage" StatusMessage.of_json in
@@ -3638,6 +3687,7 @@ module AnalysisResult =
       let type_ =
         (Option.map ~f:AnalysisType.of_xml) (Xml.child xml_arg0 "type") in
       make ?locations ?message ?level ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locations =
         field_map json "locations" AnalysisResultLocations.of_json in
@@ -3706,6 +3756,7 @@ module InputConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ~status ~lastUpdateTime ~creationTime ~inputArn ?inputDescription
         ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" InputStatus.of_json in
       let lastUpdateTime =
@@ -3737,6 +3788,7 @@ module InputDefinition =
         Attributes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attributes") in
       make ~attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map_exn json "attributes" Attributes.of_json in
       make ~attributes ()
@@ -3845,6 +3897,7 @@ module DetectorModelConfiguration =
       make ?evaluationMethod ?key ?status ?lastUpdateTime ?creationTime
         ?roleArn ?detectorModelArn ?detectorModelDescription
         ?detectorModelVersion ?detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationMethod =
         field_map json "evaluationMethod" EvaluationMethod.of_json in
@@ -3891,6 +3944,7 @@ module DetectorModelDefinition =
       let states =
         States.of_xml (Xml.child_exn ~context:context_ xml_arg0 "states") in
       make ~initialStateName ~states ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initialStateName =
         field_map_exn json "initialStateName" StateName.of_json in
@@ -3939,6 +3993,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3959,6 +4014,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3979,6 +4035,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3999,6 +4056,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4019,6 +4077,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4039,6 +4098,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4073,6 +4133,7 @@ module AlarmCapabilities =
         (Option.map ~f:InitializationConfiguration.of_xml)
           (Xml.child xml_arg0 "initializationConfiguration") in
       make ?acknowledgeFlow ?initializationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acknowledgeFlow =
         field_map json "acknowledgeFlow" AcknowledgeFlow.of_json in
@@ -4101,6 +4162,7 @@ module AlarmEventActions =
         (Option.map ~f:AlarmActions.of_xml)
           (Xml.child xml_arg0 "alarmActions") in
       make ?alarmActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmActions = field_map json "alarmActions" AlarmActions.of_json in
       make ?alarmActions ()
@@ -4124,6 +4186,7 @@ module AlarmNotification =
         (Option.map ~f:NotificationActions.of_xml)
           (Xml.child xml_arg0 "notificationActions") in
       make ?notificationActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationActions =
         field_map json "notificationActions" NotificationActions.of_json in
@@ -4147,6 +4210,7 @@ module AlarmRule =
       let simpleRule =
         (Option.map ~f:SimpleRule.of_xml) (Xml.child xml_arg0 "simpleRule") in
       make ?simpleRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let simpleRule = field_map json "simpleRule" SimpleRule.of_json in
       make ?simpleRule ()
@@ -4208,6 +4272,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4290,6 +4355,7 @@ module LoggingOptions =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ?detectorDebugOptions ~enabled ~level ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorDebugOptions =
         field_map json "detectorDebugOptions" DetectorDebugOptions.of_json in
@@ -4407,6 +4473,7 @@ module InputIdentifier =
         (Option.map ~f:IotEventsInputIdentifier.of_xml)
           (Xml.child xml_arg0 "iotEventsInputIdentifier") in
       make ?iotSiteWiseInputIdentifier ?iotEventsInputIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iotSiteWiseInputIdentifier =
         field_map json "iotSiteWiseInputIdentifier"
@@ -4573,6 +4640,7 @@ module UnsupportedOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4604,6 +4672,7 @@ module Input =
         (Option.map ~f:InputConfiguration.of_xml)
           (Xml.child xml_arg0 "inputConfiguration") in
       make ?inputDefinition ?inputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputDefinition =
         field_map json "inputDefinition" InputDefinition.of_json in
@@ -4640,6 +4709,7 @@ module DetectorModel =
         (Option.map ~f:DetectorModelDefinition.of_xml)
           (Xml.child xml_arg0 "detectorModelDefinition") in
       make ?detectorModelConfiguration ?detectorModelDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorModelConfiguration =
         field_map json "detectorModelConfiguration"
@@ -4704,6 +4774,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceArn ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "resourceArn" ResourceArn.of_json in
       let resourceId = field_map json "resourceId" ResourceId.of_json in
@@ -4802,6 +4873,7 @@ module UpdateInputResponse =
         (Option.map ~f:InputConfiguration.of_xml)
           (Xml.child xml_arg0 "inputConfiguration") in
       make ?inputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputConfiguration =
         field_map json "inputConfiguration" InputConfiguration.of_json in
@@ -4842,6 +4914,7 @@ module UpdateInputRequest =
         InputName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ~inputDefinition ?inputDescription ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputDefinition =
         field_map_exn json "inputDefinition" InputDefinition.of_json in
@@ -4945,6 +5018,7 @@ module UpdateDetectorModelResponse =
         (Option.map ~f:DetectorModelConfiguration.of_xml)
           (Xml.child xml_arg0 "detectorModelConfiguration") in
       make ?detectorModelConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorModelConfiguration =
         field_map json "detectorModelConfiguration"
@@ -5014,6 +5088,7 @@ module UpdateDetectorModelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ?evaluationMethod ~roleArn ?detectorModelDescription
         ~detectorModelDefinition ~detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationMethod =
         field_map json "evaluationMethod" EvaluationMethod.of_json in
@@ -5164,6 +5239,7 @@ module UpdateAlarmModelResponse =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       make ?status ?lastUpdateTime ?alarmModelVersion ?alarmModelArn
         ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" AlarmModelVersionStatus.of_json in
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
@@ -5265,6 +5341,7 @@ module UpdateAlarmModelRequest =
       make ?alarmCapabilities ?alarmEventActions ?alarmNotification
         ~alarmRule ?severity ~roleArn ?alarmModelDescription ~alarmModelName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmCapabilities =
         field_map json "alarmCapabilities" AlarmCapabilities.of_json in
@@ -5356,6 +5433,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the given tags (metadata) from the resource."]
@@ -5383,6 +5461,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn =
@@ -5470,6 +5549,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5495,6 +5575,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" Tags.of_json in
       let resourceArn =
@@ -5584,6 +5665,7 @@ module StartDetectorModelAnalysisResponse =
       let analysisId =
         (Option.map ~f:AnalysisId.of_xml) (Xml.child xml_arg0 "analysisId") in
       make ?analysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisId = field_map json "analysisId" AnalysisId.of_json in
       make ?analysisId ()
@@ -5606,6 +5688,7 @@ module StartDetectorModelAnalysisRequest =
         DetectorModelDefinition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelDefinition") in
       make ~detectorModelDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorModelDefinition =
         field_map_exn json "detectorModelDefinition"
@@ -5632,6 +5715,7 @@ module PutLoggingOptionsRequest =
         LoggingOptions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "loggingOptions") in
       make ~loggingOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingOptions =
         field_map_exn json "loggingOptions" LoggingOptions.of_json in
@@ -5715,6 +5799,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5737,6 +5822,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" AmazonResourceName.of_json in
@@ -5824,6 +5910,7 @@ module ListInputsResponse =
         (Option.map ~f:InputSummaries.of_xml)
           (Xml.child xml_arg0 "inputSummaries") in
       make ?nextToken ?inputSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let inputSummaries =
@@ -5854,6 +5941,7 @@ module ListInputsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5949,6 +6037,7 @@ module ListInputRoutingsResponse =
         (Option.map ~f:RoutedResources.of_xml)
           (Xml.child xml_arg0 "routedResources") in
       make ?nextToken ?routedResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let routedResources =
@@ -5989,6 +6078,7 @@ module ListInputRoutingsRequest =
         InputIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputIdentifier") in
       make ?nextToken ?maxResults ~inputIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -6078,6 +6168,7 @@ module ListDetectorModelsResponse =
         (Option.map ~f:DetectorModelSummaries.of_xml)
           (Xml.child xml_arg0 "detectorModelSummaries") in
       make ?nextToken ?detectorModelSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let detectorModelSummaries =
@@ -6110,6 +6201,7 @@ module ListDetectorModelsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6208,6 +6300,7 @@ module ListDetectorModelVersionsResponse =
         (Option.map ~f:DetectorModelVersionSummaries.of_xml)
           (Xml.child xml_arg0 "detectorModelVersionSummaries") in
       make ?nextToken ?detectorModelVersionSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let detectorModelVersionSummaries =
@@ -6251,6 +6344,7 @@ module ListDetectorModelVersionsRequest =
         DetectorModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ?maxResults ?nextToken ~detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6340,6 +6434,7 @@ module ListAlarmModelsResponse =
         (Option.map ~f:AlarmModelSummaries.of_xml)
           (Xml.child xml_arg0 "alarmModelSummaries") in
       make ?nextToken ?alarmModelSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let alarmModelSummaries =
@@ -6371,6 +6466,7 @@ module ListAlarmModelsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6468,6 +6564,7 @@ module ListAlarmModelVersionsResponse =
         (Option.map ~f:AlarmModelVersionSummaries.of_xml)
           (Xml.child xml_arg0 "alarmModelVersionSummaries") in
       make ?nextToken ?alarmModelVersionSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let alarmModelVersionSummaries =
@@ -6510,6 +6607,7 @@ module ListAlarmModelVersionsRequest =
         AlarmModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alarmModelName") in
       make ?maxResults ?nextToken ~alarmModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6609,6 +6707,7 @@ module GetDetectorModelAnalysisResultsResponse =
         (Option.map ~f:AnalysisResults.of_xml)
           (Xml.child xml_arg0 "analysisResults") in
       make ?nextToken ?analysisResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let analysisResults =
@@ -6651,6 +6750,7 @@ module GetDetectorModelAnalysisResultsRequest =
         AnalysisId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analysisId") in
       make ?maxResults ?nextToken ~analysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxAnalysisResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -6753,6 +6853,7 @@ module DescribeLoggingOptionsResponse =
         (Option.map ~f:LoggingOptions.of_xml)
           (Xml.child xml_arg0 "loggingOptions") in
       make ?loggingOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingOptions =
         field_map json "loggingOptions" LoggingOptions.of_json in
@@ -6768,6 +6869,7 @@ module DescribeLoggingOptionsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6849,6 +6951,7 @@ module DescribeInputResponse =
     let of_xml xml_arg0 =
       let input = (Option.map ~f:Input.of_xml) (Xml.child xml_arg0 "input") in
       make ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let input = field_map json "input" Input.of_json in make ?input ()
     let to_json v = composed_to_json to_value v
@@ -6869,6 +6972,7 @@ module DescribeInputRequest =
         InputName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputName = field_map_exn json "inputName" InputName.of_json in
       make ~inputName ()
@@ -6956,6 +7060,7 @@ module DescribeDetectorModelResponse =
         (Option.map ~f:DetectorModel.of_xml)
           (Xml.child xml_arg0 "detectorModel") in
       make ?detectorModel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorModel =
         field_map json "detectorModel" DetectorModel.of_json in
@@ -6990,6 +7095,7 @@ module DescribeDetectorModelRequest =
         DetectorModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ?detectorModelVersion ~detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorModelVersion =
         field_map json "detectorModelVersion" DetectorModelVersion.of_json in
@@ -7080,6 +7186,7 @@ module DescribeDetectorModelAnalysisResponse =
       let status =
         (Option.map ~f:AnalysisStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" AnalysisStatus.of_json in
       make ?status ()
@@ -7104,6 +7211,7 @@ module DescribeDetectorModelAnalysisRequest =
         AnalysisId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analysisId") in
       make ~analysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisId = field_map_exn json "analysisId" AnalysisId.of_json in
       make ~analysisId ()
@@ -7326,6 +7434,7 @@ module DescribeAlarmModelResponse =
         ?alarmRule ?severity ?key ?roleArn ?alarmModelDescription
         ?alarmModelName ?statusMessage ?status ?lastUpdateTime
         ?alarmModelVersion ?alarmModelArn ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmCapabilities =
         field_map json "alarmCapabilities" AlarmCapabilities.of_json in
@@ -7383,6 +7492,7 @@ module DescribeAlarmModelRequest =
         AlarmModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alarmModelName") in
       make ?alarmModelVersion ~alarmModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmModelVersion =
         field_map json "alarmModelVersion" AlarmModelVersion.of_json in
@@ -7474,6 +7584,7 @@ module DeleteInputResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an input."]
@@ -7493,6 +7604,7 @@ module DeleteInputRequest =
         InputName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputName = field_map_exn json "inputName" InputName.of_json in
       make ~inputName ()
@@ -7580,6 +7692,7 @@ module DeleteDetectorModelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7602,6 +7715,7 @@ module DeleteDetectorModelRequest =
         DetectorModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ~detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorModelName =
         field_map_exn json "detectorModelName" DetectorModelName.of_json in
@@ -7691,6 +7805,7 @@ module DeleteAlarmModelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7713,6 +7828,7 @@ module DeleteAlarmModelRequest =
         AlarmModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alarmModelName") in
       make ~alarmModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmModelName =
         field_map_exn json "alarmModelName" AlarmModelName.of_json in
@@ -7804,6 +7920,7 @@ module CreateInputResponse =
         (Option.map ~f:InputConfiguration.of_xml)
           (Xml.child xml_arg0 "inputConfiguration") in
       make ?inputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputConfiguration =
         field_map json "inputConfiguration" InputConfiguration.of_json in
@@ -7849,6 +7966,7 @@ module CreateInputRequest =
         InputName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "inputName") in
       make ?tags ~inputDefinition ?inputDescription ~inputName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let inputDefinition =
@@ -7964,6 +8082,7 @@ module CreateDetectorModelResponse =
         (Option.map ~f:DetectorModelConfiguration.of_xml)
           (Xml.child xml_arg0 "detectorModelConfiguration") in
       make ?detectorModelConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectorModelConfiguration =
         field_map json "detectorModelConfiguration"
@@ -8047,6 +8166,7 @@ module CreateDetectorModelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ?evaluationMethod ?tags ~roleArn ?key ?detectorModelDescription
         ~detectorModelDefinition ~detectorModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluationMethod =
         field_map json "evaluationMethod" EvaluationMethod.of_json in
@@ -8209,6 +8329,7 @@ module CreateAlarmModelResponse =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       make ?status ?lastUpdateTime ?alarmModelVersion ?alarmModelArn
         ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" AlarmModelVersionStatus.of_json in
       let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
@@ -8327,6 +8448,7 @@ module CreateAlarmModelRequest =
       make ?alarmCapabilities ?alarmEventActions ?alarmNotification
         ~alarmRule ?severity ?key ?tags ~roleArn ?alarmModelDescription
         ~alarmModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmCapabilities =
         field_map json "alarmCapabilities" AlarmCapabilities.of_json in

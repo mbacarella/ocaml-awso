@@ -191,6 +191,7 @@ module DeviceTemplate =
       let deviceType =
         (Option.map ~f:DeviceType.of_xml) (Xml.child xml_arg0 "deviceType") in
       make ?callbackOverrides ?deviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callbackOverrides =
         field_map json "callbackOverrides" DeviceCallbackOverrideMap.of_json in
@@ -464,6 +465,7 @@ module ProjectSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       let arn = (Option.map ~f:ProjectArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ~updatedDate ~createdDate ~projectName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let updatedDate = field_map_exn json "updatedDate" Time.of_json in
@@ -514,6 +516,7 @@ module PlacementSummary =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~updatedDate ~createdDate ~placementName ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedDate = field_map_exn json "updatedDate" Time.of_json in
       let createdDate = field_map_exn json "createdDate" Time.of_json in
@@ -589,6 +592,7 @@ module PlacementTemplate =
         (Option.map ~f:DefaultPlacementAttributeMap.of_xml)
           (Xml.child xml_arg0 "defaultAttributes") in
       make ?deviceTemplates ?defaultAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceTemplates =
         field_map json "deviceTemplates" DeviceTemplateMap.of_json in
@@ -645,6 +649,7 @@ module InternalFailureException =
       let code =
         Code.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" Message.of_json in
       let code = field_map_exn json "code" Code.of_json in
@@ -669,6 +674,7 @@ module InvalidRequestException =
       let code =
         Code.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" Message.of_json in
       let code = field_map_exn json "code" Code.of_json in
@@ -693,6 +699,7 @@ module ResourceNotFoundException =
       let code =
         Code.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" Message.of_json in
       let code = field_map_exn json "code" Code.of_json in
@@ -717,6 +724,7 @@ module TooManyRequestsException =
       let code =
         Code.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" Message.of_json in
       let code = field_map_exn json "code" Code.of_json in
@@ -932,6 +940,7 @@ module ProjectDescription =
       let arn = (Option.map ~f:ProjectArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?placementTemplate ~updatedDate ~createdDate ?description
         ~projectName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let placementTemplate =
@@ -1001,6 +1010,7 @@ module PlacementDescription =
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~updatedDate ~createdDate ~attributes ~placementName ~projectName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedDate = field_map_exn json "updatedDate" Time.of_json in
       let createdDate = field_map_exn json "createdDate" Time.of_json in
@@ -1031,6 +1041,7 @@ module ResourceConflictException =
       let code =
         Code.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" Message.of_json in
       let code = field_map_exn json "code" Code.of_json in
@@ -1099,6 +1110,7 @@ module UpdateProjectResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1136,6 +1148,7 @@ module UpdateProjectRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ?placementTemplate ?description ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementTemplate =
         field_map json "placementTemplate" PlacementTemplate.of_json in
@@ -1207,6 +1220,7 @@ module UpdatePlacementResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1246,6 +1260,7 @@ module UpdatePlacementRequest =
         PlacementName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "placementName") in
       make ?attributes ~projectName ~placementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map json "attributes" PlacementAttributeMap.of_json in
@@ -1309,6 +1324,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1337,6 +1353,7 @@ module UntagResourceRequest =
         ProjectArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ProjectArn.of_json in
@@ -1397,6 +1414,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1425,6 +1443,7 @@ module TagResourceRequest =
         ProjectArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ProjectArn.of_json in
@@ -1491,6 +1510,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1513,6 +1533,7 @@ module ListTagsForResourceRequest =
         ProjectArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ProjectArn.of_json in
       make ~resourceArn ()
@@ -1578,6 +1599,7 @@ module ListProjectsResponse =
         ProjectSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projects") in
       make ?nextToken ~projects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let projects = field_map_exn json "projects" ProjectSummaryList.of_json in
@@ -1607,6 +1629,7 @@ module ListProjectsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -1683,6 +1706,7 @@ module ListPlacementsResponse =
         PlacementSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "placements") in
       make ?nextToken ~placements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let placements =
@@ -1720,6 +1744,7 @@ module ListPlacementsRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ?maxResults ?nextToken ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -1788,6 +1813,7 @@ module GetDevicesInPlacementResponse =
       let devices =
         DeviceMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "devices") in
       make ~devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let devices = field_map_exn json "devices" DeviceMap.of_json in
       make ~devices ()
@@ -1818,6 +1844,7 @@ module GetDevicesInPlacementRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~placementName ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementName =
         field_map_exn json "placementName" PlacementName.of_json in
@@ -1888,6 +1915,7 @@ module DisassociateDeviceFromPlacementResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a physical device from a placement."]
@@ -1926,6 +1954,7 @@ module DisassociateDeviceFromPlacementRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~deviceTemplateName ~placementName ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceTemplateName =
         field_map_exn json "deviceTemplateName" DeviceTemplateName.of_json in
@@ -1997,6 +2026,7 @@ module DescribeProjectResponse =
         ProjectDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "project") in
       make ~project ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let project = field_map_exn json "project" ProjectDescription.of_json in
       make ~project ()
@@ -2019,6 +2049,7 @@ module DescribeProjectRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectName = field_map_exn json "projectName" ProjectName.of_json in
       make ~projectName ()
@@ -2086,6 +2117,7 @@ module DescribePlacementResponse =
         PlacementDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "placement") in
       make ~placement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placement =
         field_map_exn json "placement" PlacementDescription.of_json in
@@ -2116,6 +2148,7 @@ module DescribePlacementRequest =
         PlacementName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "placementName") in
       make ~projectName ~placementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectName = field_map_exn json "projectName" ProjectName.of_json in
       let placementName =
@@ -2185,6 +2218,7 @@ module DeleteProjectResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2206,6 +2240,7 @@ module DeleteProjectRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectName = field_map_exn json "projectName" ProjectName.of_json in
       make ~projectName ()
@@ -2274,6 +2309,7 @@ module DeletePlacementResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2302,6 +2338,7 @@ module DeletePlacementRequest =
         PlacementName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "placementName") in
       make ~projectName ~placementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectName = field_map_exn json "projectName" ProjectName.of_json in
       let placementName =
@@ -2363,6 +2400,7 @@ module CreateProjectResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2406,6 +2444,7 @@ module CreateProjectRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ?tags ?placementTemplate ?description ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let placementTemplate =
@@ -2478,6 +2517,7 @@ module CreatePlacementResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an empty placement."]
@@ -2516,6 +2556,7 @@ module CreatePlacementRequest =
         PlacementName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "placementName") in
       make ?attributes ~projectName ~placementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes =
         field_map json "attributes" PlacementAttributeMap.of_json in
@@ -2587,6 +2628,7 @@ module AssociateDeviceWithPlacementResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a physical device with a placement."]
@@ -2634,6 +2676,7 @@ module AssociateDeviceWithPlacementRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~deviceTemplateName ~deviceId ~placementName ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceTemplateName =
         field_map_exn json "deviceTemplateName" DeviceTemplateName.of_json in

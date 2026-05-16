@@ -542,6 +542,7 @@ module NfsMountOptions =
       let version =
         (Option.map ~f:NfsVersion.of_xml) (Xml.child xml_arg0 "Version") in
       make ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" NfsVersion.of_json in
       make ?version ()
@@ -623,6 +624,7 @@ module FilterRule =
       let filterType =
         (Option.map ~f:FilterType.of_xml) (Xml.child xml_arg0 "FilterType") in
       make ?value ?filterType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" FilterValue.of_json in
       let filterType = field_map json "FilterType" FilterType.of_json in
@@ -1083,6 +1085,7 @@ module HdfsNameNode =
         HdfsServerHostname.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Hostname") in
       make ~port ~hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let port = field_map_exn json "Port" HdfsServerPort.of_json in
       let hostname = field_map_exn json "Hostname" HdfsServerHostname.of_json in
@@ -1177,6 +1180,7 @@ module TagListEntry =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1207,6 +1211,7 @@ module TaskListEntry =
       let taskArn =
         (Option.map ~f:TaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
       make ?name ?status ?taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" TagValue.of_json in
       let status = field_map json "Status" TaskStatus.of_json in
@@ -1247,6 +1252,7 @@ module TaskFilter =
         TaskFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~operator ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operator = field_map_exn json "Operator" Operator.of_json in
       let values = field_map_exn json "Values" FilterValues.of_json in
@@ -1280,6 +1286,7 @@ module TaskExecutionListEntry =
         (Option.map ~f:TaskExecutionArn.of_xml)
           (Xml.child xml_arg0 "TaskExecutionArn") in
       make ?status ?taskExecutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" TaskExecutionStatus.of_json in
       let taskExecutionArn =
@@ -1311,6 +1318,7 @@ module LocationListEntry =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationUri ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationUri = field_map json "LocationUri" LocationUri.of_json in
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
@@ -1350,6 +1358,7 @@ module LocationFilter =
         LocationFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~operator ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operator = field_map_exn json "Operator" Operator.of_json in
       let values = field_map_exn json "Values" FilterValues.of_json in
@@ -1381,6 +1390,7 @@ module AgentListEntry =
       let agentArn =
         (Option.map ~f:AgentArn.of_xml) (Xml.child xml_arg0 "AgentArn") in
       make ?status ?name ?agentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" AgentStatus.of_json in
       let name = field_map json "Name" TagValue.of_json in
@@ -1486,6 +1496,7 @@ module FsxProtocolNfs =
         (Option.map ~f:NfsMountOptions.of_xml)
           (Xml.child xml_arg0 "MountOptions") in
       make ?mountOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountOptions =
         field_map json "MountOptions" NfsMountOptions.of_json in
@@ -1635,6 +1646,7 @@ module InternalException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?errorCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode = field_map json "errorCode" String_.of_json in
       let message = field_map json "message" String_.of_json in
@@ -1659,6 +1671,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?errorCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode = field_map json "errorCode" String_.of_json in
       let message = field_map json "message" String_.of_json in
@@ -1854,6 +1867,7 @@ module Options =
         ?bytesPerSecond ?posixPermissions ?preserveDevices
         ?preserveDeletedFiles ?gid ?uid ?mtime ?atime ?overwriteMode
         ?verifyMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityDescriptorCopyFlags =
         field_map json "SecurityDescriptorCopyFlags"
@@ -1902,6 +1916,7 @@ module TaskSchedule =
         ScheduleExpressionCron.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduleExpression") in
       make ~scheduleExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduleExpression =
         field_map_exn json "ScheduleExpression"
@@ -1946,6 +1961,7 @@ module SmbMountOptions =
       let version =
         (Option.map ~f:SmbVersion.of_xml) (Xml.child xml_arg0 "Version") in
       make ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" SmbVersion.of_json in
       make ?version ()
@@ -2149,6 +2165,7 @@ module OnPremConfig =
         AgentArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AgentArns") in
       make ~agentArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentArns = field_map_exn json "AgentArns" AgentArnList.of_json in
       make ~agentArns ()
@@ -2381,6 +2398,7 @@ module QopConfiguration =
         (Option.map ~f:HdfsRpcProtection.of_xml)
           (Xml.child xml_arg0 "RpcProtection") in
       make ?dataTransferProtection ?rpcProtection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataTransferProtection =
         field_map json "DataTransferProtection"
@@ -2833,6 +2851,7 @@ module TaskExecutionResultDetail =
       make ?errorDetail ?errorCode ?verifyStatus ?verifyDuration
         ?transferStatus ?transferDuration ?totalDuration ?prepareStatus
         ?prepareDuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorDetail = field_map json "ErrorDetail" String_.of_json in
       let errorCode = field_map json "ErrorCode" String_.of_json in
@@ -2882,6 +2901,7 @@ module S3Config =
         IamRoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BucketAccessRoleArn") in
       make ~bucketAccessRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketAccessRoleArn =
         field_map_exn json "BucketAccessRoleArn" IamRoleArn.of_json in
@@ -2945,6 +2965,7 @@ module FsxProtocol =
       let nFS =
         (Option.map ~f:FsxProtocolNfs.of_xml) (Xml.child xml_arg0 "NFS") in
       make ?nFS ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nFS = field_map json "NFS" FsxProtocolNfs.of_json in make ?nFS ()
     let to_json v = composed_to_json to_value v
@@ -2977,6 +2998,7 @@ module Ec2Config =
         Ec2SubnetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetArn") in
       make ~securityGroupArns ~subnetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupArns =
         field_map_exn json "SecurityGroupArns"
@@ -3066,6 +3088,7 @@ module PrivateLinkConfig =
           (Xml.child xml_arg0 "VpcEndpointId") in
       make ?securityGroupArns ?subnetArns ?privateLinkEndpoint ?vpcEndpointId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupArns =
         field_map json "SecurityGroupArns" PLSecurityGroupArnList.of_json in
@@ -3324,6 +3347,7 @@ module UpdateTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the metadata associated with a task."]
@@ -3394,6 +3418,7 @@ module UpdateTaskRequest =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
       make ?includes ?cloudWatchLogGroupArn ?name ?schedule ?excludes
         ?options ~taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includes = field_map json "Includes" FilterList.of_json in
       let cloudWatchLogGroupArn =
@@ -3451,6 +3476,7 @@ module UpdateTaskExecutionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3479,6 +3505,7 @@ module UpdateTaskExecutionRequest =
         TaskExecutionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TaskExecutionArn") in
       make ~options ~taskExecutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options = field_map_exn json "Options" Options.of_json in
       let taskExecutionArn =
@@ -3531,6 +3558,7 @@ module UpdateLocationSmbResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3607,6 +3635,7 @@ module UpdateLocationSmbRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ?mountOptions ?agentArns ?password ?domain ?user ?subdirectory
         ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountOptions =
         field_map json "MountOptions" SmbMountOptions.of_json in
@@ -3666,6 +3695,7 @@ module UpdateLocationObjectStorageResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3752,6 +3782,7 @@ module UpdateLocationObjectStorageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ?agentArns ?secretKey ?accessKey ?subdirectory ?serverProtocol
         ?serverPort ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentArns = field_map json "AgentArns" AgentArnList.of_json in
       let secretKey =
@@ -3813,6 +3844,7 @@ module UpdateLocationNfsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3860,6 +3892,7 @@ module UpdateLocationNfsRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ?mountOptions ?onPremConfig ?subdirectory ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mountOptions =
         field_map json "MountOptions" NfsMountOptions.of_json in
@@ -3915,6 +3948,7 @@ module UpdateLocationHdfsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4057,6 +4091,7 @@ module UpdateLocationHdfsRequest =
         ?simpleUser ?authenticationType ?qopConfiguration ?kmsKeyProviderUri
         ?replicationFactor ?blockSize ?nameNodes ?subdirectory ~locationArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentArns = field_map json "AgentArns" AgentArnList.of_json in
       let kerberosKrb5Conf =
@@ -4130,6 +4165,7 @@ module UpdateAgentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the name of an agent."]
@@ -4153,6 +4189,7 @@ module UpdateAgentRequest =
       let agentArn =
         AgentArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AgentArn") in
       make ?name ~agentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" TagValue.of_json in
       let agentArn = field_map_exn json "AgentArn" AgentArn.of_json in
@@ -4203,6 +4240,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from an Amazon Web Services resource."]
@@ -4229,6 +4267,7 @@ module UntagResourceRequest =
         TaggableResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~keys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keys = field_map_exn json "Keys" TagKeyList.of_json in
       let resourceArn =
@@ -4280,6 +4319,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4306,6 +4346,7 @@ module TagResourceRequest =
         TaggableResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" InputTagList.of_json in
       let resourceArn =
@@ -4367,6 +4408,7 @@ module StartTaskExecutionResponse =
         (Option.map ~f:TaskExecutionArn.of_xml)
           (Xml.child xml_arg0 "TaskExecutionArn") in
       make ?taskExecutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskExecutionArn =
         field_map json "TaskExecutionArn" TaskExecutionArn.of_json in
@@ -4410,6 +4452,7 @@ module StartTaskExecutionRequest =
       let taskArn =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
       make ?excludes ?includes ?overrideOptions ~taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let excludes = field_map json "Excludes" FilterList.of_json in
       let includes = field_map json "Includes" FilterList.of_json in
@@ -4475,6 +4518,7 @@ module ListTasksResponse =
       let tasks =
         (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "Tasks") in
       make ?nextToken ?tasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tasks = field_map json "Tasks" TaskList.of_json in
@@ -4510,6 +4554,7 @@ module ListTasksRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" TaskFilters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -4577,6 +4622,7 @@ module ListTaskExecutionsResponse =
         (Option.map ~f:TaskExecutionList.of_xml)
           (Xml.child xml_arg0 "TaskExecutions") in
       make ?nextToken ?taskExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let taskExecutions =
@@ -4613,6 +4659,7 @@ module ListTaskExecutionsRequest =
       let taskArn =
         (Option.map ~f:TaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
       make ?nextToken ?maxResults ?taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4676,6 +4723,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:OutputTagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" OutputTagList.of_json in
@@ -4713,6 +4761,7 @@ module ListTagsForResourceRequest =
         TaggableResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ?maxResults ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4779,6 +4828,7 @@ module ListLocationsResponse =
       let locations =
         (Option.map ~f:LocationList.of_xml) (Xml.child xml_arg0 "Locations") in
       make ?nextToken ?locations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let locations = field_map json "Locations" LocationList.of_json in
@@ -4814,6 +4864,7 @@ module ListLocationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" LocationFilters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -4878,6 +4929,7 @@ module ListAgentsResponse =
       let agents =
         (Option.map ~f:AgentList.of_xml) (Xml.child xml_arg0 "Agents") in
       make ?nextToken ?agents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let agents = field_map json "Agents" AgentList.of_json in
@@ -4906,6 +4958,7 @@ module ListAgentsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5104,6 +5157,7 @@ module DescribeTaskResponse =
         ?sourceNetworkInterfaceArns ?cloudWatchLogGroupArn
         ?destinationLocationArn ?sourceLocationArn ?currentTaskExecutionArn
         ?name ?status ?taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includes = field_map json "Includes" FilterList.of_json in
       let creationTime = field_map json "CreationTime" Time.of_json in
@@ -5152,6 +5206,7 @@ module DescribeTaskRequest =
       let taskArn =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
       make ~taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskArn = field_map_exn json "TaskArn" TaskArn.of_json in
       make ~taskArn ()
@@ -5310,6 +5365,7 @@ module DescribeTaskExecutionResponse =
       make ?result ?bytesTransferred ?bytesWritten ?filesTransferred
         ?estimatedBytesToTransfer ?estimatedFilesToTransfer ?startTime
         ?includes ?excludes ?options ?status ?taskExecutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map json "Result" TaskExecutionResultDetail.of_json in
       let bytesTransferred = field_map json "BytesTransferred" Long.of_json in
@@ -5350,6 +5406,7 @@ module DescribeTaskExecutionRequest =
         TaskExecutionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TaskExecutionArn") in
       make ~taskExecutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskExecutionArn =
         field_map_exn json "TaskExecutionArn" TaskExecutionArn.of_json in
@@ -5460,6 +5517,7 @@ module DescribeLocationSmbResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?mountOptions ?domain ?user ?agentArns ?locationUri
         ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let mountOptions =
@@ -5491,6 +5549,7 @@ module DescribeLocationSmbRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -5592,6 +5651,7 @@ module DescribeLocationS3Response =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?agentArns ?s3Config ?s3StorageClass ?locationUri
         ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let agentArns = field_map json "AgentArns" AgentArnList.of_json in
@@ -5622,6 +5682,7 @@ module DescribeLocationS3Request =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -5739,6 +5800,7 @@ module DescribeLocationObjectStorageResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?agentArns ?serverProtocol ?serverPort ?accessKey
         ?locationUri ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let agentArns = field_map json "AgentArns" AgentArnList.of_json in
@@ -5772,6 +5834,7 @@ module DescribeLocationObjectStorageRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -5866,6 +5929,7 @@ module DescribeLocationNfsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?mountOptions ?onPremConfig ?locationUri
         ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let mountOptions =
@@ -5895,6 +5959,7 @@ module DescribeLocationNfsRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -6053,6 +6118,7 @@ module DescribeLocationHdfsResponse =
       make ?creationTime ?agentArns ?kerberosPrincipal ?simpleUser
         ?authenticationType ?qopConfiguration ?kmsKeyProviderUri
         ?replicationFactor ?blockSize ?nameNodes ?locationUri ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let agentArns = field_map json "AgentArns" AgentArnList.of_json in
@@ -6095,6 +6161,7 @@ module DescribeLocationHdfsRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -6199,6 +6266,7 @@ module DescribeLocationFsxWindowsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?domain ?user ?creationTime ?securityGroupArns ?locationUri
         ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "Domain" SmbDomain.of_json in
       let user = field_map json "User" SmbUser.of_json in
@@ -6230,6 +6298,7 @@ module DescribeLocationFsxWindowsRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -6327,6 +6396,7 @@ module DescribeLocationFsxOpenZfsResponse =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?protocol ?securityGroupArns ?locationUri
         ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let protocol = field_map json "Protocol" FsxProtocol.of_json in
@@ -6357,6 +6427,7 @@ module DescribeLocationFsxOpenZfsRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -6439,6 +6510,7 @@ module DescribeLocationFsxLustreResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?securityGroupArns ?locationUri ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let securityGroupArns =
@@ -6467,6 +6539,7 @@ module DescribeLocationFsxLustreRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -6543,6 +6616,7 @@ module DescribeLocationEfsResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?creationTime ?ec2Config ?locationUri ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Time.of_json in
       let ec2Config = field_map json "Ec2Config" Ec2Config.of_json in
@@ -6569,6 +6643,7 @@ module DescribeLocationEfsRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -6679,6 +6754,7 @@ module DescribeAgentResponse =
         (Option.map ~f:AgentArn.of_xml) (Xml.child xml_arg0 "AgentArn") in
       make ?privateLinkConfig ?endpointType ?creationTime ?lastConnectionTime
         ?status ?name ?agentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateLinkConfig =
         field_map json "PrivateLinkConfig" PrivateLinkConfig.of_json in
@@ -6710,6 +6786,7 @@ module DescribeAgentRequest =
       let agentArn =
         AgentArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AgentArn") in
       make ~agentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentArn = field_map_exn json "AgentArn" AgentArn.of_json in
       make ~agentArn ()
@@ -6759,6 +6836,7 @@ module DeleteTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a task."]
@@ -6777,6 +6855,7 @@ module DeleteTaskRequest =
       let taskArn =
         TaskArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskArn") in
       make ~taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskArn = field_map_exn json "TaskArn" TaskArn.of_json in
       make ~taskArn ()
@@ -6826,6 +6905,7 @@ module DeleteLocationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6848,6 +6928,7 @@ module DeleteLocationRequest =
         LocationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LocationArn") in
       make ~locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map_exn json "LocationArn" LocationArn.of_json in
       make ~locationArn ()
@@ -6897,6 +6978,7 @@ module DeleteAgentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6918,6 +7000,7 @@ module DeleteAgentRequest =
       let agentArn =
         AgentArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AgentArn") in
       make ~agentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentArn = field_map_exn json "AgentArn" AgentArn.of_json in
       make ~agentArn ()
@@ -6974,6 +7057,7 @@ module CreateTaskResponse =
       let taskArn =
         (Option.map ~f:TaskArn.of_xml) (Xml.child xml_arg0 "TaskArn") in
       make ?taskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskArn = field_map json "TaskArn" TaskArn.of_json in
       make ?taskArn ()
@@ -7070,6 +7154,7 @@ module CreateTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationArn") in
       make ?includes ?tags ?schedule ?excludes ?options ?name
         ?cloudWatchLogGroupArn ~destinationLocationArn ~sourceLocationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includes = field_map json "Includes" FilterList.of_json in
       let tags = field_map json "Tags" InputTagList.of_json in
@@ -7139,6 +7224,7 @@ module CreateLocationSmbResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -7228,6 +7314,7 @@ module CreateLocationSmbRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Subdirectory") in
       make ?tags ?mountOptions ~agentArns ~password ?domain ~user
         ~serverHostname ~subdirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let mountOptions =
@@ -7296,6 +7383,7 @@ module CreateLocationS3Response =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -7366,6 +7454,7 @@ module CreateLocationS3Request =
           (Xml.child xml_arg0 "Subdirectory") in
       make ?tags ?agentArns ~s3Config ?s3StorageClass ~s3BucketArn
         ?subdirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let agentArns = field_map json "AgentArns" AgentArnList.of_json in
@@ -7430,6 +7519,7 @@ module CreateLocationObjectStorageResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -7537,6 +7627,7 @@ module CreateLocationObjectStorageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerHostname") in
       make ?tags ~agentArns ?secretKey ?accessKey ~bucketName ?subdirectory
         ?serverProtocol ?serverPort ~serverHostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let agentArns = field_map_exn json "AgentArns" AgentArnList.of_json in
@@ -7609,6 +7700,7 @@ module CreateLocationNfsResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -7672,6 +7764,7 @@ module CreateLocationNfsRequest =
         NfsSubdirectory.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Subdirectory") in
       make ?tags ?mountOptions ~onPremConfig ~serverHostname ~subdirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let mountOptions =
@@ -7737,6 +7830,7 @@ module CreateLocationHdfsResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -7881,6 +7975,7 @@ module CreateLocationHdfsRequest =
         ?kerberosPrincipal ?simpleUser ~authenticationType ?qopConfiguration
         ?kmsKeyProviderUri ?replicationFactor ?blockSize ~nameNodes
         ?subdirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let agentArns = field_map_exn json "AgentArns" AgentArnList.of_json in
@@ -7963,6 +8058,7 @@ module CreateLocationFsxWindowsResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -8046,6 +8142,7 @@ module CreateLocationFsxWindowsRequest =
           (Xml.child xml_arg0 "Subdirectory") in
       make ~password ?domain ~user ?tags ~securityGroupArns ~fsxFilesystemArn
         ?subdirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "Password" SmbPassword.of_json in
       let domain = field_map json "Domain" SmbDomain.of_json in
@@ -8115,6 +8212,7 @@ module CreateLocationFsxOpenZfsResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -8182,6 +8280,7 @@ module CreateLocationFsxOpenZfsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FsxFilesystemArn") in
       make ?tags ?subdirectory ~securityGroupArns ~protocol ~fsxFilesystemArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let subdirectory =
@@ -8249,6 +8348,7 @@ module CreateLocationFsxLustreResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -8301,6 +8401,7 @@ module CreateLocationFsxLustreRequest =
         FsxFilesystemArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FsxFilesystemArn") in
       make ?tags ?subdirectory ~securityGroupArns ~fsxFilesystemArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let subdirectory =
@@ -8366,6 +8467,7 @@ module CreateLocationEfsResponse =
       let locationArn =
         (Option.map ~f:LocationArn.of_xml) (Xml.child xml_arg0 "LocationArn") in
       make ?locationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationArn = field_map json "LocationArn" LocationArn.of_json in
       make ?locationArn ()
@@ -8415,6 +8517,7 @@ module CreateLocationEfsRequest =
         (Option.map ~f:EfsSubdirectory.of_xml)
           (Xml.child xml_arg0 "Subdirectory") in
       make ?tags ~ec2Config ~efsFilesystemArn ?subdirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagList.of_json in
       let ec2Config = field_map_exn json "Ec2Config" Ec2Config.of_json in
@@ -8477,6 +8580,7 @@ module CreateAgentResponse =
       let agentArn =
         (Option.map ~f:AgentArn.of_xml) (Xml.child xml_arg0 "AgentArn") in
       make ?agentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentArn = field_map json "AgentArn" AgentArn.of_json in
       make ?agentArn ()
@@ -8550,6 +8654,7 @@ module CreateAgentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ActivationKey") in
       make ?securityGroupArns ?subnetArns ?vpcEndpointId ?tags ?agentName
         ~activationKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupArns =
         field_map json "SecurityGroupArns" PLSecurityGroupArnList.of_json in
@@ -8608,6 +8713,7 @@ module CancelTaskExecutionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8631,6 +8737,7 @@ module CancelTaskExecutionRequest =
         TaskExecutionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TaskExecutionArn") in
       make ~taskExecutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskExecutionArn =
         field_map_exn json "TaskExecutionArn" TaskExecutionArn.of_json in

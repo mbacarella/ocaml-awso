@@ -465,6 +465,7 @@ module ItemValue =
           (Xml.child xml_arg0 "metricDefinition") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?url ?metricDefinition ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" Url.of_json in
       let metricDefinition =
@@ -496,6 +497,7 @@ module AttributeValueList =
         (Option.map ~f:IntegerList.of_xml)
           (Xml.child xml_arg0 "integerValues") in
       make ?stringValues ?integerValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringValues = field_map json "stringValues" StringList.of_json in
       let integerValues = field_map json "integerValues" IntegerList.of_json in
@@ -673,6 +675,7 @@ module SsmAutomation =
           (Xml.child_exn ~context:context_ xml_arg0 "documentName") in
       make ?targetAccount ~roleArn ?parameters ?documentVersion ~documentName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetAccount =
         field_map json "targetAccount" SsmTargetAccount.of_json in
@@ -713,6 +716,7 @@ module AddRegionAction =
         RegionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "regionName") in
       make ?sseKmsKeyId ~regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sseKmsKeyId = field_map json "sseKmsKeyId" SseKmsKey.of_json in
       let regionName = field_map_exn json "regionName" RegionName.of_json in
@@ -738,6 +742,7 @@ module DeleteRegionAction =
         RegionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "regionName") in
       make ~regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regionName = field_map_exn json "regionName" RegionName.of_json in
       make ~regionName ()
@@ -765,6 +770,7 @@ module ItemIdentifier =
       let type_ =
         ItemType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" ItemValue.of_json in
       let type_ = field_map_exn json "type" ItemType.of_json in
@@ -851,6 +857,7 @@ module Condition =
       let after =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "after") in
       make ?equals ?before ?after ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let equals = field_map json "equals" AttributeValueList.of_json in
       let before = field_map json "before" Timestamp.of_json in
@@ -971,6 +978,7 @@ module IncidentRecordSource =
       let createdBy =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "createdBy") in
       make ~source ?resourceArn ?invokedBy ~createdBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let source = field_map_exn json "source" IncidentSource.of_json in
       let resourceArn = field_map json "resourceArn" Arn.of_json in
@@ -1039,6 +1047,7 @@ module NotificationTargetItem =
       let snsTopicArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "snsTopicArn") in
       make ?snsTopicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsTopicArn = field_map json "snsTopicArn" Arn.of_json in
       make ?snsTopicArn ()
@@ -1124,6 +1133,7 @@ module RegionInfo =
       let sseKmsKeyId =
         (Option.map ~f:SseKmsKey.of_xml) (Xml.child xml_arg0 "sseKmsKeyId") in
       make ~statusUpdateDateTime ?statusMessage ~status ?sseKmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusUpdateDateTime =
         field_map_exn json "statusUpdateDateTime" Timestamp.of_json in
@@ -1150,6 +1160,7 @@ module AutomationExecution =
       let ssmExecutionArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ssmExecutionArn") in
       make ?ssmExecutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ssmExecutionArn = field_map json "ssmExecutionArn" Arn.of_json in
       make ?ssmExecutionArn ()
@@ -1193,6 +1204,7 @@ module EmptyChatChannel =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1280,6 +1292,7 @@ module Action =
         (Option.map ~f:SsmAutomation.of_xml)
           (Xml.child xml_arg0 "ssmAutomation") in
       make ?ssmAutomation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ssmAutomation =
         field_map json "ssmAutomation" SsmAutomation.of_json in
@@ -1337,6 +1350,7 @@ module UpdateReplicationSetAction =
         (Option.map ~f:AddRegionAction.of_xml)
           (Xml.child xml_arg0 "addRegionAction") in
       make ?deleteRegionAction ?addRegionAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteRegionAction =
         field_map json "deleteRegionAction" DeleteRegionAction.of_json in
@@ -1368,6 +1382,7 @@ module RelatedItem =
         ItemIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
       make ?title ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map json "title" RelatedItemTitleString.of_json in
       let identifier = field_map_exn json "identifier" ItemIdentifier.of_json in
@@ -1489,6 +1504,7 @@ module EventSummary =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eventId") in
       make ~incidentRecordArn ~eventUpdatedTime ~eventType ~eventTime
         ~eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -1525,6 +1541,7 @@ module Filter =
         Condition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "condition") in
       make ~key ~condition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map_exn json "key" FilterKeyString.of_json in
       let condition = field_map_exn json "condition" Condition.of_json in
@@ -1562,6 +1579,7 @@ module ResponsePlanSummary =
           (Xml.child xml_arg0 "displayName") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~name ?displayName ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" ResponsePlanName.of_json in
       let displayName =
@@ -1639,6 +1657,7 @@ module IncidentRecordSummary =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~title ~status ?resolvedTime ~incidentRecordSource ~impact
         ~creationTime ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map_exn json "title" IncidentTitle.of_json in
       let status = field_map_exn json "status" IncidentRecordStatus.of_json in
@@ -1769,6 +1788,7 @@ module ResourcePolicy =
         Policy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "policyDocument") in
       make ~ramResourceShareRegion ~policyId ~policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ramResourceShareRegion =
         field_map_exn json "ramResourceShareRegion" String_.of_json in
@@ -1911,6 +1931,7 @@ module ChatChannel =
         (Option.map ~f:ChatbotSnsConfigurationSet.of_xml)
           (Xml.child xml_arg0 "chatbotSns") in
       make ?empty ?chatbotSns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let empty = field_map json "empty" EmptyChatChannel.of_json in
       let chatbotSns =
@@ -1935,6 +1956,7 @@ module RegionMapInputValue =
       let sseKmsKeyId =
         (Option.map ~f:SseKmsKey.of_xml) (Xml.child xml_arg0 "sseKmsKeyId") in
       make ?sseKmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sseKmsKeyId = field_map json "sseKmsKeyId" SseKmsKey.of_json in
       make ?sseKmsKeyId ()
@@ -1956,6 +1978,7 @@ module AccessDeniedException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -2002,6 +2025,7 @@ module ConflictException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfter ?resourceType ?resourceIdentifier ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfter = field_map json "retryAfter" Timestamp.of_json in
       let resourceType = field_map json "resourceType" ResourceType.of_json in
@@ -2027,6 +2051,7 @@ module InternalServerException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -2065,6 +2090,7 @@ module ResourceNotFoundException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?resourceType ?resourceIdentifier ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceIdentifier =
@@ -2100,6 +2126,7 @@ module ThrottlingException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~serviceCode ~quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "serviceCode" ServiceCode.of_json in
       let quotaCode = field_map_exn json "quotaCode" String_.of_json in
@@ -2122,6 +2149,7 @@ module ValidationException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ExceptionMessage.of_json in
       make ~message ()
@@ -2255,6 +2283,7 @@ module RelatedItemsUpdate =
       let itemToAdd =
         (Option.map ~f:RelatedItem.of_xml) (Xml.child xml_arg0 "itemToAdd") in
       make ?itemToRemove ?itemToAdd ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let itemToRemove = field_map json "itemToRemove" ItemIdentifier.of_json in
       let itemToAdd = field_map json "itemToAdd" RelatedItem.of_json in
@@ -2339,6 +2368,7 @@ module ServiceQuotaExceededException =
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~serviceCode ?resourceType ?resourceIdentifier ~quotaCode ~message
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "serviceCode" ServiceCode.of_json in
       let resourceType = field_map json "resourceType" ResourceType.of_json in
@@ -2451,6 +2481,7 @@ module TriggerDetails =
       let rawData =
         (Option.map ~f:RawData.of_xml) (Xml.child xml_arg0 "rawData") in
       make ?triggerArn ~timestamp ~source ?rawData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggerArn = field_map json "triggerArn" Arn.of_json in
       let timestamp = field_map_exn json "timestamp" Timestamp.of_json in
@@ -2742,6 +2773,7 @@ module TimelineEvent =
           (Xml.child_exn ~context:context_ xml_arg0 "eventData") in
       make ~incidentRecordArn ~eventUpdatedTime ~eventType ~eventTime
         ~eventId ~eventData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -2806,6 +2838,7 @@ module IncidentTemplate =
         (Option.map ~f:DedupeString.of_xml)
           (Xml.child xml_arg0 "dedupeString") in
       make ~title ?summary ?notificationTargets ~impact ?dedupeString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map_exn json "title" IncidentTitle.of_json in
       let summary = field_map json "summary" IncidentSummary.of_json in
@@ -2925,6 +2958,7 @@ module ReplicationSet =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ~status ~regionMap ~lastModifiedTime ~lastModifiedBy
         ~deletionProtected ~createdTime ~createdBy ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" ReplicationSetStatus.of_json in
       let regionMap = field_map_exn json "regionMap" RegionInfoMap.of_json in
@@ -3075,6 +3109,7 @@ module IncidentRecord =
         ~lastModifiedTime ~lastModifiedBy ~incidentRecordSource ~impact
         ~dedupeString ~creationTime ?chatChannel ?automationExecutions ~arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map_exn json "title" IncidentTitle.of_json in
       let summary = field_map json "summary" IncidentSummary.of_json in
@@ -3218,6 +3253,7 @@ module UpdateTimelineEventOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3284,6 +3320,7 @@ module UpdateTimelineEventInput =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~incidentRecordArn ?eventType ?eventTime ~eventId ?eventData
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -3377,6 +3414,7 @@ module UpdateResponsePlanOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified response plan."]
@@ -3496,6 +3534,7 @@ module UpdateResponsePlanInput =
         ?incidentTemplateNotificationTargets ?incidentTemplateImpact
         ?incidentTemplateDedupeString ?engagements ?displayName ?clientToken
         ?chatChannel ~arn ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentTemplateTitle =
         field_map json "incidentTemplateTitle" IncidentTitle.of_json in
@@ -3592,6 +3631,7 @@ module UpdateReplicationSetOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Add or delete Regions from your replication set."]
@@ -3625,6 +3665,7 @@ module UpdateReplicationSetInput =
         UpdateReplicationSetInputActionsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actions") in
       make ?clientToken ~arn ~actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" ClientToken.of_json in
       let arn = field_map_exn json "arn" Arn.of_json in
@@ -3714,6 +3755,7 @@ module UpdateRelatedItemsOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3752,6 +3794,7 @@ module UpdateRelatedItemsInput =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~relatedItemsUpdate ~incidentRecordArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relatedItemsUpdate =
         field_map_exn json "relatedItemsUpdate" RelatedItemsUpdate.of_json in
@@ -3842,6 +3885,7 @@ module UpdateIncidentRecordOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3925,6 +3969,7 @@ module UpdateIncidentRecordInput =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?title ?summary ?status ?notificationTargets ?impact ?clientToken
         ?chatChannel ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map json "title" IncidentTitle.of_json in
       let summary = field_map json "summary" IncidentSummary.of_json in
@@ -4011,6 +4056,7 @@ module UpdateDeletionProtectionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4047,6 +4093,7 @@ module UpdateDeletionProtectionInput =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~deletionProtected ?clientToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletionProtected =
         field_map_exn json "deletionProtected" Boolean.of_json in
@@ -4136,6 +4183,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -4165,6 +4213,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -4262,6 +4311,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to a response plan."]
@@ -4289,6 +4339,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -4384,6 +4435,7 @@ module StartIncidentOutput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "incidentRecordArn") in
       make ~incidentRecordArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -4458,6 +4510,7 @@ module StartIncidentInput =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?triggerDetails ?title ~responsePlanArn ?relatedItems ?impact
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggerDetails =
         field_map json "triggerDetails" TriggerDetails.of_json in
@@ -4550,6 +4603,7 @@ module PutResourcePolicyOutput =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
       make ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyId = field_map_exn json "policyId" PolicyId.of_json in
       make ~policyId ()
@@ -4576,6 +4630,7 @@ module PutResourcePolicyInput =
       let policy =
         Policy.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~resourceArn ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       let policy = field_map_exn json "policy" Policy.of_json in
@@ -4662,6 +4717,7 @@ module ListTimelineEventsOutput =
         EventSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "eventSummaries") in
       make ?nextToken ~eventSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let eventSummaries =
@@ -4731,6 +4787,7 @@ module ListTimelineEventsInput =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?sortOrder ?sortBy ?nextToken ?maxResults ~incidentRecordArn
         ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortOrder = field_map json "sortOrder" SortOrder.of_json in
       let sortBy = field_map json "sortBy" TimelineEventSort.of_json in
@@ -4820,6 +4877,7 @@ module ListTagsForResourceResponse =
       let tags =
         TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
@@ -4842,6 +4900,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -4928,6 +4987,7 @@ module ListResponsePlansOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~responsePlanSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responsePlanSummaries =
         field_map_exn json "responsePlanSummaries"
@@ -4958,6 +5018,7 @@ module ListResponsePlansInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -5044,6 +5105,7 @@ module ListReplicationSetsOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~replicationSetArns ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationSetArns =
         field_map_exn json "replicationSetArns" ReplicationSetArnList.of_json in
@@ -5074,6 +5136,7 @@ module ListReplicationSetsInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -5159,6 +5222,7 @@ module ListRelatedItemsOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~relatedItems ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relatedItems =
         field_map_exn json "relatedItems" RelatedItemList.of_json in
@@ -5198,6 +5262,7 @@ module ListRelatedItemsInput =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "incidentRecordArn") in
       make ?nextToken ?maxResults ~incidentRecordArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -5287,6 +5352,7 @@ module ListIncidentRecordsOutput =
         IncidentRecordSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "incidentRecordSummaries") in
       make ?nextToken ~incidentRecordSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let incidentRecordSummaries =
@@ -5325,6 +5391,7 @@ module ListIncidentRecordsInput =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "filters") in
       make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -5411,6 +5478,7 @@ module GetTimelineEventOutput =
         TimelineEvent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "event") in
       make ~event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let event = field_map_exn json "event" TimelineEvent.of_json in
       make ~event ()
@@ -5442,6 +5510,7 @@ module GetTimelineEventInput =
       let eventId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eventId") in
       make ~incidentRecordArn ~eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -5586,6 +5655,7 @@ module GetResponsePlanOutput =
         (Option.map ~f:ActionsList.of_xml) (Xml.child xml_arg0 "actions") in
       make ~name ~incidentTemplate ?engagements ?displayName ?chatChannel
         ~arn ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" ResponsePlanName.of_json in
       let incidentTemplate =
@@ -5614,6 +5684,7 @@ module GetResponsePlanInput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -5707,6 +5778,7 @@ module GetResourcePoliciesOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~resourcePolicies ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcePolicies =
         field_map_exn json "resourcePolicies" ResourcePolicyList.of_json in
@@ -5746,6 +5818,7 @@ module GetResourcePoliciesInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~resourceArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -5835,6 +5908,7 @@ module GetReplicationSetOutput =
         ReplicationSet.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "replicationSet") in
       make ~replicationSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationSet =
         field_map_exn json "replicationSet" ReplicationSet.of_json in
@@ -5856,6 +5930,7 @@ module GetReplicationSetInput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -5941,6 +6016,7 @@ module GetIncidentRecordOutput =
         IncidentRecord.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "incidentRecord") in
       make ~incidentRecord ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecord =
         field_map_exn json "incidentRecord" IncidentRecord.of_json in
@@ -5961,6 +6037,7 @@ module GetIncidentRecordInput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -6027,6 +6104,7 @@ module DeleteTimelineEventOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a timeline event from an incident."]
@@ -6055,6 +6133,7 @@ module DeleteTimelineEventInput =
       let eventId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eventId") in
       make ~incidentRecordArn ~eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -6124,6 +6203,7 @@ module DeleteResponsePlanOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6142,6 +6222,7 @@ module DeleteResponsePlanInput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -6218,6 +6299,7 @@ module DeleteResourcePolicyOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6245,6 +6327,7 @@ module DeleteResourcePolicyInput =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
       make ~resourceArn ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       let policyId = field_map_exn json "policyId" PolicyId.of_json in
@@ -6323,6 +6406,7 @@ module DeleteReplicationSetOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6342,6 +6426,7 @@ module DeleteReplicationSetInput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -6409,6 +6494,7 @@ module DeleteIncidentRecordOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete an incident record from Incident Manager."]
@@ -6427,6 +6513,7 @@ module DeleteIncidentRecordInput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -6527,6 +6614,7 @@ module CreateTimelineEventOutput =
       let eventId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eventId") in
       make ~incidentRecordArn ~eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -6591,6 +6679,7 @@ module CreateTimelineEventInput =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~incidentRecordArn ~eventType ~eventTime ~eventData ?clientToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incidentRecordArn =
         field_map_exn json "incidentRecordArn" Arn.of_json in
@@ -6690,6 +6779,7 @@ module CreateResponsePlanOutput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -6778,6 +6868,7 @@ module CreateResponsePlanInput =
         (Option.map ~f:ActionsList.of_xml) (Xml.child xml_arg0 "actions") in
       make ?tags ~name ~incidentTemplate ?engagements ?displayName
         ?clientToken ?chatChannel ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let name = field_map_exn json "name" ResponsePlanName.of_json in
@@ -6882,6 +6973,7 @@ module CreateReplicationSetOutput =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -6912,6 +7004,7 @@ module CreateReplicationSetInput =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~regions ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regions = field_map_exn json "regions" RegionMapInput.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in

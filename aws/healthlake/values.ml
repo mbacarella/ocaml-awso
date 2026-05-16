@@ -115,6 +115,7 @@ module S3Configuration =
       let s3Uri =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~kmsKeyId ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map_exn json "KmsKeyId" EncryptionKeyID.of_json in
       let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
@@ -162,6 +163,7 @@ module KmsEncryptionConfig =
       let cmkType =
         CmkType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CmkType") in
       make ?kmsKeyId ~cmkType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "KmsKeyId" EncryptionKeyID.of_json in
       let cmkType = field_map_exn json "CmkType" CmkType.of_json in
@@ -271,6 +273,7 @@ module InputDataConfig =
     let of_xml xml_arg0 =
       let s3Uri = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "S3Uri") in
       make ?s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Uri = field_map json "S3Uri" S3Uri.of_json in make ?s3Uri ()
     let to_json v = composed_to_json to_value v
@@ -393,6 +396,7 @@ module OutputDataConfig =
         (Option.map ~f:S3Configuration.of_xml)
           (Xml.child xml_arg0 "S3Configuration") in
       make ?s3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Configuration =
         field_map json "S3Configuration" S3Configuration.of_json in
@@ -518,6 +522,7 @@ module PreloadDataConfig =
         PreloadDataType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PreloadDataType") in
       make ~preloadDataType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preloadDataType =
         field_map_exn json "PreloadDataType" PreloadDataType.of_json in
@@ -544,6 +549,7 @@ module SseConfiguration =
         KmsEncryptionConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "KmsEncryptionConfig") in
       make ~kmsEncryptionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsEncryptionConfig =
         field_map_exn json "KmsEncryptionConfig" KmsEncryptionConfig.of_json in
@@ -591,6 +597,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -695,6 +702,7 @@ module ImportJobProperties =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?message ?dataAccessRoleArn ?jobOutputDataConfig ~inputDataConfig
         ~datastoreId ?endTime ~submitTime ~jobStatus ?jobName ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       let dataAccessRoleArn =
@@ -802,6 +810,7 @@ module ExportJobProperties =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?message ?dataAccessRoleArn ~outputDataConfig ~datastoreId
         ?endTime ~submitTime ~jobStatus ?jobName ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       let dataAccessRoleArn =
@@ -915,6 +924,7 @@ module DatastoreProperties =
       make ?preloadDataConfig ?sseConfiguration ~datastoreEndpoint
         ~datastoreTypeVersion ?createdAt ~datastoreStatus ?datastoreName
         ~datastoreArn ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preloadDataConfig =
         field_map json "PreloadDataConfig" PreloadDataConfig.of_json in
@@ -951,6 +961,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -969,6 +980,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1065,6 +1077,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1084,6 +1097,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1102,6 +1116,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1284,6 +1299,7 @@ module DatastoreFilter =
         (Option.map ~f:DatastoreName.of_xml)
           (Xml.child xml_arg0 "DatastoreName") in
       make ?createdAfter ?createdBefore ?datastoreStatus ?datastoreName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAfter = field_map json "CreatedAfter" Timestamp.of_json in
       let createdBefore = field_map json "CreatedBefore" Timestamp.of_json in
@@ -1328,6 +1344,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1378,6 +1395,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a Data Store."]
@@ -1407,6 +1425,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -1458,6 +1477,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a user specifed key and value tag to a Data Store."]
@@ -1485,6 +1505,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN =
@@ -1582,6 +1603,7 @@ module StartFHIRImportJobResponse =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?datastoreId ~jobStatus ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
       let jobStatus = field_map_exn json "JobStatus" JobStatus.of_json in
@@ -1656,6 +1678,7 @@ module StartFHIRImportJobRequest =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ~clientToken ~dataAccessRoleArn ~datastoreId ~jobOutputDataConfig
         ~inputDataConfig ?jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken =
         field_map_exn json "ClientToken" ClientTokenString.of_json in
@@ -1764,6 +1787,7 @@ module StartFHIRExportJobResponse =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?datastoreId ~jobStatus ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
       let jobStatus = field_map_exn json "JobStatus" JobStatus.of_json in
@@ -1830,6 +1854,7 @@ module StartFHIRExportJobRequest =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ~clientToken ~dataAccessRoleArn ~datastoreId ~outputDataConfig
         ?jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken =
         field_map_exn json "ClientToken" ClientTokenString.of_json in
@@ -1892,6 +1917,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1915,6 +1941,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" AmazonResourceName.of_json in
@@ -2012,6 +2039,7 @@ module ListFHIRImportJobsResponse =
         ImportJobPropertiesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ImportJobPropertiesList") in
       make ?nextToken ~importJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let importJobPropertiesList =
@@ -2098,6 +2126,7 @@ module ListFHIRImportJobsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ?submittedAfter ?submittedBefore ?jobStatus ?jobName ?maxResults
         ?nextToken ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submittedAfter = field_map json "SubmittedAfter" Timestamp.of_json in
       let submittedBefore =
@@ -2202,6 +2231,7 @@ module ListFHIRExportJobsResponse =
         ExportJobPropertiesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExportJobPropertiesList") in
       make ?nextToken ~exportJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let exportJobPropertiesList =
@@ -2288,6 +2318,7 @@ module ListFHIRExportJobsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ?submittedAfter ?submittedBefore ?jobStatus ?jobName ?maxResults
         ?nextToken ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submittedAfter = field_map json "SubmittedAfter" Timestamp.of_json in
       let submittedBefore =
@@ -2373,6 +2404,7 @@ module ListFHIRDatastoresResponse =
         DatastorePropertiesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatastorePropertiesList") in
       make ?nextToken ~datastorePropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let datastorePropertiesList =
@@ -2414,6 +2446,7 @@ module ListFHIRDatastoresRequest =
       let filter =
         (Option.map ~f:DatastoreFilter.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2495,6 +2528,7 @@ module DescribeFHIRImportJobResponse =
         ImportJobProperties.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ImportJobProperties") in
       make ~importJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let importJobProperties =
         field_map_exn json "ImportJobProperties" ImportJobProperties.of_json in
@@ -2523,6 +2557,7 @@ module DescribeFHIRImportJobRequest =
         DatastoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ~jobId ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in
       let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
@@ -2603,6 +2638,7 @@ module DescribeFHIRExportJobResponse =
         ExportJobProperties.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExportJobProperties") in
       make ~exportJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportJobProperties =
         field_map_exn json "ExportJobProperties" ExportJobProperties.of_json in
@@ -2632,6 +2668,7 @@ module DescribeFHIRExportJobRequest =
         DatastoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ~jobId ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in
       let datastoreId = field_map_exn json "DatastoreId" DatastoreId.of_json in
@@ -2712,6 +2749,7 @@ module DescribeFHIRDatastoreResponse =
         DatastoreProperties.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreProperties") in
       make ~datastoreProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datastoreProperties =
         field_map_exn json "DatastoreProperties" DatastoreProperties.of_json in
@@ -2735,6 +2773,7 @@ module DescribeFHIRDatastoreRequest =
       let datastoreId =
         (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
       make ?datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
       make ?datastoreId ()
@@ -2859,6 +2898,7 @@ module DeleteFHIRDatastoreResponse =
         DatastoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ~datastoreEndpoint ~datastoreStatus ~datastoreArn ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datastoreEndpoint =
         field_map_exn json "DatastoreEndpoint" BoundedLengthString.of_json in
@@ -2885,6 +2925,7 @@ module DeleteFHIRDatastoreRequest =
       let datastoreId =
         (Option.map ~f:DatastoreId.of_xml) (Xml.child xml_arg0 "DatastoreId") in
       make ?datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datastoreId = field_map json "DatastoreId" DatastoreId.of_json in
       make ?datastoreId ()
@@ -2991,6 +3032,7 @@ module CreateFHIRDatastoreResponse =
         DatastoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatastoreId") in
       make ~datastoreEndpoint ~datastoreStatus ~datastoreArn ~datastoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datastoreEndpoint =
         field_map_exn json "DatastoreEndpoint" BoundedLengthString.of_json in
@@ -3073,6 +3115,7 @@ module CreateFHIRDatastoreRequest =
           (Xml.child xml_arg0 "DatastoreName") in
       make ?tags ?clientToken ?preloadDataConfig ?sseConfiguration
         ~datastoreTypeVersion ?datastoreName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientToken =

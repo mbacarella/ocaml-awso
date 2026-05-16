@@ -297,6 +297,7 @@ module Administrator =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?delegationTime ?graphArn ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegationTime = field_map json "DelegationTime" Timestamp.of_json in
       let graphArn = field_map json "GraphArn" GraphArn.of_json in
@@ -448,6 +449,7 @@ module MemberDetail =
         ?percentOfGraphUtilization ?volumeUsageUpdatedTime
         ?volumeUsageInBytes ?updatedTime ?invitedTime ?disabledReason ?status
         ?administratorId ?masterId ?graphArn ?emailAddress ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invitationType =
         field_map json "InvitationType" InvitationType.of_json in
@@ -496,6 +498,7 @@ module Graph =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedTime") in
       let arn = (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?createdTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime = field_map json "CreatedTime" Timestamp.of_json in
       let arn = field_map json "Arn" GraphArn.of_json in
@@ -525,6 +528,7 @@ module UnprocessedAccount =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?reason ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" UnprocessedReason.of_json in
       let accountId = field_map json "AccountId" AccountId.of_json in
@@ -558,6 +562,7 @@ module Account =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~emailAddress ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress =
         field_map_exn json "EmailAddress" EmailAddress.of_json in
@@ -592,6 +597,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -611,6 +617,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -629,6 +636,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -748,6 +756,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -885,6 +894,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -903,6 +913,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -978,6 +989,7 @@ module UpdateOrganizationConfigurationRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ?autoEnable ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoEnable = field_map json "AutoEnable" Boolean.of_json in
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
@@ -1038,6 +1050,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a behavior graph."]
@@ -1066,6 +1079,7 @@ module UntagResourceRequest =
         GraphArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" GraphArn.of_json in
@@ -1125,6 +1139,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies tag values to a behavior graph."]
@@ -1151,6 +1166,7 @@ module TagResourceRequest =
         GraphArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" GraphArn.of_json in
@@ -1179,6 +1195,7 @@ module StartMonitoringMemberRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accountId ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
@@ -1203,6 +1220,7 @@ module RejectInvitationRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
       make ~graphArn ()
@@ -1268,6 +1286,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1291,6 +1310,7 @@ module ListTagsForResourceRequest =
         GraphArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" GraphArn.of_json in
       make ~resourceArn ()
@@ -1367,6 +1387,7 @@ module ListOrganizationAdminAccountsResponse =
         (Option.map ~f:AdministratorList.of_xml)
           (Xml.child xml_arg0 "Administrators") in
       make ?nextToken ?administrators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let administrators =
@@ -1400,6 +1421,7 @@ module ListOrganizationAdminAccountsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -1478,6 +1500,7 @@ module ListMembersResponse =
         (Option.map ~f:MemberDetailList.of_xml)
           (Xml.child xml_arg0 "MemberDetails") in
       make ?nextToken ?memberDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let memberDetails =
@@ -1520,6 +1543,7 @@ module ListMembersRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ?maxResults ?nextToken ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -1590,6 +1614,7 @@ module ListInvitationsResponse =
         (Option.map ~f:MemberDetailList.of_xml)
           (Xml.child xml_arg0 "Invitations") in
       make ?nextToken ?invitations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let invitations = field_map json "Invitations" MemberDetailList.of_json in
@@ -1623,6 +1648,7 @@ module ListInvitationsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -1690,6 +1716,7 @@ module ListGraphsResponse =
       let graphList =
         (Option.map ~f:GraphList.of_xml) (Xml.child xml_arg0 "GraphList") in
       make ?nextToken ?graphList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let graphList = field_map json "GraphList" GraphList.of_json in
@@ -1723,6 +1750,7 @@ module ListGraphsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -1804,6 +1832,7 @@ module GetMembersResponse =
         (Option.map ~f:MemberDetailList.of_xml)
           (Xml.child xml_arg0 "MemberDetails") in
       make ?unprocessedAccounts ?memberDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map json "UnprocessedAccounts" UnprocessedAccountList.of_json in
@@ -1838,6 +1867,7 @@ module GetMembersRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accountIds ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
@@ -1863,6 +1893,7 @@ module EnableOrganizationAdminAccountRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
       make ~accountId ()
@@ -1886,6 +1917,7 @@ module DisassociateMembershipRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
       make ~graphArn ()
@@ -1953,6 +1985,7 @@ module DescribeOrganizationConfigurationResponse =
       let autoEnable =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoEnable") in
       make ?autoEnable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoEnable = field_map json "AutoEnable" Boolean.of_json in
       make ?autoEnable ()
@@ -1975,6 +2008,7 @@ module DescribeOrganizationConfigurationRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
       make ~graphArn ()
@@ -2063,6 +2097,7 @@ module DeleteMembersResponse =
         (Option.map ~f:AccountIdList.of_xml)
           (Xml.child xml_arg0 "AccountIds") in
       make ?unprocessedAccounts ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map json "UnprocessedAccounts" UnprocessedAccountList.of_json in
@@ -2095,6 +2130,7 @@ module DeleteMembersRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accountIds ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
@@ -2118,6 +2154,7 @@ module DeleteGraphRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
       make ~graphArn ()
@@ -2207,6 +2244,7 @@ module CreateMembersResponse =
         (Option.map ~f:MemberDetailList.of_xml)
           (Xml.child xml_arg0 "Members") in
       make ?unprocessedAccounts ?members ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedAccounts =
         field_map json "UnprocessedAccounts" UnprocessedAccountList.of_json in
@@ -2256,6 +2294,7 @@ module CreateMembersRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accounts ?disableEmailNotification ?message ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accounts = field_map_exn json "Accounts" AccountList.of_json in
       let disableEmailNotification =
@@ -2328,6 +2367,7 @@ module CreateGraphResponse =
       let graphArn =
         (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "GraphArn") in
       make ?graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let graphArn = field_map json "GraphArn" GraphArn.of_json in
       make ?graphArn ()
@@ -2348,6 +2388,7 @@ module CreateGraphRequest =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2370,6 +2411,7 @@ module AcceptInvitationRequest =
       let graphArn =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
       make ~graphArn ()

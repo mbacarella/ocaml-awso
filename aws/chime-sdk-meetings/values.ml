@@ -570,6 +570,7 @@ module AudioFeatures =
         (Option.map ~f:MeetingFeatureStatus.of_xml)
           (Xml.child xml_arg0 "EchoReduction") in
       make ?echoReduction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let echoReduction =
         field_map json "EchoReduction" MeetingFeatureStatus.of_json in
@@ -648,6 +649,7 @@ module EngineTranscribeMedicalSettings =
           (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
       make ?contentIdentificationType ?region ?vocabularyName ~type_
         ~specialty ~languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentIdentificationType =
         field_map json "ContentIdentificationType"
@@ -820,6 +822,7 @@ module EngineTranscribeSettings =
         ?contentIdentificationType ?partialResultsStability
         ?enablePartialResultsStabilization ?region ?vocabularyName
         ?vocabularyFilterName ?vocabularyFilterMethod ?languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferredLanguage =
         field_map json "PreferredLanguage" TranscribeLanguageCode.of_json in
@@ -890,6 +893,7 @@ module Attendee =
         (Option.map ~f:ExternalUserId.of_xml)
           (Xml.child xml_arg0 "ExternalUserId") in
       make ?joinToken ?attendeeId ?externalUserId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let joinToken = field_map json "JoinToken" JoinTokenString.of_json in
       let attendeeId = field_map json "AttendeeId" GuidString.of_json in
@@ -991,6 +995,7 @@ module MediaPlacement =
       make ?eventIngestionUrl ?screenSharingUrl ?screenViewingUrl
         ?screenDataUrl ?turnControlUrl ?signalingUrl ?audioFallbackUrl
         ?audioHostUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventIngestionUrl =
         field_map json "EventIngestionUrl" String_.of_json in
@@ -1044,6 +1049,7 @@ module MeetingFeaturesConfiguration =
       let audio =
         (Option.map ~f:AudioFeatures.of_xml) (Xml.child xml_arg0 "Audio") in
       make ?audio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let audio = field_map json "Audio" AudioFeatures.of_json in
       make ?audio ()
@@ -1097,6 +1103,7 @@ module CreateAttendeeError =
         (Option.map ~f:ExternalUserId.of_xml)
           (Xml.child xml_arg0 "ExternalUserId") in
       make ?errorMessage ?errorCode ?externalUserId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" String_.of_json in
       let errorCode = field_map json "ErrorCode" String_.of_json in
@@ -1138,6 +1145,7 @@ module CreateAttendeeRequestItem =
         ExternalUserId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExternalUserId") in
       make ~externalUserId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalUserId =
         field_map_exn json "ExternalUserId" ExternalUserId.of_json in
@@ -1199,6 +1207,7 @@ module TranscriptionConfiguration =
         (Option.map ~f:EngineTranscribeSettings.of_xml)
           (Xml.child xml_arg0 "EngineTranscribeSettings") in
       make ?engineTranscribeMedicalSettings ?engineTranscribeSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineTranscribeMedicalSettings =
         field_map json "EngineTranscribeMedicalSettings"
@@ -1259,6 +1268,7 @@ module BadRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1292,6 +1302,7 @@ module ForbiddenException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1325,6 +1336,7 @@ module NotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1425,6 +1437,7 @@ module Meeting =
         (Option.map ~f:GuidString.of_xml) (Xml.child xml_arg0 "MeetingId") in
       make ?primaryMeetingId ?meetingFeatures ?mediaPlacement ?mediaRegion
         ?externalMeetingId ?meetingHostId ?meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let primaryMeetingId =
         field_map json "PrimaryMeetingId" PrimaryMeetingId.of_json in
@@ -1493,6 +1506,7 @@ module LimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1535,6 +1549,7 @@ module ServiceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?retryAfterSeconds ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -1569,6 +1584,7 @@ module UnauthorizedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1654,6 +1670,7 @@ module NotificationsConfiguration =
       let lambdaFunctionArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LambdaFunctionArn") in
       make ?sqsQueueArn ?snsTopicArn ?lambdaFunctionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqsQueueArn = field_map json "SqsQueueArn" Arn.of_json in
       let snsTopicArn = field_map json "SnsTopicArn" Arn.of_json in
@@ -1687,6 +1704,7 @@ module UnprocessableEntityException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?requestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map json "RequestId" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1744,6 +1762,7 @@ module StopMeetingTranscriptionRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
       make ~meetingId ()
@@ -1779,6 +1798,7 @@ module StartMeetingTranscriptionRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~transcriptionConfiguration ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transcriptionConfiguration =
         field_map_exn json "TranscriptionConfiguration"
@@ -1853,6 +1873,7 @@ module ListAttendeesResponse =
       let attendees =
         (Option.map ~f:AttendeeList.of_xml) (Xml.child xml_arg0 "Attendees") in
       make ?nextToken ?attendees ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let attendees = field_map json "Attendees" AttendeeList.of_json in
@@ -1889,6 +1910,7 @@ module ListAttendeesRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ?maxResults ?nextToken ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ResultMax.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -1957,6 +1979,7 @@ module GetMeetingResponse =
       let meeting =
         (Option.map ~f:Meeting.of_xml) (Xml.child xml_arg0 "Meeting") in
       make ?meeting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meeting = field_map json "Meeting" Meeting.of_json in
       make ?meeting ()
@@ -1979,6 +2002,7 @@ module GetMeetingRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
       make ~meetingId ()
@@ -2045,6 +2069,7 @@ module GetAttendeeResponse =
       let attendee =
         (Option.map ~f:Attendee.of_xml) (Xml.child xml_arg0 "Attendee") in
       make ?attendee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attendee = field_map json "Attendee" Attendee.of_json in
       make ?attendee ()
@@ -2074,6 +2099,7 @@ module GetAttendeeRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~attendeeId ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attendeeId = field_map_exn json "AttendeeId" GuidString.of_json in
       let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
@@ -2097,6 +2123,7 @@ module DeleteMeetingRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
       make ~meetingId ()
@@ -2126,6 +2153,7 @@ module DeleteAttendeeRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~attendeeId ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attendeeId = field_map_exn json "AttendeeId" GuidString.of_json in
       let meetingId = field_map_exn json "MeetingId" GuidString.of_json in
@@ -2221,6 +2249,7 @@ module CreateMeetingWithAttendeesResponse =
       let meeting =
         (Option.map ~f:Meeting.of_xml) (Xml.child xml_arg0 "Meeting") in
       make ?errors ?attendees ?meeting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map json "Errors" BatchCreateAttendeeErrorList.of_json in
@@ -2324,6 +2353,7 @@ module CreateMeetingWithAttendeesRequest =
       make ?primaryMeetingId ~attendees ?notificationsConfiguration
         ?meetingFeatures ~externalMeetingId ?meetingHostId ~mediaRegion
         ~clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let primaryMeetingId =
         field_map json "PrimaryMeetingId" PrimaryMeetingId.of_json in
@@ -2420,6 +2450,7 @@ module CreateMeetingResponse =
       let meeting =
         (Option.map ~f:Meeting.of_xml) (Xml.child xml_arg0 "Meeting") in
       make ?meeting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meeting = field_map json "Meeting" Meeting.of_json in
       make ?meeting ()
@@ -2508,6 +2539,7 @@ module CreateMeetingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
       make ?primaryMeetingId ?meetingFeatures ?notificationsConfiguration
         ~externalMeetingId ?meetingHostId ~mediaRegion ~clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let primaryMeetingId =
         field_map json "PrimaryMeetingId" PrimaryMeetingId.of_json in
@@ -2629,6 +2661,7 @@ module CreateAttendeeResponse =
       let attendee =
         (Option.map ~f:Attendee.of_xml) (Xml.child xml_arg0 "Attendee") in
       make ?attendee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attendee = field_map json "Attendee" Attendee.of_json in
       make ?attendee ()
@@ -2659,6 +2692,7 @@ module CreateAttendeeRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~externalUserId ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalUserId =
         field_map_exn json "ExternalUserId" ExternalUserId.of_json in
@@ -2765,6 +2799,7 @@ module BatchCreateAttendeeResponse =
       let attendees =
         (Option.map ~f:AttendeeList.of_xml) (Xml.child xml_arg0 "Attendees") in
       make ?errors ?attendees ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors =
         field_map json "Errors" BatchCreateAttendeeErrorList.of_json in
@@ -2800,6 +2835,7 @@ module BatchCreateAttendeeRequest =
         GuidString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MeetingId") in
       make ~attendees ~meetingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attendees =
         field_map_exn json "Attendees" CreateAttendeeRequestItemList.of_json in

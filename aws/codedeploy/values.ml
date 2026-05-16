@@ -121,6 +121,7 @@ module TargetGroupInfo =
       let name =
         (Option.map ~f:TargetGroupName.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" TargetGroupName.of_json in
       make ?name ()
@@ -174,6 +175,7 @@ module EC2TagFilter =
       let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "Key") in
       make ?type_ ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" EC2TagFilterType.of_json in
       let value = field_map json "Value" Value.of_json in
@@ -342,6 +344,7 @@ module TrafficRoute =
         (Option.map ~f:ListenerArnList.of_xml)
           (Xml.child xml_arg0 "listenerArns") in
       make ?listenerArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listenerArns =
         field_map json "listenerArns" ListenerArnList.of_json in
@@ -411,6 +414,7 @@ module Diagnostics =
         (Option.map ~f:LifecycleErrorCode.of_xml)
           (Xml.child xml_arg0 "errorCode") in
       make ?logTail ?message ?scriptName ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logTail = field_map json "logTail" LogTail.of_json in
       let message = field_map json "message" LifecycleMessage.of_json in
@@ -592,6 +596,7 @@ module TagFilter =
       let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "Key") in
       make ?type_ ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" TagFilterType.of_json in
       let value = field_map json "Value" Value.of_json in
@@ -784,6 +789,7 @@ module ELBInfo =
     let of_xml xml_arg0 =
       let name = (Option.map ~f:ELBName.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" ELBName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
@@ -826,6 +832,7 @@ module TargetGroupPairInfo =
         (Option.map ~f:TargetGroupInfoList.of_xml)
           (Xml.child xml_arg0 "targetGroups") in
       make ?testTrafficRoute ?prodTrafficRoute ?targetGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testTrafficRoute =
         field_map json "testTrafficRoute" TrafficRoute.of_json in
@@ -1075,6 +1082,7 @@ module LifecycleEvent =
         (Option.map ~f:LifecycleEventName.of_xml)
           (Xml.child xml_arg0 "lifecycleEventName") in
       make ?status ?endTime ?startTime ?diagnostics ?lifecycleEventName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" LifecycleEventStatus.of_json in
       let endTime = field_map json "endTime" Timestamp.of_json in
@@ -1173,6 +1181,7 @@ module ECSTaskSet =
           (Xml.child xml_arg0 "identifer") in
       make ?taskSetLabel ?targetGroup ?trafficWeight ?status ?runningCount
         ?pendingCount ?desiredCount ?identifer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskSetLabel = field_map json "taskSetLabel" TargetLabel.of_json in
       let targetGroup = field_map json "targetGroup" TargetGroupInfo.of_json in
@@ -1245,6 +1254,7 @@ module Alarm =
     let of_xml xml_arg0 =
       let name = (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" AlarmName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
@@ -1425,6 +1435,7 @@ module Tag =
       let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Value.of_json in
       let key = field_map json "Key" Key.of_json in make ?value ?key ()
@@ -1494,6 +1505,7 @@ module BlueInstanceTerminationOption =
       let action =
         (Option.map ~f:InstanceAction.of_xml) (Xml.child xml_arg0 "action") in
       make ?terminationWaitTimeInMinutes ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminationWaitTimeInMinutes =
         field_map json "terminationWaitTimeInMinutes" Duration.of_json in
@@ -1530,6 +1542,7 @@ module DeploymentReadyOption =
         (Option.map ~f:DeploymentReadyAction.of_xml)
           (Xml.child xml_arg0 "actionOnTimeout") in
       make ?waitTimeInMinutes ?actionOnTimeout ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitTimeInMinutes =
         field_map json "waitTimeInMinutes" Duration.of_json in
@@ -1557,6 +1570,7 @@ module GreenFleetProvisioningOption =
         (Option.map ~f:GreenFleetProvisioningAction.of_xml)
           (Xml.child xml_arg0 "action") in
       make ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action =
         field_map json "action" GreenFleetProvisioningAction.of_json in
@@ -1863,6 +1877,7 @@ module AppSpecContent =
         (Option.map ~f:RawStringContent.of_xml)
           (Xml.child xml_arg0 "content") in
       make ?sha256 ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sha256 = field_map json "sha256" RawStringSha256.of_json in
       let content = field_map json "content" RawStringContent.of_json in
@@ -1893,6 +1908,7 @@ module GitHubLocation =
       let repository =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?commitId ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commitId = field_map json "commitId" CommitId.of_json in
       let repository = field_map json "repository" Repository.of_json in
@@ -1922,6 +1938,7 @@ module RawString =
         (Option.map ~f:RawStringContent.of_xml)
           (Xml.child xml_arg0 "content") in
       make ?sha256 ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sha256 = field_map json "sha256" RawStringSha256.of_json in
       let content = field_map json "content" RawStringContent.of_json in
@@ -2003,6 +2020,7 @@ module S3Location =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?eTag ?version ?bundleType ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "eTag" ETag.of_json in
       let version = field_map json "version" VersionId.of_json in
@@ -2070,6 +2088,7 @@ module EC2TagSet =
         (Option.map ~f:EC2TagSetList.of_xml)
           (Xml.child xml_arg0 "ec2TagSetList") in
       make ?ec2TagSetList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ec2TagSetList =
         field_map json "ec2TagSetList" EC2TagSetList.of_json in
@@ -2274,6 +2293,7 @@ module LambdaFunctionInfo =
           (Xml.child xml_arg0 "functionName") in
       make ?targetVersionWeight ?targetVersion ?currentVersion ?functionAlias
         ?functionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetVersionWeight =
         field_map json "targetVersionWeight" TrafficWeight.of_json in
@@ -2333,6 +2353,7 @@ module AutoScalingGroup =
         (Option.map ~f:AutoScalingGroupName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?hook ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hook = field_map json "hook" AutoScalingGroupHook.of_json in
       let name = field_map json "name" AutoScalingGroupName.of_json in
@@ -2365,6 +2386,7 @@ module ECSService =
         (Option.map ~f:ECSServiceName.of_xml)
           (Xml.child xml_arg0 "serviceName") in
       make ?clusterName ?serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterName = field_map json "clusterName" ECSClusterName.of_json in
       let serviceName = field_map json "serviceName" ECSServiceName.of_json in
@@ -2474,6 +2496,7 @@ module TriggerConfig =
       let triggerName =
         (Option.map ~f:TriggerName.of_xml) (Xml.child xml_arg0 "triggerName") in
       make ?triggerEvents ?triggerTargetArn ?triggerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let triggerEvents =
         field_map json "triggerEvents" TriggerEventTypeList.of_json in
@@ -2592,6 +2615,7 @@ module TimeBasedCanary =
         (Option.map ~f:Percentage.of_xml)
           (Xml.child xml_arg0 "canaryPercentage") in
       make ?canaryInterval ?canaryPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let canaryInterval =
         field_map json "canaryInterval" WaitTimeInMins.of_json in
@@ -2628,6 +2652,7 @@ module TimeBasedLinear =
         (Option.map ~f:Percentage.of_xml)
           (Xml.child xml_arg0 "linearPercentage") in
       make ?linearInterval ?linearPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linearInterval =
         field_map json "linearInterval" WaitTimeInMins.of_json in
@@ -2794,6 +2819,7 @@ module AutoRollbackConfiguration =
       let enabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?events ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "events" AutoRollbackEventsList.of_json in
       let enabled = field_map json "enabled" Boolean.of_json in
@@ -2848,6 +2874,7 @@ module BlueGreenDeploymentConfiguration =
           (Xml.child xml_arg0 "terminateBlueInstancesOnDeploymentSuccess") in
       make ?greenFleetProvisioningOption ?deploymentReadyOption
         ?terminateBlueInstancesOnDeploymentSuccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let greenFleetProvisioningOption =
         field_map json "greenFleetProvisioningOption"
@@ -3003,6 +3030,7 @@ module DeploymentOverview =
       let pending =
         (Option.map ~f:InstanceCount.of_xml) (Xml.child xml_arg0 "Pending") in
       make ?ready ?skipped ?failed ?succeeded ?inProgress ?pending ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ready = field_map json "Ready" InstanceCount.of_json in
       let skipped = field_map json "Skipped" InstanceCount.of_json in
@@ -3066,6 +3094,7 @@ module DeploymentStyle =
         (Option.map ~f:DeploymentType.of_xml)
           (Xml.child xml_arg0 "deploymentType") in
       make ?deploymentOption ?deploymentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentOption =
         field_map json "deploymentOption" DeploymentOption.of_json in
@@ -3095,6 +3124,7 @@ module ErrorInformation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let code = field_map json "code" ErrorCode.of_json in
@@ -3180,6 +3210,7 @@ module LoadBalancerInfo =
       let elbInfoList =
         (Option.map ~f:ELBInfoList.of_xml) (Xml.child xml_arg0 "elbInfoList") in
       make ?targetGroupPairInfoList ?targetGroupInfoList ?elbInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetGroupPairInfoList =
         field_map json "targetGroupPairInfoList"
@@ -3226,6 +3257,7 @@ module RelatedDeployments =
           (Xml.child xml_arg0 "autoUpdateOutdatedInstancesRootDeploymentId") in
       make ?autoUpdateOutdatedInstancesDeploymentIds
         ?autoUpdateOutdatedInstancesRootDeploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoUpdateOutdatedInstancesDeploymentIds =
         field_map json "autoUpdateOutdatedInstancesDeploymentIds"
@@ -3297,6 +3329,7 @@ module RevisionLocation =
           (Xml.child xml_arg0 "revisionType") in
       make ?appSpecContent ?string ?gitHubLocation ?s3Location ?revisionType
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appSpecContent =
         field_map json "appSpecContent" AppSpecContent.of_json in
@@ -3354,6 +3387,7 @@ module RollbackInfo =
           (Xml.child xml_arg0 "rollbackDeploymentId") in
       make ?rollbackMessage ?rollbackTriggeringDeploymentId
         ?rollbackDeploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rollbackMessage =
         field_map json "rollbackMessage" Description.of_json in
@@ -3401,6 +3435,7 @@ module TargetInstances =
         (Option.map ~f:EC2TagFilterList.of_xml)
           (Xml.child xml_arg0 "tagFilters") in
       make ?ec2TagSet ?autoScalingGroups ?tagFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ec2TagSet = field_map json "ec2TagSet" EC2TagSet.of_json in
       let autoScalingGroups =
@@ -3487,6 +3522,7 @@ module CloudFormationTarget =
           (Xml.child xml_arg0 "deploymentId") in
       make ?targetVersionWeight ?resourceType ?status ?lifecycleEvents
         ?lastUpdatedAt ?targetId ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetVersionWeight =
         field_map json "targetVersionWeight" TrafficWeight.of_json in
@@ -3607,6 +3643,7 @@ module ECSTarget =
           (Xml.child xml_arg0 "deploymentId") in
       make ?taskSetsInfo ?status ?lifecycleEvents ?lastUpdatedAt ?targetArn
         ?targetId ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskSetsInfo = field_map json "taskSetsInfo" ECSTaskSetList.of_json in
       let status = field_map json "status" TargetStatus.of_json in
@@ -3694,6 +3731,7 @@ module InstanceTarget =
           (Xml.child xml_arg0 "deploymentId") in
       make ?instanceLabel ?lifecycleEvents ?lastUpdatedAt ?status ?targetArn
         ?targetId ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceLabel = field_map json "instanceLabel" TargetLabel.of_json in
       let lifecycleEvents =
@@ -3781,6 +3819,7 @@ module LambdaTarget =
           (Xml.child xml_arg0 "deploymentId") in
       make ?lambdaFunctionInfo ?lifecycleEvents ?lastUpdatedAt ?status
         ?targetArn ?targetId ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaFunctionInfo =
         field_map json "lambdaFunctionInfo" LambdaFunctionInfo.of_json in
@@ -3899,6 +3938,7 @@ module AlarmConfiguration =
       let enabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?alarms ?ignorePollAlarmFailure ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarms = field_map json "alarms" AlarmList.of_json in
       let ignorePollAlarmFailure =
@@ -4008,6 +4048,7 @@ module LastDeploymentInfo =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?createTime ?endTime ?status ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createTime = field_map json "createTime" Timestamp.of_json in
       let endTime = field_map json "endTime" Timestamp.of_json in
@@ -4036,6 +4077,7 @@ module OnPremisesTagSet =
         (Option.map ~f:OnPremisesTagSetList.of_xml)
           (Xml.child xml_arg0 "onPremisesTagSetList") in
       make ?onPremisesTagSetList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onPremisesTagSetList =
         field_map json "onPremisesTagSetList" OnPremisesTagSetList.of_json in
@@ -4183,6 +4225,7 @@ module GenericRevisionInfo =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ?registerTime ?lastUsedTime ?firstUsedTime ?deploymentGroups
         ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let registerTime = field_map json "registerTime" Timestamp.of_json in
       let lastUsedTime = field_map json "lastUsedTime" Timestamp.of_json in
@@ -4279,6 +4322,7 @@ module MinimumHealthyHosts =
         (Option.map ~f:MinimumHealthyHostsType.of_xml)
           (Xml.child xml_arg0 "type") in
       make ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" MinimumHealthyHostsValue.of_json in
       let type_ = field_map json "type" MinimumHealthyHostsType.of_json in
@@ -4320,6 +4364,7 @@ module TrafficRoutingConfig =
       let type_ =
         (Option.map ~f:TrafficRoutingType.of_xml) (Xml.child xml_arg0 "type") in
       make ?timeBasedLinear ?timeBasedCanary ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeBasedLinear =
         field_map json "timeBasedLinear" TimeBasedLinear.of_json in
@@ -4402,6 +4447,7 @@ module InstanceInfo =
           (Xml.child xml_arg0 "instanceName") in
       make ?tags ?deregisterTime ?registerTime ?instanceArn ?iamUserArn
         ?iamSessionArn ?instanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let deregisterTime = field_map json "deregisterTime" Timestamp.of_json in
@@ -4721,6 +4767,7 @@ module DeploymentInfo =
         ?deploymentOverview ?completeTime ?startTime ?createTime
         ?errorInformation ?status ?revision ?previousRevision ?deploymentId
         ?deploymentConfigName ?deploymentGroupName ?applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relatedDeployments =
         field_map json "relatedDeployments" RelatedDeployments.of_json in
@@ -4846,6 +4893,7 @@ module DeploymentTarget =
           (Xml.child xml_arg0 "deploymentTargetType") in
       make ?cloudFormationTarget ?ecsTarget ?lambdaTarget ?instanceTarget
         ?deploymentTargetType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudFormationTarget =
         field_map json "cloudFormationTarget" CloudFormationTarget.of_json in
@@ -4922,6 +4970,7 @@ module InstanceSummary =
           (Xml.child xml_arg0 "deploymentId") in
       make ?instanceType ?lifecycleEvents ?lastUpdatedAt ?status ?instanceId
         ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceType = field_map json "instanceType" InstanceType.of_json in
       let lifecycleEvents =
@@ -5170,6 +5219,7 @@ module DeploymentGroupInfo =
         ?autoScalingGroups ?onPremisesInstanceTagFilters ?ec2TagFilters
         ?deploymentConfigName ?deploymentGroupName ?deploymentGroupId
         ?applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ecsServices = field_map json "ecsServices" ECSServiceList.of_json in
       let computePlatform =
@@ -5290,6 +5340,7 @@ module ApplicationInfo =
           (Xml.child xml_arg0 "applicationId") in
       make ?computePlatform ?gitHubAccountName ?linkedToGitHub ?createTime
         ?applicationName ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computePlatform =
         field_map json "computePlatform" ComputePlatform.of_json in
@@ -5333,6 +5384,7 @@ module RevisionInfo =
         (Option.map ~f:RevisionLocation.of_xml)
           (Xml.child xml_arg0 "revisionLocation") in
       make ?genericRevisionInfo ?revisionLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let genericRevisionInfo =
         field_map json "genericRevisionInfo" GenericRevisionInfo.of_json in
@@ -5349,6 +5401,7 @@ module AlarmsLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5361,6 +5414,7 @@ module ApplicationDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5373,6 +5427,7 @@ module ApplicationNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5385,6 +5440,7 @@ module DeploymentConfigDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5397,6 +5453,7 @@ module DeploymentGroupAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5409,6 +5466,7 @@ module DeploymentGroupDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5421,6 +5479,7 @@ module DeploymentGroupNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The deployment group name was not specified."]
@@ -5432,6 +5491,7 @@ module ECSServiceMappingLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5444,6 +5504,7 @@ module InvalidAlarmConfigException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5456,6 +5517,7 @@ module InvalidApplicationNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The application name was specified in an invalid format."]
@@ -5467,6 +5529,7 @@ module InvalidAutoRollbackConfigException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5479,6 +5542,7 @@ module InvalidAutoScalingGroupException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5491,6 +5555,7 @@ module InvalidBlueGreenDeploymentConfigurationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5503,6 +5568,7 @@ module InvalidDeploymentConfigNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5515,6 +5581,7 @@ module InvalidDeploymentGroupNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5527,6 +5594,7 @@ module InvalidDeploymentStyleException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5539,6 +5607,7 @@ module InvalidEC2TagCombinationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5551,6 +5620,7 @@ module InvalidEC2TagException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tag was specified in an invalid format."]
@@ -5562,6 +5632,7 @@ module InvalidECSServiceException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The Amazon ECS service identifier is not valid."]
@@ -5573,6 +5644,7 @@ module InvalidInputException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input was specified in an invalid format."]
@@ -5584,6 +5656,7 @@ module InvalidLoadBalancerInfoException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5596,6 +5669,7 @@ module InvalidOnPremisesTagCombinationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5608,6 +5682,7 @@ module InvalidRoleException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5620,6 +5695,7 @@ module InvalidTagException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tag was specified in an invalid format."]
@@ -5631,6 +5707,7 @@ module InvalidTargetGroupPairException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5643,6 +5720,7 @@ module InvalidTrafficRoutingConfigurationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5655,6 +5733,7 @@ module InvalidTriggerConfigException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The trigger was specified in an invalid format."]
@@ -5666,6 +5745,7 @@ module LifecycleHookLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The limit for lifecycle hooks was exceeded."]
@@ -5677,6 +5757,7 @@ module TagSetListLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5689,6 +5770,7 @@ module ThrottlingException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An API function was called too frequently."]
@@ -5700,6 +5782,7 @@ module TriggerTargetsLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The maximum allowed number of triggers was exceeded."]
@@ -5711,6 +5794,7 @@ module ArnNotSupportedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5723,6 +5807,7 @@ module InvalidArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified ARN is not in a valid format."]
@@ -5734,6 +5819,7 @@ module InvalidTagsToAddException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified tags are not valid."]
@@ -5745,6 +5831,7 @@ module ResourceArnRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The ARN of a resource is required, but was not found."]
@@ -5756,6 +5843,7 @@ module TagRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A tag was not specified."]
@@ -5808,6 +5896,7 @@ module DeploymentAlreadyCompletedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The deployment is already complete."]
@@ -5819,6 +5908,7 @@ module DeploymentDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5831,6 +5921,7 @@ module DeploymentIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "At least one deployment ID must be specified."]
@@ -5842,6 +5933,7 @@ module InvalidDeploymentIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5892,6 +5984,7 @@ module UnsupportedActionForDeploymentTypeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5941,6 +6034,7 @@ module InvalidLifecycleEventHookExecutionIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5953,6 +6047,7 @@ module InvalidLifecycleEventHookExecutionStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5965,6 +6060,7 @@ module LifecycleEventAlreadyCompletedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6003,6 +6099,7 @@ module InvalidNextTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The next token was specified in an invalid format."]
@@ -6014,6 +6111,7 @@ module InvalidRegistrationStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6026,6 +6124,7 @@ module InvalidTagFilterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tag filter was specified in an invalid format."]
@@ -6089,6 +6188,7 @@ module OperationNotSupportedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The API used does not support the deployment."]
@@ -6100,6 +6200,7 @@ module ResourceValidationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource could not be validated."]
@@ -6111,6 +6212,7 @@ module InvalidDeploymentStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6123,6 +6225,7 @@ module InvalidExternalIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The external ID was specified in an invalid format."]
@@ -6134,6 +6237,7 @@ module InvalidTimeRangeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6184,6 +6288,7 @@ module TimeRange =
       let start =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "start") in
       make ?end_ ?start ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let end_ = field_map json "end" Timestamp.of_json in
       let start = field_map json "start" Timestamp.of_json in
@@ -6198,6 +6303,7 @@ module DeploymentNotStartedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified deployment has not started."]
@@ -6209,6 +6315,7 @@ module InvalidDeploymentInstanceTypeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6221,6 +6328,7 @@ module InvalidInstanceStatusException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified instance status does not exist."]
@@ -6232,6 +6340,7 @@ module InvalidInstanceTypeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6323,6 +6432,7 @@ module InvalidComputePlatformException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6335,6 +6445,7 @@ module InvalidTargetFilterNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The target filter name is invalid."]
@@ -6446,6 +6557,7 @@ module BucketNameFilterRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A bucket name is required, but was not provided."]
@@ -6457,6 +6569,7 @@ module InvalidBucketNameFilterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6469,6 +6582,7 @@ module InvalidDeployedStateFilterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6481,6 +6595,7 @@ module InvalidKeyPrefixFilterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6493,6 +6608,7 @@ module InvalidSortByException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6505,6 +6621,7 @@ module InvalidSortOrderException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The sort order was specified in an invalid format."]
@@ -6626,6 +6743,7 @@ module InstanceNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An on-premises instance name was not specified."]
@@ -6637,6 +6755,7 @@ module InstanceNotRegisteredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified on-premises instance is not registered."]
@@ -6648,6 +6767,7 @@ module InvalidInstanceNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6660,6 +6780,7 @@ module DeploymentTargetDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6672,6 +6793,7 @@ module DeploymentTargetIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A deployment target ID was not provided."]
@@ -6683,6 +6805,7 @@ module InvalidDeploymentTargetIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The target ID provided was not valid."]
@@ -6694,6 +6817,7 @@ module InstanceDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6706,6 +6830,7 @@ module InstanceIdRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The instance ID was not specified."]
@@ -6778,6 +6903,7 @@ module DeploymentConfigInfo =
           (Xml.child xml_arg0 "deploymentConfigId") in
       make ?trafficRoutingConfig ?computePlatform ?createTime
         ?minimumHealthyHosts ?deploymentConfigName ?deploymentConfigId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficRoutingConfig =
         field_map json "trafficRoutingConfig" TrafficRoutingConfig.of_json in
@@ -6802,6 +6928,7 @@ module DeploymentConfigNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The deployment configuration name was not specified."]
@@ -6813,6 +6940,7 @@ module InvalidRevisionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The revision was specified in an invalid format."]
@@ -6824,6 +6952,7 @@ module RevisionDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6836,6 +6965,7 @@ module RevisionRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The revision ID was not specified."]
@@ -6847,6 +6977,7 @@ module GitHubAccountTokenDoesNotExistException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6859,6 +6990,7 @@ module GitHubAccountTokenNameRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6871,6 +7003,7 @@ module InvalidGitHubAccountTokenNameException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6883,6 +7016,7 @@ module DeploymentLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The number of allowed deployments was exceeded."]
@@ -6894,6 +7028,7 @@ module DescriptionTooLongException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description is too long."]
@@ -6905,6 +7040,7 @@ module InvalidFileExistsBehaviorException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6917,6 +7053,7 @@ module InvalidGitHubAccountTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The GitHub token is not valid."]
@@ -6928,6 +7065,7 @@ module InvalidIgnoreApplicationStopFailuresValueException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6940,6 +7078,7 @@ module InvalidTargetInstancesException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6952,6 +7091,7 @@ module InvalidUpdateOutdatedInstancesOnlyValueException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6964,6 +7104,7 @@ module DeploymentGroupLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The deployment groups limit was exceeded."]
@@ -6975,6 +7116,7 @@ module RoleRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The role ID was not specified."]
@@ -6986,6 +7128,7 @@ module DeploymentConfigAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6998,6 +7141,7 @@ module DeploymentConfigLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The deployment configurations limit was exceeded."]
@@ -7009,6 +7153,7 @@ module InvalidMinimumHealthyHostValueException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7021,6 +7166,7 @@ module ApplicationAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7033,6 +7179,7 @@ module ApplicationLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7071,6 +7218,7 @@ module BatchLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7157,6 +7305,7 @@ module DeploymentTargetListSizeExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7650,6 +7799,7 @@ module UpdateDeploymentGroupOutput =
         (Option.map ~f:AutoScalingGroupList.of_xml)
           (Xml.child xml_arg0 "hooksNotCleanedUp") in
       make ?hooksNotCleanedUp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hooksNotCleanedUp =
         field_map json "hooksNotCleanedUp" AutoScalingGroupList.of_json in
@@ -7859,6 +8009,7 @@ module UpdateDeploymentGroupInput =
         ?autoScalingGroups ?onPremisesInstanceTagFilters ?ec2TagFilters
         ?deploymentConfigName ?newDeploymentGroupName
         ~currentDeploymentGroupName ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onPremisesTagSet =
         field_map json "onPremisesTagSet" OnPremisesTagSet.of_json in
@@ -7934,6 +8085,7 @@ module UpdateApplicationInput =
         (Option.map ~f:ApplicationName.of_xml)
           (Xml.child xml_arg0 "applicationName") in
       make ?newApplicationName ?applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newApplicationName =
         field_map json "newApplicationName" ApplicationName.of_json in
@@ -8052,6 +8204,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8081,6 +8234,7 @@ module UntagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -8198,6 +8352,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8225,6 +8380,7 @@ module TagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -8240,6 +8396,7 @@ module TagLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The maximum allowed number of tags was exceeded."]
@@ -8355,6 +8512,7 @@ module StopDeploymentOutput =
       let status =
         (Option.map ~f:StopStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?statusMessage ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage = field_map json "statusMessage" Message.of_json in
       let status = field_map json "status" StopStatus.of_json in
@@ -8387,6 +8545,7 @@ module StopDeploymentInput =
         DeploymentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ?autoRollbackEnabled ~deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoRollbackEnabled =
         field_map json "autoRollbackEnabled" NullableBoolean.of_json in
@@ -8413,6 +8572,7 @@ module SkipWaitTimeForInstanceTerminationInput =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
       make ?deploymentId ()
@@ -8443,6 +8603,7 @@ module RemoveTagsFromOnPremisesInstancesInput =
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~instanceNames ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceNames =
         field_map_exn json "instanceNames" InstanceNameList.of_json in
@@ -8485,6 +8646,7 @@ module RegisterOnPremisesInstanceInput =
         InstanceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceName") in
       make ?iamUserArn ?iamSessionArn ~instanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamUserArn = field_map json "iamUserArn" IamUserArn.of_json in
       let iamSessionArn =
@@ -8528,6 +8690,7 @@ module RegisterApplicationRevisionInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~revision ?description ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "revision" RevisionLocation.of_json in
       let description = field_map json "description" Description.of_json in
@@ -8663,6 +8826,7 @@ module PutLifecycleEventHookExecutionStatusOutput =
         (Option.map ~f:LifecycleEventHookExecutionId.of_xml)
           (Xml.child xml_arg0 "lifecycleEventHookExecutionId") in
       make ?lifecycleEventHookExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycleEventHookExecutionId =
         field_map json "lifecycleEventHookExecutionId"
@@ -8708,6 +8872,7 @@ module PutLifecycleEventHookExecutionStatusInput =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?status ?lifecycleEventHookExecutionId ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" LifecycleEventStatus.of_json in
       let lifecycleEventHookExecutionId =
@@ -8726,6 +8891,7 @@ module MultipleIamArnsProvidedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8798,6 +8964,7 @@ module ListTagsForResourceOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -8829,6 +8996,7 @@ module ListTagsForResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -8908,6 +9076,7 @@ module ListOnPremisesInstancesOutput =
         (Option.map ~f:InstanceNameList.of_xml)
           (Xml.child xml_arg0 "instanceNames") in
       make ?nextToken ?instanceNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let instanceNames =
@@ -8950,6 +9119,7 @@ module ListOnPremisesInstancesInput =
         (Option.map ~f:RegistrationStatus.of_xml)
           (Xml.child xml_arg0 "registrationStatus") in
       make ?nextToken ?tagFilters ?registrationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let tagFilters = field_map json "tagFilters" TagFilterList.of_json in
@@ -9032,6 +9202,7 @@ module ListGitHubAccountTokenNamesOutput =
         (Option.map ~f:GitHubAccountTokenNameList.of_xml)
           (Xml.child xml_arg0 "tokenNameList") in
       make ?nextToken ?tokenNameList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let tokenNameList =
@@ -9056,6 +9227,7 @@ module ListGitHubAccountTokenNamesInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       make ?nextToken ()
@@ -9225,6 +9397,7 @@ module ListDeploymentsOutput =
         (Option.map ~f:DeploymentsList.of_xml)
           (Xml.child xml_arg0 "deployments") in
       make ?nextToken ?deployments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let deployments = field_map json "deployments" DeploymentsList.of_json in
@@ -9300,6 +9473,7 @@ module ListDeploymentsInput =
           (Xml.child xml_arg0 "applicationName") in
       make ?nextToken ?createTimeRange ?includeOnlyStatuses ?externalId
         ?deploymentGroupName ?applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let createTimeRange =
@@ -9443,6 +9617,7 @@ module ListDeploymentTargetsOutput =
       let targetIds =
         (Option.map ~f:TargetIdList.of_xml) (Xml.child xml_arg0 "targetIds") in
       make ?nextToken ?targetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let targetIds = field_map json "targetIds" TargetIdList.of_json in
@@ -9484,6 +9659,7 @@ module ListDeploymentTargetsInput =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?targetFilters ?nextToken ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetFilters =
         field_map json "targetFilters" TargetFilters.of_json in
@@ -9646,6 +9822,7 @@ module ListDeploymentInstancesOutput =
         (Option.map ~f:InstancesList.of_xml)
           (Xml.child xml_arg0 "instancesList") in
       make ?nextToken ?instancesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let instancesList =
@@ -9704,6 +9881,7 @@ module ListDeploymentInstancesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ?instanceTypeFilter ?instanceStatusFilter ?nextToken ~deploymentId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceTypeFilter =
         field_map json "instanceTypeFilter" InstanceTypeList.of_json in
@@ -9813,6 +9991,7 @@ module ListDeploymentGroupsOutput =
         (Option.map ~f:ApplicationName.of_xml)
           (Xml.child xml_arg0 "applicationName") in
       make ?nextToken ?deploymentGroups ?applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let deploymentGroups =
@@ -9849,6 +10028,7 @@ module ListDeploymentGroupsInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ?nextToken ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let applicationName =
@@ -9910,6 +10090,7 @@ module ListDeploymentConfigsOutput =
         (Option.map ~f:DeploymentConfigsList.of_xml)
           (Xml.child xml_arg0 "deploymentConfigsList") in
       make ?nextToken ?deploymentConfigsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let deploymentConfigsList =
@@ -9934,6 +10115,7 @@ module ListDeploymentConfigsInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       make ?nextToken ()
@@ -9991,6 +10173,7 @@ module ListApplicationsOutput =
         (Option.map ~f:ApplicationsList.of_xml)
           (Xml.child xml_arg0 "applications") in
       make ?nextToken ?applications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let applications =
@@ -10014,6 +10197,7 @@ module ListApplicationsInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       make ?nextToken ()
@@ -10172,6 +10356,7 @@ module ListApplicationRevisionsOutput =
         (Option.map ~f:RevisionLocationList.of_xml)
           (Xml.child xml_arg0 "revisions") in
       make ?nextToken ?revisions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let revisions = field_map json "revisions" RevisionLocationList.of_json in
@@ -10255,6 +10440,7 @@ module ListApplicationRevisionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ?nextToken ?deployed ?s3KeyPrefix ?s3Bucket ?sortOrder ?sortBy
         ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let deployed = field_map json "deployed" ListStateFilterAction.of_json in
@@ -10277,6 +10463,7 @@ module InvalidTargetException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A target is not valid."]
@@ -10288,6 +10475,7 @@ module InvalidOperationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An invalid operation was detected."]
@@ -10299,6 +10487,7 @@ module InvalidInstanceIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -10310,6 +10499,7 @@ module InvalidIamUserArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The IAM user ARN was specified in an invalid format."]
@@ -10321,6 +10511,7 @@ module InvalidIamSessionArnException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The IAM session ARN was specified in an invalid format."]
@@ -10332,6 +10523,7 @@ module InvalidDeploymentWaitTypeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The wait type is invalid."]
@@ -10343,6 +10535,7 @@ module InstanceNameAlreadyRegisteredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10355,6 +10548,7 @@ module InstanceLimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10367,6 +10561,7 @@ module IamUserArnRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An IAM user ARN was not specified."]
@@ -10378,6 +10573,7 @@ module IamUserArnAlreadyRegisteredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10390,6 +10586,7 @@ module IamSessionArnAlreadyRegisteredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10402,6 +10599,7 @@ module IamArnRequiredException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10474,6 +10672,7 @@ module GetOnPremisesInstanceOutput =
         (Option.map ~f:InstanceInfo.of_xml)
           (Xml.child xml_arg0 "instanceInfo") in
       make ?instanceInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceInfo = field_map json "instanceInfo" InstanceInfo.of_json in
       make ?instanceInfo ()
@@ -10498,6 +10697,7 @@ module GetOnPremisesInstanceInput =
         InstanceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceName") in
       make ~instanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceName =
         field_map_exn json "instanceName" InstanceName.of_json in
@@ -10633,6 +10833,7 @@ module GetDeploymentTargetOutput =
         (Option.map ~f:DeploymentTarget.of_xml)
           (Xml.child xml_arg0 "deploymentTarget") in
       make ?deploymentTarget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentTarget =
         field_map json "deploymentTarget" DeploymentTarget.of_json in
@@ -10662,6 +10863,7 @@ module GetDeploymentTargetInput =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?targetId ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetId = field_map json "targetId" TargetId.of_json in
       let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
@@ -10737,6 +10939,7 @@ module GetDeploymentOutput =
         (Option.map ~f:DeploymentInfo.of_xml)
           (Xml.child xml_arg0 "deploymentInfo") in
       make ?deploymentInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentInfo =
         field_map json "deploymentInfo" DeploymentInfo.of_json in
@@ -10856,6 +11059,7 @@ module GetDeploymentInstanceOutput =
         (Option.map ~f:InstanceSummary.of_xml)
           (Xml.child xml_arg0 "instanceSummary") in
       make ?instanceSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceSummary =
         field_map json "instanceSummary" InstanceSummary.of_json in
@@ -10887,6 +11091,7 @@ module GetDeploymentInstanceInput =
         DeploymentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~instanceId ~deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "instanceId" InstanceId.of_json in
       let deploymentId =
@@ -10913,6 +11118,7 @@ module GetDeploymentInput =
         DeploymentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentId =
         field_map_exn json "deploymentId" DeploymentId.of_json in
@@ -11038,6 +11244,7 @@ module GetDeploymentGroupOutput =
         (Option.map ~f:DeploymentGroupInfo.of_xml)
           (Xml.child xml_arg0 "deploymentGroupInfo") in
       make ?deploymentGroupInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentGroupInfo =
         field_map json "deploymentGroupInfo" DeploymentGroupInfo.of_json in
@@ -11073,6 +11280,7 @@ module GetDeploymentGroupInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~deploymentGroupName ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentGroupName =
         field_map_exn json "deploymentGroupName" DeploymentGroupName.of_json in
@@ -11165,6 +11373,7 @@ module GetDeploymentConfigOutput =
         (Option.map ~f:DeploymentConfigInfo.of_xml)
           (Xml.child xml_arg0 "deploymentConfigInfo") in
       make ?deploymentConfigInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentConfigInfo =
         field_map json "deploymentConfigInfo" DeploymentConfigInfo.of_json in
@@ -11191,6 +11400,7 @@ module GetDeploymentConfigInput =
         DeploymentConfigName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentConfigName") in
       make ~deploymentConfigName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentConfigName =
         field_map_exn json "deploymentConfigName"
@@ -11316,6 +11526,7 @@ module GetApplicationRevisionOutput =
         (Option.map ~f:ApplicationName.of_xml)
           (Xml.child xml_arg0 "applicationName") in
       make ?revisionInfo ?revision ?applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionInfo =
         field_map json "revisionInfo" GenericRevisionInfo.of_json in
@@ -11353,6 +11564,7 @@ module GetApplicationRevisionInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~revision ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "revision" RevisionLocation.of_json in
       let applicationName =
@@ -11432,6 +11644,7 @@ module GetApplicationOutput =
         (Option.map ~f:ApplicationInfo.of_xml)
           (Xml.child xml_arg0 "application") in
       make ?application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let application = field_map json "application" ApplicationInfo.of_json in
       make ?application ()
@@ -11456,6 +11669,7 @@ module GetApplicationInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationName =
         field_map_exn json "applicationName" ApplicationName.of_json in
@@ -11479,6 +11693,7 @@ module DeregisterOnPremisesInstanceInput =
         InstanceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceName") in
       make ~instanceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceName =
         field_map_exn json "instanceName" InstanceName.of_json in
@@ -11494,6 +11709,7 @@ module DeploymentIsNotInReadyStateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11506,6 +11722,7 @@ module DeploymentConfigInUseException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The deployment configuration is still in use."]
@@ -11517,6 +11734,7 @@ module DeploymentAlreadyStartedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11547,6 +11765,7 @@ module DeleteResourcesByExternalIdOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes resources linked to an external ID."]
@@ -11566,6 +11785,7 @@ module DeleteResourcesByExternalIdInput =
       let externalId =
         (Option.map ~f:ExternalId.of_xml) (Xml.child xml_arg0 "externalId") in
       make ?externalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map json "externalId" ExternalId.of_json in
       make ?externalId ()
@@ -11666,6 +11886,7 @@ module DeleteGitHubAccountTokenOutput =
         (Option.map ~f:GitHubAccountTokenName.of_xml)
           (Xml.child xml_arg0 "tokenName") in
       make ?tokenName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tokenName =
         field_map json "tokenName" GitHubAccountTokenName.of_json in
@@ -11690,6 +11911,7 @@ module DeleteGitHubAccountTokenInput =
         (Option.map ~f:GitHubAccountTokenName.of_xml)
           (Xml.child xml_arg0 "tokenName") in
       make ?tokenName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tokenName =
         field_map json "tokenName" GitHubAccountTokenName.of_json in
@@ -11789,6 +12011,7 @@ module DeleteDeploymentGroupOutput =
         (Option.map ~f:AutoScalingGroupList.of_xml)
           (Xml.child xml_arg0 "hooksNotCleanedUp") in
       make ?hooksNotCleanedUp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hooksNotCleanedUp =
         field_map json "hooksNotCleanedUp" AutoScalingGroupList.of_json in
@@ -11825,6 +12048,7 @@ module DeleteDeploymentGroupInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~deploymentGroupName ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentGroupName =
         field_map_exn json "deploymentGroupName" DeploymentGroupName.of_json in
@@ -11853,6 +12077,7 @@ module DeleteDeploymentConfigInput =
         DeploymentConfigName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentConfigName") in
       make ~deploymentConfigName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentConfigName =
         field_map_exn json "deploymentConfigName"
@@ -11880,6 +12105,7 @@ module DeleteApplicationInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationName =
         field_map_exn json "applicationName" ApplicationName.of_json in
@@ -12200,6 +12426,7 @@ module CreateDeploymentOutput =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
       make ?deploymentId ()
@@ -12316,6 +12543,7 @@ module CreateDeploymentInput =
         ?autoRollbackConfiguration ?targetInstances
         ?ignoreApplicationStopFailures ?description ?deploymentConfigName
         ?revision ?deploymentGroupName ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileExistsBehavior =
         field_map json "fileExistsBehavior" FileExistsBehavior.of_json in
@@ -12748,6 +12976,7 @@ module CreateDeploymentGroupOutput =
         (Option.map ~f:DeploymentGroupId.of_xml)
           (Xml.child xml_arg0 "deploymentGroupId") in
       make ?deploymentGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentGroupId =
         field_map json "deploymentGroupId" DeploymentGroupId.of_json in
@@ -12952,6 +13181,7 @@ module CreateDeploymentGroupInput =
         ?alarmConfiguration ?triggerConfigurations ~serviceRoleArn
         ?autoScalingGroups ?onPremisesInstanceTagFilters ?ec2TagFilters
         ?deploymentConfigName ~deploymentGroupName ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let onPremisesTagSet =
@@ -13118,6 +13348,7 @@ module CreateDeploymentConfigOutput =
         (Option.map ~f:DeploymentConfigId.of_xml)
           (Xml.child xml_arg0 "deploymentConfigId") in
       make ?deploymentConfigId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentConfigId =
         field_map json "deploymentConfigId" DeploymentConfigId.of_json in
@@ -13178,6 +13409,7 @@ module CreateDeploymentConfigInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentConfigName") in
       make ?computePlatform ?trafficRoutingConfig ?minimumHealthyHosts
         ~deploymentConfigName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computePlatform =
         field_map json "computePlatform" ComputePlatform.of_json in
@@ -13296,6 +13528,7 @@ module CreateApplicationOutput =
         (Option.map ~f:ApplicationId.of_xml)
           (Xml.child xml_arg0 "applicationId") in
       make ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationId =
         field_map json "applicationId" ApplicationId.of_json in
@@ -13337,6 +13570,7 @@ module CreateApplicationInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ?tags ?computePlatform ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let computePlatform =
@@ -13374,6 +13608,7 @@ module ContinueDeploymentInput =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?deploymentWaitType ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentWaitType =
         field_map json "deploymentWaitType" DeploymentWaitType.of_json in
@@ -13450,6 +13685,7 @@ module BatchGetOnPremisesInstancesOutput =
         (Option.map ~f:InstanceInfoList.of_xml)
           (Xml.child xml_arg0 "instanceInfos") in
       make ?instanceInfos ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceInfos =
         field_map json "instanceInfos" InstanceInfoList.of_json in
@@ -13476,6 +13712,7 @@ module BatchGetOnPremisesInstancesInput =
         InstanceNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceNames") in
       make ~instanceNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceNames =
         field_map_exn json "instanceNames" InstanceNameList.of_json in
@@ -13551,6 +13788,7 @@ module BatchGetDeploymentsOutput =
         (Option.map ~f:DeploymentsInfoList.of_xml)
           (Xml.child xml_arg0 "deploymentsInfo") in
       make ?deploymentsInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentsInfo =
         field_map json "deploymentsInfo" DeploymentsInfoList.of_json in
@@ -13576,6 +13814,7 @@ module BatchGetDeploymentsInput =
         DeploymentsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentIds") in
       make ~deploymentIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentIds =
         field_map_exn json "deploymentIds" DeploymentsList.of_json in
@@ -13723,6 +13962,7 @@ module BatchGetDeploymentTargetsOutput =
         (Option.map ~f:DeploymentTargetList.of_xml)
           (Xml.child xml_arg0 "deploymentTargets") in
       make ?deploymentTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentTargets =
         field_map json "deploymentTargets" DeploymentTargetList.of_json in
@@ -13754,6 +13994,7 @@ module BatchGetDeploymentTargetsInput =
         (Option.map ~f:DeploymentId.of_xml)
           (Xml.child xml_arg0 "deploymentId") in
       make ?targetIds ?deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetIds = field_map json "targetIds" TargetIdList.of_json in
       let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
@@ -13882,6 +14123,7 @@ module BatchGetDeploymentInstancesOutput =
         (Option.map ~f:InstanceSummaryList.of_xml)
           (Xml.child xml_arg0 "instancesSummary") in
       make ?errorMessage ?instancesSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
       let instancesSummary =
@@ -13915,6 +14157,7 @@ module BatchGetDeploymentInstancesInput =
         DeploymentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~instanceIds ~deploymentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceIds =
         field_map_exn json "instanceIds" InstancesList.of_json in
@@ -14052,6 +14295,7 @@ module BatchGetDeploymentGroupsOutput =
         (Option.map ~f:DeploymentGroupInfoList.of_xml)
           (Xml.child xml_arg0 "deploymentGroupsInfo") in
       make ?errorMessage ?deploymentGroupsInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
       let deploymentGroupsInfo =
@@ -14088,6 +14332,7 @@ module BatchGetDeploymentGroupsInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~deploymentGroupNames ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentGroupNames =
         field_map_exn json "deploymentGroupNames"
@@ -14180,6 +14425,7 @@ module BatchGetApplicationsOutput =
         (Option.map ~f:ApplicationsInfoList.of_xml)
           (Xml.child xml_arg0 "applicationsInfo") in
       make ?applicationsInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationsInfo =
         field_map json "applicationsInfo" ApplicationsInfoList.of_json in
@@ -14206,6 +14452,7 @@ module BatchGetApplicationsInput =
         ApplicationsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationNames") in
       make ~applicationNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationNames =
         field_map_exn json "applicationNames" ApplicationsList.of_json in
@@ -14332,6 +14579,7 @@ module BatchGetApplicationRevisionsOutput =
         (Option.map ~f:ApplicationName.of_xml)
           (Xml.child xml_arg0 "applicationName") in
       make ?revisions ?errorMessage ?applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisions = field_map json "revisions" RevisionInfoList.of_json in
       let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
@@ -14368,6 +14616,7 @@ module BatchGetApplicationRevisionsInput =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~revisions ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisions =
         field_map_exn json "revisions" RevisionLocationList.of_json in
@@ -14401,6 +14650,7 @@ module AddTagsToOnPremisesInstancesInput =
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~instanceNames ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceNames =
         field_map_exn json "instanceNames" InstanceNameList.of_json in

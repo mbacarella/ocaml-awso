@@ -205,6 +205,7 @@ module User =
       let userId =
         StringType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?properties ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties = field_map json "properties" UserProperties.of_json in
       let userId = field_map_exn json "userId" StringType.of_json in
@@ -234,6 +235,7 @@ module Item =
       let itemId =
         StringType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "itemId") in
       make ?properties ~itemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties = field_map json "properties" ItemProperties.of_json in
       let itemId = field_map_exn json "itemId" StringType.of_json in
@@ -323,6 +325,7 @@ module Event =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "eventId") in
       make ?impression ?recommendationId ~sentAt ?properties ?itemId
         ?eventValue ~eventType ?eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let impression = field_map json "impression" Impression.of_json in
       let recommendationId =
@@ -484,6 +487,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -502,6 +506,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -528,6 +533,7 @@ module PutUsersRequest =
       let datasetArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
       make ~users ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let users = field_map_exn json "users" UserList.of_json in
       let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
@@ -556,6 +562,7 @@ module PutItemsRequest =
       let datasetArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
       make ~items ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "items" ItemList.of_json in
       let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
@@ -603,6 +610,7 @@ module PutEventsRequest =
         StringType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "trackingId") in
       make ~eventList ~sessionId ?userId ~trackingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventList = field_map_exn json "eventList" EventList.of_json in
       let sessionId = field_map_exn json "sessionId" StringType.of_json in
@@ -625,6 +633,7 @@ module InvalidInputException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()

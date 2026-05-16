@@ -110,6 +110,7 @@ module ListCustomLineItemFlatChargeDetails =
         CustomLineItemChargeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChargeValue") in
       make ~chargeValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chargeValue =
         field_map_exn json "ChargeValue" CustomLineItemChargeValue.of_json in
@@ -137,6 +138,7 @@ module ListCustomLineItemPercentageChargeDetails =
         CustomLineItemPercentageChargeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PercentageValue") in
       make ~percentageValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let percentageValue =
         field_map_exn json "PercentageValue"
@@ -236,6 +238,7 @@ module ValidationExceptionField =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~message ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -652,6 +655,7 @@ module ListCustomLineItemChargeDetails =
         (Option.map ~f:ListCustomLineItemFlatChargeDetails.of_xml)
           (Xml.child xml_arg0 "Flat") in
       make ~type_ ?percentage ?flat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" CustomLineItemType.of_json in
       let percentage =
@@ -789,6 +793,7 @@ module ComputationPreference =
         PricingPlanFullArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PricingPlanArn") in
       make ~pricingPlanArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingPlanArn =
         field_map_exn json "PricingPlanArn" PricingPlanFullArn.of_json in
@@ -955,6 +960,7 @@ module AssociateResourceError =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" AssociateResourceErrorReason.of_json in
@@ -1193,6 +1199,7 @@ module UpdateCustomLineItemFlatChargeDetails =
         CustomLineItemChargeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChargeValue") in
       make ~chargeValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chargeValue =
         field_map_exn json "ChargeValue" CustomLineItemChargeValue.of_json in
@@ -1220,6 +1227,7 @@ module UpdateCustomLineItemPercentageChargeDetails =
         CustomLineItemPercentageChargeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PercentageValue") in
       make ~percentageValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let percentageValue =
         field_map_exn json "PercentageValue"
@@ -1289,6 +1297,7 @@ module ListResourcesAssociatedToCustomLineItemResponseElement =
         (Option.map ~f:CustomLineItemAssociationElement.of_xml)
           (Xml.child xml_arg0 "Arn") in
       make ?relationship ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relationship =
         field_map json "Relationship" CustomLineItemRelationship.of_json in
@@ -1394,6 +1403,7 @@ module PricingRuleListElement =
         (Option.map ~f:PricingRuleName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lastModifiedTime ?creationTime ?associatedPricingPlanCount
         ?service ?modifierPercentage ?type_ ?scope ?description ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" Instant.of_json in
@@ -1505,6 +1515,7 @@ module PricingPlanListElement =
       let name =
         (Option.map ~f:PricingPlanName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lastModifiedTime ?creationTime ?size ?description ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" Instant.of_json in
@@ -1650,6 +1661,7 @@ module CustomLineItemListElement =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?associationSize ?lastModifiedTime ?creationTime ?billingGroupArn
         ?productCode ?description ?currencyCode ?chargeDetails ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationSize =
         field_map json "AssociationSize" NumberOfAssociations.of_json in
@@ -1861,6 +1873,7 @@ module BillingGroupListElement =
         (Option.map ~f:BillingGroupName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?statusReason ?status ?lastModifiedTime ?creationTime ?size
         ?computationPreference ?primaryAccountId ?description ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason =
         field_map json "StatusReason" BillingGroupStatusReason.of_json in
@@ -1939,6 +1952,7 @@ module BillingGroupCostReportElement =
       let arn =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?currency ?marginPercentage ?margin ?proformaCost ?aWSCost ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currency = field_map json "Currency" Currency.of_json in
       let marginPercentage =
@@ -1991,6 +2005,7 @@ module AccountAssociationsListElement =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?accountEmail ?accountName ?billingGroupArn ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountEmail = field_map json "AccountEmail" AccountEmail.of_json in
       let accountName = field_map json "AccountName" AccountName.of_json in
@@ -2037,6 +2052,7 @@ module CustomLineItemFlatChargeDetails =
         CustomLineItemChargeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChargeValue") in
       make ~chargeValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chargeValue =
         field_map_exn json "ChargeValue" CustomLineItemChargeValue.of_json in
@@ -2074,6 +2090,7 @@ module CustomLineItemPercentageChargeDetails =
         CustomLineItemPercentageChargeValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PercentageValue") in
       make ?associatedValues ~percentageValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associatedValues =
         field_map json "AssociatedValues"
@@ -2136,6 +2153,7 @@ module DisassociateResourceResponseElement =
       let arn =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?error ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" AssociateResourceError.of_json in
       let arn = field_map json "Arn" CustomLineItemArn.of_json in
@@ -2166,6 +2184,7 @@ module AssociateResourceResponseElement =
       let arn =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?error ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" AssociateResourceError.of_json in
       let arn = field_map json "Arn" CustomLineItemArn.of_json in
@@ -2186,6 +2205,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2219,6 +2239,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "ResourceType" String_.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
@@ -2250,6 +2271,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -2286,6 +2308,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "ResourceType" String_.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
@@ -2316,6 +2339,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -2353,6 +2377,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?fields ?reason ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields =
         field_map json "Fields" ValidationExceptionFieldList.of_json in
@@ -2411,6 +2436,7 @@ module CustomLineItemBillingPeriodRange =
           (Xml.child_exn ~context:context_ xml_arg0
              "InclusiveStartBillingPeriod") in
       make ~exclusiveEndBillingPeriod ~inclusiveStartBillingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exclusiveEndBillingPeriod =
         field_map_exn json "ExclusiveEndBillingPeriod" BillingPeriod.of_json in
@@ -2449,6 +2475,7 @@ module UpdateCustomLineItemChargeDetails =
         (Option.map ~f:UpdateCustomLineItemFlatChargeDetails.of_xml)
           (Xml.child xml_arg0 "Flat") in
       make ?percentage ?flat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let percentage =
         field_map json "Percentage"
@@ -2605,6 +2632,7 @@ module ListResourcesAssociatedToCustomLineItemFilter =
         (Option.map ~f:CustomLineItemRelationship.of_xml)
           (Xml.child xml_arg0 "Relationship") in
       make ?relationship ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relationship =
         field_map json "Relationship" CustomLineItemRelationship.of_json in
@@ -2673,6 +2701,7 @@ module ListPricingRulesFilter =
       let arns =
         (Option.map ~f:PricingRuleArns.of_xml) (Xml.child xml_arg0 "Arns") in
       make ?arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arns = field_map json "Arns" PricingRuleArns.of_json in
       make ?arns ()
@@ -2757,6 +2786,7 @@ module ListPricingPlansFilter =
       let arns =
         (Option.map ~f:PricingPlanArns.of_xml) (Xml.child xml_arg0 "Arns") in
       make ?arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arns = field_map json "Arns" PricingPlanArns.of_json in
       make ?arns ()
@@ -2821,6 +2851,7 @@ module ListCustomLineItemsFilter =
         (Option.map ~f:CustomLineItemNameList.of_xml)
           (Xml.child xml_arg0 "Names") in
       make ?arns ?billingGroups ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arns = field_map json "Arns" CustomLineItemArns.of_json in
       let billingGroups =
@@ -2899,6 +2930,7 @@ module ListBillingGroupsFilter =
         (Option.map ~f:BillingGroupArnList.of_xml)
           (Xml.child xml_arg0 "Arns") in
       make ?pricingPlan ?arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingPlan =
         field_map json "PricingPlan" PricingPlanFullArn.of_json in
@@ -2951,6 +2983,7 @@ module ListBillingGroupCostReportsFilter =
         (Option.map ~f:BillingGroupArnList.of_xml)
           (Xml.child xml_arg0 "BillingGroupArns") in
       make ?billingGroupArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingGroupArns =
         field_map json "BillingGroupArns" BillingGroupArnList.of_json in
@@ -3006,6 +3039,7 @@ module ListAccountAssociationsFilter =
       let association =
         (Option.map ~f:Association.of_xml) (Xml.child xml_arg0 "Association") in
       make ?accountId ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "AccountId" AccountId.of_json in
       let association = field_map json "Association" Association.of_json in
@@ -3086,6 +3120,7 @@ module ServiceLimitExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "ServiceCode" String_.of_json in
       let limitCode = field_map_exn json "LimitCode" String_.of_json in
@@ -3180,6 +3215,7 @@ module CustomLineItemChargeDetails =
         (Option.map ~f:CustomLineItemFlatChargeDetails.of_xml)
           (Xml.child xml_arg0 "Flat") in
       make ~type_ ?percentage ?flat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" CustomLineItemType.of_json in
       let percentage =
@@ -3210,6 +3246,7 @@ module AccountGrouping =
         AccountIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LinkedAccountIds") in
       make ~linkedAccountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkedAccountIds =
         field_map_exn json "LinkedAccountIds" AccountIdList.of_json in
@@ -3496,6 +3533,7 @@ module UpdatePricingRuleOutput =
         (Option.map ~f:PricingRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?lastModifiedTime ?associatedPricingPlanCount ?service
         ?modifierPercentage ?type_ ?scope ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" Instant.of_json in
@@ -3564,6 +3602,7 @@ module UpdatePricingRuleInput =
         PricingRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?modifierPercentage ?type_ ?description ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modifierPercentage =
         field_map json "ModifierPercentage" ModifierPercentage.of_json in
@@ -3696,6 +3735,7 @@ module UpdatePricingPlanOutput =
       let arn =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?lastModifiedTime ?size ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" Instant.of_json in
@@ -3739,6 +3779,7 @@ module UpdatePricingPlanInput =
         PricingPlanArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?description ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" PricingPlanDescription.of_json in
@@ -3888,6 +3929,7 @@ module UpdateCustomLineItemOutput =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?associationSize ?lastModifiedTime ?chargeDetails ?description
         ?name ?billingGroupArn ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationSize =
         field_map json "AssociationSize" NumberOfAssociations.of_json in
@@ -3958,6 +4000,7 @@ module UpdateCustomLineItemInput =
         CustomLineItemArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?billingPeriodRange ?chargeDetails ?description ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingPeriodRange =
         field_map json "BillingPeriodRange"
@@ -4139,6 +4182,7 @@ module UpdateBillingGroupOutput =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?statusReason ?status ?lastModifiedTime ?size ?pricingPlanArn
         ?primaryAccountId ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason =
         field_map json "StatusReason" BillingGroupStatusReason.of_json in
@@ -4211,6 +4255,7 @@ module UpdateBillingGroupInput =
         BillingGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?description ?computationPreference ?status ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" BillingGroupDescription.of_json in
@@ -4293,6 +4338,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes specified tags from a resource."]
@@ -4321,6 +4367,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -4398,6 +4445,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4425,6 +4473,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -4507,6 +4556,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4528,6 +4578,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -4631,6 +4682,7 @@ module ListResourcesAssociatedToCustomLineItemOutput =
       let arn =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?nextToken ?associatedResources ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let associatedResources =
@@ -4695,6 +4747,7 @@ module ListResourcesAssociatedToCustomLineItemInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ~arn ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters =
         field_map json "Filters"
@@ -4796,6 +4849,7 @@ module ListPricingRulesOutput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingRules ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let pricingRules =
@@ -4848,6 +4902,7 @@ module ListPricingRulesInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ?filters ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -4966,6 +5021,7 @@ module ListPricingRulesAssociatedToPricingPlanOutput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingRuleArns ?pricingPlanArn ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let pricingRuleArns =
@@ -5022,6 +5078,7 @@ module ListPricingRulesAssociatedToPricingPlanInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ~pricingPlanArn ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -5121,6 +5178,7 @@ module ListPricingPlansOutput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingPlans ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let pricingPlans =
@@ -5173,6 +5231,7 @@ module ListPricingPlansInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ?filters ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -5291,6 +5350,7 @@ module ListPricingPlansAssociatedWithPricingRuleOutput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingPlanArns ?pricingRuleArn ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let pricingPlanArns =
@@ -5348,6 +5408,7 @@ module ListPricingPlansAssociatedWithPricingRuleInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ~pricingRuleArn ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -5447,6 +5508,7 @@ module ListCustomLineItemsOutput =
         (Option.map ~f:CustomLineItemList.of_xml)
           (Xml.child xml_arg0 "CustomLineItems") in
       make ?nextToken ?customLineItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let customLineItems =
@@ -5498,6 +5560,7 @@ module ListCustomLineItemsInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters =
         field_map json "Filters" ListCustomLineItemsFilter.of_json in
@@ -5597,6 +5660,7 @@ module ListBillingGroupsOutput =
         (Option.map ~f:BillingGroupList.of_xml)
           (Xml.child xml_arg0 "BillingGroups") in
       make ?nextToken ?billingGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let billingGroups =
@@ -5647,6 +5711,7 @@ module ListBillingGroupsInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" ListBillingGroupsFilter.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -5746,6 +5811,7 @@ module ListBillingGroupCostReportsOutput =
         (Option.map ~f:BillingGroupCostReportList.of_xml)
           (Xml.child xml_arg0 "BillingGroupCostReports") in
       make ?nextToken ?billingGroupCostReports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let billingGroupCostReports =
@@ -5797,6 +5863,7 @@ module ListBillingGroupCostReportsInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters =
         field_map json "Filters" ListBillingGroupCostReportsFilter.of_json in
@@ -5896,6 +5963,7 @@ module ListAccountAssociationsOutput =
         (Option.map ~f:AccountAssociationsList.of_xml)
           (Xml.child xml_arg0 "LinkedAccounts") in
       make ?nextToken ?linkedAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let linkedAccounts =
@@ -5938,6 +6006,7 @@ module ListAccountAssociationsInput =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?filters ?billingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let filters =
@@ -6036,6 +6105,7 @@ module DisassociatePricingRulesOutput =
       let arn =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6068,6 +6138,7 @@ module DisassociatePricingRulesInput =
         PricingPlanArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~pricingRuleArns ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingRuleArns =
         field_map_exn json "PricingRuleArns"
@@ -6165,6 +6236,7 @@ module DisassociateAccountsOutput =
       let arn =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6194,6 +6266,7 @@ module DisassociateAccountsInput =
         BillingGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~accountIds ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
       let arn = field_map_exn json "Arn" BillingGroupArn.of_json in
@@ -6280,6 +6353,7 @@ module DeletePricingRuleOutput =
       let arn =
         (Option.map ~f:PricingRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PricingRuleArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6302,6 +6376,7 @@ module DeletePricingRuleInput =
         PricingRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" PricingRuleArn.of_json in
       make ~arn ()
@@ -6387,6 +6462,7 @@ module DeletePricingPlanOutput =
       let arn =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6409,6 +6485,7 @@ module DeletePricingPlanInput =
         PricingPlanArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" PricingPlanArn.of_json in
       make ~arn ()
@@ -6493,6 +6570,7 @@ module DeleteCustomLineItemOutput =
       let arn =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" CustomLineItemArn.of_json in
       make ?arn ()
@@ -6524,6 +6602,7 @@ module DeleteCustomLineItemInput =
         CustomLineItemArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?billingPeriodRange ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingPeriodRange =
         field_map json "BillingPeriodRange"
@@ -6603,6 +6682,7 @@ module DeleteBillingGroupOutput =
       let arn =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6624,6 +6704,7 @@ module DeleteBillingGroupInput =
         BillingGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" BillingGroupArn.of_json in
       make ~arn ()
@@ -6719,6 +6800,7 @@ module CreatePricingRuleOutput =
       let arn =
         (Option.map ~f:PricingRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PricingRuleArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6807,6 +6889,7 @@ module CreatePricingRuleInput =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?service ~modifierPercentage ~type_ ~scope ?description
         ~name ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let service = field_map json "Service" Service.of_json in
@@ -6922,6 +7005,7 @@ module CreatePricingPlanOutput =
       let arn =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6979,6 +7063,7 @@ module CreatePricingPlanInput =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?pricingRuleArns ?description ~name ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let pricingRuleArns =
@@ -7081,6 +7166,7 @@ module CreateCustomLineItemOutput =
       let arn =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" CustomLineItemArn.of_json in
       make ?arn ()
@@ -7167,6 +7253,7 @@ module CreateCustomLineItemInput =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ~chargeDetails ?tags ?billingPeriodRange ~billingGroupArn
         ~description ~name ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chargeDetails =
         field_map_exn json "ChargeDetails"
@@ -7276,6 +7363,7 @@ module CreateBillingGroupOutput =
       let arn =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7359,6 +7447,7 @@ module CreateBillingGroupInput =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?description ?primaryAccountId ~computationPreference
         ~accountGrouping ~name ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let description =
@@ -7484,6 +7573,7 @@ module BatchDisassociateResourcesFromCustomLineItemOutput =
           (Xml.child xml_arg0 "SuccessfullyDisassociatedResources") in
       make ?failedDisassociatedResources ?successfullyDisassociatedResources
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedDisassociatedResources =
         field_map json "FailedDisassociatedResources"
@@ -7533,6 +7623,7 @@ module BatchDisassociateResourcesFromCustomLineItemInput =
         CustomLineItemArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetArn") in
       make ?billingPeriodRange ~resourceArns ~targetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingPeriodRange =
         field_map json "BillingPeriodRange"
@@ -7661,6 +7752,7 @@ module BatchAssociateResourcesToCustomLineItemOutput =
         (Option.map ~f:AssociateResourcesResponseList.of_xml)
           (Xml.child xml_arg0 "SuccessfullyAssociatedResources") in
       make ?failedAssociatedResources ?successfullyAssociatedResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedAssociatedResources =
         field_map json "FailedAssociatedResources"
@@ -7708,6 +7800,7 @@ module BatchAssociateResourcesToCustomLineItemInput =
         CustomLineItemArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetArn") in
       make ?billingPeriodRange ~resourceArns ~targetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingPeriodRange =
         field_map json "BillingPeriodRange"
@@ -7820,6 +7913,7 @@ module AssociatePricingRulesOutput =
       let arn =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7852,6 +7946,7 @@ module AssociatePricingRulesInput =
         PricingPlanArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~pricingRuleArns ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pricingRuleArns =
         field_map_exn json "PricingRuleArns"
@@ -7960,6 +8055,7 @@ module AssociateAccountsOutput =
       let arn =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7989,6 +8085,7 @@ module AssociateAccountsInput =
         BillingGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~accountIds ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
       let arn = field_map_exn json "Arn" BillingGroupArn.of_json in

@@ -159,6 +159,7 @@ module ProcessorParameter =
         ProcessorParameterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterName") in
       make ~parameterValue ~parameterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterValue =
         field_map_exn json "ParameterValue" ProcessorParameterValue.of_json in
@@ -543,6 +544,7 @@ module HiveJsonSerDe =
         (Option.map ~f:ListOfNonEmptyStrings.of_xml)
           (Xml.child xml_arg0 "TimestampFormats") in
       make ?timestampFormats ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestampFormats =
         field_map json "TimestampFormats" ListOfNonEmptyStrings.of_json in
@@ -595,6 +597,7 @@ module OpenXJsonSerDe =
           (Xml.child xml_arg0 "ConvertDotsInJsonKeysToUnderscores") in
       make ?columnToJsonKeyMappings ?caseInsensitive
         ?convertDotsInJsonKeysToUnderscores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let columnToJsonKeyMappings =
         field_map json "ColumnToJsonKeyMappings"
@@ -726,6 +729,7 @@ module OrcSerDe =
         ?bloomFilterFalsePositiveProbability ?bloomFilterColumns ?compression
         ?paddingTolerance ?enablePadding ?rowIndexStride ?blockSizeBytes
         ?stripeSizeBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let formatVersion =
         field_map json "FormatVersion" OrcFormatVersion.of_json in
@@ -827,6 +831,7 @@ module ParquetSerDe =
           (Xml.child xml_arg0 "BlockSizeBytes") in
       make ?writerVersion ?maxPaddingBytes ?enableDictionaryCompression
         ?compression ?pageSizeBytes ?blockSizeBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writerVersion =
         field_map json "WriterVersion" ParquetWriterVersion.of_json in
@@ -908,6 +913,7 @@ module Processor =
         ProcessorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?parameters ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "Parameters" ProcessorParameterList.of_json in
@@ -1008,6 +1014,7 @@ module KMSEncryptionConfig =
         AWSKMSKeyARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AWSKMSKeyARN") in
       make ~aWSKMSKeyARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aWSKMSKeyARN =
         field_map_exn json "AWSKMSKeyARN" AWSKMSKeyARN.of_json in
@@ -1061,6 +1068,7 @@ module Deserializer =
         (Option.map ~f:OpenXJsonSerDe.of_xml)
           (Xml.child xml_arg0 "OpenXJsonSerDe") in
       make ?hiveJsonSerDe ?openXJsonSerDe ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hiveJsonSerDe =
         field_map json "HiveJsonSerDe" HiveJsonSerDe.of_json in
@@ -1095,6 +1103,7 @@ module Serializer =
         (Option.map ~f:ParquetSerDe.of_xml)
           (Xml.child xml_arg0 "ParquetSerDe") in
       make ?orcSerDe ?parquetSerDe ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orcSerDe = field_map json "OrcSerDe" OrcSerDe.of_json in
       let parquetSerDe = field_map json "ParquetSerDe" ParquetSerDe.of_json in
@@ -1146,6 +1155,7 @@ module HttpEndpointCommonAttribute =
         HttpEndpointAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ~attributeValue ~attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeValue =
         field_map_exn json "AttributeValue"
@@ -1285,6 +1295,7 @@ module BufferingHints =
       let sizeInMBs =
         (Option.map ~f:SizeInMBs.of_xml) (Xml.child xml_arg0 "SizeInMBs") in
       make ?intervalInSeconds ?sizeInMBs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intervalInSeconds =
         field_map json "IntervalInSeconds" IntervalInSeconds.of_json in
@@ -1327,6 +1338,7 @@ module CloudWatchLoggingOptions =
       let enabled =
         (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?logStreamName ?logGroupName ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logStreamName =
         field_map json "LogStreamName" LogStreamName.of_json in
@@ -1398,6 +1410,7 @@ module EncryptionConfiguration =
         (Option.map ~f:NoEncryptionConfig.of_xml)
           (Xml.child xml_arg0 "NoEncryptionConfig") in
       make ?kMSEncryptionConfig ?noEncryptionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSEncryptionConfig =
         field_map json "KMSEncryptionConfig" KMSEncryptionConfig.of_json in
@@ -1603,6 +1616,7 @@ module InputFormatConfiguration =
         (Option.map ~f:Deserializer.of_xml)
           (Xml.child xml_arg0 "Deserializer") in
       make ?deserializer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deserializer = field_map json "Deserializer" Deserializer.of_json in
       make ?deserializer ()
@@ -1625,6 +1639,7 @@ module OutputFormatConfiguration =
       let serializer =
         (Option.map ~f:Serializer.of_xml) (Xml.child xml_arg0 "Serializer") in
       make ?serializer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serializer = field_map json "Serializer" Serializer.of_json in
       make ?serializer ()
@@ -1704,6 +1719,7 @@ module SchemaConfiguration =
         (Option.map ~f:NonEmptyStringWithoutWhitespace.of_xml)
           (Xml.child xml_arg0 "RoleARN") in
       make ?versionId ?region ?tableName ?databaseName ?catalogId ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId =
         field_map json "VersionId" NonEmptyStringWithoutWhitespace.of_json in
@@ -1739,6 +1755,7 @@ module RetryOptions =
         (Option.map ~f:RetryDurationInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds" RetryDurationInSeconds.of_json in
@@ -2018,6 +2035,7 @@ module AmazonopensearchserviceBufferingHints =
            ~f:AmazonopensearchserviceBufferingIntervalInSeconds.of_xml)
           (Xml.child xml_arg0 "IntervalInSeconds") in
       make ?sizeInMBs ?intervalInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeInMBs =
         field_map json "SizeInMBs"
@@ -2146,6 +2164,7 @@ module AmazonopensearchserviceRetryOptions =
         (Option.map ~f:AmazonopensearchserviceRetryDurationInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds"
@@ -2222,6 +2241,7 @@ module ProcessingConfiguration =
       let enabled =
         (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?processors ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processors = field_map json "Processors" ProcessorList.of_json in
       let enabled = field_map json "Enabled" BooleanObject.of_json in
@@ -2318,6 +2338,7 @@ module S3DestinationDescription =
       make ?cloudWatchLoggingOptions ~encryptionConfiguration
         ~compressionFormat ~bufferingHints ?errorOutputPrefix ?prefix
         ~bucketARN ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -2381,6 +2402,7 @@ module VpcConfigurationDescription =
         SubnetIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
       make ~vpcId ~securityGroupIds ~roleARN ~subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId =
         field_map_exn json "VpcId" NonEmptyStringWithoutWhitespace.of_json in
@@ -2419,6 +2441,7 @@ module ElasticsearchBufferingHints =
         (Option.map ~f:ElasticsearchBufferingIntervalInSeconds.of_xml)
           (Xml.child xml_arg0 "IntervalInSeconds") in
       make ?sizeInMBs ?intervalInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeInMBs =
         field_map json "SizeInMBs" ElasticsearchBufferingSizeInMBs.of_json in
@@ -2545,6 +2568,7 @@ module ElasticsearchRetryOptions =
         (Option.map ~f:ElasticsearchRetryDurationInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds"
@@ -2653,6 +2677,7 @@ module DataFormatConversionConfiguration =
           (Xml.child xml_arg0 "SchemaConfiguration") in
       make ?enabled ?outputFormatConfiguration ?inputFormatConfiguration
         ?schemaConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" BooleanObject.of_json in
       let outputFormatConfiguration =
@@ -2693,6 +2718,7 @@ module DynamicPartitioningConfiguration =
         (Option.map ~f:RetryOptions.of_xml)
           (Xml.child xml_arg0 "RetryOptions") in
       make ?enabled ?retryOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" BooleanObject.of_json in
       let retryOptions = field_map json "RetryOptions" RetryOptions.of_json in
@@ -2753,6 +2779,7 @@ module HttpEndpointBufferingHints =
         (Option.map ~f:HttpEndpointBufferingSizeInMBs.of_xml)
           (Xml.child xml_arg0 "SizeInMBs") in
       make ?intervalInSeconds ?sizeInMBs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intervalInSeconds =
         field_map json "IntervalInSeconds"
@@ -2785,6 +2812,7 @@ module HttpEndpointDescription =
       let url =
         (Option.map ~f:HttpEndpointUrl.of_xml) (Xml.child xml_arg0 "Url") in
       make ?name ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" HttpEndpointName.of_json in
       let url = field_map json "Url" HttpEndpointUrl.of_json in
@@ -2820,6 +2848,7 @@ module HttpEndpointRequestConfiguration =
         (Option.map ~f:ContentEncoding.of_xml)
           (Xml.child xml_arg0 "ContentEncoding") in
       make ?commonAttributes ?contentEncoding ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commonAttributes =
         field_map json "CommonAttributes"
@@ -2848,6 +2877,7 @@ module HttpEndpointRetryOptions =
         (Option.map ~f:HttpEndpointRetryDurationInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds"
@@ -2939,6 +2969,7 @@ module CopyCommand =
         DataTableName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataTableName") in
       make ?copyOptions ?dataTableColumns ~dataTableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyOptions = field_map json "CopyOptions" CopyOptions.of_json in
       let dataTableColumns =
@@ -2967,6 +2998,7 @@ module RedshiftRetryOptions =
         (Option.map ~f:RedshiftRetryDurationInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds"
@@ -3119,6 +3151,7 @@ module SplunkRetryOptions =
         (Option.map ~f:SplunkRetryDurationInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       make ?durationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationInSeconds =
         field_map json "DurationInSeconds"
@@ -3348,6 +3381,7 @@ module AmazonopensearchserviceDestinationDescription =
         ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
         ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
         ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfigurationDescription =
         field_map json "VpcConfigurationDescription"
@@ -3550,6 +3584,7 @@ module ElasticsearchDestinationDescription =
         ?processingConfiguration ?s3DestinationDescription ?s3BackupMode
         ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
         ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfigurationDescription =
         field_map json "VpcConfigurationDescription"
@@ -3729,6 +3764,7 @@ module ExtendedS3DestinationDescription =
         ?processingConfiguration ?cloudWatchLoggingOptions
         ~encryptionConfiguration ~compressionFormat ~bufferingHints
         ?errorOutputPrefix ?prefix ~bucketARN ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dynamicPartitioningConfiguration =
         field_map json "DynamicPartitioningConfiguration"
@@ -3865,6 +3901,7 @@ module HttpEndpointDestinationDescription =
       make ?s3DestinationDescription ?s3BackupMode ?retryOptions ?roleARN
         ?processingConfiguration ?requestConfiguration
         ?cloudWatchLoggingOptions ?bufferingHints ?endpointConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3DestinationDescription =
         field_map json "S3DestinationDescription"
@@ -3998,6 +4035,7 @@ module RedshiftDestinationDescription =
       make ?cloudWatchLoggingOptions ?s3BackupDescription ?s3BackupMode
         ?processingConfiguration ~s3DestinationDescription ?retryOptions
         ~username ~copyCommand ~clusterJDBCURL ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -4127,6 +4165,7 @@ module SplunkDestinationDescription =
         ?s3DestinationDescription ?s3BackupMode ?retryOptions
         ?hECAcknowledgmentTimeoutInSeconds ?hECToken ?hECEndpointType
         ?hECEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -4366,6 +4405,7 @@ module FailureDescription =
         DeliveryStreamFailureType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~details ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map_exn json "Details" NonEmptyString.of_json in
       let type_ = field_map_exn json "Type" DeliveryStreamFailureType.of_json in
@@ -4496,6 +4536,7 @@ module DestinationDescription =
         ?elasticsearchDestinationDescription ?redshiftDestinationDescription
         ?extendedS3DestinationDescription ?s3DestinationDescription
         ~destinationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let httpEndpointDestinationDescription =
         field_map json "HttpEndpointDestinationDescription"
@@ -4563,6 +4604,7 @@ module KinesisStreamSourceDescription =
         (Option.map ~f:KinesisStreamARN.of_xml)
           (Xml.child xml_arg0 "KinesisStreamARN") in
       make ?deliveryStartTimestamp ?roleARN ?kinesisStreamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryStartTimestamp =
         field_map json "DeliveryStartTimestamp"
@@ -4664,6 +4706,7 @@ module S3DestinationUpdate =
       make ?cloudWatchLoggingOptions ?encryptionConfiguration
         ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
         ?bucketARN ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -4718,6 +4761,7 @@ module HttpEndpointConfiguration =
         HttpEndpointUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Url") in
       make ?accessKey ?name ~url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessKey =
         field_map json "AccessKey" HttpEndpointAccessKey.of_json in
@@ -4770,6 +4814,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -4808,6 +4853,7 @@ module PutRecordBatchResponseEntry =
         (Option.map ~f:PutResponseRecordId.of_xml)
           (Xml.child xml_arg0 "RecordId") in
       make ?errorMessage ?errorCode ?recordId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -4834,6 +4880,7 @@ module Record =
       let data =
         Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let data = field_map_exn json "Data" Data.of_json in make ~data ()
     let to_json v = composed_to_json to_value v
@@ -4920,6 +4967,7 @@ module DeliveryStreamEncryptionConfiguration =
       let keyARN =
         (Option.map ~f:AWSKMSKeyARN.of_xml) (Xml.child xml_arg0 "KeyARN") in
       make ?failureDescription ?status ?keyType ?keyARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureDescription =
         field_map json "FailureDescription" FailureDescription.of_json in
@@ -5058,6 +5106,7 @@ module SourceDescription =
         (Option.map ~f:KinesisStreamSourceDescription.of_xml)
           (Xml.child xml_arg0 "KinesisStreamSourceDescription") in
       make ?kinesisStreamSourceDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kinesisStreamSourceDescription =
         field_map json "KinesisStreamSourceDescription"
@@ -5170,6 +5219,7 @@ module S3DestinationConfiguration =
       make ?cloudWatchLoggingOptions ?encryptionConfiguration
         ?compressionFormat ?bufferingHints ?errorOutputPrefix ?prefix
         ~bucketARN ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -5227,6 +5277,7 @@ module VpcConfiguration =
         SubnetIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
       make ~securityGroupIds ~roleARN ~subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map_exn json "SecurityGroupIds" SecurityGroupIdList.of_json in
@@ -5250,6 +5301,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5271,6 +5323,7 @@ module InvalidArgumentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5292,6 +5345,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5313,6 +5367,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5426,6 +5481,7 @@ module AmazonopensearchserviceDestinationUpdate =
       make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
         ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
         ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -5581,6 +5637,7 @@ module ElasticsearchDestinationUpdate =
       make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
         ?retryOptions ?bufferingHints ?indexRotationPeriod ?typeName
         ?indexName ?clusterEndpoint ?domainARN ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -5753,6 +5810,7 @@ module ExtendedS3DestinationUpdate =
         ?processingConfiguration ?cloudWatchLoggingOptions
         ?encryptionConfiguration ?compressionFormat ?bufferingHints
         ?errorOutputPrefix ?prefix ?bucketARN ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dynamicPartitioningConfiguration =
         field_map json "DynamicPartitioningConfiguration"
@@ -5887,6 +5945,7 @@ module HttpEndpointDestinationUpdate =
       make ?s3Update ?s3BackupMode ?retryOptions ?roleARN
         ?processingConfiguration ?requestConfiguration
         ?cloudWatchLoggingOptions ?bufferingHints ?endpointConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Update = field_map json "S3Update" S3DestinationUpdate.of_json in
       let s3BackupMode =
@@ -6021,6 +6080,7 @@ module RedshiftDestinationUpdate =
       make ?cloudWatchLoggingOptions ?s3BackupUpdate ?s3BackupMode
         ?processingConfiguration ?s3Update ?retryOptions ?password ?username
         ?copyCommand ?clusterJDBCURL ?roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -6148,6 +6208,7 @@ module SplunkDestinationUpdate =
       make ?cloudWatchLoggingOptions ?processingConfiguration ?s3Update
         ?s3BackupMode ?retryOptions ?hECAcknowledgmentTimeoutInSeconds
         ?hECToken ?hECEndpointType ?hECEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -6187,6 +6248,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -6266,6 +6328,7 @@ module InvalidKMSResourceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let code = field_map json "code" ErrorCode.of_json in
@@ -6296,6 +6359,7 @@ module DeliveryStreamEncryptionConfigurationInput =
       let keyARN =
         (Option.map ~f:AWSKMSKeyARN.of_xml) (Xml.child xml_arg0 "KeyARN") in
       make ~keyType ?keyARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyType = field_map_exn json "KeyType" KeyType.of_json in
       let keyARN = field_map json "KeyARN" AWSKMSKeyARN.of_json in
@@ -6318,6 +6382,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -6613,6 +6678,7 @@ module DeliveryStreamDescription =
         ?createTimestamp ~versionId ~deliveryStreamType
         ?deliveryStreamEncryptionConfiguration ?failureDescription
         ~deliveryStreamStatus ~deliveryStreamARN ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hasMoreDestinations =
         field_map_exn json "HasMoreDestinations" BooleanObject.of_json in
@@ -6792,6 +6858,7 @@ module AmazonopensearchserviceDestinationConfiguration =
         ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
         ?bufferingHints ?indexRotationPeriod ?typeName ~indexName
         ?clusterEndpoint ?domainARN ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfiguration =
         field_map json "VpcConfiguration" VpcConfiguration.of_json in
@@ -6977,6 +7044,7 @@ module ElasticsearchDestinationConfiguration =
         ?processingConfiguration ~s3Configuration ?s3BackupMode ?retryOptions
         ?bufferingHints ?indexRotationPeriod ?typeName ~indexName
         ?clusterEndpoint ?domainARN ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfiguration =
         field_map json "VpcConfiguration" VpcConfiguration.of_json in
@@ -7160,6 +7228,7 @@ module ExtendedS3DestinationConfiguration =
         ?s3BackupMode ?processingConfiguration ?cloudWatchLoggingOptions
         ?encryptionConfiguration ?compressionFormat ?bufferingHints
         ?errorOutputPrefix ?prefix ~bucketARN ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dynamicPartitioningConfiguration =
         field_map json "DynamicPartitioningConfiguration"
@@ -7297,6 +7366,7 @@ module HttpEndpointDestinationConfiguration =
       make ~s3Configuration ?s3BackupMode ?retryOptions ?roleARN
         ?processingConfiguration ?requestConfiguration
         ?cloudWatchLoggingOptions ?bufferingHints ~endpointConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Configuration =
         field_map_exn json "S3Configuration"
@@ -7352,6 +7422,7 @@ module KinesisStreamSourceConfiguration =
         KinesisStreamARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "KinesisStreamARN") in
       make ~roleARN ~kinesisStreamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
       let kinesisStreamARN =
@@ -7471,6 +7542,7 @@ module RedshiftDestinationConfiguration =
       make ?cloudWatchLoggingOptions ?s3BackupConfiguration ?s3BackupMode
         ?processingConfiguration ~s3Configuration ?retryOptions ~password
         ~username ~copyCommand ~clusterJDBCURL ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -7604,6 +7676,7 @@ module SplunkDestinationConfiguration =
         ~s3Configuration ?s3BackupMode ?retryOptions
         ?hECAcknowledgmentTimeoutInSeconds ~hECToken ~hECEndpointType
         ~hECEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLoggingOptions =
         field_map json "CloudWatchLoggingOptions"
@@ -7696,6 +7769,7 @@ module UpdateDestinationOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7819,6 +7893,7 @@ module UpdateDestinationInput =
         ?elasticsearchDestinationUpdate ?redshiftDestinationUpdate
         ?extendedS3DestinationUpdate ?s3DestinationUpdate ~destinationId
         ~currentDeliveryStreamVersionId ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let httpEndpointDestinationUpdate =
         field_map json "HttpEndpointDestinationUpdate"
@@ -7917,6 +7992,7 @@ module UntagDeliveryStreamOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7947,6 +8023,7 @@ module UntagDeliveryStreamInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~tagKeys ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let deliveryStreamName =
@@ -8017,6 +8094,7 @@ module TagDeliveryStreamOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8047,6 +8125,7 @@ module TagDeliveryStreamInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~tags ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags =
         field_map_exn json "Tags" TagDeliveryStreamInputTagList.of_json in
@@ -8118,6 +8197,7 @@ module StopDeliveryStreamEncryptionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8141,6 +8221,7 @@ module StopDeliveryStreamEncryptionInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryStreamName =
         field_map_exn json "DeliveryStreamName" DeliveryStreamName.of_json in
@@ -8221,6 +8302,7 @@ module StartDeliveryStreamEncryptionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8257,6 +8339,7 @@ module StartDeliveryStreamEncryptionInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?deliveryStreamEncryptionConfigurationInput ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryStreamEncryptionConfigurationInput =
         field_map json "DeliveryStreamEncryptionConfigurationInput"
@@ -8347,6 +8430,7 @@ module PutRecordOutput =
         PutResponseRecordId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RecordId") in
       make ?encrypted ~recordId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encrypted = field_map json "Encrypted" BooleanObject.of_json in
       let recordId =
@@ -8378,6 +8462,7 @@ module PutRecordInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~record ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let record = field_map_exn json "Record" Record.of_json in
       let deliveryStreamName =
@@ -8480,6 +8565,7 @@ module PutRecordBatchOutput =
         NonNegativeIntegerObject.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FailedPutCount") in
       make ~requestResponses ?encrypted ~failedPutCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestResponses =
         field_map_exn json "RequestResponses"
@@ -8517,6 +8603,7 @@ module PutRecordBatchInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ~records ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let records =
         field_map_exn json "Records" PutRecordBatchRequestEntryList.of_json in
@@ -8597,6 +8684,7 @@ module ListTagsForDeliveryStreamOutput =
         ListTagsForDeliveryStreamOutputTagList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~hasMoreTags ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hasMoreTags =
         field_map_exn json "HasMoreTags" BooleanObject.of_json in
@@ -8645,6 +8733,7 @@ module ListTagsForDeliveryStreamInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?limit ?exclusiveStartTagKey ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit =
         field_map json "Limit" ListTagsForDeliveryStreamInputLimit.of_json in
@@ -8702,6 +8791,7 @@ module ListDeliveryStreamsOutput =
         DeliveryStreamNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamNames") in
       make ~hasMoreDeliveryStreams ~deliveryStreamNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hasMoreDeliveryStreams =
         field_map_exn json "HasMoreDeliveryStreams" BooleanObject.of_json in
@@ -8751,6 +8841,7 @@ module ListDeliveryStreamsInput =
         (Option.map ~f:ListDeliveryStreamsInputLimit.of_xml)
           (Xml.child xml_arg0 "Limit") in
       make ?exclusiveStartDeliveryStreamName ?deliveryStreamType ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exclusiveStartDeliveryStreamName =
         field_map json "ExclusiveStartDeliveryStreamName"
@@ -8811,6 +8902,7 @@ module DescribeDeliveryStreamOutput =
           (Xml.child_exn ~context:context_ xml_arg0
              "DeliveryStreamDescription") in
       make ~deliveryStreamDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryStreamDescription =
         field_map_exn json "DeliveryStreamDescription"
@@ -8857,6 +8949,7 @@ module DescribeDeliveryStreamInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?exclusiveStartDestinationId ?limit ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exclusiveStartDestinationId =
         field_map json "ExclusiveStartDestinationId" DestinationId.of_json in
@@ -8912,6 +9005,7 @@ module DeleteDeliveryStreamOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8944,6 +9038,7 @@ module DeleteDeliveryStreamInput =
         DeliveryStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryStreamName") in
       make ?allowForceDelete ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowForceDelete =
         field_map json "AllowForceDelete" BooleanObject.of_json in
@@ -9026,6 +9121,7 @@ module CreateDeliveryStreamOutput =
         (Option.map ~f:DeliveryStreamARN.of_xml)
           (Xml.child xml_arg0 "DeliveryStreamARN") in
       make ?deliveryStreamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryStreamARN =
         field_map json "DeliveryStreamARN" DeliveryStreamARN.of_json in
@@ -9189,6 +9285,7 @@ module CreateDeliveryStreamInput =
         ?deliveryStreamEncryptionConfigurationInput
         ?kinesisStreamSourceConfiguration ?deliveryStreamType
         ~deliveryStreamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagDeliveryStreamInputTagList.of_json in
       let httpEndpointDestinationConfiguration =

@@ -97,6 +97,7 @@ module StorageRuleType =
         (Option.map ~f:PositiveSizeType.of_xml)
           (Xml.child xml_arg0 "StorageAllocatedInBytes") in
       make ?storageType ?storageAllocatedInBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageType = field_map json "StorageType" StorageType.of_json in
       let storageAllocatedInBytes =
@@ -485,6 +486,7 @@ module UserStorageMetadata =
         (Option.map ~f:SizeType.of_xml)
           (Xml.child xml_arg0 "StorageUtilizedInBytes") in
       make ?storageRule ?storageUtilizedInBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageRule = field_map json "StorageRule" StorageRuleType.of_json in
       let storageUtilizedInBytes =
@@ -543,6 +545,7 @@ module GroupMetadata =
         (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" GroupNameType.of_json in
       let id = field_map json "Id" IdType.of_json in make ?name ?id ()
@@ -591,6 +594,7 @@ module UserMetadata =
         (Option.map ~f:UsernameType.of_xml) (Xml.child xml_arg0 "Username") in
       let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?emailAddress ?surname ?givenName ?username ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress =
         field_map json "EmailAddress" EmailAddressType.of_json in
@@ -804,6 +808,7 @@ module PermissionInfo =
         (Option.map ~f:RolePermissionType.of_xml) (Xml.child xml_arg0 "Type") in
       let role = (Option.map ~f:RoleType.of_xml) (Xml.child xml_arg0 "Role") in
       make ?type_ ?role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" RolePermissionType.of_json in
       let role = field_map json "Role" RoleType.of_json in
@@ -988,6 +993,7 @@ module User =
       make ?storage ?locale ?timeZoneId ?modifiedTimestamp ?createdTimestamp
         ?type_ ?status ?recycleBinFolderId ?rootFolderId ?organizationId
         ?surname ?givenName ?emailAddress ?username ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storage = field_map json "Storage" UserStorageMetadata.of_json in
       let locale = field_map json "Locale" LocaleType.of_json in
@@ -1244,6 +1250,7 @@ module DocumentVersionMetadata =
       make ?source ?thumbnail ?creatorId ?contentModifiedTimestamp
         ?contentCreatedTimestamp ?modifiedTimestamp ?createdTimestamp ?status
         ?signature ?size ?contentType ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let source = field_map json "Source" DocumentSourceUrlMap.of_json in
       let thumbnail =
@@ -1344,6 +1351,7 @@ module ResourcePathComponent =
         (Option.map ~f:ResourceNameType.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" ResourceNameType.of_json in
       let id = field_map json "Id" IdType.of_json in make ?name ?id ()
@@ -1677,6 +1685,7 @@ module CommentMetadata =
         (Option.map ~f:CommentIdType.of_xml) (Xml.child xml_arg0 "CommentId") in
       make ?recipientId ?commentStatus ?createdTimestamp ?contributor
         ?commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recipientId = field_map json "RecipientId" IdType.of_json in
       let commentStatus =
@@ -1709,6 +1718,7 @@ module Participants =
       let users =
         (Option.map ~f:UserMetadataList.of_xml) (Xml.child xml_arg0 "Users") in
       make ?groups ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groups = field_map json "Groups" GroupMetadataList.of_json in
       let users = field_map json "Users" UserMetadataList.of_json in
@@ -1780,6 +1790,7 @@ module ResourceMetadata =
       let type_ =
         (Option.map ~f:ResourceType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?parentId ?owner ?versionId ?id ?originalName ?name ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parentId = field_map json "ParentId" ResourceIdType.of_json in
       let owner = field_map json "Owner" UserMetadata.of_json in
@@ -1980,6 +1991,7 @@ module DocumentMetadata =
         (Option.map ~f:ResourceIdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?labels ?resourceState ?latestVersionMetadata ?modifiedTimestamp
         ?createdTimestamp ?parentFolderId ?creatorId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let labels = field_map json "Labels" SharedLabels.of_json in
       let resourceState =
@@ -2096,6 +2108,7 @@ module FolderMetadata =
       make ?latestVersionSize ?size ?labels ?signature ?resourceState
         ?modifiedTimestamp ?createdTimestamp ?parentFolderId ?creatorId ?name
         ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestVersionSize =
         field_map json "LatestVersionSize" SizeType.of_json in
@@ -2211,6 +2224,7 @@ module Principal =
         (Option.map ~f:PrincipalType.of_xml) (Xml.child xml_arg0 "Type") in
       let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?roles ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roles = field_map json "Roles" PermissionInfoList.of_json in
       let type_ = field_map json "Type" PrincipalType.of_json in
@@ -2249,6 +2263,7 @@ module Subscription =
       let subscriptionId =
         (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "SubscriptionId") in
       make ?protocol ?endPoint ?subscriptionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol =
         field_map json "Protocol" SubscriptionProtocolType.of_json in
@@ -2341,6 +2356,7 @@ module Comment =
           (Xml.child_exn ~context:context_ xml_arg0 "CommentId") in
       make ?recipientId ?visibility ?status ?createdTimestamp ?contributor
         ?text ?threadId ?parentId ~commentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recipientId = field_map json "RecipientId" IdType.of_json in
       let visibility =
@@ -2447,6 +2463,7 @@ module Activity =
         (Option.map ~f:ActivityType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?commentMetadata ?originalParent ?resourceMetadata ?participants
         ?initiator ?organizationId ?isIndirectActivity ?timeStamp ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commentMetadata =
         field_map json "CommentMetadata" CommentMetadata.of_json in
@@ -2519,6 +2536,7 @@ module ShareResult =
         (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "PrincipalId") in
       make ?statusMessage ?shareId ?status ?role ?inviteePrincipalId
         ?principalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage = field_map json "StatusMessage" MessageType.of_json in
       let shareId = field_map json "ShareId" ResourceIdType.of_json in
@@ -2554,6 +2572,7 @@ module SharePrincipal =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       let id = IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~role ~type_ ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let role = field_map_exn json "Role" RoleType.of_json in
       let type_ = field_map_exn json "Type" PrincipalType.of_json in
@@ -2569,6 +2588,7 @@ module DeactivatingLastSystemUserException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The last user in the organization is being deactivated."]
@@ -2591,6 +2611,7 @@ module EntityNotExistsException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?entityIds ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entityIds = field_map json "EntityIds" EntityIdList.of_json in
       let message = field_map json "Message" ErrorMessageType.of_json in
@@ -2611,6 +2632,7 @@ module FailedDependencyException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2631,6 +2653,7 @@ module IllegalUserStateException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2650,6 +2673,7 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2669,6 +2693,7 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2682,6 +2707,7 @@ module UnauthorizedOperationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation is not permitted."]
@@ -2699,6 +2725,7 @@ module UnauthorizedResourceAccessException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2774,6 +2801,7 @@ module DraftUploadOutOfSyncException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2794,6 +2822,7 @@ module EntityAlreadyExistsException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2813,6 +2842,7 @@ module ProhibitedStateException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2833,6 +2863,7 @@ module ResourceAlreadyCheckedOutException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2852,6 +2883,7 @@ module StorageLimitExceededException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2871,6 +2903,7 @@ module StorageLimitWillExceedException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -2898,6 +2931,7 @@ module UploadMetadata =
       let uploadUrl =
         (Option.map ~f:UrlType.of_xml) (Xml.child xml_arg0 "UploadUrl") in
       make ?signedHeaders ?uploadUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signedHeaders =
         field_map json "SignedHeaders" SignedHeaderMap.of_json in
@@ -3062,6 +3096,7 @@ module ResourcePath =
         (Option.map ~f:ResourcePathComponentList.of_xml)
           (Xml.child xml_arg0 "Components") in
       make ?components ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let components =
         field_map json "Components" ResourcePathComponentList.of_json in
@@ -3102,6 +3137,7 @@ module InvalidPasswordException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3145,6 +3181,7 @@ module RequestedEntityTooLargeException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3562,6 +3599,7 @@ module TooManySubscriptionsException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3598,6 +3636,7 @@ module TooManyLabelsException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3618,6 +3657,7 @@ module ConflictingOperationException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3638,6 +3678,7 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3658,6 +3699,7 @@ module CustomMetadataLimitExceededException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3678,6 +3720,7 @@ module DocumentLockedForCommentsException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3698,6 +3741,7 @@ module InvalidCommentOperationException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -3751,6 +3795,7 @@ module NotificationOptions =
       let sendEmail =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "SendEmail") in
       make ?emailMessage ?sendEmail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailMessage = field_map json "EmailMessage" MessageType.of_json in
       let sendEmail = field_map json "SendEmail" BooleanType.of_json in
@@ -3896,6 +3941,7 @@ module UpdateUserResponse =
     let of_xml xml_arg0 =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map json "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
@@ -3988,6 +4034,7 @@ module UpdateUserRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?grantPoweruserPrivileges ?locale ?timeZoneId ?storageRule ?type_
         ?surname ?givenName ~userId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantPoweruserPrivileges =
         field_map json "GrantPoweruserPrivileges" BooleanEnumType.of_json in
@@ -4063,6 +4110,7 @@ module UpdateFolderRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?resourceState ?parentFolderId ?name ~folderId
         ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceState =
         field_map json "ResourceState" ResourceStateType.of_json in
@@ -4120,6 +4168,7 @@ module UpdateDocumentVersionRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?versionStatus ~versionId ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionStatus =
         field_map json "VersionStatus" DocumentVersionStatus.of_json in
@@ -4190,6 +4239,7 @@ module UpdateDocumentRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?resourceState ?parentFolderId ?name ~documentId
         ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceState =
         field_map json "ResourceState" ResourceStateType.of_json in
@@ -4244,6 +4294,7 @@ module RemoveResourcePermissionRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?principalType ~principalId ~resourceId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalType =
         field_map json "PrincipalType" PrincipalType.of_json in
@@ -4281,6 +4332,7 @@ module RemoveAllResourcePermissionsRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~resourceId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" ResourceIdType.of_json in
       let authenticationToken =
@@ -4302,6 +4354,7 @@ module InvalidOperationException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -4466,6 +4519,7 @@ module InitiateDocumentVersionUploadResponse =
         (Option.map ~f:DocumentMetadata.of_xml)
           (Xml.child xml_arg0 "Metadata") in
       make ?uploadMetadata ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadMetadata =
         field_map json "UploadMetadata" UploadMetadata.of_json in
@@ -4559,6 +4613,7 @@ module InitiateDocumentVersionUploadRequest =
       make ~parentFolderId ?documentSizeInBytes ?contentType
         ?contentModifiedTimestamp ?contentCreatedTimestamp ?name ?id
         ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parentFolderId =
         field_map_exn json "ParentFolderId" ResourceIdType.of_json in
@@ -4681,6 +4736,7 @@ module GetResourcesResponse =
         (Option.map ~f:FolderMetadataList.of_xml)
           (Xml.child xml_arg0 "Folders") in
       make ?marker ?documents ?folders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let documents = field_map json "Documents" DocumentMetadataList.of_json in
@@ -4739,6 +4795,7 @@ module GetResourcesRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?limit ?collectionType ?userId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -4862,6 +4919,7 @@ module GetFolderResponse =
       let metadata =
         (Option.map ~f:FolderMetadata.of_xml) (Xml.child xml_arg0 "Metadata") in
       make ?customMetadata ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customMetadata =
         field_map json "CustomMetadata" CustomMetadataMap.of_json in
@@ -4905,6 +4963,7 @@ module GetFolderRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?includeCustomMetadata ~folderId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeCustomMetadata =
         field_map json "IncludeCustomMetadata" BooleanType.of_json in
@@ -4998,6 +5057,7 @@ module GetFolderPathResponse =
       let path =
         (Option.map ~f:ResourcePath.of_xml) (Xml.child xml_arg0 "Path") in
       make ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "Path" ResourcePath.of_json in make ?path ()
     let to_json v = composed_to_json to_value v
@@ -5050,6 +5110,7 @@ module GetFolderPathRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?fields ?limit ~folderId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let fields = field_map json "Fields" FieldNamesType.of_json in
@@ -5174,6 +5235,7 @@ module GetDocumentVersionResponse =
         (Option.map ~f:DocumentVersionMetadata.of_xml)
           (Xml.child xml_arg0 "Metadata") in
       make ?customMetadata ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customMetadata =
         field_map json "CustomMetadata" CustomMetadataMap.of_json in
@@ -5240,6 +5302,7 @@ module GetDocumentVersionRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?includeCustomMetadata ?fields ~versionId ~documentId
         ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeCustomMetadata =
         field_map json "IncludeCustomMetadata" BooleanType.of_json in
@@ -5365,6 +5428,7 @@ module GetDocumentResponse =
         (Option.map ~f:DocumentMetadata.of_xml)
           (Xml.child xml_arg0 "Metadata") in
       make ?customMetadata ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customMetadata =
         field_map json "CustomMetadata" CustomMetadataMap.of_json in
@@ -5409,6 +5473,7 @@ module GetDocumentRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?includeCustomMetadata ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeCustomMetadata =
         field_map json "IncludeCustomMetadata" BooleanType.of_json in
@@ -5502,6 +5567,7 @@ module GetDocumentPathResponse =
       let path =
         (Option.map ~f:ResourcePath.of_xml) (Xml.child xml_arg0 "Path") in
       make ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "Path" ResourcePath.of_json in make ?path ()
     let to_json v = composed_to_json to_value v
@@ -5554,6 +5620,7 @@ module GetDocumentPathRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?fields ?limit ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let fields = field_map json "Fields" FieldNamesType.of_json in
@@ -5647,6 +5714,7 @@ module GetCurrentUserResponse =
     let of_xml xml_arg0 =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map json "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
@@ -5678,6 +5746,7 @@ module GetCurrentUserRequest =
         AuthenticationHeaderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Authentication") in
       make ~authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationToken =
         field_map_exn json "AuthenticationToken"
@@ -5807,6 +5876,7 @@ module DescribeUsersResponse =
         (Option.map ~f:OrganizationUserList.of_xml)
           (Xml.child xml_arg0 "Users") in
       make ?marker ?totalNumberOfUsers ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let totalNumberOfUsers =
@@ -5903,6 +5973,7 @@ module DescribeUsersRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?fields ?limit ?marker ?sort ?order ?include_ ?query ?userIds
         ?organizationId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields = field_map json "Fields" FieldNamesType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -6011,6 +6082,7 @@ module DescribeRootFoldersResponse =
         (Option.map ~f:FolderMetadataList.of_xml)
           (Xml.child xml_arg0 "Folders") in
       make ?marker ?folders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let folders = field_map json "Folders" FolderMetadataList.of_json in
@@ -6050,6 +6122,7 @@ module DescribeRootFoldersRequest =
         AuthenticationHeaderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Authentication") in
       make ?marker ?limit ~authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -6142,6 +6215,7 @@ module DescribeResourcePermissionsResponse =
         (Option.map ~f:PrincipalList.of_xml)
           (Xml.child xml_arg0 "Principals") in
       make ?marker ?principals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let principals = field_map json "Principals" PrincipalList.of_json in
@@ -6196,6 +6270,7 @@ module DescribeResourcePermissionsRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?limit ?principalId ~resourceId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -6280,6 +6355,7 @@ module DescribeNotificationSubscriptionsResponse =
         (Option.map ~f:SubscriptionList.of_xml)
           (Xml.child xml_arg0 "Subscriptions") in
       make ?marker ?subscriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let subscriptions =
@@ -6316,6 +6392,7 @@ module DescribeNotificationSubscriptionsRequest =
         IdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?limit ?marker ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" LimitType.of_json in
       let marker = field_map json "Marker" PageMarkerType.of_json in
@@ -6405,6 +6482,7 @@ module DescribeGroupsResponse =
         (Option.map ~f:GroupMetadataList.of_xml)
           (Xml.child xml_arg0 "Groups") in
       make ?marker ?groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let groups = field_map json "Groups" GroupMetadataList.of_json in
@@ -6468,6 +6546,7 @@ module DescribeGroupsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?limit ?marker ?organizationId ~searchQuery ?authenticationToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PositiveIntegerType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -6589,6 +6668,7 @@ module DescribeFolderContentsResponse =
         (Option.map ~f:FolderMetadataList.of_xml)
           (Xml.child xml_arg0 "Folders") in
       make ?marker ?documents ?folders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let documents = field_map json "Documents" DocumentMetadataList.of_json in
@@ -6671,6 +6751,7 @@ module DescribeFolderContentsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?include_ ?type_ ?marker ?limit ?order ?sort ~folderId
         ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let include_ = field_map json "Include" FieldNamesType.of_json in
       let type_ = field_map json "Type" FolderContentType.of_json in
@@ -6799,6 +6880,7 @@ module DescribeDocumentVersionsResponse =
         (Option.map ~f:DocumentVersionMetadataList.of_xml)
           (Xml.child xml_arg0 "DocumentVersions") in
       make ?marker ?documentVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" PageMarkerType.of_json in
       let documentVersions =
@@ -6871,6 +6953,7 @@ module DescribeDocumentVersionsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?fields ?include_ ?limit ?marker ~documentId ?authenticationToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields = field_map json "Fields" FieldNamesType.of_json in
       let include_ = field_map json "Include" FieldNamesType.of_json in
@@ -6985,6 +7068,7 @@ module DescribeCommentsResponse =
       let comments =
         (Option.map ~f:CommentList.of_xml) (Xml.child xml_arg0 "Comments") in
       make ?marker ?comments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let comments = field_map json "Comments" CommentList.of_json in
@@ -7040,6 +7124,7 @@ module DescribeCommentsRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?marker ?limit ~versionId ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -7146,6 +7231,7 @@ module DescribeActivitiesResponse =
         (Option.map ~f:UserActivities.of_xml)
           (Xml.child xml_arg0 "UserActivities") in
       make ?marker ?userActivities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let userActivities =
@@ -7253,6 +7339,7 @@ module DescribeActivitiesRequest =
       make ?marker ?limit ?includeIndirectActivities ?userId ?resourceId
         ?activityTypes ?organizationId ?endTime ?startTime
         ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -7298,6 +7385,7 @@ module DeleteUserRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~userId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map_exn json "UserId" IdType.of_json in
       let authenticationToken =
@@ -7328,6 +7416,7 @@ module DeleteNotificationSubscriptionRequest =
         IdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionId") in
       make ~organizationId ~subscriptionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationId = field_map_exn json "OrganizationId" IdType.of_json in
       let subscriptionId = field_map_exn json "SubscriptionId" IdType.of_json in
@@ -7413,6 +7502,7 @@ module DeleteLabelsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified list of labels from a resource."]
@@ -7456,6 +7546,7 @@ module DeleteLabelsRequest =
         ResourceIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?deleteAll ?labels ?authenticationToken ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteAll = field_map json "DeleteAll" BooleanType.of_json in
       let labels = field_map json "Labels" SharedLabels.of_json in
@@ -7491,6 +7582,7 @@ module DeleteFolderRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~folderId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let folderId = field_map_exn json "FolderId" ResourceIdType.of_json in
       let authenticationToken =
@@ -7525,6 +7617,7 @@ module DeleteFolderContentsRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~folderId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let folderId = field_map_exn json "FolderId" ResourceIdType.of_json in
       let authenticationToken =
@@ -7558,6 +7651,7 @@ module DeleteDocumentRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let documentId = field_map_exn json "DocumentId" ResourceIdType.of_json in
       let authenticationToken =
@@ -7653,6 +7747,7 @@ module DeleteCustomMetadataResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes custom metadata from the specified resource."]
@@ -7709,6 +7804,7 @@ module DeleteCustomMetadataRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ?deleteAll ?keys ?versionId ~resourceId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteAll = field_map json "DeleteAll" BooleanType.of_json in
       let keys = field_map json "Keys" CustomMetadataKeyList.of_json in
@@ -7761,6 +7857,7 @@ module DeleteCommentRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~commentId ~versionId ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commentId = field_map_exn json "CommentId" CommentIdType.of_json in
       let versionId =
@@ -7796,6 +7893,7 @@ module DeactivateUserRequest =
       let userId =
         IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ?authenticationToken ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationToken =
         field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
@@ -7888,6 +7986,7 @@ module CreateUserResponse =
     let of_xml xml_arg0 =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map json "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
@@ -7981,6 +8080,7 @@ module CreateUserRequest =
         (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "OrganizationId") in
       make ?authenticationToken ?storageRule ?timeZoneId ~password ~surname
         ~givenName ?emailAddress ~username ?organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationToken =
         field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
@@ -8068,6 +8168,7 @@ module CreateNotificationSubscriptionResponse =
         (Option.map ~f:Subscription.of_xml)
           (Xml.child xml_arg0 "Subscription") in
       make ?subscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscription = field_map json "Subscription" Subscription.of_json in
       make ?subscription ()
@@ -8116,6 +8217,7 @@ module CreateNotificationSubscriptionRequest =
         IdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~subscriptionType ~protocol ~endpoint ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionType =
         field_map_exn json "SubscriptionType" SubscriptionType.of_json in
@@ -8215,6 +8317,7 @@ module CreateLabelsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8252,6 +8355,7 @@ module CreateLabelsRequest =
         ResourceIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?authenticationToken ~labels ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationToken =
         field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
@@ -8386,6 +8490,7 @@ module CreateFolderResponse =
       let metadata =
         (Option.map ~f:FolderMetadata.of_xml) (Xml.child xml_arg0 "Metadata") in
       make ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata = field_map json "Metadata" FolderMetadata.of_json in
       make ?metadata ()
@@ -8426,6 +8531,7 @@ module CreateFolderRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~parentFolderId ?name ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parentFolderId =
         field_map_exn json "ParentFolderId" ResourceIdType.of_json in
@@ -8536,6 +8642,7 @@ module CreateCustomMetadataResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8585,6 +8692,7 @@ module CreateCustomMetadataRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~customMetadata ?versionId ~resourceId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customMetadata =
         field_map_exn json "CustomMetadata" CustomMetadataMap.of_json in
@@ -8716,6 +8824,7 @@ module CreateCommentResponse =
       let comment =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "Comment") in
       make ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" Comment.of_json in
       make ?comment ()
@@ -8802,6 +8911,7 @@ module CreateCommentRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?notifyCollaborators ?visibility ~text ?threadId ?parentId
         ~versionId ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notifyCollaborators =
         field_map json "NotifyCollaborators" BooleanType.of_json in
@@ -8833,6 +8943,7 @@ module ConcurrentModificationException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessageType.of_json in
       make ?message ()
@@ -8916,6 +9027,7 @@ module AddResourcePermissionsResponse =
         (Option.map ~f:ShareResultsList.of_xml)
           (Xml.child xml_arg0 "ShareResults") in
       make ?shareResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareResults =
         field_map json "ShareResults" ShareResultsList.of_json in
@@ -8973,6 +9085,7 @@ module AddResourcePermissionsRequest =
           (Xml.child xml_arg0 "Authentication") in
       make ?notificationOptions ~principals ~resourceId ?authenticationToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationOptions =
         field_map json "NotificationOptions" NotificationOptions.of_json in
@@ -9068,6 +9181,7 @@ module ActivateUserResponse =
     let of_xml xml_arg0 =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map json "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
@@ -9098,6 +9212,7 @@ module ActivateUserRequest =
       let userId =
         IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ?authenticationToken ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationToken =
         field_map json "AuthenticationToken" AuthenticationHeaderType.of_json in
@@ -9140,6 +9255,7 @@ module AbortDocumentVersionUploadRequest =
         (Option.map ~f:AuthenticationHeaderType.of_xml)
           (Xml.child xml_arg0 "Authentication") in
       make ~versionId ~documentId ?authenticationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId =
         field_map_exn json "VersionId" DocumentVersionIdType.of_json in

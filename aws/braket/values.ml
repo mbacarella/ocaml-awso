@@ -91,6 +91,7 @@ module S3DataSource =
       let s3Uri =
         S3Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "s3Uri") in
       make ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Uri = field_map_exn json "s3Uri" S3Path.of_json in make ~s3Uri ()
     let to_json v = composed_to_json to_value v
@@ -598,6 +599,7 @@ module DataSource =
         S3DataSource.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "s3DataSource") in
       make ~s3DataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3DataSource =
         field_map_exn json "s3DataSource" S3DataSource.of_json in
@@ -779,6 +781,7 @@ module QuantumTaskSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
       make ?tags ~status ~shots ~quantumTaskArn ~outputS3Directory
         ~outputS3Bucket ?endedAt ~deviceArn ~createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let status = field_map_exn json "status" QuantumTaskStatus.of_json in
@@ -829,6 +832,7 @@ module SearchQuantumTasksFilter =
       let name =
         String64.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~values ~operator ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map_exn json "values"
@@ -918,6 +922,7 @@ module JobSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
       make ?tags ~status ?startedAt ~jobName ~jobArn ?endedAt ~device
         ~createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let status = field_map_exn json "status" JobPrimaryStatus.of_json in
@@ -962,6 +967,7 @@ module SearchJobsFilter =
       let name =
         String64.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~values ~operator ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map_exn json "values" SearchJobsFilterValuesList.of_json in
@@ -1019,6 +1025,7 @@ module DeviceSummary =
         DeviceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
       make ~providerName ~deviceType ~deviceStatus ~deviceName ~deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerName = field_map_exn json "providerName" String_.of_json in
       let deviceType = field_map_exn json "deviceType" DeviceType.of_json in
@@ -1052,6 +1059,7 @@ module SearchDevicesFilter =
         SearchDevicesFilterNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map_exn json "values" SearchDevicesFilterValuesList.of_json in
@@ -1073,6 +1081,7 @@ module ContainerImage =
     let of_xml xml_arg0 =
       let uri = Uri_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uri") in
       make ~uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uri = field_map_exn json "uri" Uri_.of_json in make ~uri ()
     let to_json v = composed_to_json to_value v
@@ -1111,6 +1120,7 @@ module ScriptModeConfig =
         (Option.map ~f:CompressionType.of_xml)
           (Xml.child xml_arg0 "compressionType") in
       make ~s3Uri ~entryPoint ?compressionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Uri = field_map_exn json "s3Uri" S3Path.of_json in
       let entryPoint = field_map_exn json "entryPoint" String_.of_json in
@@ -1170,6 +1180,7 @@ module InputFileConfig =
         InputFileConfigChannelNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~dataSource ?contentType ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSource = field_map_exn json "dataSource" DataSource.of_json in
       let contentType = field_map json "contentType" String256.of_json in
@@ -1385,6 +1396,7 @@ module JobEventDetails =
       let eventType =
         (Option.map ~f:JobEventType.of_xml) (Xml.child xml_arg0 "eventType") in
       make ?timeOfEvent ?message ?eventType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeOfEvent =
         field_map json "timeOfEvent" SyntheticTimestamp_date_time.of_json in
@@ -1447,6 +1459,7 @@ module InternalServiceException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1466,6 +1479,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1484,6 +1498,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1526,6 +1541,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1570,6 +1586,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1811,6 +1828,7 @@ module AlgorithmSpecification =
         (Option.map ~f:ContainerImage.of_xml)
           (Xml.child xml_arg0 "containerImage") in
       make ?scriptModeConfig ?containerImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scriptModeConfig =
         field_map json "scriptModeConfig" ScriptModeConfig.of_json in
@@ -1836,6 +1854,7 @@ module DeviceConfig =
       let device =
         String256.of_xml (Xml.child_exn ~context:context_ xml_arg0 "device") in
       make ~device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map_exn json "device" String256.of_json in
       make ~device ()
@@ -1951,6 +1970,7 @@ module InstanceConfig =
         InstanceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceType") in
       make ~volumeSizeInGb ~instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let volumeSizeInGb =
         field_map_exn json "volumeSizeInGb"
@@ -1997,6 +2017,7 @@ module JobCheckpointConfig =
       let localPath =
         (Option.map ~f:String4096.of_xml) (Xml.child xml_arg0 "localPath") in
       make ~s3Uri ?localPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Uri = field_map_exn json "s3Uri" S3Path.of_json in
       let localPath = field_map json "localPath" String4096.of_json in
@@ -2055,6 +2076,7 @@ module JobOutputDataConfig =
       let kmsKeyId =
         (Option.map ~f:String2048.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
       make ~s3Path ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Path = field_map_exn json "s3Path" S3Path.of_json in
       let kmsKeyId = field_map json "kmsKeyId" String2048.of_json in
@@ -2082,6 +2104,7 @@ module JobStoppingCondition =
         (Option.map ~f:JobStoppingConditionMaxRuntimeInSecondsInteger.of_xml)
           (Xml.child xml_arg0 "maxRuntimeInSeconds") in
       make ?maxRuntimeInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRuntimeInSeconds =
         field_map json "maxRuntimeInSeconds"
@@ -2139,6 +2162,7 @@ module DeviceOfflineException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2157,6 +2181,7 @@ module DeviceRetiredException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2175,6 +2200,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2283,6 +2309,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2418,6 +2445,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove tags from a resource."]
@@ -2446,6 +2474,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -2505,6 +2534,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Add a tag to the specified resource."]
@@ -2530,6 +2560,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagsMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -2616,6 +2647,7 @@ module SearchQuantumTasksResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~quantumTasks ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantumTasks =
         field_map_exn json "quantumTasks" QuantumTaskSummaryList.of_json in
@@ -2658,6 +2690,7 @@ module SearchQuantumTasksRequest =
         SearchQuantumTasksRequestFiltersList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ?nextToken ?maxResults ~filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults =
@@ -2748,6 +2781,7 @@ module SearchJobsResponse =
         JobSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobs") in
       make ?nextToken ~jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let jobs = field_map_exn json "jobs" JobSummaryList.of_json in
@@ -2790,6 +2824,7 @@ module SearchJobsRequest =
         SearchJobsRequestFiltersList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ?nextToken ?maxResults ~filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults =
@@ -2879,6 +2914,7 @@ module SearchDevicesResponse =
         DeviceSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "devices") in
       make ?nextToken ~devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let devices = field_map_exn json "devices" DeviceSummaryList.of_json in
@@ -2920,6 +2956,7 @@ module SearchDevicesRequest =
         SearchDevicesRequestFiltersList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ?nextToken ?maxResults ~filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults =
@@ -2989,6 +3026,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3011,6 +3049,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -3186,6 +3225,7 @@ module GetQuantumTaskResponse =
       make ?tags ~status ~shots ~quantumTaskArn ~outputS3Directory
         ~outputS3Bucket ?jobArn ?failureReason ?endedAt ~deviceParameters
         ~deviceArn ~createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let status = field_map_exn json "status" QuantumTaskStatus.of_json in
@@ -3228,6 +3268,7 @@ module GetQuantumTaskRequest =
         QuantumTaskArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
       make ~quantumTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantumTaskArn =
         field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
@@ -3487,6 +3528,7 @@ module GetJobResponse =
         ?hyperParameters ?failureReason ?events ?endedAt ?deviceConfig
         ~createdAt ?checkpointConfig ?billableDuration
         ~algorithmSpecification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let stoppingCondition =
@@ -3541,6 +3583,7 @@ module GetJobRequest =
       let jobArn =
         JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
       make ~jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobArn = field_map_exn json "jobArn" JobArn.of_json in
       make ~jobArn ()
@@ -3668,6 +3711,7 @@ module GetDeviceResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
       make ~providerName ~deviceType ~deviceStatus ~deviceName
         ~deviceCapabilities ~deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerName = field_map_exn json "providerName" String_.of_json in
       let deviceType = field_map_exn json "deviceType" DeviceType.of_json in
@@ -3698,6 +3742,7 @@ module GetDeviceRequest =
         DeviceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
       make ~deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceArn = field_map_exn json "deviceArn" DeviceArn.of_json in
       make ~deviceArn ()
@@ -3804,6 +3849,7 @@ module CreateQuantumTaskResponse =
         QuantumTaskArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
       make ~quantumTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantumTaskArn =
         field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
@@ -3903,6 +3949,7 @@ module CreateQuantumTaskRequest =
         JsonValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ?tags ~shots ~outputS3KeyPrefix ~outputS3Bucket ?jobToken
         ?deviceParameters ~deviceArn ~clientToken ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let shots =
@@ -4022,6 +4069,7 @@ module CreateJobResponse =
       let jobArn =
         JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
       make ~jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobArn = field_map_exn json "jobArn" JobArn.of_json in
       make ~jobArn ()
@@ -4154,6 +4202,7 @@ module CreateJobRequest =
       make ?tags ?stoppingCondition ~roleArn ~outputDataConfig ~jobName
         ~instanceConfig ?inputDataConfig ?hyperParameters ~deviceConfig
         ~clientToken ?checkpointConfig ~algorithmSpecification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let stoppingCondition =
@@ -4279,6 +4328,7 @@ module CancelQuantumTaskResponse =
         CancellationStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cancellationStatus") in
       make ~quantumTaskArn ~cancellationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantumTaskArn =
         field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
@@ -4311,6 +4361,7 @@ module CancelQuantumTaskRequest =
         String64.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       make ~quantumTaskArn ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantumTaskArn =
         field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
@@ -4413,6 +4464,7 @@ module CancelJobResponse =
         CancellationStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cancellationStatus") in
       make ~jobArn ~cancellationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobArn = field_map_exn json "jobArn" JobArn.of_json in
       let cancellationStatus =
@@ -4435,6 +4487,7 @@ module CancelJobRequest =
       let jobArn =
         JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
       make ~jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobArn = field_map_exn json "jobArn" JobArn.of_json in
       make ~jobArn ()

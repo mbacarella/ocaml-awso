@@ -327,6 +327,7 @@ module ErrorReason =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -397,6 +398,7 @@ module MetricInfo =
           (Xml.child xml_arg0 "MetricNamespace") in
       make ?metricStatisticRecommendation ?metricDimensions ?metricName
         ?metricNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricStatisticRecommendation =
         field_map json "MetricStatisticRecommendation" Statistic.of_json in
@@ -490,6 +492,7 @@ module QuotaPeriod =
       let periodValue =
         (Option.map ~f:PeriodValue.of_xml) (Xml.child xml_arg0 "PeriodValue") in
       make ?periodUnit ?periodValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let periodUnit = field_map json "PeriodUnit" PeriodUnit.of_json in
       let periodValue = field_map json "PeriodValue" PeriodValue.of_json in
@@ -678,6 +681,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -705,6 +709,7 @@ module ServiceInfo =
       let serviceCode =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?serviceName ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceName = field_map json "ServiceName" ServiceName.of_json in
       let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
@@ -802,6 +807,7 @@ module ServiceQuota =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?errorReason ?period ?usageMetric ?globalQuota ?adjustable ?unit
         ?value ?quotaName ?quotaCode ?quotaArn ?serviceName ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorReason = field_map json "ErrorReason" ErrorReason.of_json in
       let period = field_map json "Period" QuotaPeriod.of_json in
@@ -882,6 +888,7 @@ module ServiceQuotaIncreaseRequestInTemplate =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?globalQuota ?unit ?awsRegion ?desiredValue ?quotaName ?quotaCode
         ?serviceName ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalQuota = field_map json "GlobalQuota" GlobalQuota.of_json in
       let unit = field_map json "Unit" QuotaUnit.of_json in
@@ -1003,6 +1010,7 @@ module RequestedServiceQuotaChange =
       make ?unit ?globalQuota ?quotaArn ?requester ?lastUpdated ?created
         ?status ?desiredValue ?quotaName ?quotaCode ?serviceName ?serviceCode
         ?caseId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" QuotaUnit.of_json in
       let globalQuota = field_map json "GlobalQuota" GlobalQuota.of_json in
@@ -1038,6 +1046,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1058,6 +1067,7 @@ module IllegalArgumentException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1077,6 +1087,7 @@ module NoSuchResourceException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1096,6 +1107,7 @@ module ServiceException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1115,6 +1127,7 @@ module TooManyRequestsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1181,6 +1194,7 @@ module TagPolicyViolationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1200,6 +1214,7 @@ module TooManyTagsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1244,6 +1259,7 @@ module DependencyAccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1264,6 +1280,7 @@ module InvalidResourceStateException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1283,6 +1300,7 @@ module QuotaExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1303,6 +1321,7 @@ module ResourceAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1322,6 +1341,7 @@ module AWSServiceAccessNotEnabledException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1342,6 +1362,7 @@ module NoAvailableOrganizationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1362,6 +1383,7 @@ module TemplatesNotAvailableInRegionException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1406,6 +1428,7 @@ module InvalidPaginationTokenException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1593,6 +1616,7 @@ module ServiceQuotaTemplateNotInUseException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1613,6 +1637,7 @@ module OrganizationNotInAllFeaturesModeException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1689,6 +1714,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1719,6 +1745,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" InputTagKeys.of_json in
       let resourceARN =
@@ -1817,6 +1844,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1844,6 +1872,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" InputTags.of_json in
       let resourceARN =
@@ -1974,6 +2003,7 @@ module RequestServiceQuotaIncreaseResponse =
         (Option.map ~f:RequestedServiceQuotaChange.of_xml)
           (Xml.child xml_arg0 "RequestedQuota") in
       make ?requestedQuota ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestedQuota =
         field_map json "RequestedQuota" RequestedServiceQuotaChange.of_json in
@@ -2011,6 +2041,7 @@ module RequestServiceQuotaIncreaseRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~desiredValue ~quotaCode ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredValue = field_map_exn json "DesiredValue" QuotaValue.of_json in
       let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
@@ -2158,6 +2189,7 @@ module PutServiceQuotaIncreaseRequestIntoTemplateResponse =
         (Option.map ~f:ServiceQuotaIncreaseRequestInTemplate.of_xml)
           (Xml.child xml_arg0 "ServiceQuotaIncreaseRequestInTemplate") in
       make ?serviceQuotaIncreaseRequestInTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceQuotaIncreaseRequestInTemplate =
         field_map json "ServiceQuotaIncreaseRequestInTemplate"
@@ -2202,6 +2234,7 @@ module PutServiceQuotaIncreaseRequestIntoTemplateRequest =
         QuotaCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QuotaCode") in
       make ~desiredValue ~awsRegion ~serviceCode ~quotaCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredValue = field_map_exn json "DesiredValue" QuotaValue.of_json in
       let awsRegion = field_map_exn json "AwsRegion" AwsRegion.of_json in
@@ -2289,6 +2322,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:OutputTags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" OutputTags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2312,6 +2346,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" AmazonResourceName.of_json in
@@ -2406,6 +2441,7 @@ module ListServicesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?services ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let services =
         field_map json "Services" ServiceInfoListDefinition.of_json in
@@ -2436,6 +2472,7 @@ module ListServicesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2539,6 +2576,7 @@ module ListServiceQuotasResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?quotas ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quotas = field_map json "Quotas" ServiceQuotaListDefinition.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2575,6 +2613,7 @@ module ListServiceQuotasRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2711,6 +2750,7 @@ module ListServiceQuotaIncreaseRequestsInTemplateResponse =
         (Option.map ~f:ServiceQuotaIncreaseRequestInTemplateList.of_xml)
           (Xml.child xml_arg0 "ServiceQuotaIncreaseRequestInTemplateList") in
       make ?nextToken ?serviceQuotaIncreaseRequestInTemplateList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let serviceQuotaIncreaseRequestInTemplateList =
@@ -2754,6 +2794,7 @@ module ListServiceQuotaIncreaseRequestsInTemplateRequest =
       let serviceCode =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ?awsRegion ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2863,6 +2904,7 @@ module ListRequestedServiceQuotaChangeHistoryResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?requestedQuotas ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestedQuotas =
         field_map json "RequestedQuotas"
@@ -2907,6 +2949,7 @@ module ListRequestedServiceQuotaChangeHistoryRequest =
       let serviceCode =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ?status ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3016,6 +3059,7 @@ module ListRequestedServiceQuotaChangeHistoryByQuotaResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?requestedQuotas ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestedQuotas =
         field_map json "RequestedQuotas"
@@ -3068,6 +3112,7 @@ module ListRequestedServiceQuotaChangeHistoryByQuotaRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ?status ~quotaCode ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3174,6 +3219,7 @@ module ListAWSDefaultServiceQuotasResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?quotas ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quotas = field_map json "Quotas" ServiceQuotaListDefinition.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3210,6 +3256,7 @@ module ListAWSDefaultServiceQuotasRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3295,6 +3342,7 @@ module GetServiceQuotaResponse =
       let quota =
         (Option.map ~f:ServiceQuota.of_xml) (Xml.child xml_arg0 "Quota") in
       make ?quota ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quota = field_map json "Quota" ServiceQuota.of_json in
       make ?quota ()
@@ -3323,6 +3371,7 @@ module GetServiceQuotaRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~quotaCode ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
       let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
@@ -3460,6 +3509,7 @@ module GetServiceQuotaIncreaseRequestFromTemplateResponse =
         (Option.map ~f:ServiceQuotaIncreaseRequestInTemplate.of_xml)
           (Xml.child xml_arg0 "ServiceQuotaIncreaseRequestInTemplate") in
       make ?serviceQuotaIncreaseRequestInTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceQuotaIncreaseRequestInTemplate =
         field_map json "ServiceQuotaIncreaseRequestInTemplate"
@@ -3496,6 +3546,7 @@ module GetServiceQuotaIncreaseRequestFromTemplateRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~awsRegion ~quotaCode ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let awsRegion = field_map_exn json "AwsRegion" AwsRegion.of_json in
       let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
@@ -3584,6 +3635,7 @@ module GetRequestedServiceQuotaChangeResponse =
         (Option.map ~f:RequestedServiceQuotaChange.of_xml)
           (Xml.child xml_arg0 "RequestedQuota") in
       make ?requestedQuota ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestedQuota =
         field_map json "RequestedQuota" RequestedServiceQuotaChange.of_json in
@@ -3608,6 +3660,7 @@ module GetRequestedServiceQuotaChangeRequest =
         RequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RequestId") in
       make ~requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestId = field_map_exn json "RequestId" RequestId.of_json in
       make ~requestId ()
@@ -3739,6 +3792,7 @@ module GetAssociationForServiceQuotaTemplateResponse =
         (Option.map ~f:ServiceQuotaTemplateAssociationStatus.of_xml)
           (Xml.child xml_arg0 "ServiceQuotaTemplateAssociationStatus") in
       make ?serviceQuotaTemplateAssociationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceQuotaTemplateAssociationStatus =
         field_map json "ServiceQuotaTemplateAssociationStatus"
@@ -3755,6 +3809,7 @@ module GetAssociationForServiceQuotaTemplateRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3836,6 +3891,7 @@ module GetAWSDefaultServiceQuotaResponse =
       let quota =
         (Option.map ~f:ServiceQuota.of_xml) (Xml.child xml_arg0 "Quota") in
       make ?quota ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quota = field_map json "Quota" ServiceQuota.of_json in
       make ?quota ()
@@ -3864,6 +3920,7 @@ module GetAWSDefaultServiceQuotaRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~quotaCode ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
       let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
@@ -3983,6 +4040,7 @@ module DisassociateServiceQuotaTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3995,6 +4053,7 @@ module DisassociateServiceQuotaTemplateRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4117,6 +4176,7 @@ module DeleteServiceQuotaIncreaseRequestFromTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4149,6 +4209,7 @@ module DeleteServiceQuotaIncreaseRequestFromTemplateRequest =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~awsRegion ~quotaCode ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let awsRegion = field_map_exn json "AwsRegion" AwsRegion.of_json in
       let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
@@ -4270,6 +4331,7 @@ module AssociateServiceQuotaTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4282,6 +4344,7 @@ module AssociateServiceQuotaTemplateRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

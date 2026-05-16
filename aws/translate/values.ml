@@ -104,6 +104,7 @@ module Term =
       let sourceText =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceText") in
       make ?targetText ?sourceText ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetText = field_map json "TargetText" String_.of_json in
       let sourceText = field_map json "SourceText" String_.of_json in
@@ -186,6 +187,7 @@ module EncryptionKey =
         EncryptionKeyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~id ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" EncryptionKeyID.of_json in
       let type_ = field_map_exn json "Type" EncryptionKeyType.of_json in
@@ -369,6 +371,7 @@ module InputDataConfig =
       let s3Uri =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~contentType ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map_exn json "ContentType" ContentType.of_json in
       let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
@@ -419,6 +422,7 @@ module JobDetails =
           (Xml.child xml_arg0 "TranslatedDocumentsCount") in
       make ?inputDocumentsCount ?documentsWithErrorsCount
         ?translatedDocumentsCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputDocumentsCount =
         field_map json "InputDocumentsCount" Integer.of_json in
@@ -539,6 +543,7 @@ module OutputDataConfig =
       let s3Uri =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ?encryptionKey ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKey =
         field_map json "EncryptionKey" EncryptionKey.of_json in
@@ -633,6 +638,7 @@ module TranslationSettings =
       let formality =
         (Option.map ~f:Formality.of_xml) (Xml.child xml_arg0 "Formality") in
       make ?profanity ?formality ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profanity = field_map json "Profanity" Profanity.of_json in
       let formality = field_map json "Formality" Formality.of_json in
@@ -816,6 +822,7 @@ module ParallelDataConfig =
       let s3Uri =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~format ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let format = field_map_exn json "Format" ParallelDataFormat.of_json in
       let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
@@ -880,6 +887,7 @@ module AppliedTerminology =
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?terms ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terms = field_map json "Terms" TermList.of_json in
       let name = field_map json "Name" ResourceName.of_json in
@@ -1031,6 +1039,7 @@ module TextTranslationJobProperties =
         ?endTime ?submittedTime ?message ?parallelDataNames ?terminologyNames
         ?targetLanguageCodes ?sourceLanguageCode ?jobDetails ?jobStatus
         ?jobName ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let settings = field_map json "Settings" TranslationSettings.of_json in
       let dataAccessRoleArn =
@@ -1196,6 +1205,7 @@ module TerminologyProperties =
       make ?format ?skippedTermCount ?message ?directionality ?lastUpdatedAt
         ?createdAt ?termCount ?sizeBytes ?encryptionKey ?targetLanguageCodes
         ?sourceLanguageCode ?arn ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let format = field_map json "Format" TerminologyDataFormat.of_json in
       let skippedTermCount =
@@ -1391,6 +1401,7 @@ module ParallelDataProperties =
         ?importedRecordCount ?importedDataSize ?message ?parallelDataConfig
         ?targetLanguageCodes ?sourceLanguageCode ?status ?description ?arn
         ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestUpdateAttemptAt =
         field_map json "LatestUpdateAttemptAt" Timestamp.of_json in
@@ -1449,6 +1460,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1468,6 +1480,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1487,6 +1500,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1505,6 +1519,7 @@ module InvalidParameterValueException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1524,6 +1539,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1543,6 +1559,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1562,6 +1579,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1581,6 +1599,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1656,6 +1675,7 @@ module DetectedLanguageLowConfidenceException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?detectedLanguageCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectedLanguageCode =
         field_map json "DetectedLanguageCode" LanguageCodeString.of_json in
@@ -1677,6 +1697,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1696,6 +1717,7 @@ module TextSizeLimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1734,6 +1756,7 @@ module UnsupportedLanguagePairException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?targetLanguageCode ?sourceLanguageCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetLanguageCode =
         field_map json "TargetLanguageCode" LanguageCodeString.of_json in
@@ -1778,6 +1801,7 @@ module InvalidFilterException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1887,6 +1911,7 @@ module TextTranslationJobFilter =
       let jobName =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submittedAfterTime ?submittedBeforeTime ?jobStatus ?jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submittedAfterTime =
         field_map json "SubmittedAfterTime" Timestamp.of_json in
@@ -1974,6 +1999,7 @@ module TerminologyDataLocation =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RepositoryType") in
       make ~location ~repositoryType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" String_.of_json in
       let repositoryType =
@@ -2032,6 +2058,7 @@ module TerminologyData =
         TerminologyFile.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "File") in
       make ?directionality ~format ~file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directionality =
         field_map json "Directionality" Directionality.of_json in
@@ -2065,6 +2092,7 @@ module ParallelDataDataLocation =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RepositoryType") in
       make ~location ~repositoryType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" String_.of_json in
       let repositoryType =
@@ -2216,6 +2244,7 @@ module UpdateParallelDataResponse =
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?latestUpdateAttemptAt ?latestUpdateAttemptStatus ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestUpdateAttemptAt =
         field_map json "LatestUpdateAttemptAt" Timestamp.of_json in
@@ -2268,6 +2297,7 @@ module UpdateParallelDataRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~clientToken ~parallelDataConfig ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken =
         field_map_exn json "ClientToken" ClientTokenString.of_json in
@@ -2439,6 +2469,7 @@ module TranslateTextResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "TranslatedText") in
       make ?appliedSettings ?appliedTerminologies ~targetLanguageCode
         ~sourceLanguageCode ~translatedText ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appliedSettings =
         field_map json "AppliedSettings" TranslationSettings.of_json in
@@ -2517,6 +2548,7 @@ module TranslateTextRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ?settings ~targetLanguageCode ~sourceLanguageCode
         ?terminologyNames ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let settings = field_map json "Settings" TranslationSettings.of_json in
       let targetLanguageCode =
@@ -2596,6 +2628,7 @@ module StopTextTranslationJobResponse =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobStatus = field_map json "JobStatus" JobStatus.of_json in
       let jobId = field_map json "JobId" JobId.of_json in
@@ -2617,6 +2650,7 @@ module StopTextTranslationJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -2720,6 +2754,7 @@ module StartTextTranslationJobResponse =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobStatus = field_map json "JobStatus" JobStatus.of_json in
       let jobId = field_map json "JobId" JobId.of_json in
@@ -2836,6 +2871,7 @@ module StartTextTranslationJobRequest =
       make ?settings ~clientToken ?parallelDataNames ?terminologyNames
         ~targetLanguageCodes ~sourceLanguageCode ~dataAccessRoleArn
         ~outputDataConfig ~inputDataConfig ?jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let settings = field_map json "Settings" TranslationSettings.of_json in
       let clientToken =
@@ -2944,6 +2980,7 @@ module ListTextTranslationJobsResponse =
         (Option.map ~f:TextTranslationJobPropertiesList.of_xml)
           (Xml.child xml_arg0 "TextTranslationJobPropertiesList") in
       make ?nextToken ?textTranslationJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let textTranslationJobPropertiesList =
@@ -2986,6 +3023,7 @@ module ListTextTranslationJobsRequest =
         (Option.map ~f:TextTranslationJobFilter.of_xml)
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3067,6 +3105,7 @@ module ListTerminologiesResponse =
         (Option.map ~f:TerminologyPropertiesList.of_xml)
           (Xml.child xml_arg0 "TerminologyPropertiesList") in
       make ?nextToken ?terminologyPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let terminologyPropertiesList =
@@ -3101,6 +3140,7 @@ module ListTerminologiesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3181,6 +3221,7 @@ module ListParallelDataResponse =
         (Option.map ~f:ParallelDataPropertiesList.of_xml)
           (Xml.child xml_arg0 "ParallelDataPropertiesList") in
       make ?nextToken ?parallelDataPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let parallelDataPropertiesList =
@@ -3215,6 +3256,7 @@ module ListParallelDataRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3308,6 +3350,7 @@ module ImportTerminologyResponse =
         (Option.map ~f:TerminologyProperties.of_xml)
           (Xml.child xml_arg0 "TerminologyProperties") in
       make ?auxiliaryDataLocation ?terminologyProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auxiliaryDataLocation =
         field_map json "AuxiliaryDataLocation"
@@ -3376,6 +3419,7 @@ module ImportTerminologyRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?encryptionKey ~terminologyData ?description ~mergeStrategy ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKey =
         field_map json "EncryptionKey" EncryptionKey.of_json in
@@ -3492,6 +3536,7 @@ module GetTerminologyResponse =
           (Xml.child xml_arg0 "TerminologyProperties") in
       make ?auxiliaryDataLocation ?terminologyDataLocation
         ?terminologyProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auxiliaryDataLocation =
         field_map json "AuxiliaryDataLocation"
@@ -3531,6 +3576,7 @@ module GetTerminologyRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?terminologyDataFormat ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminologyDataFormat =
         field_map json "TerminologyDataFormat" TerminologyDataFormat.of_json in
@@ -3651,6 +3697,7 @@ module GetParallelDataResponse =
           (Xml.child xml_arg0 "ParallelDataProperties") in
       make ?latestUpdateAttemptAuxiliaryDataLocation ?auxiliaryDataLocation
         ?dataLocation ?parallelDataProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latestUpdateAttemptAuxiliaryDataLocation =
         field_map json "LatestUpdateAttemptAuxiliaryDataLocation"
@@ -3683,6 +3730,7 @@ module GetParallelDataRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       make ~name ()
@@ -3753,6 +3801,7 @@ module DescribeTextTranslationJobResponse =
         (Option.map ~f:TextTranslationJobProperties.of_xml)
           (Xml.child xml_arg0 "TextTranslationJobProperties") in
       make ?textTranslationJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let textTranslationJobProperties =
         field_map json "TextTranslationJobProperties"
@@ -3777,6 +3826,7 @@ module DescribeTextTranslationJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -3797,6 +3847,7 @@ module DeleteTerminologyRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       make ~name ()
@@ -3881,6 +3932,7 @@ module DeleteParallelDataResponse =
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ParallelDataStatus.of_json in
       let name = field_map json "Name" ResourceName.of_json in
@@ -3903,6 +3955,7 @@ module DeleteParallelDataRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       make ~name ()
@@ -4005,6 +4058,7 @@ module CreateParallelDataResponse =
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ParallelDataStatus.of_json in
       let name = field_map json "Name" ResourceName.of_json in
@@ -4069,6 +4123,7 @@ module CreateParallelDataRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~clientToken ?encryptionKey ~parallelDataConfig ?description ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken =
         field_map_exn json "ClientToken" ClientTokenString.of_json in

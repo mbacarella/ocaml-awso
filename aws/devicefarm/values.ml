@@ -213,6 +213,7 @@ module InstanceProfile =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?description ?name ?rebootAfterUse ?excludeAppPackagesFromCleanup
         ?packageCleanup ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" Message.of_json in
       let name = field_map json "name" Name.of_json in
@@ -321,6 +322,7 @@ module DeviceInstance =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?instanceProfile ?udid ?status ?labels ?deviceArn ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfile =
         field_map json "instanceProfile" InstanceProfile.of_json in
@@ -387,6 +389,7 @@ module CPU =
       let frequency =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "frequency") in
       make ?clock ?architecture ?frequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clock = field_map json "clock" Double.of_json in
       let architecture = field_map json "architecture" String_.of_json in
@@ -521,6 +524,7 @@ module Resolution =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "height") in
       let width = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "width") in
       make ?height ?width ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let height = field_map json "height" Integer.of_json in
       let width = field_map json "width" Integer.of_json in
@@ -552,6 +556,7 @@ module MonetaryAmount =
       let amount =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "amount") in
       make ?currencyCode ?amount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currencyCode = field_map json "currencyCode" CurrencyCode.of_json in
       let amount = field_map json "amount" Double.of_json in
@@ -738,6 +743,7 @@ module Device =
         ?remoteAccessEnabled ?radio ?carrier ?image ?memory ?heapSize
         ?resolution ?cpu ?os ?platform ?formFactor ?modelId ?model
         ?manufacturer ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availability =
         field_map json "availability" DeviceAvailability.of_json in
@@ -827,6 +833,7 @@ module ProblemDetail =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" Name.of_json in
       let arn = field_map json "arn" AmazonResourceName.of_json in
@@ -979,6 +986,7 @@ module RecurringCharge =
       let cost =
         (Option.map ~f:MonetaryAmount.of_xml) (Xml.child xml_arg0 "cost") in
       make ?frequency ?cost ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frequency =
         field_map json "frequency" RecurringChargeFrequency.of_json in
@@ -1040,6 +1048,7 @@ module Problem =
       let run =
         (Option.map ~f:ProblemDetail.of_xml) (Xml.child xml_arg0 "run") in
       make ?message ?result ?device ?test ?suite ?job ?run ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       let result = field_map json "result" ExecutionResult.of_json in
@@ -1105,6 +1114,7 @@ module DeviceFilter =
         DeviceFilterAttribute.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attribute") in
       make ~values ~operator ~attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "values" DeviceFilterValues.of_json in
       let operator = field_map_exn json "operator" RuleOperator.of_json in
@@ -1505,6 +1515,7 @@ module Offering =
       let id =
         (Option.map ~f:OfferingIdentifier.of_xml) (Xml.child xml_arg0 "id") in
       make ?recurringCharges ?platform ?type_ ?description ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recurringCharges =
         field_map json "recurringCharges" RecurringCharges.of_json in
@@ -1572,6 +1583,7 @@ module Rule =
         (Option.map ~f:DeviceAttribute.of_xml)
           (Xml.child xml_arg0 "attribute") in
       make ?value ?operator ?attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" String_.of_json in
       let operator = field_map json "operator" RuleOperator.of_json in
@@ -1600,6 +1612,7 @@ module IncompatibilityMessage =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?type_ ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" DeviceAttribute.of_json in
       let message = field_map json "message" Message.of_json in
@@ -1965,6 +1978,7 @@ module UniqueProblem =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?problems ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let problems = field_map json "problems" Problems.of_json in
       let message = field_map json "message" Message.of_json in
@@ -2028,6 +2042,7 @@ module Counters =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "passed") in
       let total = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "total") in
       make ?skipped ?stopped ?errored ?warned ?failed ?passed ?total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skipped = field_map json "skipped" Integer.of_json in
       let stopped = field_map json "stopped" Integer.of_json in
@@ -2068,6 +2083,7 @@ module DeviceMinutes =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "metered") in
       let total = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "total") in
       make ?unmetered ?metered ?total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unmetered = field_map json "unmetered" Double.of_json in
       let metered = field_map json "metered" Double.of_json in
@@ -2330,6 +2346,7 @@ module TestGridVpcConfig =
         SecurityGroupIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "securityGroupIds") in
       make ~vpcId ~subnetIds ~securityGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "vpcId" NonEmptyString.of_json in
       let subnetIds = field_map_exn json "subnetIds" SubnetIds.of_json in
@@ -2487,6 +2504,7 @@ module CustomerArtifactPaths =
       let iosPaths =
         (Option.map ~f:IosPaths.of_xml) (Xml.child xml_arg0 "iosPaths") in
       make ?deviceHostPaths ?androidPaths ?iosPaths ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceHostPaths =
         field_map json "deviceHostPaths" DeviceHostPaths.of_json in
@@ -2528,6 +2546,7 @@ module DeviceSelectionResult =
       let filters =
         (Option.map ~f:DeviceFilters.of_xml) (Xml.child xml_arg0 "filters") in
       make ?maxDevices ?matchedDevicesCount ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxDevices = field_map json "maxDevices" Integer.of_json in
       let matchedDevicesCount =
@@ -2596,6 +2615,7 @@ module Location =
       let latitude =
         Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "latitude") in
       make ~longitude ~latitude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let longitude = field_map_exn json "longitude" Double.of_json in
       let latitude = field_map_exn json "latitude" Double.of_json in
@@ -2718,6 +2738,7 @@ module NetworkProfile =
         ?uplinkJitterMs ?downlinkDelayMs ?uplinkDelayMs
         ?downlinkBandwidthBits ?uplinkBandwidthBits ?type_ ?description ?name
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downlinkLossPercent =
         field_map json "downlinkLossPercent" PercentInteger.of_json in
@@ -2775,6 +2796,7 @@ module Radios =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "bluetooth") in
       let wifi = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "wifi") in
       make ?gps ?nfc ?bluetooth ?wifi ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gps = field_map json "gps" Boolean.of_json in
       let nfc = field_map json "nfc" Boolean.of_json in
@@ -2906,6 +2928,7 @@ module OfferingStatus =
         (Option.map ~f:OfferingTransactionType.of_xml)
           (Xml.child xml_arg0 "type") in
       make ?effectiveOn ?quantity ?offering ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectiveOn = field_map json "effectiveOn" DateTime.of_json in
       let quantity = field_map json "quantity" Integer.of_json in
@@ -3154,6 +3177,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -3321,6 +3345,7 @@ module VPCEConfiguration =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?vpceConfigurationDescription ?serviceDnsName ?vpceServiceName
         ?vpceConfigurationName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceConfigurationDescription =
         field_map json "vpceConfigurationDescription"
@@ -3422,6 +3447,7 @@ module Upload =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?category ?message ?contentType ?metadata ?url ?status ?type_
         ?created ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let category = field_map json "category" UploadCategory.of_json in
       let message = field_map json "message" Message.of_json in
@@ -3550,6 +3576,7 @@ module Test =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?deviceMinutes ?message ?counters ?stopped ?started ?result
         ?status ?created ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceMinutes =
         field_map json "deviceMinutes" DeviceMinutes.of_json in
@@ -3625,6 +3652,7 @@ module TestGridSession =
         (Option.map ~f:DeviceFarmArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?seleniumProperties ?billingMinutes ?ended ?created ?status ?arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let seleniumProperties =
         field_map json "seleniumProperties" String_.of_json in
@@ -3666,6 +3694,7 @@ module TestGridSessionArtifact =
       let filename =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "filename") in
       make ?url ?type_ ?filename ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" SensitiveString.of_json in
       let type_ = field_map json "type" TestGridSessionArtifactType.of_json in
@@ -3717,6 +3746,7 @@ module TestGridSessionAction =
       let action =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "action") in
       make ?requestMethod ?statusCode ?duration ?started ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestMethod = field_map json "requestMethod" String_.of_json in
       let statusCode = field_map json "statusCode" String_.of_json in
@@ -3765,6 +3795,7 @@ module TestGridProject =
       let arn =
         (Option.map ~f:DeviceFarmArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?created ?vpcConfig ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let created = field_map json "created" DateTime.of_json in
       let vpcConfig = field_map json "vpcConfig" TestGridVpcConfig.of_json in
@@ -3863,6 +3894,7 @@ module Suite =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?deviceMinutes ?message ?counters ?stopped ?started ?result
         ?status ?created ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceMinutes =
         field_map json "deviceMinutes" DeviceMinutes.of_json in
@@ -3905,6 +3937,7 @@ module Sample =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?url ?type_ ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" URL.of_json in
       let type_ = field_map json "type" SampleType.of_json in
@@ -4187,6 +4220,7 @@ module Run =
         ?parsingResultUrl ?networkProfile ?deviceMinutes ?billingMethod
         ?completedJobs ?totalJobs ?message ?counters ?stopped ?started
         ?result ?status ?created ?platform ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceSelectionResult =
         field_map json "deviceSelectionResult" DeviceSelectionResult.of_json in
@@ -4434,6 +4468,7 @@ module RemoteAccessSession =
         ?remoteRecordAppArn ?remoteRecordEnabled ?remoteDebugEnabled
         ?instanceArn ?device ?stopped ?started ?message ?result ?status
         ?created ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skipAppResign =
         field_map json "skipAppResign" SkipAppResign.of_json in
@@ -4505,6 +4540,7 @@ module Project =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?created ?defaultJobTimeoutMinutes ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let created = field_map json "created" DateTime.of_json in
       let defaultJobTimeoutMinutes =
@@ -4571,6 +4607,7 @@ module OfferingTransaction =
           (Xml.child xml_arg0 "offeringStatus") in
       make ?cost ?createdOn ?offeringPromotionId ?transactionId
         ?offeringStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cost = field_map json "cost" MonetaryAmount.of_json in
       let createdOn = field_map json "createdOn" DateTime.of_json in
@@ -4606,6 +4643,7 @@ module OfferingPromotion =
         (Option.map ~f:OfferingPromotionIdentifier.of_xml)
           (Xml.child xml_arg0 "id") in
       make ?description ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" Message.of_json in
       let id = field_map json "id" OfferingPromotionIdentifier.of_json in
@@ -4733,6 +4771,7 @@ module Job =
       make ?videoCapture ?videoEndpoint ?deviceMinutes ?instanceArn ?device
         ?message ?counters ?stopped ?started ?result ?status ?created ?type_
         ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoCapture = field_map json "videoCapture" VideoCapture.of_json in
       let videoEndpoint = field_map json "videoEndpoint" String_.of_json in
@@ -4801,6 +4840,7 @@ module DevicePool =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?maxDevices ?rules ?type_ ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxDevices = field_map json "maxDevices" Integer.of_json in
       let rules = field_map json "rules" Rules.of_json in
@@ -4848,6 +4888,7 @@ module Artifact =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?url ?extension ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" URL.of_json in
       let extension = field_map json "extension" String_.of_json in
@@ -4891,6 +4932,7 @@ module DevicePoolCompatibilityResult =
       let device =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "device") in
       make ?incompatibilityMessages ?compatible ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incompatibilityMessages =
         field_map json "incompatibilityMessages"
@@ -4995,6 +5037,7 @@ module TrialMinutes =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "remaining") in
       let total = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "total") in
       make ?remaining ?total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remaining = field_map json "remaining" Double.of_json in
       let total = field_map json "total" Double.of_json in
@@ -5017,6 +5060,7 @@ module ArgumentException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5035,6 +5079,7 @@ module InvalidOperationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5056,6 +5101,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5076,6 +5122,7 @@ module ServiceAccountException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5096,6 +5143,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5114,6 +5162,7 @@ module InternalServiceException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5182,6 +5231,7 @@ module TagOperationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName =
         field_map json "resourceName" AmazonResourceName.of_json in
@@ -5235,6 +5285,7 @@ module TagPolicyException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName =
         field_map json "resourceName" AmazonResourceName.of_json in
@@ -5265,6 +5316,7 @@ module TooManyTagsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName =
         field_map json "resourceName" AmazonResourceName.of_json in
@@ -5312,6 +5364,7 @@ module IdempotencyException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -5342,6 +5395,7 @@ module DeviceSelectionConfiguration =
         DeviceFilters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ~maxDevices ~filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxDevices = field_map_exn json "maxDevices" Integer.of_json in
       let filters = field_map_exn json "filters" DeviceFilters.of_json in
@@ -5412,6 +5466,7 @@ module ExecutionConfiguration =
           (Xml.child xml_arg0 "jobTimeoutMinutes") in
       make ?skipAppResign ?videoCapture ?appPackagesCleanup ?accountsCleanup
         ?jobTimeoutMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skipAppResign =
         field_map json "skipAppResign" SkipAppResign.of_json in
@@ -5522,6 +5577,7 @@ module ScheduleRunConfiguration =
       make ?billingMethod ?auxiliaryApps ?radios ?customerArtifactPaths
         ?vpceConfigurationArns ?location ?locale ?networkProfileArn
         ?extraDataPackageArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingMethod =
         field_map json "billingMethod" BillingMethod.of_json in
@@ -5592,6 +5648,7 @@ module ScheduleRunTest =
       let type_ =
         TestType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?parameters ?filter ?testSpecArn ?testPackageArn ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "parameters" TestParameters.of_json in
       let filter = field_map json "filter" Filter.of_json in
@@ -5619,6 +5676,7 @@ module NotEligibleException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -6422,6 +6480,7 @@ module AccountSettings =
       make ?skipAppResign ?defaultJobTimeoutMinutes ?maxSlots ?trialMinutes
         ?maxJobTimeoutMinutes ?unmeteredRemoteAccessDevices ?unmeteredDevices
         ?awsAccountNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skipAppResign =
         field_map json "skipAppResign" SkipAppResign.of_json in
@@ -6457,6 +6516,7 @@ module CannotDeleteException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Message.of_json in
       make ?message ()
@@ -6509,6 +6569,7 @@ module CreateRemoteAccessSessionConfiguration =
         (Option.map ~f:BillingMethod.of_xml)
           (Xml.child xml_arg0 "billingMethod") in
       make ?vpceConfigurationArns ?billingMethod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceConfigurationArns =
         field_map json "vpceConfigurationArns" AmazonResourceNames.of_json in
@@ -6608,6 +6669,7 @@ module UpdateVPCEConfigurationResult =
         (Option.map ~f:VPCEConfiguration.of_xml)
           (Xml.child xml_arg0 "vpceConfiguration") in
       make ?vpceConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceConfiguration =
         field_map json "vpceConfiguration" VPCEConfiguration.of_json in
@@ -6680,6 +6742,7 @@ module UpdateVPCEConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?vpceConfigurationDescription ?serviceDnsName ?vpceServiceName
         ?vpceConfigurationName ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceConfigurationDescription =
         field_map json "vpceConfigurationDescription"
@@ -6765,6 +6828,7 @@ module UpdateUploadResult =
       let upload =
         (Option.map ~f:Upload.of_xml) (Xml.child xml_arg0 "upload") in
       make ?upload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let upload = field_map json "upload" Upload.of_json in make ?upload ()
     let to_json v = composed_to_json to_value v
@@ -6807,6 +6871,7 @@ module UpdateUploadRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?editContent ?contentType ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let editContent = field_map json "editContent" Boolean.of_json in
       let contentType = field_map json "contentType" ContentType.of_json in
@@ -6886,6 +6951,7 @@ module UpdateTestGridProjectResult =
         (Option.map ~f:TestGridProject.of_xml)
           (Xml.child xml_arg0 "testGridProject") in
       make ?testGridProject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testGridProject =
         field_map json "testGridProject" TestGridProject.of_json in
@@ -6932,6 +6998,7 @@ module UpdateTestGridProjectRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ?vpcConfig ?description ?name ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfig = field_map json "vpcConfig" TestGridVpcConfig.of_json in
       let description =
@@ -7009,6 +7076,7 @@ module UpdateProjectResult =
       let project =
         (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "project") in
       make ?project ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let project = field_map json "project" Project.of_json in
       make ?project ()
@@ -7048,6 +7116,7 @@ module UpdateProjectRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?defaultJobTimeoutMinutes ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultJobTimeoutMinutes =
         field_map json "defaultJobTimeoutMinutes" JobTimeoutMinutes.of_json in
@@ -7127,6 +7196,7 @@ module UpdateNetworkProfileResult =
         (Option.map ~f:NetworkProfile.of_xml)
           (Xml.child xml_arg0 "networkProfile") in
       make ?networkProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfile =
         field_map json "networkProfile" NetworkProfile.of_json in
@@ -7254,6 +7324,7 @@ module UpdateNetworkProfileRequest =
         ?uplinkJitterMs ?downlinkDelayMs ?uplinkDelayMs
         ?downlinkBandwidthBits ?uplinkBandwidthBits ?type_ ?description ?name
         ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downlinkLossPercent =
         field_map json "downlinkLossPercent" PercentInteger.of_json in
@@ -7349,6 +7420,7 @@ module UpdateInstanceProfileResult =
         (Option.map ~f:InstanceProfile.of_xml)
           (Xml.child xml_arg0 "instanceProfile") in
       make ?instanceProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfile =
         field_map json "instanceProfile" InstanceProfile.of_json in
@@ -7418,6 +7490,7 @@ module UpdateInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?rebootAfterUse ?excludeAppPackagesFromCleanup ?packageCleanup
         ?description ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rebootAfterUse = field_map json "rebootAfterUse" Boolean.of_json in
       let excludeAppPackagesFromCleanup =
@@ -7500,6 +7573,7 @@ module UpdateDevicePoolResult =
       let devicePool =
         (Option.map ~f:DevicePool.of_xml) (Xml.child xml_arg0 "devicePool") in
       make ?devicePool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let devicePool = field_map json "devicePool" DevicePool.of_json in
       make ?devicePool ()
@@ -7565,6 +7639,7 @@ module UpdateDevicePoolRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?clearMaxDevices ?maxDevices ?rules ?description ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clearMaxDevices = field_map json "clearMaxDevices" Boolean.of_json in
       let maxDevices = field_map json "maxDevices" Integer.of_json in
@@ -7648,6 +7723,7 @@ module UpdateDeviceInstanceResult =
         (Option.map ~f:DeviceInstance.of_xml)
           (Xml.child xml_arg0 "deviceInstance") in
       make ?deviceInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceInstance =
         field_map json "deviceInstance" DeviceInstance.of_json in
@@ -7686,6 +7762,7 @@ module UpdateDeviceInstanceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?labels ?profileArn ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let labels = field_map json "labels" InstanceLabels.of_json in
       let profileArn = field_map json "profileArn" AmazonResourceName.of_json in
@@ -7746,6 +7823,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified tags from a resource."]
@@ -7774,6 +7852,7 @@ module UntagResourceRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -7852,6 +7931,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7880,6 +7960,7 @@ module TagResourceRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN =
@@ -7954,6 +8035,7 @@ module StopRunResult =
     let of_xml xml_arg0 =
       let run = (Option.map ~f:Run.of_xml) (Xml.child xml_arg0 "run") in
       make ?run ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let run = field_map json "run" Run.of_json in make ?run ()
     let to_json v = composed_to_json to_value v
@@ -7976,6 +8058,7 @@ module StopRunRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -8053,6 +8136,7 @@ module StopRemoteAccessSessionResult =
         (Option.map ~f:RemoteAccessSession.of_xml)
           (Xml.child xml_arg0 "remoteAccessSession") in
       make ?remoteAccessSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccessSession =
         field_map json "remoteAccessSession" RemoteAccessSession.of_json in
@@ -8078,6 +8162,7 @@ module StopRemoteAccessSessionRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -8150,6 +8235,7 @@ module StopJobResult =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -8173,6 +8259,7 @@ module StopJobRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -8254,6 +8341,7 @@ module ScheduleRunResult =
     let of_xml xml_arg0 =
       let run = (Option.map ~f:Run.of_xml) (Xml.child xml_arg0 "run") in
       make ?run ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let run = field_map json "run" Run.of_json in make ?run ()
     let to_json v = composed_to_json to_value v
@@ -8346,6 +8434,7 @@ module ScheduleRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ?executionConfiguration ?configuration ~test ?name
         ?deviceSelectionConfiguration ?devicePoolArn ?appArn ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionConfiguration =
         field_map json "executionConfiguration"
@@ -8447,6 +8536,7 @@ module RenewOfferingResult =
         (Option.map ~f:OfferingTransaction.of_xml)
           (Xml.child xml_arg0 "offeringTransaction") in
       make ?offeringTransaction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringTransaction =
         field_map json "offeringTransaction" OfferingTransaction.of_json in
@@ -8476,6 +8566,7 @@ module RenewOfferingRequest =
         OfferingIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "offeringId") in
       make ~quantity ~offeringId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantity = field_map_exn json "quantity" Integer.of_json in
       let offeringId =
@@ -8564,6 +8655,7 @@ module PurchaseOfferingResult =
         (Option.map ~f:OfferingTransaction.of_xml)
           (Xml.child xml_arg0 "offeringTransaction") in
       make ?offeringTransaction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringTransaction =
         field_map json "offeringTransaction" OfferingTransaction.of_json in
@@ -8605,6 +8697,7 @@ module PurchaseOfferingRequest =
         OfferingIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "offeringId") in
       make ?offeringPromotionId ~quantity ~offeringId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringPromotionId =
         field_map json "offeringPromotionId"
@@ -8677,6 +8770,7 @@ module ListVPCEConfigurationsResult =
         (Option.map ~f:VPCEConfigurations.of_xml)
           (Xml.child xml_arg0 "vpceConfigurations") in
       make ?nextToken ?vpceConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let vpceConfigurations =
@@ -8709,6 +8803,7 @@ module ListVPCEConfigurationsRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -8791,6 +8886,7 @@ module ListUploadsResult =
       let uploads =
         (Option.map ~f:Uploads.of_xml) (Xml.child xml_arg0 "uploads") in
       make ?nextToken ?uploads ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let uploads = field_map json "uploads" Uploads.of_json in
@@ -8829,6 +8925,7 @@ module ListUploadsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ?type_ ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let type_ = field_map json "type" UploadType.of_json in
@@ -8917,6 +9014,7 @@ module ListUniqueProblemsResult =
         (Option.map ~f:UniqueProblemsByExecutionResultMap.of_xml)
           (Xml.child xml_arg0 "uniqueProblems") in
       make ?nextToken ?uniqueProblems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let uniqueProblems =
@@ -8948,6 +9046,7 @@ module ListUniqueProblemsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
@@ -9029,6 +9128,7 @@ module ListTestsResult =
           (Xml.child xml_arg0 "nextToken") in
       let tests = (Option.map ~f:Tests.of_xml) (Xml.child xml_arg0 "tests") in
       make ?nextToken ?tests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let tests = field_map json "tests" Tests.of_json in
@@ -9059,6 +9159,7 @@ module ListTestsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
@@ -9134,6 +9235,7 @@ module ListTestGridSessionsResult =
         (Option.map ~f:TestGridSessions.of_xml)
           (Xml.child xml_arg0 "testGridSessions") in
       make ?nextToken ?testGridSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let testGridSessions =
@@ -9216,6 +9318,7 @@ module ListTestGridSessionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ?nextToken ?maxResult ?endTimeBefore ?endTimeAfter
         ?creationTimeBefore ?creationTimeAfter ?status ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResult = field_map json "maxResult" MaxPageSize.of_json in
@@ -9300,6 +9403,7 @@ module ListTestGridSessionArtifactsResult =
         (Option.map ~f:TestGridSessionArtifacts.of_xml)
           (Xml.child xml_arg0 "artifacts") in
       make ?nextToken ?artifacts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let artifacts =
@@ -9347,6 +9451,7 @@ module ListTestGridSessionArtifactsRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sessionArn") in
       make ?nextToken ?maxResult ?type_ ~sessionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResult = field_map json "maxResult" MaxPageSize.of_json in
@@ -9424,6 +9529,7 @@ module ListTestGridSessionActionsResult =
         (Option.map ~f:TestGridSessionActions.of_xml)
           (Xml.child xml_arg0 "actions") in
       make ?nextToken ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let actions = field_map json "actions" TestGridSessionActions.of_json in
@@ -9460,6 +9566,7 @@ module ListTestGridSessionActionsRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sessionArn") in
       make ?nextToken ?maxResult ~sessionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResult = field_map json "maxResult" MaxPageSize.of_json in
@@ -9530,6 +9637,7 @@ module ListTestGridProjectsResult =
         (Option.map ~f:TestGridProjects.of_xml)
           (Xml.child xml_arg0 "testGridProjects") in
       make ?nextToken ?testGridProjects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let testGridProjects =
@@ -9560,6 +9668,7 @@ module ListTestGridProjectsRequest =
       let maxResult =
         (Option.map ~f:MaxPageSize.of_xml) (Xml.child xml_arg0 "maxResult") in
       make ?nextToken ?maxResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResult = field_map json "maxResult" MaxPageSize.of_json in
@@ -9626,6 +9735,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -9648,6 +9758,7 @@ module ListTagsForResourceRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" DeviceFarmArn.of_json in
@@ -9729,6 +9840,7 @@ module ListSuitesResult =
       let suites =
         (Option.map ~f:Suites.of_xml) (Xml.child xml_arg0 "suites") in
       make ?nextToken ?suites ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let suites = field_map json "suites" Suites.of_json in
@@ -9759,6 +9871,7 @@ module ListSuitesRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
@@ -9840,6 +9953,7 @@ module ListSamplesResult =
       let samples =
         (Option.map ~f:Samples.of_xml) (Xml.child xml_arg0 "samples") in
       make ?nextToken ?samples ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let samples = field_map json "samples" Samples.of_json in
@@ -9871,6 +9985,7 @@ module ListSamplesRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
@@ -9951,6 +10066,7 @@ module ListRunsResult =
           (Xml.child xml_arg0 "nextToken") in
       let runs = (Option.map ~f:Runs.of_xml) (Xml.child xml_arg0 "runs") in
       make ?nextToken ?runs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let runs = field_map json "runs" Runs.of_json in
@@ -9982,6 +10098,7 @@ module ListRunsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
@@ -10069,6 +10186,7 @@ module ListRemoteAccessSessionsResult =
         (Option.map ~f:RemoteAccessSessions.of_xml)
           (Xml.child xml_arg0 "remoteAccessSessions") in
       make ?nextToken ?remoteAccessSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let remoteAccessSessions =
@@ -10102,6 +10220,7 @@ module ListRemoteAccessSessionsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
@@ -10185,6 +10304,7 @@ module ListProjectsResult =
       let projects =
         (Option.map ~f:Projects.of_xml) (Xml.child xml_arg0 "projects") in
       make ?nextToken ?projects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let projects = field_map json "projects" Projects.of_json in
@@ -10214,6 +10334,7 @@ module ListProjectsRequest =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?nextToken ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map json "arn" AmazonResourceName.of_json in
@@ -10306,6 +10427,7 @@ module ListOfferingsResult =
       let offerings =
         (Option.map ~f:Offerings.of_xml) (Xml.child xml_arg0 "offerings") in
       make ?nextToken ?offerings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let offerings = field_map json "offerings" Offerings.of_json in
@@ -10329,6 +10451,7 @@ module ListOfferingsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       make ?nextToken ()
@@ -10424,6 +10547,7 @@ module ListOfferingTransactionsResult =
         (Option.map ~f:OfferingTransactions.of_xml)
           (Xml.child xml_arg0 "offeringTransactions") in
       make ?nextToken ?offeringTransactions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let offeringTransactions =
@@ -10448,6 +10572,7 @@ module ListOfferingTransactionsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       make ?nextToken ()
@@ -10542,6 +10667,7 @@ module ListOfferingPromotionsResult =
         (Option.map ~f:OfferingPromotions.of_xml)
           (Xml.child xml_arg0 "offeringPromotions") in
       make ?nextToken ?offeringPromotions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let offeringPromotions =
@@ -10567,6 +10693,7 @@ module ListOfferingPromotionsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       make ?nextToken ()
@@ -10652,6 +10779,7 @@ module ListNetworkProfilesResult =
         (Option.map ~f:NetworkProfiles.of_xml)
           (Xml.child xml_arg0 "networkProfiles") in
       make ?nextToken ?networkProfiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let networkProfiles =
@@ -10691,6 +10819,7 @@ module ListNetworkProfilesRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ?type_ ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let type_ = field_map json "type" NetworkProfileType.of_json in
@@ -10772,6 +10901,7 @@ module ListJobsResult =
           (Xml.child xml_arg0 "nextToken") in
       let jobs = (Option.map ~f:Jobs.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?nextToken ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let jobs = field_map json "jobs" Jobs.of_json in
@@ -10802,6 +10932,7 @@ module ListJobsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
@@ -10888,6 +11019,7 @@ module ListInstanceProfilesResult =
         (Option.map ~f:InstanceProfiles.of_xml)
           (Xml.child xml_arg0 "instanceProfiles") in
       make ?nextToken ?instanceProfiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let instanceProfiles =
@@ -10920,6 +11052,7 @@ module ListInstanceProfilesRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -11002,6 +11135,7 @@ module ListDevicesResult =
       let devices =
         (Option.map ~f:Devices.of_xml) (Xml.child xml_arg0 "devices") in
       make ?nextToken ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let devices = field_map json "devices" Devices.of_json in
@@ -11037,6 +11171,7 @@ module ListDevicesRequest =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
       make ?filters ?nextToken ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" DeviceFilters.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -11121,6 +11256,7 @@ module ListDevicePoolsResult =
       let devicePools =
         (Option.map ~f:DevicePools.of_xml) (Xml.child xml_arg0 "devicePools") in
       make ?nextToken ?devicePools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let devicePools = field_map json "devicePools" DevicePools.of_json in
@@ -11157,6 +11293,7 @@ module ListDevicePoolsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ?type_ ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let type_ = field_map json "type" DevicePoolType.of_json in
@@ -11244,6 +11381,7 @@ module ListDeviceInstancesResult =
         (Option.map ~f:DeviceInstances.of_xml)
           (Xml.child xml_arg0 "deviceInstances") in
       make ?nextToken ?deviceInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let deviceInstances =
@@ -11276,6 +11414,7 @@ module ListDeviceInstancesRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -11360,6 +11499,7 @@ module ListArtifactsResult =
       let artifacts =
         (Option.map ~f:Artifacts.of_xml) (Xml.child xml_arg0 "artifacts") in
       make ?nextToken ?artifacts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let artifacts = field_map json "artifacts" Artifacts.of_json in
@@ -11398,6 +11538,7 @@ module ListArtifactsRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?nextToken ~type_ ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let type_ = field_map_exn json "type" ArtifactCategory.of_json in
@@ -11474,6 +11615,7 @@ module InstallToRemoteAccessSessionResult =
       let appUpload =
         (Option.map ~f:Upload.of_xml) (Xml.child xml_arg0 "appUpload") in
       make ?appUpload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appUpload = field_map json "appUpload" Upload.of_json in
       make ?appUpload ()
@@ -11507,6 +11649,7 @@ module InstallToRemoteAccessSessionRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "remoteAccessSessionArn") in
       make ~appArn ~remoteAccessSessionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appArn = field_map_exn json "appArn" AmazonResourceName.of_json in
       let remoteAccessSessionArn =
@@ -11579,6 +11722,7 @@ module GetVPCEConfigurationResult =
         (Option.map ~f:VPCEConfiguration.of_xml)
           (Xml.child xml_arg0 "vpceConfiguration") in
       make ?vpceConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceConfiguration =
         field_map json "vpceConfiguration" VPCEConfiguration.of_json in
@@ -11604,6 +11748,7 @@ module GetVPCEConfigurationRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -11680,6 +11825,7 @@ module GetUploadResult =
       let upload =
         (Option.map ~f:Upload.of_xml) (Xml.child xml_arg0 "upload") in
       make ?upload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let upload = field_map json "upload" Upload.of_json in make ?upload ()
     let to_json v = composed_to_json to_value v
@@ -11700,6 +11846,7 @@ module GetUploadRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -11771,6 +11918,7 @@ module GetTestResult =
     let of_xml xml_arg0 =
       let test = (Option.map ~f:Test.of_xml) (Xml.child xml_arg0 "test") in
       make ?test ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let test = field_map json "test" Test.of_json in make ?test ()
     let to_json v = composed_to_json to_value v
@@ -11791,6 +11939,7 @@ module GetTestRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -11858,6 +12007,7 @@ module GetTestGridSessionResult =
         (Option.map ~f:TestGridSession.of_xml)
           (Xml.child xml_arg0 "testGridSession") in
       make ?testGridSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testGridSession =
         field_map json "testGridSession" TestGridSession.of_json in
@@ -11895,6 +12045,7 @@ module GetTestGridSessionRequest =
         (Option.map ~f:DeviceFarmArn.of_xml)
           (Xml.child xml_arg0 "projectArn") in
       make ?sessionArn ?sessionId ?projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionArn = field_map json "sessionArn" DeviceFarmArn.of_json in
       let sessionId = field_map json "sessionId" ResourceId.of_json in
@@ -11965,6 +12116,7 @@ module GetTestGridProjectResult =
         (Option.map ~f:TestGridProject.of_xml)
           (Xml.child xml_arg0 "testGridProject") in
       make ?testGridProject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testGridProject =
         field_map json "testGridProject" TestGridProject.of_json in
@@ -11989,6 +12141,7 @@ module GetTestGridProjectRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map_exn json "projectArn" DeviceFarmArn.of_json in
       make ~projectArn ()
@@ -12060,6 +12213,7 @@ module GetSuiteResult =
     let of_xml xml_arg0 =
       let suite = (Option.map ~f:Suite.of_xml) (Xml.child xml_arg0 "suite") in
       make ?suite ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suite = field_map json "suite" Suite.of_json in make ?suite ()
     let to_json v = composed_to_json to_value v
@@ -12080,6 +12234,7 @@ module GetSuiteRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12151,6 +12306,7 @@ module GetRunResult =
     let of_xml xml_arg0 =
       let run = (Option.map ~f:Run.of_xml) (Xml.child xml_arg0 "run") in
       make ?run ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let run = field_map json "run" Run.of_json in make ?run ()
     let to_json v = composed_to_json to_value v
@@ -12170,6 +12326,7 @@ module GetRunRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12247,6 +12404,7 @@ module GetRemoteAccessSessionResult =
         (Option.map ~f:RemoteAccessSession.of_xml)
           (Xml.child xml_arg0 "remoteAccessSession") in
       make ?remoteAccessSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccessSession =
         field_map json "remoteAccessSession" RemoteAccessSession.of_json in
@@ -12272,6 +12430,7 @@ module GetRemoteAccessSessionRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12347,6 +12506,7 @@ module GetProjectResult =
       let project =
         (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "project") in
       make ?project ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let project = field_map json "project" Project.of_json in
       make ?project ()
@@ -12368,6 +12528,7 @@ module GetProjectRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12470,6 +12631,7 @@ module GetOfferingStatusResult =
         (Option.map ~f:OfferingStatusMap.of_xml)
           (Xml.child xml_arg0 "current") in
       make ?nextToken ?nextPeriod ?current ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let nextPeriod = field_map json "nextPeriod" OfferingStatusMap.of_json in
@@ -12494,6 +12656,7 @@ module GetOfferingStatusRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       make ?nextToken ()
@@ -12571,6 +12734,7 @@ module GetNetworkProfileResult =
         (Option.map ~f:NetworkProfile.of_xml)
           (Xml.child xml_arg0 "networkProfile") in
       make ?networkProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfile =
         field_map json "networkProfile" NetworkProfile.of_json in
@@ -12595,6 +12759,7 @@ module GetNetworkProfileRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12668,6 +12833,7 @@ module GetJobResult =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -12687,6 +12853,7 @@ module GetJobRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12764,6 +12931,7 @@ module GetInstanceProfileResult =
         (Option.map ~f:InstanceProfile.of_xml)
           (Xml.child xml_arg0 "instanceProfile") in
       make ?instanceProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfile =
         field_map json "instanceProfile" InstanceProfile.of_json in
@@ -12788,6 +12956,7 @@ module GetInstanceProfileRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12864,6 +13033,7 @@ module GetDeviceResult =
       let device =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "device") in
       make ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map json "device" Device.of_json in make ?device ()
     let to_json v = composed_to_json to_value v
@@ -12884,6 +13054,7 @@ module GetDeviceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -12959,6 +13130,7 @@ module GetDevicePoolResult =
       let devicePool =
         (Option.map ~f:DevicePool.of_xml) (Xml.child xml_arg0 "devicePool") in
       make ?devicePool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let devicePool = field_map json "devicePool" DevicePool.of_json in
       make ?devicePool ()
@@ -12980,6 +13152,7 @@ module GetDevicePoolRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -13067,6 +13240,7 @@ module GetDevicePoolCompatibilityResult =
         (Option.map ~f:DevicePoolCompatibilityResults.of_xml)
           (Xml.child xml_arg0 "compatibleDevices") in
       make ?incompatibleDevices ?compatibleDevices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let incompatibleDevices =
         field_map json "incompatibleDevices"
@@ -13129,6 +13303,7 @@ module GetDevicePoolCompatibilityRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "devicePoolArn") in
       make ?configuration ?test ?testType ?appArn ~devicePoolArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "configuration" ScheduleRunConfiguration.of_json in
@@ -13213,6 +13388,7 @@ module GetDeviceInstanceResult =
         (Option.map ~f:DeviceInstance.of_xml)
           (Xml.child xml_arg0 "deviceInstance") in
       make ?deviceInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceInstance =
         field_map json "deviceInstance" DeviceInstance.of_json in
@@ -13238,6 +13414,7 @@ module GetDeviceInstanceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -13315,6 +13492,7 @@ module GetAccountSettingsResult =
         (Option.map ~f:AccountSettings.of_xml)
           (Xml.child xml_arg0 "accountSettings") in
       make ?accountSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountSettings =
         field_map json "accountSettings" AccountSettings.of_json in
@@ -13330,6 +13508,7 @@ module GetAccountSettingsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13396,6 +13575,7 @@ module DeleteVPCEConfigurationResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13418,6 +13598,7 @@ module DeleteVPCEConfigurationRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -13486,6 +13667,7 @@ module DeleteUploadResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the result of a delete upload request."]
@@ -13507,6 +13689,7 @@ module DeleteUploadRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -13574,6 +13757,7 @@ module DeleteTestGridProjectResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13596,6 +13780,7 @@ module DeleteTestGridProjectRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map_exn json "projectArn" DeviceFarmArn.of_json in
       make ~projectArn ()
@@ -13664,6 +13849,7 @@ module DeleteRunResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the result of a delete run request."]
@@ -13684,6 +13870,7 @@ module DeleteRunRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -13751,6 +13938,7 @@ module DeleteRemoteAccessSessionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13773,6 +13961,7 @@ module DeleteRemoteAccessSessionRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -13841,6 +14030,7 @@ module DeleteProjectResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the result of a delete project request."]
@@ -13862,6 +14052,7 @@ module DeleteProjectRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -13929,6 +14120,7 @@ module DeleteNetworkProfileResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a network profile."]
@@ -13949,6 +14141,7 @@ module DeleteNetworkProfileRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -14016,6 +14209,7 @@ module DeleteInstanceProfileResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14038,6 +14232,7 @@ module DeleteInstanceProfileRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -14106,6 +14301,7 @@ module DeleteDevicePoolResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the result of a delete device pool request."]
@@ -14127,6 +14323,7 @@ module DeleteDevicePoolRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -14196,6 +14393,7 @@ module CreateVPCEConfigurationResult =
         (Option.map ~f:VPCEConfiguration.of_xml)
           (Xml.child xml_arg0 "vpceConfiguration") in
       make ?vpceConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceConfiguration =
         field_map json "vpceConfiguration" VPCEConfiguration.of_json in
@@ -14257,6 +14455,7 @@ module CreateVPCEConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "vpceConfigurationName") in
       make ?vpceConfigurationDescription ~serviceDnsName ~vpceServiceName
         ~vpceConfigurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpceConfigurationDescription =
         field_map json "vpceConfigurationDescription"
@@ -14341,6 +14540,7 @@ module CreateUploadResult =
       let upload =
         (Option.map ~f:Upload.of_xml) (Xml.child xml_arg0 "upload") in
       make ?upload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let upload = field_map json "upload" Upload.of_json in make ?upload ()
     let to_json v = composed_to_json to_value v
@@ -14383,6 +14583,7 @@ module CreateUploadRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ?contentType ~type_ ~name ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map json "contentType" ContentType.of_json in
       let type_ = field_map_exn json "type" UploadType.of_json in
@@ -14459,6 +14660,7 @@ module CreateTestGridUrlResult =
       let url =
         (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "url") in
       make ?expires ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expires = field_map json "expires" DateTime.of_json in
       let url = field_map json "url" SensitiveString.of_json in
@@ -14493,6 +14695,7 @@ module CreateTestGridUrlRequest =
         DeviceFarmArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ~expiresInSeconds ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiresInSeconds =
         field_map_exn json "expiresInSeconds"
@@ -14564,6 +14767,7 @@ module CreateTestGridProjectResult =
         (Option.map ~f:TestGridProject.of_xml)
           (Xml.child xml_arg0 "testGridProject") in
       make ?testGridProject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testGridProject =
         field_map json "testGridProject" TestGridProject.of_json in
@@ -14603,6 +14807,7 @@ module CreateTestGridProjectRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?vpcConfig ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfig = field_map json "vpcConfig" TestGridVpcConfig.of_json in
       let description =
@@ -14684,6 +14889,7 @@ module CreateRemoteAccessSessionResult =
         (Option.map ~f:RemoteAccessSession.of_xml)
           (Xml.child xml_arg0 "remoteAccessSession") in
       make ?remoteAccessSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let remoteAccessSession =
         field_map json "remoteAccessSession" RemoteAccessSession.of_json in
@@ -14817,6 +15023,7 @@ module CreateRemoteAccessSessionRequest =
       make ?skipAppResign ?interactionMode ?configuration ?clientId ?name
         ?remoteRecordAppArn ?remoteRecordEnabled ?remoteDebugEnabled
         ?sshPublicKey ?instanceArn ~deviceArn ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skipAppResign = field_map json "skipAppResign" Boolean.of_json in
       let interactionMode =
@@ -14922,6 +15129,7 @@ module CreateProjectResult =
       let project =
         (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "project") in
       make ?project ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let project = field_map json "project" Project.of_json in
       make ?project ()
@@ -14952,6 +15160,7 @@ module CreateProjectRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?defaultJobTimeoutMinutes ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultJobTimeoutMinutes =
         field_map json "defaultJobTimeoutMinutes" JobTimeoutMinutes.of_json in
@@ -15031,6 +15240,7 @@ module CreateNetworkProfileResult =
         (Option.map ~f:NetworkProfile.of_xml)
           (Xml.child xml_arg0 "networkProfile") in
       make ?networkProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfile =
         field_map json "networkProfile" NetworkProfile.of_json in
@@ -15156,6 +15366,7 @@ module CreateNetworkProfileRequest =
         ?uplinkJitterMs ?downlinkDelayMs ?uplinkDelayMs
         ?downlinkBandwidthBits ?uplinkBandwidthBits ?type_ ?description ~name
         ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downlinkLossPercent =
         field_map json "downlinkLossPercent" PercentInteger.of_json in
@@ -15252,6 +15463,7 @@ module CreateInstanceProfileResult =
         (Option.map ~f:InstanceProfile.of_xml)
           (Xml.child xml_arg0 "instanceProfile") in
       make ?instanceProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfile =
         field_map json "instanceProfile" InstanceProfile.of_json in
@@ -15312,6 +15524,7 @@ module CreateInstanceProfileRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?rebootAfterUse ?excludeAppPackagesFromCleanup ?packageCleanup
         ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rebootAfterUse = field_map json "rebootAfterUse" Boolean.of_json in
       let excludeAppPackagesFromCleanup =
@@ -15393,6 +15606,7 @@ module CreateDevicePoolResult =
       let devicePool =
         (Option.map ~f:DevicePool.of_xml) (Xml.child xml_arg0 "devicePool") in
       make ?devicePool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let devicePool = field_map json "devicePool" DevicePool.of_json in
       make ?devicePool ()
@@ -15439,6 +15653,7 @@ module CreateDevicePoolRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ?maxDevices ~rules ?description ~name ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxDevices = field_map json "maxDevices" Integer.of_json in
       let rules = field_map_exn json "rules" Rules.of_json in

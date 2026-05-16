@@ -149,6 +149,7 @@ module S3Object =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?version ?name ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" S3ObjectVersion.of_json in
       let name = field_map json "Name" S3ObjectName.of_json in
@@ -344,6 +345,7 @@ module BoundingBox =
       let height = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Height") in
       let width = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Width") in
       make ?top ?left ?height ?width ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let top = field_map json "Top" Float.of_json in
       let left = field_map json "Left" Float.of_json in
@@ -374,6 +376,7 @@ module CoversBodyPart =
       let confidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       make ?value ?confidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Boolean.of_json in
       let confidence = field_map json "Confidence" Percent.of_json in
@@ -424,6 +427,7 @@ module GroundTruthManifest =
       let s3Object =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Object = field_map json "S3Object" S3Object.of_json in
       make ?s3Object ()
@@ -450,6 +454,7 @@ module Point =
       let y = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Y") in
       let x = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "X") in
       make ?y ?x ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let y = field_map json "Y" Float.of_json in
       let x = field_map json "X" Float.of_json in make ?y ?x ()
@@ -489,6 +494,7 @@ module Emotion =
       let type_ =
         (Option.map ~f:EmotionName.of_xml) (Xml.child xml_arg0 "Type") in
       make ?confidence ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let type_ = field_map json "Type" EmotionName.of_json in
@@ -539,6 +545,7 @@ module Landmark =
       let type_ =
         (Option.map ~f:LandmarkType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?y ?x ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let y = field_map json "Y" Float.of_json in
       let x = field_map json "X" Float.of_json in
@@ -687,6 +694,7 @@ module EquipmentDetection =
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?coversBodyPart ?type_ ?confidence ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coversBodyPart =
         field_map json "CoversBodyPart" CoversBodyPart.of_json in
@@ -712,6 +720,7 @@ module Asset =
         (Option.map ~f:GroundTruthManifest.of_xml)
           (Xml.child xml_arg0 "GroundTruthManifest") in
       make ?groundTruthManifest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groundTruthManifest =
         field_map json "GroundTruthManifest" GroundTruthManifest.of_json in
@@ -758,6 +767,7 @@ module AgeRange =
       let high = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "High") in
       let low = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Low") in
       make ?high ?low ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let high = field_map json "High" UInteger.of_json in
       let low = field_map json "Low" UInteger.of_json in make ?high ?low ()
@@ -784,6 +794,7 @@ module Beard =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" Boolean.of_json in
@@ -834,6 +845,7 @@ module EyeOpen =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" Boolean.of_json in
@@ -861,6 +873,7 @@ module Eyeglasses =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" Boolean.of_json in
@@ -888,6 +901,7 @@ module Gender =
       let value =
         (Option.map ~f:GenderType.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" GenderType.of_json in
@@ -918,6 +932,7 @@ module ImageQuality =
       let brightness =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Brightness") in
       make ?sharpness ?brightness ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharpness = field_map json "Sharpness" Float.of_json in
       let brightness = field_map json "Brightness" Float.of_json in
@@ -968,6 +983,7 @@ module MouthOpen =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" Boolean.of_json in
@@ -995,6 +1011,7 @@ module Mustache =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" Boolean.of_json in
@@ -1025,6 +1042,7 @@ module Pose =
       let yaw = (Option.map ~f:Degree.of_xml) (Xml.child xml_arg0 "Yaw") in
       let roll = (Option.map ~f:Degree.of_xml) (Xml.child xml_arg0 "Roll") in
       make ?pitch ?yaw ?roll ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pitch = field_map json "Pitch" Degree.of_json in
       let yaw = field_map json "Yaw" Degree.of_json in
@@ -1053,6 +1071,7 @@ module Smile =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" Boolean.of_json in
@@ -1080,6 +1099,7 @@ module Sunglasses =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let value = field_map json "Value" Boolean.of_json in
@@ -1109,6 +1129,7 @@ module Instance =
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?confidence ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
@@ -1128,6 +1149,7 @@ module Parent =
     let of_xml xml_arg0 =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
@@ -1198,6 +1220,7 @@ module Face =
         (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
       make ?indexFacesModelVersion ?confidence ?externalImageId ?imageId
         ?boundingBox ?faceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexFacesModelVersion =
         field_map json "IndexFacesModelVersion"
@@ -1571,6 +1594,7 @@ module Geometry =
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?polygon ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let polygon = field_map json "Polygon" Polygon.of_json in
       let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
@@ -1798,6 +1822,7 @@ module FaceDetail =
       make ?confidence ?quality ?pose ?landmarks ?emotions ?mouthOpen
         ?eyesOpen ?mustache ?beard ?gender ?sunglasses ?eyeglasses ?smile
         ?ageRange ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let quality = field_map json "Quality" ImageQuality.of_json in
@@ -1901,6 +1926,7 @@ module FaceMatch =
       let similarity =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Similarity") in
       make ?face ?similarity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let face = field_map json "Face" Face.of_json in
       let similarity = field_map json "Similarity" Percent.of_json in
@@ -1924,6 +1950,7 @@ module KnownGender =
       let type_ =
         (Option.map ~f:KnownGenderType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" KnownGenderType.of_json in
       make ?type_ ()
@@ -2003,6 +2030,7 @@ module ProtectiveEquipmentBodyPart =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let name = (Option.map ~f:BodyPart.of_xml) (Xml.child xml_arg0 "Name") in
       make ?equipmentDetections ?confidence ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let equipmentDetections =
         field_map json "EquipmentDetections" EquipmentDetections.of_json in
@@ -2104,6 +2132,7 @@ module DatasetMetadata =
           (Xml.child xml_arg0 "CreationTimestamp") in
       make ?statusMessageCode ?statusMessage ?status ?datasetArn ?datasetType
         ?creationTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessageCode =
         field_map json "StatusMessageCode" DatasetStatusMessageCode.of_json in
@@ -2132,6 +2161,7 @@ module Summary =
       let s3Object =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Object = field_map json "S3Object" S3Object.of_json in
       make ?s3Object ()
@@ -2172,6 +2202,7 @@ module TestingData =
       let assets =
         (Option.map ~f:Assets.of_xml) (Xml.child xml_arg0 "Assets") in
       make ?autoCreate ?assets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoCreate = field_map json "AutoCreate" Boolean.of_json in
       let assets = field_map json "Assets" Assets.of_json in
@@ -2194,6 +2225,7 @@ module ValidationData =
       let assets =
         (Option.map ~f:Assets.of_xml) (Xml.child xml_arg0 "Assets") in
       make ?assets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assets = field_map json "Assets" Assets.of_json in make ?assets ()
     let to_json v = composed_to_json to_value v
@@ -2215,6 +2247,7 @@ module TrainingData =
       let assets =
         (Option.map ~f:Assets.of_xml) (Xml.child xml_arg0 "Assets") in
       make ?assets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assets = field_map json "Assets" Assets.of_json in make ?assets ()
     let to_json v = composed_to_json to_value v
@@ -2270,6 +2303,7 @@ module RegionOfInterest =
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
       make ?boundingBox ()
@@ -2305,6 +2339,7 @@ module BlackFrame =
         (Option.map ~f:MaxPixelThreshold.of_xml)
           (Xml.child xml_arg0 "MaxPixelThreshold") in
       make ?minCoveragePercentage ?maxPixelThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minCoveragePercentage =
         field_map json "MinCoveragePercentage" MinCoveragePercentage.of_json in
@@ -2378,6 +2413,7 @@ module ComparedFace =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?smile ?emotions ?quality ?pose ?landmarks ?confidence
         ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let smile = field_map json "Smile" Smile.of_json in
       let emotions = field_map json "Emotions" Emotions.of_json in
@@ -2491,6 +2527,7 @@ module DatasetLabelStats =
       let entryCount =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "EntryCount") in
       make ?boundingBoxCount ?entryCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let boundingBoxCount =
         field_map json "BoundingBoxCount" UInteger.of_json in
@@ -2573,6 +2610,7 @@ module TextDetection =
       let detectedText =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DetectedText") in
       make ?geometry ?confidence ?parentId ?id ?type_ ?detectedText ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geometry = field_map json "Geometry" Geometry.of_json in
       let confidence = field_map json "Confidence" Percent.of_json in
@@ -2645,6 +2683,7 @@ module ShotSegment =
           (Xml.child xml_arg0 "Confidence") in
       let index = (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "Index") in
       make ?confidence ?index ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" SegmentConfidence.of_json in
       let index = field_map json "Index" ULong.of_json in
@@ -2675,6 +2714,7 @@ module TechnicalCueSegment =
       let type_ =
         (Option.map ~f:TechnicalCueType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?confidence ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" SegmentConfidence.of_json in
       let type_ = field_map json "Type" TechnicalCueType.of_json in
@@ -2741,6 +2781,7 @@ module PersonDetail =
       let index =
         (Option.map ~f:PersonIndex.of_xml) (Xml.child xml_arg0 "Index") in
       make ?face ?boundingBox ?index ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let face = field_map json "Face" FaceDetail.of_json in
       let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
@@ -2782,6 +2823,7 @@ module Label =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?parents ?instances ?confidence ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parents = field_map json "Parents" Parents.of_json in
       let instances = field_map json "Instances" Instances.of_json in
@@ -2844,6 +2886,7 @@ module ModerationLabel =
       let confidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       make ?parentName ?name ?confidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parentName = field_map json "ParentName" String_.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -2912,6 +2955,7 @@ module CelebrityDetail =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let urls = (Option.map ~f:Urls.of_xml) (Xml.child xml_arg0 "Urls") in
       make ?knownGender ?face ?boundingBox ?confidence ?id ?name ?urls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knownGender = field_map json "KnownGender" KnownGender.of_json in
       let face = field_map json "Face" FaceDetail.of_json in
@@ -3140,6 +3184,7 @@ module EvaluationResult =
       let f1Score =
         (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "F1Score") in
       make ?summary ?f1Score ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary = field_map json "Summary" Summary.of_json in
       let f1Score = field_map json "F1Score" Float.of_json in
@@ -3204,6 +3249,7 @@ module OutputConfig =
       let s3Bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "S3Bucket") in
       make ?s3KeyPrefix ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3KeyPrefix = field_map json "S3KeyPrefix" S3KeyPrefix.of_json in
       let s3Bucket = field_map json "S3Bucket" S3Bucket.of_json in
@@ -3310,6 +3356,7 @@ module TestingDataResult =
       let input =
         (Option.map ~f:TestingData.of_xml) (Xml.child xml_arg0 "Input") in
       make ?validation ?output ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validation = field_map json "Validation" ValidationData.of_json in
       let output = field_map json "Output" TestingData.of_json in
@@ -3348,6 +3395,7 @@ module TrainingDataResult =
       let input =
         (Option.map ~f:TrainingData.of_xml) (Xml.child xml_arg0 "Input") in
       make ?validation ?output ?input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validation = field_map json "Validation" ValidationData.of_json in
       let output = field_map json "Output" TrainingData.of_json in
@@ -3483,6 +3531,7 @@ module DetectionFilter =
       let minConfidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "MinConfidence") in
       make ?minBoundingBoxWidth ?minBoundingBoxHeight ?minConfidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minBoundingBoxWidth =
         field_map json "MinBoundingBoxWidth" BoundingBoxWidth.of_json in
@@ -3540,6 +3589,7 @@ module StartShotDetectionFilter =
         (Option.map ~f:SegmentConfidence.of_xml)
           (Xml.child xml_arg0 "MinSegmentConfidence") in
       make ?minSegmentConfidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minSegmentConfidence =
         field_map json "MinSegmentConfidence" SegmentConfidence.of_json in
@@ -3572,6 +3622,7 @@ module StartTechnicalCueDetectionFilter =
         (Option.map ~f:SegmentConfidence.of_xml)
           (Xml.child xml_arg0 "MinSegmentConfidence") in
       make ?blackFrame ?minSegmentConfidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blackFrame = field_map json "BlackFrame" BlackFrame.of_json in
       let minSegmentConfidence =
@@ -3639,6 +3690,7 @@ module Celebrity =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let urls = (Option.map ~f:Urls.of_xml) (Xml.child xml_arg0 "Urls") in
       make ?knownGender ?matchConfidence ?face ?id ?name ?urls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knownGender = field_map json "KnownGender" KnownGender.of_json in
       let matchConfidence = field_map json "MatchConfidence" Percent.of_json in
@@ -3673,6 +3725,7 @@ module StreamProcessor =
         (Option.map ~f:StreamProcessorName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" StreamProcessorStatus.of_json in
       let name = field_map json "Name" StreamProcessorName.of_json in
@@ -3702,6 +3755,7 @@ module DatasetLabelDescription =
       let labelName =
         (Option.map ~f:DatasetLabel.of_xml) (Xml.child xml_arg0 "LabelName") in
       make ?labelStats ?labelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let labelStats = field_map json "LabelStats" DatasetLabelStats.of_json in
       let labelName = field_map json "LabelName" DatasetLabel.of_json in
@@ -3750,6 +3804,7 @@ module FaceRecord =
         (Option.map ~f:FaceDetail.of_xml) (Xml.child xml_arg0 "FaceDetail") in
       let face = (Option.map ~f:Face.of_xml) (Xml.child xml_arg0 "Face") in
       make ?faceDetail ?face ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceDetail = field_map json "FaceDetail" FaceDetail.of_json in
       let face = field_map json "Face" Face.of_json in
@@ -3779,6 +3834,7 @@ module UnindexedFace =
       let reasons =
         (Option.map ~f:Reasons.of_xml) (Xml.child xml_arg0 "Reasons") in
       make ?faceDetail ?reasons ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceDetail = field_map json "FaceDetail" FaceDetail.of_json in
       let reasons = field_map json "Reasons" Reasons.of_json in
@@ -3829,6 +3885,7 @@ module TextDetectionResult =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?textDetection ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let textDetection =
         field_map json "TextDetection" TextDetection.of_json in
@@ -3872,6 +3929,7 @@ module AudioMetadata =
         (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "DurationMillis") in
       let codec = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Codec") in
       make ?numberOfChannels ?sampleRate ?durationMillis ?codec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfChannels = field_map json "NumberOfChannels" ULong.of_json in
       let sampleRate = field_map json "SampleRate" ULong.of_json in
@@ -4001,6 +4059,7 @@ module SegmentDetection =
         ?technicalCueSegment ?durationSMPTE ?endTimecodeSMPTE
         ?startTimecodeSMPTE ?durationMillis ?endTimestampMillis
         ?startTimestampMillis ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationFrames = field_map json "DurationFrames" ULong.of_json in
       let endFrameNumber = field_map json "EndFrameNumber" ULong.of_json in
@@ -4047,6 +4106,7 @@ module SegmentTypeInfo =
       let type_ =
         (Option.map ~f:SegmentType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?modelVersion ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelVersion = field_map json "ModelVersion" String_.of_json in
       let type_ = field_map json "Type" SegmentType.of_json in
@@ -4118,6 +4178,7 @@ module VideoMetadata =
       let codec = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Codec") in
       make ?colorRange ?frameWidth ?frameHeight ?frameRate ?format
         ?durationMillis ?codec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let colorRange = field_map json "ColorRange" VideoColorRange.of_json in
       let frameWidth = field_map json "FrameWidth" ULong.of_json in
@@ -4153,6 +4214,7 @@ module PersonDetection =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?person ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let person = field_map json "Person" PersonDetail.of_json in
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
@@ -4179,6 +4241,7 @@ module LabelDetection =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?label ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let label = field_map json "Label" Label.of_json in
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
@@ -4216,6 +4279,7 @@ module PersonMatch =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?faceMatches ?person ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceMatches = field_map json "FaceMatches" FaceMatchList.of_json in
       let person = field_map json "Person" PersonDetail.of_json in
@@ -4245,6 +4309,7 @@ module FaceDetection =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?face ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let face = field_map json "Face" FaceDetail.of_json in
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
@@ -4277,6 +4342,7 @@ module ContentModerationDetection =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?moderationLabel ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let moderationLabel =
         field_map json "ModerationLabel" ModerationLabel.of_json in
@@ -4308,6 +4374,7 @@ module CelebrityRecognition =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?celebrity ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let celebrity = field_map json "Celebrity" CelebrityDetail.of_json in
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
@@ -4331,6 +4398,7 @@ module DistributeDataset =
       let arn =
         DatasetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" DatasetArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -4371,6 +4439,7 @@ module ProtectiveEquipmentPerson =
       let bodyParts =
         (Option.map ~f:BodyParts.of_xml) (Xml.child xml_arg0 "BodyParts") in
       make ?id ?confidence ?boundingBox ?bodyParts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" UInteger.of_json in
       let confidence = field_map json "Confidence" Percent.of_json in
@@ -4519,6 +4588,7 @@ module HumanLoopDataAttributes =
         (Option.map ~f:ContentClassifiers.of_xml)
           (Xml.child xml_arg0 "ContentClassifiers") in
       make ?contentClassifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentClassifiers =
         field_map json "ContentClassifiers" ContentClassifiers.of_json in
@@ -4574,6 +4644,7 @@ module CustomLabel =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?geometry ?confidence ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geometry = field_map json "Geometry" Geometry.of_json in
       let confidence = field_map json "Confidence" Percent.of_json in
@@ -4598,6 +4669,7 @@ module KinesisVideoStream =
       let arn =
         (Option.map ~f:KinesisVideoArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" KinesisVideoArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -4618,6 +4690,7 @@ module KinesisDataStream =
       let arn =
         (Option.map ~f:KinesisDataArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" KinesisDataArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -4651,6 +4724,7 @@ module FaceSearchSettings =
         (Option.map ~f:CollectionId.of_xml)
           (Xml.child xml_arg0 "CollectionId") in
       make ?faceMatchThreshold ?collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceMatchThreshold =
         field_map json "FaceMatchThreshold" Percent.of_json in
@@ -4698,6 +4772,7 @@ module ProjectDescription =
       let projectArn =
         (Option.map ~f:ProjectArn.of_xml) (Xml.child xml_arg0 "ProjectArn") in
       make ?datasets ?status ?creationTimestamp ?projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasets = field_map json "Datasets" DatasetMetadataList.of_json in
       let status = field_map json "Status" ProjectStatus.of_json in
@@ -4865,6 +4940,7 @@ module ProjectVersionDescription =
         ?trainingDataResult ?outputConfig ?trainingEndTimestamp
         ?billableTrainingTimeInSeconds ?statusMessage ?status
         ?minInferenceUnits ?creationTimestamp ?projectVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
       let manifestSummary =
@@ -4954,6 +5030,7 @@ module DatasetStats =
       let labeledEntries =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "LabeledEntries") in
       make ?errorEntries ?totalLabels ?totalEntries ?labeledEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorEntries = field_map json "ErrorEntries" UInteger.of_json in
       let totalLabels = field_map json "TotalLabels" UInteger.of_json in
@@ -4984,6 +5061,7 @@ module CompareFacesMatch =
       let similarity =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Similarity") in
       make ?face ?similarity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let face = field_map json "Face" ComparedFace.of_json in
       let similarity = field_map json "Similarity" Percent.of_json in
@@ -4999,6 +5077,7 @@ module AccessDeniedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You are not authorized to perform the action."]
@@ -5010,6 +5089,7 @@ module InternalServerError =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5022,6 +5102,7 @@ module InvalidParameterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5034,6 +5115,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5046,6 +5128,7 @@ module ProvisionedThroughputExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5058,6 +5141,7 @@ module ResourceInUseException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource is already being used."]
@@ -5069,6 +5153,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource specified in the request cannot be found."]
@@ -5080,6 +5165,7 @@ module ThrottlingException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5104,6 +5190,7 @@ module DatasetChanges =
         GroundTruthBlob.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroundTruth") in
       make ~groundTruth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groundTruth =
         field_map_exn json "GroundTruth" GroundTruthBlob.of_json in
@@ -5165,6 +5252,7 @@ module ServiceQuotaExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5210,6 +5298,7 @@ module IdempotentParameterMismatchException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5222,6 +5311,7 @@ module InvalidS3ObjectException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5254,6 +5344,7 @@ module VideoTooLargeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5323,6 +5414,7 @@ module NotificationChannel =
         SNSTopicArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SNSTopicArn") in
       make ~roleArn ~sNSTopicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
       let sNSTopicArn = field_map_exn json "SNSTopicArn" SNSTopicArn.of_json in
@@ -5357,6 +5449,7 @@ module StartTextDetectionFilters =
         (Option.map ~f:DetectionFilter.of_xml)
           (Xml.child xml_arg0 "WordFilter") in
       make ?regionsOfInterest ?wordFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regionsOfInterest =
         field_map json "RegionsOfInterest" RegionsOfInterest.of_json in
@@ -5380,6 +5473,7 @@ module Video =
       let s3Object =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Object = field_map json "S3Object" S3Object.of_json in
       make ?s3Object ()
@@ -5437,6 +5531,7 @@ module StartSegmentDetectionFilters =
         (Option.map ~f:StartTechnicalCueDetectionFilter.of_xml)
           (Xml.child xml_arg0 "TechnicalCueFilter") in
       make ?shotFilter ?technicalCueFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shotFilter =
         field_map json "ShotFilter" StartShotDetectionFilter.of_json in
@@ -5491,6 +5586,7 @@ module ImageTooLargeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5503,6 +5599,7 @@ module InvalidImageFormatException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The provided image format is not supported."]
@@ -5526,6 +5623,7 @@ module Image =
       let bytes =
         (Option.map ~f:ImageBlob.of_xml) (Xml.child xml_arg0 "Bytes") in
       make ?s3Object ?bytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Object = field_map json "S3Object" S3Object.of_json in
       let bytes = field_map json "Bytes" ImageBlob.of_json in
@@ -5656,6 +5754,7 @@ module InvalidPaginationTokenException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Pagination token in the request is not valid."]
@@ -5801,6 +5900,7 @@ module ResourceNotReadyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6581,6 +6681,7 @@ module DetectTextFilters =
         (Option.map ~f:DetectionFilter.of_xml)
           (Xml.child xml_arg0 "WordFilter") in
       make ?regionsOfInterest ?wordFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regionsOfInterest =
         field_map json "RegionsOfInterest" RegionsOfInterest.of_json in
@@ -6661,6 +6762,7 @@ module ProtectiveEquipmentSummary =
           (Xml.child xml_arg0 "PersonsWithRequiredEquipment") in
       make ?personsIndeterminate ?personsWithoutRequiredEquipment
         ?personsWithRequiredEquipment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let personsIndeterminate =
         field_map json "PersonsIndeterminate"
@@ -6704,6 +6806,7 @@ module ProtectiveEquipmentSummarizationAttributes =
         Percent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MinConfidence") in
       make ~requiredEquipmentTypes ~minConfidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requiredEquipmentTypes =
         field_map_exn json "RequiredEquipmentTypes"
@@ -6759,6 +6862,7 @@ module HumanLoopActivationOutput =
           (Xml.child xml_arg0 "HumanLoopArn") in
       make ?humanLoopActivationConditionsEvaluationResults
         ?humanLoopActivationReasons ?humanLoopArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let humanLoopActivationConditionsEvaluationResults =
         field_map json "HumanLoopActivationConditionsEvaluationResults"
@@ -6797,6 +6901,7 @@ module HumanLoopQuotaExceededException =
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       make ?serviceCode ?quotaCode ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "ServiceCode" String_.of_json in
       let quotaCode = field_map json "QuotaCode" String_.of_json in
@@ -6866,6 +6971,7 @@ module HumanLoopConfig =
         HumanLoopName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
       make ?dataAttributes ~flowDefinitionArn ~humanLoopName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataAttributes =
         field_map json "DataAttributes" HumanLoopDataAttributes.of_json in
@@ -6984,6 +7090,7 @@ module StreamProcessorInput =
         (Option.map ~f:KinesisVideoStream.of_xml)
           (Xml.child xml_arg0 "KinesisVideoStream") in
       make ?kinesisVideoStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kinesisVideoStream =
         field_map json "KinesisVideoStream" KinesisVideoStream.of_json in
@@ -7008,6 +7115,7 @@ module StreamProcessorOutput =
         (Option.map ~f:KinesisDataStream.of_xml)
           (Xml.child xml_arg0 "KinesisDataStream") in
       make ?kinesisDataStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kinesisDataStream =
         field_map json "KinesisDataStream" KinesisDataStream.of_json in
@@ -7032,6 +7140,7 @@ module StreamProcessorSettings =
         (Option.map ~f:FaceSearchSettings.of_xml)
           (Xml.child xml_arg0 "FaceSearch") in
       make ?faceSearch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceSearch = field_map json "FaceSearch" FaceSearchSettings.of_json in
       make ?faceSearch ()
@@ -7251,6 +7360,7 @@ module DatasetDescription =
           (Xml.child xml_arg0 "CreationTimestamp") in
       make ?datasetStats ?statusMessageCode ?statusMessage ?status
         ?lastUpdatedTimestamp ?creationTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetStats = field_map json "DatasetStats" DatasetStats.of_json in
       let statusMessageCode =
@@ -7303,6 +7413,7 @@ module ResourceAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource with the specified ID already exists."]
@@ -7329,6 +7440,7 @@ module DatasetSource =
         (Option.map ~f:GroundTruthManifest.of_xml)
           (Xml.child xml_arg0 "GroundTruthManifest") in
       make ?datasetArn ?groundTruthManifest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
       let groundTruthManifest =
@@ -7409,6 +7521,7 @@ module ComparedSourceImageFace =
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?confidence ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
@@ -7517,6 +7630,7 @@ module UpdateDatasetEntriesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7545,6 +7659,7 @@ module UpdateDatasetEntriesRequest =
         DatasetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~changes ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changes = field_map_exn json "Changes" DatasetChanges.of_json in
       let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
@@ -7635,6 +7750,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7664,6 +7780,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -7765,6 +7882,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7792,6 +7910,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -7891,6 +8010,7 @@ module StopStreamProcessorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7913,6 +8033,7 @@ module StopStreamProcessorRequest =
         StreamProcessorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" StreamProcessorName.of_json in
       make ~name ()
@@ -8019,6 +8140,7 @@ module StopProjectVersionResponse =
         (Option.map ~f:ProjectVersionStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ProjectVersionStatus.of_json in
       make ?status ()
@@ -8044,6 +8166,7 @@ module StopProjectVersionRequest =
         ProjectVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
       make ~projectVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectVersionArn =
         field_map_exn json "ProjectVersionArn" ProjectVersionArn.of_json in
@@ -8170,6 +8293,7 @@ module StartTextDetectionResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -8231,6 +8355,7 @@ module StartTextDetectionRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?filters ?jobTag ?notificationChannel ?clientRequestToken ~video
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters =
         field_map json "Filters" StartTextDetectionFilters.of_json in
@@ -8337,6 +8462,7 @@ module StartStreamProcessorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8358,6 +8484,7 @@ module StartStreamProcessorRequest =
         StreamProcessorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" StreamProcessorName.of_json in
       make ~name ()
@@ -8483,6 +8610,7 @@ module StartSegmentDetectionResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -8554,6 +8682,7 @@ module StartSegmentDetectionRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ~segmentTypes ?filters ?jobTag ?notificationChannel
         ?clientRequestToken ~video ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let segmentTypes =
         field_map_exn json "SegmentTypes" SegmentTypes.of_json in
@@ -8679,6 +8808,7 @@ module StartProjectVersionResponse =
         (Option.map ~f:ProjectVersionStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ProjectVersionStatus.of_json in
       make ?status ()
@@ -8714,6 +8844,7 @@ module StartProjectVersionRequest =
         ProjectVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
       make ~minInferenceUnits ~projectVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minInferenceUnits =
         field_map_exn json "MinInferenceUnits" InferenceUnits.of_json in
@@ -8842,6 +8973,7 @@ module StartPersonTrackingResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -8891,6 +9023,7 @@ module StartPersonTrackingRequest =
       let video =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?notificationChannel ?clientRequestToken ~video ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTag = field_map json "JobTag" JobTag.of_json in
       let notificationChannel =
@@ -9021,6 +9154,7 @@ module StartLabelDetectionResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -9084,6 +9218,7 @@ module StartLabelDetectionRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?notificationChannel ?minConfidence ?clientRequestToken
         ~video ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTag = field_map json "JobTag" JobTag.of_json in
       let notificationChannel =
@@ -9225,6 +9360,7 @@ module StartFaceSearchResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -9299,6 +9435,7 @@ module StartFaceSearchRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?notificationChannel ~collectionId ?faceMatchThreshold
         ?clientRequestToken ~video ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTag = field_map json "JobTag" JobTag.of_json in
       let notificationChannel =
@@ -9434,6 +9571,7 @@ module StartFaceDetectionResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -9499,6 +9637,7 @@ module StartFaceDetectionRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?faceAttributes ?notificationChannel ?clientRequestToken
         ~video ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTag = field_map json "JobTag" JobTag.of_json in
       let faceAttributes =
@@ -9632,6 +9771,7 @@ module StartContentModerationResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -9695,6 +9835,7 @@ module StartContentModerationRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?notificationChannel ?clientRequestToken ?minConfidence
         ~video ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTag = field_map json "JobTag" JobTag.of_json in
       let notificationChannel =
@@ -9827,6 +9968,7 @@ module StartCelebrityRecognitionResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -9876,6 +10018,7 @@ module StartCelebrityRecognitionRequest =
       let video =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?notificationChannel ?clientRequestToken ~video ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobTag = field_map json "JobTag" JobTag.of_json in
       let notificationChannel =
@@ -9996,6 +10139,7 @@ module SearchFacesResponse =
       let searchedFaceId =
         (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "SearchedFaceId") in
       make ?faceModelVersion ?faceMatches ?searchedFaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceModelVersion =
         field_map json "FaceModelVersion" String_.of_json in
@@ -10045,6 +10189,7 @@ module SearchFacesRequest =
         CollectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ?faceMatchThreshold ?maxFaces ~faceId ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceMatchThreshold =
         field_map json "FaceMatchThreshold" Percent.of_json in
@@ -10212,6 +10357,7 @@ module SearchFacesByImageResponse =
           (Xml.child xml_arg0 "SearchedFaceBoundingBox") in
       make ?faceModelVersion ?faceMatches ?searchedFaceConfidence
         ?searchedFaceBoundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceModelVersion =
         field_map json "FaceModelVersion" String_.of_json in
@@ -10283,6 +10429,7 @@ module SearchFacesByImageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ?qualityFilter ?faceMatchThreshold ?maxFaces ~image ~collectionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualityFilter =
         field_map json "QualityFilter" QualityFilter.of_json in
@@ -10430,6 +10577,7 @@ module RecognizeCelebritiesResponse =
         (Option.map ~f:CelebrityList.of_xml)
           (Xml.child xml_arg0 "CelebrityFaces") in
       make ?orientationCorrection ?unrecognizedFaces ?celebrityFaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orientationCorrection =
         field_map json "OrientationCorrection" OrientationCorrection.of_json in
@@ -10457,6 +10605,7 @@ module RecognizeCelebritiesRequest =
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ~image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let image = field_map_exn json "Image" Image.of_json in make ~image ()
     let to_json v = composed_to_json to_value v
@@ -10550,6 +10699,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -10573,6 +10723,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -10681,6 +10832,7 @@ module ListStreamProcessorsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?streamProcessors ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamProcessors =
         field_map json "StreamProcessors" StreamProcessorList.of_json in
@@ -10713,6 +10865,7 @@ module ListStreamProcessorsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -10837,6 +10990,7 @@ module ListFacesResponse =
       let faces =
         (Option.map ~f:FaceList.of_xml) (Xml.child xml_arg0 "Faces") in
       make ?faceModelVersion ?nextToken ?faces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceModelVersion =
         field_map json "FaceModelVersion" String_.of_json in
@@ -10878,6 +11032,7 @@ module ListFacesRequest =
         CollectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ?maxResults ?nextToken ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" PageSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -11018,6 +11173,7 @@ module ListDatasetLabelsResponse =
         (Option.map ~f:DatasetLabelDescriptions.of_xml)
           (Xml.child xml_arg0 "DatasetLabelDescriptions") in
       make ?nextToken ?datasetLabelDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" ExtendedPaginationToken.of_json in
@@ -11064,6 +11220,7 @@ module ListDatasetLabelsRequest =
         DatasetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ?maxResults ?nextToken ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListDatasetLabelsPageSize.of_json in
@@ -11204,6 +11361,7 @@ module ListDatasetEntriesResponse =
         (Option.map ~f:DatasetEntries.of_xml)
           (Xml.child xml_arg0 "DatasetEntries") in
       make ?nextToken ?datasetEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" ExtendedPaginationToken.of_json in
@@ -11292,6 +11450,7 @@ module ListDatasetEntriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ?maxResults ?nextToken ?hasErrors ?sourceRefContains ?labeled
         ?containsLabels ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListDatasetEntriesPageSize.of_json in
@@ -11430,6 +11589,7 @@ module ListCollectionsResponse =
         (Option.map ~f:CollectionIdList.of_xml)
           (Xml.child xml_arg0 "CollectionIds") in
       make ?faceModelVersions ?nextToken ?collectionIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceModelVersions =
         field_map json "FaceModelVersions" FaceModelVersionList.of_json in
@@ -11462,6 +11622,7 @@ module ListCollectionsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" PageSize.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -11638,6 +11799,7 @@ module IndexFacesResponse =
           (Xml.child xml_arg0 "FaceRecords") in
       make ?unindexedFaces ?faceModelVersion ?orientationCorrection
         ?faceRecords ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unindexedFaces =
         field_map json "UnindexedFaces" UnindexedFaces.of_json in
@@ -11721,6 +11883,7 @@ module IndexFacesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ?qualityFilter ?maxFaces ?detectionAttributes ?externalImageId
         ~image ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualityFilter =
         field_map json "QualityFilter" QualityFilter.of_json in
@@ -11891,6 +12054,7 @@ module GetTextDetectionResponse =
           (Xml.child xml_arg0 "JobStatus") in
       make ?textModelVersion ?nextToken ?textDetections ?videoMetadata
         ?statusMessage ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let textModelVersion =
         field_map json "TextModelVersion" String_.of_json in
@@ -11939,6 +12103,7 @@ module GetTextDetectionRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -12112,6 +12277,7 @@ module GetSegmentDetectionResponse =
           (Xml.child xml_arg0 "JobStatus") in
       make ?selectedSegmentTypes ?segments ?nextToken ?audioMetadata
         ?videoMetadata ?statusMessage ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectedSegmentTypes =
         field_map json "SelectedSegmentTypes" SegmentTypesInfo.of_json in
@@ -12161,6 +12327,7 @@ module GetSegmentDetectionRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -12308,6 +12475,7 @@ module GetPersonTrackingResponse =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
       make ?persons ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let persons = field_map json "Persons" PersonDetections.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -12360,6 +12528,7 @@ module GetPersonTrackingRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" PersonTrackingSortBy.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -12523,6 +12692,7 @@ module GetLabelDetectionResponse =
           (Xml.child xml_arg0 "JobStatus") in
       make ?labelModelVersion ?labels ?nextToken ?videoMetadata
         ?statusMessage ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let labelModelVersion =
         field_map json "LabelModelVersion" String_.of_json in
@@ -12578,6 +12748,7 @@ module GetLabelDetectionRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" LabelDetectionSortBy.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -12725,6 +12896,7 @@ module GetFaceSearchResponse =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
       make ?persons ?videoMetadata ?nextToken ?statusMessage ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let persons = field_map json "Persons" PersonMatches.of_json in
       let videoMetadata =
@@ -12776,6 +12948,7 @@ module GetFaceSearchRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" FaceSearchSortBy.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -12922,6 +13095,7 @@ module GetFaceDetectionResponse =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
       make ?faces ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faces = field_map json "Faces" FaceDetections.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -12966,6 +13140,7 @@ module GetFaceDetectionRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -13132,6 +13307,7 @@ module GetContentModerationResponse =
           (Xml.child xml_arg0 "JobStatus") in
       make ?moderationModelVersion ?nextToken ?moderationLabels
         ?videoMetadata ?statusMessage ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let moderationModelVersion =
         field_map json "ModerationModelVersion" String_.of_json in
@@ -13188,6 +13364,7 @@ module GetContentModerationRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" ContentModerationSortBy.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -13342,6 +13519,7 @@ module GetCelebrityRecognitionResponse =
           (Xml.child xml_arg0 "JobStatus") in
       make ?celebrities ?nextToken ?videoMetadata ?statusMessage ?jobStatus
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let celebrities =
         field_map json "Celebrities" CelebrityRecognitions.of_json in
@@ -13397,6 +13575,7 @@ module GetCelebrityRecognitionRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" CelebrityRecognitionSortBy.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -13505,6 +13684,7 @@ module GetCelebrityInfoResponse =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let urls = (Option.map ~f:Urls.of_xml) (Xml.child xml_arg0 "Urls") in
       make ?knownGender ?name ?urls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knownGender = field_map json "KnownGender" KnownGender.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -13530,6 +13710,7 @@ module GetCelebrityInfoRequest =
         RekognitionUniqueId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" RekognitionUniqueId.of_json in
       make ~id ()
@@ -13628,6 +13809,7 @@ module DistributeDatasetEntriesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13651,6 +13833,7 @@ module DistributeDatasetEntriesRequest =
         DistributeDatasetMetadataList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Datasets") in
       make ~datasets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasets =
         field_map_exn json "Datasets" DistributeDatasetMetadataList.of_json in
@@ -13778,6 +13961,7 @@ module DetectTextResponse =
         (Option.map ~f:TextDetectionList.of_xml)
           (Xml.child xml_arg0 "TextDetections") in
       make ?textModelVersion ?textDetections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let textModelVersion =
         field_map json "TextModelVersion" String_.of_json in
@@ -13811,6 +13995,7 @@ module DetectTextRequest =
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?filters ~image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" DetectTextFilters.of_json in
       let image = field_map_exn json "Image" Image.of_json in
@@ -13950,6 +14135,7 @@ module DetectProtectiveEquipmentResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ProtectiveEquipmentModelVersion") in
       make ?summary ?persons ?protectiveEquipmentModelVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summary =
         field_map json "Summary" ProtectiveEquipmentSummary.of_json in
@@ -13988,6 +14174,7 @@ module DetectProtectiveEquipmentRequest =
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?summarizationAttributes ~image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summarizationAttributes =
         field_map json "SummarizationAttributes"
@@ -14146,6 +14333,7 @@ module DetectModerationLabelsResponse =
           (Xml.child xml_arg0 "ModerationLabels") in
       make ?humanLoopActivationOutput ?moderationModelVersion
         ?moderationLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let humanLoopActivationOutput =
         field_map json "HumanLoopActivationOutput"
@@ -14192,6 +14380,7 @@ module DetectModerationLabelsRequest =
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?humanLoopConfig ?minConfidence ~image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let humanLoopConfig =
         field_map json "HumanLoopConfig" HumanLoopConfig.of_json in
@@ -14332,6 +14521,7 @@ module DetectLabelsResponse =
       let labels =
         (Option.map ~f:Labels.of_xml) (Xml.child xml_arg0 "Labels") in
       make ?labelModelVersion ?orientationCorrection ?labels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let labelModelVersion =
         field_map json "LabelModelVersion" String_.of_json in
@@ -14373,6 +14563,7 @@ module DetectLabelsRequest =
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?minConfidence ?maxLabels ~image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minConfidence = field_map json "MinConfidence" Percent.of_json in
       let maxLabels = field_map json "MaxLabels" UInteger.of_json in
@@ -14504,6 +14695,7 @@ module DetectFacesResponse =
         (Option.map ~f:FaceDetailList.of_xml)
           (Xml.child xml_arg0 "FaceDetails") in
       make ?orientationCorrection ?faceDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orientationCorrection =
         field_map json "OrientationCorrection" OrientationCorrection.of_json in
@@ -14535,6 +14727,7 @@ module DetectFacesRequest =
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?attributes ~image ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" Attributes.of_json in
       let image = field_map_exn json "Image" Image.of_json in
@@ -14681,6 +14874,7 @@ module DetectCustomLabelsResponse =
         (Option.map ~f:CustomLabels.of_xml)
           (Xml.child xml_arg0 "CustomLabels") in
       make ?customLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customLabels = field_map json "CustomLabels" CustomLabels.of_json in
       make ?customLabels ()
@@ -14725,6 +14919,7 @@ module DetectCustomLabelsRequest =
         ProjectVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
       make ?minConfidence ?maxResults ~image ~projectVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minConfidence = field_map json "MinConfidence" Percent.of_json in
       let maxResults = field_map json "MaxResults" UInteger.of_json in
@@ -14911,6 +15106,7 @@ module DescribeStreamProcessorResponse =
       make ?settings ?roleArn ?output ?input ?lastUpdateTimestamp
         ?creationTimestamp ?statusMessage ?status ?streamProcessorArn ?name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let settings =
         field_map json "Settings" StreamProcessorSettings.of_json in
@@ -14950,6 +15146,7 @@ module DescribeStreamProcessorRequest =
         StreamProcessorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" StreamProcessorName.of_json in
       make ~name ()
@@ -15060,6 +15257,7 @@ module DescribeProjectsResponse =
         (Option.map ~f:ProjectDescriptions.of_xml)
           (Xml.child xml_arg0 "ProjectDescriptions") in
       make ?nextToken ?projectDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" ExtendedPaginationToken.of_json in
@@ -15106,6 +15304,7 @@ module DescribeProjectsRequest =
         (Option.map ~f:ExtendedPaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?projectNames ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectNames = field_map json "ProjectNames" ProjectNames.of_json in
       let maxResults = field_map json "MaxResults" ProjectsPageSize.of_json in
@@ -15229,6 +15428,7 @@ module DescribeProjectVersionsResponse =
         (Option.map ~f:ProjectVersionDescriptions.of_xml)
           (Xml.child xml_arg0 "ProjectVersionDescriptions") in
       make ?nextToken ?projectVersionDescriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" ExtendedPaginationToken.of_json in
@@ -15285,6 +15485,7 @@ module DescribeProjectVersionsRequest =
         ProjectArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
       make ?maxResults ?nextToken ?versionNames ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ProjectVersionsPageSize.of_json in
@@ -15388,6 +15589,7 @@ module DescribeDatasetResponse =
         (Option.map ~f:DatasetDescription.of_xml)
           (Xml.child xml_arg0 "DatasetDescription") in
       make ?datasetDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetDescription =
         field_map json "DatasetDescription" DatasetDescription.of_json in
@@ -15413,6 +15615,7 @@ module DescribeDatasetRequest =
         DatasetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
       make ~datasetArn ()
@@ -15537,6 +15740,7 @@ module DescribeCollectionResponse =
       let faceCount =
         (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "FaceCount") in
       make ?creationTimestamp ?collectionARN ?faceModelVersion ?faceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTimestamp =
         field_map json "CreationTimestamp" DateTime.of_json in
@@ -15565,6 +15769,7 @@ module DescribeCollectionRequest =
         CollectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let collectionId =
         field_map_exn json "CollectionId" CollectionId.of_json in
@@ -15664,6 +15869,7 @@ module DeleteStreamProcessorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15685,6 +15891,7 @@ module DeleteStreamProcessorRequest =
         StreamProcessorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" StreamProcessorName.of_json in
       make ~name ()
@@ -15791,6 +15998,7 @@ module DeleteProjectVersionResponse =
         (Option.map ~f:ProjectVersionStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ProjectVersionStatus.of_json in
       make ?status ()
@@ -15816,6 +16024,7 @@ module DeleteProjectVersionRequest =
         ProjectVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
       make ~projectVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectVersionArn =
         field_map_exn json "ProjectVersionArn" ProjectVersionArn.of_json in
@@ -15922,6 +16131,7 @@ module DeleteProjectResponse =
       let status =
         (Option.map ~f:ProjectStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ProjectStatus.of_json in
       make ?status ()
@@ -15946,6 +16156,7 @@ module DeleteProjectRequest =
         ProjectArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
       make ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map_exn json "ProjectArn" ProjectArn.of_json in
       make ~projectArn ()
@@ -16043,6 +16254,7 @@ module DeleteFacesResponse =
       let deletedFaces =
         (Option.map ~f:FaceIdList.of_xml) (Xml.child xml_arg0 "DeletedFaces") in
       make ?deletedFaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletedFaces = field_map json "DeletedFaces" FaceIdList.of_json in
       make ?deletedFaces ()
@@ -16072,6 +16284,7 @@ module DeleteFacesRequest =
         CollectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ~faceIds ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceIds = field_map_exn json "FaceIds" FaceIdList.of_json in
       let collectionId =
@@ -16181,6 +16394,7 @@ module DeleteDatasetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16203,6 +16417,7 @@ module DeleteDatasetRequest =
         DatasetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
       make ~datasetArn ()
@@ -16300,6 +16515,7 @@ module DeleteCollectionResponse =
       let statusCode =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "StatusCode") in
       make ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusCode = field_map json "StatusCode" UInteger.of_json in
       make ?statusCode ()
@@ -16323,6 +16539,7 @@ module DeleteCollectionRequest =
         CollectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let collectionId =
         field_map_exn json "CollectionId" CollectionId.of_json in
@@ -16442,6 +16659,7 @@ module CreateStreamProcessorResponse =
         (Option.map ~f:StreamProcessorArn.of_xml)
           (Xml.child xml_arg0 "StreamProcessorArn") in
       make ?streamProcessorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamProcessorArn =
         field_map json "StreamProcessorArn" StreamProcessorArn.of_json in
@@ -16505,6 +16723,7 @@ module CreateStreamProcessorRequest =
         StreamProcessorInput.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Input") in
       make ?tags ~roleArn ~settings ~name ~output ~input ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
@@ -16639,6 +16858,7 @@ module CreateProjectVersionResponse =
         (Option.map ~f:ProjectVersionArn.of_xml)
           (Xml.child xml_arg0 "ProjectVersionArn") in
       make ?projectVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectVersionArn =
         field_map json "ProjectVersionArn" ProjectVersionArn.of_json in
@@ -16720,6 +16940,7 @@ module CreateProjectVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
       make ?kmsKeyId ?tags ?testingData ?trainingData ~outputConfig
         ~versionName ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -16834,6 +17055,7 @@ module CreateProjectResponse =
       let projectArn =
         (Option.map ~f:ProjectArn.of_xml) (Xml.child xml_arg0 "ProjectArn") in
       make ?projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map json "ProjectArn" ProjectArn.of_json in
       make ?projectArn ()
@@ -16857,6 +17079,7 @@ module CreateProjectRequest =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectName") in
       make ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectName = field_map_exn json "ProjectName" ProjectName.of_json in
       make ~projectName ()
@@ -16983,6 +17206,7 @@ module CreateDatasetResponse =
       let datasetArn =
         (Option.map ~f:DatasetArn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
       make ?datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
       make ?datasetArn ()
@@ -17025,6 +17249,7 @@ module CreateDatasetRequest =
         (Option.map ~f:DatasetSource.of_xml)
           (Xml.child xml_arg0 "DatasetSource") in
       make ~projectArn ~datasetType ?datasetSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let projectArn = field_map_exn json "ProjectArn" ProjectArn.of_json in
       let datasetType = field_map_exn json "DatasetType" DatasetType.of_json in
@@ -17155,6 +17380,7 @@ module CreateCollectionResponse =
       let statusCode =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "StatusCode") in
       make ?faceModelVersion ?collectionArn ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let faceModelVersion =
         field_map json "FaceModelVersion" String_.of_json in
@@ -17186,6 +17412,7 @@ module CreateCollectionRequest =
         CollectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ?tags ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let collectionId =
@@ -17355,6 +17582,7 @@ module CompareFacesResponse =
       make ?targetImageOrientationCorrection
         ?sourceImageOrientationCorrection ?unmatchedFaces ?faceMatches
         ?sourceImageFace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetImageOrientationCorrection =
         field_map json "TargetImageOrientationCorrection"
@@ -17419,6 +17647,7 @@ module CompareFacesRequest =
       let sourceImage =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SourceImage") in
       make ?qualityFilter ?similarityThreshold ~targetImage ~sourceImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let qualityFilter =
         field_map json "QualityFilter" QualityFilter.of_json in

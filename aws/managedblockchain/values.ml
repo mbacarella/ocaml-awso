@@ -83,6 +83,7 @@ module LogConfiguration =
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Enabled.of_json in
       make ?enabled ()
@@ -248,6 +249,7 @@ module InviteAction =
         PrincipalString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Principal") in
       make ~principal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principal = field_map_exn json "Principal" PrincipalString.of_json in
       make ~principal ()
@@ -271,6 +273,7 @@ module RemoveAction =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
       make ~memberId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
       make ~memberId ()
@@ -308,6 +311,7 @@ module LogConfigurations =
         (Option.map ~f:LogConfiguration.of_xml)
           (Xml.child xml_arg0 "Cloudwatch") in
       make ?cloudwatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudwatch = field_map json "Cloudwatch" LogConfiguration.of_json in
       make ?cloudwatch ()
@@ -750,6 +754,7 @@ module NetworkSummary =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?creationDate ?status ?frameworkVersion ?framework
         ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnString.of_json in
       let creationDate = field_map json "CreationDate" Timestamp.of_json in
@@ -874,6 +879,7 @@ module NodeEthereumAttributes =
       let httpEndpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "HttpEndpoint") in
       make ?webSocketEndpoint ?httpEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webSocketEndpoint =
         field_map json "WebSocketEndpoint" String_.of_json in
@@ -906,6 +912,7 @@ module NodeFabricAttributes =
       let peerEndpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PeerEndpoint") in
       make ?peerEventEndpoint ?peerEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerEventEndpoint =
         field_map json "PeerEventEndpoint" String_.of_json in
@@ -940,6 +947,7 @@ module NodeFabricLogPublishingConfiguration =
         (Option.map ~f:LogConfigurations.of_xml)
           (Xml.child xml_arg0 "ChaincodeLogs") in
       make ?peerLogs ?chaincodeLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerLogs = field_map json "PeerLogs" LogConfigurations.of_json in
       let chaincodeLogs =
@@ -964,6 +972,7 @@ module NetworkEthereumAttributes =
       let chainId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ChainId") in
       make ?chainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let chainId = field_map json "ChainId" String_.of_json in
       make ?chainId ()
@@ -993,6 +1002,7 @@ module NetworkFabricAttributes =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "OrderingServiceEndpoint") in
       make ?edition ?orderingServiceEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let edition = field_map json "Edition" Edition.of_json in
       let orderingServiceEndpoint =
@@ -1045,6 +1055,7 @@ module ApprovalThresholdPolicy =
           (Xml.child xml_arg0 "ThresholdPercentage") in
       make ?thresholdComparator ?proposalDurationInHours ?thresholdPercentage
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thresholdComparator =
         field_map json "ThresholdComparator" ThresholdComparator.of_json in
@@ -1082,6 +1093,7 @@ module MemberFabricAttributes =
         (Option.map ~f:UsernameString.of_xml)
           (Xml.child xml_arg0 "AdminUsername") in
       make ?caEndpoint ?adminUsername ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let caEndpoint = field_map json "CaEndpoint" String_.of_json in
       let adminUsername =
@@ -1107,6 +1119,7 @@ module MemberFabricLogPublishingConfiguration =
         (Option.map ~f:LogConfigurations.of_xml)
           (Xml.child xml_arg0 "CaLogs") in
       make ?caLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let caLogs = field_map json "CaLogs" LogConfigurations.of_json in
       make ?caLogs ()
@@ -1139,6 +1152,7 @@ module MemberFabricConfiguration =
         UsernameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AdminUsername") in
       make ~adminPassword ~adminUsername ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adminPassword =
         field_map_exn json "AdminPassword" PasswordString.of_json in
@@ -1244,6 +1258,7 @@ module ProposalSummary =
           (Xml.child xml_arg0 "ProposalId") in
       make ?arn ?expirationDate ?creationDate ?status ?proposedByMemberName
         ?proposedByMemberId ?description ?proposalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnString.of_json in
       let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
@@ -1291,6 +1306,7 @@ module VoteSummary =
           (Xml.child xml_arg0 "MemberName") in
       let vote = (Option.map ~f:VoteValue.of_xml) (Xml.child xml_arg0 "Vote") in
       make ?memberId ?memberName ?vote ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberId = field_map json "MemberId" ResourceIdString.of_json in
       let memberName =
@@ -1357,6 +1373,7 @@ module NodeSummary =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?instanceType ?availabilityZone ?creationDate ?status ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnString.of_json in
       let instanceType =
@@ -1435,6 +1452,7 @@ module MemberSummary =
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?isOwned ?creationDate ?status ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnString.of_json in
       let isOwned = field_map json "IsOwned" IsOwned.of_json in
@@ -1510,6 +1528,7 @@ module Invitation =
           (Xml.child xml_arg0 "InvitationId") in
       make ?arn ?networkSummary ?status ?expirationDate ?creationDate
         ?invitationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnString.of_json in
       let networkSummary =
@@ -1583,6 +1602,7 @@ module ProposalActions =
         (Option.map ~f:InviteActionList.of_xml)
           (Xml.child xml_arg0 "Invitations") in
       make ?removals ?invitations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removals = field_map json "Removals" RemoveActionList.of_json in
       let invitations = field_map json "Invitations" InviteActionList.of_json in
@@ -1628,6 +1648,7 @@ module NodeFrameworkAttributes =
         (Option.map ~f:NodeFabricAttributes.of_xml)
           (Xml.child xml_arg0 "Fabric") in
       make ?ethereum ?fabric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ethereum = field_map json "Ethereum" NodeEthereumAttributes.of_json in
       let fabric = field_map json "Fabric" NodeFabricAttributes.of_json in
@@ -1654,6 +1675,7 @@ module NodeLogPublishingConfiguration =
         (Option.map ~f:NodeFabricLogPublishingConfiguration.of_xml)
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fabric =
         field_map json "Fabric" NodeFabricLogPublishingConfiguration.of_json in
@@ -1712,6 +1734,7 @@ module NetworkFrameworkAttributes =
         (Option.map ~f:NetworkFabricAttributes.of_xml)
           (Xml.child xml_arg0 "Fabric") in
       make ?ethereum ?fabric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ethereum =
         field_map json "Ethereum" NetworkEthereumAttributes.of_json in
@@ -1739,6 +1762,7 @@ module VotingPolicy =
         (Option.map ~f:ApprovalThresholdPolicy.of_xml)
           (Xml.child xml_arg0 "ApprovalThresholdPolicy") in
       make ?approvalThresholdPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approvalThresholdPolicy =
         field_map json "ApprovalThresholdPolicy"
@@ -1764,6 +1788,7 @@ module MemberFrameworkAttributes =
         (Option.map ~f:MemberFabricAttributes.of_xml)
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fabric = field_map json "Fabric" MemberFabricAttributes.of_json in
       make ?fabric ()
@@ -1789,6 +1814,7 @@ module MemberLogPublishingConfiguration =
         (Option.map ~f:MemberFabricLogPublishingConfiguration.of_xml)
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fabric =
         field_map json "Fabric"
@@ -1847,6 +1873,7 @@ module MemberFrameworkConfiguration =
         (Option.map ~f:MemberFabricConfiguration.of_xml)
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fabric = field_map json "Fabric" MemberFabricConfiguration.of_json in
       make ?fabric ()
@@ -1869,6 +1896,7 @@ module NetworkFabricConfiguration =
       let edition =
         Edition.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Edition") in
       make ~edition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let edition = field_map_exn json "Edition" Edition.of_json in
       make ~edition ()
@@ -1888,6 +1916,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1907,6 +1936,7 @@ module IllegalActionException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1920,6 +1950,7 @@ module InternalServiceErrorException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1937,6 +1968,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1964,6 +1996,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" ArnString.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1979,6 +2012,7 @@ module ThrottlingException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1996,6 +2030,7 @@ module ResourceNotReadyException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2050,6 +2085,7 @@ module TooManyTagsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" ArnString.of_json in
       let message = field_map json "Message" ExceptionMessage.of_json in
@@ -2301,6 +2337,7 @@ module ResourceLimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2442,6 +2479,7 @@ module Proposal =
       make ?arn ?tags ?outstandingVoteCount ?noVoteCount ?yesVoteCount
         ?expirationDate ?creationDate ?status ?proposedByMemberName
         ?proposedByMemberId ?actions ?description ?networkId ?proposalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnString.of_json in
       let tags = field_map json "Tags" OutputTagMap.of_json in
@@ -2592,6 +2630,7 @@ module Node =
       make ?kmsKeyArn ?arn ?tags ?creationDate ?status ?stateDB
         ?logPublishingConfiguration ?frameworkAttributes ?availabilityZone
         ?instanceType ?id ?memberId ?networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" String_.of_json in
       let arn = field_map json "Arn" ArnString.of_json in
@@ -2730,6 +2769,7 @@ module Network =
       make ?arn ?tags ?creationDate ?status ?votingPolicy
         ?vpcEndpointServiceName ?frameworkAttributes ?frameworkVersion
         ?framework ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnString.of_json in
       let tags = field_map json "Tags" OutputTagMap.of_json in
@@ -2860,6 +2900,7 @@ module Member =
       make ?kmsKeyArn ?arn ?tags ?creationDate ?status
         ?logPublishingConfiguration ?frameworkAttributes ?description ?name
         ?id ?networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" String_.of_json in
       let arn = field_map json "Arn" ArnString.of_json in
@@ -2914,6 +2955,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2973,6 +3015,7 @@ module NodeConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceType") in
       make ?stateDB ?logPublishingConfiguration ?availabilityZone
         ~instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateDB = field_map json "StateDB" StateDBType.of_json in
       let logPublishingConfiguration =
@@ -3054,6 +3097,7 @@ module MemberConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?kmsKeyArn ?tags ?logPublishingConfiguration
         ~frameworkConfiguration ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" ArnString.of_json in
       let tags = field_map json "Tags" InputTagMap.of_json in
@@ -3089,6 +3133,7 @@ module NetworkFrameworkConfiguration =
         (Option.map ~f:NetworkFabricConfiguration.of_xml)
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fabric = field_map json "Fabric" NetworkFabricConfiguration.of_json in
       make ?fabric ()
@@ -3177,6 +3222,7 @@ module VoteOnProposalOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3218,6 +3264,7 @@ module VoteOnProposalInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~vote ~voterMemberId ~proposalId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vote = field_map_exn json "Vote" VoteValue.of_json in
       let voterMemberId =
@@ -3302,6 +3349,7 @@ module UpdateNodeOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3351,6 +3399,7 @@ module UpdateNodeInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?logPublishingConfiguration ~nodeId ?memberId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logPublishingConfiguration =
         field_map json "LogPublishingConfiguration"
@@ -3435,6 +3484,7 @@ module UpdateMemberOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3475,6 +3525,7 @@ module UpdateMemberInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?logPublishingConfiguration ~memberId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logPublishingConfiguration =
         field_map json "LogPublishingConfiguration"
@@ -3549,6 +3600,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3577,6 +3629,7 @@ module UntagResourceRequest =
         ArnString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ArnString.of_json in
@@ -3657,6 +3710,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3685,6 +3739,7 @@ module TagResourceRequest =
         ArnString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" InputTagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ArnString.of_json in
@@ -3774,6 +3829,7 @@ module RejectInvitationOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3795,6 +3851,7 @@ module RejectInvitationInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "invitationId") in
       make ~invitationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invitationId =
         field_map_exn json "InvitationId" ResourceIdString.of_json in
@@ -3873,6 +3930,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:OutputTagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" OutputTagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3896,6 +3954,7 @@ module ListTagsForResourceRequest =
         ArnString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ArnString.of_json in
       make ~resourceArn ()
@@ -3992,6 +4051,7 @@ module ListProposalsOutput =
         (Option.map ~f:ProposalSummaryList.of_xml)
           (Xml.child xml_arg0 "Proposals") in
       make ?nextToken ?proposals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let proposals = field_map json "Proposals" ProposalSummaryList.of_json in
@@ -4032,6 +4092,7 @@ module ListProposalsInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults =
@@ -4122,6 +4183,7 @@ module ListProposalVotesOutput =
         (Option.map ~f:ProposalVoteList.of_xml)
           (Xml.child xml_arg0 "ProposalVotes") in
       make ?nextToken ?proposalVotes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let proposalVotes =
@@ -4171,6 +4233,7 @@ module ListProposalVotesInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ~proposalId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults =
@@ -4261,6 +4324,7 @@ module ListNodesOutput =
       let nodes =
         (Option.map ~f:NodeSummaryList.of_xml) (Xml.child xml_arg0 "Nodes") in
       make ?nextToken ?nodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let nodes = field_map json "Nodes" NodeSummaryList.of_json in
@@ -4319,6 +4383,7 @@ module ListNodesInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ?status ?memberId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults = field_map json "MaxResults" NodeListMaxResults.of_json in
@@ -4409,6 +4474,7 @@ module ListNetworksOutput =
         (Option.map ~f:NetworkSummaryList.of_xml)
           (Xml.child xml_arg0 "Networks") in
       make ?nextToken ?networks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let networks = field_map json "Networks" NetworkSummaryList.of_json in
@@ -4460,6 +4526,7 @@ module ListNetworksInput =
         (Option.map ~f:Framework.of_xml) (Xml.child xml_arg0 "framework") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?nextToken ?maxResults ?status ?framework ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults =
@@ -4551,6 +4618,7 @@ module ListMembersOutput =
         (Option.map ~f:MemberSummaryList.of_xml)
           (Xml.child xml_arg0 "Members") in
       make ?nextToken ?members ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let members = field_map json "Members" MemberSummaryList.of_json in
@@ -4614,6 +4682,7 @@ module ListMembersInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ?isOwned ?status ?name ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults =
@@ -4727,6 +4796,7 @@ module ListInvitationsOutput =
         (Option.map ~f:InvitationList.of_xml)
           (Xml.child xml_arg0 "Invitations") in
       make ?nextToken ?invitations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let invitations = field_map json "Invitations" InvitationList.of_json in
@@ -4759,6 +4829,7 @@ module ListInvitationsInput =
         (Option.map ~f:ProposalListMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults =
@@ -4847,6 +4918,7 @@ module GetProposalOutput =
       let proposal =
         (Option.map ~f:Proposal.of_xml) (Xml.child xml_arg0 "Proposal") in
       make ?proposal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let proposal = field_map json "Proposal" Proposal.of_json in
       make ?proposal ()
@@ -4878,6 +4950,7 @@ module GetProposalInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~proposalId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let proposalId =
         field_map_exn json "ProposalId" ResourceIdString.of_json in
@@ -4964,6 +5037,7 @@ module GetNodeOutput =
     let of_xml xml_arg0 =
       let node = (Option.map ~f:Node.of_xml) (Xml.child xml_arg0 "Node") in
       make ?node ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let node = field_map json "Node" Node.of_json in make ?node ()
     let to_json v = composed_to_json to_value v
@@ -5002,6 +5076,7 @@ module GetNodeInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~nodeId ?memberId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeId = field_map_exn json "NodeId" ResourceIdString.of_json in
       let memberId = field_map json "MemberId" ResourceIdString.of_json in
@@ -5090,6 +5165,7 @@ module GetNetworkOutput =
       let network =
         (Option.map ~f:Network.of_xml) (Xml.child xml_arg0 "Network") in
       make ?network ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let network = field_map json "Network" Network.of_json in
       make ?network ()
@@ -5114,6 +5190,7 @@ module GetNetworkInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
       make ~networkId ()
@@ -5199,6 +5276,7 @@ module GetMemberOutput =
       let member =
         (Option.map ~f:Member.of_xml) (Xml.child xml_arg0 "Member") in
       make ?member ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let member = field_map json "Member" Member.of_json in make ?member ()
     let to_json v = composed_to_json to_value v
@@ -5228,6 +5306,7 @@ module GetMemberInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~memberId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
       let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
@@ -5317,6 +5396,7 @@ module DeleteNodeOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5354,6 +5434,7 @@ module DeleteNodeInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~nodeId ?memberId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeId = field_map_exn json "NodeId" ResourceIdString.of_json in
       let memberId = field_map json "MemberId" ResourceIdString.of_json in
@@ -5444,6 +5525,7 @@ module DeleteMemberOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5472,6 +5554,7 @@ module DeleteMemberInput =
         ResourceIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~memberId ~networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
       let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
@@ -5579,6 +5662,7 @@ module CreateProposalOutput =
         (Option.map ~f:ResourceIdString.of_xml)
           (Xml.child xml_arg0 "ProposalId") in
       make ?proposalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let proposalId = field_map json "ProposalId" ResourceIdString.of_json in
       make ?proposalId ()
@@ -5654,6 +5738,7 @@ module CreateProposalInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
       make ?tags ?description ~actions ~memberId ~networkId
         ~clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagMap.of_json in
       let description =
@@ -5789,6 +5874,7 @@ module CreateNodeOutput =
       let nodeId =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "NodeId") in
       make ?nodeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeId = field_map json "NodeId" ResourceIdString.of_json in
       make ?nodeId ()
@@ -5854,6 +5940,7 @@ module CreateNodeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
       make ?tags ~nodeConfiguration ?memberId ~networkId ~clientRequestToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagMap.of_json in
       let nodeConfiguration =
@@ -5978,6 +6065,7 @@ module CreateNetworkOutput =
         (Option.map ~f:ResourceIdString.of_xml)
           (Xml.child xml_arg0 "NetworkId") in
       make ?memberId ?networkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberId = field_map json "MemberId" ResourceIdString.of_json in
       let networkId = field_map json "NetworkId" ResourceIdString.of_json in
@@ -6081,6 +6169,7 @@ module CreateNetworkInput =
       make ?tags ~memberConfiguration ~votingPolicy ?frameworkConfiguration
         ~frameworkVersion ~framework ?description ~name ~clientRequestToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" InputTagMap.of_json in
       let memberConfiguration =
@@ -6226,6 +6315,7 @@ module CreateMemberOutput =
         (Option.map ~f:ResourceIdString.of_xml)
           (Xml.child xml_arg0 "MemberId") in
       make ?memberId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberId = field_map json "MemberId" ResourceIdString.of_json in
       make ?memberId ()
@@ -6283,6 +6373,7 @@ module CreateMemberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
       make ~memberConfiguration ~networkId ~invitationId ~clientRequestToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberConfiguration =
         field_map_exn json "MemberConfiguration" MemberConfiguration.of_json in

@@ -118,6 +118,7 @@ module Encryption =
       let mode =
         (Option.map ~f:EncryptionMode.of_xml) (Xml.child xml_arg0 "Mode") in
       make ?initializationVector ?keyMd5 ?key ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initializationVector =
         field_map json "InitializationVector" ZeroTo255String.of_json in
@@ -399,6 +400,7 @@ module CaptionSource =
         (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "Language") in
       let key = (Option.map ~f:LongKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?encryption ?label ?timeOffset ?language ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryption = field_map json "Encryption" Encryption.of_json in
       let label = field_map json "Label" Name.of_json in
@@ -441,6 +443,7 @@ module CaptionFormat =
         (Option.map ~f:CaptionFormatFormat.of_xml)
           (Xml.child xml_arg0 "Format") in
       make ?encryption ?pattern ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryption = field_map json "Encryption" Encryption.of_json in
       let pattern = field_map json "Pattern" CaptionFormatPattern.of_json in
@@ -471,6 +474,7 @@ module TimeSpan =
       let startTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?duration ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let duration = field_map json "Duration" Time.of_json in
       let startTime = field_map json "StartTime" Time.of_json in
@@ -552,6 +556,7 @@ module Artwork =
         (Option.map ~f:WatermarkKey.of_xml) (Xml.child xml_arg0 "InputKey") in
       make ?encryption ?albumArtFormat ?paddingPolicy ?sizingPolicy
         ?maxHeight ?maxWidth ?inputKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryption = field_map json "Encryption" Encryption.of_json in
       let albumArtFormat = field_map json "AlbumArtFormat" JpgOrPng.of_json in
@@ -871,6 +876,7 @@ module Clip =
       let timeSpan =
         (Option.map ~f:TimeSpan.of_xml) (Xml.child xml_arg0 "TimeSpan") in
       make ?timeSpan ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeSpan = field_map json "TimeSpan" TimeSpan.of_json in
       make ?timeSpan ()
@@ -951,6 +957,7 @@ module JobWatermark =
         (Option.map ~f:PresetWatermarkId.of_xml)
           (Xml.child xml_arg0 "PresetWatermarkId") in
       make ?encryption ?inputKey ?presetWatermarkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryption = field_map json "Encryption" Encryption.of_json in
       let inputKey = field_map json "InputKey" WatermarkKey.of_json in
@@ -1270,6 +1277,7 @@ module PresetWatermark =
         (Option.map ~f:PresetWatermarkId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?target ?opacity ?verticalOffset ?verticalAlign ?horizontalOffset
         ?horizontalAlign ?sizingPolicy ?maxHeight ?maxWidth ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let target = field_map json "Target" Target.of_json in
       let opacity = field_map json "Opacity" Opacity.of_json in
@@ -1321,6 +1329,7 @@ module Permission =
       let granteeType =
         (Option.map ~f:GranteeType.of_xml) (Xml.child xml_arg0 "GranteeType") in
       make ?access ?grantee ?granteeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let access = field_map json "Access" AccessControls.of_json in
       let grantee = field_map json "Grantee" Grantee.of_json in
@@ -1391,6 +1400,7 @@ module DetectedProperties =
       let width =
         (Option.map ~f:NullableInteger.of_xml) (Xml.child xml_arg0 "Width") in
       make ?durationMillis ?fileSize ?frameRate ?height ?width ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationMillis =
         field_map json "DurationMillis" NullableLong.of_json in
@@ -1447,6 +1457,7 @@ module InputCaptions =
         (Option.map ~f:CaptionMergePolicy.of_xml)
           (Xml.child xml_arg0 "MergePolicy") in
       make ?captionSources ?mergePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let captionSources =
         field_map json "CaptionSources" CaptionSources.of_json in
@@ -1544,6 +1555,7 @@ module Captions =
         (Option.map ~f:CaptionMergePolicy.of_xml)
           (Xml.child xml_arg0 "MergePolicy") in
       make ?captionFormats ?captionSources ?mergePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let captionFormats =
         field_map json "CaptionFormats" CaptionFormats.of_json in
@@ -1633,6 +1645,7 @@ module JobAlbumArt =
       let mergePolicy =
         (Option.map ~f:MergePolicy.of_xml) (Xml.child xml_arg0 "MergePolicy") in
       make ?artwork ?mergePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let artwork = field_map json "Artwork" Artworks.of_json in
       let mergePolicy = field_map json "MergePolicy" MergePolicy.of_json in
@@ -1815,6 +1828,7 @@ module HlsContentProtection =
           (Xml.child xml_arg0 "Method") in
       make ?keyStoragePolicy ?licenseAcquisitionUrl ?initializationVector
         ?keyMd5 ?key ?method_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyStoragePolicy =
         field_map json "KeyStoragePolicy" KeyStoragePolicy.of_json in
@@ -1925,6 +1939,7 @@ module PlayReadyDrm =
           (Xml.child xml_arg0 "Format") in
       make ?licenseAcquisitionUrl ?initializationVector ?keyId ?keyMd5 ?key
         ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseAcquisitionUrl =
         field_map json "LicenseAcquisitionUrl" OneTo512String.of_json in
@@ -2046,6 +2061,7 @@ module AudioCodecOptions =
         (Option.map ~f:AudioCodecProfile.of_xml)
           (Xml.child xml_arg0 "Profile") in
       make ?signed ?bitOrder ?bitDepth ?profile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signed = field_map json "Signed" AudioSigned.of_json in
       let bitOrder = field_map json "BitOrder" AudioBitOrder.of_json in
@@ -2424,6 +2440,7 @@ module JobInput =
       let key = (Option.map ~f:LongKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?detectedProperties ?inputCaptions ?timeSpan ?encryption
         ?container ?interlaced ?aspectRatio ?resolution ?frameRate ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectedProperties =
         field_map json "DetectedProperties" DetectedProperties.of_json in
@@ -2628,6 +2645,7 @@ module JobOutput =
         ?albumArt ?watermarks ?durationMillis ?fileSize ?frameRate ?height
         ?width ?duration ?statusDetail ?status ?segmentDuration ?presetId
         ?rotate ?thumbnailEncryption ?thumbnailPattern ?key ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appliedColorSpaceConversion =
         field_map json "AppliedColorSpaceConversion" String_.of_json in
@@ -2734,6 +2752,7 @@ module Playlist =
       let name = (Option.map ~f:Filename.of_xml) (Xml.child xml_arg0 "Name") in
       make ?statusDetail ?status ?playReadyDrm ?hlsContentProtection
         ?outputKeys ?format ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusDetail = field_map json "StatusDetail" Description.of_json in
       let status = field_map json "Status" JobStatus.of_json in
@@ -2814,6 +2833,7 @@ module AudioParameters =
         (Option.map ~f:AudioCodec.of_xml) (Xml.child xml_arg0 "Codec") in
       make ?codecOptions ?audioPackingMode ?channels ?bitRate ?sampleRate
         ?codec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codecOptions =
         field_map json "CodecOptions" AudioCodecOptions.of_json in
@@ -2943,6 +2963,7 @@ module Thumbnails =
         (Option.map ~f:JpgOrPng.of_xml) (Xml.child xml_arg0 "Format") in
       make ?paddingPolicy ?sizingPolicy ?maxHeight ?maxWidth ?aspectRatio
         ?resolution ?interval ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paddingPolicy =
         field_map json "PaddingPolicy" PaddingPolicy.of_json in
@@ -3107,6 +3128,7 @@ module VideoParameters =
         ?maxHeight ?maxWidth ?aspectRatio ?resolution ?maxFrameRate
         ?frameRate ?bitRate ?fixedGOP ?keyframesMaxDist ?codecOptions ?codec
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let watermarks = field_map json "Watermarks" PresetWatermarks.of_json in
       let paddingPolicy =
@@ -3187,6 +3209,7 @@ module Notifications =
       let progressing =
         (Option.map ~f:SnsTopic.of_xml) (Xml.child xml_arg0 "Progressing") in
       make ?error ?warning ?completed ?progressing ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" SnsTopic.of_json in
       let warning = field_map json "Warning" SnsTopic.of_json in
@@ -3228,6 +3251,7 @@ module PipelineOutputConfig =
       let bucket =
         (Option.map ~f:BucketName.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?permissions ?storageClass ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissions = field_map json "Permissions" Permissions.of_json in
       let storageClass = field_map json "StorageClass" StorageClass.of_json in
@@ -3377,6 +3401,7 @@ module Timing =
         (Option.map ~f:NullableLong.of_xml)
           (Xml.child xml_arg0 "SubmitTimeMillis") in
       make ?finishTimeMillis ?startTimeMillis ?submitTimeMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finishTimeMillis =
         field_map json "FinishTimeMillis" NullableLong.of_json in
@@ -3435,6 +3460,7 @@ module Warning =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let code = field_map json "Code" String_.of_json in
@@ -3521,6 +3547,7 @@ module Preset =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?type_ ?thumbnails ?video ?audio ?container ?description ?name
         ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" PresetType.of_json in
       let thumbnails = field_map json "Thumbnails" Thumbnails.of_json in
@@ -3638,6 +3665,7 @@ module Pipeline =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?thumbnailConfig ?contentConfig ?notifications ?awsKmsKeyArn ?role
         ?outputBucket ?inputBucket ?status ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbnailConfig =
         field_map json "ThumbnailConfig" PipelineOutputConfig.of_json in
@@ -3764,6 +3792,7 @@ module Job =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?timing ?userMetadata ?status ?playlists ?outputKeyPrefix ?outputs
         ?output ?inputs ?input ?pipelineId ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timing = field_map json "Timing" Timing.of_json in
       let userMetadata = field_map json "UserMetadata" UserMetadata.of_json in
@@ -3890,6 +3919,7 @@ module CreateJobOutput =
       make ?encryption ?captions ?composition ?albumArt ?watermarks
         ?segmentDuration ?presetId ?rotate ?thumbnailEncryption
         ?thumbnailPattern ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryption = field_map json "Encryption" Encryption.of_json in
       let captions = field_map json "Captions" Captions.of_json in
@@ -3965,6 +3995,7 @@ module CreateJobPlaylist =
         (Option.map ~f:PlaylistFormat.of_xml) (Xml.child xml_arg0 "Format") in
       let name = (Option.map ~f:Filename.of_xml) (Xml.child xml_arg0 "Name") in
       make ?playReadyDrm ?hlsContentProtection ?outputKeys ?format ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playReadyDrm = field_map json "PlayReadyDrm" PlayReadyDrm.of_json in
       let hlsContentProtection =
@@ -3983,6 +4014,7 @@ module AccessDeniedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3995,6 +4027,7 @@ module IncompatibleVersionException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -4006,6 +4039,7 @@ module InternalServiceException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4018,6 +4052,7 @@ module ResourceInUseException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4030,6 +4065,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4042,6 +4078,7 @@ module ValidationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4226,6 +4263,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4372,6 +4410,7 @@ module UpdatePipelineStatusResponse =
       let pipeline =
         (Option.map ~f:Pipeline.of_xml) (Xml.child xml_arg0 "Pipeline") in
       make ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipeline = field_map json "Pipeline" Pipeline.of_json in
       make ?pipeline ()
@@ -4399,6 +4438,7 @@ module UpdatePipelineStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~status ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" PipelineStatus.of_json in
       let id = field_map_exn json "Id" Id.of_json in make ~status ~id ()
@@ -4500,6 +4540,7 @@ module UpdatePipelineResponse =
       let pipeline =
         (Option.map ~f:Pipeline.of_xml) (Xml.child xml_arg0 "Pipeline") in
       make ?warnings ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warnings = field_map json "Warnings" Warnings.of_json in
       let pipeline = field_map json "Pipeline" Pipeline.of_json in
@@ -4586,6 +4627,7 @@ module UpdatePipelineRequest =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?thumbnailConfig ?contentConfig ?notifications ?awsKmsKeyArn ?role
         ?inputBucket ?name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbnailConfig =
         field_map json "ThumbnailConfig" PipelineOutputConfig.of_json in
@@ -4692,6 +4734,7 @@ module UpdatePipelineNotificationsResponse =
       let pipeline =
         (Option.map ~f:Pipeline.of_xml) (Xml.child xml_arg0 "Pipeline") in
       make ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pipeline = field_map json "Pipeline" Pipeline.of_json in
       make ?pipeline ()
@@ -4720,6 +4763,7 @@ module UpdatePipelineNotificationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Notifications") in
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~notifications ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notifications =
         field_map_exn json "Notifications" Notifications.of_json in
@@ -4815,6 +4859,7 @@ module TestRoleResponse =
       let success =
         (Option.map ~f:Success.of_xml) (Xml.child xml_arg0 "Success") in
       make ?messages ?success ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messages = field_map json "Messages" ExceptionMessages.of_json in
       let success = field_map json "Success" Success.of_json in
@@ -4862,6 +4907,7 @@ module TestRoleRequest =
       let role =
         Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Role") in
       make ~topics ~outputBucket ~inputBucket ~role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topics = field_map_exn json "Topics" SnsTopics.of_json in
       let outputBucket = field_map_exn json "OutputBucket" BucketName.of_json in
@@ -4951,6 +4997,7 @@ module ReadPresetResponse =
       let preset =
         (Option.map ~f:Preset.of_xml) (Xml.child xml_arg0 "Preset") in
       make ?preset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preset = field_map json "Preset" Preset.of_json in make ?preset ()
     let to_json v = composed_to_json to_value v
@@ -4969,6 +5016,7 @@ module ReadPresetRequest =
     let of_xml xml_arg0 =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5060,6 +5108,7 @@ module ReadPipelineResponse =
       let pipeline =
         (Option.map ~f:Pipeline.of_xml) (Xml.child xml_arg0 "Pipeline") in
       make ?warnings ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warnings = field_map json "Warnings" Warnings.of_json in
       let pipeline = field_map json "Pipeline" Pipeline.of_json in
@@ -5078,6 +5127,7 @@ module ReadPipelineRequest =
     let of_xml xml_arg0 =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5161,6 +5211,7 @@ module ReadJobResponse =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "Job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -5179,6 +5230,7 @@ module ReadJobRequest =
     let of_xml xml_arg0 =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5260,6 +5312,7 @@ module ListPresetsResponse =
       let presets =
         (Option.map ~f:Presets.of_xml) (Xml.child xml_arg0 "Presets") in
       make ?nextPageToken ?presets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" Id.of_json in
       let presets = field_map json "Presets" Presets.of_json in
@@ -5289,6 +5342,7 @@ module ListPresetsRequest =
       let ascending =
         (Option.map ~f:Ascending.of_xml) (Xml.child xml_arg0 "Ascending") in
       make ?pageToken ?ascending ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" Id.of_json in
       let ascending = field_map json "Ascending" Ascending.of_json in
@@ -5373,6 +5427,7 @@ module ListPipelinesResponse =
       let pipelines =
         (Option.map ~f:Pipelines.of_xml) (Xml.child xml_arg0 "Pipelines") in
       make ?nextPageToken ?pipelines ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" Id.of_json in
       let pipelines = field_map json "Pipelines" Pipelines.of_json in
@@ -5403,6 +5458,7 @@ module ListPipelinesRequest =
       let ascending =
         (Option.map ~f:Ascending.of_xml) (Xml.child xml_arg0 "Ascending") in
       make ?pageToken ?ascending ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" Id.of_json in
       let ascending = field_map json "Ascending" Ascending.of_json in
@@ -5495,6 +5551,7 @@ module ListJobsByStatusResponse =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "NextPageToken") in
       let jobs = (Option.map ~f:Jobs.of_xml) (Xml.child xml_arg0 "Jobs") in
       make ?nextPageToken ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" Id.of_json in
       let jobs = field_map json "Jobs" Jobs.of_json in
@@ -5532,6 +5589,7 @@ module ListJobsByStatusRequest =
       let status =
         JobStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?pageToken ?ascending ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" Id.of_json in
       let ascending = field_map json "Ascending" Ascending.of_json in
@@ -5625,6 +5683,7 @@ module ListJobsByPipelineResponse =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "NextPageToken") in
       let jobs = (Option.map ~f:Jobs.of_xml) (Xml.child xml_arg0 "Jobs") in
       make ?nextPageToken ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" Id.of_json in
       let jobs = field_map json "Jobs" Jobs.of_json in
@@ -5662,6 +5721,7 @@ module ListJobsByPipelineRequest =
       let pipelineId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PipelineId") in
       make ?pageToken ?ascending ~pipelineId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" Id.of_json in
       let ascending = field_map json "Ascending" Ascending.of_json in
@@ -5742,6 +5802,7 @@ module DeletePresetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The DeletePresetResponse structure."]
@@ -5759,6 +5820,7 @@ module DeletePresetRequest =
     let of_xml xml_arg0 =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5845,6 +5907,7 @@ module DeletePipelineResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The DeletePipelineResponse structure."]
@@ -5862,6 +5925,7 @@ module DeletePipelineRequest =
     let of_xml xml_arg0 =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5953,6 +6017,7 @@ module CreatePresetResponse =
       let preset =
         (Option.map ~f:Preset.of_xml) (Xml.child xml_arg0 "Preset") in
       make ?warning ?preset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warning = field_map json "Warning" String_.of_json in
       let preset = field_map json "Preset" Preset.of_json in
@@ -6013,6 +6078,7 @@ module CreatePresetRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?thumbnails ?audio ?video ~container ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbnails = field_map json "Thumbnails" Thumbnails.of_json in
       let audio = field_map json "Audio" AudioParameters.of_json in
@@ -6119,6 +6185,7 @@ module CreatePipelineResponse =
       let pipeline =
         (Option.map ~f:Pipeline.of_xml) (Xml.child xml_arg0 "Pipeline") in
       make ?warnings ?pipeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warnings = field_map json "Warnings" Warnings.of_json in
       let pipeline = field_map json "Pipeline" Pipeline.of_json in
@@ -6211,6 +6278,7 @@ module CreatePipelineRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?thumbnailConfig ?contentConfig ?notifications ?awsKmsKeyArn ~role
         ?outputBucket ~inputBucket ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbnailConfig =
         field_map json "ThumbnailConfig" PipelineOutputConfig.of_json in
@@ -6315,6 +6383,7 @@ module CreateJobResponse =
     let of_xml xml_arg0 =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "Job") in
       make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map json "Job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
@@ -6402,6 +6471,7 @@ module CreateJobRequest =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PipelineId") in
       make ?userMetadata ?playlists ?outputKeyPrefix ?outputs ?output ?inputs
         ?input ~pipelineId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userMetadata = field_map json "UserMetadata" UserMetadata.of_json in
       let playlists = field_map json "Playlists" CreateJobPlaylists.of_json in
@@ -6497,6 +6567,7 @@ module CancelJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6515,6 +6586,7 @@ module CancelJobRequest =
     let of_xml xml_arg0 =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in make ~id ()
     let to_json v = composed_to_json to_value v

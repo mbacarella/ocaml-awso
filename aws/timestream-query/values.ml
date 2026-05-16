@@ -52,6 +52,7 @@ module AccessDeniedException =
         (Option.map ~f:ServiceErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ServiceErrorMessage.of_json in
       make ?message ()
@@ -111,6 +112,7 @@ module CancelQueryRequest =
       let queryId =
         QueryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       make ~queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryId = field_map_exn json "QueryId" QueryId.of_json in
       make ~queryId ()
@@ -143,6 +145,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -161,6 +164,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -192,6 +196,7 @@ module InvalidEndpointException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -210,6 +215,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -297,6 +303,7 @@ module CancelQueryResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CancellationMessage") in
       make ?cancellationMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cancellationMessage =
         field_map json "CancellationMessage" String_.of_json in
@@ -430,6 +437,7 @@ module rec
         Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ~type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" Type.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -546,6 +554,8 @@ module rec
                (Xml.child xml_arg0 "ScalarType") in
            make ?rowColumnInfo ?timeSeriesMeasureValueColumnInfo
              ?arrayColumnInfo ?scalarType ()
+         let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning
+                                                               "-32"]
          let of_json json =
            let rowColumnInfo =
              field_map json "RowColumnInfo" ColumnInfoList.of_json in
@@ -573,6 +583,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -681,6 +692,7 @@ module MultiMeasureAttributeMapping =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceColumn") in
       make ~measureValueType ?targetMultiMeasureAttributeName ~sourceColumn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let measureValueType =
         field_map_exn json "MeasureValueType" ScalarMeasureValueType.of_json in
@@ -750,6 +762,7 @@ module MultiMeasureMappings =
         (Option.map ~f:SchemaName.of_xml)
           (Xml.child xml_arg0 "TargetMultiMeasureName") in
       make ~multiMeasureAttributeMappings ?targetMultiMeasureName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multiMeasureAttributeMappings =
         field_map_exn json "MultiMeasureAttributeMappings"
@@ -856,6 +869,7 @@ module MixedMeasureMapping =
         (Option.map ~f:SchemaName.of_xml) (Xml.child xml_arg0 "MeasureName") in
       make ?multiMeasureAttributeMappings ~measureValueType
         ?targetMeasureName ?sourceColumn ?measureName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multiMeasureAttributeMappings =
         field_map json "MultiMeasureAttributeMappings"
@@ -938,6 +952,7 @@ module DimensionMapping =
       let name =
         SchemaName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~dimensionValueType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionValueType =
         field_map_exn json "DimensionValueType" DimensionValueType.of_json in
@@ -1051,6 +1066,7 @@ module TimestreamConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ?measureNameColumn ?mixedMeasureMappings ?multiMeasureMappings
         ~dimensionMappings ~timeColumn ~tableName ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let measureNameColumn =
         field_map json "MeasureNameColumn" SchemaName.of_json in
@@ -1088,6 +1104,7 @@ module TargetConfiguration =
         TimestreamConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimestreamConfiguration") in
       make ~timestreamConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestreamConfiguration =
         field_map_exn json "TimestreamConfiguration"
@@ -1153,6 +1170,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1263,6 +1281,7 @@ module ScheduleConfiguration =
         ScheduleExpression.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduleExpression") in
       make ~scheduleExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduleExpression =
         field_map_exn json "ScheduleExpression" ScheduleExpression.of_json in
@@ -1305,6 +1324,7 @@ module SnsConfiguration =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicArn = field_map_exn json "TopicArn" AmazonResourceName.of_json in
       make ~topicArn ()
@@ -1329,6 +1349,7 @@ module NotificationConfiguration =
         SnsConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SnsConfiguration") in
       make ~snsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsConfiguration =
         field_map_exn json "SnsConfiguration" SnsConfiguration.of_json in
@@ -1443,6 +1464,7 @@ module S3Configuration =
         S3BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BucketName") in
       make ?encryptionOption ?objectKeyPrefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionOption =
         field_map json "EncryptionOption" S3EncryptionOption.of_json in
@@ -1471,6 +1493,7 @@ module ErrorReportConfiguration =
         S3Configuration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3Configuration") in
       make ~s3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Configuration =
         field_map_exn json "S3Configuration" S3Configuration.of_json in
@@ -1587,6 +1610,7 @@ module CreateScheduledQueryRequest =
         ~scheduledQueryExecutionRoleArn ?clientToken ?targetConfiguration
         ~notificationConfiguration ~scheduleConfiguration ~queryString ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorReportConfiguration =
         field_map_exn json "ErrorReportConfiguration"
@@ -1627,6 +1651,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1732,6 +1757,7 @@ module CreateScheduledQueryResponse =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" AmazonResourceName.of_json in
       make ~arn ()
@@ -1855,6 +1881,7 @@ module rec
       let scalarValue =
         (Option.map ~f:ScalarValue.of_xml) (Xml.child xml_arg0 "ScalarValue") in
       make ?nullValue ?rowValue ?arrayValue ?timeSeriesValue ?scalarValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nullValue = field_map json "NullValue" NullableBoolean.of_json in
       let rowValue = field_map json "RowValue" Row.of_json in
@@ -1927,6 +1954,8 @@ module rec
              DatumList.of_xml
                (Xml.child_exn ~context:context_ xml_arg0 "Data") in
            make ~data ()
+         let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning
+                                                               "-32"]
          let of_json json =
            let data = field_map_exn json "Data" DatumList.of_json in
            make ~data ()
@@ -1969,6 +1998,7 @@ module rec
       let time =
         Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Time") in
       make ~value ~time ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" Datum.of_json in
       let time = field_map_exn json "Time" Timestamp.of_json in
@@ -2030,6 +2060,7 @@ module DeleteScheduledQueryRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
       make ~scheduledQueryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledQueryArn =
         field_map_exn json "ScheduledQueryArn" AmazonResourceName.of_json in
@@ -2045,6 +2076,7 @@ module DescribeEndpointsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2086,6 +2118,7 @@ module Endpoint =
       let address =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Address") in
       make ~cachePeriodInMinutes ~address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachePeriodInMinutes =
         field_map_exn json "CachePeriodInMinutes" Long.of_json in
@@ -2181,6 +2214,7 @@ module DescribeEndpointsResponse =
         Endpoints.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Endpoints") in
       make ~endpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoints = field_map_exn json "Endpoints" Endpoints.of_json in
       make ~endpoints ()
@@ -2205,6 +2239,7 @@ module DescribeScheduledQueryRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
       make ~scheduledQueryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledQueryArn =
         field_map_exn json "ScheduledQueryArn" AmazonResourceName.of_json in
@@ -2336,6 +2371,7 @@ module ExecutionStats =
           (Xml.child xml_arg0 "ExecutionTimeInMillis") in
       make ?queryResultRows ?recordsIngested ?bytesMetered ?dataWrites
         ?executionTimeInMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryResultRows = field_map json "QueryResultRows" Long.of_json in
       let recordsIngested = field_map json "RecordsIngested" Long.of_json in
@@ -2379,6 +2415,7 @@ module S3ReportLocation =
       let bucketName =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "BucketName") in
       make ?objectKey ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectKey = field_map json "ObjectKey" S3ObjectKey.of_json in
       let bucketName = field_map json "BucketName" S3BucketName.of_json in
@@ -2402,6 +2439,7 @@ module ErrorReportLocation =
         (Option.map ~f:S3ReportLocation.of_xml)
           (Xml.child xml_arg0 "S3ReportLocation") in
       make ?s3ReportLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3ReportLocation =
         field_map json "S3ReportLocation" S3ReportLocation.of_json in
@@ -2474,6 +2512,7 @@ module ScheduledQueryRunSummary =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "InvocationTime") in
       make ?failureReason ?errorReportLocation ?executionStats ?runStatus
         ?triggerTime ?invocationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason = field_map json "FailureReason" ErrorMessage.of_json in
       let errorReportLocation =
@@ -2663,6 +2702,7 @@ module ScheduledQueryDescription =
         ~notificationConfiguration ~scheduleConfiguration ?nextInvocationTime
         ?previousInvocationTime ~state ?creationTime ~queryString ~name ~arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recentlyFailedRuns =
         field_map json "RecentlyFailedRuns"
@@ -2722,6 +2762,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?scheduledQueryArn ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledQueryArn =
         field_map json "ScheduledQueryArn" AmazonResourceName.of_json in
@@ -2819,6 +2860,7 @@ module DescribeScheduledQueryResponse =
         ScheduledQueryDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQuery") in
       make ~scheduledQuery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledQuery =
         field_map_exn json "ScheduledQuery" ScheduledQueryDescription.of_json in
@@ -2870,6 +2912,7 @@ module ExecuteScheduledQueryRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
       make ?clientToken ~invocationTime ~scheduledQueryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let invocationTime = field_map_exn json "InvocationTime" Time.of_json in
@@ -2937,6 +2980,7 @@ module ListScheduledQueriesRequest =
         (Option.map ~f:MaxScheduledQueriesResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" NextScheduledQueriesResultsToken.of_json in
@@ -2968,6 +3012,7 @@ module TimestreamDestination =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "DatabaseName") in
       make ?tableName ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map json "TableName" ResourceName.of_json in
       let databaseName = field_map json "DatabaseName" ResourceName.of_json in
@@ -2993,6 +3038,7 @@ module TargetDestination =
         (Option.map ~f:TimestreamDestination.of_xml)
           (Xml.child xml_arg0 "TimestreamDestination") in
       make ?timestreamDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestreamDestination =
         field_map json "TimestreamDestination" TimestreamDestination.of_json in
@@ -3090,6 +3136,7 @@ module ScheduledQuery =
       make ?lastRunStatus ?targetDestination ?errorReportConfiguration
         ?nextInvocationTime ?previousInvocationTime ~state ?creationTime
         ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastRunStatus =
         field_map json "LastRunStatus" ScheduledQueryRunStatus.of_json in
@@ -3227,6 +3274,7 @@ module ListScheduledQueriesResponse =
         ScheduledQueryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueries") in
       make ?nextToken ~scheduledQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" NextScheduledQueriesResultsToken.of_json in
@@ -3302,6 +3350,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?nextToken ?maxResults ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" NextTagsForResourceResultsToken.of_json in
@@ -3391,6 +3440,7 @@ module ListTagsForResourceResponse =
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?nextToken ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" NextTagsForResourceResultsToken.of_json in
@@ -3453,6 +3503,7 @@ module ParameterMapping =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" Type.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -3511,6 +3562,7 @@ module PrepareQueryRequest =
         QueryString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
       make ?validateOnly ~queryString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validateOnly =
         field_map json "ValidateOnly" NullableBoolean.of_json in
@@ -3558,6 +3610,7 @@ module SelectColumn =
       let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aliased ?tableName ?databaseName ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliased = field_map json "Aliased" NullableBoolean.of_json in
       let tableName = field_map json "TableName" ResourceName.of_json in
@@ -3687,6 +3740,7 @@ module PrepareQueryResponse =
         QueryString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
       make ~parameters ~columns ~queryString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map_exn json "Parameters" ParameterMappingList.of_json in
@@ -3709,6 +3763,7 @@ module QueryExecutionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3756,6 +3811,7 @@ module QueryRequest =
         QueryString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
       make ?maxRows ?nextToken ?clientToken ~queryString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRows = field_map json "MaxRows" MaxQueryResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3831,6 +3887,7 @@ module QueryStatus =
           (Xml.child xml_arg0 "ProgressPercentage") in
       make ?cumulativeBytesMetered ?cumulativeBytesScanned
         ?progressPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cumulativeBytesMetered =
         field_map json "CumulativeBytesMetered" Long.of_json in
@@ -3968,6 +4025,7 @@ module QueryResponse =
       let queryId =
         QueryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       make ?queryStatus ~columnInfo ~rows ?nextToken ~queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
       let columnInfo = field_map_exn json "ColumnInfo" ColumnInfoList.of_json in
@@ -4029,6 +4087,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN =
@@ -4110,6 +4169,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4140,6 +4200,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -4210,6 +4271,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4239,6 +4301,7 @@ module UpdateScheduledQueryRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
       make ~state ~scheduledQueryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map_exn json "State" ScheduledQueryState.of_json in
       let scheduledQueryArn =

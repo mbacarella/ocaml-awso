@@ -335,6 +335,7 @@ module ResourceTargetDefinition =
         (Option.map ~f:ResourceAttribute.of_xml)
           (Xml.child xml_arg0 "Attribute") in
       make ?requiresRecreation ?name ?attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requiresRecreation =
         field_map json "RequiresRecreation" RequiresRecreation.of_json in
@@ -377,6 +378,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -586,6 +588,7 @@ module RecordError =
           (Xml.child xml_arg0 "Description") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?description ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" ErrorDescription.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -611,6 +614,7 @@ module RecordTag =
       let key =
         (Option.map ~f:RecordTagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" RecordTagValue.of_json in
       let key = field_map json "Key" RecordTagKey.of_json in
@@ -708,6 +712,7 @@ module ConstraintSummary =
       let type_ =
         (Option.map ~f:ConstraintType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?description ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" ConstraintDescription.of_json in
@@ -858,6 +863,7 @@ module ResourceChangeDetail =
         (Option.map ~f:ResourceTargetDefinition.of_xml)
           (Xml.child xml_arg0 "Target") in
       make ?causingEntity ?evaluation ?target ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let causingEntity =
         field_map json "CausingEntity" CausingEntity.of_json in
@@ -1280,6 +1286,7 @@ module ProductViewAggregationValue =
       let value =
         (Option.map ~f:AttributeValue.of_xml) (Xml.child xml_arg0 "Value") in
       make ?approximateCount ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approximateCount =
         field_map json "ApproximateCount" ApproximateCount.of_json in
@@ -1404,6 +1411,7 @@ module ProductViewSummary =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?supportUrl ?supportDescription ?supportEmail ?hasDefaultPath
         ?distributor ?type_ ?shortDescription ?owner ?name ?productId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportUrl = field_map json "SupportUrl" SupportUrl.of_json in
       let supportDescription =
@@ -1910,6 +1918,7 @@ module ProvisioningArtifact =
           (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?guidance ?createdTime ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let guidance =
         field_map json "Guidance" ProvisioningArtifactGuidance.of_json in
@@ -2382,6 +2391,7 @@ module ParameterConstraints =
           (Xml.child xml_arg0 "AllowedValues") in
       make ?minValue ?maxValue ?minLength ?maxLength ?constraintDescription
         ?allowedPattern ?allowedValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minValue = field_map json "MinValue" String_.of_json in
       let maxValue = field_map json "MaxValue" String_.of_json in
@@ -2510,6 +2520,7 @@ module UpdateProvisioningParameter =
       let key =
         (Option.map ~f:ParameterKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?usePreviousValue ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usePreviousValue =
         field_map json "UsePreviousValue" UsePreviousValue.of_json in
@@ -2790,6 +2801,7 @@ module ShareError =
       let accounts =
         (Option.map ~f:Namespaces.of_xml) (Xml.child xml_arg0 "Accounts") in
       make ?error ?message ?accounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" Error.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -2961,6 +2973,7 @@ module ServiceActionSummary =
         (Option.map ~f:ServiceActionName.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?definitionType ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let definitionType =
         field_map json "DefinitionType" ServiceActionDefinitionType.of_json in
@@ -3339,6 +3352,7 @@ module ProvisionedProductAttribute =
         ?lastSuccessfulProvisioningRecordId ?lastProvisioningRecordId
         ?lastRecordId ?idempotencyToken ?createdTime ?statusMessage ?status
         ?id ?type_ ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArnSession =
         field_map json "UserArnSession" UserArnSession.of_json in
@@ -3598,6 +3612,7 @@ module ProductViewDetail =
         (Option.map ~f:ProductViewSummary.of_xml)
           (Xml.child xml_arg0 "ProductViewSummary") in
       make ?createdTime ?productARN ?status ?productViewSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
       let productARN = field_map json "ProductARN" ResourceARN.of_json in
@@ -3748,6 +3763,7 @@ module ProvisionedProductDetail =
         ?lastSuccessfulProvisioningRecordId ?lastProvisioningRecordId
         ?lastRecordId ?idempotencyToken ?createdTime ?statusMessage ?status
         ?id ?type_ ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchRoleArn = field_map json "LaunchRoleArn" RoleArn.of_json in
       let provisioningArtifactId =
@@ -3793,6 +3809,7 @@ module ProvisioningParameter =
       let key =
         (Option.map ~f:ParameterKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" ParameterValue.of_json in
       let key = field_map json "Key" ParameterKey.of_json in
@@ -3835,6 +3852,7 @@ module TagOptionDetail =
       let key =
         (Option.map ~f:TagOptionKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?owner ?id ?active ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map json "Owner" Owner.of_json in
       let id = field_map json "Id" TagOptionId.of_json in
@@ -3877,6 +3895,7 @@ module StackInstance =
       let account =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "Account") in
       make ?stackInstanceStatus ?region ?account ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackInstanceStatus =
         field_map json "StackInstanceStatus" StackInstanceStatus.of_json in
@@ -3929,6 +3948,7 @@ module ResourceDetail =
       let id =
         (Option.map ~f:ResourceDetailId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?createdTime ?description ?name ?aRN ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime =
         field_map json "CreatedTime" ResourceDetailCreatedTime.of_json in
@@ -4063,6 +4083,7 @@ module RecordDetail =
         ?provisioningArtifactId ?productId ?provisionedProductId ?recordType
         ?provisionedProductType ?updatedTime ?createdTime ?status
         ?provisionedProductName ?recordId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchRoleArn = field_map json "LaunchRoleArn" RoleArn.of_json in
       let recordTags = field_map json "RecordTags" RecordTags.of_json in
@@ -4187,6 +4208,7 @@ module ProvisioningArtifactDetail =
           (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?guidance ?active ?createdTime ?type_ ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let guidance =
         field_map json "Guidance" ProvisioningArtifactGuidance.of_json in
@@ -4228,6 +4250,7 @@ module ProvisioningArtifactView =
         (Option.map ~f:ProductViewSummary.of_xml)
           (Xml.child xml_arg0 "ProductViewSummary") in
       make ?provisioningArtifact ?productViewSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifact =
         field_map json "ProvisioningArtifact" ProvisioningArtifact.of_json in
@@ -4299,6 +4322,7 @@ module ProvisionedProductPlanSummary =
           (Xml.child xml_arg0 "PlanName") in
       make ?provisioningArtifactId ?planType ?provisionProductName
         ?provisionProductId ?planId ?planName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifactId =
         field_map json "ProvisioningArtifactId" Id.of_json in
@@ -4339,6 +4363,7 @@ module Principal =
         (Option.map ~f:PrincipalARN.of_xml)
           (Xml.child xml_arg0 "PrincipalARN") in
       make ?principalType ?principalARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalType =
         field_map json "PrincipalType" PrincipalType.of_json in
@@ -4404,6 +4429,7 @@ module PortfolioDetail =
       let aRN = (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ARN") in
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?providerName ?createdTime ?description ?displayName ?aRN ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerName = field_map json "ProviderName" ProviderName.of_json in
       let createdTime = field_map json "CreatedTime" CreationTime.of_json in
@@ -4438,6 +4464,7 @@ module OrganizationNode =
         (Option.map ~f:OrganizationNodeType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" OrganizationNodeValue.of_json in
       let type_ = field_map json "Type" OrganizationNodeType.of_json in
@@ -4477,6 +4504,7 @@ module LaunchPathSummary =
           (Xml.child xml_arg0 "ConstraintSummaries") in
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?tags ?constraintSummaries ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" PortfolioName.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -4545,6 +4573,7 @@ module ConstraintDetail =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "ConstraintId") in
       make ?portfolioId ?productId ?owner ?description ?type_ ?constraintId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioId = field_map json "PortfolioId" Id.of_json in
       let productId = field_map json "ProductId" Id.of_json in
@@ -4572,6 +4601,7 @@ module BudgetDetail =
       let budgetName =
         (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
       make ?budgetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budgetName = field_map json "BudgetName" BudgetName.of_json in
       make ?budgetName ()
@@ -4602,6 +4632,7 @@ module RecordOutput =
       let outputKey =
         (Option.map ~f:OutputKey.of_xml) (Xml.child xml_arg0 "OutputKey") in
       make ?description ?outputValue ?outputKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let outputValue = field_map json "OutputValue" OutputValue.of_json in
@@ -4641,6 +4672,7 @@ module ExecutionParameter =
         (Option.map ~f:ExecutionParameterKey.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?defaultValues ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValues =
         field_map json "DefaultValues" ExecutionParameterValueList.of_json in
@@ -4674,6 +4706,7 @@ module ProvisioningArtifactOutput =
         (Option.map ~f:ProvisioningArtifactOutputKey.of_xml)
           (Xml.child xml_arg0 "Key") in
       make ?description ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" OutputDescription.of_json in
@@ -4744,6 +4777,7 @@ module ProvisioningArtifactParameter =
           (Xml.child xml_arg0 "ParameterKey") in
       make ?parameterConstraints ?description ?isNoEcho ?parameterType
         ?defaultValue ?parameterKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterConstraints =
         field_map json "ParameterConstraints" ParameterConstraints.of_json in
@@ -4776,6 +4810,7 @@ module TagOptionSummary =
       let key =
         (Option.map ~f:TagOptionKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" TagOptionValues.of_json in
       let key = field_map json "Key" TagOptionKey.of_json in
@@ -4802,6 +4837,7 @@ module UsageInstruction =
       let type_ =
         (Option.map ~f:InstructionType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" InstructionValue.of_json in
       let type_ = field_map json "Type" InstructionType.of_json in
@@ -4986,6 +5022,7 @@ module ResourceChange =
         (Option.map ~f:ChangeAction.of_xml) (Xml.child xml_arg0 "Action") in
       make ?details ?scope ?replacement ?resourceType ?physicalResourceId
         ?logicalResourceId ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "Details" ResourceChangeDetails.of_json in
       let scope = field_map json "Scope" Scope.of_json in
@@ -5018,6 +5055,7 @@ module CloudWatchDashboard =
         (Option.map ~f:CloudWatchDashboardName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" CloudWatchDashboardName.of_json in
       make ?name ()
@@ -5041,6 +5079,7 @@ module LaunchPath =
         (Option.map ~f:PortfolioName.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" PortfolioName.of_json in
       let id = field_map json "Id" Id.of_json in make ?name ?id ()
@@ -5104,6 +5143,7 @@ module ProvisioningArtifactSummary =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?provisioningArtifactMetadata ?createdTime ?description ?name ?id
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifactMetadata =
         field_map json "ProvisioningArtifactMetadata"
@@ -5158,6 +5198,7 @@ module PortfolioShareDetail =
       let principalId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PrincipalId") in
       make ?shareTagOptions ?accepted ?type_ ?principalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareTagOptions = field_map json "ShareTagOptions" Boolean.of_json in
       let accepted = field_map json "Accepted" Boolean.of_json in
@@ -5336,6 +5377,7 @@ module FailedServiceActionAssociation =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "ServiceActionId") in
       make ?errorMessage ?errorCode ?provisioningArtifactId ?productId
         ?serviceActionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage =
         field_map json "ErrorMessage"
@@ -5386,6 +5428,7 @@ module ServiceActionAssociation =
         Id.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceActionId") in
       make ~provisioningArtifactId ~productId ~serviceActionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifactId =
         field_map_exn json "ProvisioningArtifactId" Id.of_json in
@@ -5403,6 +5446,7 @@ module DuplicateResourceException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource is a duplicate."]
@@ -5414,6 +5458,7 @@ module InvalidParametersException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5426,6 +5471,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource was not found."]
@@ -5437,6 +5483,7 @@ module TagOptionNotMigratedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5467,6 +5514,7 @@ module ServiceActionDetail =
         (Option.map ~f:ServiceActionSummary.of_xml)
           (Xml.child xml_arg0 "ServiceActionSummary") in
       make ?definition ?serviceActionSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let definition =
         field_map json "Definition" ServiceActionDefinitionMap.of_json in
@@ -5498,6 +5546,7 @@ module InvalidStateException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5626,6 +5675,7 @@ module UpdateProvisioningPreferences =
       make ?stackSetOperationType ?stackSetMaxConcurrencyPercentage
         ?stackSetMaxConcurrencyCount ?stackSetFailureTolerancePercentage
         ?stackSetFailureToleranceCount ?stackSetRegions ?stackSetAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackSetOperationType =
         field_map json "StackSetOperationType" StackSetOperationType.of_json in
@@ -5706,6 +5756,7 @@ module OperationNotSupportedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation is not supported."]
@@ -5764,6 +5815,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5891,6 +5943,7 @@ module AccessLevelFilter =
         (Option.map ~f:AccessLevelFilterKey.of_xml)
           (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" AccessLevelFilterValue.of_json in
       let key = field_map json "Key" AccessLevelFilterKey.of_json in
@@ -6344,6 +6397,7 @@ module ProvisioningPreferences =
       make ?stackSetMaxConcurrencyPercentage ?stackSetMaxConcurrencyCount
         ?stackSetFailureTolerancePercentage ?stackSetFailureToleranceCount
         ?stackSetRegions ?stackSetAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackSetMaxConcurrencyPercentage =
         field_map json "StackSetMaxConcurrencyPercentage"
@@ -6415,6 +6469,7 @@ module ListTagOptionsFilters =
       let key =
         (Option.map ~f:TagOptionKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?active ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let active = field_map json "Active" TagOptionActive.of_json in
       let value = field_map json "Value" TagOptionValue.of_json in
@@ -6553,6 +6608,7 @@ module ListRecordHistorySearchFilter =
       let key =
         (Option.map ~f:SearchFilterKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" SearchFilterValue.of_json in
       let key = field_map json "Key" SearchFilterKey.of_json in
@@ -6945,6 +7001,7 @@ module ResourceInUseException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7054,6 +7111,7 @@ module ProvisioningArtifactPreferences =
         (Option.map ~f:StackSetAccounts.of_xml)
           (Xml.child xml_arg0 "StackSetAccounts") in
       make ?stackSetRegions ?stackSetAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stackSetRegions =
         field_map json "StackSetRegions" StackSetRegions.of_json in
@@ -7261,6 +7319,7 @@ module ProvisionedProductPlanDetails =
         ?updatedTime ?status ?provisioningArtifactId ?planType
         ?provisionProductName ?provisionProductId ?planId ?planName
         ?productId ?pathId ?createdTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "StatusMessage" StatusMessage.of_json in
@@ -7466,6 +7525,7 @@ module ShareDetails =
         (Option.map ~f:SuccessfulShares.of_xml)
           (Xml.child xml_arg0 "SuccessfulShares") in
       make ?shareErrors ?successfulShares ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareErrors = field_map json "ShareErrors" ShareErrors.of_json in
       let successfulShares =
@@ -7571,6 +7631,7 @@ module ProvisioningArtifactProperties =
         (Option.map ~f:ProvisioningArtifactName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?disableTemplateValidation ?type_ ~info ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disableTemplateValidation =
         field_map json "DisableTemplateValidation"
@@ -7789,6 +7850,7 @@ module UpdateTagOptionOutput =
         (Option.map ~f:TagOptionDetail.of_xml)
           (Xml.child xml_arg0 "TagOptionDetail") in
       make ?tagOptionDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagOptionDetail =
         field_map json "TagOptionDetail" TagOptionDetail.of_json in
@@ -7820,6 +7882,7 @@ module UpdateTagOptionInput =
       let id =
         TagOptionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?active ?value ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let active = field_map json "Active" TagOptionActive.of_json in
       let value = field_map json "Value" TagOptionValue.of_json in
@@ -7881,6 +7944,7 @@ module UpdateServiceActionOutput =
         (Option.map ~f:ServiceActionDetail.of_xml)
           (Xml.child xml_arg0 "ServiceActionDetail") in
       make ?serviceActionDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceActionDetail =
         field_map json "ServiceActionDetail" ServiceActionDetail.of_json in
@@ -7933,6 +7997,7 @@ module UpdateServiceActionInput =
         (Option.map ~f:ServiceActionName.of_xml) (Xml.child xml_arg0 "Name") in
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?acceptLanguage ?description ?definition ?name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -8013,6 +8078,7 @@ module UpdateProvisioningArtifactOutput =
         (Option.map ~f:ProvisioningArtifactDetail.of_xml)
           (Xml.child xml_arg0 "ProvisioningArtifactDetail") in
       make ?status ?info ?provisioningArtifactDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let info = field_map json "Info" ProvisioningArtifactInfo.of_json in
@@ -8100,6 +8166,7 @@ module UpdateProvisioningArtifactInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?guidance ?active ?description ?name ~provisioningArtifactId
         ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let guidance =
         field_map json "Guidance" ProvisioningArtifactGuidance.of_json in
@@ -8206,6 +8273,7 @@ module UpdateProvisionedProductPropertiesOutput =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "ProvisionedProductId") in
       make ?status ?recordId ?provisionedProductProperties
         ?provisionedProductId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" RecordStatus.of_json in
       let recordId = field_map json "RecordId" Id.of_json in
@@ -8274,6 +8342,7 @@ module UpdateProvisionedProductPropertiesInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ~provisionedProductProperties
         ~provisionedProductId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -8343,6 +8412,7 @@ module UpdateProvisionedProductOutput =
         (Option.map ~f:RecordDetail.of_xml)
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
@@ -8487,6 +8557,7 @@ module UpdateProvisionedProductInput =
         ?provisioningParameters ?pathName ?pathId ?provisioningArtifactName
         ?provisioningArtifactId ?productName ?productId ?provisionedProductId
         ?provisionedProductName ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateToken =
         field_map_exn json "UpdateToken" IdempotencyToken.of_json in
@@ -8591,6 +8662,7 @@ module UpdateProductOutput =
         (Option.map ~f:ProductViewDetail.of_xml)
           (Xml.child xml_arg0 "ProductViewDetail") in
       make ?tags ?productViewDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let productViewDetail =
@@ -8697,6 +8769,7 @@ module UpdateProductInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?removeTags ?addTags ?supportUrl ?supportEmail ?supportDescription
         ?distributor ?description ?owner ?name ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeTags = field_map json "RemoveTags" TagKeys.of_json in
       let addTags = field_map json "AddTags" AddTags.of_json in
@@ -8797,6 +8870,7 @@ module UpdatePortfolioShareOutput =
       let portfolioShareToken =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PortfolioShareToken") in
       make ?status ?portfolioShareToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ShareStatus.of_json in
       let portfolioShareToken =
@@ -8863,6 +8937,7 @@ module UpdatePortfolioShareInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?shareTagOptions ?organizationNode ?accountId ~portfolioId
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareTagOptions =
         field_map json "ShareTagOptions" NullableBoolean.of_json in
@@ -8957,6 +9032,7 @@ module UpdatePortfolioOutput =
         (Option.map ~f:PortfolioDetail.of_xml)
           (Xml.child xml_arg0 "PortfolioDetail") in
       make ?tags ?portfolioDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let portfolioDetail =
@@ -9033,6 +9109,7 @@ module UpdatePortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?removeTags ?addTags ?providerName ?description ?displayName ~id
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeTags = field_map json "RemoveTags" TagKeys.of_json in
       let addTags = field_map json "AddTags" AddTags.of_json in
@@ -9118,6 +9195,7 @@ module UpdateConstraintOutput =
         (Option.map ~f:ConstraintDetail.of_xml)
           (Xml.child xml_arg0 "ConstraintDetail") in
       make ?status ?constraintParameters ?constraintDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let constraintParameters =
@@ -9168,6 +9246,7 @@ module UpdateConstraintInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?parameters ?description ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "Parameters" ConstraintParameters.of_json in
@@ -9223,6 +9302,7 @@ module TerminateProvisionedProductOutput =
         (Option.map ~f:RecordDetail.of_xml)
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
@@ -9304,6 +9384,7 @@ module TerminateProvisionedProductInput =
           (Xml.child xml_arg0 "ProvisionedProductName") in
       make ?retainPhysicalResources ?acceptLanguage ?ignoreErrors
         ~terminateToken ?provisionedProductId ?provisionedProductName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retainPhysicalResources =
         field_map json "RetainPhysicalResources"
@@ -9385,6 +9466,7 @@ module SearchProvisionedProductsOutput =
         (Option.map ~f:ProvisionedProductAttributes.of_xml)
           (Xml.child xml_arg0 "ProvisionedProducts") in
       make ?nextPageToken ?totalResultsCount ?provisionedProducts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let totalResultsCount =
@@ -9473,6 +9555,7 @@ module SearchProvisionedProductsInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?sortOrder ?sortBy ?filters
         ?accessLevelFilter ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize =
@@ -9554,6 +9637,7 @@ module SearchProductsOutput =
         (Option.map ~f:ProductViewSummaries.of_xml)
           (Xml.child xml_arg0 "ProductViewSummaries") in
       make ?nextPageToken ?productViewAggregations ?productViewSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let productViewAggregations =
@@ -9629,6 +9713,7 @@ module SearchProductsInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?sortOrder ?sortBy ?pageSize ?filters ?acceptLanguage
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let sortOrder = field_map json "SortOrder" SortOrder.of_json in
@@ -9703,6 +9788,7 @@ module SearchProductsAsAdminOutput =
         (Option.map ~f:ProductViewDetails.of_xml)
           (Xml.child xml_arg0 "ProductViewDetails") in
       make ?nextPageToken ?productViewDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let productViewDetails =
@@ -9790,6 +9876,7 @@ module SearchProductsAsAdminInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?productSource ?pageSize ?pageToken ?sortOrder ?sortBy ?filters
         ?portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productSource =
         field_map json "ProductSource" ProductSource.of_json in
@@ -9859,6 +9946,7 @@ module ScanProvisionedProductsOutput =
         (Option.map ~f:ProvisionedProductDetails.of_xml)
           (Xml.child xml_arg0 "ProvisionedProducts") in
       make ?nextPageToken ?provisionedProducts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let provisionedProducts =
@@ -9910,6 +9998,7 @@ module ScanProvisionedProductsInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?accessLevelFilter ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -9956,6 +10045,7 @@ module RejectPortfolioShareOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rejects an offer to share the specified portfolio."]
@@ -9993,6 +10083,7 @@ module RejectPortfolioShareInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?portfolioShareType ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioShareType =
         field_map json "PortfolioShareType" PortfolioShareType.of_json in
@@ -10067,6 +10158,7 @@ module ProvisionProductOutput =
         (Option.map ~f:RecordDetail.of_xml)
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
@@ -10212,6 +10304,7 @@ module ProvisionProductInput =
         ?provisioningParameters ~provisionedProductName ?pathName ?pathId
         ?provisioningArtifactName ?provisioningArtifactId ?productName
         ?productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisionToken =
         field_map_exn json "ProvisionToken" IdempotencyToken.of_json in
@@ -10308,6 +10401,7 @@ module ListTagOptionsOutput =
         (Option.map ~f:TagOptionDetails.of_xml)
           (Xml.child xml_arg0 "TagOptionDetails") in
       make ?pageToken ?tagOptionDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let tagOptionDetails =
@@ -10346,6 +10440,7 @@ module ListTagOptionsInput =
         (Option.map ~f:ListTagOptionsFilters.of_xml)
           (Xml.child xml_arg0 "Filters") in
       make ?pageToken ?pageSize ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -10414,6 +10509,7 @@ module ListStackInstancesForProvisionedProductOutput =
         (Option.map ~f:StackInstances.of_xml)
           (Xml.child xml_arg0 "StackInstances") in
       make ?nextPageToken ?stackInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let stackInstances =
@@ -10463,6 +10559,7 @@ module ListStackInstancesForProvisionedProductInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ~provisionedProductId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" PageSize.of_json in
       let pageToken = field_map json "PageToken" PageToken.of_json in
@@ -10529,6 +10626,7 @@ module ListServiceActionsOutput =
         (Option.map ~f:ServiceActionSummaries.of_xml)
           (Xml.child xml_arg0 "ServiceActionSummaries") in
       make ?nextPageToken ?serviceActionSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let serviceActionSummaries =
@@ -10568,6 +10666,7 @@ module ListServiceActionsInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -10640,6 +10739,7 @@ module ListServiceActionsForProvisioningArtifactOutput =
         (Option.map ~f:ServiceActionSummaries.of_xml)
           (Xml.child xml_arg0 "ServiceActionSummaries") in
       make ?nextPageToken ?serviceActionSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let serviceActionSummaries =
@@ -10706,6 +10806,7 @@ module ListServiceActionsForProvisioningArtifactInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ProductId") in
       make ?acceptLanguage ?pageToken ?pageSize ~provisioningArtifactId
         ~productId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -10791,6 +10892,7 @@ module ListResourcesForTagOptionOutput =
         (Option.map ~f:ResourceDetails.of_xml)
           (Xml.child xml_arg0 "ResourceDetails") in
       make ?pageToken ?resourceDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let resourceDetails =
@@ -10837,6 +10939,7 @@ module ListResourcesForTagOptionInput =
         TagOptionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TagOptionId") in
       make ?pageToken ?pageSize ?resourceType ~tagOptionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -10898,6 +11001,7 @@ module ListRecordHistoryOutput =
         (Option.map ~f:RecordDetails.of_xml)
           (Xml.child xml_arg0 "RecordDetails") in
       make ?nextPageToken ?recordDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let recordDetails =
@@ -10963,6 +11067,7 @@ module ListRecordHistoryInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?searchFilter ?accessLevelFilter
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -11039,6 +11144,7 @@ module ListProvisioningArtifactsOutput =
         (Option.map ~f:ProvisioningArtifactDetails.of_xml)
           (Xml.child xml_arg0 "ProvisioningArtifactDetails") in
       make ?nextPageToken ?provisioningArtifactDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let provisioningArtifactDetails =
@@ -11072,6 +11178,7 @@ module ListProvisioningArtifactsInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productId = field_map_exn json "ProductId" Id.of_json in
       let acceptLanguage =
@@ -11144,6 +11251,7 @@ module ListProvisioningArtifactsForServiceActionOutput =
         (Option.map ~f:ProvisioningArtifactViews.of_xml)
           (Xml.child xml_arg0 "ProvisioningArtifactViews") in
       make ?nextPageToken ?provisioningArtifactViews ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let provisioningArtifactViews =
@@ -11195,6 +11303,7 @@ module ListProvisioningArtifactsForServiceActionInput =
         Id.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceActionId") in
       make ?acceptLanguage ?pageToken ?pageSize ~serviceActionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -11268,6 +11377,7 @@ module ListProvisionedProductPlansOutput =
         (Option.map ~f:ProvisionedProductPlans.of_xml)
           (Xml.child xml_arg0 "ProvisionedProductPlans") in
       make ?nextPageToken ?provisionedProductPlans ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let provisionedProductPlans =
@@ -11332,6 +11442,7 @@ module ListProvisionedProductPlansInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?accessLevelFilter ?pageToken ?pageSize ?provisionProductId
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessLevelFilter =
         field_map json "AccessLevelFilter" AccessLevelFilter.of_json in
@@ -11405,6 +11516,7 @@ module ListPrincipalsForPortfolioOutput =
       let principals =
         (Option.map ~f:Principals.of_xml) (Xml.child xml_arg0 "Principals") in
       make ?nextPageToken ?principals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let principals = field_map json "Principals" Principals.of_json in
@@ -11450,6 +11562,7 @@ module ListPrincipalsForPortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -11512,6 +11625,7 @@ module ListPortfoliosOutput =
         (Option.map ~f:PortfolioDetails.of_xml)
           (Xml.child xml_arg0 "PortfolioDetails") in
       make ?nextPageToken ?portfolioDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let portfolioDetails =
@@ -11550,6 +11664,7 @@ module ListPortfoliosInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
       let pageToken = field_map json "PageToken" PageToken.of_json in
@@ -11619,6 +11734,7 @@ module ListPortfoliosForProductOutput =
         (Option.map ~f:PortfolioDetails.of_xml)
           (Xml.child xml_arg0 "PortfolioDetails") in
       make ?nextPageToken ?portfolioDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let portfolioDetails =
@@ -11665,6 +11781,7 @@ module ListPortfoliosForProductInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
       let pageToken = field_map json "PageToken" PageToken.of_json in
@@ -11735,6 +11852,7 @@ module ListPortfolioAccessOutput =
       let accountIds =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "AccountIds") in
       make ?nextPageToken ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let accountIds = field_map json "AccountIds" AccountIds.of_json in
@@ -11796,6 +11914,7 @@ module ListPortfolioAccessInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ?organizationParentId ~portfolioId
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
       let pageToken = field_map json "PageToken" PageToken.of_json in
@@ -11881,6 +12000,7 @@ module ListOrganizationPortfolioAccessOutput =
         (Option.map ~f:OrganizationNodes.of_xml)
           (Xml.child xml_arg0 "OrganizationNodes") in
       make ?nextPageToken ?organizationNodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let organizationNodes =
@@ -11946,6 +12066,7 @@ module ListOrganizationPortfolioAccessInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ~organizationNodeType ~portfolioId
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" PageSize.of_json in
       let pageToken = field_map json "PageToken" PageToken.of_json in
@@ -12021,6 +12142,7 @@ module ListLaunchPathsOutput =
         (Option.map ~f:LaunchPathSummaries.of_xml)
           (Xml.child xml_arg0 "LaunchPathSummaries") in
       make ?nextPageToken ?launchPathSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let launchPathSummaries =
@@ -12067,6 +12189,7 @@ module ListLaunchPathsInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -12138,6 +12261,7 @@ module ListConstraintsForPortfolioOutput =
         (Option.map ~f:ConstraintDetails.of_xml)
           (Xml.child xml_arg0 "ConstraintDetails") in
       make ?nextPageToken ?constraintDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let constraintDetails =
@@ -12191,6 +12315,7 @@ module ListConstraintsForPortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?productId ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -12261,6 +12386,7 @@ module ListBudgetsForResourceOutput =
       let budgets =
         (Option.map ~f:Budgets.of_xml) (Xml.child xml_arg0 "Budgets") in
       make ?nextPageToken ?budgets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let budgets = field_map json "Budgets" Budgets.of_json in
@@ -12306,6 +12432,7 @@ module ListBudgetsForResourceInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~resourceId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -12379,6 +12506,7 @@ module ListAcceptedPortfolioSharesOutput =
         (Option.map ~f:PortfolioDetails.of_xml)
           (Xml.child xml_arg0 "PortfolioDetails") in
       make ?nextPageToken ?portfolioDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let portfolioDetails =
@@ -12429,6 +12557,7 @@ module ListAcceptedPortfolioSharesInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?portfolioShareType ?pageSize ?pageToken ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioShareType =
         field_map json "PortfolioShareType" PortfolioShareType.of_json in
@@ -12511,6 +12640,7 @@ module ImportAsProvisionedProductOutput =
         (Option.map ~f:RecordDetail.of_xml)
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
@@ -12585,6 +12715,7 @@ module ImportAsProvisionedProductInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ~physicalId ~provisionedProductName
         ~provisioningArtifactId ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -12662,6 +12793,7 @@ module GetProvisionedProductOutputsOutput =
       let outputs =
         (Option.map ~f:RecordOutputs.of_xml) (Xml.child xml_arg0 "Outputs") in
       make ?nextPageToken ?outputs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let outputs = field_map json "Outputs" RecordOutputs.of_json in
@@ -12735,6 +12867,7 @@ module GetProvisionedProductOutputsInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?outputKeys ?provisionedProductName
         ?provisionedProductId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -12806,6 +12939,7 @@ module GetAWSOrganizationsAccessStatusOutput =
         (Option.map ~f:AccessStatus.of_xml)
           (Xml.child xml_arg0 "AccessStatus") in
       make ?accessStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessStatus = field_map json "AccessStatus" AccessStatus.of_json in
       make ?accessStatus ()
@@ -12820,6 +12954,7 @@ module GetAWSOrganizationsAccessStatusInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12888,6 +13023,7 @@ module ExecuteProvisionedProductServiceActionOutput =
         (Option.map ~f:RecordDetail.of_xml)
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
@@ -12955,6 +13091,7 @@ module ExecuteProvisionedProductServiceActionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ProvisionedProductId") in
       make ?parameters ?acceptLanguage ~executeToken ~serviceActionId
         ~provisionedProductId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "Parameters" ExecutionParameterMap.of_json in
@@ -13034,6 +13171,7 @@ module ExecuteProvisionedProductPlanOutput =
         (Option.map ~f:RecordDetail.of_xml)
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
@@ -13074,6 +13212,7 @@ module ExecuteProvisionedProductPlanInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ~planId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -13139,6 +13278,7 @@ module EnableAWSOrganizationsAccessOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13151,6 +13291,7 @@ module EnableAWSOrganizationsAccessInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13201,6 +13342,7 @@ module DisassociateTagOptionFromResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13227,6 +13369,7 @@ module DisassociateTagOptionFromResourceInput =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagOptionId ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagOptionId = field_map_exn json "TagOptionId" TagOptionId.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -13269,6 +13412,7 @@ module DisassociateServiceActionFromProvisioningArtifactOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13324,6 +13468,7 @@ module DisassociateServiceActionFromProvisioningArtifactInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ProductId") in
       make ?acceptLanguage ~serviceActionId ~provisioningArtifactId
         ~productId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -13390,6 +13535,7 @@ module DisassociateProductFromPortfolioOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13424,6 +13570,7 @@ module DisassociateProductFromPortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~portfolioId ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
       let productId = field_map_exn json "ProductId" Id.of_json in
@@ -13478,6 +13625,7 @@ module DisassociatePrincipalFromPortfolioOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13514,6 +13662,7 @@ module DisassociatePrincipalFromPortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~principalARN ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalARN =
         field_map_exn json "PrincipalARN" PrincipalARN.of_json in
@@ -13559,6 +13708,7 @@ module DisassociateBudgetFromResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13587,6 +13737,7 @@ module DisassociateBudgetFromResourceInput =
         BudgetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
       make ~resourceId ~budgetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" Id.of_json in
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
@@ -13649,6 +13800,7 @@ module DisableAWSOrganizationsAccessOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13661,6 +13813,7 @@ module DisableAWSOrganizationsAccessInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13720,6 +13873,7 @@ module DescribeTagOptionOutput =
         (Option.map ~f:TagOptionDetail.of_xml)
           (Xml.child xml_arg0 "TagOptionDetail") in
       make ?tagOptionDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagOptionDetail =
         field_map json "TagOptionDetail" TagOptionDetail.of_json in
@@ -13740,6 +13894,7 @@ module DescribeTagOptionInput =
       let id =
         TagOptionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" TagOptionId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -13788,6 +13943,7 @@ module DescribeServiceActionOutput =
         (Option.map ~f:ServiceActionDetail.of_xml)
           (Xml.child xml_arg0 "ServiceActionDetail") in
       make ?serviceActionDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceActionDetail =
         field_map json "ServiceActionDetail" ServiceActionDetail.of_json in
@@ -13816,6 +13972,7 @@ module DescribeServiceActionInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?acceptLanguage ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -13878,6 +14035,7 @@ module DescribeServiceActionExecutionParametersOutput =
         (Option.map ~f:ExecutionParameters.of_xml)
           (Xml.child xml_arg0 "ServiceActionParameters") in
       make ?serviceActionParameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceActionParameters =
         field_map json "ServiceActionParameters" ExecutionParameters.of_json in
@@ -13920,6 +14078,7 @@ module DescribeServiceActionExecutionParametersInput =
         Id.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProvisionedProductId") in
       make ?acceptLanguage ~serviceActionId ~provisionedProductId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -13991,6 +14150,7 @@ module DescribeRecordOutput =
         (Option.map ~f:RecordDetail.of_xml)
           (Xml.child xml_arg0 "RecordDetail") in
       make ?nextPageToken ?recordOutputs ?recordDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let recordOutputs =
@@ -14038,6 +14198,7 @@ module DescribeRecordInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" PageSize.of_json in
       let pageToken = field_map json "PageToken" PageToken.of_json in
@@ -14173,6 +14334,7 @@ module DescribeProvisioningParametersOutput =
       make ?provisioningArtifactOutputKeys ?provisioningArtifactOutputs
         ?provisioningArtifactPreferences ?tagOptions ?usageInstructions
         ?constraintSummaries ?provisioningArtifactParameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifactOutputKeys =
         field_map json "ProvisioningArtifactOutputKeys"
@@ -14276,6 +14438,7 @@ module DescribeProvisioningParametersInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pathName ?pathId ?provisioningArtifactName
         ?provisioningArtifactId ?productName ?productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pathName = field_map json "PathName" PortfolioDisplayName.of_json in
       let pathId = field_map json "PathId" Id.of_json in
@@ -14361,6 +14524,7 @@ module DescribeProvisioningArtifactOutput =
         (Option.map ~f:ProvisioningArtifactDetail.of_xml)
           (Xml.child xml_arg0 "ProvisioningArtifactDetail") in
       make ?status ?info ?provisioningArtifactDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let info = field_map json "Info" ProvisioningArtifactInfo.of_json in
@@ -14435,6 +14599,7 @@ module DescribeProvisioningArtifactInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?verbose ?productName ?provisioningArtifactName ?productId
         ?provisioningArtifactId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let verbose = field_map json "Verbose" Verbose.of_json in
       let productName = field_map json "ProductName" ProductViewName.of_json in
@@ -14524,6 +14689,7 @@ module DescribeProvisionedProductPlanOutput =
         (Option.map ~f:ProvisionedProductPlanDetails.of_xml)
           (Xml.child xml_arg0 "ProvisionedProductPlanDetails") in
       make ?nextPageToken ?resourceChanges ?provisionedProductPlanDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let resourceChanges =
@@ -14573,6 +14739,7 @@ module DescribeProvisionedProductPlanInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~planId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageToken = field_map json "PageToken" PageToken.of_json in
       let pageSize = field_map json "PageSize" PageSize.of_json in
@@ -14648,6 +14815,7 @@ module DescribeProvisionedProductOutput =
         (Option.map ~f:ProvisionedProductDetail.of_xml)
           (Xml.child xml_arg0 "ProvisionedProductDetail") in
       make ?cloudWatchDashboards ?provisionedProductDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchDashboards =
         field_map json "CloudWatchDashboards" CloudWatchDashboards.of_json in
@@ -14689,6 +14857,7 @@ module DescribeProvisionedProductInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?name ?id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" ProvisionedProductName.of_json in
       let id = field_map json "Id" Id.of_json in
@@ -14763,6 +14932,7 @@ module DescribeProductViewOutput =
         (Option.map ~f:ProductViewSummary.of_xml)
           (Xml.child xml_arg0 "ProductViewSummary") in
       make ?provisioningArtifacts ?productViewSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifacts =
         field_map json "ProvisioningArtifacts" ProvisioningArtifacts.of_json in
@@ -14793,6 +14963,7 @@ module DescribeProductViewInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in
       let acceptLanguage =
@@ -14884,6 +15055,7 @@ module DescribeProductOutput =
           (Xml.child xml_arg0 "ProductViewSummary") in
       make ?launchPaths ?budgets ?provisioningArtifacts ?productViewSummary
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchPaths = field_map json "LaunchPaths" LaunchPaths.of_json in
       let budgets = field_map json "Budgets" Budgets.of_json in
@@ -14921,6 +15093,7 @@ module DescribeProductInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?name ?id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" ProductViewName.of_json in
       let id = field_map json "Id" Id.of_json in
@@ -15023,6 +15196,7 @@ module DescribeProductAsAdminOutput =
           (Xml.child xml_arg0 "ProductViewDetail") in
       make ?budgets ?tagOptions ?tags ?provisioningArtifactSummaries
         ?productViewDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budgets = field_map json "Budgets" Budgets.of_json in
       let tagOptions = field_map json "TagOptions" TagOptionDetails.of_json in
@@ -15073,6 +15247,7 @@ module DescribeProductAsAdminInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?sourcePortfolioId ?name ?id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourcePortfolioId = field_map json "SourcePortfolioId" Id.of_json in
       let name = field_map json "Name" ProductViewName.of_json in
@@ -15147,6 +15322,7 @@ module DescribePortfolioSharesOutput =
       let nextPageToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "NextPageToken") in
       make ?portfolioShareDetails ?nextPageToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioShareDetails =
         field_map json "PortfolioShareDetails" PortfolioShareDetails.of_json in
@@ -15193,6 +15369,7 @@ module DescribePortfolioSharesInput =
       let portfolioId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PortfolioId") in
       make ?pageSize ?pageToken ~type_ ~portfolioId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
       let pageToken = field_map json "PageToken" PageToken.of_json in
@@ -15306,6 +15483,7 @@ module DescribePortfolioShareStatusOutput =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PortfolioShareToken") in
       make ?shareDetails ?status ?organizationNodeValue ?portfolioId
         ?portfolioShareToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareDetails = field_map json "ShareDetails" ShareDetails.of_json in
       let status = field_map json "Status" ShareStatus.of_json in
@@ -15337,6 +15515,7 @@ module DescribePortfolioShareStatusInput =
         Id.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PortfolioShareToken") in
       make ~portfolioShareToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioShareToken =
         field_map_exn json "PortfolioShareToken" Id.of_json in
@@ -15410,6 +15589,7 @@ module DescribePortfolioOutput =
         (Option.map ~f:PortfolioDetail.of_xml)
           (Xml.child xml_arg0 "PortfolioDetail") in
       make ?budgets ?tagOptions ?tags ?portfolioDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budgets = field_map json "Budgets" Budgets.of_json in
       let tagOptions = field_map json "TagOptions" TagOptionDetails.of_json in
@@ -15442,6 +15622,7 @@ module DescribePortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in
       let acceptLanguage =
@@ -15508,6 +15689,7 @@ module DescribeCopyProductStatusOutput =
         (Option.map ~f:CopyProductStatus.of_xml)
           (Xml.child xml_arg0 "CopyProductStatus") in
       make ?statusDetail ?targetProductId ?copyProductStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusDetail = field_map json "StatusDetail" StatusDetail.of_json in
       let targetProductId = field_map json "TargetProductId" Id.of_json in
@@ -15543,6 +15725,7 @@ module DescribeCopyProductStatusInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~copyProductToken ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyProductToken = field_map_exn json "CopyProductToken" Id.of_json in
       let acceptLanguage =
@@ -15609,6 +15792,7 @@ module DescribeConstraintOutput =
         (Option.map ~f:ConstraintDetail.of_xml)
           (Xml.child xml_arg0 "ConstraintDetail") in
       make ?status ?constraintParameters ?constraintDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let constraintParameters =
@@ -15640,6 +15824,7 @@ module DescribeConstraintInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in
       let acceptLanguage =
@@ -15702,6 +15887,7 @@ module DeleteTagOptionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15720,6 +15906,7 @@ module DeleteTagOptionInput =
       let id =
         TagOptionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" TagOptionId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -15769,6 +15956,7 @@ module DeleteServiceActionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a self-service action."]
@@ -15796,6 +15984,7 @@ module DeleteServiceActionInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?acceptLanguage ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -15857,6 +16046,7 @@ module DeleteProvisioningArtifactOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15894,6 +16084,7 @@ module DeleteProvisioningArtifactInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~provisioningArtifactId ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifactId =
         field_map_exn json "ProvisioningArtifactId" Id.of_json in
@@ -15949,6 +16140,7 @@ module DeleteProvisionedProductPlanOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified plan."]
@@ -15985,6 +16177,7 @@ module DeleteProvisionedProductPlanInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?ignoreErrors ~planId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ignoreErrors = field_map json "IgnoreErrors" IgnoreErrors.of_json in
       let planId = field_map_exn json "PlanId" Id.of_json in
@@ -16058,6 +16251,7 @@ module DeleteProductOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16084,6 +16278,7 @@ module DeleteProductInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in
       let acceptLanguage =
@@ -16166,6 +16361,7 @@ module DeletePortfolioShareOutput =
       let portfolioShareToken =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PortfolioShareToken") in
       make ?portfolioShareToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioShareToken =
         field_map json "PortfolioShareToken" Id.of_json in
@@ -16213,6 +16409,7 @@ module DeletePortfolioShareInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?organizationNode ?accountId ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationNode =
         field_map json "OrganizationNode" OrganizationNode.of_json in
@@ -16289,6 +16486,7 @@ module DeletePortfolioOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16315,6 +16513,7 @@ module DeletePortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in
       let acceptLanguage =
@@ -16368,6 +16567,7 @@ module DeleteConstraintOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16394,6 +16594,7 @@ module DeleteConstraintInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" Id.of_json in
       let acceptLanguage =
@@ -16467,6 +16668,7 @@ module CreateTagOptionOutput =
         (Option.map ~f:TagOptionDetail.of_xml)
           (Xml.child xml_arg0 "TagOptionDetail") in
       make ?tagOptionDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagOptionDetail =
         field_map json "TagOptionDetail" TagOptionDetail.of_json in
@@ -16493,6 +16695,7 @@ module CreateTagOptionInput =
       let key =
         TagOptionKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagOptionValue.of_json in
       let key = field_map_exn json "Key" TagOptionKey.of_json in
@@ -16554,6 +16757,7 @@ module CreateServiceActionOutput =
         (Option.map ~f:ServiceActionDetail.of_xml)
           (Xml.child xml_arg0 "ServiceActionDetail") in
       make ?serviceActionDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceActionDetail =
         field_map json "ServiceActionDetail" ServiceActionDetail.of_json in
@@ -16630,6 +16834,7 @@ module CreateServiceActionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~idempotencyToken ?acceptLanguage ?description ~definition
         ~definitionType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -16725,6 +16930,7 @@ module CreateProvisioningArtifactOutput =
         (Option.map ~f:ProvisioningArtifactDetail.of_xml)
           (Xml.child xml_arg0 "ProvisioningArtifactDetail") in
       make ?status ?info ?provisioningArtifactDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let info = field_map json "Info" ProvisioningArtifactInfo.of_json in
@@ -16778,6 +16984,7 @@ module CreateProvisioningArtifactInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ~parameters ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -16890,6 +17097,7 @@ module CreateProvisionedProductPlanOutput =
           (Xml.child xml_arg0 "PlanName") in
       make ?provisioningArtifactId ?provisionedProductName
         ?provisionProductId ?planId ?planName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisioningArtifactId =
         field_map json "ProvisioningArtifactId" Id.of_json in
@@ -17015,6 +17223,7 @@ module CreateProvisionedProductPlanInput =
       make ?tags ~idempotencyToken ?provisioningParameters
         ~provisioningArtifactId ~provisionedProductName ~productId ?pathId
         ?notificationArns ~planType ~planName ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let idempotencyToken =
@@ -17124,6 +17333,7 @@ module CreateProductOutput =
         (Option.map ~f:ProductViewDetail.of_xml)
           (Xml.child xml_arg0 "ProductViewDetail") in
       make ?tags ?provisioningArtifactDetail ?productViewDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let provisioningArtifactDetail =
@@ -17252,6 +17462,7 @@ module CreateProductInput =
       make ~idempotencyToken ~provisioningArtifactParameters ?tags
         ~productType ?supportUrl ?supportEmail ?supportDescription
         ?distributor ?description ~owner ~name ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -17360,6 +17571,7 @@ module CreatePortfolioShareOutput =
       let portfolioShareToken =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PortfolioShareToken") in
       make ?portfolioShareToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioShareToken =
         field_map json "PortfolioShareToken" Id.of_json in
@@ -17423,6 +17635,7 @@ module CreatePortfolioShareInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?shareTagOptions ?organizationNode ?accountId ~portfolioId
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareTagOptions = field_map json "ShareTagOptions" Boolean.of_json in
       let organizationNode =
@@ -17507,6 +17720,7 @@ module CreatePortfolioOutput =
         (Option.map ~f:PortfolioDetail.of_xml)
           (Xml.child xml_arg0 "PortfolioDetail") in
       make ?tags ?portfolioDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let portfolioDetail =
@@ -17579,6 +17793,7 @@ module CreatePortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ?tags ~providerName ?description ~displayName
         ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -17684,6 +17899,7 @@ module CreateConstraintOutput =
         (Option.map ~f:ConstraintDetail.of_xml)
           (Xml.child xml_arg0 "ConstraintDetail") in
       make ?status ?constraintParameters ?constraintDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let constraintParameters =
@@ -17767,6 +17983,7 @@ module CreateConstraintInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ?description ~type_ ~parameters ~productId
         ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -17837,6 +18054,7 @@ module CopyProductOutput =
       let copyProductToken =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "CopyProductToken") in
       make ?copyProductToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyProductToken = field_map json "CopyProductToken" Id.of_json in
       make ?copyProductToken ()
@@ -17924,6 +18142,7 @@ module CopyProductInput =
       make ~idempotencyToken ?copyOptions
         ?sourceProvisioningArtifactIdentifiers ?targetProductName
         ?targetProductId ~sourceProductArn ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
@@ -17993,6 +18212,7 @@ module BatchDisassociateServiceActionFromProvisioningArtifactOutput =
         (Option.map ~f:FailedServiceActionAssociations.of_xml)
           (Xml.child xml_arg0 "FailedServiceActionAssociations") in
       make ?failedServiceActionAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedServiceActionAssociations =
         field_map json "FailedServiceActionAssociations"
@@ -18033,6 +18253,7 @@ module BatchDisassociateServiceActionFromProvisioningArtifactInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "ServiceActionAssociations") in
       make ?acceptLanguage ~serviceActionAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -18092,6 +18313,7 @@ module BatchAssociateServiceActionWithProvisioningArtifactOutput =
         (Option.map ~f:FailedServiceActionAssociations.of_xml)
           (Xml.child xml_arg0 "FailedServiceActionAssociations") in
       make ?failedServiceActionAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedServiceActionAssociations =
         field_map json "FailedServiceActionAssociations"
@@ -18131,6 +18353,7 @@ module BatchAssociateServiceActionWithProvisioningArtifactInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "ServiceActionAssociations") in
       make ?acceptLanguage ~serviceActionAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -18225,6 +18448,7 @@ module AssociateTagOptionWithResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18251,6 +18475,7 @@ module AssociateTagOptionWithResourceInput =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagOptionId ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagOptionId = field_map_exn json "TagOptionId" TagOptionId.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -18312,6 +18537,7 @@ module AssociateServiceActionWithProvisioningArtifactOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18367,6 +18593,7 @@ module AssociateServiceActionWithProvisioningArtifactInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ProductId") in
       make ?acceptLanguage ~serviceActionId ~provisioningArtifactId
         ~productId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptLanguage =
         field_map json "AcceptLanguage" AcceptLanguage.of_json in
@@ -18433,6 +18660,7 @@ module AssociateProductWithPortfolioOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18475,6 +18703,7 @@ module AssociateProductWithPortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?sourcePortfolioId ~portfolioId ~productId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourcePortfolioId = field_map json "SourcePortfolioId" Id.of_json in
       let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
@@ -18539,6 +18768,7 @@ module AssociatePrincipalWithPortfolioOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18583,6 +18813,7 @@ module AssociatePrincipalWithPortfolioInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~principalType ~principalARN ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalType =
         field_map_exn json "PrincipalType" PrincipalType.of_json in
@@ -18659,6 +18890,7 @@ module AssociateBudgetWithResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18687,6 +18919,7 @@ module AssociateBudgetWithResourceInput =
         BudgetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
       make ~resourceId ~budgetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" Id.of_json in
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
@@ -18748,6 +18981,7 @@ module AcceptPortfolioShareOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Accepts an offer to share the specified portfolio."]
@@ -18785,6 +19019,7 @@ module AcceptPortfolioShareInput =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?portfolioShareType ~portfolioId ?acceptLanguage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portfolioShareType =
         field_map json "PortfolioShareType" PortfolioShareType.of_json in

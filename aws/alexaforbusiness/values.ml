@@ -164,6 +164,7 @@ module DeviceStatusDetail =
       let feature =
         (Option.map ~f:Feature.of_xml) (Xml.child xml_arg0 "Feature") in
       make ?code ?feature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "Code" DeviceStatusDetailCode.of_json in
       let feature = field_map json "Feature" Feature.of_json in
@@ -608,6 +609,7 @@ module PhoneNumber =
         RawPhoneNumber.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Number") in
       make ~type_ ~number ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" PhoneNumberType.of_json in
       let number = field_map_exn json "Number" RawPhoneNumber.of_json in
@@ -634,6 +636,7 @@ module SipAddress =
       let uri =
         SipUri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uri") in
       make ~type_ ~uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" SipType.of_json in
       let uri = field_map_exn json "Uri" SipUri.of_json in
@@ -711,6 +714,7 @@ module DeveloperInfo =
         (Option.map ~f:DeveloperName.of_xml)
           (Xml.child xml_arg0 "DeveloperName") in
       make ?url ?email ?privacyPolicy ?developerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" Url.of_json in
       let email = field_map json "Email" Email.of_json in
@@ -1093,6 +1097,7 @@ module BusinessReportS3Location =
         (Option.map ~f:BusinessReportS3Path.of_xml)
           (Xml.child xml_arg0 "Path") in
       make ?bucketName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketName =
         field_map json "BucketName" CustomerS3BucketName.of_json in
@@ -1320,6 +1325,7 @@ module Audio =
       let locale =
         Locale.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Locale") in
       make ~location ~locale ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" AudioLocation.of_json in
       let locale = field_map_exn json "Locale" Locale.of_json in
@@ -1350,6 +1356,7 @@ module Ssml =
       let locale =
         Locale.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Locale") in
       make ~value ~locale ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" SsmlValue.of_json in
       let locale = field_map_exn json "Locale" Locale.of_json in
@@ -1378,6 +1385,7 @@ module Text =
       let locale =
         Locale.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Locale") in
       make ~value ~locale ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TextValue.of_json in
       let locale = field_map_exn json "Locale" Locale.of_json in
@@ -2106,6 +2114,7 @@ module DeviceStatusInfo =
           (Xml.child xml_arg0 "DeviceStatusDetails") in
       make ?connectionStatusUpdatedTime ?connectionStatus
         ?deviceStatusDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionStatusUpdatedTime =
         field_map json "ConnectionStatusUpdatedTime"
@@ -2522,6 +2531,7 @@ module SkillDetails =
       make ?developerInfo ?reviews ?skillTypes ?newInThisVersionBulletPoints
         ?bulletPoints ?genericKeywords ?endUserLicenseAgreement ?releaseDate
         ?invocationPhrase ?productDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let developerInfo =
         field_map json "DeveloperInfo" DeveloperInfo.of_json in
@@ -2910,6 +2920,7 @@ module IPDialIn =
       let endpoint =
         Endpoint.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Endpoint") in
       make ~commsProtocol ~endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commsProtocol =
         field_map_exn json "CommsProtocol" CommsProtocol.of_json in
@@ -2935,6 +2946,7 @@ module MeetingSetting =
         RequirePin.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RequirePin") in
       make ~requirePin ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requirePin = field_map_exn json "RequirePin" RequirePin.of_json in
       make ~requirePin ()
@@ -2984,6 +2996,7 @@ module PSTNDialIn =
         CountryCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CountryCode") in
       make ~oneClickPinDelay ~oneClickIdDelay ~phoneNumber ~countryCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oneClickPinDelay =
         field_map_exn json "OneClickPinDelay" OneClickPinDelay.of_json in
@@ -3049,6 +3062,7 @@ module BusinessReport =
         (Option.map ~f:BusinessReportStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?downloadUrl ?deliveryTime ?s3Location ?failureCode ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downloadUrl =
         field_map json "DownloadUrl" BusinessReportDownloadUrl.of_json in
@@ -3079,6 +3093,7 @@ module BusinessReportContentRange =
         BusinessReportInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Interval") in
       make ~interval ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interval =
         field_map_exn json "Interval" BusinessReportInterval.of_json in
@@ -3118,6 +3133,7 @@ module BusinessReportRecurrence =
       let startDate =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartDate") in
       make ?startDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startDate = field_map json "StartDate" Date.of_json in
       make ?startDate ()
@@ -3201,6 +3217,7 @@ module EndOfMeetingReminder =
         (Option.map ~f:EndOfMeetingReminderMinutesList.of_xml)
           (Xml.child xml_arg0 "ReminderAtMinutes") in
       make ?enabled ?reminderType ?reminderAtMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       let reminderType =
@@ -3236,6 +3253,7 @@ module InstantBooking =
         (Option.map ~f:Minutes.of_xml)
           (Xml.child xml_arg0 "DurationInMinutes") in
       make ?enabled ?durationInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       let durationInMinutes =
@@ -3268,6 +3286,7 @@ module RequireCheckIn =
         (Option.map ~f:Minutes.of_xml)
           (Xml.child xml_arg0 "ReleaseAfterMinutes") in
       make ?enabled ?releaseAfterMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       let releaseAfterMinutes =
@@ -3354,6 +3373,7 @@ module UpdateEndOfMeetingReminder =
         (Option.map ~f:EndOfMeetingReminderMinutesList.of_xml)
           (Xml.child xml_arg0 "ReminderAtMinutes") in
       make ?enabled ?reminderType ?reminderAtMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       let reminderType =
@@ -3389,6 +3409,7 @@ module UpdateInstantBooking =
         (Option.map ~f:Minutes.of_xml)
           (Xml.child xml_arg0 "DurationInMinutes") in
       make ?enabled ?durationInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       let durationInMinutes =
@@ -3421,6 +3442,7 @@ module UpdateRequireCheckIn =
         (Option.map ~f:Minutes.of_xml)
           (Xml.child xml_arg0 "ReleaseAfterMinutes") in
       make ?enabled ?releaseAfterMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Boolean.of_json in
       let releaseAfterMinutes =
@@ -3451,6 +3473,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -3549,6 +3572,7 @@ module Filter =
       let key =
         FilterKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~values ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "Values" FilterValueList.of_json in
       let key = field_map_exn json "Key" FilterKey.of_json in
@@ -3612,6 +3636,7 @@ module UserData =
       let userArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "UserArn") in
       make ?enrollmentId ?enrollmentStatus ?email ?lastName ?firstName
         ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enrollmentId = field_map json "EnrollmentId" EnrollmentId.of_json in
       let enrollmentStatus =
@@ -3643,6 +3668,7 @@ module Sort =
       let key =
         SortKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" SortValue.of_json in
       let key = field_map_exn json "Key" SortKey.of_json in
@@ -3681,6 +3707,7 @@ module SkillGroupData =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?description ?skillGroupName ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" SkillGroupDescription.of_json in
@@ -3745,6 +3772,7 @@ module RoomData =
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ?profileName ?profileArn ?providerCalendarId ?description
         ?roomName ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileName = field_map json "ProfileName" ProfileName.of_json in
       let profileArn = field_map json "ProfileArn" Arn.of_json in
@@ -3836,6 +3864,7 @@ module ProfileData =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
       make ?locale ?wakeWord ?temperatureUnit ?distanceUnit ?timezone
         ?address ?isDefault ?profileName ?profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locale = field_map json "Locale" DeviceLocale.of_json in
       let wakeWord = field_map json "WakeWord" WakeWord.of_json in
@@ -3928,6 +3957,7 @@ module NetworkProfileData =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "NetworkProfileArn") in
       make ?certificateAuthorityArn ?eapMethod ?securityType ?ssid
         ?description ?networkProfileName ?networkProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArn =
         field_map json "CertificateAuthorityArn" Arn.of_json in
@@ -4061,6 +4091,7 @@ module DeviceData =
         ?networkProfileName ?networkProfileArn ?deviceStatus ?macAddress
         ?softwareVersion ?deviceName ?deviceType ?deviceSerialNumber
         ?deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime =
         field_map json "CreatedTime" DeviceDataCreatedTime.of_json in
@@ -4156,6 +4187,7 @@ module ContactData =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ContactArn") in
       make ?sipAddresses ?phoneNumbers ?phoneNumber ?lastName ?firstName
         ?displayName ?contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sipAddresses = field_map json "SipAddresses" SipAddressList.of_json in
       let phoneNumbers =
@@ -4198,6 +4230,7 @@ module AddressBookData =
       let addressBookArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AddressBookArn") in
       make ?description ?name ?addressBookArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" AddressBookDescription.of_json in
@@ -4233,6 +4266,7 @@ module RoomSkillParameter =
         RoomSkillParameterKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterKey") in
       make ~parameterValue ~parameterKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterValue =
         field_map_exn json "ParameterValue" RoomSkillParameterValue.of_json in
@@ -4305,6 +4339,7 @@ module SmartHomeAppliance =
         (Option.map ~f:ApplianceFriendlyName.of_xml)
           (Xml.child xml_arg0 "FriendlyName") in
       make ?manufacturerName ?description ?friendlyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let manufacturerName =
         field_map json "ManufacturerName" ApplianceManufacturerName.of_json in
@@ -4384,6 +4419,7 @@ module SkillsStoreSkill =
         (Option.map ~f:SkillId.of_xml) (Xml.child xml_arg0 "SkillId") in
       make ?supportsLinking ?skillDetails ?sampleUtterances ?iconUrl
         ?shortDescription ?skillName ?skillId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportsLinking =
         field_map json "SupportsLinking" Boolean__lc1.of_json in
@@ -4422,6 +4458,7 @@ module Category =
       let categoryId =
         (Option.map ~f:CategoryId.of_xml) (Xml.child xml_arg0 "CategoryId") in
       make ?categoryName ?categoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categoryName = field_map json "CategoryName" CategoryName.of_json in
       let categoryId = field_map json "CategoryId" CategoryId.of_json in
@@ -4480,6 +4517,7 @@ module SkillSummary =
       let skillId =
         (Option.map ~f:SkillId.of_xml) (Xml.child xml_arg0 "SkillId") in
       make ?skillType ?enablementType ?supportsLinking ?skillName ?skillId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillType = field_map json "SkillType" SkillType.of_json in
       let enablementType =
@@ -4535,6 +4573,7 @@ module GatewaySummary =
         (Option.map ~f:GatewayName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?softwareVersion ?gatewayGroupArn ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let softwareVersion =
         field_map json "SoftwareVersion" GatewayVersion.of_json in
@@ -4572,6 +4611,7 @@ module GatewayGroupSummary =
         (Option.map ~f:GatewayGroupName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" GatewayGroupDescription.of_json in
@@ -4606,6 +4646,7 @@ module DeviceEvent =
       let type_ =
         (Option.map ~f:DeviceEventType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?timestamp ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" DeviceEventTime.of_json in
       let value = field_map json "Value" DeviceEventValue.of_json in
@@ -4663,6 +4704,7 @@ module ConferenceProvider =
           (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?meetingSetting ?pSTNDialIn ?iPDialIn ?type_ ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meetingSetting =
         field_map json "MeetingSetting" MeetingSetting.of_json in
@@ -4757,6 +4799,7 @@ module BusinessReportSchedule =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ScheduleArn") in
       make ?lastBusinessReport ?recurrence ?contentRange ?format ?s3KeyPrefix
         ?s3BucketName ?scheduleName ?scheduleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastBusinessReport =
         field_map json "LastBusinessReport" BusinessReport.of_json in
@@ -4841,6 +4884,7 @@ module MeetingRoomConfiguration =
           (Xml.child xml_arg0 "RoomUtilizationMetricsEnabled") in
       make ?requireCheckIn ?instantBooking ?endOfMeetingReminder
         ?roomUtilizationMetricsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requireCheckIn =
         field_map json "RequireCheckIn" RequireCheckIn.of_json in
@@ -4956,6 +5000,7 @@ module DeviceNetworkProfileInfo =
       let networkProfileArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "NetworkProfileArn") in
       make ?certificateExpirationTime ?certificateArn ?networkProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateExpirationTime =
         field_map json "CertificateExpirationTime" CertificateTime.of_json in
@@ -5023,6 +5068,7 @@ module CreateEndOfMeetingReminder =
         EndOfMeetingReminderMinutesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReminderAtMinutes") in
       make ~enabled ~reminderType ~reminderAtMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Boolean.of_json in
       let reminderType =
@@ -5058,6 +5104,7 @@ module CreateInstantBooking =
         Minutes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DurationInMinutes") in
       make ~enabled ~durationInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Boolean.of_json in
       let durationInMinutes =
@@ -5091,6 +5138,7 @@ module CreateRequireCheckIn =
         Minutes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReleaseAfterMinutes") in
       make ~enabled ~releaseAfterMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Boolean.of_json in
       let releaseAfterMinutes =
@@ -5112,6 +5160,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5130,6 +5179,7 @@ module NameInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5148,6 +5198,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5206,6 +5257,7 @@ module UpdateMeetingRoomConfiguration =
           (Xml.child xml_arg0 "RoomUtilizationMetricsEnabled") in
       make ?requireCheckIn ?instantBooking ?endOfMeetingReminder
         ?roomUtilizationMetricsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requireCheckIn =
         field_map json "RequireCheckIn" UpdateRequireCheckIn.of_json in
@@ -5233,6 +5285,7 @@ module InvalidCertificateAuthorityException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5252,6 +5305,7 @@ module InvalidSecretsManagerResourceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5270,6 +5324,7 @@ module DeviceNotRegisteredException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5358,6 +5413,7 @@ module InvalidUserStatusException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5377,6 +5433,7 @@ module AlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5395,6 +5452,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5426,6 +5484,7 @@ module Content =
       let textList =
         (Option.map ~f:TextList.of_xml) (Xml.child xml_arg0 "TextList") in
       make ?audioList ?ssmlList ?textList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let audioList = field_map json "AudioList" AudioList.of_json in
       let ssmlList = field_map json "SsmlList" SsmlList.of_json in
@@ -5800,6 +5859,7 @@ module InvalidDeviceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5896,6 +5956,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5996,6 +6057,7 @@ module ConferencePreference =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "DefaultConferenceProviderArn") in
       make ?defaultConferenceProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultConferenceProviderArn =
         field_map json "DefaultConferenceProviderArn" Arn.of_json in
@@ -6329,6 +6391,7 @@ module SkillGroup =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?description ?skillGroupName ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" SkillGroupDescription.of_json in
@@ -6385,6 +6448,7 @@ module Room =
         (Option.map ~f:RoomName.of_xml) (Xml.child xml_arg0 "RoomName") in
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ?profileArn ?providerCalendarId ?description ?roomName ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileArn = field_map json "ProfileArn" Arn.of_json in
       let providerCalendarId =
@@ -6527,6 +6591,7 @@ module Profile =
         ?pSTNEnabled ?maxVolumeLimit ?setupModeDisabled ?locale ?wakeWord
         ?temperatureUnit ?distanceUnit ?timezone ?address ?isDefault
         ?profileName ?profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meetingRoomConfiguration =
         field_map json "MeetingRoomConfiguration"
@@ -6662,6 +6727,7 @@ module NetworkProfile =
       make ?trustAnchors ?certificateAuthorityArn ?nextPassword
         ?currentPassword ?eapMethod ?securityType ?ssid ?description
         ?networkProfileName ?networkProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustAnchors =
         field_map json "TrustAnchors" TrustAnchorList.of_json in
@@ -6729,6 +6795,7 @@ module Gateway =
         (Option.map ~f:GatewayName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?softwareVersion ?gatewayGroupArn ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let softwareVersion =
         field_map json "SoftwareVersion" GatewayVersion.of_json in
@@ -6766,6 +6833,7 @@ module GatewayGroup =
         (Option.map ~f:GatewayGroupName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?description ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" GatewayGroupDescription.of_json in
@@ -6865,6 +6933,7 @@ module Device =
       make ?networkProfileInfo ?deviceStatusInfo ?deviceStatus ?roomArn
         ?macAddress ?softwareVersion ?deviceName ?deviceType
         ?deviceSerialNumber ?deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfileInfo =
         field_map json "NetworkProfileInfo" DeviceNetworkProfileInfo.of_json in
@@ -6955,6 +7024,7 @@ module Contact =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ContactArn") in
       make ?sipAddresses ?phoneNumbers ?phoneNumber ?lastName ?firstName
         ?displayName ?contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sipAddresses = field_map json "SipAddresses" SipAddressList.of_json in
       let phoneNumbers =
@@ -6997,6 +7067,7 @@ module AddressBook =
       let addressBookArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AddressBookArn") in
       make ?description ?name ?addressBookArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" AddressBookDescription.of_json in
@@ -7026,6 +7097,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?clientRequestToken ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -7046,6 +7118,7 @@ module ResourceAssociatedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -7139,6 +7212,7 @@ module CreateMeetingRoomConfiguration =
           (Xml.child xml_arg0 "RoomUtilizationMetricsEnabled") in
       make ?requireCheckIn ?instantBooking ?endOfMeetingReminder
         ?roomUtilizationMetricsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requireCheckIn =
         field_map json "RequireCheckIn" CreateRequireCheckIn.of_json in
@@ -7166,6 +7240,7 @@ module InvalidServiceLinkedRoleStateException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -7184,6 +7259,7 @@ module SkillNotLinkedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -7245,6 +7321,7 @@ module UpdateSkillGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates skill group details by skill group ARN."]
@@ -7280,6 +7357,7 @@ module UpdateSkillGroupRequest =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?description ?skillGroupName ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" SkillGroupDescription.of_json in
@@ -7333,6 +7411,7 @@ module UpdateRoomResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates room details by room ARN."]
@@ -7385,6 +7464,7 @@ module UpdateRoomRequest =
         (Option.map ~f:RoomName.of_xml) (Xml.child xml_arg0 "RoomName") in
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ?profileArn ?providerCalendarId ?description ?roomName ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileArn = field_map json "ProfileArn" Arn.of_json in
       let providerCalendarId =
@@ -7451,6 +7531,7 @@ module UpdateProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing room profile by room profile ARN."]
@@ -7583,6 +7664,7 @@ module UpdateProfileRequest =
         ?maxVolumeLimit ?setupModeDisabled ?locale ?wakeWord ?temperatureUnit
         ?distanceUnit ?address ?timezone ?isDefault ?profileName ?profileArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meetingRoomConfiguration =
         field_map json "MeetingRoomConfiguration"
@@ -7690,6 +7772,7 @@ module UpdateNetworkProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a network profile by the network profile ARN."]
@@ -7775,6 +7858,7 @@ module UpdateNetworkProfileRequest =
       make ?trustAnchors ?certificateAuthorityArn ?nextPassword
         ?currentPassword ?description ?networkProfileName ~networkProfileArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustAnchors =
         field_map json "TrustAnchors" TrustAnchorList.of_json in
@@ -7839,6 +7923,7 @@ module UpdateGatewayResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7882,6 +7967,7 @@ module UpdateGatewayRequest =
       let gatewayArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ?softwareVersion ?description ?name ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let softwareVersion =
         field_map json "SoftwareVersion" GatewayVersion.of_json in
@@ -7937,6 +8023,7 @@ module UpdateGatewayGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7973,6 +8060,7 @@ module UpdateGatewayGroupRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayGroupArn") in
       make ?description ?name ~gatewayGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" GatewayGroupDescription.of_json in
@@ -8040,6 +8128,7 @@ module UpdateDeviceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the device name by device ARN."]
@@ -8064,6 +8153,7 @@ module UpdateDeviceRequest =
       let deviceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DeviceArn") in
       make ?deviceName ?deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceName = field_map json "DeviceName" DeviceName.of_json in
       let deviceArn = field_map json "DeviceArn" Arn.of_json in
@@ -8117,6 +8207,7 @@ module UpdateContactResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the contact details by the contact ARN."]
@@ -8189,6 +8280,7 @@ module UpdateContactRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ?sipAddresses ?phoneNumbers ?phoneNumber ?lastName ?firstName
         ?displayName ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sipAddresses = field_map json "SipAddresses" SipAddressList.of_json in
       let phoneNumbers =
@@ -8237,6 +8329,7 @@ module UpdateConferenceProviderResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing conference provider's settings."]
@@ -8294,6 +8387,7 @@ module UpdateConferenceProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConferenceProviderArn") in
       make ~meetingSetting ?pSTNDialIn ?iPDialIn ~conferenceProviderType
         ~conferenceProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meetingSetting =
         field_map_exn json "MeetingSetting" MeetingSetting.of_json in
@@ -8355,6 +8449,7 @@ module UpdateBusinessReportScheduleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8423,6 +8518,7 @@ module UpdateBusinessReportScheduleRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ScheduleArn") in
       make ?recurrence ?scheduleName ?format ?s3KeyPrefix ?s3BucketName
         ~scheduleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recurrence =
         field_map json "Recurrence" BusinessReportRecurrence.of_json in
@@ -8494,6 +8590,7 @@ module UpdateAddressBookResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates address book details by the address book ARN."]
@@ -8528,6 +8625,7 @@ module UpdateAddressBookRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AddressBookArn") in
       make ?description ?name ~addressBookArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" AddressBookDescription.of_json in
@@ -8571,6 +8669,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes metadata tags from a specified resource."]
@@ -8597,6 +8696,7 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tagKeys ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let arn = field_map_exn json "Arn" Arn.of_json in make ~tagKeys ~arn ()
@@ -8637,6 +8737,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds metadata tags to a specified resource."]
@@ -8662,6 +8763,7 @@ module TagResourceRequest =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tags ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let arn = field_map_exn json "Arn" Arn.of_json in make ~tags ~arn ()
@@ -8702,6 +8804,7 @@ module StartSmartHomeApplianceDiscoveryResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8722,6 +8825,7 @@ module StartSmartHomeApplianceDiscoveryRequest =
       let roomArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoomArn") in
       make ~roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map_exn json "RoomArn" Arn.of_json in
       make ~roomArn ()
@@ -8765,6 +8869,7 @@ module StartDeviceSyncResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8797,6 +8902,7 @@ module StartDeviceSyncRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DeviceArn") in
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ~features ?deviceArn ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let features = field_map_exn json "Features" Features.of_json in
       let deviceArn = field_map json "DeviceArn" Arn.of_json in
@@ -8862,6 +8968,7 @@ module SendInvitationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8881,6 +8988,7 @@ module SendInvitationRequest =
     let of_xml xml_arg0 =
       let userArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "UserArn") in
       make ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map json "UserArn" Arn.of_json in make ?userArn ()
     let to_json v = composed_to_json to_value v
@@ -8937,6 +9045,7 @@ module SendAnnouncementResponse =
       let announcementArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AnnouncementArn") in
       make ?announcementArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let announcementArn = field_map json "AnnouncementArn" Arn.of_json in
       make ?announcementArn ()
@@ -8989,6 +9098,7 @@ module SendAnnouncementRequest =
         FilterList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoomFilters") in
       make ~clientRequestToken ?timeToLiveInSeconds ~content ~roomFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
@@ -9047,6 +9157,7 @@ module SearchUsersResponse =
       let users =
         (Option.map ~f:UserDataList.of_xml) (Xml.child xml_arg0 "Users") in
       make ?totalCount ?nextToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9093,6 +9204,7 @@ module SearchUsersRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sortCriteria ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortCriteria = field_map json "SortCriteria" SortList.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -9151,6 +9263,7 @@ module SearchSkillGroupsResponse =
         (Option.map ~f:SkillGroupDataList.of_xml)
           (Xml.child xml_arg0 "SkillGroups") in
       make ?totalCount ?nextToken ?skillGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9198,6 +9311,7 @@ module SearchSkillGroupsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sortCriteria ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortCriteria = field_map json "SortCriteria" SortList.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -9254,6 +9368,7 @@ module SearchRoomsResponse =
       let rooms =
         (Option.map ~f:RoomDataList.of_xml) (Xml.child xml_arg0 "Rooms") in
       make ?totalCount ?nextToken ?rooms ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9300,6 +9415,7 @@ module SearchRoomsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sortCriteria ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortCriteria = field_map json "SortCriteria" SortList.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -9357,6 +9473,7 @@ module SearchProfilesResponse =
         (Option.map ~f:ProfileDataList.of_xml)
           (Xml.child xml_arg0 "Profiles") in
       make ?totalCount ?nextToken ?profiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9403,6 +9520,7 @@ module SearchProfilesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sortCriteria ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortCriteria = field_map json "SortCriteria" SortList.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -9462,6 +9580,7 @@ module SearchNetworkProfilesResponse =
         (Option.map ~f:NetworkProfileDataList.of_xml)
           (Xml.child xml_arg0 "NetworkProfiles") in
       make ?totalCount ?nextToken ?networkProfiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9509,6 +9628,7 @@ module SearchNetworkProfilesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sortCriteria ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortCriteria = field_map json "SortCriteria" SortList.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -9565,6 +9685,7 @@ module SearchDevicesResponse =
       let devices =
         (Option.map ~f:DeviceDataList.of_xml) (Xml.child xml_arg0 "Devices") in
       make ?totalCount ?nextToken ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9611,6 +9732,7 @@ module SearchDevicesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sortCriteria ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortCriteria = field_map json "SortCriteria" SortList.of_json in
       let filters = field_map json "Filters" FilterList.of_json in
@@ -9668,6 +9790,7 @@ module SearchContactsResponse =
         (Option.map ~f:ContactDataList.of_xml)
           (Xml.child xml_arg0 "Contacts") in
       make ?totalCount ?nextToken ?contacts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9714,6 +9837,7 @@ module SearchContactsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?sortCriteria ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9772,6 +9896,7 @@ module SearchAddressBooksResponse =
         (Option.map ~f:AddressBookDataList.of_xml)
           (Xml.child xml_arg0 "AddressBooks") in
       make ?totalCount ?nextToken ?addressBooks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalCount = field_map json "TotalCount" TotalCount.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9819,6 +9944,7 @@ module SearchAddressBooksRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?sortCriteria ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9875,6 +10001,7 @@ module RevokeInvitationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9903,6 +10030,7 @@ module RevokeInvitationRequest =
           (Xml.child xml_arg0 "EnrollmentId") in
       let userArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "UserArn") in
       make ?enrollmentId ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enrollmentId = field_map json "EnrollmentId" EnrollmentId.of_json in
       let userArn = field_map json "UserArn" Arn.of_json in
@@ -9968,6 +10096,7 @@ module ResolveRoomResponse =
         (Option.map ~f:RoomName.of_xml) (Xml.child xml_arg0 "RoomName") in
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ?roomSkillParameters ?roomName ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomSkillParameters =
         field_map json "RoomSkillParameters" RoomSkillParameters.of_json in
@@ -9997,6 +10126,7 @@ module ResolveRoomRequest =
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ~skillId ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
       let userId = field_map_exn json "UserId" UserId.of_json in
@@ -10051,6 +10181,7 @@ module RejectSkillResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10069,6 +10200,7 @@ module RejectSkillRequest =
       let skillId =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       make ~skillId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
       make ~skillId ()
@@ -10146,6 +10278,7 @@ module RegisterAVSDeviceResponse =
       let deviceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DeviceArn") in
       make ?deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceArn = field_map json "DeviceArn" Arn.of_json in
       make ?deviceArn ()
@@ -10224,6 +10357,7 @@ module RegisterAVSDeviceRequest =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ClientId") in
       make ?tags ?roomArn ~amazonId ?deviceSerialNumber ~productId ~userCode
         ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let roomArn = field_map json "RoomArn" Arn.of_json in
@@ -10285,6 +10419,7 @@ module PutSkillAuthorizationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10318,6 +10453,7 @@ module PutSkillAuthorizationRequest =
         AuthorizationResult.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AuthorizationResult") in
       make ?roomArn ~skillId ~authorizationResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
@@ -10365,6 +10501,7 @@ module PutRoomSkillParameterResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10401,6 +10538,7 @@ module PutRoomSkillParameterRequest =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ~roomSkillParameter ~skillId ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomSkillParameter =
         field_map_exn json "RoomSkillParameter" RoomSkillParameter.of_json in
@@ -10457,6 +10595,7 @@ module PutInvitationConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10497,6 +10636,7 @@ module PutInvitationConfigurationRequest =
         OrganizationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationName") in
       make ?privateSkillIds ?contactEmail ~organizationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateSkillIds =
         field_map json "PrivateSkillIds" ShortSkillIdList.of_json in
@@ -10542,6 +10682,7 @@ module PutConferencePreferenceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10565,6 +10706,7 @@ module PutConferencePreferenceRequest =
         ConferencePreference.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConferencePreference") in
       make ~conferencePreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conferencePreference =
         field_map_exn json "ConferencePreference"
@@ -10620,6 +10762,7 @@ module ListTagsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -10655,6 +10798,7 @@ module ListTagsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?maxResults ?nextToken ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10713,6 +10857,7 @@ module ListSmartHomeAppliancesResponse =
         (Option.map ~f:SmartHomeApplianceList.of_xml)
           (Xml.child xml_arg0 "SmartHomeAppliances") in
       make ?nextToken ?smartHomeAppliances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let smartHomeAppliances =
@@ -10750,6 +10895,7 @@ module ListSmartHomeAppliancesRequest =
       let roomArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoomArn") in
       make ?nextToken ?maxResults ~roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -10799,6 +10945,7 @@ module ListSkillsStoreSkillsByCategoryResponse =
         (Option.map ~f:SkillsStoreSkillList.of_xml)
           (Xml.child xml_arg0 "SkillsStoreSkills") in
       make ?nextToken ?skillsStoreSkills ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let skillsStoreSkills =
@@ -10839,6 +10986,7 @@ module ListSkillsStoreSkillsByCategoryRequest =
         CategoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryId") in
       make ?maxResults ?nextToken ~categoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" SkillListMaxResults.of_json in
@@ -10888,6 +11036,7 @@ module ListSkillsStoreCategoriesResponse =
         (Option.map ~f:CategoryList.of_xml)
           (Xml.child xml_arg0 "CategoryList") in
       make ?nextToken ?categoryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let categoryList = field_map json "CategoryList" CategoryList.of_json in
@@ -10916,6 +11065,7 @@ module ListSkillsStoreCategoriesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10964,6 +11114,7 @@ module ListSkillsResponse =
         (Option.map ~f:SkillSummaryList.of_xml)
           (Xml.child xml_arg0 "SkillSummaries") in
       make ?nextToken ?skillSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let skillSummaries =
@@ -11028,6 +11179,7 @@ module ListSkillsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?maxResults ?nextToken ?skillType ?enablementType ?skillGroupArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" SkillListMaxResults.of_json in
@@ -11080,6 +11232,7 @@ module ListGatewaysResponse =
         (Option.map ~f:GatewaySummaries.of_xml)
           (Xml.child xml_arg0 "Gateways") in
       make ?nextToken ?gateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let gateways = field_map json "Gateways" GatewaySummaries.of_json in
@@ -11117,6 +11270,7 @@ module ListGatewaysRequest =
       let gatewayGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GatewayGroupArn") in
       make ?maxResults ?nextToken ?gatewayGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11167,6 +11321,7 @@ module ListGatewayGroupsResponse =
         (Option.map ~f:GatewayGroupSummaries.of_xml)
           (Xml.child xml_arg0 "GatewayGroups") in
       make ?nextToken ?gatewayGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let gatewayGroups =
@@ -11198,6 +11353,7 @@ module ListGatewayGroupsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11256,6 +11412,7 @@ module ListDeviceEventsResponse =
         (Option.map ~f:DeviceEventList.of_xml)
           (Xml.child xml_arg0 "DeviceEvents") in
       make ?nextToken ?deviceEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let deviceEvents =
@@ -11302,6 +11459,7 @@ module ListDeviceEventsRequest =
       let deviceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceArn") in
       make ?maxResults ?nextToken ?eventType ~deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11353,6 +11511,7 @@ module ListConferenceProvidersResponse =
         (Option.map ~f:ConferenceProvidersList.of_xml)
           (Xml.child xml_arg0 "ConferenceProviders") in
       make ?nextToken ?conferenceProviders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let conferenceProviders =
@@ -11382,6 +11541,7 @@ module ListConferenceProvidersRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11431,6 +11591,7 @@ module ListBusinessReportSchedulesResponse =
         (Option.map ~f:BusinessReportScheduleList.of_xml)
           (Xml.child xml_arg0 "BusinessReportSchedules") in
       make ?nextToken ?businessReportSchedules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let businessReportSchedules =
@@ -11462,6 +11623,7 @@ module ListBusinessReportSchedulesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -11511,6 +11673,7 @@ module GetSkillGroupResponse =
       let skillGroup =
         (Option.map ~f:SkillGroup.of_xml) (Xml.child xml_arg0 "SkillGroup") in
       make ?skillGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillGroup = field_map json "SkillGroup" SkillGroup.of_json in
       make ?skillGroup ()
@@ -11532,6 +11695,7 @@ module GetSkillGroupRequest =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillGroupArn = field_map json "SkillGroupArn" Arn.of_json in
       make ?skillGroupArn ()
@@ -11582,6 +11746,7 @@ module GetRoomSkillParameterResponse =
         (Option.map ~f:RoomSkillParameter.of_xml)
           (Xml.child xml_arg0 "RoomSkillParameter") in
       make ?roomSkillParameter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomSkillParameter =
         field_map json "RoomSkillParameter" RoomSkillParameter.of_json in
@@ -11621,6 +11786,7 @@ module GetRoomSkillParameterRequest =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ~parameterKey ~skillId ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterKey =
         field_map_exn json "ParameterKey" RoomSkillParameterKey.of_json in
@@ -11669,6 +11835,7 @@ module GetRoomResponse =
     let of_xml xml_arg0 =
       let room = (Option.map ~f:Room.of_xml) (Xml.child xml_arg0 "Room") in
       make ?room ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let room = field_map json "Room" Room.of_json in make ?room ()
     let to_json v = composed_to_json to_value v
@@ -11688,6 +11855,7 @@ module GetRoomRequest =
     let of_xml xml_arg0 =
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in make ?roomArn ()
     let to_json v = composed_to_json to_value v
@@ -11734,6 +11902,7 @@ module GetProfileResponse =
       let profile =
         (Option.map ~f:Profile.of_xml) (Xml.child xml_arg0 "Profile") in
       make ?profile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profile = field_map json "Profile" Profile.of_json in
       make ?profile ()
@@ -11755,6 +11924,7 @@ module GetProfileRequest =
       let profileArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
       make ?profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileArn = field_map json "ProfileArn" Arn.of_json in
       make ?profileArn ()
@@ -11817,6 +11987,7 @@ module GetNetworkProfileResponse =
         (Option.map ~f:NetworkProfile.of_xml)
           (Xml.child xml_arg0 "NetworkProfile") in
       make ?networkProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfile =
         field_map json "NetworkProfile" NetworkProfile.of_json in
@@ -11842,6 +12013,7 @@ module GetNetworkProfileRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "NetworkProfileArn") in
       make ~networkProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfileArn =
         field_map_exn json "NetworkProfileArn" Arn.of_json in
@@ -11911,6 +12083,7 @@ module GetInvitationConfigurationResponse =
         (Option.map ~f:OrganizationName.of_xml)
           (Xml.child xml_arg0 "OrganizationName") in
       make ?privateSkillIds ?contactEmail ?organizationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateSkillIds =
         field_map json "PrivateSkillIds" ShortSkillIdList.of_json in
@@ -11929,6 +12102,7 @@ module GetInvitationConfigurationRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11974,6 +12148,7 @@ module GetGatewayResponse =
       let gateway =
         (Option.map ~f:Gateway.of_xml) (Xml.child xml_arg0 "Gateway") in
       make ?gateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gateway = field_map json "Gateway" Gateway.of_json in
       make ?gateway ()
@@ -11993,6 +12168,7 @@ module GetGatewayRequest =
       let gatewayArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map_exn json "GatewayArn" Arn.of_json in
       make ~gatewayArn ()
@@ -12040,6 +12216,7 @@ module GetGatewayGroupResponse =
         (Option.map ~f:GatewayGroup.of_xml)
           (Xml.child xml_arg0 "GatewayGroup") in
       make ?gatewayGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayGroup = field_map json "GatewayGroup" GatewayGroup.of_json in
       make ?gatewayGroup ()
@@ -12062,6 +12239,7 @@ module GetGatewayGroupRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayGroupArn") in
       make ~gatewayGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayGroupArn = field_map_exn json "GatewayGroupArn" Arn.of_json in
       make ~gatewayGroupArn ()
@@ -12109,6 +12287,7 @@ module GetDeviceResponse =
       let device =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "Device") in
       make ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map json "Device" Device.of_json in make ?device ()
     let to_json v = composed_to_json to_value v
@@ -12129,6 +12308,7 @@ module GetDeviceRequest =
       let deviceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DeviceArn") in
       make ?deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceArn = field_map json "DeviceArn" Arn.of_json in
       make ?deviceArn ()
@@ -12176,6 +12356,7 @@ module GetContactResponse =
       let contact =
         (Option.map ~f:Contact.of_xml) (Xml.child xml_arg0 "Contact") in
       make ?contact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contact = field_map json "Contact" Contact.of_json in
       make ?contact ()
@@ -12196,6 +12377,7 @@ module GetContactRequest =
       let contactArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactArn = field_map_exn json "ContactArn" Arn.of_json in
       make ~contactArn ()
@@ -12245,6 +12427,7 @@ module GetConferenceProviderResponse =
         (Option.map ~f:ConferenceProvider.of_xml)
           (Xml.child xml_arg0 "ConferenceProvider") in
       make ?conferenceProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conferenceProvider =
         field_map json "ConferenceProvider" ConferenceProvider.of_json in
@@ -12269,6 +12452,7 @@ module GetConferenceProviderRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConferenceProviderArn") in
       make ~conferenceProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conferenceProviderArn =
         field_map_exn json "ConferenceProviderArn" Arn.of_json in
@@ -12319,6 +12503,7 @@ module GetConferencePreferenceResponse =
         (Option.map ~f:ConferencePreference.of_xml)
           (Xml.child xml_arg0 "Preference") in
       make ?preference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preference =
         field_map json "Preference" ConferencePreference.of_json in
@@ -12333,6 +12518,7 @@ module GetConferencePreferenceRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the existing conference preferences."]
@@ -12378,6 +12564,7 @@ module GetAddressBookResponse =
       let addressBook =
         (Option.map ~f:AddressBook.of_xml) (Xml.child xml_arg0 "AddressBook") in
       make ?addressBook ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressBook = field_map json "AddressBook" AddressBook.of_json in
       make ?addressBook ()
@@ -12401,6 +12588,7 @@ module GetAddressBookRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AddressBookArn") in
       make ~addressBookArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressBookArn = field_map_exn json "AddressBookArn" Arn.of_json in
       make ~addressBookArn ()
@@ -12441,6 +12629,7 @@ module ForgetSmartHomeAppliancesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Forgets smart home appliances associated to a room."]
@@ -12459,6 +12648,7 @@ module ForgetSmartHomeAppliancesRequest =
       let roomArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoomArn") in
       make ~roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map_exn json "RoomArn" Arn.of_json in
       make ~roomArn ()
@@ -12502,6 +12692,7 @@ module DisassociateSkillGroupFromRoomResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12528,6 +12719,7 @@ module DisassociateSkillGroupFromRoomRequest =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?roomArn ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in
       let skillGroupArn = field_map json "SkillGroupArn" Arn.of_json in
@@ -12582,6 +12774,7 @@ module DisassociateSkillFromUsersResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12602,6 +12795,7 @@ module DisassociateSkillFromUsersRequest =
       let skillId =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       make ~skillId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
       make ~skillId ()
@@ -12655,6 +12849,7 @@ module DisassociateSkillFromSkillGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a skill from a skill group."]
@@ -12680,6 +12875,7 @@ module DisassociateSkillFromSkillGroupRequest =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ~skillId ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
       let skillGroupArn = field_map json "SkillGroupArn" Arn.of_json in
@@ -12735,6 +12931,7 @@ module DisassociateDeviceFromRoomResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12755,6 +12952,7 @@ module DisassociateDeviceFromRoomRequest =
       let deviceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DeviceArn") in
       make ?deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceArn = field_map json "DeviceArn" Arn.of_json in
       make ?deviceArn ()
@@ -12787,6 +12985,7 @@ module DisassociateContactFromAddressBookResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a contact from a given address book."]
@@ -12815,6 +13014,7 @@ module DisassociateContactFromAddressBookRequest =
       let contactArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~addressBookArn ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressBookArn = field_map_exn json "AddressBookArn" Arn.of_json in
       let contactArn = field_map_exn json "ContactArn" Arn.of_json in
@@ -12868,6 +13068,7 @@ module DeleteUserResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a specified user by user ARN and enrollment ARN."]
@@ -12895,6 +13096,7 @@ module DeleteUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EnrollmentId") in
       let userArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "UserArn") in
       make ~enrollmentId ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enrollmentId =
         field_map_exn json "EnrollmentId" EnrollmentId.of_json in
@@ -12949,6 +13151,7 @@ module DeleteSkillGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a skill group by skill group ARN."]
@@ -12967,6 +13170,7 @@ module DeleteSkillGroupRequest =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillGroupArn = field_map json "SkillGroupArn" Arn.of_json in
       make ?skillGroupArn ()
@@ -13019,6 +13223,7 @@ module DeleteSkillAuthorizationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Unlinks a third-party account from a skill."]
@@ -13041,6 +13246,7 @@ module DeleteSkillAuthorizationRequest =
       let skillId =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       make ?roomArn ~skillId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
@@ -13085,6 +13291,7 @@ module DeleteRoomSkillParameterResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13121,6 +13328,7 @@ module DeleteRoomSkillParameterRequest =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ~parameterKey ~skillId ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterKey =
         field_map_exn json "ParameterKey" RoomSkillParameterKey.of_json in
@@ -13177,6 +13385,7 @@ module DeleteRoomResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a room by the room ARN."]
@@ -13194,6 +13403,7 @@ module DeleteRoomRequest =
     let of_xml xml_arg0 =
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in make ?roomArn ()
     let to_json v = composed_to_json to_value v
@@ -13245,6 +13455,7 @@ module DeleteProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a room profile by the profile ARN."]
@@ -13263,6 +13474,7 @@ module DeleteProfileRequest =
       let profileArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
       make ?profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileArn = field_map json "ProfileArn" Arn.of_json in
       make ?profileArn ()
@@ -13324,6 +13536,7 @@ module DeleteNetworkProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a network profile by the network profile ARN."]
@@ -13345,6 +13558,7 @@ module DeleteNetworkProfileRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "NetworkProfileArn") in
       make ~networkProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfileArn =
         field_map_exn json "NetworkProfileArn" Arn.of_json in
@@ -13388,6 +13602,7 @@ module DeleteGatewayGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a gateway group."]
@@ -13408,6 +13623,7 @@ module DeleteGatewayGroupRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayGroupArn") in
       make ~gatewayGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayGroupArn = field_map_exn json "GatewayGroupArn" Arn.of_json in
       make ~gatewayGroupArn ()
@@ -13468,6 +13684,7 @@ module DeleteDeviceUsageDataResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13495,6 +13712,7 @@ module DeleteDeviceUsageDataRequest =
       let deviceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceArn") in
       make ~deviceUsageType ~deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceUsageType =
         field_map_exn json "DeviceUsageType" DeviceUsageType.of_json in
@@ -13562,6 +13780,7 @@ module DeleteDeviceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a device from Alexa For Business."]
@@ -13580,6 +13799,7 @@ module DeleteDeviceRequest =
       let deviceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceArn") in
       make ~deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceArn = field_map_exn json "DeviceArn" Arn.of_json in
       make ~deviceArn ()
@@ -13632,6 +13852,7 @@ module DeleteContactResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a contact by the contact ARN."]
@@ -13649,6 +13870,7 @@ module DeleteContactRequest =
       let contactArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactArn = field_map_exn json "ContactArn" Arn.of_json in
       make ~contactArn ()
@@ -13689,6 +13911,7 @@ module DeleteConferenceProviderResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a conference provider."]
@@ -13710,6 +13933,7 @@ module DeleteConferenceProviderRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConferenceProviderArn") in
       make ~conferenceProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conferenceProviderArn =
         field_map_exn json "ConferenceProviderArn" Arn.of_json in
@@ -13763,6 +13987,7 @@ module DeleteBusinessReportScheduleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13783,6 +14008,7 @@ module DeleteBusinessReportScheduleRequest =
       let scheduleArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ScheduleArn") in
       make ~scheduleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduleArn = field_map_exn json "ScheduleArn" Arn.of_json in
       make ~scheduleArn ()
@@ -13836,6 +14062,7 @@ module DeleteAddressBookResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an address book by the address book ARN."]
@@ -13856,6 +14083,7 @@ module DeleteAddressBookRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AddressBookArn") in
       make ~addressBookArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressBookArn = field_map_exn json "AddressBookArn" Arn.of_json in
       make ~addressBookArn ()
@@ -13923,6 +14151,7 @@ module CreateUserResponse =
     let of_xml xml_arg0 =
       let userArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "UserArn") in
       make ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map json "UserArn" Arn.of_json in make ?userArn ()
     let to_json v = composed_to_json to_value v
@@ -13982,6 +14211,7 @@ module CreateUserRequest =
         User_UserId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ?tags ?clientRequestToken ?email ?lastName ?firstName ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -14056,6 +14286,7 @@ module CreateSkillGroupResponse =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillGroupArn = field_map json "SkillGroupArn" Arn.of_json in
       make ?skillGroupArn ()
@@ -14103,6 +14334,7 @@ module CreateSkillGroupRequest =
         SkillGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SkillGroupName") in
       make ?tags ?clientRequestToken ?description ~skillGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -14165,6 +14397,7 @@ module CreateRoomResponse =
     let of_xml xml_arg0 =
       let roomArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoomArn") in
       make ?roomArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in make ?roomArn ()
     let to_json v = composed_to_json to_value v
@@ -14229,6 +14462,7 @@ module CreateRoomRequest =
         RoomName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoomName") in
       make ?tags ?clientRequestToken ?providerCalendarId ?profileArn
         ?description ~roomName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -14305,6 +14539,7 @@ module CreateProfileResponse =
       let profileArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
       make ?profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileArn = field_map json "ProfileArn" Arn.of_json in
       make ?profileArn ()
@@ -14439,6 +14674,7 @@ module CreateProfileRequest =
         ?maxVolumeLimit ?setupModeDisabled ?clientRequestToken ?locale
         ~wakeWord ~temperatureUnit ~distanceUnit ~address ~timezone
         ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let meetingRoomConfiguration =
@@ -14556,6 +14792,7 @@ module CreateNetworkProfileResponse =
       let networkProfileArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "NetworkProfileArn") in
       make ?networkProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfileArn = field_map json "NetworkProfileArn" Arn.of_json in
       make ?networkProfileArn ()
@@ -14674,6 +14911,7 @@ module CreateNetworkProfileRequest =
       make ?tags ~clientRequestToken ?trustAnchors ?certificateAuthorityArn
         ?nextPassword ?currentPassword ?eapMethod ~securityType ~ssid
         ?description ~networkProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -14750,6 +14988,7 @@ module CreateGatewayGroupResponse =
       let gatewayGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GatewayGroupArn") in
       make ?gatewayGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayGroupArn = field_map json "GatewayGroupArn" Arn.of_json in
       make ?gatewayGroupArn ()
@@ -14795,6 +15034,7 @@ module CreateGatewayGroupRequest =
         GatewayGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~clientRequestToken ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -14856,6 +15096,7 @@ module CreateContactResponse =
       let contactArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ContactArn") in
       make ?contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactArn = field_map json "ContactArn" Arn.of_json in
       make ?contactArn ()
@@ -14944,6 +15185,7 @@ module CreateContactRequest =
         (Option.map ~f:ContactName.of_xml) (Xml.child xml_arg0 "DisplayName") in
       make ?tags ?clientRequestToken ?sipAddresses ?phoneNumbers ?phoneNumber
         ?lastName ~firstName ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -15003,6 +15245,7 @@ module CreateConferenceProviderResponse =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "ConferenceProviderArn") in
       make ?conferenceProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conferenceProviderArn =
         field_map json "ConferenceProviderArn" Arn.of_json in
@@ -15080,6 +15323,7 @@ module CreateConferenceProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConferenceProviderName") in
       make ?tags ?clientRequestToken ~meetingSetting ?pSTNDialIn ?iPDialIn
         ~conferenceProviderType ~conferenceProviderName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -15141,6 +15385,7 @@ module CreateBusinessReportScheduleResponse =
       let scheduleArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ScheduleArn") in
       make ?scheduleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduleArn = field_map json "ScheduleArn" Arn.of_json in
       make ?scheduleArn ()
@@ -15230,6 +15475,7 @@ module CreateBusinessReportScheduleRequest =
           (Xml.child xml_arg0 "ScheduleName") in
       make ?tags ?clientRequestToken ?recurrence ~contentRange ~format
         ?s3KeyPrefix ?s3BucketName ?scheduleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -15300,6 +15546,7 @@ module CreateAddressBookResponse =
       let addressBookArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AddressBookArn") in
       make ?addressBookArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressBookArn = field_map json "AddressBookArn" Arn.of_json in
       make ?addressBookArn ()
@@ -15345,6 +15592,7 @@ module CreateAddressBookRequest =
         AddressBookName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?clientRequestToken ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -15402,6 +15650,7 @@ module AssociateSkillWithUsersResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15422,6 +15671,7 @@ module AssociateSkillWithUsersRequest =
       let skillId =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       make ~skillId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
       make ~skillId ()
@@ -15484,6 +15734,7 @@ module AssociateSkillWithSkillGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a skill with a skill group."]
@@ -15509,6 +15760,7 @@ module AssociateSkillWithSkillGroupRequest =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ~skillId ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
       let skillGroupArn = field_map json "SkillGroupArn" Arn.of_json in
@@ -15553,6 +15805,7 @@ module AssociateSkillGroupWithRoomResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15579,6 +15832,7 @@ module AssociateSkillGroupWithRoomRequest =
       let skillGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SkillGroupArn") in
       make ?roomArn ?skillGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in
       let skillGroupArn = field_map json "SkillGroupArn" Arn.of_json in
@@ -15644,6 +15898,7 @@ module AssociateDeviceWithRoomResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15669,6 +15924,7 @@ module AssociateDeviceWithRoomRequest =
       let deviceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DeviceArn") in
       make ?roomArn ?deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roomArn = field_map json "RoomArn" Arn.of_json in
       let deviceArn = field_map json "DeviceArn" Arn.of_json in
@@ -15734,6 +15990,7 @@ module AssociateDeviceWithNetworkProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a device with the specified network profile."]
@@ -15760,6 +16017,7 @@ module AssociateDeviceWithNetworkProfileRequest =
       let deviceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceArn") in
       make ~networkProfileArn ~deviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkProfileArn =
         field_map_exn json "NetworkProfileArn" Arn.of_json in
@@ -15802,6 +16060,7 @@ module AssociateContactWithAddressBookResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a contact with a given address book."]
@@ -15830,6 +16089,7 @@ module AssociateContactWithAddressBookRequest =
       let contactArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~addressBookArn ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressBookArn = field_map_exn json "AddressBookArn" Arn.of_json in
       let contactArn = field_map_exn json "ContactArn" Arn.of_json in
@@ -15892,6 +16152,7 @@ module ApproveSkillResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15910,6 +16171,7 @@ module ApproveSkillRequest =
       let skillId =
         SkillId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SkillId") in
       make ~skillId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skillId = field_map_exn json "SkillId" SkillId.of_json in
       make ~skillId ()

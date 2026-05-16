@@ -83,6 +83,7 @@ module EngineAttribute =
         (Option.map ~f:EngineAttributeName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" EngineAttributeValue.of_json in
       let name = field_map json "Name" EngineAttributeName.of_json in
@@ -483,6 +484,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -714,6 +716,7 @@ module Server =
         ?disableAutomatedBackup ?customDomain ?cloudFormationStackArn
         ?createdAt ?serverName ?backupRetentionCount
         ?associatePublicIpAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverArn = field_map json "ServerArn" String_.of_json in
       let subnetIds = field_map json "SubnetIds" Strings.of_json in
@@ -793,6 +796,7 @@ module ServerEvent =
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?logUrl ?message ?serverName ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logUrl = field_map json "LogUrl" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -1014,6 +1018,7 @@ module Backup =
         ?keyPair ?instanceType ?instanceProfileArn ?engineVersion
         ?engineModel ?engine ?description ?createdAt ?backupType ?backupId
         ?backupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map json "UserArn" String_.of_json in
       let toolsVersion = field_map json "ToolsVersion" String_.of_json in
@@ -1078,6 +1083,7 @@ module AccountAttribute =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Maximum") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?used ?maximum ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let used = field_map json "Used" Integer.of_json in
       let maximum = field_map json "Maximum" Integer.of_json in
@@ -1101,6 +1107,7 @@ module InvalidStateException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1123,6 +1130,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1145,6 +1153,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1367,6 +1376,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1513,6 +1523,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1534,6 +1545,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -1695,6 +1707,7 @@ module UpdateServerResponse =
       let server =
         (Option.map ~f:Server.of_xml) (Xml.child xml_arg0 "Server") in
       make ?server ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let server = field_map json "Server" Server.of_json in make ?server ()
     let to_json v = composed_to_json to_value v
@@ -1760,6 +1773,7 @@ module UpdateServerRequest =
           (Xml.child xml_arg0 "DisableAutomatedBackup") in
       make ?preferredBackupWindow ?preferredMaintenanceWindow ~serverName
         ?backupRetentionCount ?disableAutomatedBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferredBackupWindow =
         field_map json "PreferredBackupWindow" TimeWindowDefinition.of_json in
@@ -1837,6 +1851,7 @@ module UpdateServerEngineAttributesResponse =
       let server =
         (Option.map ~f:Server.of_xml) (Xml.child xml_arg0 "Server") in
       make ?server ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let server = field_map json "Server" Server.of_json in make ?server ()
     let to_json v = composed_to_json to_value v
@@ -1875,6 +1890,7 @@ module UpdateServerEngineAttributesRequest =
         ServerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ?attributeValue ~attributeName ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeValue =
         field_map json "AttributeValue" AttributeValue.of_json in
@@ -1938,6 +1954,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1968,6 +1985,7 @@ module UntagResourceRequest =
         AWSOpsWorksCMResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -2029,6 +2047,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2058,6 +2077,7 @@ module TagResourceRequest =
         AWSOpsWorksCMResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -2126,6 +2146,7 @@ module StartMaintenanceResponse =
       let server =
         (Option.map ~f:Server.of_xml) (Xml.child xml_arg0 "Server") in
       make ?server ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let server = field_map json "Server" Server.of_json in make ?server ()
     let to_json v = composed_to_json to_value v
@@ -2157,6 +2178,7 @@ module StartMaintenanceRequest =
         ServerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ?engineAttributes ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineAttributes =
         field_map json "EngineAttributes" EngineAttributes.of_json in
@@ -2223,6 +2245,7 @@ module RestoreServerResponse =
       let server =
         (Option.map ~f:Server.of_xml) (Xml.child xml_arg0 "Server") in
       make ?server ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let server = field_map json "Server" Server.of_json in make ?server ()
     let to_json v = composed_to_json to_value v
@@ -2267,6 +2290,7 @@ module RestoreServerRequest =
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ?keyPair ?instanceType ~serverName ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPair = field_map json "KeyPair" KeyPair.of_json in
       let instanceType = field_map json "InstanceType" String_.of_json in
@@ -2332,6 +2356,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -2372,6 +2397,7 @@ module ListTagsForResourceRequest =
         AWSOpsWorksCMResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2450,6 +2476,7 @@ module ExportServerEngineAttributeResponse =
         (Option.map ~f:EngineAttribute.of_xml)
           (Xml.child xml_arg0 "EngineAttribute") in
       make ?serverName ?engineAttribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverName = field_map json "ServerName" ServerName.of_json in
       let engineAttribute =
@@ -2495,6 +2522,7 @@ module ExportServerEngineAttributeRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExportAttributeName") in
       make ?inputAttributes ~serverName ~exportAttributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputAttributes =
         field_map json "InputAttributes" EngineAttributes.of_json in
@@ -2570,6 +2598,7 @@ module DisassociateNodeResponse =
         (Option.map ~f:NodeAssociationStatusToken.of_xml)
           (Xml.child xml_arg0 "NodeAssociationStatusToken") in
       make ?nodeAssociationStatusToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeAssociationStatusToken =
         field_map json "NodeAssociationStatusToken"
@@ -2610,6 +2639,7 @@ module DisassociateNodeRequest =
         ServerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ?engineAttributes ~nodeName ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineAttributes =
         field_map json "EngineAttributes" EngineAttributes.of_json in
@@ -2686,6 +2716,7 @@ module DescribeServersResponse =
       let servers =
         (Option.map ~f:Servers.of_xml) (Xml.child xml_arg0 "Servers") in
       make ?nextToken ?servers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let servers = field_map json "Servers" Servers.of_json in
@@ -2722,6 +2753,7 @@ module DescribeServersRequest =
       let serverName =
         (Option.map ~f:ServerName.of_xml) (Xml.child xml_arg0 "ServerName") in
       make ?maxResults ?nextToken ?serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2795,6 +2827,7 @@ module DescribeNodeAssociationStatusResponse =
         (Option.map ~f:NodeAssociationStatus.of_xml)
           (Xml.child xml_arg0 "NodeAssociationStatus") in
       make ?engineAttributes ?nodeAssociationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineAttributes =
         field_map json "EngineAttributes" EngineAttributes.of_json in
@@ -2834,6 +2867,7 @@ module DescribeNodeAssociationStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "NodeAssociationStatusToken") in
       make ~serverName ~nodeAssociationStatusToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverName = field_map_exn json "ServerName" ServerName.of_json in
       let nodeAssociationStatusToken =
@@ -2912,6 +2946,7 @@ module DescribeEventsResponse =
         (Option.map ~f:ServerEvents.of_xml)
           (Xml.child xml_arg0 "ServerEvents") in
       make ?nextToken ?serverEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let serverEvents = field_map json "ServerEvents" ServerEvents.of_json in
@@ -2951,6 +2986,7 @@ module DescribeEventsRequest =
         ServerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ?maxResults ?nextToken ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3025,6 +3061,7 @@ module DescribeBackupsResponse =
       let backups =
         (Option.map ~f:Backups.of_xml) (Xml.child xml_arg0 "Backups") in
       make ?nextToken ?backups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let backups = field_map json "Backups" Backups.of_json in
@@ -3068,6 +3105,7 @@ module DescribeBackupsRequest =
       let backupId =
         (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "BackupId") in
       make ?maxResults ?nextToken ?serverName ?backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3112,6 +3150,7 @@ module DescribeAccountAttributesResponse =
         (Option.map ~f:AccountAttributes.of_xml)
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" AccountAttributes.of_json in
       make ?attributes ()
@@ -3126,6 +3165,7 @@ module DescribeAccountAttributesRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3183,6 +3223,7 @@ module DeleteServerResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3203,6 +3244,7 @@ module DeleteServerRequest =
         ServerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverName = field_map_exn json "ServerName" ServerName.of_json in
       make ~serverName ()
@@ -3262,6 +3304,7 @@ module DeleteBackupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3283,6 +3326,7 @@ module DeleteBackupRequest =
       let backupId =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ~backupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupId = field_map_exn json "BackupId" BackupId.of_json in
       make ~backupId ()
@@ -3360,6 +3404,7 @@ module CreateServerResponse =
       let server =
         (Option.map ~f:Server.of_xml) (Xml.child xml_arg0 "Server") in
       make ?server ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let server = field_map json "Server" Server.of_json in make ?server ()
     let to_json v = composed_to_json to_value v
@@ -3578,6 +3623,7 @@ module CreateServerRequest =
         ?engineAttributes ?engineVersion ?engineModel ~engine
         ?disableAutomatedBackup ?customPrivateKey ?customCertificate
         ?customDomain ?associatePublicIpAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupId = field_map json "BackupId" BackupId.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -3690,6 +3736,7 @@ module CreateBackupResponse =
       let backup =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backup = field_map json "Backup" Backup.of_json in make ?backup ()
     let to_json v = composed_to_json to_value v
@@ -3724,6 +3771,7 @@ module CreateBackupRequest =
         ServerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ?tags ?description ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map json "Description" String_.of_json in
@@ -3797,6 +3845,7 @@ module AssociateNodeResponse =
         (Option.map ~f:NodeAssociationStatusToken.of_xml)
           (Xml.child xml_arg0 "NodeAssociationStatusToken") in
       make ?nodeAssociationStatusToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeAssociationStatusToken =
         field_map json "NodeAssociationStatusToken"
@@ -3838,6 +3887,7 @@ module AssociateNodeRequest =
         ServerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerName") in
       make ~engineAttributes ~nodeName ~serverName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineAttributes =
         field_map_exn json "EngineAttributes" EngineAttributes.of_json in

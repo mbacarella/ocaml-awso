@@ -147,6 +147,7 @@ module ExcludedRule =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleId = field_map_exn json "RuleId" ResourceId.of_json in
       make ~ruleId ()
@@ -224,6 +225,7 @@ module HTTPHeader =
       let name =
         (Option.map ~f:HeaderName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" HeaderValue.of_json in
       let name = field_map json "Name" HeaderName.of_json in
@@ -255,6 +257,7 @@ module FieldToMatch =
         MatchFieldType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?data ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let data = field_map json "Data" MatchFieldData.of_json in
       let type_ = field_map_exn json "Type" MatchFieldType.of_json in
@@ -355,6 +358,7 @@ module WafAction =
         WafActionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" WafActionType.of_json in
       make ~type_ ()
@@ -379,6 +383,7 @@ module WafOverrideAction =
         WafOverrideActionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" WafOverrideActionType.of_json in
       make ~type_ ()
@@ -1597,6 +1602,7 @@ module XssMatchTuple =
         FieldToMatch.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
       make ~textTransformation ~fieldToMatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let textTransformation =
         field_map_exn json "TextTransformation" TextTransformation.of_json in
@@ -1672,6 +1678,7 @@ module ActivatedRule =
         RulePriority.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Priority") in
       make ?excludedRules ?type_ ?overrideAction ?action ~ruleId ~priority ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let excludedRules =
         field_map json "ExcludedRules" ExcludedRules.of_json in
@@ -1713,6 +1720,7 @@ module SqlInjectionMatchTuple =
         FieldToMatch.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
       make ~textTransformation ~fieldToMatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let textTransformation =
         field_map_exn json "TextTransformation" TextTransformation.of_json in
@@ -1767,6 +1775,7 @@ module SizeConstraint =
         FieldToMatch.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
       make ~size ~comparisonOperator ~textTransformation ~fieldToMatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let size = field_map_exn json "Size" Size.of_json in
       let comparisonOperator =
@@ -1810,6 +1819,7 @@ module Predicate =
       let negated =
         Negated.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Negated") in
       make ~dataId ~type_ ~negated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataId = field_map_exn json "DataId" ResourceId.of_json in
       let type_ = field_map_exn json "Type" PredicateType.of_json in
@@ -1875,6 +1885,7 @@ module RegexMatchTuple =
         FieldToMatch.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
       make ~regexPatternSetId ~textTransformation ~fieldToMatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexPatternSetId =
         field_map_exn json "RegexPatternSetId" ResourceId.of_json in
@@ -1909,6 +1920,7 @@ module IPSetDescriptor =
         IPSetDescriptorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" IPSetDescriptorValue.of_json in
       let type_ = field_map_exn json "Type" IPSetDescriptorType.of_json in
@@ -1940,6 +1952,7 @@ module GeoMatchConstraint =
         GeoMatchConstraintType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" GeoMatchConstraintValue.of_json in
       let type_ = field_map_exn json "Type" GeoMatchConstraintType.of_json in
@@ -2000,6 +2013,7 @@ module ByteMatchTuple =
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
       make ~positionalConstraint ~textTransformation ~targetString
         ~fieldToMatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let positionalConstraint =
         field_map_exn json "PositionalConstraint"
@@ -2053,6 +2067,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -2198,6 +2213,7 @@ module HTTPRequest =
       let clientIP =
         (Option.map ~f:IPString.of_xml) (Xml.child xml_arg0 "ClientIP") in
       make ?headers ?hTTPVersion ?method_ ?uRI ?country ?clientIP ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headers = field_map json "Headers" HTTPHeaders.of_json in
       let hTTPVersion = field_map json "HTTPVersion" HTTPVersion.of_json in
@@ -2400,6 +2416,7 @@ module XssMatchSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~xssMatchTuple ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xssMatchTuple =
         field_map_exn json "XssMatchTuple" XssMatchTuple.of_json in
@@ -2434,6 +2451,7 @@ module WebACLUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~activatedRule ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activatedRule =
         field_map_exn json "ActivatedRule" ActivatedRule.of_json in
@@ -2470,6 +2488,7 @@ module SqlInjectionMatchSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~sqlInjectionMatchTuple ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqlInjectionMatchTuple =
         field_map_exn json "SqlInjectionMatchTuple"
@@ -2505,6 +2524,7 @@ module SizeConstraintSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~sizeConstraint ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeConstraint =
         field_map_exn json "SizeConstraint" SizeConstraint.of_json in
@@ -2538,6 +2558,7 @@ module RuleUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~predicate ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predicate = field_map_exn json "Predicate" Predicate.of_json in
       let action = field_map_exn json "Action" ChangeAction.of_json in
@@ -2571,6 +2592,7 @@ module RuleGroupUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~activatedRule ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activatedRule =
         field_map_exn json "ActivatedRule" ActivatedRule.of_json in
@@ -2606,6 +2628,7 @@ module RegexPatternSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~regexPatternString ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexPatternString =
         field_map_exn json "RegexPatternString" RegexPatternString.of_json in
@@ -2641,6 +2664,7 @@ module RegexMatchSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~regexMatchTuple ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexMatchTuple =
         field_map_exn json "RegexMatchTuple" RegexMatchTuple.of_json in
@@ -2676,6 +2700,7 @@ module IPSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~iPSetDescriptor ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iPSetDescriptor =
         field_map_exn json "IPSetDescriptor" IPSetDescriptor.of_json in
@@ -2711,6 +2736,7 @@ module GeoMatchSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~geoMatchConstraint ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geoMatchConstraint =
         field_map_exn json "GeoMatchConstraint" GeoMatchConstraint.of_json in
@@ -2745,6 +2771,7 @@ module ByteMatchSetUpdate =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~byteMatchTuple ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byteMatchTuple =
         field_map_exn json "ByteMatchTuple" ByteMatchTuple.of_json in
@@ -2776,6 +2803,7 @@ module XssMatchSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "XssMatchSetId") in
       make ~name ~xssMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let xssMatchSetId =
@@ -2808,6 +2836,7 @@ module WebACLSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ~name ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let webACLId = field_map_exn json "WebACLId" ResourceId.of_json in
@@ -2871,6 +2900,7 @@ module SubscribedRuleGroupSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupId") in
       make ~metricName ~name ~ruleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricName = field_map_exn json "MetricName" MetricName.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -2905,6 +2935,7 @@ module SqlInjectionMatchSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SqlInjectionMatchSetId") in
       make ~name ~sqlInjectionMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let sqlInjectionMatchSetId =
@@ -2938,6 +2969,7 @@ module SizeConstraintSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SizeConstraintSetId") in
       make ~name ~sizeConstraintSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let sizeConstraintSetId =
@@ -2969,6 +3001,7 @@ module RuleSummary =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~name ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let ruleId = field_map_exn json "RuleId" ResourceId.of_json in
@@ -3000,6 +3033,7 @@ module RuleGroupSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupId") in
       make ~name ~ruleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let ruleGroupId = field_map_exn json "RuleGroupId" ResourceId.of_json in
@@ -3033,6 +3067,7 @@ module RegexPatternSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexPatternSetId") in
       make ~name ~regexPatternSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let regexPatternSetId =
@@ -3066,6 +3101,7 @@ module RegexMatchSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexMatchSetId") in
       make ~name ~regexMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let regexMatchSetId =
@@ -3110,6 +3146,7 @@ module LoggingConfiguration =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?redactedFields ~logDestinationConfigs ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redactedFields =
         field_map json "RedactedFields" RedactedFields.of_json in
@@ -3145,6 +3182,7 @@ module IPSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IPSetId") in
       make ~name ~iPSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let iPSetId = field_map_exn json "IPSetId" ResourceId.of_json in
@@ -3176,6 +3214,7 @@ module GeoMatchSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GeoMatchSetId") in
       make ~name ~geoMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let geoMatchSetId =
@@ -3209,6 +3248,7 @@ module ByteMatchSetSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ByteMatchSetId") in
       make ~name ~byteMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ResourceName.of_json in
       let byteMatchSetId =
@@ -3366,6 +3406,7 @@ module SampledHTTPRequest =
         HTTPRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Request") in
       make ?ruleWithinRuleGroup ?action ?timestamp ~weight ~request ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleWithinRuleGroup =
         field_map json "RuleWithinRuleGroup" ResourceId.of_json in
@@ -3660,6 +3701,7 @@ module WAFInternalErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3674,6 +3716,7 @@ module WAFInvalidAccountException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3691,6 +3734,7 @@ module WAFInvalidOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3725,6 +3769,7 @@ module WAFInvalidParameterException =
         (Option.map ~f:ParameterExceptionField.of_xml)
           (Xml.child xml_arg0 "field") in
       make ?reason ?parameter ?field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ParameterExceptionReason.of_json in
       let parameter =
@@ -3747,6 +3792,7 @@ module WAFLimitsExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3766,6 +3812,7 @@ module WAFNonexistentContainerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3785,6 +3832,7 @@ module WAFNonexistentItemException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3804,6 +3852,7 @@ module WAFStaleDataException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3849,6 +3898,7 @@ module WAFReferencedItemException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3868,6 +3918,7 @@ module WAFSubscriptionNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4014,6 +4065,7 @@ module WAFInvalidRegexPatternException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4060,6 +4112,7 @@ module WAFDisallowedNameException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4182,6 +4235,7 @@ module WAFBadRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4200,6 +4254,7 @@ module WAFTagOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4218,6 +4273,7 @@ module WAFTagOperationInternalErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4260,6 +4316,7 @@ module WAFInvalidPermissionPolicyException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4299,6 +4356,7 @@ module WAFServiceLinkedRoleErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4411,6 +4469,7 @@ module TagInfoForResource =
       let resourceARN =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?tagList ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       let resourceARN = field_map json "ResourceARN" ResourceArn.of_json in
@@ -4780,6 +4839,7 @@ module XssMatchSet =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "XssMatchSetId") in
       make ~xssMatchTuples ?name ~xssMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xssMatchTuples =
         field_map_exn json "XssMatchTuples" XssMatchTuples.of_json in
@@ -4853,6 +4913,7 @@ module WebACL =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ?webACLArn ~rules ~defaultAction ?metricName ?name ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webACLArn = field_map json "WebACLArn" ResourceArn.of_json in
       let rules = field_map_exn json "Rules" ActivatedRules.of_json in
@@ -4878,6 +4939,7 @@ module WAFUnavailableEntityException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4919,6 +4981,7 @@ module SqlInjectionMatchSet =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SqlInjectionMatchSetId") in
       make ~sqlInjectionMatchTuples ?name ~sqlInjectionMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqlInjectionMatchTuples =
         field_map_exn json "SqlInjectionMatchTuples"
@@ -4965,6 +5028,7 @@ module SizeConstraintSet =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SizeConstraintSetId") in
       make ~sizeConstraints ?name ~sizeConstraintSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeConstraints =
         field_map_exn json "SizeConstraints" SizeConstraints.of_json in
@@ -5037,6 +5101,7 @@ module TimeWindow =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
       make ~endTime ~startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map_exn json "EndTime" Timestamp.of_json in
       let startTime = field_map_exn json "StartTime" Timestamp.of_json in
@@ -5102,6 +5167,7 @@ module Rule =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~predicates ?metricName ?name ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predicates = field_map_exn json "Predicates" Predicates.of_json in
       let metricName = field_map json "MetricName" MetricName.of_json in
@@ -5143,6 +5209,7 @@ module RuleGroup =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupId") in
       make ?metricName ?name ~ruleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricName = field_map json "MetricName" MetricName.of_json in
       let name = field_map json "Name" ResourceName.of_json in
@@ -5187,6 +5254,7 @@ module RegexPatternSet =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexPatternSetId") in
       make ~regexPatternStrings ?name ~regexPatternSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexPatternStrings =
         field_map_exn json "RegexPatternStrings" RegexPatternStrings.of_json in
@@ -5232,6 +5300,7 @@ module RegexMatchSet =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "RegexMatchSetId") in
       make ?regexMatchTuples ?name ?regexMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexMatchTuples =
         field_map json "RegexMatchTuples" RegexMatchTuples.of_json in
@@ -5305,6 +5374,7 @@ module RateBasedRule =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~rateLimit ~rateKey ~matchPredicates ?metricName ?name ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rateLimit = field_map_exn json "RateLimit" RateLimit.of_json in
       let rateKey = field_map_exn json "RateKey" RateKey.of_json in
@@ -5376,6 +5446,7 @@ module IPSet =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IPSetId") in
       make ~iPSetDescriptors ?name ~iPSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iPSetDescriptors =
         field_map_exn json "IPSetDescriptors" IPSetDescriptors.of_json in
@@ -5420,6 +5491,7 @@ module GeoMatchSet =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GeoMatchSetId") in
       make ~geoMatchConstraints ?name ~geoMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geoMatchConstraints =
         field_map_exn json "GeoMatchConstraints" GeoMatchConstraints.of_json in
@@ -5494,6 +5566,7 @@ module ByteMatchSet =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ByteMatchSetId") in
       make ~byteMatchTuples ?name ~byteMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byteMatchTuples =
         field_map_exn json "ByteMatchTuples" ByteMatchTuples.of_json in
@@ -5517,6 +5590,7 @@ module WAFNonEmptyEntityException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5566,6 +5640,7 @@ module WAFEntityMigrationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?migrationErrorReason ?migrationErrorType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let migrationErrorReason =
         field_map json "MigrationErrorReason" ErrorReason.of_json in
@@ -5728,6 +5803,7 @@ module UpdateXssMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -5767,6 +5843,7 @@ module UpdateXssMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "XssMatchSetId") in
       make ~updates ~changeToken ~xssMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates = field_map_exn json "Updates" XssMatchSetUpdates.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -5914,6 +5991,7 @@ module UpdateWebACLResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -5961,6 +6039,7 @@ module UpdateWebACLRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ?defaultAction ?updates ~changeToken ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultAction = field_map json "DefaultAction" WafAction.of_json in
       let updates = field_map json "Updates" WebACLUpdates.of_json in
@@ -6087,6 +6166,7 @@ module UpdateSqlInjectionMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -6128,6 +6208,7 @@ module UpdateSqlInjectionMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SqlInjectionMatchSetId") in
       make ~updates ~changeToken ~sqlInjectionMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates =
         field_map_exn json "Updates" SqlInjectionMatchSetUpdates.of_json in
@@ -6264,6 +6345,7 @@ module UpdateSizeConstraintSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -6306,6 +6388,7 @@ module UpdateSizeConstraintSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SizeConstraintSetId") in
       make ~updates ~changeToken ~sizeConstraintSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates =
         field_map_exn json "Updates" SizeConstraintSetUpdates.of_json in
@@ -6443,6 +6526,7 @@ module UpdateRuleResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -6482,6 +6566,7 @@ module UpdateRuleRequest =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~updates ~changeToken ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates = field_map_exn json "Updates" RuleUpdates.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -6597,6 +6682,7 @@ module UpdateRuleGroupResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -6637,6 +6723,7 @@ module UpdateRuleGroupRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupId") in
       make ~changeToken ~updates ~ruleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let updates = field_map_exn json "Updates" RuleGroupUpdates.of_json in
@@ -6762,6 +6849,7 @@ module UpdateRegexPatternSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -6804,6 +6892,7 @@ module UpdateRegexPatternSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexPatternSetId") in
       make ~changeToken ~updates ~regexPatternSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let updates =
@@ -6930,6 +7019,7 @@ module UpdateRegexMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -6971,6 +7061,7 @@ module UpdateRegexMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexMatchSetId") in
       make ~changeToken ~updates ~regexMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let updates = field_map_exn json "Updates" RegexMatchSetUpdates.of_json in
@@ -7107,6 +7198,7 @@ module UpdateRateBasedRuleResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -7155,6 +7247,7 @@ module UpdateRateBasedRuleRequest =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~rateLimit ~updates ~changeToken ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rateLimit = field_map_exn json "RateLimit" RateLimit.of_json in
       let updates = field_map_exn json "Updates" RuleUpdates.of_json in
@@ -7291,6 +7384,7 @@ module UpdateIPSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -7331,6 +7425,7 @@ module UpdateIPSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IPSetId") in
       make ~updates ~changeToken ~iPSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates = field_map_exn json "Updates" IPSetUpdates.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -7466,6 +7561,7 @@ module UpdateGeoMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -7506,6 +7602,7 @@ module UpdateGeoMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GeoMatchSetId") in
       make ~updates ~changeToken ~geoMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates = field_map_exn json "Updates" GeoMatchSetUpdates.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -7632,6 +7729,7 @@ module UpdateByteMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -7672,6 +7770,7 @@ module UpdateByteMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ByteMatchSetId") in
       make ~updates ~changeToken ~byteMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updates = field_map_exn json "Updates" ByteMatchSetUpdates.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -7768,6 +7867,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7793,6 +7893,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
@@ -7897,6 +7998,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7920,6 +8022,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
@@ -7994,6 +8097,7 @@ module PutPermissionPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8022,6 +8126,7 @@ module PutPermissionPolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~policy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" PolicyString.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -8107,6 +8212,7 @@ module PutLoggingConfigurationResponse =
         (Option.map ~f:LoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "LoggingConfiguration") in
       make ?loggingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingConfiguration =
         field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
@@ -8133,6 +8239,7 @@ module PutLoggingConfigurationRequest =
         LoggingConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LoggingConfiguration") in
       make ~loggingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingConfiguration =
         field_map_exn json "LoggingConfiguration"
@@ -8202,6 +8309,7 @@ module ListXssMatchSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?xssMatchSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xssMatchSets =
         field_map json "XssMatchSets" XssMatchSetSummaries.of_json in
@@ -8231,6 +8339,7 @@ module ListXssMatchSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8296,6 +8405,7 @@ module ListWebACLsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?webACLs ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webACLs = field_map json "WebACLs" WebACLSummaries.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8325,6 +8435,7 @@ module ListWebACLsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8432,6 +8543,7 @@ module ListTagsForResourceResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?tagInfoForResource ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagInfoForResource =
         field_map json "TagInfoForResource" TagInfoForResource.of_json in
@@ -8466,6 +8578,7 @@ module ListTagsForResourceRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ~resourceARN ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
       let limit = field_map json "Limit" PaginationLimit.of_json in
@@ -8536,6 +8649,7 @@ module ListSubscribedRuleGroupsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?ruleGroups ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroups =
         field_map json "RuleGroups" SubscribedRuleGroupSummaries.of_json in
@@ -8566,6 +8680,7 @@ module ListSubscribedRuleGroupsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8636,6 +8751,7 @@ module ListSqlInjectionMatchSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?sqlInjectionMatchSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqlInjectionMatchSets =
         field_map json "SqlInjectionMatchSets"
@@ -8666,6 +8782,7 @@ module ListSqlInjectionMatchSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8735,6 +8852,7 @@ module ListSizeConstraintSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?sizeConstraintSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeConstraintSets =
         field_map json "SizeConstraintSets"
@@ -8766,6 +8884,7 @@ module ListSizeConstraintSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8831,6 +8950,7 @@ module ListRulesResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?rules ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map json "Rules" RuleSummaries.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8860,6 +8980,7 @@ module ListRulesRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8918,6 +9039,7 @@ module ListRuleGroupsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?ruleGroups ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroups = field_map json "RuleGroups" RuleGroupSummaries.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -8947,6 +9069,7 @@ module ListRuleGroupsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9031,6 +9154,7 @@ module ListResourcesForWebACLResponse =
         (Option.map ~f:ResourceArns.of_xml)
           (Xml.child xml_arg0 "ResourceArns") in
       make ?resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArns = field_map json "ResourceArns" ResourceArns.of_json in
       make ?resourceArns ()
@@ -9064,6 +9188,7 @@ module ListResourcesForWebACLRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ?resourceType ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let webACLId = field_map_exn json "WebACLId" ResourceId.of_json in
@@ -9132,6 +9257,7 @@ module ListRegexPatternSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?regexPatternSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexPatternSets =
         field_map json "RegexPatternSets" RegexPatternSetSummaries.of_json in
@@ -9162,6 +9288,7 @@ module ListRegexPatternSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9230,6 +9357,7 @@ module ListRegexMatchSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?regexMatchSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexMatchSets =
         field_map json "RegexMatchSets" RegexMatchSetSummaries.of_json in
@@ -9260,6 +9388,7 @@ module ListRegexMatchSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9325,6 +9454,7 @@ module ListRateBasedRulesResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?rules ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map json "Rules" RuleSummaries.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9354,6 +9484,7 @@ module ListRateBasedRulesRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9435,6 +9566,7 @@ module ListLoggingConfigurationsResponse =
         (Option.map ~f:LoggingConfigurations.of_xml)
           (Xml.child xml_arg0 "LoggingConfigurations") in
       make ?nextMarker ?loggingConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
       let loggingConfigurations =
@@ -9465,6 +9597,7 @@ module ListLoggingConfigurationsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9530,6 +9663,7 @@ module ListIPSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?iPSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iPSets = field_map json "IPSets" IPSetSummaries.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9559,6 +9693,7 @@ module ListIPSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9627,6 +9762,7 @@ module ListGeoMatchSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?geoMatchSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geoMatchSets =
         field_map json "GeoMatchSets" GeoMatchSetSummaries.of_json in
@@ -9657,6 +9793,7 @@ module ListGeoMatchSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9725,6 +9862,7 @@ module ListByteMatchSetsResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?byteMatchSets ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byteMatchSets =
         field_map json "ByteMatchSets" ByteMatchSetSummaries.of_json in
@@ -9755,6 +9893,7 @@ module ListByteMatchSetsRequest =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?limit ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9835,6 +9974,7 @@ module ListActivatedRulesInRuleGroupResponse =
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?activatedRules ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activatedRules =
         field_map json "ActivatedRules" ActivatedRules.of_json in
@@ -9873,6 +10013,7 @@ module ListActivatedRulesInRuleGroupRequest =
       let ruleGroupId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "RuleGroupId") in
       make ?limit ?nextMarker ?ruleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" PaginationLimit.of_json in
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
@@ -9945,6 +10086,7 @@ module GetXssMatchSetResponse =
       let xssMatchSet =
         (Option.map ~f:XssMatchSet.of_xml) (Xml.child xml_arg0 "XssMatchSet") in
       make ?xssMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xssMatchSet = field_map json "XssMatchSet" XssMatchSet.of_json in
       make ?xssMatchSet ()
@@ -9968,6 +10110,7 @@ module GetXssMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "XssMatchSetId") in
       make ~xssMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xssMatchSetId =
         field_map_exn json "XssMatchSetId" ResourceId.of_json in
@@ -10038,6 +10181,7 @@ module GetWebACLResponse =
       let webACL =
         (Option.map ~f:WebACL.of_xml) (Xml.child xml_arg0 "WebACL") in
       make ?webACL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webACL = field_map json "WebACL" WebACL.of_json in make ?webACL ()
     let to_json v = composed_to_json to_value v
@@ -10061,6 +10205,7 @@ module GetWebACLRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webACLId = field_map_exn json "WebACLId" ResourceId.of_json in
       make ~webACLId ()
@@ -10155,6 +10300,7 @@ module GetWebACLForResourceResponse =
         (Option.map ~f:WebACLSummary.of_xml)
           (Xml.child xml_arg0 "WebACLSummary") in
       make ?webACLSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webACLSummary =
         field_map json "WebACLSummary" WebACLSummary.of_json in
@@ -10180,6 +10326,7 @@ module GetWebACLForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -10253,6 +10400,7 @@ module GetSqlInjectionMatchSetResponse =
         (Option.map ~f:SqlInjectionMatchSet.of_xml)
           (Xml.child xml_arg0 "SqlInjectionMatchSet") in
       make ?sqlInjectionMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqlInjectionMatchSet =
         field_map json "SqlInjectionMatchSet" SqlInjectionMatchSet.of_json in
@@ -10278,6 +10426,7 @@ module GetSqlInjectionMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SqlInjectionMatchSetId") in
       make ~sqlInjectionMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqlInjectionMatchSetId =
         field_map_exn json "SqlInjectionMatchSetId" ResourceId.of_json in
@@ -10350,6 +10499,7 @@ module GetSizeConstraintSetResponse =
         (Option.map ~f:SizeConstraintSet.of_xml)
           (Xml.child xml_arg0 "SizeConstraintSet") in
       make ?sizeConstraintSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeConstraintSet =
         field_map json "SizeConstraintSet" SizeConstraintSet.of_json in
@@ -10376,6 +10526,7 @@ module GetSizeConstraintSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SizeConstraintSetId") in
       make ~sizeConstraintSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeConstraintSetId =
         field_map_exn json "SizeConstraintSetId" ResourceId.of_json in
@@ -10456,6 +10607,7 @@ module GetSampledRequestsResponse =
         (Option.map ~f:SampledHTTPRequests.of_xml)
           (Xml.child xml_arg0 "SampledRequests") in
       make ?timeWindow ?populationSize ?sampledRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeWindow = field_map json "TimeWindow" TimeWindow.of_json in
       let populationSize =
@@ -10508,6 +10660,7 @@ module GetSampledRequestsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebAclId") in
       make ~maxItems ~timeWindow ~ruleId ~webAclId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems =
         field_map_exn json "MaxItems" GetSampledRequestsMaxItems.of_json in
@@ -10580,6 +10733,7 @@ module GetRuleResponse =
     let of_xml xml_arg0 =
       let rule = (Option.map ~f:Rule.of_xml) (Xml.child xml_arg0 "Rule") in
       make ?rule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rule = field_map json "Rule" Rule.of_json in make ?rule ()
     let to_json v = composed_to_json to_value v
@@ -10601,6 +10755,7 @@ module GetRuleRequest =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleId = field_map_exn json "RuleId" ResourceId.of_json in
       make ~ruleId ()
@@ -10661,6 +10816,7 @@ module GetRuleGroupResponse =
       let ruleGroup =
         (Option.map ~f:RuleGroup.of_xml) (Xml.child xml_arg0 "RuleGroup") in
       make ?ruleGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroup = field_map json "RuleGroup" RuleGroup.of_json in
       make ?ruleGroup ()
@@ -10685,6 +10841,7 @@ module GetRuleGroupRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupId") in
       make ~ruleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroupId = field_map_exn json "RuleGroupId" ResourceId.of_json in
       make ~ruleGroupId ()
@@ -10757,6 +10914,7 @@ module GetRegexPatternSetResponse =
         (Option.map ~f:RegexPatternSet.of_xml)
           (Xml.child xml_arg0 "RegexPatternSet") in
       make ?regexPatternSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexPatternSet =
         field_map json "RegexPatternSet" RegexPatternSet.of_json in
@@ -10783,6 +10941,7 @@ module GetRegexPatternSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexPatternSetId") in
       make ~regexPatternSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexPatternSetId =
         field_map_exn json "RegexPatternSetId" ResourceId.of_json in
@@ -10856,6 +11015,7 @@ module GetRegexMatchSetResponse =
         (Option.map ~f:RegexMatchSet.of_xml)
           (Xml.child xml_arg0 "RegexMatchSet") in
       make ?regexMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexMatchSet =
         field_map json "RegexMatchSet" RegexMatchSet.of_json in
@@ -10881,6 +11041,7 @@ module GetRegexMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexMatchSetId") in
       make ~regexMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regexMatchSetId =
         field_map_exn json "RegexMatchSetId" ResourceId.of_json in
@@ -10952,6 +11113,7 @@ module GetRateBasedRuleResponse =
       let rule =
         (Option.map ~f:RateBasedRule.of_xml) (Xml.child xml_arg0 "Rule") in
       make ?rule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rule = field_map json "Rule" RateBasedRule.of_json in make ?rule ()
     let to_json v = composed_to_json to_value v
@@ -10973,6 +11135,7 @@ module GetRateBasedRuleRequest =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleId = field_map_exn json "RuleId" ResourceId.of_json in
       make ~ruleId ()
@@ -11060,6 +11223,7 @@ module GetRateBasedRuleManagedKeysResponse =
       let managedKeys =
         (Option.map ~f:ManagedKeys.of_xml) (Xml.child xml_arg0 "ManagedKeys") in
       make ?nextMarker ?managedKeys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
       let managedKeys = field_map json "ManagedKeys" ManagedKeys.of_json in
@@ -11090,6 +11254,7 @@ module GetRateBasedRuleManagedKeysRequest =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ?nextMarker ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextMarker = field_map json "NextMarker" NextMarker.of_json in
       let ruleId = field_map_exn json "RuleId" ResourceId.of_json in
@@ -11150,6 +11315,7 @@ module GetPermissionPolicyResponse =
       let policy =
         (Option.map ~f:PolicyString.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" PolicyString.of_json in
       make ?policy ()
@@ -11174,6 +11340,7 @@ module GetPermissionPolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -11236,6 +11403,7 @@ module GetLoggingConfigurationResponse =
         (Option.map ~f:LoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "LoggingConfiguration") in
       make ?loggingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingConfiguration =
         field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
@@ -11261,6 +11429,7 @@ module GetLoggingConfigurationRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -11329,6 +11498,7 @@ module GetIPSetResponse =
     let of_xml xml_arg0 =
       let iPSet = (Option.map ~f:IPSet.of_xml) (Xml.child xml_arg0 "IPSet") in
       make ?iPSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iPSet = field_map json "IPSet" IPSet.of_json in make ?iPSet ()
     let to_json v = composed_to_json to_value v
@@ -11352,6 +11522,7 @@ module GetIPSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IPSetId") in
       make ~iPSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iPSetId = field_map_exn json "IPSetId" ResourceId.of_json in
       make ~iPSetId ()
@@ -11422,6 +11593,7 @@ module GetGeoMatchSetResponse =
       let geoMatchSet =
         (Option.map ~f:GeoMatchSet.of_xml) (Xml.child xml_arg0 "GeoMatchSet") in
       make ?geoMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geoMatchSet = field_map json "GeoMatchSet" GeoMatchSet.of_json in
       make ?geoMatchSet ()
@@ -11446,6 +11618,7 @@ module GetGeoMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GeoMatchSetId") in
       make ~geoMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geoMatchSetId =
         field_map_exn json "GeoMatchSetId" ResourceId.of_json in
@@ -11508,6 +11681,7 @@ module GetChangeTokenStatusResponse =
         (Option.map ~f:ChangeTokenStatus.of_xml)
           (Xml.child xml_arg0 "ChangeTokenStatus") in
       make ?changeTokenStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeTokenStatus =
         field_map json "ChangeTokenStatus" ChangeTokenStatus.of_json in
@@ -11533,6 +11707,7 @@ module GetChangeTokenStatusRequest =
         ChangeToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeToken") in
       make ~changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       make ~changeToken ()
@@ -11582,6 +11757,7 @@ module GetChangeTokenResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -11596,6 +11772,7 @@ module GetChangeTokenRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11666,6 +11843,7 @@ module GetByteMatchSetResponse =
         (Option.map ~f:ByteMatchSet.of_xml)
           (Xml.child xml_arg0 "ByteMatchSet") in
       make ?byteMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byteMatchSet = field_map json "ByteMatchSet" ByteMatchSet.of_json in
       make ?byteMatchSet ()
@@ -11690,6 +11868,7 @@ module GetByteMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ByteMatchSetId") in
       make ~byteMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byteMatchSetId =
         field_map_exn json "ByteMatchSetId" ResourceId.of_json in
@@ -11764,6 +11943,7 @@ module DisassociateWebACLResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11786,6 +11966,7 @@ module DisassociateWebACLRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -11885,6 +12066,7 @@ module DeleteXssMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -11917,6 +12099,7 @@ module DeleteXssMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "XssMatchSetId") in
       make ~changeToken ~xssMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let xssMatchSetId =
@@ -12038,6 +12221,7 @@ module DeleteWebACLResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -12070,6 +12254,7 @@ module DeleteWebACLRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ~changeToken ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let webACLId = field_map_exn json "WebACLId" ResourceId.of_json in
@@ -12170,6 +12355,7 @@ module DeleteSqlInjectionMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -12203,6 +12389,7 @@ module DeleteSqlInjectionMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SqlInjectionMatchSetId") in
       make ~changeToken ~sqlInjectionMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let sqlInjectionMatchSetId =
@@ -12303,6 +12490,7 @@ module DeleteSizeConstraintSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -12336,6 +12524,7 @@ module DeleteSizeConstraintSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SizeConstraintSetId") in
       make ~changeToken ~sizeConstraintSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let sizeConstraintSetId =
@@ -12458,6 +12647,7 @@ module DeleteRuleResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -12488,6 +12678,7 @@ module DeleteRuleRequest =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~changeToken ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let ruleId = field_map_exn json "RuleId" ResourceId.of_json in
@@ -12610,6 +12801,7 @@ module DeleteRuleGroupResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -12642,6 +12834,7 @@ module DeleteRuleGroupRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupId") in
       make ~changeToken ~ruleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let ruleGroupId = field_map_exn json "RuleGroupId" ResourceId.of_json in
@@ -12742,6 +12935,7 @@ module DeleteRegexPatternSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -12775,6 +12969,7 @@ module DeleteRegexPatternSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexPatternSetId") in
       make ~changeToken ~regexPatternSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let regexPatternSetId =
@@ -12876,6 +13071,7 @@ module DeleteRegexMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -12908,6 +13104,7 @@ module DeleteRegexMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegexMatchSetId") in
       make ~changeToken ~regexMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let regexMatchSetId =
@@ -13030,6 +13227,7 @@ module DeleteRateBasedRuleResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -13060,6 +13258,7 @@ module DeleteRateBasedRuleRequest =
       let ruleId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleId") in
       make ~changeToken ~ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let ruleId = field_map_exn json "RuleId" ResourceId.of_json in
@@ -13122,6 +13321,7 @@ module DeletePermissionPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13144,6 +13344,7 @@ module DeletePermissionPolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -13205,6 +13406,7 @@ module DeleteLoggingConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13227,6 +13429,7 @@ module DeleteLoggingConfigurationRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -13326,6 +13529,7 @@ module DeleteIPSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -13358,6 +13562,7 @@ module DeleteIPSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IPSetId") in
       make ~changeToken ~iPSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let iPSetId = field_map_exn json "IPSetId" ResourceId.of_json in
@@ -13458,6 +13663,7 @@ module DeleteGeoMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -13490,6 +13696,7 @@ module DeleteGeoMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GeoMatchSetId") in
       make ~changeToken ~geoMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let geoMatchSetId =
@@ -13591,6 +13798,7 @@ module DeleteByteMatchSetResponse =
       let changeToken =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       make ?changeToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       make ?changeToken ()
@@ -13623,6 +13831,7 @@ module DeleteByteMatchSetRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ByteMatchSetId") in
       make ~changeToken ~byteMatchSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let byteMatchSetId =
@@ -13729,6 +13938,7 @@ module CreateXssMatchSetResponse =
       let xssMatchSet =
         (Option.map ~f:XssMatchSet.of_xml) (Xml.child xml_arg0 "XssMatchSet") in
       make ?changeToken ?xssMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let xssMatchSet = field_map json "XssMatchSet" XssMatchSet.of_json in
@@ -13759,6 +13969,7 @@ module CreateXssMatchSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -13893,6 +14104,7 @@ module CreateWebACLResponse =
       let webACL =
         (Option.map ~f:WebACL.of_xml) (Xml.child xml_arg0 "WebACL") in
       make ?changeToken ?webACL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let webACL = field_map json "WebACL" WebACL.of_json in
@@ -13947,6 +14159,7 @@ module CreateWebACLRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~changeToken ~defaultAction ~metricName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -14046,6 +14259,7 @@ module CreateWebACLMigrationStackResponse =
         S3ObjectUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3ObjectUrl") in
       make ~s3ObjectUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3ObjectUrl = field_map_exn json "S3ObjectUrl" S3ObjectUrl.of_json in
       make ~s3ObjectUrl ()
@@ -14088,6 +14302,7 @@ module CreateWebACLMigrationStackRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ~ignoreUnsupportedType ~s3BucketName ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ignoreUnsupportedType =
         field_map_exn json "IgnoreUnsupportedType"
@@ -14201,6 +14416,7 @@ module CreateSqlInjectionMatchSetResponse =
         (Option.map ~f:SqlInjectionMatchSet.of_xml)
           (Xml.child xml_arg0 "SqlInjectionMatchSet") in
       make ?changeToken ?sqlInjectionMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let sqlInjectionMatchSet =
@@ -14232,6 +14448,7 @@ module CreateSqlInjectionMatchSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -14340,6 +14557,7 @@ module CreateSizeConstraintSetResponse =
         (Option.map ~f:SizeConstraintSet.of_xml)
           (Xml.child xml_arg0 "SizeConstraintSet") in
       make ?changeToken ?sizeConstraintSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let sizeConstraintSet =
@@ -14372,6 +14590,7 @@ module CreateSizeConstraintSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -14496,6 +14715,7 @@ module CreateRuleResponse =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       let rule = (Option.map ~f:Rule.of_xml) (Xml.child xml_arg0 "Rule") in
       make ?changeToken ?rule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let rule = field_map json "Rule" Rule.of_json in
@@ -14541,6 +14761,7 @@ module CreateRuleRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~changeToken ~metricName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -14657,6 +14878,7 @@ module CreateRuleGroupResponse =
       let ruleGroup =
         (Option.map ~f:RuleGroup.of_xml) (Xml.child xml_arg0 "RuleGroup") in
       make ?changeToken ?ruleGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let ruleGroup = field_map json "RuleGroup" RuleGroup.of_json in
@@ -14702,6 +14924,7 @@ module CreateRuleGroupRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~changeToken ~metricName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -14791,6 +15014,7 @@ module CreateRegexPatternSetResponse =
         (Option.map ~f:RegexPatternSet.of_xml)
           (Xml.child xml_arg0 "RegexPatternSet") in
       make ?changeToken ?regexPatternSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let regexPatternSet =
@@ -14823,6 +15047,7 @@ module CreateRegexPatternSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -14911,6 +15136,7 @@ module CreateRegexMatchSetResponse =
         (Option.map ~f:RegexMatchSet.of_xml)
           (Xml.child xml_arg0 "RegexMatchSet") in
       make ?changeToken ?regexMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let regexMatchSet =
@@ -14943,6 +15169,7 @@ module CreateRegexMatchSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -15069,6 +15296,7 @@ module CreateRateBasedRuleResponse =
       let rule =
         (Option.map ~f:RateBasedRule.of_xml) (Xml.child xml_arg0 "Rule") in
       make ?changeToken ?rule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let rule = field_map json "Rule" RateBasedRule.of_json in
@@ -15130,6 +15358,7 @@ module CreateRateBasedRuleRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~changeToken ~rateLimit ~rateKey ~metricName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
@@ -15238,6 +15467,7 @@ module CreateIPSetResponse =
         (Option.map ~f:ChangeToken.of_xml) (Xml.child xml_arg0 "ChangeToken") in
       let iPSet = (Option.map ~f:IPSet.of_xml) (Xml.child xml_arg0 "IPSet") in
       make ?changeToken ?iPSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let iPSet = field_map json "IPSet" IPSet.of_json in
@@ -15269,6 +15499,7 @@ module CreateIPSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -15376,6 +15607,7 @@ module CreateGeoMatchSetResponse =
       let geoMatchSet =
         (Option.map ~f:GeoMatchSet.of_xml) (Xml.child xml_arg0 "GeoMatchSet") in
       make ?changeToken ?geoMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let geoMatchSet = field_map json "GeoMatchSet" GeoMatchSet.of_json in
@@ -15407,6 +15639,7 @@ module CreateGeoMatchSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -15516,6 +15749,7 @@ module CreateByteMatchSetResponse =
         (Option.map ~f:ByteMatchSet.of_xml)
           (Xml.child xml_arg0 "ByteMatchSet") in
       make ?changeToken ?byteMatchSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map json "ChangeToken" ChangeToken.of_json in
       let byteMatchSet = field_map json "ByteMatchSet" ByteMatchSet.of_json in
@@ -15547,6 +15781,7 @@ module CreateByteMatchSetRequest =
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~changeToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeToken = field_map_exn json "ChangeToken" ChangeToken.of_json in
       let name = field_map_exn json "Name" ResourceName.of_json in
@@ -15632,6 +15867,7 @@ module AssociateWebACLResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15661,6 +15897,7 @@ module AssociateWebACLRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLId") in
       make ~resourceArn ~webACLId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       let webACLId = field_map_exn json "WebACLId" ResourceId.of_json in

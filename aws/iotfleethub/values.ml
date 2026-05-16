@@ -279,6 +279,7 @@ module ApplicationSummary =
       make ?applicationState ?applicationLastUpdateDate
         ?applicationCreationDate ~applicationUrl ?applicationDescription
         ~applicationName ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationState =
         field_map json "applicationState" ApplicationState.of_json in
@@ -311,6 +312,7 @@ module ConflictException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -331,6 +333,7 @@ module InternalFailureException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -350,6 +353,7 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -369,6 +373,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -388,6 +393,7 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -586,6 +592,7 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -662,6 +669,7 @@ module UpdateApplicationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -713,6 +721,7 @@ module UpdateApplicationRequest =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?clientToken ?applicationDescription ?applicationName
         ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken =
         field_map json "clientToken" ClientRequestToken.of_json in
@@ -778,6 +787,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -806,6 +816,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -866,6 +877,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -891,6 +903,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -956,6 +969,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -977,6 +991,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -1053,6 +1068,7 @@ module ListApplicationsResponse =
         (Option.map ~f:ApplicationSummaries.of_xml)
           (Xml.child xml_arg0 "applicationSummaries") in
       make ?nextToken ?applicationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let applicationSummaries =
@@ -1076,6 +1092,7 @@ module ListApplicationsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       make ?nextToken ()
@@ -1252,6 +1269,7 @@ module DescribeApplicationResponse =
         ~applicationLastUpdateDate ~applicationCreationDate ~applicationState
         ~applicationUrl ?applicationDescription ~applicationName
         ~applicationArn ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let errorMessage__lc1 =
@@ -1293,6 +1311,7 @@ module DescribeApplicationRequest =
       let applicationId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationId = field_map_exn json "applicationId" Id.of_json in
       make ~applicationId ()
@@ -1361,6 +1380,7 @@ module DeleteApplicationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1390,6 +1410,7 @@ module DeleteApplicationRequest =
       let applicationId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?clientToken ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken =
         field_map json "clientToken" ClientRequestToken.of_json in
@@ -1474,6 +1495,7 @@ module CreateApplicationResponse =
       let applicationId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~applicationArn ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationArn = field_map_exn json "applicationArn" Arn.of_json in
       let applicationId = field_map_exn json "applicationId" Id.of_json in
@@ -1536,6 +1558,7 @@ module CreateApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ?tags ~roleArn ?clientToken ?applicationDescription
         ~applicationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let roleArn = field_map_exn json "roleArn" Arn.of_json in

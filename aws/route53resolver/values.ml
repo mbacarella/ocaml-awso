@@ -82,6 +82,7 @@ module TargetAddress =
       let port = (Option.map ~f:Port.of_xml) (Xml.child xml_arg0 "Port") in
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Ip") in
       make ?port ~ip ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let port = field_map json "Port" Port.of_json in
       let ip = field_map_exn json "Ip" Ip.of_json in make ?port ~ip ()
@@ -1177,6 +1178,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1318,6 +1320,7 @@ module ResolverRule =
       make ?modificationTime ?creationTime ?shareStatus ?ownerId
         ?resolverEndpointId ?targetIps ?name ?ruleType ?statusMessage ?status
         ?domainName ?arn ?creatorRequestId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modificationTime =
         field_map json "ModificationTime" Rfc3339TimeString.of_json in
@@ -1366,6 +1369,7 @@ module Filter =
       let name =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" FilterValues.of_json in
       let name = field_map json "Name" FilterName.of_json in
@@ -1430,6 +1434,7 @@ module ResolverRuleAssociation =
           (Xml.child xml_arg0 "ResolverRuleId") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?statusMessage ?status ?vPCId ?name ?resolverRuleId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "StatusMessage" StatusMessage.of_json in
@@ -1541,6 +1546,7 @@ module ResolverQueryLogConfig =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?creationTime ?creatorRequestId ?destinationArn ?name ?arn
         ?associationCount ?shareStatus ?status ?ownerId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime =
         field_map json "CreationTime" Rfc3339TimeString.of_json in
@@ -1641,6 +1647,7 @@ module ResolverQueryLogConfigAssociation =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?creationTime ?errorMessage ?error ?status ?resourceId
         ?resolverQueryLogConfigId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime =
         field_map json "CreationTime" Rfc3339TimeString.of_json in
@@ -1781,6 +1788,7 @@ module ResolverEndpoint =
       make ?modificationTime ?creationTime ?statusMessage ?status ?hostVPCId
         ?ipAddressCount ?direction ?securityGroupIds ?name ?arn
         ?creatorRequestId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modificationTime =
         field_map json "ModificationTime" Rfc3339TimeString.of_json in
@@ -1877,6 +1885,7 @@ module IpAddressResponse =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "IpId") in
       make ?modificationTime ?creationTime ?statusMessage ?status ?ip
         ?subnetId ?ipId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modificationTime =
         field_map json "ModificationTime" Rfc3339TimeString.of_json in
@@ -1932,6 +1941,7 @@ module ResolverDnssecConfig =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "OwnerId") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?validationStatus ?resourceId ?ownerId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validationStatus =
         field_map json "ValidationStatus"
@@ -1982,6 +1992,7 @@ module ResolverConfig =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?autodefinedReverse ?ownerId ?resourceId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autodefinedReverse =
         field_map json "AutodefinedReverse"
@@ -2118,6 +2129,7 @@ module FirewallRule =
         ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
         ?blockResponse ?action ?priority ?name ?firewallDomainListId
         ?firewallRuleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modificationTime =
         field_map json "ModificationTime" Rfc3339TimeString.of_json in
@@ -2193,6 +2205,7 @@ module FirewallRuleGroupMetadata =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?shareStatus ?creatorRequestId ?ownerId ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shareStatus = field_map json "ShareStatus" ShareStatus.of_json in
       let creatorRequestId =
@@ -2332,6 +2345,7 @@ module FirewallRuleGroupAssociation =
       make ?modificationTime ?creationTime ?creatorRequestId ?statusMessage
         ?status ?managedOwnerName ?mutationProtection ?priority ?name ?vpcId
         ?firewallRuleGroupId ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modificationTime =
         field_map json "ModificationTime" Rfc3339TimeString.of_json in
@@ -2402,6 +2416,7 @@ module FirewallDomainListMetadata =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?managedOwnerName ?creatorRequestId ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let managedOwnerName =
         field_map json "ManagedOwnerName" ServicePrinciple.of_json in
@@ -2452,6 +2467,7 @@ module FirewallConfig =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?firewallFailOpen ?ownerId ?resourceId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallFailOpen =
         field_map json "FirewallFailOpen" FirewallFailOpenStatus.of_json in
@@ -2548,6 +2564,7 @@ module IpAddressRequest =
       let subnetId =
         SubnetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SubnetId") in
       make ?ip ~subnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ip = field_map json "Ip" Ip.of_json in
       let subnetId = field_map_exn json "SubnetId" SubnetId.of_json in
@@ -2569,6 +2586,7 @@ module InternalServiceErrorException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2597,6 +2615,7 @@ module InvalidParameterException =
         ExceptionMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?fieldName ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldName = field_map json "FieldName" String_.of_json in
       let message = field_map_exn json "Message" ExceptionMessage.of_json in
@@ -2617,6 +2636,7 @@ module InvalidRequestException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2643,6 +2663,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -2670,6 +2691,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -2697,6 +2719,7 @@ module ResourceUnavailableException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -2717,6 +2740,7 @@ module ThrottlingException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2754,6 +2778,7 @@ module ResolverRuleConfig =
         (Option.map ~f:TargetList.of_xml) (Xml.child xml_arg0 "TargetIps") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?resolverEndpointId ?targetIps ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpointId =
         field_map json "ResolverEndpointId" ResourceId.of_json in
@@ -2777,6 +2802,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2849,6 +2875,7 @@ module ConflictException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2868,6 +2895,7 @@ module ValidationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -2986,6 +3014,7 @@ module InvalidTagException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -3042,6 +3071,7 @@ module InvalidPolicyDocument =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -3061,6 +3091,7 @@ module UnknownResourceException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -3121,6 +3152,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -3748,6 +3780,7 @@ module FirewallRuleGroup =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?modificationTime ?creationTime ?shareStatus ?creatorRequestId
         ?ownerId ?statusMessage ?status ?ruleCount ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modificationTime =
         field_map json "ModificationTime" Rfc3339TimeString.of_json in
@@ -3867,6 +3900,7 @@ module FirewallDomainList =
       make ?modificationTime ?creationTime ?creatorRequestId
         ?managedOwnerName ?statusMessage ?status ?domainCount ?name ?arn ?id
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modificationTime =
         field_map json "ModificationTime" Rfc3339TimeString.of_json in
@@ -3910,6 +3944,7 @@ module ResourceExistsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -3942,6 +3977,7 @@ module IpAddressUpdate =
       let ipId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "IpId") in
       make ?ip ?subnetId ?ipId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ip = field_map json "Ip" Ip.of_json in
       let subnetId = field_map json "SubnetId" SubnetId.of_json in
@@ -3971,6 +4007,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" String_.of_json in
       let message = field_map json "Message" String_.of_json in
@@ -4109,6 +4146,7 @@ module UpdateResolverRuleResponse =
         (Option.map ~f:ResolverRule.of_xml)
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
@@ -4139,6 +4177,7 @@ module UpdateResolverRuleRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~config ~resolverRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let config = field_map_exn json "Config" ResolverRuleConfig.of_json in
       let resolverRuleId =
@@ -4229,6 +4268,7 @@ module UpdateResolverEndpointResponse =
         (Option.map ~f:ResolverEndpoint.of_xml)
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpoint =
         field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
@@ -4261,6 +4301,7 @@ module UpdateResolverEndpointRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ?name ~resolverEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" Name.of_json in
       let resolverEndpointId =
@@ -4362,6 +4403,7 @@ module UpdateResolverDnssecConfigResponse =
         (Option.map ~f:ResolverDnssecConfig.of_xml)
           (Xml.child xml_arg0 "ResolverDNSSECConfig") in
       make ?resolverDNSSECConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverDNSSECConfig =
         field_map json "ResolverDNSSECConfig" ResolverDnssecConfig.of_json in
@@ -4395,6 +4437,7 @@ module UpdateResolverDnssecConfigRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~validation ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validation = field_map_exn json "Validation" Validation.of_json in
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
@@ -4514,6 +4557,7 @@ module UpdateResolverConfigResponse =
         (Option.map ~f:ResolverConfig.of_xml)
           (Xml.child xml_arg0 "ResolverConfig") in
       make ?resolverConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverConfig =
         field_map json "ResolverConfig" ResolverConfig.of_json in
@@ -4549,6 +4593,7 @@ module UpdateResolverConfigRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~autodefinedReverseFlag ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autodefinedReverseFlag =
         field_map_exn json "AutodefinedReverseFlag"
@@ -4649,6 +4694,7 @@ module UpdateFirewallRuleResponse =
         (Option.map ~f:FirewallRule.of_xml)
           (Xml.child xml_arg0 "FirewallRule") in
       make ?firewallRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRule = field_map json "FirewallRule" FirewallRule.of_json in
       make ?firewallRule ()
@@ -4749,6 +4795,7 @@ module UpdateFirewallRuleRequest =
       make ?name ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
         ?blockResponse ?action ?priority ~firewallDomainListId
         ~firewallRuleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" Name.of_json in
       let blockOverrideTtl =
@@ -4863,6 +4910,7 @@ module UpdateFirewallRuleGroupAssociationResponse =
         (Option.map ~f:FirewallRuleGroupAssociation.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupAssociation =
         field_map json "FirewallRuleGroupAssociation"
@@ -4920,6 +4968,7 @@ module UpdateFirewallRuleGroupAssociationRequest =
              "FirewallRuleGroupAssociationId") in
       make ?name ?mutationProtection ?priority
         ~firewallRuleGroupAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" Name.of_json in
       let mutationProtection =
@@ -5051,6 +5100,7 @@ module UpdateFirewallDomainsResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?statusMessage ?status ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "StatusMessage" StatusMessage.of_json in
@@ -5098,6 +5148,7 @@ module UpdateFirewallDomainsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~domains ~operation ~firewallDomainListId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domains = field_map_exn json "Domains" FirewallDomains.of_json in
       let operation =
@@ -5191,6 +5242,7 @@ module UpdateFirewallConfigResponse =
         (Option.map ~f:FirewallConfig.of_xml)
           (Xml.child xml_arg0 "FirewallConfig") in
       make ?firewallConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallConfig =
         field_map json "FirewallConfig" FirewallConfig.of_json in
@@ -5224,6 +5276,7 @@ module UpdateFirewallConfigRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~firewallFailOpen ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallFailOpen =
         field_map_exn json "FirewallFailOpen" FirewallFailOpenStatus.of_json in
@@ -5305,6 +5358,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from a specified resource."]
@@ -5333,6 +5387,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -5430,6 +5485,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more tags to a specified resource."]
@@ -5456,6 +5512,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -5534,6 +5591,7 @@ module PutResolverRulePolicyResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ReturnValue") in
       make ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnValue = field_map json "ReturnValue" Boolean.of_json in
       make ?returnValue ()
@@ -5564,6 +5622,7 @@ module PutResolverRulePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRulePolicy") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~resolverRulePolicy ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRulePolicy =
         field_map_exn json "ResolverRulePolicy" ResolverRulePolicy.of_json in
@@ -5662,6 +5721,7 @@ module PutResolverQueryLogConfigPolicyResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ReturnValue") in
       make ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnValue = field_map json "ReturnValue" Boolean.of_json in
       make ?returnValue ()
@@ -5697,6 +5757,7 @@ module PutResolverQueryLogConfigPolicyRequest =
              "ResolverQueryLogConfigPolicy") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~resolverQueryLogConfigPolicy ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigPolicy =
         field_map_exn json "ResolverQueryLogConfigPolicy"
@@ -5784,6 +5845,7 @@ module PutFirewallRuleGroupPolicyResponse =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ReturnValue") in
       make ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnValue = field_map json "ReturnValue" Boolean.of_json in
       make ?returnValue ()
@@ -5816,6 +5878,7 @@ module PutFirewallRuleGroupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupPolicy") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~firewallRuleGroupPolicy ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupPolicy =
         field_map_exn json "FirewallRuleGroupPolicy"
@@ -5920,6 +5983,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -5958,6 +6022,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ?maxResults ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6064,6 +6129,7 @@ module ListResolverRulesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverRules ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRules =
         field_map json "ResolverRules" ResolverRules.of_json in
@@ -6103,6 +6169,7 @@ module ListResolverRulesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6210,6 +6277,7 @@ module ListResolverRuleAssociationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverRuleAssociations ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleAssociations =
         field_map json "ResolverRuleAssociations"
@@ -6250,6 +6318,7 @@ module ListResolverRuleAssociationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6382,6 +6451,7 @@ module ListResolverQueryLogConfigsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverQueryLogConfigs ?totalFilteredCount ?totalCount
         ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigs =
         field_map json "ResolverQueryLogConfigs"
@@ -6440,6 +6510,7 @@ module ListResolverQueryLogConfigsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?sortOrder ?sortBy ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortOrder = field_map json "SortOrder" SortOrder.of_json in
       let sortBy = field_map json "SortBy" SortByKey.of_json in
@@ -6575,6 +6646,7 @@ module ListResolverQueryLogConfigAssociationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverQueryLogConfigAssociations ?totalFilteredCount
         ?totalCount ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigAssociations =
         field_map json "ResolverQueryLogConfigAssociations"
@@ -6633,6 +6705,7 @@ module ListResolverQueryLogConfigAssociationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?sortOrder ?sortBy ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortOrder = field_map json "SortOrder" SortOrder.of_json in
       let sortBy = field_map json "SortBy" SortByKey.of_json in
@@ -6741,6 +6814,7 @@ module ListResolverEndpointsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverEndpoints ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpoints =
         field_map json "ResolverEndpoints" ResolverEndpoints.of_json in
@@ -6780,6 +6854,7 @@ module ListResolverEndpointsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6885,6 +6960,7 @@ module ListResolverEndpointIpAddressesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?ipAddresses ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddresses =
         field_map json "IpAddresses" IpAddressesResponse.of_json in
@@ -6927,6 +7003,7 @@ module ListResolverEndpointIpAddressesRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ?nextToken ?maxResults ~resolverEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7036,6 +7113,7 @@ module ListResolverDnssecConfigsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverDnssecConfigs ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverDnssecConfigs =
         field_map json "ResolverDnssecConfigs"
@@ -7075,6 +7153,7 @@ module ListResolverDnssecConfigsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7182,6 +7261,7 @@ module ListResolverConfigsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverConfigs ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverConfigs =
         field_map json "ResolverConfigs" ResolverConfigList.of_json in
@@ -7215,6 +7295,7 @@ module ListResolverConfigsRequest =
         (Option.map ~f:ListResolverConfigsMaxResult.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -7313,6 +7394,7 @@ module ListFirewallRulesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallRules ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRules =
         field_map json "FirewallRules" FirewallRules.of_json in
@@ -7376,6 +7458,7 @@ module ListFirewallRulesRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       make ?nextToken ?maxResults ?action ?priority ~firewallRuleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7469,6 +7552,7 @@ module ListFirewallRuleGroupsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallRuleGroups ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroups =
         field_map json "FirewallRuleGroups"
@@ -7501,6 +7585,7 @@ module ListFirewallRuleGroupsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7591,6 +7676,7 @@ module ListFirewallRuleGroupAssociationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallRuleGroupAssociations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupAssociations =
         field_map json "FirewallRuleGroupAssociations"
@@ -7665,6 +7751,7 @@ module ListFirewallRuleGroupAssociationsRequest =
           (Xml.child xml_arg0 "FirewallRuleGroupId") in
       make ?nextToken ?maxResults ?status ?priority ?vpcId
         ?firewallRuleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7766,6 +7853,7 @@ module ListFirewallDomainsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?domains ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domains = field_map json "Domains" FirewallDomains.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7809,6 +7897,7 @@ module ListFirewallDomainsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ?nextToken ?maxResults ~firewallDomainListId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -7902,6 +7991,7 @@ module ListFirewallDomainListsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallDomainLists ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallDomainLists =
         field_map json "FirewallDomainLists"
@@ -7934,6 +8024,7 @@ module ListFirewallDomainListsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -8022,6 +8113,7 @@ module ListFirewallConfigsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallConfigs ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallConfigs =
         field_map json "FirewallConfigs" FirewallConfigList.of_json in
@@ -8055,6 +8147,7 @@ module ListFirewallConfigsRequest =
         (Option.map ~f:ListFirewallConfigsMaxResult.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -8181,6 +8274,7 @@ module ImportFirewallDomainsResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?statusMessage ?status ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "StatusMessage" StatusMessage.of_json in
@@ -8229,6 +8323,7 @@ module ImportFirewallDomainsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~domainFileUrl ~operation ~firewallDomainListId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainFileUrl =
         field_map_exn json "DomainFileUrl" DomainListFileUrl.of_json in
@@ -8314,6 +8409,7 @@ module GetResolverRuleResponse =
         (Option.map ~f:ResolverRule.of_xml)
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
@@ -8338,6 +8434,7 @@ module GetResolverRuleRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~resolverRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleId =
         field_map_exn json "ResolverRuleId" ResourceId.of_json in
@@ -8410,6 +8507,7 @@ module GetResolverRulePolicyResponse =
         (Option.map ~f:ResolverRulePolicy.of_xml)
           (Xml.child xml_arg0 "ResolverRulePolicy") in
       make ?resolverRulePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRulePolicy =
         field_map json "ResolverRulePolicy" ResolverRulePolicy.of_json in
@@ -8432,6 +8530,7 @@ module GetResolverRulePolicyRequest =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -8512,6 +8611,7 @@ module GetResolverRuleAssociationResponse =
         (Option.map ~f:ResolverRuleAssociation.of_xml)
           (Xml.child xml_arg0 "ResolverRuleAssociation") in
       make ?resolverRuleAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleAssociation =
         field_map json "ResolverRuleAssociation"
@@ -8541,6 +8641,7 @@ module GetResolverRuleAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResolverRuleAssociationId") in
       make ~resolverRuleAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleAssociationId =
         field_map_exn json "ResolverRuleAssociationId" ResourceId.of_json in
@@ -8641,6 +8742,7 @@ module GetResolverQueryLogConfigResponse =
         (Option.map ~f:ResolverQueryLogConfig.of_xml)
           (Xml.child xml_arg0 "ResolverQueryLogConfig") in
       make ?resolverQueryLogConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfig =
         field_map json "ResolverQueryLogConfig"
@@ -8670,6 +8772,7 @@ module GetResolverQueryLogConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResolverQueryLogConfigId") in
       make ~resolverQueryLogConfigId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigId =
         field_map_exn json "ResolverQueryLogConfigId" ResourceId.of_json in
@@ -8762,6 +8865,7 @@ module GetResolverQueryLogConfigPolicyResponse =
         (Option.map ~f:ResolverQueryLogConfigPolicy.of_xml)
           (Xml.child xml_arg0 "ResolverQueryLogConfigPolicy") in
       make ?resolverQueryLogConfigPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigPolicy =
         field_map json "ResolverQueryLogConfigPolicy"
@@ -8785,6 +8889,7 @@ module GetResolverQueryLogConfigPolicyRequest =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -8885,6 +8990,7 @@ module GetResolverQueryLogConfigAssociationResponse =
         (Option.map ~f:ResolverQueryLogConfigAssociation.of_xml)
           (Xml.child xml_arg0 "ResolverQueryLogConfigAssociation") in
       make ?resolverQueryLogConfigAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigAssociation =
         field_map json "ResolverQueryLogConfigAssociation"
@@ -8914,6 +9020,7 @@ module GetResolverQueryLogConfigAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResolverQueryLogConfigAssociationId") in
       make ~resolverQueryLogConfigAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigAssociationId =
         field_map_exn json "ResolverQueryLogConfigAssociationId"
@@ -8996,6 +9103,7 @@ module GetResolverEndpointResponse =
         (Option.map ~f:ResolverEndpoint.of_xml)
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpoint =
         field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
@@ -9022,6 +9130,7 @@ module GetResolverEndpointRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~resolverEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpointId =
         field_map_exn json "ResolverEndpointId" ResourceId.of_json in
@@ -9122,6 +9231,7 @@ module GetResolverDnssecConfigResponse =
         (Option.map ~f:ResolverDnssecConfig.of_xml)
           (Xml.child xml_arg0 "ResolverDNSSECConfig") in
       make ?resolverDNSSECConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverDNSSECConfig =
         field_map json "ResolverDNSSECConfig" ResolverDnssecConfig.of_json in
@@ -9147,6 +9257,7 @@ module GetResolverDnssecConfigRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
       make ~resourceId ()
@@ -9236,6 +9347,7 @@ module GetResolverConfigResponse =
         (Option.map ~f:ResolverConfig.of_xml)
           (Xml.child xml_arg0 "ResolverConfig") in
       make ?resolverConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverConfig =
         field_map json "ResolverConfig" ResolverConfig.of_json in
@@ -9261,6 +9373,7 @@ module GetResolverConfigRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
       make ~resourceId ()
@@ -9341,6 +9454,7 @@ module GetFirewallRuleGroupResponse =
         (Option.map ~f:FirewallRuleGroup.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroup") in
       make ?firewallRuleGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroup =
         field_map json "FirewallRuleGroup" FirewallRuleGroup.of_json in
@@ -9365,6 +9479,7 @@ module GetFirewallRuleGroupRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       make ~firewallRuleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupId =
         field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
@@ -9455,6 +9570,7 @@ module GetFirewallRuleGroupPolicyResponse =
         (Option.map ~f:FirewallRuleGroupPolicy.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroupPolicy") in
       make ?firewallRuleGroupPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupPolicy =
         field_map json "FirewallRuleGroupPolicy"
@@ -9477,6 +9593,7 @@ module GetFirewallRuleGroupPolicyRequest =
     let of_xml xml_arg0 =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -9557,6 +9674,7 @@ module GetFirewallRuleGroupAssociationResponse =
         (Option.map ~f:FirewallRuleGroupAssociation.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupAssociation =
         field_map json "FirewallRuleGroupAssociation"
@@ -9585,6 +9703,7 @@ module GetFirewallRuleGroupAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "FirewallRuleGroupAssociationId") in
       make ~firewallRuleGroupAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupAssociationId =
         field_map_exn json "FirewallRuleGroupAssociationId"
@@ -9666,6 +9785,7 @@ module GetFirewallDomainListResponse =
         (Option.map ~f:FirewallDomainList.of_xml)
           (Xml.child xml_arg0 "FirewallDomainList") in
       make ?firewallDomainList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallDomainList =
         field_map json "FirewallDomainList" FirewallDomainList.of_json in
@@ -9690,6 +9810,7 @@ module GetFirewallDomainListRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~firewallDomainListId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallDomainListId =
         field_map_exn json "FirewallDomainListId" ResourceId.of_json in
@@ -9779,6 +9900,7 @@ module GetFirewallConfigResponse =
         (Option.map ~f:FirewallConfig.of_xml)
           (Xml.child xml_arg0 "FirewallConfig") in
       make ?firewallConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallConfig =
         field_map json "FirewallConfig" FirewallConfig.of_json in
@@ -9804,6 +9926,7 @@ module GetFirewallConfigRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
       make ~resourceId ()
@@ -9885,6 +10008,7 @@ module DisassociateResolverRuleResponse =
         (Option.map ~f:ResolverRuleAssociation.of_xml)
           (Xml.child xml_arg0 "ResolverRuleAssociation") in
       make ?resolverRuleAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleAssociation =
         field_map json "ResolverRuleAssociation"
@@ -9918,6 +10042,7 @@ module DisassociateResolverRuleRequest =
       let vPCId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VPCId") in
       make ~resolverRuleId ~vPCId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleId =
         field_map_exn json "ResolverRuleId" ResourceId.of_json in
@@ -10021,6 +10146,7 @@ module DisassociateResolverQueryLogConfigResponse =
         (Option.map ~f:ResolverQueryLogConfigAssociation.of_xml)
           (Xml.child xml_arg0 "ResolverQueryLogConfigAssociation") in
       make ?resolverQueryLogConfigAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigAssociation =
         field_map json "ResolverQueryLogConfigAssociation"
@@ -10057,6 +10183,7 @@ module DisassociateResolverQueryLogConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResolverQueryLogConfigId") in
       make ~resourceId ~resolverQueryLogConfigId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
       let resolverQueryLogConfigId =
@@ -10157,6 +10284,7 @@ module DisassociateResolverEndpointIpAddressResponse =
         (Option.map ~f:ResolverEndpoint.of_xml)
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpoint =
         field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
@@ -10191,6 +10319,7 @@ module DisassociateResolverEndpointIpAddressRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~ipAddress ~resolverEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddress = field_map_exn json "IpAddress" IpAddressUpdate.of_json in
       let resolverEndpointId =
@@ -10293,6 +10422,7 @@ module DisassociateFirewallRuleGroupResponse =
         (Option.map ~f:FirewallRuleGroupAssociation.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupAssociation =
         field_map json "FirewallRuleGroupAssociation"
@@ -10321,6 +10451,7 @@ module DisassociateFirewallRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "FirewallRuleGroupAssociationId") in
       make ~firewallRuleGroupAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupAssociationId =
         field_map_exn json "FirewallRuleGroupAssociationId"
@@ -10412,6 +10543,7 @@ module DeleteResolverRuleResponse =
         (Option.map ~f:ResolverRule.of_xml)
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
@@ -10435,6 +10567,7 @@ module DeleteResolverRuleRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~resolverRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleId =
         field_map_exn json "ResolverRuleId" ResourceId.of_json in
@@ -10535,6 +10668,7 @@ module DeleteResolverQueryLogConfigResponse =
         (Option.map ~f:ResolverQueryLogConfig.of_xml)
           (Xml.child xml_arg0 "ResolverQueryLogConfig") in
       make ?resolverQueryLogConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfig =
         field_map json "ResolverQueryLogConfig"
@@ -10564,6 +10698,7 @@ module DeleteResolverQueryLogConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResolverQueryLogConfigId") in
       make ~resolverQueryLogConfigId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigId =
         field_map_exn json "ResolverQueryLogConfigId" ResourceId.of_json in
@@ -10654,6 +10789,7 @@ module DeleteResolverEndpointResponse =
         (Option.map ~f:ResolverEndpoint.of_xml)
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpoint =
         field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
@@ -10680,6 +10816,7 @@ module DeleteResolverEndpointRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~resolverEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpointId =
         field_map_exn json "ResolverEndpointId" ResourceId.of_json in
@@ -10761,6 +10898,7 @@ module DeleteFirewallRuleResponse =
         (Option.map ~f:FirewallRule.of_xml)
           (Xml.child xml_arg0 "FirewallRule") in
       make ?firewallRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRule = field_map json "FirewallRule" FirewallRule.of_json in
       make ?firewallRule ()
@@ -10794,6 +10932,7 @@ module DeleteFirewallRuleRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       make ~firewallDomainListId ~firewallRuleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallDomainListId =
         field_map_exn json "FirewallDomainListId" ResourceId.of_json in
@@ -10894,6 +11033,7 @@ module DeleteFirewallRuleGroupResponse =
         (Option.map ~f:FirewallRuleGroup.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroup") in
       make ?firewallRuleGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroup =
         field_map json "FirewallRuleGroup" FirewallRuleGroup.of_json in
@@ -10919,6 +11059,7 @@ module DeleteFirewallRuleGroupRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       make ~firewallRuleGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupId =
         field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
@@ -11007,6 +11148,7 @@ module DeleteFirewallDomainListResponse =
         (Option.map ~f:FirewallDomainList.of_xml)
           (Xml.child xml_arg0 "FirewallDomainList") in
       make ?firewallDomainList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallDomainList =
         field_map json "FirewallDomainList" FirewallDomainList.of_json in
@@ -11031,6 +11173,7 @@ module DeleteFirewallDomainListRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~firewallDomainListId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallDomainListId =
         field_map_exn json "FirewallDomainListId" ResourceId.of_json in
@@ -11149,6 +11292,7 @@ module CreateResolverRuleResponse =
         (Option.map ~f:ResolverRule.of_xml)
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
@@ -11229,6 +11373,7 @@ module CreateResolverRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
       make ?tags ?resolverEndpointId ?targetIps ~domainName ~ruleType ?name
         ~creatorRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let resolverEndpointId =
@@ -11355,6 +11500,7 @@ module CreateResolverQueryLogConfigResponse =
         (Option.map ~f:ResolverQueryLogConfig.of_xml)
           (Xml.child xml_arg0 "ResolverQueryLogConfig") in
       make ?resolverQueryLogConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfig =
         field_map json "ResolverQueryLogConfig"
@@ -11405,6 +11551,7 @@ module CreateResolverQueryLogConfigRequest =
         ResolverQueryLogConfigName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~creatorRequestId ~destinationArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let creatorRequestId =
@@ -11517,6 +11664,7 @@ module CreateResolverEndpointResponse =
         (Option.map ~f:ResolverEndpoint.of_xml)
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpoint =
         field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
@@ -11591,6 +11739,7 @@ module CreateResolverEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
       make ?tags ~ipAddresses ~direction ~securityGroupIds ?name
         ~creatorRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let ipAddresses =
@@ -11698,6 +11847,7 @@ module CreateFirewallRuleResponse =
         (Option.map ~f:FirewallRule.of_xml)
           (Xml.child xml_arg0 "FirewallRule") in
       make ?firewallRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRule = field_map json "FirewallRule" FirewallRule.of_json in
       make ?firewallRule ()
@@ -11813,6 +11963,7 @@ module CreateFirewallRuleRequest =
       make ~name ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
         ?blockResponse ~action ~priority ~firewallDomainListId
         ~firewallRuleGroupId ~creatorRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in
       let blockOverrideTtl =
@@ -11920,6 +12071,7 @@ module CreateFirewallRuleGroupResponse =
         (Option.map ~f:FirewallRuleGroup.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroup") in
       make ?firewallRuleGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroup =
         field_map json "FirewallRuleGroup" FirewallRuleGroup.of_json in
@@ -11959,6 +12111,7 @@ module CreateFirewallRuleGroupRequest =
         CreatorRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
       make ?tags ~name ~creatorRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -12050,6 +12203,7 @@ module CreateFirewallDomainListResponse =
         (Option.map ~f:FirewallDomainList.of_xml)
           (Xml.child xml_arg0 "FirewallDomainList") in
       make ?firewallDomainList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallDomainList =
         field_map json "FirewallDomainList" FirewallDomainList.of_json in
@@ -12089,6 +12243,7 @@ module CreateFirewallDomainListRequest =
         CreatorRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
       make ?tags ~name ~creatorRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -12211,6 +12366,7 @@ module AssociateResolverRuleResponse =
         (Option.map ~f:ResolverRuleAssociation.of_xml)
           (Xml.child xml_arg0 "ResolverRuleAssociation") in
       make ?resolverRuleAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverRuleAssociation =
         field_map json "ResolverRuleAssociation"
@@ -12250,6 +12406,7 @@ module AssociateResolverRuleRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~vPCId ?name ~resolverRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPCId = field_map_exn json "VPCId" ResourceId.of_json in
       let name = field_map json "Name" Name.of_json in
@@ -12372,6 +12529,7 @@ module AssociateResolverQueryLogConfigResponse =
         (Option.map ~f:ResolverQueryLogConfigAssociation.of_xml)
           (Xml.child xml_arg0 "ResolverQueryLogConfigAssociation") in
       make ?resolverQueryLogConfigAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverQueryLogConfigAssociation =
         field_map json "ResolverQueryLogConfigAssociation"
@@ -12408,6 +12566,7 @@ module AssociateResolverQueryLogConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResolverQueryLogConfigId") in
       make ~resourceId ~resolverQueryLogConfigId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
       let resolverQueryLogConfigId =
@@ -12517,6 +12676,7 @@ module AssociateResolverEndpointIpAddressResponse =
         (Option.map ~f:ResolverEndpoint.of_xml)
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resolverEndpoint =
         field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
@@ -12551,6 +12711,7 @@ module AssociateResolverEndpointIpAddressRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~ipAddress ~resolverEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddress = field_map_exn json "IpAddress" IpAddressUpdate.of_json in
       let resolverEndpointId =
@@ -12662,6 +12823,7 @@ module AssociateFirewallRuleGroupResponse =
         (Option.map ~f:FirewallRuleGroupAssociation.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallRuleGroupAssociation =
         field_map json "FirewallRuleGroupAssociation"
@@ -12745,6 +12907,7 @@ module AssociateFirewallRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
       make ?tags ?mutationProtection ~name ~priority ~vpcId
         ~firewallRuleGroupId ~creatorRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let mutationProtection =

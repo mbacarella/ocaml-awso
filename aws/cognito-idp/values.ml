@@ -404,6 +404,7 @@ module AccountTakeoverActionType =
         AccountTakeoverActionNotifyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Notify") in
       make ~eventAction ~notify ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventAction =
         field_map_exn json "EventAction"
@@ -447,6 +448,7 @@ module NotifyEmailType =
         EmailNotificationSubjectType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
       make ?textBody ?htmlBody ~subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let textBody =
         field_map json "TextBody" EmailNotificationBodyType.of_json in
@@ -536,6 +538,7 @@ module AttributeType =
         AttributeNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" AttributeValueType.of_json in
       let name = field_map_exn json "Name" AttributeNameType.of_json in
@@ -569,6 +572,7 @@ module MFAOptionType =
         (Option.map ~f:DeliveryMediumType.of_xml)
           (Xml.child xml_arg0 "DeliveryMedium") in
       make ?attributeName ?deliveryMedium ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeName =
         field_map json "AttributeName" AttributeNameType.of_json in
@@ -605,6 +609,7 @@ module CustomEmailLambdaVersionConfigType =
         CustomEmailSenderLambdaVersionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LambdaVersion") in
       make ~lambdaArn ~lambdaVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaArn = field_map_exn json "LambdaArn" ArnType.of_json in
       let lambdaVersion =
@@ -639,6 +644,7 @@ module CustomSMSLambdaVersionConfigType =
         CustomSMSSenderLambdaVersionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LambdaVersion") in
       make ~lambdaArn ~lambdaVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lambdaArn = field_map_exn json "LambdaArn" ArnType.of_json in
       let lambdaVersion =
@@ -674,6 +680,7 @@ module ResourceServerScopeType =
         ResourceServerScopeNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScopeName") in
       make ~scopeDescription ~scopeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scopeDescription =
         field_map_exn json "ScopeDescription"
@@ -707,6 +714,7 @@ module RecoveryOptionType =
         PriorityType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Priority") in
       make ~name ~priority ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" RecoveryOptionNameType.of_json in
       let priority = field_map_exn json "Priority" PriorityType.of_json in
@@ -867,6 +875,7 @@ module NumberAttributeConstraintsType =
       let minValue =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "MinValue") in
       make ?maxValue ?minValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxValue = field_map json "MaxValue" StringType.of_json in
       let minValue = field_map json "MinValue" StringType.of_json in
@@ -893,6 +902,7 @@ module StringAttributeConstraintsType =
       let minLength =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "MinLength") in
       make ?maxLength ?minLength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxLength = field_map json "MaxLength" StringType.of_json in
       let minLength = field_map json "MinLength" StringType.of_json in
@@ -963,6 +973,7 @@ module ChallengeResponseType =
         (Option.map ~f:ChallengeName.of_xml)
           (Xml.child xml_arg0 "ChallengeName") in
       make ?challengeResponse ?challengeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let challengeResponse =
         field_map json "ChallengeResponse" ChallengeResponse.of_json in
@@ -1370,6 +1381,7 @@ module AccountTakeoverActionsType =
         (Option.map ~f:AccountTakeoverActionType.of_xml)
           (Xml.child xml_arg0 "LowAction") in
       make ?highAction ?mediumAction ?lowAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let highAction =
         field_map json "HighAction" AccountTakeoverActionType.of_json in
@@ -1445,6 +1457,7 @@ module NotifyConfigurationType =
       let from =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "From") in
       make ?mfaEmail ?noActionEmail ?blockEmail ~sourceArn ?replyTo ?from ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mfaEmail = field_map json "MfaEmail" NotifyEmailType.of_json in
       let noActionEmail =
@@ -1475,6 +1488,7 @@ module CompromisedCredentialsActionsType =
         CompromisedCredentialsEventActionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventAction") in
       make ~eventAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventAction =
         field_map_exn json "EventAction"
@@ -1817,6 +1831,7 @@ module LambdaConfigType =
         ?preTokenGeneration ?verifyAuthChallengeResponse ?createAuthChallenge
         ?defineAuthChallenge ?postAuthentication ?preAuthentication
         ?postConfirmation ?customMessage ?preSignUp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSKeyID = field_map json "KMSKeyID" ArnType.of_json in
       let customEmailSender =
@@ -2333,6 +2348,7 @@ module MessageTemplateType =
         (Option.map ~f:SmsVerificationMessageType.of_xml)
           (Xml.child xml_arg0 "SMSMessage") in
       make ?emailSubject ?emailMessage ?sMSMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailSubject =
         field_map json "EmailSubject" EmailVerificationSubjectType.of_json in
@@ -2515,6 +2531,7 @@ module SchemaAttributeType =
           (Xml.child xml_arg0 "Name") in
       make ?stringAttributeConstraints ?numberAttributeConstraints ?required
         ?mutable_ ?developerOnlyAttribute ?attributeDataType ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringAttributeConstraints =
         field_map json "StringAttributeConstraints"
@@ -2639,6 +2656,7 @@ module PasswordPolicyType =
           (Xml.child xml_arg0 "MinimumLength") in
       make ?temporaryPasswordValidityDays ?requireSymbols ?requireNumbers
         ?requireLowercase ?requireUppercase ?minimumLength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let temporaryPasswordValidityDays =
         field_map json "TemporaryPasswordValidityDays"
@@ -2839,6 +2857,7 @@ module HttpHeader =
       let headerName =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "headerName") in
       make ?headerValue ?headerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headerValue = field_map json "headerValue" StringType.of_json in
       let headerName = field_map json "headerName" StringType.of_json in
@@ -2906,6 +2925,7 @@ module EventContextDataType =
       let ipAddress =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "IpAddress") in
       make ?country ?city ?timezone ?deviceName ?ipAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let country = field_map json "Country" StringType.of_json in
       let city = field_map json "City" StringType.of_json in
@@ -2945,6 +2965,7 @@ module EventFeedbackType =
         FeedbackValueType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeedbackValue") in
       make ?feedbackDate ~provider ~feedbackValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let feedbackDate = field_map json "FeedbackDate" DateType.of_json in
       let provider = field_map_exn json "Provider" StringType.of_json in
@@ -3013,6 +3034,7 @@ module EventRiskType =
         (Option.map ~f:RiskDecisionType.of_xml)
           (Xml.child xml_arg0 "RiskDecision") in
       make ?compromisedCredentialsDetected ?riskLevel ?riskDecision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compromisedCredentialsDetected =
         field_map json "CompromisedCredentialsDetected"
@@ -3138,6 +3160,7 @@ module AnalyticsConfigurationType =
           (Xml.child xml_arg0 "ApplicationId") in
       make ?userDataShared ?externalId ?roleArn ?applicationArn
         ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userDataShared =
         field_map json "UserDataShared" BooleanType.of_json in
@@ -3462,6 +3485,7 @@ module TokenValidityUnitsType =
         (Option.map ~f:TimeUnitsType.of_xml)
           (Xml.child xml_arg0 "AccessToken") in
       make ?refreshToken ?idToken ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let refreshToken = field_map json "RefreshToken" TimeUnitsType.of_json in
       let idToken = field_map json "IdToken" TimeUnitsType.of_json in
@@ -3502,6 +3526,7 @@ module CodeDeliveryDetailsType =
       let destination =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "Destination") in
       make ?attributeName ?deliveryMedium ?destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeName =
         field_map json "AttributeName" AttributeNameType.of_json in
@@ -3631,6 +3656,7 @@ module SmsConfigurationType =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SnsCallerArn") in
       make ?snsRegion ?externalId ~snsCallerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsRegion = field_map json "SnsRegion" RegionCodeType.of_json in
       let externalId = field_map json "ExternalId" StringType.of_json in
@@ -3705,6 +3731,7 @@ module AccountTakeoverRiskConfigurationType =
         (Option.map ~f:NotifyConfigurationType.of_xml)
           (Xml.child xml_arg0 "NotifyConfiguration") in
       make ~actions ?notifyConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions =
         field_map_exn json "Actions" AccountTakeoverActionsType.of_json in
@@ -3742,6 +3769,7 @@ module CompromisedCredentialsRiskConfigurationType =
         (Option.map ~f:EventFiltersType.of_xml)
           (Xml.child xml_arg0 "EventFilter") in
       make ~actions ?eventFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions =
         field_map_exn json "Actions"
@@ -3779,6 +3807,7 @@ module RiskExceptionConfigurationType =
         (Option.map ~f:BlockedIPRangeListType.of_xml)
           (Xml.child xml_arg0 "BlockedIPRangeList") in
       make ?skippedIPRangeList ?blockedIPRangeList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skippedIPRangeList =
         field_map json "SkippedIPRangeList" SkippedIPRangeListType.of_json in
@@ -3824,6 +3853,7 @@ module NewDeviceMetadataType =
       let deviceKey =
         (Option.map ~f:DeviceKeyType.of_xml) (Xml.child xml_arg0 "DeviceKey") in
       make ?deviceGroupKey ?deviceKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceGroupKey = field_map json "DeviceGroupKey" StringType.of_json in
       let deviceKey = field_map json "DeviceKey" DeviceKeyType.of_json in
@@ -3917,6 +3947,7 @@ module UserType =
         (Option.map ~f:UsernameType.of_xml) (Xml.child xml_arg0 "Username") in
       make ?mFAOptions ?userStatus ?enabled ?userLastModifiedDate
         ?userCreateDate ?attributes ?username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mFAOptions = field_map json "MFAOptions" MFAOptionListType.of_json in
       let userStatus = field_map json "UserStatus" UserStatusType.of_json in
@@ -3989,6 +4020,7 @@ module UserPoolDescriptionType =
       let id =
         (Option.map ~f:UserPoolIdType.of_xml) (Xml.child xml_arg0 "Id") in
       make ?creationDate ?lastModifiedDate ?status ?lambdaConfig ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" DateType.of_json in
       let lastModifiedDate =
@@ -4031,6 +4063,7 @@ module UserPoolClientDescription =
       let clientId =
         (Option.map ~f:ClientIdType.of_xml) (Xml.child xml_arg0 "ClientId") in
       make ?clientName ?userPoolId ?clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientName = field_map json "ClientName" ClientNameType.of_json in
       let userPoolId = field_map json "UserPoolId" UserPoolIdType.of_json in
@@ -4159,6 +4192,7 @@ module UserImportJobType =
       make ?completionMessage ?failedUsers ?skippedUsers ?importedUsers
         ?cloudWatchLogsRoleArn ?status ?completionDate ?startDate
         ?creationDate ?preSignedUrl ?userPoolId ?jobId ?jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let completionMessage =
         field_map json "CompletionMessage" CompletionMessageType.of_json in
@@ -4222,6 +4256,7 @@ module ResourceServerType =
         (Option.map ~f:UserPoolIdType.of_xml)
           (Xml.child xml_arg0 "UserPoolId") in
       make ?scopes ?name ?identifier ?userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scopes =
         field_map json "Scopes" ResourceServerScopeListType.of_json in
@@ -4274,6 +4309,7 @@ module ProviderDescription =
         (Option.map ~f:ProviderNameType.of_xml)
           (Xml.child xml_arg0 "ProviderName") in
       make ?creationDate ?lastModifiedDate ?providerType ?providerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" DateType.of_json in
       let lastModifiedDate =
@@ -4353,6 +4389,7 @@ module GroupType =
         (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?creationDate ?lastModifiedDate ?precedence ?roleArn ?description
         ?userPoolId ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" DateType.of_json in
       let lastModifiedDate =
@@ -4421,6 +4458,7 @@ module DeviceType =
         (Option.map ~f:DeviceKeyType.of_xml) (Xml.child xml_arg0 "DeviceKey") in
       make ?deviceLastAuthenticatedDate ?deviceLastModifiedDate
         ?deviceCreateDate ?deviceAttributes ?deviceKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceLastAuthenticatedDate =
         field_map json "DeviceLastAuthenticatedDate" DateType.of_json in
@@ -4453,6 +4491,7 @@ module AccountRecoverySettingType =
         (Option.map ~f:RecoveryMechanismsType.of_xml)
           (Xml.child xml_arg0 "RecoveryMechanisms") in
       make ?recoveryMechanisms ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recoveryMechanisms =
         field_map json "RecoveryMechanisms" RecoveryMechanismsType.of_json in
@@ -4504,6 +4543,7 @@ module AdminCreateUserConfigType =
           (Xml.child xml_arg0 "AllowAdminCreateUserOnly") in
       make ?inviteMessageTemplate ?unusedAccountValidityDays
         ?allowAdminCreateUserOnly ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inviteMessageTemplate =
         field_map json "InviteMessageTemplate" MessageTemplateType.of_json in
@@ -4571,6 +4611,7 @@ module DeviceConfigurationType =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "ChallengeRequiredOnNewDevice") in
       make ?deviceOnlyRememberedOnUserPrompt ?challengeRequiredOnNewDevice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceOnlyRememberedOnUserPrompt =
         field_map json "DeviceOnlyRememberedOnUserPrompt" BooleanType.of_json in
@@ -4662,6 +4703,7 @@ module EmailConfigurationType =
         (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "SourceArn") in
       make ?configurationSet ?from ?emailSendingAccount ?replyToEmailAddress
         ?sourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSet =
         field_map json "ConfigurationSet" SESConfigurationSet.of_json in
@@ -4724,6 +4766,7 @@ module UserPoolAddOnsType =
         AdvancedSecurityModeType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AdvancedSecurityMode") in
       make ~advancedSecurityMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedSecurityMode =
         field_map_exn json "AdvancedSecurityMode"
@@ -4776,6 +4819,7 @@ module UserPoolPolicyType =
         (Option.map ~f:PasswordPolicyType.of_xml)
           (Xml.child xml_arg0 "PasswordPolicy") in
       make ?passwordPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let passwordPolicy =
         field_map json "PasswordPolicy" PasswordPolicyType.of_json in
@@ -4855,6 +4899,7 @@ module UsernameConfigurationType =
         WrappedBooleanType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CaseSensitive") in
       make ~caseSensitive ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let caseSensitive =
         field_map_exn json "CaseSensitive" WrappedBooleanType.of_json in
@@ -4934,6 +4979,7 @@ module VerificationMessageTemplateType =
           (Xml.child xml_arg0 "SmsMessage") in
       make ?defaultEmailOption ?emailSubjectByLink ?emailMessageByLink
         ?emailSubject ?emailMessage ?smsMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultEmailOption =
         field_map json "DefaultEmailOption" DefaultEmailOptionType.of_json in
@@ -5010,6 +5056,7 @@ module CustomDomainConfigType =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
       make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn =
         field_map_exn json "CertificateArn" ArnType.of_json in
@@ -5190,6 +5237,7 @@ module AuthEventType =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "EventId") in
       make ?eventFeedback ?eventContextData ?challengeResponses ?eventRisk
         ?eventResponse ?creationDate ?eventType ?eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventFeedback =
         field_map json "EventFeedback" EventFeedbackType.of_json in
@@ -5223,6 +5271,7 @@ module CodeMismatchException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5245,6 +5294,7 @@ module ExpiredCodeException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5266,6 +5316,7 @@ module InternalErrorException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5288,6 +5339,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5310,6 +5362,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5332,6 +5385,7 @@ module NotAuthorizedException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5353,6 +5407,7 @@ module PasswordResetRequiredException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5375,6 +5430,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5397,6 +5453,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5419,6 +5476,7 @@ module UserNotConfirmedException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5440,6 +5498,7 @@ module UserNotFoundException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5478,6 +5537,7 @@ module EnableSoftwareTokenMFAException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5500,6 +5560,7 @@ module InvalidUserPoolConfigurationException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5537,6 +5598,7 @@ module SoftwareTokenMFANotFoundException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5607,6 +5669,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5629,6 +5692,7 @@ module InvalidEmailRoleAccessPolicyException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5651,6 +5715,7 @@ module InvalidSmsRoleAccessPolicyException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5673,6 +5738,7 @@ module InvalidSmsRoleTrustRelationshipException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5695,6 +5761,7 @@ module UserImportInProgressException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5714,6 +5781,7 @@ module UserPoolTaggingException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5733,6 +5801,7 @@ module InvalidOAuthFlowException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -5752,6 +5821,7 @@ module ScopeDoesNotExistException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6005,6 +6075,7 @@ module UserPoolClientType =
         ?tokenValidityUnits ?idTokenValidity ?accessTokenValidity
         ?refreshTokenValidity ?creationDate ?lastModifiedDate ?clientSecret
         ?clientId ?clientName ?userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableTokenRevocation =
         field_map json "EnableTokenRevocation" WrappedBooleanType.of_json in
@@ -6076,6 +6147,7 @@ module AliasExistsException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6124,6 +6196,7 @@ module CodeDeliveryFailureException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6146,6 +6219,7 @@ module InvalidLambdaResponseException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6168,6 +6242,7 @@ module UnexpectedLambdaException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6190,6 +6265,7 @@ module UserLambdaValidationException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6307,6 +6383,7 @@ module IdentityProviderType =
           (Xml.child xml_arg0 "UserPoolId") in
       make ?creationDate ?lastModifiedDate ?idpIdentifiers ?attributeMapping
         ?providerDetails ?providerType ?providerName ?userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" DateType.of_json in
       let lastModifiedDate =
@@ -6339,6 +6416,7 @@ module UnsupportedIdentityProviderException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6386,6 +6464,7 @@ module UserPoolAddOnNotEnabledException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6452,6 +6531,7 @@ module PreconditionNotMetException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6473,6 +6553,7 @@ module InvalidPasswordException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6495,6 +6576,7 @@ module UsernameExistsException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6518,6 +6600,7 @@ module AnalyticsMetadataType =
         (Option.map ~f:StringType.of_xml)
           (Xml.child xml_arg0 "AnalyticsEndpointId") in
       make ?analyticsEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyticsEndpointId =
         field_map json "AnalyticsEndpointId" StringType.of_json in
@@ -6579,6 +6662,7 @@ module UserContextDataType =
       let encodedData =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "EncodedData") in
       make ?encodedData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encodedData = field_map json "EncodedData" StringType.of_json in
       make ?encodedData ()
@@ -6614,6 +6698,7 @@ module SmsMfaConfigType =
         (Option.map ~f:SmsVerificationMessageType.of_xml)
           (Xml.child xml_arg0 "SmsAuthenticationMessage") in
       make ?smsConfiguration ?smsAuthenticationMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let smsConfiguration =
         field_map json "SmsConfiguration" SmsConfigurationType.of_json in
@@ -6639,6 +6724,7 @@ module SoftwareTokenMfaConfigType =
       let enabled =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" BooleanType.of_json in
       make ?enabled ()
@@ -6668,6 +6754,7 @@ module SMSMfaSettingsType =
       let enabled =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?preferredMfa ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferredMfa = field_map json "PreferredMfa" BooleanType.of_json in
       let enabled = field_map json "Enabled" BooleanType.of_json in
@@ -6699,6 +6786,7 @@ module SoftwareTokenMfaSettingsType =
       let enabled =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?preferredMfa ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferredMfa = field_map json "PreferredMfa" BooleanType.of_json in
       let enabled = field_map json "Enabled" BooleanType.of_json in
@@ -6771,6 +6859,7 @@ module UICustomizationType =
           (Xml.child xml_arg0 "UserPoolId") in
       make ?creationDate ?lastModifiedDate ?cSSVersion ?cSS ?imageUrl
         ?clientId ?userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" DateType.of_json in
       let lastModifiedDate =
@@ -6867,6 +6956,7 @@ module RiskConfigurationType =
       make ?lastModifiedDate ?riskExceptionConfiguration
         ?accountTakeoverRiskConfiguration
         ?compromisedCredentialsRiskConfiguration ?clientId ?userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedDate =
         field_map json "LastModifiedDate" DateType.of_json in
@@ -6899,6 +6989,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6918,6 +7009,7 @@ module UnsupportedOperationException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -6937,6 +7029,7 @@ module UnsupportedTokenTypeException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -7001,6 +7094,7 @@ module AuthenticationResultType =
           (Xml.child xml_arg0 "AccessToken") in
       make ?newDeviceMetadata ?idToken ?refreshToken ?tokenType ?expiresIn
         ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newDeviceMetadata =
         field_map json "NewDeviceMetadata" NewDeviceMetadataType.of_json in
@@ -7107,6 +7201,7 @@ module MFAMethodNotFoundException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -7964,6 +8059,7 @@ module UserPoolType =
         ?aliasAttributes ?autoVerifiedAttributes ?schemaAttributes
         ?creationDate ?lastModifiedDate ?status ?lambdaConfig ?policies ?name
         ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountRecoverySetting =
         field_map json "AccountRecoverySetting"
@@ -8119,6 +8215,7 @@ module DomainDescriptionType =
           (Xml.child xml_arg0 "UserPoolId") in
       make ?customDomainConfig ?status ?version ?cloudFrontDistribution
         ?s3Bucket ?domain ?aWSAccountId ?userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customDomainConfig =
         field_map json "CustomDomainConfig" CustomDomainConfigType.of_json in
@@ -8186,6 +8283,7 @@ module DuplicateProviderException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -8227,6 +8325,7 @@ module GroupExistsException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -8249,6 +8348,7 @@ module TooManyFailedAttemptsException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -8308,6 +8408,7 @@ module DeviceSecretVerifierConfigType =
         (Option.map ~f:StringType.of_xml)
           (Xml.child xml_arg0 "PasswordVerifier") in
       make ?salt ?passwordVerifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let salt = field_map json "Salt" StringType.of_json in
       let passwordVerifier =
@@ -8380,6 +8481,7 @@ module ContextDataType =
         StringType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IpAddress") in
       make ?encodedData ~httpHeaders ~serverPath ~serverName ~ipAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encodedData = field_map json "EncodedData" StringType.of_json in
       let httpHeaders =
@@ -8453,6 +8555,7 @@ module ProviderUserIdentifierType =
         (Option.map ~f:ProviderNameType.of_xml)
           (Xml.child xml_arg0 "ProviderName") in
       make ?providerAttributeValue ?providerAttributeName ?providerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerAttributeValue =
         field_map json "ProviderAttributeValue" StringType.of_json in
@@ -8480,6 +8583,7 @@ module UnsupportedUserStateException =
       let message =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" MessageType.of_json in
       make ?message ()
@@ -8694,6 +8798,7 @@ module VerifyUserAttributeResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8733,6 +8838,7 @@ module VerifyUserAttributeRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ~code ~attributeName ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map_exn json "Code" ConfirmationCodeType.of_json in
       let attributeName =
@@ -8901,6 +9007,7 @@ module VerifySoftwareTokenResponse =
         (Option.map ~f:VerifySoftwareTokenResponseType.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?session ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "Session" SessionType.of_json in
       let status =
@@ -8951,6 +9058,7 @@ module VerifySoftwareTokenRequest =
         (Option.map ~f:TokenModelType.of_xml)
           (Xml.child xml_arg0 "AccessToken") in
       make ?friendlyDeviceName ~userCode ?session ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let friendlyDeviceName =
         field_map json "FriendlyDeviceName" StringType.of_json in
@@ -9101,6 +9209,7 @@ module UpdateUserPoolResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9293,6 +9402,7 @@ module UpdateUserPoolRequest =
         ?verificationMessageTemplate ?emailVerificationSubject
         ?emailVerificationMessage ?smsVerificationMessage
         ?autoVerifiedAttributes ?lambdaConfig ?policies ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountRecoverySetting =
         field_map json "AccountRecoverySetting"
@@ -9423,6 +9533,7 @@ module UpdateUserPoolDomainResponse =
         (Option.map ~f:DomainType.of_xml)
           (Xml.child xml_arg0 "CloudFrontDomain") in
       make ?cloudFrontDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudFrontDomain =
         field_map json "CloudFrontDomain" DomainType.of_json in
@@ -9464,6 +9575,7 @@ module UpdateUserPoolDomainRequest =
       let domain =
         DomainType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~customDomainConfig ~userPoolId ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customDomainConfig =
         field_map_exn json "CustomDomainConfig"
@@ -9585,6 +9697,7 @@ module UpdateUserPoolClientResponse =
         (Option.map ~f:UserPoolClientType.of_xml)
           (Xml.child xml_arg0 "UserPoolClient") in
       make ?userPoolClient ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolClient =
         field_map json "UserPoolClient" UserPoolClientType.of_json in
@@ -9812,6 +9925,7 @@ module UpdateUserPoolClientRequest =
         ?explicitAuthFlows ?writeAttributes ?readAttributes
         ?tokenValidityUnits ?idTokenValidity ?accessTokenValidity
         ?refreshTokenValidity ?clientName ~clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableTokenRevocation =
         field_map json "EnableTokenRevocation" WrappedBooleanType.of_json in
@@ -10078,6 +10192,7 @@ module UpdateUserAttributesResponse =
         (Option.map ~f:CodeDeliveryDetailsListType.of_xml)
           (Xml.child xml_arg0 "CodeDeliveryDetailsList") in
       make ?codeDeliveryDetailsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeDeliveryDetailsList =
         field_map json "CodeDeliveryDetailsList"
@@ -10123,6 +10238,7 @@ module UpdateUserAttributesRequest =
         AttributeListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserAttributes") in
       make ?clientMetadata ~accessToken ~userAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -10214,6 +10330,7 @@ module UpdateResourceServerResponse =
         ResourceServerType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceServer") in
       make ~resourceServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceServer =
         field_map_exn json "ResourceServer" ResourceServerType.of_json in
@@ -10261,6 +10378,7 @@ module UpdateResourceServerRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?scopes ~name ~identifier ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scopes =
         field_map json "Scopes" ResourceServerScopeListType.of_json in
@@ -10365,6 +10483,7 @@ module UpdateIdentityProviderResponse =
         IdentityProviderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityProvider") in
       make ~identityProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProvider =
         field_map_exn json "IdentityProvider" IdentityProviderType.of_json in
@@ -10428,6 +10547,7 @@ module UpdateIdentityProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?idpIdentifiers ?attributeMapping ?providerDetails ~providerName
         ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idpIdentifiers =
         field_map json "IdpIdentifiers" IdpIdentifiersListType.of_json in
@@ -10520,6 +10640,7 @@ module UpdateGroupResponse =
       let group =
         (Option.map ~f:GroupType.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" GroupType.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
@@ -10573,6 +10694,7 @@ module UpdateGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?precedence ?roleArn ?description ~userPoolId ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let precedence = field_map json "Precedence" PrecedenceType.of_json in
       let roleArn = field_map json "RoleArn" ArnType.of_json in
@@ -10695,6 +10817,7 @@ module UpdateDeviceStatusResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request to update the device status."]
@@ -10730,6 +10853,7 @@ module UpdateDeviceStatusRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ?deviceRememberedStatus ~deviceKey ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceRememberedStatus =
         field_map json "DeviceRememberedStatus"
@@ -10832,6 +10956,7 @@ module UpdateAuthEventFeedbackResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10881,6 +11006,7 @@ module UpdateAuthEventFeedbackRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~feedbackValue ~feedbackToken ~eventId ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let feedbackValue =
         field_map_exn json "FeedbackValue" FeedbackValueType.of_json in
@@ -10964,6 +11090,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10993,6 +11120,7 @@ module UntagResourceRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" UserPoolTagsListType.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ArnType.of_json in
@@ -11071,6 +11199,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11099,6 +11228,7 @@ module TagResourceRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" UserPoolTagsType.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ArnType.of_json in
@@ -11197,6 +11327,7 @@ module StopUserImportJobResponse =
         (Option.map ~f:UserImportJobType.of_xml)
           (Xml.child xml_arg0 "UserImportJob") in
       make ?userImportJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userImportJob =
         field_map json "UserImportJob" UserImportJobType.of_json in
@@ -11228,6 +11359,7 @@ module StopUserImportJobRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~jobId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" UserImportJobIdType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -11325,6 +11457,7 @@ module StartUserImportJobResponse =
         (Option.map ~f:UserImportJobType.of_xml)
           (Xml.child xml_arg0 "UserImportJob") in
       make ?userImportJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userImportJob =
         field_map json "UserImportJob" UserImportJobType.of_json in
@@ -11356,6 +11489,7 @@ module StartUserImportJobRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~jobId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" UserImportJobIdType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -11558,6 +11692,7 @@ module SignUpResponse =
         BooleanType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserConfirmed") in
       make ~userSub ?codeDeliveryDetails ~userConfirmed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userSub = field_map_exn json "UserSub" StringType.of_json in
       let codeDeliveryDetails =
@@ -11664,6 +11799,7 @@ module SignUpRequest =
       make ?clientMetadata ?userContextData ?analyticsMetadata
         ?validationData ?userAttributes ~password ~username ?secretHash
         ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -11775,6 +11911,7 @@ module SetUserSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11804,6 +11941,7 @@ module SetUserSettingsRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ~mFAOptions ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mFAOptions =
         field_map_exn json "MFAOptions" MFAOptionListType.of_json in
@@ -11941,6 +12079,7 @@ module SetUserPoolMfaConfigResponse =
           (Xml.child xml_arg0 "SmsMfaConfiguration") in
       make ?mfaConfiguration ?softwareTokenMfaConfiguration
         ?smsMfaConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mfaConfiguration =
         field_map json "MfaConfiguration" UserPoolMfaType.of_json in
@@ -12004,6 +12143,7 @@ module SetUserPoolMfaConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?mfaConfiguration ?softwareTokenMfaConfiguration
         ?smsMfaConfiguration ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mfaConfiguration =
         field_map json "MfaConfiguration" UserPoolMfaType.of_json in
@@ -12109,6 +12249,7 @@ module SetUserMFAPreferenceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12150,6 +12291,7 @@ module SetUserMFAPreferenceRequest =
         (Option.map ~f:SMSMfaSettingsType.of_xml)
           (Xml.child xml_arg0 "SMSMfaSettings") in
       make ~accessToken ?softwareTokenMfaSettings ?sMSMfaSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "AccessToken" TokenModelType.of_json in
@@ -12243,6 +12385,7 @@ module SetUICustomizationResponse =
         UICustomizationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UICustomization") in
       make ~uICustomization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uICustomization =
         field_map_exn json "UICustomization" UICustomizationType.of_json in
@@ -12285,6 +12428,7 @@ module SetUICustomizationRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?imageFile ?cSS ?clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageFile = field_map json "ImageFile" ImageFileType.of_json in
       let cSS = field_map json "CSS" CSSType.of_json in
@@ -12410,6 +12554,7 @@ module SetRiskConfigurationResponse =
         RiskConfigurationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RiskConfiguration") in
       make ~riskConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskConfiguration =
         field_map_exn json "RiskConfiguration" RiskConfigurationType.of_json in
@@ -12478,6 +12623,7 @@ module SetRiskConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?riskExceptionConfiguration ?accountTakeoverRiskConfiguration
         ?compromisedCredentialsRiskConfiguration ?clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskExceptionConfiguration =
         field_map json "RiskExceptionConfiguration"
@@ -12579,6 +12725,7 @@ module RevokeTokenResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12616,6 +12763,7 @@ module RevokeTokenRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Token") in
       make ?clientSecret ~clientId ~token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientSecret =
         field_map json "ClientSecret" ClientSecretType.of_json in
@@ -12895,6 +13043,7 @@ module RespondToAuthChallengeResponse =
           (Xml.child xml_arg0 "ChallengeName") in
       make ?authenticationResult ?challengeParameters ?session ?challengeName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationResult =
         field_map json "AuthenticationResult"
@@ -12987,6 +13136,7 @@ module RespondToAuthChallengeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientId") in
       make ?clientMetadata ?userContextData ?analyticsMetadata
         ?challengeResponses ?session ~challengeName ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -13182,6 +13332,7 @@ module ResendConfirmationCodeResponse =
         (Option.map ~f:CodeDeliveryDetailsType.of_xml)
           (Xml.child xml_arg0 "CodeDeliveryDetails") in
       make ?codeDeliveryDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeDeliveryDetails =
         field_map json "CodeDeliveryDetails" CodeDeliveryDetailsType.of_json in
@@ -13259,6 +13410,7 @@ module ResendConfirmationCodeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientId") in
       make ?clientMetadata ?analyticsMetadata ~username ?userContextData
         ?secretHash ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -13360,6 +13512,7 @@ module ListUsersResponse =
       let users =
         (Option.map ~f:UsersListType.of_xml) (Xml.child xml_arg0 "Users") in
       make ?paginationToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" SearchPaginationTokenType.of_json in
@@ -13420,6 +13573,7 @@ module ListUsersRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?filter ?paginationToken ?limit ?attributesToGet ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "Filter" UserFilterType.of_json in
       let paginationToken =
@@ -13516,6 +13670,7 @@ module ListUsersInGroupResponse =
       let users =
         (Option.map ~f:UsersListType.of_xml) (Xml.child xml_arg0 "Users") in
       make ?nextToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let users = field_map json "Users" UsersListType.of_json in
@@ -13560,6 +13715,7 @@ module ListUsersInGroupRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?nextToken ?limit ~groupName ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let limit = field_map json "Limit" QueryLimitType.of_json in
@@ -13647,6 +13803,7 @@ module ListUserPoolsResponse =
         (Option.map ~f:UserPoolListType.of_xml)
           (Xml.child xml_arg0 "UserPools") in
       make ?nextToken ?userPools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKeyType.of_json in
       let userPools = field_map json "UserPools" UserPoolListType.of_json in
@@ -13680,6 +13837,7 @@ module ListUserPoolsRequest =
         (Option.map ~f:PaginationKeyType.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ~maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map_exn json "MaxResults" PoolQueryLimitType.of_json in
@@ -13775,6 +13933,7 @@ module ListUserPoolClientsResponse =
         (Option.map ~f:UserPoolClientListType.of_xml)
           (Xml.child xml_arg0 "UserPoolClients") in
       make ?nextToken ?userPoolClients ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let userPoolClients =
@@ -13815,6 +13974,7 @@ module ListUserPoolClientsRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?nextToken ?maxResults ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let maxResults = field_map json "MaxResults" QueryLimit.of_json in
@@ -13911,6 +14071,7 @@ module ListUserImportJobsResponse =
         (Option.map ~f:UserImportJobsListType.of_xml)
           (Xml.child xml_arg0 "UserImportJobs") in
       make ?paginationToken ?userImportJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" PaginationKeyType.of_json in
@@ -13956,6 +14117,7 @@ module ListUserImportJobsRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?paginationToken ~maxResults ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" PaginationKeyType.of_json in
@@ -14043,6 +14205,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:UserPoolTagsType.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" UserPoolTagsType.of_json in
       make ?tags ()
@@ -14067,6 +14230,7 @@ module ListTagsForResourceRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ArnType.of_json in
       make ~resourceArn ()
@@ -14161,6 +14325,7 @@ module ListResourceServersResponse =
         ResourceServersListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceServers") in
       make ?nextToken ~resourceServers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKeyType.of_json in
       let resourceServers =
@@ -14200,6 +14365,7 @@ module ListResourceServersRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?nextToken ?maxResults ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKeyType.of_json in
       let maxResults =
@@ -14295,6 +14461,7 @@ module ListIdentityProvidersResponse =
         ProvidersListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Providers") in
       make ?nextToken ~providers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKeyType.of_json in
       let providers =
@@ -14334,6 +14501,7 @@ module ListIdentityProvidersRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?nextToken ?maxResults ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKeyType.of_json in
       let maxResults =
@@ -14427,6 +14595,7 @@ module ListGroupsResponse =
       let groups =
         (Option.map ~f:GroupListType.of_xml) (Xml.child xml_arg0 "Groups") in
       make ?nextToken ?groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let groups = field_map json "Groups" GroupListType.of_json in
@@ -14464,6 +14633,7 @@ module ListGroupsRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?nextToken ?limit ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let limit = field_map json "Limit" QueryLimitType.of_json in
@@ -14599,6 +14769,7 @@ module ListDevicesResponse =
       let devices =
         (Option.map ~f:DeviceListType.of_xml) (Xml.child xml_arg0 "Devices") in
       make ?paginationToken ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" SearchPaginationTokenType.of_json in
@@ -14637,6 +14808,7 @@ module ListDevicesRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ?paginationToken ?limit ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" SearchPaginationTokenType.of_json in
@@ -14858,6 +15030,7 @@ module InitiateAuthResponse =
           (Xml.child xml_arg0 "ChallengeName") in
       make ?authenticationResult ?challengeParameters ?session ?challengeName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationResult =
         field_map json "AuthenticationResult"
@@ -14941,6 +15114,7 @@ module InitiateAuthRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AuthFlow") in
       make ?userContextData ?analyticsMetadata ~clientId ?clientMetadata
         ?authParameters ~authFlow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userContextData =
         field_map json "UserContextData" UserContextDataType.of_json in
@@ -15047,6 +15221,7 @@ module GlobalSignOutResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request to sign out all devices."]
@@ -15066,6 +15241,7 @@ module GlobalSignOutRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "AccessToken" TokenModelType.of_json in
@@ -15226,6 +15402,7 @@ module GetUserResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "Username") in
       make ?userMFASettingList ?preferredMfaSetting ?mFAOptions
         ~userAttributes ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userMFASettingList =
         field_map json "UserMFASettingList" UserMFASettingListType.of_json in
@@ -15258,6 +15435,7 @@ module GetUserRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "AccessToken" TokenModelType.of_json in
@@ -15370,6 +15548,7 @@ module GetUserPoolMfaConfigResponse =
           (Xml.child xml_arg0 "SmsMfaConfiguration") in
       make ?mfaConfiguration ?softwareTokenMfaConfiguration
         ?smsMfaConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mfaConfiguration =
         field_map json "MfaConfiguration" UserPoolMfaType.of_json in
@@ -15399,6 +15578,7 @@ module GetUserPoolMfaConfigRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       make ~userPoolId ()
@@ -15603,6 +15783,7 @@ module GetUserAttributeVerificationCodeResponse =
         (Option.map ~f:CodeDeliveryDetailsType.of_xml)
           (Xml.child xml_arg0 "CodeDeliveryDetails") in
       make ?codeDeliveryDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeDeliveryDetails =
         field_map json "CodeDeliveryDetails" CodeDeliveryDetailsType.of_json in
@@ -15647,6 +15828,7 @@ module GetUserAttributeVerificationCodeRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ?clientMetadata ~attributeName ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -15739,6 +15921,7 @@ module GetUICustomizationResponse =
         UICustomizationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UICustomization") in
       make ~uICustomization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uICustomization =
         field_map_exn json "UICustomization" UICustomizationType.of_json in
@@ -15769,6 +15952,7 @@ module GetUICustomizationRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientId = field_map json "ClientId" ClientIdType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -15836,6 +16020,7 @@ module GetSigningCertificateResponse =
       let certificate =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "Certificate") in
       make ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificate = field_map json "Certificate" StringType.of_json in
       make ?certificate ()
@@ -15858,6 +16043,7 @@ module GetSigningCertificateRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       make ~userPoolId ()
@@ -15945,6 +16131,7 @@ module GetIdentityProviderByIdentifierResponse =
         IdentityProviderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityProvider") in
       make ~identityProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProvider =
         field_map_exn json "IdentityProvider" IdentityProviderType.of_json in
@@ -15975,6 +16162,7 @@ module GetIdentityProviderByIdentifierRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~idpIdentifier ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idpIdentifier =
         field_map_exn json "IdpIdentifier" IdpIdentifierType.of_json in
@@ -16060,6 +16248,7 @@ module GetGroupResponse =
       let group =
         (Option.map ~f:GroupType.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" GroupType.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
@@ -16088,6 +16277,7 @@ module GetGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~userPoolId ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
@@ -16212,6 +16402,7 @@ module GetDeviceResponse =
       let device =
         DeviceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Device") in
       make ~device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map_exn json "Device" DeviceType.of_json in
       make ~device ()
@@ -16240,6 +16431,7 @@ module GetDeviceRequest =
         DeviceKeyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceKey") in
       make ?accessToken ~deviceKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken = field_map json "AccessToken" TokenModelType.of_json in
       let deviceKey = field_map_exn json "DeviceKey" DeviceKeyType.of_json in
@@ -16334,6 +16526,7 @@ module GetCSVHeaderResponse =
         (Option.map ~f:UserPoolIdType.of_xml)
           (Xml.child xml_arg0 "UserPoolId") in
       make ?cSVHeader ?userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cSVHeader = field_map json "CSVHeader" ListOfStringTypes.of_json in
       let userPoolId = field_map json "UserPoolId" UserPoolIdType.of_json in
@@ -16359,6 +16552,7 @@ module GetCSVHeaderRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       make ~userPoolId ()
@@ -16543,6 +16737,7 @@ module ForgotPasswordResponse =
         (Option.map ~f:CodeDeliveryDetailsType.of_xml)
           (Xml.child xml_arg0 "CodeDeliveryDetails") in
       make ?codeDeliveryDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeDeliveryDetails =
         field_map json "CodeDeliveryDetails" CodeDeliveryDetailsType.of_json in
@@ -16620,6 +16815,7 @@ module ForgotPasswordRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientId") in
       make ?clientMetadata ?analyticsMetadata ~username ?userContextData
         ?secretHash ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -16658,6 +16854,7 @@ module ForgetDeviceRequest =
         (Option.map ~f:TokenModelType.of_xml)
           (Xml.child xml_arg0 "AccessToken") in
       make ~deviceKey ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceKey = field_map_exn json "DeviceKey" DeviceKeyType.of_json in
       let accessToken = field_map json "AccessToken" TokenModelType.of_json in
@@ -16752,6 +16949,7 @@ module DescribeUserPoolResponse =
       let userPool =
         (Option.map ~f:UserPoolType.of_xml) (Xml.child xml_arg0 "UserPool") in
       make ?userPool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPool = field_map json "UserPool" UserPoolType.of_json in
       make ?userPool ()
@@ -16775,6 +16973,7 @@ module DescribeUserPoolRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       make ~userPoolId ()
@@ -16852,6 +17051,7 @@ module DescribeUserPoolDomainResponse =
         (Option.map ~f:DomainDescriptionType.of_xml)
           (Xml.child xml_arg0 "DomainDescription") in
       make ?domainDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainDescription =
         field_map json "DomainDescription" DomainDescriptionType.of_json in
@@ -16874,6 +17074,7 @@ module DescribeUserPoolDomainRequest =
       let domain =
         DomainType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map_exn json "Domain" DomainType.of_json in
       make ~domain ()
@@ -16960,6 +17161,7 @@ module DescribeUserPoolClientResponse =
         (Option.map ~f:UserPoolClientType.of_xml)
           (Xml.child xml_arg0 "UserPoolClient") in
       make ?userPoolClient ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolClient =
         field_map json "UserPoolClient" UserPoolClientType.of_json in
@@ -16993,6 +17195,7 @@ module DescribeUserPoolClientRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientId = field_map_exn json "ClientId" ClientIdType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -17079,6 +17282,7 @@ module DescribeUserImportJobResponse =
         (Option.map ~f:UserImportJobType.of_xml)
           (Xml.child xml_arg0 "UserImportJob") in
       make ?userImportJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userImportJob =
         field_map json "UserImportJob" UserImportJobType.of_json in
@@ -17110,6 +17314,7 @@ module DescribeUserImportJobRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~jobId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" UserImportJobIdType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -17209,6 +17414,7 @@ module DescribeRiskConfigurationResponse =
         RiskConfigurationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RiskConfiguration") in
       make ~riskConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let riskConfiguration =
         field_map_exn json "RiskConfiguration" RiskConfigurationType.of_json in
@@ -17236,6 +17442,7 @@ module DescribeRiskConfigurationRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientId = field_map json "ClientId" ClientIdType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -17323,6 +17530,7 @@ module DescribeResourceServerResponse =
         ResourceServerType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceServer") in
       make ~resourceServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceServer =
         field_map_exn json "ResourceServer" ResourceServerType.of_json in
@@ -17355,6 +17563,7 @@ module DescribeResourceServerRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~identifier ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier =
         field_map_exn json "Identifier" ResourceServerIdentifierType.of_json in
@@ -17443,6 +17652,7 @@ module DescribeIdentityProviderResponse =
         IdentityProviderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityProvider") in
       make ~identityProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProvider =
         field_map_exn json "IdentityProvider" IdentityProviderType.of_json in
@@ -17472,6 +17682,7 @@ module DescribeIdentityProviderRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~providerName ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerName =
         field_map_exn json "ProviderName" ProviderNameType.of_json in
@@ -17496,6 +17707,7 @@ module DeleteUserRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "AccessToken" TokenModelType.of_json in
@@ -17519,6 +17731,7 @@ module DeleteUserPoolRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       make ~userPoolId ()
@@ -17586,6 +17799,7 @@ module DeleteUserPoolDomainResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a domain for a user pool."]
@@ -17611,6 +17825,7 @@ module DeleteUserPoolDomainRequest =
       let domain =
         DomainType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~userPoolId ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       let domain = field_map_exn json "Domain" DomainType.of_json in
@@ -17643,6 +17858,7 @@ module DeleteUserPoolClientRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientId = field_map_exn json "ClientId" ClientIdType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -17749,6 +17965,7 @@ module DeleteUserAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17780,6 +17997,7 @@ module DeleteUserAttributesRequest =
         AttributeNameListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserAttributeNames") in
       make ~accessToken ~userAttributeNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "AccessToken" TokenModelType.of_json in
@@ -17814,6 +18032,7 @@ module DeleteResourceServerRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~identifier ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier =
         field_map_exn json "Identifier" ResourceServerIdentifierType.of_json in
@@ -17844,6 +18063,7 @@ module DeleteIdentityProviderRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~providerName ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerName =
         field_map_exn json "ProviderName" ProviderNameType.of_json in
@@ -17874,6 +18094,7 @@ module DeleteGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~userPoolId ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
@@ -18004,6 +18225,7 @@ module CreateUserPoolResponse =
       let userPool =
         (Option.map ~f:UserPoolType.of_xml) (Xml.child xml_arg0 "UserPool") in
       make ?userPool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPool = field_map json "UserPool" UserPoolType.of_json in
       make ?userPool ()
@@ -18241,6 +18463,7 @@ module CreateUserPoolRequest =
         ?emailVerificationSubject ?emailVerificationMessage
         ?smsVerificationMessage ?usernameAttributes ?aliasAttributes
         ?autoVerifiedAttributes ?lambdaConfig ?policies ~poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountRecoverySetting =
         field_map json "AccountRecoverySetting"
@@ -18381,6 +18604,7 @@ module CreateUserPoolDomainResponse =
         (Option.map ~f:DomainType.of_xml)
           (Xml.child xml_arg0 "CloudFrontDomain") in
       make ?cloudFrontDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudFrontDomain =
         field_map json "CloudFrontDomain" DomainType.of_json in
@@ -18420,6 +18644,7 @@ module CreateUserPoolDomainRequest =
       let domain =
         DomainType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ?customDomainConfig ~userPoolId ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customDomainConfig =
         field_map json "CustomDomainConfig" CustomDomainConfigType.of_json in
@@ -18536,6 +18761,7 @@ module CreateUserPoolClientResponse =
         (Option.map ~f:UserPoolClientType.of_xml)
           (Xml.child xml_arg0 "UserPoolClient") in
       make ?userPoolClient ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolClient =
         field_map json "UserPoolClient" UserPoolClientType.of_json in
@@ -18766,6 +18992,7 @@ module CreateUserPoolClientRequest =
         ?explicitAuthFlows ?writeAttributes ?readAttributes
         ?tokenValidityUnits ?idTokenValidity ?accessTokenValidity
         ?refreshTokenValidity ?generateSecret ~clientName ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableTokenRevocation =
         field_map json "EnableTokenRevocation" WrappedBooleanType.of_json in
@@ -18917,6 +19144,7 @@ module CreateUserImportJobResponse =
         (Option.map ~f:UserImportJobType.of_xml)
           (Xml.child xml_arg0 "UserImportJob") in
       make ?userImportJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userImportJob =
         field_map json "UserImportJob" UserImportJobType.of_json in
@@ -18959,6 +19187,7 @@ module CreateUserImportJobRequest =
         UserImportJobNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "JobName") in
       make ~cloudWatchLogsRoleArn ~userPoolId ~jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLogsRoleArn =
         field_map_exn json "CloudWatchLogsRoleArn" ArnType.of_json in
@@ -19058,6 +19287,7 @@ module CreateResourceServerResponse =
         ResourceServerType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceServer") in
       make ~resourceServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceServer =
         field_map_exn json "ResourceServer" ResourceServerType.of_json in
@@ -19107,6 +19337,7 @@ module CreateResourceServerRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?scopes ~name ~identifier ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scopes =
         field_map json "Scopes" ResourceServerScopeListType.of_json in
@@ -19218,6 +19449,7 @@ module CreateIdentityProviderResponse =
         IdentityProviderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityProvider") in
       make ~identityProvider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProvider =
         field_map_exn json "IdentityProvider" IdentityProviderType.of_json in
@@ -19291,6 +19523,7 @@ module CreateIdentityProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?idpIdentifiers ?attributeMapping ~providerDetails ~providerType
         ~providerName ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idpIdentifiers =
         field_map json "IdpIdentifiers" IdpIdentifiersListType.of_json in
@@ -19403,6 +19636,7 @@ module CreateGroupResponse =
       let group =
         (Option.map ~f:GroupType.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" GroupType.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
@@ -19456,6 +19690,7 @@ module CreateGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?precedence ?roleArn ?description ~userPoolId ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let precedence = field_map json "Precedence" PrecedenceType.of_json in
       let roleArn = field_map json "RoleArn" ArnType.of_json in
@@ -19624,6 +19859,7 @@ module ConfirmSignUpResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19720,6 +19956,7 @@ module ConfirmSignUpRequest =
       make ?clientMetadata ?userContextData ?analyticsMetadata
         ?forceAliasCreation ~confirmationCode ~username ?secretHash ~clientId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -19907,6 +20144,7 @@ module ConfirmForgotPasswordResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20001,6 +20239,7 @@ module ConfirmForgotPasswordRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientId") in
       make ?clientMetadata ?userContextData ?analyticsMetadata ~password
         ~confirmationCode ~username ?secretHash ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -20171,6 +20410,7 @@ module ConfirmDeviceResponse =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "UserConfirmationNecessary") in
       make ?userConfirmationNecessary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userConfirmationNecessary =
         field_map json "UserConfirmationNecessary" BooleanType.of_json in
@@ -20221,6 +20461,7 @@ module ConfirmDeviceRequest =
         TokenModelType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessToken") in
       make ?deviceName ?deviceSecretVerifierConfig ~deviceKey ~accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceName = field_map json "DeviceName" DeviceNameType.of_json in
       let deviceSecretVerifierConfig =
@@ -20350,6 +20591,7 @@ module ChangePasswordResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20385,6 +20627,7 @@ module ChangePasswordRequest =
         PasswordType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PreviousPassword") in
       make ~accessToken ~proposedPassword ~previousPassword ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken =
         field_map_exn json "AccessToken" TokenModelType.of_json in
@@ -20496,6 +20739,7 @@ module AssociateSoftwareTokenResponse =
         (Option.map ~f:SecretCodeType.of_xml)
           (Xml.child xml_arg0 "SecretCode") in
       make ?session ?secretCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "Session" SessionType.of_json in
       let secretCode = field_map json "SecretCode" SecretCodeType.of_json in
@@ -20526,6 +20770,7 @@ module AssociateSoftwareTokenRequest =
         (Option.map ~f:TokenModelType.of_xml)
           (Xml.child xml_arg0 "AccessToken") in
       make ?session ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "Session" SessionType.of_json in
       let accessToken = field_map json "AccessToken" TokenModelType.of_json in
@@ -20613,6 +20858,7 @@ module AdminUserGlobalSignOutResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The global sign-out response, as an administrator."]
@@ -20638,6 +20884,7 @@ module AdminUserGlobalSignOutRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map_exn json "Username" UsernameType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -20801,6 +21048,7 @@ module AdminUpdateUserAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20851,6 +21099,7 @@ module AdminUpdateUserAttributesRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?clientMetadata ~userAttributes ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -20954,6 +21203,7 @@ module AdminUpdateDeviceStatusResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20998,6 +21248,7 @@ module AdminUpdateDeviceStatusRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?deviceRememberedStatus ~deviceKey ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceRememberedStatus =
         field_map json "DeviceRememberedStatus"
@@ -21101,6 +21352,7 @@ module AdminUpdateAuthEventFeedbackResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21142,6 +21394,7 @@ module AdminUpdateAuthEventFeedbackRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~feedbackValue ~eventId ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let feedbackValue =
         field_map_exn json "FeedbackValue" FeedbackValueType.of_json in
@@ -21223,6 +21476,7 @@ module AdminSetUserSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21261,6 +21515,7 @@ module AdminSetUserSettingsRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~mFAOptions ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mFAOptions =
         field_map_exn json "MFAOptions" MFAOptionListType.of_json in
@@ -21359,6 +21614,7 @@ module AdminSetUserPasswordResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21403,6 +21659,7 @@ module AdminSetUserPasswordRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?permanent ~password ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permanent = field_map json "Permanent" BooleanType.of_json in
       let password = field_map_exn json "Password" PasswordType.of_json in
@@ -21503,6 +21760,7 @@ module AdminSetUserMFAPreferenceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21555,6 +21813,7 @@ module AdminSetUserMFAPreferenceRequest =
         (Option.map ~f:SMSMfaSettingsType.of_xml)
           (Xml.child xml_arg0 "SMSMfaSettings") in
       make ~userPoolId ~username ?softwareTokenMfaSettings ?sMSMfaSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
       let username = field_map_exn json "Username" UsernameType.of_json in
@@ -21837,6 +22096,7 @@ module AdminRespondToAuthChallengeResponse =
           (Xml.child xml_arg0 "ChallengeName") in
       make ?authenticationResult ?challengeParameters ?session ?challengeName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationResult =
         field_map json "AuthenticationResult"
@@ -21938,6 +22198,7 @@ module AdminRespondToAuthChallengeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?clientMetadata ?contextData ?analyticsMetadata ?session
         ?challengeResponses ~challengeName ~clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -22112,6 +22373,7 @@ module AdminResetUserPasswordResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22151,6 +22413,7 @@ module AdminResetUserPasswordRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?clientMetadata ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -22189,6 +22452,7 @@ module AdminRemoveUserFromGroupRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~groupName ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
       let username = field_map_exn json "Username" UsernameType.of_json in
@@ -22303,6 +22567,7 @@ module AdminListUserAuthEventsResponse =
         (Option.map ~f:AuthEventsType.of_xml)
           (Xml.child xml_arg0 "AuthEvents") in
       make ?nextToken ?authEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let authEvents = field_map json "AuthEvents" AuthEventsType.of_json in
@@ -22346,6 +22611,7 @@ module AdminListUserAuthEventsRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?nextToken ?maxResults ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let maxResults = field_map json "MaxResults" QueryLimitType.of_json in
@@ -22448,6 +22714,7 @@ module AdminListGroupsForUserResponse =
       let groups =
         (Option.map ~f:GroupListType.of_xml) (Xml.child xml_arg0 "Groups") in
       make ?nextToken ?groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let groups = field_map json "Groups" GroupListType.of_json in
@@ -22492,6 +22759,7 @@ module AdminListGroupsForUserRequest =
         UsernameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Username") in
       make ?nextToken ?limit ~userPoolId ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let limit = field_map json "Limit" QueryLimitType.of_json in
@@ -22599,6 +22867,7 @@ module AdminListDevicesResponse =
       let devices =
         (Option.map ~f:DeviceListType.of_xml) (Xml.child xml_arg0 "Devices") in
       make ?paginationToken ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" SearchPaginationTokenType.of_json in
@@ -22643,6 +22912,7 @@ module AdminListDevicesRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?paginationToken ?limit ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paginationToken =
         field_map json "PaginationToken" SearchPaginationTokenType.of_json in
@@ -22751,6 +23021,7 @@ module AdminLinkProviderForUserResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22791,6 +23062,7 @@ module AdminLinkProviderForUserRequest =
         StringType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~sourceUser ~destinationUser ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceUser =
         field_map_exn json "SourceUser" ProviderUserIdentifierType.of_json in
@@ -23024,6 +23296,7 @@ module AdminInitiateAuthResponse =
           (Xml.child xml_arg0 "ChallengeName") in
       make ?authenticationResult ?challengeParameters ?session ?challengeName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationResult =
         field_map json "AuthenticationResult"
@@ -23116,6 +23389,7 @@ module AdminInitiateAuthRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?contextData ?analyticsMetadata ?clientMetadata ?authParameters
         ~authFlow ~clientId ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contextData = field_map json "ContextData" ContextDataType.of_json in
       let analyticsMetadata =
@@ -23300,6 +23574,7 @@ module AdminGetUserResponse =
       make ?userMFASettingList ?preferredMfaSetting ?mFAOptions ?userStatus
         ?enabled ?userLastModifiedDate ?userCreateDate ?userAttributes
         ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userMFASettingList =
         field_map json "UserMFASettingList" UserMFASettingListType.of_json in
@@ -23345,6 +23620,7 @@ module AdminGetUserRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map_exn json "Username" UsernameType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -23440,6 +23716,7 @@ module AdminGetDeviceResponse =
       let device =
         DeviceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Device") in
       make ~device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map_exn json "Device" DeviceType.of_json in
       make ~device ()
@@ -23473,6 +23750,7 @@ module AdminGetDeviceRequest =
         DeviceKeyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceKey") in
       make ~username ~userPoolId ~deviceKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map_exn json "Username" UsernameType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -23509,6 +23787,7 @@ module AdminForgetDeviceRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~deviceKey ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceKey = field_map_exn json "DeviceKey" DeviceKeyType.of_json in
       let username = field_map_exn json "Username" UsernameType.of_json in
@@ -23596,6 +23875,7 @@ module AdminEnableUserResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23625,6 +23905,7 @@ module AdminEnableUserRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map_exn json "Username" UsernameType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -23712,6 +23993,7 @@ module AdminDisableUserResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23741,6 +24023,7 @@ module AdminDisableUserRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map_exn json "Username" UsernameType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -23837,6 +24120,7 @@ module AdminDisableProviderForUserResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23864,6 +24148,7 @@ module AdminDisableProviderForUserRequest =
         StringType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~user ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map_exn json "User" ProviderUserIdentifierType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" StringType.of_json in
@@ -23896,6 +24181,7 @@ module AdminDeleteUserRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map_exn json "Username" UsernameType.of_json in
       let userPoolId = field_map_exn json "UserPoolId" UserPoolIdType.of_json in
@@ -23983,6 +24269,7 @@ module AdminDeleteUserAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24023,6 +24310,7 @@ module AdminDeleteUserAttributesRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~userAttributeNames ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userAttributeNames =
         field_map_exn json "UserAttributeNames" AttributeNameListType.of_json in
@@ -24222,6 +24510,7 @@ module AdminCreateUserResponse =
     let of_xml xml_arg0 =
       let user = (Option.map ~f:UserType.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map json "User" UserType.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
@@ -24331,6 +24620,7 @@ module AdminCreateUserRequest =
       make ?clientMetadata ?desiredDeliveryMediums ?messageAction
         ?forceAliasCreation ?temporaryPassword ?validationData
         ?userAttributes ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -24486,6 +24776,7 @@ module AdminConfirmSignUpResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24525,6 +24816,7 @@ module AdminConfirmSignUpRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ?clientMetadata ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientMetadata =
         field_map json "ClientMetadata" ClientMetadataType.of_json in
@@ -24562,6 +24854,7 @@ module AdminAddUserToGroupRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~groupName ~username ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
       let username = field_map_exn json "Username" UsernameType.of_json in
@@ -24652,6 +24945,7 @@ module AddCustomAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24683,6 +24977,7 @@ module AddCustomAttributesRequest =
         UserPoolIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserPoolId") in
       make ~customAttributes ~userPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customAttributes =
         field_map_exn json "CustomAttributes"

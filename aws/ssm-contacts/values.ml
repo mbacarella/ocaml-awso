@@ -107,6 +107,7 @@ module ChannelTargetInfo =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelId") in
       make ?retryIntervalInMinutes ~contactChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryIntervalInMinutes =
         field_map json "RetryIntervalInMinutes"
@@ -142,6 +143,7 @@ module ContactTargetInfo =
         (Option.map ~f:SsmContactsArn.of_xml)
           (Xml.child xml_arg0 "ContactId") in
       make ~isEssential ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isEssential = field_map_exn json "IsEssential" IsEssential.of_json in
       let contactId = field_map json "ContactId" SsmContactsArn.of_json in
@@ -177,6 +179,7 @@ module Target =
         (Option.map ~f:ChannelTargetInfo.of_xml)
           (Xml.child xml_arg0 "ChannelTargetInfo") in
       make ?contactTargetInfo ?channelTargetInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactTargetInfo =
         field_map json "ContactTargetInfo" ContactTargetInfo.of_json in
@@ -280,6 +283,7 @@ module ValidationExceptionField =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~message ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -314,6 +318,7 @@ module Stage =
         StageDurationInMins.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DurationInMinutes") in
       make ~targets ~durationInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targets = field_map_exn json "Targets" TargetsList.of_json in
       let durationInMinutes =
@@ -629,6 +634,7 @@ module ContactChannelAddress =
         (Option.map ~f:SimpleAddress.of_xml)
           (Xml.child xml_arg0 "SimpleAddress") in
       make ?simpleAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let simpleAddress =
         field_map json "SimpleAddress" SimpleAddress.of_json in
@@ -749,6 +755,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -832,6 +839,7 @@ module Page =
           (Xml.child_exn ~context:context_ xml_arg0 "PageArn") in
       make ?readTime ?deliveryTime ?sentTime ?incidentId ~sender ~contactArn
         ~engagementArn ~pageArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let readTime = field_map json "ReadTime" DateTime.of_json in
       let deliveryTime = field_map json "DeliveryTime" DateTime.of_json in
@@ -888,6 +896,7 @@ module Receipt =
         (Option.map ~f:SsmContactsArn.of_xml)
           (Xml.child xml_arg0 "ContactChannelArn") in
       make ~receiptTime ?receiptInfo ~receiptType ?contactChannelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let receiptTime = field_map_exn json "ReceiptTime" DateTime.of_json in
       let receiptInfo = field_map json "ReceiptInfo" ReceiptInfo.of_json in
@@ -955,6 +964,7 @@ module Engagement =
           (Xml.child_exn ~context:context_ xml_arg0 "EngagementArn") in
       make ?stopTime ?startTime ?incidentId ~sender ~contactArn
         ~engagementArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stopTime = field_map json "StopTime" DateTime.of_json in
       let startTime = field_map json "StartTime" DateTime.of_json in
@@ -1007,6 +1017,7 @@ module Contact =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~type_ ?displayName ~alias ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" ContactType.of_json in
       let displayName = field_map json "DisplayName" ContactName.of_json in
@@ -1082,6 +1093,7 @@ module ContactChannel =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelArn") in
       make ~activationStatus ~deliveryAddress ?type_ ~name ~contactArn
         ~contactChannelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activationStatus =
         field_map_exn json "ActivationStatus" ActivationStatus.of_json in
@@ -1110,6 +1122,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -1129,6 +1142,7 @@ module DataEncryptionException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -1158,6 +1172,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -1194,6 +1209,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "ResourceType" String_.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
@@ -1245,6 +1261,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~serviceCode ~quotaCode ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "ServiceCode" String_.of_json in
       let quotaCode = field_map_exn json "QuotaCode" String_.of_json in
@@ -1293,6 +1310,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ?serviceCode ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -1332,6 +1350,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?fields ?reason ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields =
         field_map json "Fields" ValidationExceptionFieldList.of_json in
@@ -1357,6 +1376,7 @@ module Plan =
       let stages =
         StagesList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Stages") in
       make ~stages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stages = field_map_exn json "Stages" StagesList.of_json in
       make ~stages ()
@@ -1390,6 +1410,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "ResourceType" String_.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
@@ -1734,6 +1755,7 @@ module TimeRange =
       let startTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map json "EndTime" DateTime.of_json in
       let startTime = field_map json "StartTime" DateTime.of_json in
@@ -1984,6 +2006,7 @@ module UpdateContactResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the contact or escalation plan specified."]
@@ -2017,6 +2040,7 @@ module UpdateContactRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ?plan ?displayName ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let plan = field_map json "Plan" Plan.of_json in
       let displayName = field_map json "DisplayName" ContactName.of_json in
@@ -2113,6 +2137,7 @@ module UpdateContactChannelResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a contact's contact channel."]
@@ -2151,6 +2176,7 @@ module UpdateContactChannelRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelId") in
       make ?deliveryAddress ?name ~contactChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryAddress =
         field_map json "DeliveryAddress" ContactChannelAddress.of_json in
@@ -2231,6 +2257,7 @@ module UntagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from the specified resource."]
@@ -2259,6 +2286,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -2348,6 +2376,7 @@ module TagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2376,6 +2405,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagsList.of_json in
       let resourceARN =
@@ -2455,6 +2485,7 @@ module StopEngagementResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2482,6 +2513,7 @@ module StopEngagementRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EngagementId") in
       make ?reason ~engagementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" StopReason.of_json in
       let engagementId =
@@ -2579,6 +2611,7 @@ module StartEngagementResult =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EngagementArn") in
       make ~engagementArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engagementArn =
         field_map_exn json "EngagementArn" SsmContactsArn.of_json in
@@ -2669,6 +2702,7 @@ module StartEngagementRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ?idempotencyToken ?incidentId ?publicContent ?publicSubject
         ~content ~subject ~sender ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" IdempotencyToken.of_json in
@@ -2777,6 +2811,7 @@ module SendActivationCodeResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2799,6 +2834,7 @@ module SendActivationCodeRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelId") in
       make ~contactChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactChannelId =
         field_map_exn json "ContactChannelId" SsmContactsArn.of_json in
@@ -2886,6 +2922,7 @@ module PutContactPolicyResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2912,6 +2949,7 @@ module PutContactPolicyRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~policy ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" Policy.of_json in
       let contactArn = field_map_exn json "ContactArn" SsmContactsArn.of_json in
@@ -2995,6 +3033,7 @@ module ListTagsForResourceResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagsList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3017,6 +3056,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" AmazonResourceName.of_json in
@@ -3109,6 +3149,7 @@ module ListPagesByEngagementResult =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ~pages ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pages = field_map_exn json "Pages" PagesList.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3149,6 +3190,7 @@ module ListPagesByEngagementRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EngagementId") in
       make ?maxResults ?nextToken ~engagementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3245,6 +3287,7 @@ module ListPagesByContactResult =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ~pages ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pages = field_map_exn json "Pages" PagesList.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3284,6 +3327,7 @@ module ListPagesByContactRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ?maxResults ?nextToken ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3376,6 +3420,7 @@ module ListPageReceiptsResult =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?receipts ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let receipts = field_map json "Receipts" ReceiptsList.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3416,6 +3461,7 @@ module ListPageReceiptsRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PageId") in
       make ?maxResults ?nextToken ~pageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3504,6 +3550,7 @@ module ListEngagementsResult =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ~engagements ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engagements =
         field_map_exn json "Engagements" EngagementsList.of_json in
@@ -3550,6 +3597,7 @@ module ListEngagementsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?timeRangeValue ?incidentId ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeRangeValue = field_map json "TimeRangeValue" TimeRange.of_json in
       let incidentId = field_map json "IncidentId" IncidentId.of_json in
@@ -3635,6 +3683,7 @@ module ListContactsResult =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?contacts ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contacts = field_map json "Contacts" ContactsList.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3682,6 +3731,7 @@ module ListContactsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?type_ ?aliasPrefix ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" ContactType.of_json in
       let aliasPrefix = field_map json "AliasPrefix" ContactAlias.of_json in
@@ -3790,6 +3840,7 @@ module ListContactChannelsResult =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ~contactChannels ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactChannels =
         field_map_exn json "ContactChannels" ContactChannelList.of_json in
@@ -3828,6 +3879,7 @@ module ListContactChannelsRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ?maxResults ?nextToken ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -3952,6 +4004,7 @@ module GetContactResult =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~plan ~type_ ?displayName ~alias ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let plan = field_map_exn json "Plan" Plan.of_json in
       let type_ = field_map_exn json "Type" ContactType.of_json in
@@ -3980,6 +4033,7 @@ module GetContactRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map_exn json "ContactId" SsmContactsArn.of_json in
       make ~contactId ()
@@ -4071,6 +4125,7 @@ module GetContactPolicyResult =
         (Option.map ~f:SsmContactsArn.of_xml)
           (Xml.child xml_arg0 "ContactArn") in
       make ?policy ?contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in
       let contactArn = field_map json "ContactArn" SsmContactsArn.of_json in
@@ -4096,6 +4151,7 @@ module GetContactPolicyRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactArn = field_map_exn json "ContactArn" SsmContactsArn.of_json in
       make ~contactArn ()
@@ -4239,6 +4295,7 @@ module GetContactChannelResult =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ?activationStatus ~deliveryAddress ~type_ ~name ~contactChannelArn
         ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activationStatus =
         field_map json "ActivationStatus" ActivationStatus.of_json in
@@ -4272,6 +4329,7 @@ module GetContactChannelRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelId") in
       make ~contactChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactChannelId =
         field_map_exn json "ContactChannelId" SsmContactsArn.of_json in
@@ -4465,6 +4523,7 @@ module DescribePageResult =
       make ?deliveryTime ?readTime ?sentTime ?incidentId ?publicContent
         ?publicSubject ~content ~subject ~sender ~contactArn ~engagementArn
         ~pageArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryTime = field_map json "DeliveryTime" DateTime.of_json in
       let readTime = field_map json "ReadTime" DateTime.of_json in
@@ -4503,6 +4562,7 @@ module DescribePageRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PageId") in
       make ~pageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageId = field_map_exn json "PageId" SsmContactsArn.of_json in
       make ~pageId ()
@@ -4675,6 +4735,7 @@ module DescribeEngagementResult =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ?stopTime ?startTime ?incidentId ?publicContent ?publicSubject
         ~content ~subject ~sender ~engagementArn ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stopTime = field_map json "StopTime" DateTime.of_json in
       let startTime = field_map json "StartTime" DateTime.of_json in
@@ -4712,6 +4773,7 @@ module DescribeEngagementRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EngagementId") in
       make ~engagementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engagementId =
         field_map_exn json "EngagementId" SsmContactsArn.of_json in
@@ -4790,6 +4852,7 @@ module DeleteContactResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4812,6 +4875,7 @@ module DeleteContactRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map_exn json "ContactId" SsmContactsArn.of_json in
       make ~contactId ()
@@ -4889,6 +4953,7 @@ module DeleteContactChannelResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4911,6 +4976,7 @@ module DeleteContactChannelRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelId") in
       make ~contactChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactChannelId =
         field_map_exn json "ContactChannelId" SsmContactsArn.of_json in
@@ -4989,6 +5055,7 @@ module DeactivateContactChannelResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5012,6 +5079,7 @@ module DeactivateContactChannelRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelId") in
       make ~contactChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactChannelId =
         field_map_exn json "ContactChannelId" SsmContactsArn.of_json in
@@ -5120,6 +5188,7 @@ module CreateContactResult =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactArn") in
       make ~contactArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactArn = field_map_exn json "ContactArn" SsmContactsArn.of_json in
       make ~contactArn ()
@@ -5181,6 +5250,7 @@ module CreateContactRequest =
         ContactAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Alias") in
       make ?idempotencyToken ?tags ~plan ~type_ ?displayName ~alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" IdempotencyToken.of_json in
@@ -5283,6 +5353,7 @@ module CreateContactChannelResult =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelArn") in
       make ~contactChannelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactChannelArn =
         field_map_exn json "ContactChannelArn" SsmContactsArn.of_json in
@@ -5357,6 +5428,7 @@ module CreateContactChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ?idempotencyToken ?deferActivation ~deliveryAddress ~type_ ~name
         ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" IdempotencyToken.of_json in
@@ -5443,6 +5515,7 @@ module ActivateContactChannelResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5473,6 +5546,7 @@ module ActivateContactChannelRequest =
         SsmContactsArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactChannelId") in
       make ~activationCode ~contactChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activationCode =
         field_map_exn json "ActivationCode" ActivationCode.of_json in
@@ -5553,6 +5627,7 @@ module AcceptPageResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5624,6 +5699,7 @@ module AcceptPageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PageId") in
       make ?acceptCodeValidation ~acceptCode ?note ~acceptType
         ?contactChannelId ~pageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptCodeValidation =
         field_map json "AcceptCodeValidation" AcceptCodeValidation.of_json in

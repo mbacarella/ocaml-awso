@@ -201,6 +201,7 @@ module Tag =
       let key =
         ObjectKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" Value.of_json in
       let key = field_map_exn json "Key" ObjectKey.of_json in
@@ -229,6 +230,7 @@ module FilterRule =
       let name =
         (Option.map ~f:FilterRuleName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" FilterRuleValue.of_json in
       let name = field_map json "Name" FilterRuleName.of_json in
@@ -346,6 +348,7 @@ module Grantee =
       let displayName =
         (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "DisplayName") in
       make ?uRI ~type_ ?iD ?emailAddress ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uRI = field_map json "URI" URI.of_json in
       let type_ = field_map_exn json "Type" Type.of_json in
@@ -487,6 +490,7 @@ module ReplicationTimeValue =
       let minutes =
         (Option.map ~f:Minutes.of_xml) (Xml.child xml_arg0 "Minutes") in
       make ?minutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minutes = field_map json "Minutes" Minutes.of_json in
       make ?minutes ()
@@ -733,6 +737,7 @@ module SSEKMS =
       let keyId =
         SSEKMSKeyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" SSEKMSKeyId.of_json in
       make ~keyId ()
@@ -747,6 +752,7 @@ module SSES3 =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -793,6 +799,7 @@ module AnalyticsS3BucketDestination =
         AnalyticsS3ExportFileFormat.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Format") in
       make ?prefix ~bucket ?bucketAccountId ~format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" Prefix.of_json in
       let bucket = field_map_exn json "Bucket" BucketName.of_json in
@@ -863,6 +870,7 @@ module Grant =
       let grantee =
         (Option.map ~f:Grantee.of_xml) (Xml.child xml_arg0 "Grantee") in
       make ?permission ?grantee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permission = field_map json "Permission" Permission.of_json in
       let grantee = field_map json "Grantee" Grantee.of_json in
@@ -887,6 +895,7 @@ module MetadataEntry =
       let name =
         (Option.map ~f:MetadataKey.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" MetadataValue.of_json in
       let name = field_map json "Name" MetadataKey.of_json in
@@ -1191,6 +1200,7 @@ module AccessControlTranslation =
         OwnerOverride.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Owner") in
       make ~owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map_exn json "Owner" OwnerOverride.of_json in
       make ~owner ()
@@ -1215,6 +1225,7 @@ module EncryptionConfiguration =
         (Option.map ~f:ReplicaKmsKeyID.of_xml)
           (Xml.child xml_arg0 "ReplicaKmsKeyID") in
       make ?replicaKmsKeyID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicaKmsKeyID =
         field_map json "ReplicaKmsKeyID" ReplicaKmsKeyID.of_json in
@@ -1248,6 +1259,7 @@ module Metrics =
         MetricsStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?eventThreshold ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventThreshold =
         field_map json "EventThreshold" ReplicationTimeValue.of_json in
@@ -1280,6 +1292,7 @@ module ReplicationTime =
         ReplicationTimeStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~time ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let time = field_map_exn json "Time" ReplicationTimeValue.of_json in
       let status = field_map_exn json "Status" ReplicationTimeStatus.of_json in
@@ -1381,6 +1394,7 @@ module ReplicationRuleAndOperator =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?tags ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagSet.of_json in
       let prefix = field_map json "Prefix" Prefix.of_json in
@@ -1406,6 +1420,7 @@ module ReplicaModifications =
         ReplicaModificationsStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "Status" ReplicaModificationsStatus.of_json in
@@ -1431,6 +1446,7 @@ module SseKmsEncryptedObjects =
         SseKmsEncryptedObjectsStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "Status" SseKmsEncryptedObjectsStatus.of_json in
@@ -1567,6 +1583,7 @@ module S3KeyFilter =
         (Option.map ~f:FilterRuleList.of_xml)
           (Some (Xml.children xml_arg0 "FilterRule")) in
       make ?filterRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterRules = field_map json "FilterRules" FilterRuleList.of_json in
       make ?filterRules ()
@@ -1671,6 +1688,7 @@ module LifecycleRuleAndOperator =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?objectSizeLessThan ?objectSizeGreaterThan ?tags ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectSizeLessThan =
         field_map json "ObjectSizeLessThan" ObjectSizeLessThanBytes.of_json in
@@ -1717,6 +1735,7 @@ module NoncurrentVersionTransition =
       let noncurrentDays =
         (Option.map ~f:Days.of_xml) (Xml.child xml_arg0 "NoncurrentDays") in
       make ?newerNoncurrentVersions ?storageClass ?noncurrentDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newerNoncurrentVersions =
         field_map json "NewerNoncurrentVersions" VersionCount.of_json in
@@ -1757,6 +1776,7 @@ module Transition =
       let days = (Option.map ~f:Days.of_xml) (Xml.child xml_arg0 "Days") in
       let date = (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "Date") in
       make ?storageClass ?days ?date ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageClass =
         field_map json "StorageClass" TransitionStorageClass.of_json in
@@ -1852,6 +1872,7 @@ module InventoryEncryption =
         (Option.map ~f:SSEKMS.of_xml) (Xml.child xml_arg0 "SSE-KMS") in
       let sSES3 = (Option.map ~f:SSES3.of_xml) (Xml.child xml_arg0 "SSE-S3") in
       make ?sSEKMS ?sSES3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSEKMS = field_map json "SSEKMS" SSEKMS.of_json in
       let sSES3 = field_map json "SSES3" SSES3.of_json in
@@ -1948,6 +1969,7 @@ module AnalyticsExportDestination =
         AnalyticsS3BucketDestination.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3BucketDestination") in
       make ~s3BucketDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3BucketDestination =
         field_map_exn json "S3BucketDestination"
@@ -2047,6 +2069,7 @@ module Encryption =
         ServerSideEncryption.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EncryptionType") in
       make ?kMSContext ?kMSKeyId ~encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSContext = field_map json "KMSContext" KMSContext.of_json in
       let kMSKeyId = field_map json "KMSKeyId" SSEKMSKeyId.of_json in
@@ -2145,6 +2168,7 @@ module Tagging =
       let tagSet =
         TagSet.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagSet") in
       make ~tagSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSet = field_map_exn json "TagSet" TagSet.of_json in
       make ~tagSet ()
@@ -2256,6 +2280,7 @@ module CSVInput =
           (Xml.child xml_arg0 "FileHeaderInfo") in
       make ?allowQuotedRecordDelimiter ?quoteCharacter ?fieldDelimiter
         ?recordDelimiter ?quoteEscapeCharacter ?comments ?fileHeaderInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowQuotedRecordDelimiter =
         field_map json "AllowQuotedRecordDelimiter"
@@ -2318,6 +2343,7 @@ module JSONInput =
     let of_xml xml_arg0 =
       let type_ = (Option.map ~f:JSONType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" JSONType.of_json in make ?type_ ()
     let to_json v = composed_to_json to_value v
@@ -2330,6 +2356,7 @@ module ParquetInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Container for Parquet."]
@@ -2394,6 +2421,7 @@ module CSVOutput =
         (Option.map ~f:QuoteFields.of_xml) (Xml.child xml_arg0 "QuoteFields") in
       make ?quoteCharacter ?fieldDelimiter ?recordDelimiter
         ?quoteEscapeCharacter ?quoteFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quoteCharacter =
         field_map json "QuoteCharacter" QuoteCharacter.of_json in
@@ -2427,6 +2455,7 @@ module JSONOutput =
         (Option.map ~f:RecordDelimiter.of_xml)
           (Xml.child xml_arg0 "RecordDelimiter") in
       make ?recordDelimiter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordDelimiter =
         field_map json "RecordDelimiter" RecordDelimiter.of_json in
@@ -2502,6 +2531,7 @@ module Condition =
         (Option.map ~f:HttpErrorCodeReturnedEquals.of_xml)
           (Xml.child xml_arg0 "HttpErrorCodeReturnedEquals") in
       make ?keyPrefixEquals ?httpErrorCodeReturnedEquals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPrefixEquals =
         field_map json "KeyPrefixEquals" KeyPrefixEquals.of_json in
@@ -2570,6 +2600,7 @@ module Redirect =
         (Option.map ~f:HostName.of_xml) (Xml.child xml_arg0 "HostName") in
       make ?replaceKeyWith ?replaceKeyPrefixWith ?protocol ?httpRedirectCode
         ?hostName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replaceKeyWith =
         field_map json "ReplaceKeyWith" ReplaceKeyWith.of_json in
@@ -2602,6 +2633,7 @@ module DeleteMarkerReplication =
         (Option.map ~f:DeleteMarkerReplicationStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "Status" DeleteMarkerReplicationStatus.of_json in
@@ -2689,6 +2721,7 @@ module Destination =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?metrics ?replicationTime ?encryptionConfiguration
         ?accessControlTranslation ?storageClass ?account ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metrics = field_map json "Metrics" Metrics.of_json in
       let replicationTime =
@@ -2723,6 +2756,7 @@ module ExistingObjectReplication =
         ExistingObjectReplicationStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "Status" ExistingObjectReplicationStatus.of_json in
@@ -2772,6 +2806,7 @@ module ReplicationRuleFilter =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?and_ ?tag ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let and_ = field_map json "And" ReplicationRuleAndOperator.of_json in
       let tag = field_map json "Tag" Tag.of_json in
@@ -2836,6 +2871,7 @@ module SourceSelectionCriteria =
         (Option.map ~f:SseKmsEncryptedObjects.of_xml)
           (Xml.child xml_arg0 "SseKmsEncryptedObjects") in
       make ?replicaModifications ?sseKmsEncryptedObjects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicaModifications =
         field_map json "ReplicaModifications" ReplicaModifications.of_json in
@@ -2913,6 +2949,7 @@ module NotificationConfigurationFilter =
       let key =
         (Option.map ~f:S3KeyFilter.of_xml) (Xml.child xml_arg0 "S3Key") in
       make ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map json "Key" S3KeyFilter.of_json in make ?key ()
     let to_json v = composed_to_json to_value v
@@ -2982,6 +3019,7 @@ module TargetGrant =
       let grantee =
         (Option.map ~f:Grantee.of_xml) (Xml.child xml_arg0 "Grantee") in
       make ?permission ?grantee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permission =
         field_map json "Permission" BucketLogsPermission.of_json in
@@ -3008,6 +3046,7 @@ module AbortIncompleteMultipartUpload =
         (Option.map ~f:DaysAfterInitiation.of_xml)
           (Xml.child xml_arg0 "DaysAfterInitiation") in
       make ?daysAfterInitiation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let daysAfterInitiation =
         field_map json "DaysAfterInitiation" DaysAfterInitiation.of_json in
@@ -3072,6 +3111,7 @@ module LifecycleExpiration =
       let days = (Option.map ~f:Days.of_xml) (Xml.child xml_arg0 "Days") in
       let date = (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "Date") in
       make ?expiredObjectDeleteMarker ?days ?date ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiredObjectDeleteMarker =
         field_map json "ExpiredObjectDeleteMarker"
@@ -3108,6 +3148,7 @@ module NoncurrentVersionExpiration =
       let noncurrentDays =
         (Option.map ~f:Days.of_xml) (Xml.child xml_arg0 "NoncurrentDays") in
       make ?newerNoncurrentVersions ?noncurrentDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newerNoncurrentVersions =
         field_map json "NewerNoncurrentVersions" VersionCount.of_json in
@@ -3170,6 +3211,7 @@ module LifecycleRuleFilter =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?and_ ?objectSizeLessThan ?objectSizeGreaterThan ?tag ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let and_ = field_map json "And" LifecycleRuleAndOperator.of_json in
       let objectSizeLessThan =
@@ -3254,6 +3296,7 @@ module ServerSideEncryptionByDefault =
         ServerSideEncryption.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SSEAlgorithm") in
       make ?kMSMasterKeyID ~sSEAlgorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSMasterKeyID =
         field_map json "KMSMasterKeyID" SSEKMSKeyId.of_json in
@@ -3395,6 +3438,7 @@ module MetricsAndOperator =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?accessPointArn ?tags ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPointArn =
         field_map json "AccessPointArn" AccessPointArn.of_json in
@@ -3451,6 +3495,7 @@ module InventoryS3BucketDestination =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?encryption ?prefix ~format ~bucket ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryption =
         field_map json "Encryption" InventoryEncryption.of_json in
@@ -3563,6 +3608,7 @@ module IntelligentTieringAndOperator =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?tags ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagSet.of_json in
       let prefix = field_map json "Prefix" Prefix.of_json in
@@ -3596,6 +3642,7 @@ module Tiering =
         IntelligentTieringDays.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Days") in
       make ~accessTier ~days ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessTier =
         field_map_exn json "AccessTier" IntelligentTieringAccessTier.of_json in
@@ -3625,6 +3672,7 @@ module AnalyticsAndOperator =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?tags ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagSet.of_json in
       let prefix = field_map json "Prefix" Prefix.of_json in
@@ -3661,6 +3709,7 @@ module StorageClassAnalysisDataExport =
         StorageClassAnalysisSchemaVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OutputSchemaVersion") in
       make ~destination ~outputSchemaVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination =
         field_map_exn json "Destination" AnalyticsExportDestination.of_json in
@@ -3812,6 +3861,7 @@ module Progress =
         (Option.map ~f:BytesScanned.of_xml)
           (Xml.child xml_arg0 "BytesScanned") in
       make ?bytesReturned ?bytesProcessed ?bytesScanned ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bytesReturned =
         field_map json "BytesReturned" BytesReturned.of_json in
@@ -3870,6 +3920,7 @@ module Stats =
         (Option.map ~f:BytesScanned.of_xml)
           (Xml.child xml_arg0 "BytesScanned") in
       make ?bytesReturned ?bytesProcessed ?bytesScanned ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bytesReturned =
         field_map json "BytesReturned" BytesReturned.of_json in
@@ -3990,6 +4041,7 @@ module S3Location =
           (Xml.child_exn ~context:context_ xml_arg0 "BucketName") in
       make ?storageClass ?userMetadata ?tagging ?accessControlList ?cannedACL
         ?encryption ~prefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageClass = field_map json "StorageClass" StorageClass.of_json in
       let userMetadata = field_map json "UserMetadata" UserMetadata.of_json in
@@ -4069,6 +4121,7 @@ module InputSerialization =
           (Xml.child xml_arg0 "CompressionType") in
       let cSV = (Option.map ~f:CSVInput.of_xml) (Xml.child xml_arg0 "CSV") in
       make ?parquet ?jSON ?compressionType ?cSV ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parquet = field_map json "Parquet" ParquetInput.of_json in
       let jSON = field_map json "JSON" JSONInput.of_json in
@@ -4099,6 +4152,7 @@ module OutputSerialization =
         (Option.map ~f:JSONOutput.of_xml) (Xml.child xml_arg0 "JSON") in
       let cSV = (Option.map ~f:CSVOutput.of_xml) (Xml.child xml_arg0 "CSV") in
       make ?jSON ?cSV ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jSON = field_map json "JSON" JSONOutput.of_json in
       let cSV = field_map json "CSV" CSVOutput.of_json in make ?jSON ?cSV ()
@@ -4132,6 +4186,7 @@ module DefaultRetention =
         (Option.map ~f:ObjectLockRetentionMode.of_xml)
           (Xml.child xml_arg0 "Mode") in
       make ?years ?days ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let years = field_map json "Years" Years.of_json in
       let days = field_map json "Days" Days.of_json in
@@ -4176,6 +4231,7 @@ module RoutingRule =
       let condition =
         (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
       make ~redirect ?condition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redirect = field_map_exn json "Redirect" Redirect.of_json in
       let condition = field_map json "Condition" Condition.of_json in
@@ -4273,6 +4329,7 @@ module ReplicationRule =
       let iD = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "ID") in
       make ?deleteMarkerReplication ~destination ?existingObjectReplication
         ?sourceSelectionCriteria ~status ?filter ?prefix ?priority ?iD ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteMarkerReplication =
         field_map json "DeleteMarkerReplication"
@@ -4310,6 +4367,7 @@ module OwnershipControlsRule =
         ObjectOwnership.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectOwnership") in
       make ~objectOwnership ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectOwnership =
         field_map_exn json "ObjectOwnership" ObjectOwnership.of_json in
@@ -4379,6 +4437,7 @@ module LambdaFunctionConfiguration =
       let id =
         (Option.map ~f:NotificationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?filter ~events ~lambdaFunctionArn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter =
         field_map json "Filter" NotificationConfigurationFilter.of_json in
@@ -4425,6 +4484,7 @@ module QueueConfiguration =
       let id =
         (Option.map ~f:NotificationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?filter ~events ~queueArn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter =
         field_map json "Filter" NotificationConfigurationFilter.of_json in
@@ -4470,6 +4530,7 @@ module TopicConfiguration =
       let id =
         (Option.map ~f:NotificationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?filter ~events ~topicArn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter =
         field_map json "Filter" NotificationConfigurationFilter.of_json in
@@ -4614,6 +4675,7 @@ module Rule =
       make ?abortIncompleteMultipartUpload ?noncurrentVersionExpiration
         ?noncurrentVersionTransition ?transition ~status ~prefix ?iD
         ?expiration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let abortIncompleteMultipartUpload =
         field_map json "AbortIncompleteMultipartUpload"
@@ -4732,6 +4794,7 @@ module LifecycleRule =
       make ?abortIncompleteMultipartUpload ?noncurrentVersionExpiration
         ?noncurrentVersionTransitions ?transitions ~status ?filter ?prefix
         ?iD ?expiration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let abortIncompleteMultipartUpload =
         field_map json "AbortIncompleteMultipartUpload"
@@ -4785,6 +4848,7 @@ module ServerSideEncryptionRule =
         (Option.map ~f:ServerSideEncryptionByDefault.of_xml)
           (Xml.child xml_arg0 "ApplyServerSideEncryptionByDefault") in
       make ?bucketKeyEnabled ?applyServerSideEncryptionByDefault ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketKeyEnabled =
         field_map json "BucketKeyEnabled" BucketKeyEnabled.of_json in
@@ -4861,6 +4925,7 @@ module CORSRule =
       let iD = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "ID") in
       make ?maxAgeSeconds ?exposeHeaders ~allowedOrigins ~allowedMethods
         ?allowedHeaders ?iD ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxAgeSeconds =
         field_map json "MaxAgeSeconds" MaxAgeSeconds.of_json in
@@ -4970,6 +5035,7 @@ module Owner =
       let displayName =
         (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "DisplayName") in
       make ?iD ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iD = field_map json "ID" ID.of_json in
       let displayName = field_map json "DisplayName" DisplayName.of_json in
@@ -5038,6 +5104,7 @@ module Initiator =
         (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "DisplayName") in
       let iD = (Option.map ~f:ID.of_xml) (Xml.child xml_arg0 "ID") in
       make ?displayName ?iD ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName = field_map json "DisplayName" DisplayName.of_json in
       let iD = field_map json "ID" ID.of_json in make ?displayName ?iD ()
@@ -5105,6 +5172,7 @@ module MetricsFilter =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?and_ ?accessPointArn ?tag ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let and_ = field_map json "And" MetricsAndOperator.of_json in
       let accessPointArn =
@@ -5148,6 +5216,7 @@ module InventoryDestination =
         InventoryS3BucketDestination.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3BucketDestination") in
       make ~s3BucketDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3BucketDestination =
         field_map_exn json "S3BucketDestination"
@@ -5172,6 +5241,7 @@ module InventoryFilter =
       let prefix =
         Prefix.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Prefix") in
       make ~prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map_exn json "Prefix" Prefix.of_json in
       make ~prefix ()
@@ -5257,6 +5327,7 @@ module InventorySchedule =
         InventoryFrequency.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Frequency") in
       make ~frequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frequency =
         field_map_exn json "Frequency" InventoryFrequency.of_json in
@@ -5304,6 +5375,7 @@ module IntelligentTieringFilter =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?and_ ?tag ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let and_ = field_map json "And" IntelligentTieringAndOperator.of_json in
       let tag = field_map json "Tag" Tag.of_json in
@@ -5393,6 +5465,7 @@ module AnalyticsFilter =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?and_ ?tag ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let and_ = field_map json "And" AnalyticsAndOperator.of_json in
       let tag = field_map json "Tag" Tag.of_json in
@@ -5433,6 +5506,7 @@ module StorageClassAnalysis =
         (Option.map ~f:StorageClassAnalysisDataExport.of_xml)
           (Xml.child xml_arg0 "DataExport") in
       make ?dataExport ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataExport =
         field_map json "DataExport" StorageClassAnalysisDataExport.of_json in
@@ -5507,6 +5581,7 @@ module ObjectPart =
         (Option.map ~f:PartNumber.of_xml) (Xml.child xml_arg0 "PartNumber") in
       make ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C ?checksumCRC32 ?size
         ?partNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumSHA256 =
         field_map json "ChecksumSHA256" ChecksumSHA256.of_json in
@@ -5545,6 +5620,7 @@ module ObjectIdentifier =
       let key =
         ObjectKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?versionId ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" ObjectVersionId.of_json in
       let key = field_map_exn json "Key" ObjectKey.of_json in
@@ -5670,6 +5746,7 @@ module CompletedPart =
       let eTag = (Option.map ~f:ETag.of_xml) (Xml.child xml_arg0 "ETag") in
       make ?partNumber ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C
         ?checksumCRC32 ?eTag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partNumber = field_map json "PartNumber" PartNumber.of_json in
       let checksumSHA256 =
@@ -5731,6 +5808,7 @@ module ContinuationEvent =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -5742,6 +5820,7 @@ module EndEvent =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5760,6 +5839,7 @@ module ProgressEvent =
       let details =
         (Option.map ~f:Progress.of_xml) (Xml.child xml_arg0 "Details") in
       make ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "Details" Progress.of_json in
       make ?details ()
@@ -5783,6 +5863,7 @@ module RecordsEvent =
       let payload =
         (Option.map ~f:Body.of_xml) (Xml.child xml_arg0 "Payload") in
       make ?payload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload = field_map json "Payload" Body.of_json in make ?payload ()
     let to_json v = composed_to_json to_value v
@@ -5801,6 +5882,7 @@ module StatsEvent =
       let details =
         (Option.map ~f:Stats.of_xml) (Xml.child xml_arg0 "Details") in
       make ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "Details" Stats.of_json in
       make ?details ()
@@ -5834,6 +5916,7 @@ module GlacierJobParameters =
       let tier =
         Tier.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tier") in
       make ~tier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tier = field_map_exn json "Tier" Tier.of_json in make ~tier ()
     let to_json v = composed_to_json to_value v
@@ -5852,6 +5935,7 @@ module OutputLocation =
     let of_xml xml_arg0 =
       let s3 = (Option.map ~f:S3Location.of_xml) (Xml.child xml_arg0 "S3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "S3" S3Location.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
@@ -5924,6 +6008,7 @@ module SelectParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "InputSerialization") in
       make ~outputSerialization ~expression ~expressionType
         ~inputSerialization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputSerialization =
         field_map_exn json "OutputSerialization" OutputSerialization.of_json in
@@ -5984,6 +6069,7 @@ module ObjectLockRule =
         (Option.map ~f:DefaultRetention.of_xml)
           (Xml.child xml_arg0 "DefaultRetention") in
       make ?defaultRetention ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultRetention =
         field_map json "DefaultRetention" DefaultRetention.of_json in
@@ -6027,6 +6113,7 @@ module ErrorDocument =
       let key =
         ObjectKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map_exn json "Key" ObjectKey.of_json in make ~key ()
     let to_json v = composed_to_json to_value v
@@ -6047,6 +6134,7 @@ module IndexDocument =
       let suffix =
         Suffix.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Suffix") in
       make ~suffix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suffix = field_map_exn json "Suffix" Suffix.of_json in
       make ~suffix ()
@@ -6074,6 +6162,7 @@ module RedirectAllRequestsTo =
       let hostName =
         HostName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostName") in
       make ?protocol ~hostName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol = field_map json "Protocol" Protocol.of_json in
       let hostName = field_map_exn json "HostName" HostName.of_json in
@@ -6271,6 +6360,7 @@ module CloudFunctionConfiguration =
       let id =
         (Option.map ~f:NotificationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?invocationRole ?cloudFunction ?events ?event ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invocationRole =
         field_map json "InvocationRole" CloudFunctionInvocationRole.of_json in
@@ -6315,6 +6405,7 @@ module QueueConfigurationDeprecated =
       let id =
         (Option.map ~f:NotificationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?queue ?events ?event ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queue = field_map json "Queue" QueueArn.of_json in
       let events = field_map json "Events" EventList.of_json in
@@ -6356,6 +6447,7 @@ module TopicConfigurationDeprecated =
       let id =
         (Option.map ~f:NotificationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?topic ?event ?events ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topic = field_map json "Topic" TopicArn.of_json in
       let event = field_map json "Event" Event.of_json in
@@ -6373,6 +6465,7 @@ module EventBridgeConfiguration =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6459,6 +6552,7 @@ module LoggingEnabled =
         TargetBucket.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetBucket") in
       make ~targetPrefix ?targetGrants ~targetBucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetPrefix =
         field_map_exn json "TargetPrefix" TargetPrefix.of_json in
@@ -6635,6 +6729,7 @@ module Part =
         (Option.map ~f:PartNumber.of_xml) (Xml.child xml_arg0 "PartNumber") in
       make ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C ?checksumCRC32 ?size
         ?eTag ?lastModified ?partNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumSHA256 =
         field_map json "ChecksumSHA256" ChecksumSHA256.of_json in
@@ -6666,6 +6761,7 @@ module CommonPrefix =
       let prefix =
         (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" Prefix.of_json in make ?prefix ()
     let to_json v = composed_to_json to_value v
@@ -6736,6 +6832,7 @@ module Object =
       let key = (Option.map ~f:ObjectKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?owner ?storageClass ?size ?checksumAlgorithm ?eTag ?lastModified
         ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map json "Owner" Owner.of_json in
       let storageClass =
@@ -6791,6 +6888,7 @@ module DeleteMarkerEntry =
       let key = (Option.map ~f:ObjectKey.of_xml) (Xml.child xml_arg0 "Key") in
       let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
       make ?lastModified ?isLatest ?versionId ?key ?owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModified = field_map json "LastModified" LastModified.of_json in
       let isLatest = field_map json "IsLatest" IsLatest.of_json in
@@ -6879,6 +6977,7 @@ module ObjectVersion =
       let eTag = (Option.map ~f:ETag.of_xml) (Xml.child xml_arg0 "ETag") in
       make ?owner ?lastModified ?isLatest ?versionId ?key ?storageClass ?size
         ?checksumAlgorithm ?eTag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map json "Owner" Owner.of_json in
       let lastModified = field_map json "LastModified" LastModified.of_json in
@@ -6964,6 +7063,7 @@ module MultipartUpload =
           (Xml.child xml_arg0 "UploadId") in
       make ?checksumAlgorithm ?initiator ?owner ?storageClass ?initiated ?key
         ?uploadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -7000,6 +7100,7 @@ module Bucket =
       let name =
         (Option.map ~f:BucketName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?creationDate ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" CreationDate.of_json in
       let name = field_map json "Name" BucketName.of_json in
@@ -7029,6 +7130,7 @@ module MetricsConfiguration =
       let id =
         MetricsId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?filter ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "Filter" MetricsFilter.of_json in
       let id = field_map_exn json "Id" MetricsId.of_json in
@@ -7115,6 +7217,7 @@ module InventoryConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
       make ~schedule ?optionalFields ~includedObjectVersions ~id ?filter
         ~isEnabled ~destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let schedule = field_map_exn json "Schedule" InventorySchedule.of_json in
       let optionalFields =
@@ -7172,6 +7275,7 @@ module IntelligentTieringConfiguration =
         IntelligentTieringId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~tierings ~status ?filter ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tierings = field_map_exn json "Tierings" TieringList.of_json in
       let status =
@@ -7215,6 +7319,7 @@ module AnalyticsConfiguration =
       let id =
         AnalyticsId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~storageClassAnalysis ?filter ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageClassAnalysis =
         field_map_exn json "StorageClassAnalysis"
@@ -7422,6 +7527,7 @@ module DeletedObject =
           (Xml.child xml_arg0 "VersionId") in
       let key = (Option.map ~f:ObjectKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?deleteMarkerVersionId ?deleteMarker ?versionId ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteMarkerVersionId =
         field_map json "DeleteMarkerVersionId" DeleteMarkerVersionId.of_json in
@@ -7464,6 +7570,7 @@ module Error =
           (Xml.child xml_arg0 "VersionId") in
       let key = (Option.map ~f:ObjectKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?message ?code ?versionId ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       let code = field_map json "Code" Code.of_json in
@@ -8187,6 +8294,7 @@ module CopyPartResult =
       let eTag = (Option.map ~f:ETag.of_xml) (Xml.child xml_arg0 "ETag") in
       make ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C ?checksumCRC32
         ?lastModified ?eTag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumSHA256 =
         field_map json "ChecksumSHA256" ChecksumSHA256.of_json in
@@ -8232,6 +8340,7 @@ module RequestProgress =
         (Option.map ~f:EnableRequestProgress.of_xml)
           (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" EnableRequestProgress.of_json in
       make ?enabled ()
@@ -8258,6 +8367,7 @@ module ScanRange =
       let end_ = (Option.map ~f:End.of_xml) (Xml.child xml_arg0 "End") in
       let start = (Option.map ~f:Start.of_xml) (Xml.child xml_arg0 "Start") in
       make ?end_ ?start ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let end_ = field_map json "End" End.of_json in
       let start = field_map json "Start" Start.of_json in
@@ -8298,6 +8408,7 @@ module SelectObjectContentEventStream =
       let records =
         (Option.map ~f:RecordsEvent.of_xml) (Xml.child xml_arg0 "Records") in
       make ?end_ ?cont ?progress ?stats ?records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let end_ = field_map json "End" EndEvent.of_json in
       let cont = field_map json "Cont" ContinuationEvent.of_json in
@@ -8377,6 +8488,7 @@ module RestoreRequest =
       let days = (Option.map ~f:Days.of_xml) (Xml.child xml_arg0 "Days") in
       make ?outputLocation ?selectParameters ?description ?tier ?type_
         ?glacierJobParameters ?days ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputLocation =
         field_map json "OutputLocation" OutputLocation.of_json in
@@ -8400,6 +8512,7 @@ module ObjectAlreadyInActiveTierError =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This action is not allowed against this storage tier."]
@@ -8468,6 +8581,7 @@ module PublicAccessBlockConfiguration =
         (Option.map ~f:Setting.of_xml) (Xml.child xml_arg0 "BlockPublicAcls") in
       make ?restrictPublicBuckets ?blockPublicPolicy ?ignorePublicAcls
         ?blockPublicAcls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restrictPublicBuckets =
         field_map json "RestrictPublicBuckets" Setting.of_json in
@@ -8517,6 +8631,7 @@ module ObjectLockRetention =
         (Option.map ~f:ObjectLockRetentionMode.of_xml)
           (Xml.child xml_arg0 "Mode") in
       make ?retainUntilDate ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retainUntilDate = field_map json "RetainUntilDate" Date.of_json in
       let mode = field_map json "Mode" ObjectLockRetentionMode.of_json in
@@ -8639,6 +8754,7 @@ module ObjectLockConfiguration =
         (Option.map ~f:ObjectLockEnabled.of_xml)
           (Xml.child xml_arg0 "ObjectLockEnabled") in
       make ?rule ?objectLockEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rule = field_map json "Rule" ObjectLockRule.of_json in
       let objectLockEnabled =
@@ -8678,6 +8794,7 @@ module ObjectLockLegalHold =
         (Option.map ~f:ObjectLockLegalHoldStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ObjectLockLegalHoldStatus.of_json in
       make ?status ()
@@ -8702,6 +8819,7 @@ module AccessControlPolicy =
         (Option.map ~f:Grants.of_xml)
           (Xml.child xml_arg0 "AccessControlList") in
       make ?owner ?grants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map json "Owner" Owner.of_json in
       let grants = field_map json "Grants" Grants.of_json in
@@ -8730,6 +8848,7 @@ module NoSuchKey =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified key does not exist."]
@@ -8785,6 +8904,7 @@ module WebsiteConfiguration =
           (Xml.child xml_arg0 "ErrorDocument") in
       make ?routingRules ?redirectAllRequestsTo ?indexDocument ?errorDocument
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingRules = field_map json "RoutingRules" RoutingRules.of_json in
       let redirectAllRequestsTo =
@@ -8833,6 +8953,7 @@ module VersioningConfiguration =
       let mFADelete =
         (Option.map ~f:MFADelete.of_xml) (Xml.child xml_arg0 "MfaDelete") in
       make ?status ?mFADelete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" BucketVersioningStatus.of_json in
       let mFADelete = field_map json "MFADelete" MFADelete.of_json in
@@ -8855,6 +8976,7 @@ module RequestPaymentConfiguration =
       let payer =
         Payer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Payer") in
       make ~payer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payer = field_map_exn json "Payer" Payer.of_json in make ~payer ()
     let to_json v = composed_to_json to_value v
@@ -8881,6 +9003,7 @@ module ReplicationConfiguration =
       let role =
         Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Role") in
       make ~rules ~role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map_exn json "Rules" ReplicationRules.of_json in
       let role = field_map_exn json "Role" Role.of_json in
@@ -8929,6 +9052,7 @@ module OwnershipControls =
       let rules =
         OwnershipControlsRules.of_xml (Xml.children xml_arg0 "Rule") in
       make ~rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map_exn json "Rules" OwnershipControlsRules.of_json in
       make ~rules ()
@@ -8998,6 +9122,7 @@ module NotificationConfigurationDeprecated =
           (Xml.child xml_arg0 "TopicConfiguration") in
       make ?cloudFunctionConfiguration ?queueConfiguration
         ?topicConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudFunctionConfiguration =
         field_map json "CloudFunctionConfiguration"
@@ -9086,6 +9211,7 @@ module NotificationConfiguration =
           (Some (Xml.children xml_arg0 "TopicConfiguration")) in
       make ?eventBridgeConfiguration ?lambdaFunctionConfigurations
         ?queueConfigurations ?topicConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventBridgeConfiguration =
         field_map json "EventBridgeConfiguration"
@@ -9130,6 +9256,7 @@ module BucketLoggingStatus =
         (Option.map ~f:LoggingEnabled.of_xml)
           (Xml.child xml_arg0 "LoggingEnabled") in
       make ?loggingEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingEnabled =
         field_map json "LoggingEnabled" LoggingEnabled.of_json in
@@ -9150,6 +9277,7 @@ module LifecycleConfiguration =
     let of_xml xml_arg0 =
       let rules = Rules.of_xml (Xml.children xml_arg0 "Rule") in
       make ~rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map_exn json "Rules" Rules.of_json in make ~rules ()
     let to_json v = composed_to_json to_value v
@@ -9169,6 +9297,7 @@ module BucketLifecycleConfiguration =
     let of_xml xml_arg0 =
       let rules = LifecycleRules.of_xml (Xml.children xml_arg0 "Rule") in
       make ~rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map_exn json "Rules" LifecycleRules.of_json in
       make ~rules ()
@@ -9191,6 +9320,7 @@ module ServerSideEncryptionConfiguration =
       let rules =
         ServerSideEncryptionRules.of_xml (Xml.children xml_arg0 "Rule") in
       make ~rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules =
         field_map_exn json "Rules" ServerSideEncryptionRules.of_json in
@@ -9213,6 +9343,7 @@ module CORSConfiguration =
     let of_xml xml_arg0 =
       let cORSRules = CORSRules.of_xml (Xml.children xml_arg0 "CORSRule") in
       make ~cORSRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cORSRules = field_map_exn json "CORSRules" CORSRules.of_json in
       make ~cORSRules ()
@@ -9267,6 +9398,7 @@ module AccelerateConfiguration =
         (Option.map ~f:BucketAccelerateStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" BucketAccelerateStatus.of_json in
       make ?status ()
@@ -9440,6 +9572,7 @@ module NoSuchBucket =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified bucket does not exist."]
@@ -9909,6 +10042,7 @@ module InvalidObjectState =
         (Option.map ~f:StorageClass.of_xml)
           (Xml.child xml_arg0 "StorageClass") in
       make ?accessTier ?storageClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessTier =
         field_map json "AccessTier" IntelligentTieringAccessTier.of_json in
@@ -9988,6 +10122,7 @@ module Checksum =
         (Option.map ~f:ChecksumCRC32.of_xml)
           (Xml.child xml_arg0 "ChecksumCRC32") in
       make ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C ?checksumCRC32 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumSHA256 =
         field_map json "ChecksumSHA256" ChecksumSHA256.of_json in
@@ -10064,6 +10199,7 @@ module GetObjectAttributesParts =
         (Option.map ~f:PartsCount.of_xml) (Xml.child xml_arg0 "PartsCount") in
       make ?parts ?isTruncated ?maxParts ?nextPartNumberMarker
         ?partNumberMarker ?totalPartsCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parts = field_map json "Parts" PartsList.of_json in
       let isTruncated = field_map json "IsTruncated" IsTruncated.of_json in
@@ -10133,6 +10269,7 @@ module PolicyStatus =
       let isPublic =
         (Option.map ~f:IsPublic.of_xml) (Xml.child xml_arg0 "IsPublic") in
       make ?isPublic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isPublic = field_map json "IsPublic" IsPublic.of_json in
       make ?isPublic ()
@@ -10157,6 +10294,7 @@ module Delete =
       let objects =
         ObjectIdentifierList.of_xml (Xml.children xml_arg0 "Object") in
       make ?quiet ~objects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quiet = field_map json "Quiet" Quiet.of_json in
       let objects = field_map_exn json "Objects" ObjectIdentifierList.of_json in
@@ -10209,6 +10347,7 @@ module CreateBucketConfiguration =
         (Option.map ~f:BucketLocationConstraint.of_xml)
           (Xml.child xml_arg0 "LocationConstraint") in
       make ?locationConstraint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationConstraint =
         field_map json "LocationConstraint" BucketLocationConstraint.of_json in
@@ -10236,6 +10375,7 @@ module BucketAlreadyExists =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10248,6 +10388,7 @@ module BucketAlreadyOwnedByYou =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10373,6 +10514,7 @@ module CopyObjectResult =
       let eTag = (Option.map ~f:ETag.of_xml) (Xml.child xml_arg0 "ETag") in
       make ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C ?checksumCRC32
         ?lastModified ?eTag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumSHA256 =
         field_map json "ChecksumSHA256" ChecksumSHA256.of_json in
@@ -10395,6 +10537,7 @@ module ObjectNotInActiveTierError =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10416,6 +10559,7 @@ module CompletedMultipartUpload =
         (Option.map ~f:CompletedPartList.of_xml)
           (Some (Xml.children xml_arg0 "Part")) in
       make ?parts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parts = field_map json "Parts" CompletedPartList.of_json in
       make ?parts ()
@@ -10430,6 +10574,7 @@ module NoSuchUpload =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified multipart upload does not exist."]
@@ -11038,6 +11183,7 @@ module WriteGetObjectResponseRequest =
         ?contentLength ?contentLanguage ?contentEncoding ?contentDisposition
         ?cacheControl ?acceptRanges ?errorMessage ?errorCode ?statusCode
         ?body ~requestToken ~requestRoute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketKeyEnabled =
         field_map json "BucketKeyEnabled" BucketKeyEnabled.of_json in
@@ -11202,6 +11348,74 @@ module UploadPartRequest =
                                           partNumber;
                                           uploadId
                                         }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?body:(Some pipe)
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentLength:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "Content-Length")
+                              ~f:ContentLength.of_string)
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?checksumCRC32:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "x-amz-checksum-crc32")
+                              ~f:ChecksumCRC32.of_string)
+            ?checksumCRC32C:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-checksum-crc32c")
+                               ~f:ChecksumCRC32C.of_string)
+            ?checksumSHA1:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-checksum-sha1")
+                             ~f:ChecksumSHA1.of_string)
+            ?checksumSHA256:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-checksum-sha256")
+                               ~f:ChecksumSHA256.of_string)
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key"))
+            ~partNumber:(PartNumber.of_string
+                           ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                              xs "partNumber"))
+            ~uploadId:(MultipartUploadId.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "uploadId"))
+            ?sSECustomerAlgorithm:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption-customer-algorithm")
+                                     ~f:SSECustomerAlgorithm.of_string)
+            ?sSECustomerKey:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs
+                                  "x-amz-server-side-encryption-customer-key")
+                               ~f:SSECustomerKey.of_string)
+            ?sSECustomerKeyMD5:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-server-side-encryption-customer-key-MD5")
+                                  ~f:SSECustomerKeyMD5.of_string)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Body", (Option.map x.body ~f:Body.to_value));
@@ -11285,6 +11499,7 @@ module UploadPartRequest =
         ?sSECustomerKey ?sSECustomerAlgorithm ~uploadId ~partNumber ~key
         ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C ?checksumCRC32
         ?checksumAlgorithm ?contentMD5 ?contentLength ~bucket ?body ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -11509,6 +11724,7 @@ module UploadPartOutput =
       make ?requestCharged ?bucketKeyEnabled ?sSEKMSKeyId ?sSECustomerKeyMD5
         ?sSECustomerAlgorithm ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C
         ?checksumCRC32 ?eTag ?serverSideEncryption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -11744,6 +11960,7 @@ module UploadPartCopyRequest =
         ?sSECustomerAlgorithm ~uploadId ~partNumber ~key ?copySourceRange
         ?copySourceIfUnmodifiedSince ?copySourceIfNoneMatch
         ?copySourceIfModifiedSince ?copySourceIfMatch ~copySource ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedSourceBucketOwner =
         field_map json "ExpectedSourceBucketOwner" AccountId.of_json in
@@ -11853,6 +12070,45 @@ module UploadPartCopyOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ?copySourceVersionId:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-copy-source-version-id")
+                                    ~f:CopySourceVersionId.of_string)
+            ?copyPartResult:(Some pipe)
+            ?serverSideEncryption:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption")
+                                     ~f:ServerSideEncryption.of_string)
+            ?sSECustomerAlgorithm:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption-customer-algorithm")
+                                     ~f:SSECustomerAlgorithm.of_string)
+            ?sSECustomerKeyMD5:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-server-side-encryption-customer-key-MD5")
+                                  ~f:SSECustomerKeyMD5.of_string)
+            ?sSEKMSKeyId:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs
+                               "x-amz-server-side-encryption-aws-kms-key-id")
+                            ~f:SSEKMSKeyId.of_string)
+            ?bucketKeyEnabled:(Option.map
+                                 ((List.Assoc.find
+                                     ~equal:String.Caseless.equal) xs
+                                    "x-amz-server-side-encryption-bucket-key-enabled")
+                                 ~f:BucketKeyEnabled.of_string)
+            ?requestCharged:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-request-charged")
+                               ~f:RequestCharged.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("x-amz-copy-source-version-id",
@@ -11902,6 +12158,7 @@ module UploadPartCopyOutput =
       make ?requestCharged ?bucketKeyEnabled ?sSEKMSKeyId ?sSECustomerKeyMD5
         ?sSECustomerAlgorithm ?serverSideEncryption ?copyPartResult
         ?copySourceVersionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -12048,6 +12305,7 @@ module SelectObjectContentRequest =
         ~inputSerialization ?requestProgress ~expressionType ~expression
         ?sSECustomerKeyMD5 ?sSECustomerKey ?sSECustomerAlgorithm ~key ~bucket
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -12101,6 +12359,8 @@ module SelectObjectContentOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?payload:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("Payload",
@@ -12111,6 +12371,7 @@ module SelectObjectContentOutput =
         (Option.map ~f:SelectObjectContentEventStream.of_xml)
           (Xml.child xml_arg0 "Payload") in
       make ?payload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payload =
         field_map json "Payload" SelectObjectContentEventStream.of_json in
@@ -12156,6 +12417,34 @@ module RestoreObjectRequest =
                       bucket;
                       key
                     }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key"))
+            ?versionId:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "versionId") ~f:ObjectVersionId.of_string)
+            ?restoreRequest:(Some pipe)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -12192,6 +12481,7 @@ module RestoreObjectRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?checksumAlgorithm ?requestPayer
         ?restoreRequest ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -12276,6 +12566,7 @@ module RestoreObjectOutput =
         (Option.map ~f:RequestCharged.of_xml)
           (Xml.child xml_arg0 "x-amz-request-charged") in
       make ?restoreOutputPath ?requestCharged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restoreOutputPath =
         field_map json "RestoreOutputPath" RestoreOutputPath.of_json in
@@ -12318,6 +12609,27 @@ module PutPublicAccessBlockRequest =
                   bucket;
                   publicAccessBlockConfiguration
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~publicAccessBlockConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -12348,6 +12660,7 @@ module PutPublicAccessBlockRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~publicAccessBlockConfiguration
         ?checksumAlgorithm ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -12406,6 +12719,37 @@ module PutObjectTaggingRequest =
                         key;
                         tagging
                       }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key"))
+            ?versionId:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "versionId") ~f:ObjectVersionId.of_string)
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~tagging:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -12443,6 +12787,7 @@ module PutObjectTaggingRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?requestPayer ?expectedBucketOwner ~tagging ?checksumAlgorithm
         ?contentMD5 ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestPayer = field_map json "RequestPayer" RequestPayer.of_json in
       let expectedBucketOwner =
@@ -12502,6 +12847,7 @@ module PutObjectTaggingOutput =
         (Option.map ~f:ObjectVersionId.of_xml)
           (Xml.child xml_arg0 "x-amz-version-id") in
       make ?versionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" ObjectVersionId.of_json in
       make ?versionId ()
@@ -12559,6 +12905,42 @@ module PutObjectRetentionRequest =
                           bucket;
                           key
                         }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key")) ?retention:(Some pipe)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?versionId:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "versionId") ~f:ObjectVersionId.of_string)
+            ?bypassGovernanceRetention:(Option.map
+                                          ((List.Assoc.find
+                                              ~equal:String.Caseless.equal)
+                                             xs
+                                             "x-amz-bypass-governance-retention")
+                                          ~f:BypassGovernanceRetention.of_string)
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -12605,6 +12987,7 @@ module PutObjectRetentionRequest =
       make ?expectedBucketOwner ?checksumAlgorithm ?contentMD5
         ?bypassGovernanceRetention ?versionId ?requestPayer ?retention ~key
         ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -12666,6 +13049,7 @@ module PutObjectRetentionOutput =
         (Option.map ~f:RequestCharged.of_xml)
           (Xml.child xml_arg0 "x-amz-request-charged") in
       make ?requestCharged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -12880,6 +13264,160 @@ module PutObjectRequest =
                                                                     bucket;
                                                                     key
                                                                     }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ?aCL:(Option.map
+                    ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                       "x-amz-acl") ~f:ObjectCannedACL.of_string)
+            ?body:(Some pipe)
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?cacheControl:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "Cache-Control") ~f:CacheControl.of_string)
+            ?contentDisposition:(Option.map
+                                   ((List.Assoc.find
+                                       ~equal:String.Caseless.equal) xs
+                                      "Content-Disposition")
+                                   ~f:ContentDisposition.of_string)
+            ?contentEncoding:(Option.map
+                                ((List.Assoc.find
+                                    ~equal:String.Caseless.equal) xs
+                                   "Content-Encoding")
+                                ~f:ContentEncoding.of_string)
+            ?contentLanguage:(Option.map
+                                ((List.Assoc.find
+                                    ~equal:String.Caseless.equal) xs
+                                   "Content-Language")
+                                ~f:ContentLanguage.of_string)
+            ?contentLength:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "Content-Length")
+                              ~f:ContentLength.of_string)
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?contentType:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "Content-Type") ~f:ContentType.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?checksumCRC32:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "x-amz-checksum-crc32")
+                              ~f:ChecksumCRC32.of_string)
+            ?checksumCRC32C:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-checksum-crc32c")
+                               ~f:ChecksumCRC32C.of_string)
+            ?checksumSHA1:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-checksum-sha1")
+                             ~f:ChecksumSHA1.of_string)
+            ?checksumSHA256:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-checksum-sha256")
+                               ~f:ChecksumSHA256.of_string)
+            ?expires:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "Expires") ~f:Expires.of_string)
+            ?grantFullControl:(Option.map
+                                 ((List.Assoc.find
+                                     ~equal:String.Caseless.equal) xs
+                                    "x-amz-grant-full-control")
+                                 ~f:GrantFullControl.of_string)
+            ?grantRead:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "x-amz-grant-read") ~f:GrantRead.of_string)
+            ?grantReadACP:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-grant-read-acp")
+                             ~f:GrantReadACP.of_string)
+            ?grantWriteACP:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "x-amz-grant-write-acp")
+                              ~f:GrantWriteACP.of_string)
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key")) ?metadata:(Some (Metadata.of_header xs))
+            ?serverSideEncryption:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption")
+                                     ~f:ServerSideEncryption.of_string)
+            ?storageClass:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-storage-class")
+                             ~f:StorageClass.of_string)
+            ?websiteRedirectLocation:(Option.map
+                                        ((List.Assoc.find
+                                            ~equal:String.Caseless.equal) xs
+                                           "x-amz-website-redirect-location")
+                                        ~f:WebsiteRedirectLocation.of_string)
+            ?sSECustomerAlgorithm:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption-customer-algorithm")
+                                     ~f:SSECustomerAlgorithm.of_string)
+            ?sSECustomerKey:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs
+                                  "x-amz-server-side-encryption-customer-key")
+                               ~f:SSECustomerKey.of_string)
+            ?sSECustomerKeyMD5:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-server-side-encryption-customer-key-MD5")
+                                  ~f:SSECustomerKeyMD5.of_string)
+            ?sSEKMSKeyId:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs
+                               "x-amz-server-side-encryption-aws-kms-key-id")
+                            ~f:SSEKMSKeyId.of_string)
+            ?sSEKMSEncryptionContext:(Option.map
+                                        ((List.Assoc.find
+                                            ~equal:String.Caseless.equal) xs
+                                           "x-amz-server-side-encryption-context")
+                                        ~f:SSEKMSEncryptionContext.of_string)
+            ?bucketKeyEnabled:(Option.map
+                                 ((List.Assoc.find
+                                     ~equal:String.Caseless.equal) xs
+                                    "x-amz-server-side-encryption-bucket-key-enabled")
+                                 ~f:BucketKeyEnabled.of_string)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?tagging:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "x-amz-tagging") ~f:TaggingHeader.of_string)
+            ?objectLockMode:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-object-lock-mode")
+                               ~f:ObjectLockMode.of_string)
+            ?objectLockRetainUntilDate:(Option.map
+                                          ((List.Assoc.find
+                                              ~equal:String.Caseless.equal)
+                                             xs
+                                             "x-amz-object-lock-retain-until-date")
+                                          ~f:ObjectLockRetainUntilDate.of_string)
+            ?objectLockLegalHoldStatus:(Option.map
+                                          ((List.Assoc.find
+                                              ~equal:String.Caseless.equal)
+                                             xs
+                                             "x-amz-object-lock-legal-hold")
+                                          ~f:ObjectLockLegalHoldStatus.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("x-amz-acl", (Option.map x.aCL ~f:ObjectCannedACL.to_value));
@@ -13068,6 +13606,7 @@ module PutObjectRequest =
         ?checksumCRC32C ?checksumCRC32 ?checksumAlgorithm ?contentType
         ?contentMD5 ?contentLength ?contentLanguage ?contentEncoding
         ?contentDisposition ?cacheControl ~bucket ?body ?aCL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -13375,6 +13914,7 @@ module PutObjectOutput =
         ?sSEKMSKeyId ?sSECustomerKeyMD5 ?sSECustomerAlgorithm ?versionId
         ?serverSideEncryption ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C
         ?checksumCRC32 ?eTag ?expiration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -13448,6 +13988,34 @@ module PutObjectLockConfigurationRequest =
                       expectedBucketOwner;
                       bucket
                     }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket")) ?objectLockConfiguration:(Some pipe)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?token:(Option.map
+                      ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                         "x-amz-bucket-object-lock-token")
+                      ~f:ObjectLockToken.of_string)
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -13486,6 +14054,7 @@ module PutObjectLockConfigurationRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?checksumAlgorithm ?contentMD5 ?token
         ?requestPayer ?objectLockConfiguration ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -13544,6 +14113,7 @@ module PutObjectLockConfigurationOutput =
         (Option.map ~f:RequestCharged.of_xml)
           (Xml.child xml_arg0 "x-amz-request-charged") in
       make ?requestCharged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -13597,6 +14167,36 @@ module PutObjectLegalHoldRequest =
                         bucket;
                         key
                       }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key")) ?legalHold:(Some pipe)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?versionId:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "versionId") ~f:ObjectVersionId.of_string)
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -13636,6 +14236,7 @@ module PutObjectLegalHoldRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?checksumAlgorithm ?contentMD5 ?versionId
         ?requestPayer ?legalHold ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -13693,6 +14294,7 @@ module PutObjectLegalHoldOutput =
         (Option.map ~f:RequestCharged.of_xml)
           (Xml.child xml_arg0 "x-amz-request-charged") in
       make ?requestCharged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -13776,6 +14378,59 @@ module PutObjectAclRequest =
                                     bucket;
                                     key
                                   }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ?aCL:(Option.map
+                    ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                       "x-amz-acl") ~f:ObjectCannedACL.of_string)
+            ?accessControlPolicy:(Some pipe)
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?grantFullControl:(Option.map
+                                 ((List.Assoc.find
+                                     ~equal:String.Caseless.equal) xs
+                                    "x-amz-grant-full-control")
+                                 ~f:GrantFullControl.of_string)
+            ?grantRead:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "x-amz-grant-read") ~f:GrantRead.of_string)
+            ?grantReadACP:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-grant-read-acp")
+                             ~f:GrantReadACP.of_string)
+            ?grantWrite:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "x-amz-grant-write") ~f:GrantWrite.of_string)
+            ?grantWriteACP:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "x-amz-grant-write-acp")
+                              ~f:GrantWriteACP.of_string)
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key"))
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?versionId:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "versionId") ~f:ObjectVersionId.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("x-amz-acl", (Option.map x.aCL ~f:ObjectCannedACL.to_value));
@@ -13844,6 +14499,7 @@ module PutObjectAclRequest =
       make ?expectedBucketOwner ?versionId ?requestPayer ~key ?grantWriteACP
         ?grantWrite ?grantReadACP ?grantRead ?grantFullControl
         ?checksumAlgorithm ?contentMD5 ~bucket ?accessControlPolicy ?aCL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -13918,6 +14574,7 @@ module PutObjectAclOutput =
         (Option.map ~f:RequestCharged.of_xml)
           (Xml.child xml_arg0 "x-amz-request-charged") in
       make ?requestCharged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -13955,6 +14612,27 @@ module PutBucketWebsiteRequest =
                   bucket;
                   websiteConfiguration
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~websiteConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -13982,6 +14660,7 @@ module PutBucketWebsiteRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~websiteConfiguration ?checksumAlgorithm
         ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14032,6 +14711,30 @@ module PutBucketVersioningRequest =
                     bucket;
                     versioningConfiguration
                   }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?mFA:(Option.map
+                    ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                       "x-amz-mfa") ~f:MFA.of_string)
+            ~versioningConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14061,6 +14764,7 @@ module PutBucketVersioningRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~versioningConfiguration ?mFA
         ?checksumAlgorithm ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14107,6 +14811,27 @@ module PutBucketTaggingRequest =
                   bucket;
                   tagging
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~tagging:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14132,6 +14857,7 @@ module PutBucketTaggingRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~tagging ?checksumAlgorithm ?contentMD5
         ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14175,6 +14901,27 @@ module PutBucketRequestPaymentRequest =
                   bucket;
                   requestPaymentConfiguration
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~requestPaymentConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14205,6 +14952,7 @@ module PutBucketRequestPaymentRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~requestPaymentConfiguration
         ?checksumAlgorithm ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14254,6 +15002,31 @@ module PutBucketReplicationRequest =
                     bucket;
                     replicationConfiguration
                   }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~replicationConfiguration:pipe
+            ?token:(Option.map
+                      ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                         "x-amz-bucket-object-lock-token")
+                      ~f:ObjectLockToken.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14288,6 +15061,7 @@ module PutBucketReplicationRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?token ~replicationConfiguration
         ?checksumAlgorithm ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14338,6 +15112,33 @@ module PutBucketPolicyRequest =
                     bucket;
                     policy
                   }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?confirmRemoveSelfBucketAccess:(Option.map
+                                              ((List.Assoc.find
+                                                  ~equal:String.Caseless.equal)
+                                                 xs
+                                                 "x-amz-confirm-remove-self-bucket-access")
+                                              ~f:ConfirmRemoveSelfBucketAccess.of_string)
+            ~policy:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14369,6 +15170,7 @@ module PutBucketPolicyRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~policy ?confirmRemoveSelfBucketAccess
         ?checksumAlgorithm ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14408,6 +15210,22 @@ module PutBucketOwnershipControlsRequest =
           fun ~ownershipControls ->
             fun () ->
               { contentMD5; expectedBucketOwner; bucket; ownershipControls }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string)
+            ~ownershipControls:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14429,6 +15247,7 @@ module PutBucketOwnershipControlsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ~ownershipControls ?expectedBucketOwner ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ownershipControls =
         field_map_exn json "OwnershipControls" OwnershipControls.of_json in
@@ -14470,6 +15289,27 @@ module PutBucketNotificationRequest =
                   bucket;
                   notificationConfiguration
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~notificationConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14500,6 +15340,7 @@ module PutBucketNotificationRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~notificationConfiguration ?checksumAlgorithm
         ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14539,6 +15380,24 @@ module PutBucketNotificationConfigurationRequest =
                 bucket;
                 notificationConfiguration
               }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket")) ~notificationConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string)
+            ?skipDestinationValidation:(Option.map
+                                          ((List.Assoc.find
+                                              ~equal:String.Caseless.equal)
+                                             xs
+                                             "x-amz-skip-destination-validation")
+                                          ~f:SkipValidation.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14565,6 +15424,7 @@ module PutBucketNotificationConfigurationRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?skipDestinationValidation ?expectedBucketOwner
         ~notificationConfiguration ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skipDestinationValidation =
         field_map json "SkipDestinationValidation" SkipValidation.of_json in
@@ -14600,6 +15460,21 @@ module PutBucketMetricsConfigurationRequest =
           fun ~metricsConfiguration ->
             fun () ->
               { expectedBucketOwner; bucket; id; metricsConfiguration }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~id:(MetricsId.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "id")) ~metricsConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14621,6 +15496,7 @@ module PutBucketMetricsConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~metricsConfiguration ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14665,6 +15541,26 @@ module PutBucketLoggingRequest =
                   bucket;
                   bucketLoggingStatus
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket")) ~bucketLoggingStatus:pipe
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14692,6 +15588,7 @@ module PutBucketLoggingRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?checksumAlgorithm ?contentMD5
         ~bucketLoggingStatus ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14735,6 +15632,27 @@ module PutBucketLifecycleRequest =
                   expectedBucketOwner;
                   bucket
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?lifecycleConfiguration:(Some pipe)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14763,6 +15681,7 @@ module PutBucketLifecycleRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?lifecycleConfiguration ?checksumAlgorithm
         ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14806,6 +15725,24 @@ module PutBucketLifecycleConfigurationRequest =
                 expectedBucketOwner;
                 bucket
               }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?lifecycleConfiguration:(Some pipe)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14831,6 +15768,7 @@ module PutBucketLifecycleConfigurationRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?lifecycleConfiguration ?checksumAlgorithm
         ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14866,6 +15804,21 @@ module PutBucketInventoryConfigurationRequest =
           fun ~inventoryConfiguration ->
             fun () ->
               { expectedBucketOwner; bucket; id; inventoryConfiguration }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~id:(InventoryId.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "id")) ~inventoryConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14887,6 +15840,7 @@ module PutBucketInventoryConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~inventoryConfiguration ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -14916,6 +15870,16 @@ module PutBucketIntelligentTieringConfigurationRequest =
       fun ~id ->
         fun ~intelligentTieringConfiguration ->
           fun () -> { bucket; id; intelligentTieringConfiguration }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~id:(IntelligentTieringId.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "id")) ~intelligentTieringConfiguration:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -14936,6 +15900,7 @@ module PutBucketIntelligentTieringConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ~intelligentTieringConfiguration ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intelligentTieringConfiguration =
         field_map_exn json "IntelligentTieringConfiguration"
@@ -14977,6 +15942,27 @@ module PutBucketEncryptionRequest =
                   bucket;
                   serverSideEncryptionConfiguration
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ~serverSideEncryptionConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -15007,6 +15993,7 @@ module PutBucketEncryptionRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~serverSideEncryptionConfiguration
         ?checksumAlgorithm ?contentMD5 ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -15055,6 +16042,26 @@ module PutBucketCorsRequest =
                   bucket;
                   cORSConfiguration
                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket")) ~cORSConfiguration:pipe
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -15082,6 +16089,7 @@ module PutBucketCorsRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?checksumAlgorithm ?contentMD5
         ~cORSConfiguration ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -15118,6 +16126,21 @@ module PutBucketAnalyticsConfigurationRequest =
           fun ~analyticsConfiguration ->
             fun () ->
               { expectedBucketOwner; bucket; id; analyticsConfiguration }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~id:(AnalyticsId.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "id")) ~analyticsConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -15139,6 +16162,7 @@ module PutBucketAnalyticsConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~analyticsConfiguration ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -15210,6 +16234,49 @@ module PutBucketAclRequest =
                               expectedBucketOwner;
                               bucket
                             }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ?aCL:(Option.map
+                    ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                       "x-amz-acl") ~f:BucketCannedACL.of_string)
+            ?accessControlPolicy:(Some pipe)
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ?contentMD5:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "Content-MD5") ~f:ContentMD5.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string)
+            ?grantFullControl:(Option.map
+                                 ((List.Assoc.find
+                                     ~equal:String.Caseless.equal) xs
+                                    "x-amz-grant-full-control")
+                                 ~f:GrantFullControl.of_string)
+            ?grantRead:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "x-amz-grant-read") ~f:GrantRead.of_string)
+            ?grantReadACP:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-grant-read-acp")
+                             ~f:GrantReadACP.of_string)
+            ?grantWrite:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "x-amz-grant-write") ~f:GrantWrite.of_string)
+            ?grantWriteACP:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "x-amz-grant-write-acp")
+                              ~f:GrantWriteACP.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("x-amz-acl", (Option.map x.aCL ~f:BucketCannedACL.to_value));
@@ -15266,6 +16333,7 @@ module PutBucketAclRequest =
       make ?expectedBucketOwner ?grantWriteACP ?grantWrite ?grantReadACP
         ?grantRead ?grantFullControl ?checksumAlgorithm ?contentMD5 ~bucket
         ?accessControlPolicy ?aCL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -15316,6 +16384,23 @@ module PutBucketAccelerateConfigurationRequest =
                 bucket;
                 accelerateConfiguration
               }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket")) ~accelerateConfiguration:pipe
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -15340,6 +16425,7 @@ module PutBucketAccelerateConfigurationRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?checksumAlgorithm ?expectedBucketOwner ~accelerateConfiguration
         ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -15460,6 +16546,7 @@ module ListPartsRequest =
       make ?sSECustomerKeyMD5 ?sSECustomerKey ?sSECustomerAlgorithm
         ?expectedBucketOwner ?requestPayer ~uploadId ?partNumberMarker
         ?maxParts ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSECustomerKeyMD5 =
         field_map json "SSECustomerKeyMD5" SSECustomerKeyMD5.of_json in
@@ -15644,6 +16731,7 @@ module ListPartsOutput =
       make ?checksumAlgorithm ?requestCharged ?storageClass ?owner ?initiator
         ?parts ?isTruncated ?maxParts ?nextPartNumberMarker ?partNumberMarker
         ?uploadId ?key ?bucket ?abortRuleId ?abortDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -15772,6 +16860,7 @@ module ListObjectsV2Request =
       make ?expectedBucketOwner ?requestPayer ?startAfter ?fetchOwner
         ?continuationToken ?prefix ?maxKeys ?encodingType ?delimiter ~bucket
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -15932,6 +17021,7 @@ module ListObjectsV2Output =
       make ?startAfter ?nextContinuationToken ?continuationToken ?keyCount
         ?encodingType ?commonPrefixes ?maxKeys ?delimiter ?prefix ?name
         ?contents ?isTruncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startAfter = field_map json "StartAfter" StartAfter.of_json in
       let nextContinuationToken =
@@ -16035,6 +17125,7 @@ module ListObjectsRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?requestPayer ?prefix ?maxKeys ?marker
         ?encodingType ?delimiter ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -16169,6 +17260,7 @@ module ListObjectsOutput =
         (Option.map ~f:IsTruncated.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       make ?encodingType ?commonPrefixes ?maxKeys ?delimiter ?prefix ?name
         ?contents ?nextMarker ?marker ?isTruncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encodingType = field_map json "EncodingType" EncodingType.of_json in
       let commonPrefixes =
@@ -16267,6 +17359,7 @@ module ListObjectVersionsRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?versionIdMarker ?prefix ?maxKeys ?keyMarker
         ?encodingType ?delimiter ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -16426,6 +17519,7 @@ module ListObjectVersionsOutput =
       make ?encodingType ?commonPrefixes ?maxKeys ?delimiter ?prefix ?name
         ?deleteMarkers ?versions ?nextVersionIdMarker ?nextKeyMarker
         ?versionIdMarker ?keyMarker ?isTruncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encodingType = field_map json "EncodingType" EncodingType.of_json in
       let commonPrefixes =
@@ -16533,6 +17627,7 @@ module ListMultipartUploadsRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?uploadIdMarker ?prefix ?maxUploads
         ?keyMarker ?encodingType ?delimiter ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -16686,6 +17781,7 @@ module ListMultipartUploadsOutput =
       make ?encodingType ?commonPrefixes ?uploads ?isTruncated ?maxUploads
         ?nextUploadIdMarker ?delimiter ?prefix ?nextKeyMarker ?uploadIdMarker
         ?keyMarker ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encodingType = field_map json "EncodingType" EncodingType.of_json in
       let commonPrefixes =
@@ -16745,6 +17841,7 @@ module ListBucketsOutput =
       let buckets =
         (Option.map ~f:Buckets.of_xml) (Xml.child xml_arg0 "Buckets") in
       make ?owner ?buckets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map json "Owner" Owner.of_json in
       let buckets = field_map json "Buckets" Buckets.of_json in
@@ -16788,6 +17885,7 @@ module ListBucketMetricsConfigurationsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?continuationToken ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -16866,6 +17964,7 @@ module ListBucketMetricsConfigurationsOutput =
         (Option.map ~f:IsTruncated.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       make ?metricsConfigurationList ?nextContinuationToken
         ?continuationToken ?isTruncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricsConfigurationList =
         field_map json "MetricsConfigurationList"
@@ -16916,6 +18015,7 @@ module ListBucketInventoryConfigurationsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?continuationToken ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -16994,6 +18094,7 @@ module ListBucketInventoryConfigurationsOutput =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "ContinuationToken") in
       make ?nextContinuationToken ?isTruncated ?inventoryConfigurationList
         ?continuationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextContinuationToken =
         field_map json "NextContinuationToken" NextToken.of_json in
@@ -17034,6 +18135,7 @@ module ListBucketIntelligentTieringConfigurationsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?continuationToken ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let continuationToken =
         field_map json "ContinuationToken" Token.of_json in
@@ -17112,6 +18214,7 @@ module ListBucketIntelligentTieringConfigurationsOutput =
         (Option.map ~f:IsTruncated.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       make ?intelligentTieringConfigurationList ?nextContinuationToken
         ?continuationToken ?isTruncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intelligentTieringConfigurationList =
         field_map json "IntelligentTieringConfigurationList"
@@ -17162,6 +18265,7 @@ module ListBucketAnalyticsConfigurationsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?continuationToken ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -17240,6 +18344,7 @@ module ListBucketAnalyticsConfigurationsOutput =
         (Option.map ~f:IsTruncated.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       make ?analyticsConfigurationList ?nextContinuationToken
         ?continuationToken ?isTruncated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyticsConfigurationList =
         field_map json "AnalyticsConfigurationList"
@@ -17404,6 +18509,7 @@ module HeadObjectRequest =
         ?sSECustomerKeyMD5 ?sSECustomerKey ?sSECustomerAlgorithm ?versionId
         ?range ~key ?ifUnmodifiedSince ?ifNoneMatch ?ifModifiedSince ?ifMatch
         ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumMode = field_map json "ChecksumMode" ChecksumMode.of_json in
       let expectedBucketOwner =
@@ -17960,6 +19066,7 @@ module HeadObjectOutput =
         ?missingMeta ?eTag ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C
         ?checksumCRC32 ?contentLength ?lastModified ?archiveStatus ?restore
         ?expiration ?acceptRanges ?deleteMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectLockLegalHoldStatus =
         field_map json "ObjectLockLegalHoldStatus"
@@ -18054,6 +19161,7 @@ module HeadBucketRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -18088,6 +19196,7 @@ module GetPublicAccessBlockRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -18123,6 +19232,9 @@ module GetPublicAccessBlockOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?publicAccessBlockConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicAccessBlockConfiguration",
@@ -18134,6 +19246,7 @@ module GetPublicAccessBlockOutput =
         (Option.map ~f:PublicAccessBlockConfiguration.of_xml)
           (Xml.child xml_arg0 "PublicAccessBlockConfiguration") in
       make ?publicAccessBlockConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicAccessBlockConfiguration =
         field_map json "PublicAccessBlockConfiguration"
@@ -18182,6 +19295,7 @@ module GetObjectTorrentRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?requestPayer ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -18240,6 +19354,7 @@ module GetObjectTorrentOutput =
           (Xml.child xml_arg0 "x-amz-request-charged") in
       let body = (Option.map ~f:Body.of_xml) (Xml.child xml_arg0 "Body") in
       make ?requestCharged ?body ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -18297,6 +19412,7 @@ module GetObjectTaggingRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?requestPayer ?expectedBucketOwner ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestPayer = field_map json "RequestPayer" RequestPayer.of_json in
       let expectedBucketOwner =
@@ -18349,6 +19465,7 @@ module GetObjectTaggingOutput =
         (Option.map ~f:ObjectVersionId.of_xml)
           (Xml.child xml_arg0 "x-amz-version-id") in
       make ~tagSet ?versionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSet = field_map_exn json "TagSet" TagSet.of_json in
       let versionId = field_map json "VersionId" ObjectVersionId.of_json in
@@ -18406,6 +19523,7 @@ module GetObjectRetentionRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?requestPayer ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -18443,6 +19561,8 @@ module GetObjectRetentionOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?retention:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("Retention",
@@ -18453,6 +19573,7 @@ module GetObjectRetentionOutput =
         (Option.map ~f:ObjectLockRetention.of_xml)
           (Xml.child xml_arg0 "Retention") in
       make ?retention ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retention = field_map json "Retention" ObjectLockRetention.of_json in
       make ?retention ()
@@ -18667,6 +19788,7 @@ module GetObjectRequest =
         ?responseContentEncoding ?responseContentDisposition
         ?responseCacheControl ?range ~key ?ifUnmodifiedSince ?ifNoneMatch
         ?ifModifiedSince ?ifMatch ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumMode = field_map json "ChecksumMode" ChecksumMode.of_json in
       let expectedBucketOwner =
@@ -19268,6 +20390,7 @@ module GetObjectOutput =
         ?cacheControl ?versionId ?missingMeta ?checksumSHA256 ?checksumSHA1
         ?checksumCRC32C ?checksumCRC32 ?eTag ?contentLength ?lastModified
         ?restore ?expiration ?acceptRanges ?deleteMarker ?body ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectLockLegalHoldStatus =
         field_map json "ObjectLockLegalHoldStatus"
@@ -19363,6 +20486,7 @@ module GetObjectLockConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -19396,6 +20520,9 @@ module GetObjectLockConfigurationOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?objectLockConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ObjectLockConfiguration",
@@ -19407,6 +20534,7 @@ module GetObjectLockConfigurationOutput =
         (Option.map ~f:ObjectLockConfiguration.of_xml)
           (Xml.child xml_arg0 "ObjectLockConfiguration") in
       make ?objectLockConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectLockConfiguration =
         field_map json "ObjectLockConfiguration"
@@ -19465,6 +20593,7 @@ module GetObjectLegalHoldRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?requestPayer ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -19502,6 +20631,8 @@ module GetObjectLegalHoldOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?legalHold:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("LegalHold",
@@ -19512,6 +20643,7 @@ module GetObjectLegalHoldOutput =
         (Option.map ~f:ObjectLockLegalHold.of_xml)
           (Xml.child xml_arg0 "LegalHold") in
       make ?legalHold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let legalHold = field_map json "LegalHold" ObjectLockLegalHold.of_json in
       make ?legalHold ()
@@ -19633,6 +20765,7 @@ module GetObjectAttributesRequest =
       make ~objectAttributes ?expectedBucketOwner ?requestPayer
         ?sSECustomerKeyMD5 ?sSECustomerKey ?sSECustomerAlgorithm
         ?partNumberMarker ?maxParts ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectAttributes =
         field_map_exn json "ObjectAttributes" ObjectAttributesList.of_json in
@@ -19772,6 +20905,7 @@ module GetObjectAttributesOutput =
           (Xml.child xml_arg0 "x-amz-delete-marker") in
       make ?objectSize ?storageClass ?objectParts ?checksum ?eTag
         ?requestCharged ?versionId ?lastModified ?deleteMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectSize = field_map json "ObjectSize" ObjectSize.of_json in
       let storageClass = field_map json "StorageClass" StorageClass.of_json in
@@ -19839,6 +20973,7 @@ module GetObjectAclRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?requestPayer ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -19902,6 +21037,7 @@ module GetObjectAclOutput =
           (Xml.child xml_arg0 "AccessControlList") in
       let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
       make ?requestCharged ?grants ?owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -19937,6 +21073,7 @@ module GetBucketWebsiteRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20017,6 +21154,7 @@ module GetBucketWebsiteOutput =
           (Xml.child xml_arg0 "RedirectAllRequestsTo") in
       make ?routingRules ?errorDocument ?indexDocument ?redirectAllRequestsTo
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingRules = field_map json "RoutingRules" RoutingRules.of_json in
       let errorDocument =
@@ -20056,6 +21194,7 @@ module GetBucketVersioningRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20105,6 +21244,7 @@ module GetBucketVersioningOutput =
         (Option.map ~f:BucketVersioningStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?mFADelete ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mFADelete = field_map json "MFADelete" MFADeleteStatus.of_json in
       let status = field_map json "Status" BucketVersioningStatus.of_json in
@@ -20138,6 +21278,7 @@ module GetBucketTaggingRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20177,6 +21318,7 @@ module GetBucketTaggingOutput =
       let tagSet =
         TagSet.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagSet") in
       make ~tagSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSet = field_map_exn json "TagSet" TagSet.of_json in
       make ~tagSet ()
@@ -20209,6 +21351,7 @@ module GetBucketRequestPaymentRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20248,6 +21391,7 @@ module GetBucketRequestPaymentOutput =
     let of_xml xml_arg0 =
       let payer = (Option.map ~f:Payer.of_xml) (Xml.child xml_arg0 "Payer") in
       make ?payer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let payer = field_map json "Payer" Payer.of_json in make ?payer ()
     let to_json v = composed_to_json to_value v
@@ -20279,6 +21423,7 @@ module GetBucketReplicationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20312,6 +21457,9 @@ module GetBucketReplicationOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?replicationConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ReplicationConfiguration",
@@ -20323,6 +21471,7 @@ module GetBucketReplicationOutput =
         (Option.map ~f:ReplicationConfiguration.of_xml)
           (Xml.child xml_arg0 "ReplicationConfiguration") in
       make ?replicationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicationConfiguration =
         field_map json "ReplicationConfiguration"
@@ -20357,6 +21506,7 @@ module GetBucketPolicyStatusRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20390,6 +21540,8 @@ module GetBucketPolicyStatusOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?policyStatus:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("PolicyStatus",
@@ -20400,6 +21552,7 @@ module GetBucketPolicyStatusOutput =
         (Option.map ~f:PolicyStatus.of_xml)
           (Xml.child xml_arg0 "PolicyStatus") in
       make ?policyStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyStatus = field_map json "PolicyStatus" PolicyStatus.of_json in
       make ?policyStatus ()
@@ -20431,6 +21584,7 @@ module GetBucketPolicyRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20464,6 +21618,8 @@ module GetBucketPolicyOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?policy:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Policy", (Option.map x.policy ~f:Policy.to_value))]
@@ -20472,6 +21628,7 @@ module GetBucketPolicyOutput =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -20503,6 +21660,7 @@ module GetBucketOwnershipControlsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20537,6 +21695,9 @@ module GetBucketOwnershipControlsOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?ownershipControls:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OwnershipControls",
@@ -20547,6 +21708,7 @@ module GetBucketOwnershipControlsOutput =
         (Option.map ~f:OwnershipControls.of_xml)
           (Xml.child xml_arg0 "OwnershipControls") in
       make ?ownershipControls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ownershipControls =
         field_map json "OwnershipControls" OwnershipControls.of_json in
@@ -20580,6 +21742,7 @@ module GetBucketNotificationConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20618,6 +21781,7 @@ module GetBucketMetricsConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20652,6 +21816,9 @@ module GetBucketMetricsConfigurationOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?metricsConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("MetricsConfiguration",
@@ -20663,6 +21830,7 @@ module GetBucketMetricsConfigurationOutput =
         (Option.map ~f:MetricsConfiguration.of_xml)
           (Xml.child xml_arg0 "MetricsConfiguration") in
       make ?metricsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricsConfiguration =
         field_map json "MetricsConfiguration" MetricsConfiguration.of_json in
@@ -20696,6 +21864,7 @@ module GetBucketLoggingRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20737,6 +21906,7 @@ module GetBucketLoggingOutput =
         (Option.map ~f:LoggingEnabled.of_xml)
           (Xml.child xml_arg0 "LoggingEnabled") in
       make ?loggingEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingEnabled =
         field_map json "LoggingEnabled" LoggingEnabled.of_json in
@@ -20769,6 +21939,7 @@ module GetBucketLocationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20814,6 +21985,7 @@ module GetBucketLocationOutput =
         (Option.map ~f:BucketLocationConstraint.of_xml)
           (Xml.child xml_arg0 "LocationConstraint") in
       make ?locationConstraint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationConstraint =
         field_map json "LocationConstraint" BucketLocationConstraint.of_json in
@@ -20847,6 +22019,7 @@ module GetBucketLifecycleRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20886,6 +22059,7 @@ module GetBucketLifecycleOutput =
       let rules =
         (Option.map ~f:Rules.of_xml) (Some (Xml.children xml_arg0 "Rule")) in
       make ?rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map json "Rules" Rules.of_json in make ?rules ()
     let to_json v = composed_to_json to_value v
@@ -20917,6 +22091,7 @@ module GetBucketLifecycleConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -20959,6 +22134,7 @@ module GetBucketLifecycleConfigurationOutput =
         (Option.map ~f:LifecycleRules.of_xml)
           (Some (Xml.children xml_arg0 "Rule")) in
       make ?rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map json "Rules" LifecycleRules.of_json in
       make ?rules ()
@@ -20996,6 +22172,7 @@ module GetBucketInventoryConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21030,6 +22207,9 @@ module GetBucketInventoryConfigurationOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?inventoryConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("InventoryConfiguration",
@@ -21041,6 +22221,7 @@ module GetBucketInventoryConfigurationOutput =
         (Option.map ~f:InventoryConfiguration.of_xml)
           (Xml.child xml_arg0 "InventoryConfiguration") in
       make ?inventoryConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inventoryConfiguration =
         field_map json "InventoryConfiguration"
@@ -21073,6 +22254,7 @@ module GetBucketIntelligentTieringConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" IntelligentTieringId.of_json in
       let bucket = field_map_exn json "Bucket" BucketName.of_json in
@@ -21107,6 +22289,10 @@ module GetBucketIntelligentTieringConfigurationOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?intelligentTieringConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("IntelligentTieringConfiguration",
@@ -21118,6 +22304,7 @@ module GetBucketIntelligentTieringConfigurationOutput =
         (Option.map ~f:IntelligentTieringConfiguration.of_xml)
           (Xml.child xml_arg0 "IntelligentTieringConfiguration") in
       make ?intelligentTieringConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let intelligentTieringConfiguration =
         field_map json "IntelligentTieringConfiguration"
@@ -21152,6 +22339,7 @@ module GetBucketEncryptionRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21186,6 +22374,10 @@ module GetBucketEncryptionOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?serverSideEncryptionConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ServerSideEncryptionConfiguration",
@@ -21197,6 +22389,7 @@ module GetBucketEncryptionOutput =
         (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
           (Xml.child xml_arg0 "ServerSideEncryptionConfiguration") in
       make ?serverSideEncryptionConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverSideEncryptionConfiguration =
         field_map json "ServerSideEncryptionConfiguration"
@@ -21231,6 +22424,7 @@ module GetBucketCorsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21274,6 +22468,7 @@ module GetBucketCorsOutput =
         (Option.map ~f:CORSRules.of_xml)
           (Some (Xml.children xml_arg0 "CORSRule")) in
       make ?cORSRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cORSRules = field_map json "CORSRules" CORSRules.of_json in
       make ?cORSRules ()
@@ -21311,6 +22506,7 @@ module GetBucketAnalyticsConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21346,6 +22542,9 @@ module GetBucketAnalyticsConfigurationOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?analyticsConfiguration:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("AnalyticsConfiguration",
@@ -21357,6 +22556,7 @@ module GetBucketAnalyticsConfigurationOutput =
         (Option.map ~f:AnalyticsConfiguration.of_xml)
           (Xml.child xml_arg0 "AnalyticsConfiguration") in
       make ?analyticsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyticsConfiguration =
         field_map json "AnalyticsConfiguration"
@@ -21390,6 +22590,7 @@ module GetBucketAclRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21435,6 +22636,7 @@ module GetBucketAclOutput =
           (Xml.child xml_arg0 "AccessControlList") in
       let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
       make ?grants ?owner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grants = field_map json "Grants" Grants.of_json in
       let owner = field_map json "Owner" Owner.of_json in
@@ -21468,6 +22670,7 @@ module GetBucketAccelerateConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21510,6 +22713,7 @@ module GetBucketAccelerateConfigurationOutput =
         (Option.map ~f:BucketAccelerateStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" BucketAccelerateStatus.of_json in
       make ?status ()
@@ -21542,6 +22746,7 @@ module DeletePublicAccessBlockRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21589,6 +22794,36 @@ module DeleteObjectsRequest =
                       bucket;
                       delete
                     }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket")) ~delete:pipe
+            ?mFA:(Option.map
+                    ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                       "x-amz-mfa") ~f:MFA.of_string)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?bypassGovernanceRetention:(Option.map
+                                          ((List.Assoc.find
+                                              ~equal:String.Caseless.equal)
+                                             xs
+                                             "x-amz-bypass-governance-retention")
+                                          ~f:BypassGovernanceRetention.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string)
+            ?checksumAlgorithm:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-sdk-checksum-algorithm")
+                                  ~f:ChecksumAlgorithm.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -21624,6 +22859,7 @@ module DeleteObjectsRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?checksumAlgorithm ?expectedBucketOwner ?bypassGovernanceRetention
         ?requestPayer ?mFA ~delete ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -21690,6 +22926,7 @@ module DeleteObjectsOutput =
         (Option.map ~f:DeletedObjects.of_xml)
           (Some (Xml.children xml_arg0 "Deleted")) in
       make ?errors ?requestCharged ?deleted ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "Errors" Errors.of_json in
       let requestCharged =
@@ -21741,6 +22978,7 @@ module DeleteObjectTaggingRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?versionId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21795,6 +23033,7 @@ module DeleteObjectTaggingOutput =
         (Option.map ~f:ObjectVersionId.of_xml)
           (Xml.child xml_arg0 "x-amz-version-id") in
       make ?versionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" ObjectVersionId.of_json in
       make ?versionId ()
@@ -21874,6 +23113,7 @@ module DeleteObjectRequest =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?bypassGovernanceRetention ?requestPayer
         ?versionId ?mFA ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -21958,6 +23198,7 @@ module DeleteObjectOutput =
         (Option.map ~f:DeleteMarker.of_xml)
           (Xml.child xml_arg0 "x-amz-delete-marker") in
       make ?requestCharged ?versionId ?deleteMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -21993,6 +23234,7 @@ module DeleteBucketWebsiteRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22026,6 +23268,7 @@ module DeleteBucketTaggingRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22058,6 +23301,7 @@ module DeleteBucketRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22090,6 +23334,7 @@ module DeleteBucketReplicationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22122,6 +23367,7 @@ module DeleteBucketPolicyRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22156,6 +23402,7 @@ module DeleteBucketOwnershipControlsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22195,6 +23442,7 @@ module DeleteBucketMetricsConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22229,6 +23477,7 @@ module DeleteBucketLifecycleRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22268,6 +23517,7 @@ module DeleteBucketInventoryConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22301,6 +23551,7 @@ module DeleteBucketIntelligentTieringConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" IntelligentTieringId.of_json in
       let bucket = field_map_exn json "Bucket" BucketName.of_json in
@@ -22334,6 +23585,7 @@ module DeleteBucketEncryptionRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22368,6 +23620,7 @@ module DeleteBucketCorsRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22407,6 +23660,7 @@ module DeleteBucketAnalyticsConfigurationRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ~id ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -22733,6 +23987,7 @@ module CreateMultipartUploadRequest =
         ?metadata ~key ?grantWriteACP ?grantReadACP ?grantRead
         ?grantFullControl ?expires ?contentType ?contentLanguage
         ?contentEncoding ?contentDisposition ?cacheControl ~bucket ?aCL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -22952,6 +24207,7 @@ module CreateMultipartUploadOutput =
         ?sSEKMSEncryptionContext ?sSEKMSKeyId ?sSECustomerKeyMD5
         ?sSECustomerAlgorithm ?serverSideEncryption ?uploadId ?key ?bucket
         ?abortRuleId ?abortDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -23031,6 +24287,46 @@ module CreateBucketRequest =
                             objectOwnership;
                             bucket
                           }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ?aCL:(Option.map
+                    ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                       "x-amz-acl") ~f:BucketCannedACL.of_string)
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket")) ?createBucketConfiguration:(Some pipe)
+            ?grantFullControl:(Option.map
+                                 ((List.Assoc.find
+                                     ~equal:String.Caseless.equal) xs
+                                    "x-amz-grant-full-control")
+                                 ~f:GrantFullControl.of_string)
+            ?grantRead:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "x-amz-grant-read") ~f:GrantRead.of_string)
+            ?grantReadACP:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-grant-read-acp")
+                             ~f:GrantReadACP.of_string)
+            ?grantWrite:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "x-amz-grant-write") ~f:GrantWrite.of_string)
+            ?grantWriteACP:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "x-amz-grant-write-acp")
+                              ~f:GrantWriteACP.of_string)
+            ?objectLockEnabledForBucket:(Option.map
+                                           ((List.Assoc.find
+                                               ~equal:String.Caseless.equal)
+                                              xs
+                                              "x-amz-bucket-object-lock-enabled")
+                                           ~f:ObjectLockEnabledForBucket.of_string)
+            ?objectOwnership:(Option.map
+                                ((List.Assoc.find
+                                    ~equal:String.Caseless.equal) xs
+                                   "x-amz-object-ownership")
+                                ~f:ObjectOwnership.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("x-amz-acl", (Option.map x.aCL ~f:BucketCannedACL.to_value));
@@ -23086,6 +24382,7 @@ module CreateBucketRequest =
       make ?objectOwnership ?objectLockEnabledForBucket ?grantWriteACP
         ?grantWrite ?grantReadACP ?grantRead ?grantFullControl
         ?createBucketConfiguration ~bucket ?aCL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectOwnership =
         field_map json "ObjectOwnership" ObjectOwnership.of_json in
@@ -23168,6 +24465,7 @@ module CreateBucketOutput =
       let location =
         (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "Location") in
       make ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" Location.of_json in
       make ?location ()
@@ -23633,6 +24931,7 @@ module CopyObjectRequest =
         ?copySourceIfModifiedSince ?copySourceIfMatch ~copySource
         ?contentType ?contentLanguage ?contentEncoding ?contentDisposition
         ?checksumAlgorithm ?cacheControl ~bucket ?aCL ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedSourceBucketOwner =
         field_map json "ExpectedSourceBucketOwner" AccountId.of_json in
@@ -23813,6 +25112,55 @@ module CopyObjectOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?copyObjectResult:(Some pipe)
+            ?expiration:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "x-amz-expiration") ~f:Expiration.of_string)
+            ?copySourceVersionId:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-copy-source-version-id")
+                                    ~f:CopySourceVersionId.of_string)
+            ?versionId:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "x-amz-version-id") ~f:ObjectVersionId.of_string)
+            ?serverSideEncryption:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption")
+                                     ~f:ServerSideEncryption.of_string)
+            ?sSECustomerAlgorithm:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption-customer-algorithm")
+                                     ~f:SSECustomerAlgorithm.of_string)
+            ?sSECustomerKeyMD5:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-server-side-encryption-customer-key-MD5")
+                                  ~f:SSECustomerKeyMD5.of_string)
+            ?sSEKMSKeyId:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs
+                               "x-amz-server-side-encryption-aws-kms-key-id")
+                            ~f:SSEKMSKeyId.of_string)
+            ?sSEKMSEncryptionContext:(Option.map
+                                        ((List.Assoc.find
+                                            ~equal:String.Caseless.equal) xs
+                                           "x-amz-server-side-encryption-context")
+                                        ~f:SSEKMSEncryptionContext.of_string)
+            ?bucketKeyEnabled:(Option.map
+                                 ((List.Assoc.find
+                                     ~equal:String.Caseless.equal) xs
+                                    "x-amz-server-side-encryption-bucket-key-enabled")
+                                 ~f:BucketKeyEnabled.of_string)
+            ?requestCharged:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-request-charged")
+                               ~f:RequestCharged.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CopyObjectResult",
@@ -23879,6 +25227,7 @@ module CopyObjectOutput =
         ?sSEKMSKeyId ?sSECustomerKeyMD5 ?sSECustomerAlgorithm
         ?serverSideEncryption ?versionId ?copySourceVersionId ?expiration
         ?copyObjectResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -23977,6 +25326,59 @@ module CompleteMultipartUploadRequest =
                                   key;
                                   uploadId
                                 }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~bucket:(BucketName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "Bucket"))
+            ~key:(ObjectKey.of_string
+                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                       "Key")) ?multipartUpload:(Some pipe)
+            ~uploadId:(MultipartUploadId.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "uploadId"))
+            ?checksumCRC32:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "x-amz-checksum-crc32")
+                              ~f:ChecksumCRC32.of_string)
+            ?checksumCRC32C:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-checksum-crc32c")
+                               ~f:ChecksumCRC32C.of_string)
+            ?checksumSHA1:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-checksum-sha1")
+                             ~f:ChecksumSHA1.of_string)
+            ?checksumSHA256:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-checksum-sha256")
+                               ~f:ChecksumSHA256.of_string)
+            ?requestPayer:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amz-request-payer")
+                             ~f:RequestPayer.of_string)
+            ?expectedBucketOwner:(Option.map
+                                    ((List.Assoc.find
+                                        ~equal:String.Caseless.equal) xs
+                                       "x-amz-expected-bucket-owner")
+                                    ~f:AccountId.of_string)
+            ?sSECustomerAlgorithm:(Option.map
+                                     ((List.Assoc.find
+                                         ~equal:String.Caseless.equal) xs
+                                        "x-amz-server-side-encryption-customer-algorithm")
+                                     ~f:SSECustomerAlgorithm.of_string)
+            ?sSECustomerKey:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs
+                                  "x-amz-server-side-encryption-customer-key")
+                               ~f:SSECustomerKey.of_string)
+            ?sSECustomerKeyMD5:(Option.map
+                                  ((List.Assoc.find
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-server-side-encryption-customer-key-MD5")
+                                  ~f:SSECustomerKeyMD5.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Bucket", (Some (BucketName.to_value x.bucket)));
@@ -24046,6 +25448,7 @@ module CompleteMultipartUploadRequest =
         ?expectedBucketOwner ?requestPayer ?checksumSHA256 ?checksumSHA1
         ?checksumCRC32C ?checksumCRC32 ~uploadId ?multipartUpload ~key
         ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSECustomerKeyMD5 =
         field_map json "SSECustomerKeyMD5" SSECustomerKeyMD5.of_json in
@@ -24234,6 +25637,7 @@ module CompleteMultipartUploadOutput =
       make ?requestCharged ?bucketKeyEnabled ?sSEKMSKeyId ?versionId
         ?serverSideEncryption ?checksumSHA256 ?checksumSHA1 ?checksumCRC32C
         ?checksumCRC32 ?eTag ?expiration ?key ?bucket ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in
@@ -24310,6 +25714,7 @@ module AbortMultipartUploadRequest =
       let bucket =
         BucketName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?expectedBucketOwner ?requestPayer ~uploadId ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedBucketOwner =
         field_map json "ExpectedBucketOwner" AccountId.of_json in
@@ -24369,6 +25774,7 @@ module AbortMultipartUploadOutput =
         (Option.map ~f:RequestCharged.of_xml)
           (Xml.child xml_arg0 "x-amz-request-charged") in
       make ?requestCharged ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestCharged =
         field_map json "RequestCharged" RequestCharged.of_json in

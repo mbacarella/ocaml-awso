@@ -323,6 +323,7 @@ module EncryptionAlgorithmOptions =
         EncryptionAlgorithms.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "allowedValues") in
       make ~defaultValue ~allowedValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValue =
         field_map_exn json "defaultValue" EncryptionAlgorithm.of_json in
@@ -358,6 +359,7 @@ module HashAlgorithmOptions =
         HashAlgorithms.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "allowedValues") in
       make ~defaultValue ~allowedValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValue =
         field_map_exn json "defaultValue" HashAlgorithm.of_json in
@@ -410,6 +412,7 @@ module S3SignedObject =
       let bucketName =
         (Option.map ~f:BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?key ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map json "key" Key.of_json in
       let bucketName = field_map json "bucketName" BucketName.of_json in
@@ -445,6 +448,7 @@ module S3Source =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~version ~key ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Version.of_json in
       let key = field_map_exn json "key" Key.of_json in
@@ -570,6 +574,7 @@ module SignatureValidityPeriod =
         (Option.map ~f:ValidityType.of_xml) (Xml.child xml_arg0 "type") in
       let value = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "value") in
       make ?type_ ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" ValidityType.of_json in
       let value = field_map json "value" Integer.of_json in
@@ -595,6 +600,7 @@ module SigningMaterial =
         CertificateArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateArn") in
       make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn =
         field_map_exn json "certificateArn" CertificateArn.of_json in
@@ -768,6 +774,7 @@ module SigningConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0
              "encryptionAlgorithmOptions") in
       make ~hashAlgorithmOptions ~encryptionAlgorithmOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hashAlgorithmOptions =
         field_map_exn json "hashAlgorithmOptions"
@@ -803,6 +810,7 @@ module SigningImageFormat =
         ImageFormats.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "supportedFormats") in
       make ~defaultFormat ~supportedFormats ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultFormat =
         field_map_exn json "defaultFormat" ImageFormat.of_json in
@@ -884,6 +892,7 @@ module SignedObject =
       let s3 =
         (Option.map ~f:S3SignedObject.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "s3" S3SignedObject.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
@@ -929,6 +938,7 @@ module Source =
     let of_xml xml_arg0 =
       let s3 = (Option.map ~f:S3Source.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "s3" S3Source.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
@@ -992,6 +1002,7 @@ module S3Destination =
       let bucketName =
         (Option.map ~f:BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?prefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" Prefix.of_json in
       let bucketName = field_map json "bucketName" BucketName.of_json in
@@ -1026,6 +1037,7 @@ module SigningConfigurationOverrides =
         (Option.map ~f:EncryptionAlgorithm.of_xml)
           (Xml.child xml_arg0 "encryptionAlgorithm") in
       make ?hashAlgorithm ?encryptionAlgorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hashAlgorithm =
         field_map json "hashAlgorithm" HashAlgorithm.of_json in
@@ -1143,6 +1155,7 @@ module SigningProfile =
       make ?tags ?arn ?status ?signingParameters ?platformDisplayName
         ?platformId ?signatureValidityPeriod ?signingMaterial
         ?profileVersionArn ?profileVersion ?profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let arn = field_map json "arn" String__lc1.of_json in
@@ -1254,6 +1267,7 @@ module SigningPlatform =
       make ?revocationSupported ?maxSizeInMB ?signingImageFormat
         ?signingConfiguration ?category ?target ?partner ?displayName
         ?platformId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revocationSupported =
         field_map json "revocationSupported" Bool.of_json in
@@ -1398,6 +1412,7 @@ module SigningJob =
       make ?jobInvoker ?jobOwner ?signatureExpiresAt ?platformDisplayName
         ?platformId ?profileVersion ?profileName ?isRevoked ?status
         ?createdAt ?signingMaterial ?signedObject ?source ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobInvoker = field_map json "jobInvoker" AccountId.of_json in
       let jobOwner = field_map json "jobOwner" AccountId.of_json in
@@ -1462,6 +1477,7 @@ module Permission =
       let action =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "action") in
       make ?profileVersion ?statementId ?principal ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileVersion =
         field_map json "profileVersion" ProfileVersion.of_json in
@@ -1488,6 +1504,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1512,6 +1529,7 @@ module InternalServiceErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1535,6 +1553,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1558,6 +1577,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1610,6 +1630,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1634,6 +1655,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1657,6 +1679,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1681,6 +1704,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1713,6 +1737,7 @@ module Destination =
     let of_xml xml_arg0 =
       let s3 = (Option.map ~f:S3Destination.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "s3" S3Destination.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
@@ -1753,6 +1778,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -1788,6 +1814,7 @@ module SigningPlatformOverrides =
         (Option.map ~f:SigningConfigurationOverrides.of_xml)
           (Xml.child xml_arg0 "signingConfiguration") in
       make ?signingImageFormat ?signingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signingImageFormat =
         field_map json "signingImageFormat" ImageFormat.of_json in
@@ -2007,6 +2034,7 @@ module SigningProfileRevocationRecord =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "revocationEffectiveFrom") in
       make ?revokedBy ?revokedAt ?revocationEffectiveFrom ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revokedBy = field_map json "revokedBy" String_.of_json in
       let revokedAt = field_map json "revokedAt" Timestamp.of_json in
@@ -2040,6 +2068,7 @@ module SigningJobRevocationRecord =
       let reason =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
       make ?revokedBy ?revokedAt ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revokedBy = field_map json "revokedBy" String_.of_json in
       let revokedAt = field_map json "revokedAt" Timestamp.of_json in
@@ -2077,6 +2106,7 @@ module ServiceLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "code" ErrorCode.of_json in
       let message = field_map json "message" ErrorMessage.of_json in
@@ -2148,6 +2178,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2178,6 +2209,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -2249,6 +2281,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2277,6 +2310,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -2376,6 +2410,7 @@ module StartSigningJobResponse =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "jobOwner") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?jobOwner ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobOwner = field_map json "jobOwner" AccountId.of_json in
       let jobId = field_map json "jobId" JobId.of_json in
@@ -2439,6 +2474,7 @@ module StartSigningJobRequest =
         Source.of_xml (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?profileOwner ~clientRequestToken ~profileName ~destination
         ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileOwner = field_map json "profileOwner" AccountId.of_json in
       let clientRequestToken =
@@ -2491,6 +2527,7 @@ module RevokeSigningProfileRequest =
         ProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ~effectiveTime ~reason ~profileVersion ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectiveTime =
         field_map_exn json "effectiveTime" Timestamp.of_json in
@@ -2529,6 +2566,7 @@ module RevokeSignatureRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~reason ?jobOwner ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map_exn json "reason" RevocationReasonString.of_json in
       let jobOwner = field_map json "jobOwner" AccountId.of_json in
@@ -2627,6 +2665,7 @@ module RemoveProfilePermissionResponse =
       let revisionId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionId = field_map json "revisionId" String_.of_json in
       make ?revisionId ()
@@ -2668,6 +2707,7 @@ module RemoveProfilePermissionRequest =
         ProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ~statementId ~revisionId ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statementId = field_map_exn json "statementId" String_.of_json in
       let revisionId = field_map_exn json "revisionId" String_.of_json in
@@ -2773,6 +2813,7 @@ module PutSigningProfileResponse =
           (Xml.child xml_arg0 "profileVersion") in
       let arn = (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "arn") in
       make ?profileVersionArn ?profileVersion ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileVersionArn = field_map json "profileVersionArn" Arn.of_json in
       let profileVersion =
@@ -2860,6 +2901,7 @@ module PutSigningProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ?tags ?signingParameters ?overrides ~platformId
         ?signatureValidityPeriod ?signingMaterial ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let signingParameters =
@@ -2947,6 +2989,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2970,6 +3013,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -3046,6 +3090,7 @@ module ListSigningProfilesResponse =
         (Option.map ~f:SigningProfiles.of_xml)
           (Xml.child xml_arg0 "profiles") in
       make ?nextToken ?profiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let profiles = field_map json "profiles" SigningProfiles.of_json in
@@ -3104,6 +3149,7 @@ module ListSigningProfilesRequest =
       let includeCanceled =
         (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "includeCanceled") in
       make ?statuses ?platformId ?nextToken ?maxResults ?includeCanceled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statuses = field_map json "statuses" Statuses.of_json in
       let platformId = field_map json "platformId" PlatformId.of_json in
@@ -3194,6 +3240,7 @@ module ListSigningPlatformsResponse =
         (Option.map ~f:SigningPlatforms.of_xml)
           (Xml.child xml_arg0 "platforms") in
       make ?nextToken ?platforms ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let platforms = field_map json "platforms" SigningPlatforms.of_json in
@@ -3244,6 +3291,7 @@ module ListSigningPlatformsRequest =
       let category =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "category") in
       make ?nextToken ?maxResults ?target ?partner ?category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3330,6 +3378,7 @@ module ListSigningJobsResponse =
       let jobs =
         (Option.map ~f:SigningJobs.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?nextToken ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let jobs = field_map json "jobs" SigningJobs.of_json in
@@ -3424,6 +3473,7 @@ module ListSigningJobsRequest =
         (Option.map ~f:SigningStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?jobInvoker ?signatureExpiresAfter ?signatureExpiresBefore
         ?isRevoked ?nextToken ?maxResults ?requestedBy ?platformId ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobInvoker = field_map json "jobInvoker" AccountId.of_json in
       let signatureExpiresAfter =
@@ -3546,6 +3596,7 @@ module ListProfilePermissionsResponse =
       let revisionId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?nextToken ?permissions ?policySizeBytes ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let permissions = field_map json "permissions" Permissions.of_json in
@@ -3581,6 +3632,7 @@ module ListProfilePermissionsRequest =
         ProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ?nextToken ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let profileName = field_map_exn json "profileName" ProfileName.of_json in
@@ -3778,6 +3830,7 @@ module GetSigningProfileResponse =
         ?signatureValidityPeriod ?platformDisplayName ?platformId
         ?signingMaterial ?revocationRecord ?profileVersionArn ?profileVersion
         ?profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let arn = field_map json "arn" String__lc1.of_json in
@@ -3831,6 +3884,7 @@ module GetSigningProfileRequest =
         ProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ?profileOwner ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileOwner = field_map json "profileOwner" AccountId.of_json in
       let profileName = field_map_exn json "profileName" ProfileName.of_json in
@@ -3981,6 +4035,7 @@ module GetSigningPlatformResponse =
       make ?revocationSupported ?maxSizeInMB ?signingImageFormat
         ?signingConfiguration ?category ?target ?partner ?displayName
         ?platformId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revocationSupported =
         field_map json "revocationSupported" Bool.of_json in
@@ -4016,6 +4071,7 @@ module GetSigningPlatformRequest =
         PlatformId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "platformId") in
       make ~platformId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platformId = field_map_exn json "platformId" PlatformId.of_json in
       make ~platformId ()
@@ -4254,6 +4310,7 @@ module DescribeSigningJobResponse =
         ?statusReason ?status ?requestedBy ?signatureExpiresAt ?completedAt
         ?createdAt ?signingParameters ?overrides ?profileVersion ?profileName
         ?platformDisplayName ?platformId ?signingMaterial ?source ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobInvoker = field_map json "jobInvoker" AccountId.of_json in
       let jobOwner = field_map json "jobOwner" AccountId.of_json in
@@ -4302,6 +4359,7 @@ module DescribeSigningJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -4324,6 +4382,7 @@ module CancelSigningProfileRequest =
         ProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileName = field_map_exn json "profileName" ProfileName.of_json in
       make ~profileName ()
@@ -4430,6 +4489,7 @@ module AddProfilePermissionResponse =
       let revisionId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revisionId = field_map json "revisionId" String_.of_json in
       make ?revisionId ()
@@ -4498,6 +4558,7 @@ module AddProfilePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ~statementId ?revisionId ~principal ~action ?profileVersion
         ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statementId = field_map_exn json "statementId" String_.of_json in
       let revisionId = field_map json "revisionId" String_.of_json in

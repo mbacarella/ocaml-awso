@@ -426,6 +426,7 @@ module ExtraParam =
         ExtraParamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" ExtraParamValue.of_json in
       let name = field_map_exn json "Name" ExtraParamName.of_json in
@@ -470,6 +471,7 @@ module PriceWithCurrency =
       let price =
         Price.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Price") in
       make ~currency ~price ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currency = field_map_exn json "Currency" Currency.of_json in
       let price = field_map_exn json "Price" Price.of_json in
@@ -675,6 +677,7 @@ module BillingRecord =
       let domainName =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       make ?price ?billDate ?invoiceId ?operation ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let price = field_map json "Price" Price.of_json in
       let billDate = field_map json "BillDate" Timestamp.of_json in
@@ -718,6 +721,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -746,6 +750,7 @@ module Nameserver =
       let name =
         HostName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?glueIps ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let glueIps = field_map json "GlueIps" GlueIpList.of_json in
       let name = field_map_exn json "Name" HostName.of_json in
@@ -1749,6 +1754,7 @@ module DomainPrice =
         (Option.map ~f:DomainPriceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?restorationPrice ?changeOwnershipPrice ?renewalPrice
         ?transferPrice ?registrationPrice ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restorationPrice =
         field_map json "RestorationPrice" PriceWithCurrency.of_json in
@@ -1805,6 +1811,7 @@ module OperationSummary =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~submittedDate ~type_ ~status ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submittedDate =
         field_map_exn json "SubmittedDate" Timestamp.of_json in
@@ -1854,6 +1861,7 @@ module DomainSummary =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?expiry ?transferLock ?autoRenew ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiry = field_map json "Expiry" Timestamp.of_json in
       let transferLock = field_map json "TransferLock" Boolean.of_json in
@@ -1893,6 +1901,7 @@ module FilterCondition =
         ListDomainsAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~operator ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "Values" Values.of_json in
       let operator = field_map_exn json "Operator" Operator.of_json in
@@ -1941,6 +1950,7 @@ module DomainSuggestion =
       let domainName =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       make ?availability ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availability = field_map json "Availability" String_.of_json in
       let domainName = field_map json "DomainName" DomainName.of_json in
@@ -2028,6 +2038,7 @@ module InvalidInput =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2079,6 +2090,7 @@ module OperationLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2101,6 +2113,7 @@ module UnsupportedTLD =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2145,6 +2158,7 @@ module DuplicateRequest =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2165,6 +2179,7 @@ module TLDRulesViolation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2329,6 +2344,7 @@ module ContactDetail =
       make ?extraParams ?fax ?email ?phoneNumber ?zipCode ?countryCode ?state
         ?city ?addressLine2 ?addressLine1 ?organizationName ?contactType
         ?lastName ?firstName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extraParams = field_map json "ExtraParams" ExtraParamList.of_json in
       let fax = field_map json "Fax" ContactNumber.of_json in
@@ -2386,6 +2402,7 @@ module DomainLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2593,6 +2610,7 @@ module SortCondition =
         ListDomainsAttributeName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~sortOrder ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortOrder = field_map_exn json "SortOrder" SortOrder.of_json in
       let name = field_map_exn json "Name" ListDomainsAttributeName.of_json in
@@ -2806,6 +2824,7 @@ module DomainTransferability =
         (Option.map ~f:Transferable.of_xml)
           (Xml.child xml_arg0 "Transferable") in
       make ?transferable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transferable = field_map json "Transferable" Transferable.of_json in
       make ?transferable ()
@@ -2907,6 +2926,7 @@ module ViewBillingResponse =
         (Option.map ~f:PageMarker.of_xml)
           (Xml.child xml_arg0 "NextPageMarker") in
       make ?billingRecords ?nextPageMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingRecords =
         field_map json "BillingRecords" BillingRecords.of_json in
@@ -2951,6 +2971,7 @@ module ViewBillingRequest =
       let start =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Start") in
       make ?maxItems ?marker ?end_ ?start ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let marker = field_map json "Marker" PageMarker.of_json in
@@ -3008,6 +3029,7 @@ module UpdateTagsForDomainResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3036,6 +3058,7 @@ module UpdateTagsForDomainRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?tagsToUpdate ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsToUpdate = field_map json "TagsToUpdate" TagList.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -3119,6 +3142,7 @@ module UpdateDomainNameserversResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -3156,6 +3180,7 @@ module UpdateDomainNameserversRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~nameservers ?fIAuthKey ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameservers =
         field_map_exn json "Nameservers" NameserverList.of_json in
@@ -3241,6 +3266,7 @@ module UpdateDomainContactResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -3290,6 +3316,7 @@ module UpdateDomainContactRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?techContact ?registrantContact ?adminContact ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let techContact = field_map json "TechContact" ContactDetail.of_json in
       let registrantContact =
@@ -3376,6 +3403,7 @@ module UpdateDomainContactPrivacyResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -3425,6 +3453,7 @@ module UpdateDomainContactPrivacyRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?techPrivacy ?registrantPrivacy ?adminPrivacy ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let techPrivacy = field_map json "TechPrivacy" Boolean.of_json in
       let registrantPrivacy =
@@ -3507,6 +3536,7 @@ module TransferDomainToAnotherAwsAccountResponse =
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?password ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map json "Password" String_.of_json in
       let operationId = field_map json "OperationId" OperationId.of_json in
@@ -3540,6 +3570,7 @@ module TransferDomainToAnotherAwsAccountRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~accountId ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -3632,6 +3663,7 @@ module TransferDomainResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -3759,6 +3791,7 @@ module TransferDomainRequest =
         ?privacyProtectAdminContact ~techContact ~registrantContact
         ~adminContact ?autoRenew ?authCode ?nameservers ~durationInYears
         ?idnLangCode ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privacyProtectTechContact =
         field_map json "PrivacyProtectTechContact" Boolean.of_json in
@@ -3835,6 +3868,7 @@ module RetrieveDomainAuthCodeResponse =
         DomainAuthCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AuthCode") in
       make ~authCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authCode = field_map_exn json "AuthCode" DomainAuthCode.of_json in
       make ~authCode ()
@@ -3859,6 +3893,7 @@ module RetrieveDomainAuthCodeRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -3939,6 +3974,7 @@ module ResendContactReachabilityEmailResponse =
       let domainName =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?isAlreadyVerified ?emailAddress ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isAlreadyVerified =
         field_map json "isAlreadyVerified" Boolean.of_json in
@@ -3964,6 +4000,7 @@ module ResendContactReachabilityEmailRequest =
       let domainName =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map json "domainName" DomainName.of_json in
       make ?domainName ()
@@ -4046,6 +4083,7 @@ module RenewDomainResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -4088,6 +4126,7 @@ module RenewDomainRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~currentExpiryYear ?durationInYears ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentExpiryYear =
         field_map_exn json "CurrentExpiryYear" CurrentExpiryYear.of_json in
@@ -4155,6 +4194,7 @@ module RejectDomainTransferFromAnotherAwsAccountResponse =
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map json "OperationId" OperationId.of_json in
       make ?operationId ()
@@ -4179,6 +4219,7 @@ module RejectDomainTransferFromAnotherAwsAccountRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -4270,6 +4311,7 @@ module RegisterDomainResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -4382,6 +4424,7 @@ module RegisterDomainRequest =
       make ?privacyProtectTechContact ?privacyProtectRegistrantContact
         ?privacyProtectAdminContact ~techContact ~registrantContact
         ~adminContact ?autoRenew ~durationInYears ?idnLangCode ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privacyProtectTechContact =
         field_map json "PrivacyProtectTechContact" Boolean.of_json in
@@ -4463,6 +4506,7 @@ module ListTagsForDomainResponse =
       let tagList =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagList") in
       make ~tagList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map_exn json "TagList" TagList.of_json in
       make ~tagList ()
@@ -4486,6 +4530,7 @@ module ListTagsForDomainRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -4551,6 +4596,7 @@ module ListPricesResponse =
         DomainPriceList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Prices") in
       make ?nextPageMarker ~prices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageMarker = field_map json "NextPageMarker" PageMarker.of_json in
       let prices = field_map_exn json "Prices" DomainPriceList.of_json in
@@ -4586,6 +4632,7 @@ module ListPricesRequest =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "Marker") in
       let tld = (Option.map ~f:TldName.of_xml) (Xml.child xml_arg0 "Tld") in
       make ?maxItems ?marker ?tld ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let marker = field_map json "Marker" PageMarker.of_json in
@@ -4645,6 +4692,7 @@ module ListOperationsResponse =
         OperationSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Operations") in
       make ?nextPageMarker ~operations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageMarker = field_map json "NextPageMarker" PageMarker.of_json in
       let operations =
@@ -4684,6 +4732,7 @@ module ListOperationsRequest =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "SubmittedSince") in
       make ?maxItems ?marker ?submittedSince ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let marker = field_map json "Marker" PageMarker.of_json in
@@ -4742,6 +4791,7 @@ module ListDomainsResponse =
         DomainSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Domains") in
       make ?nextPageMarker ~domains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageMarker = field_map json "NextPageMarker" PageMarker.of_json in
       let domains = field_map_exn json "Domains" DomainSummaryList.of_json in
@@ -4790,6 +4840,7 @@ module ListDomainsRequest =
         (Option.map ~f:FilterConditions.of_xml)
           (Xml.child xml_arg0 "FilterConditions") in
       make ?maxItems ?marker ?sortCondition ?filterConditions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let marker = field_map json "Marker" PageMarker.of_json in
@@ -4880,6 +4931,7 @@ module GetOperationDetailResponse =
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?submittedDate ?type_ ?domainName ?message ?status ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submittedDate = field_map json "SubmittedDate" Timestamp.of_json in
       let type_ = field_map json "Type" OperationType.of_json in
@@ -4909,6 +4961,7 @@ module GetOperationDetailRequest =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -4965,6 +5018,7 @@ module GetDomainSuggestionsResponse =
         (Option.map ~f:DomainSuggestionsList.of_xml)
           (Xml.child xml_arg0 "SuggestionsList") in
       make ?suggestionsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggestionsList =
         field_map json "SuggestionsList" DomainSuggestionsList.of_json in
@@ -5007,6 +5061,7 @@ module GetDomainSuggestionsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~onlyAvailable ~suggestionCount ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onlyAvailable = field_map_exn json "OnlyAvailable" Boolean.of_json in
       let suggestionCount =
@@ -5245,6 +5300,7 @@ module GetDomainDetailResponse =
         ?registrarUrl ?whoIsServer ?registrarName ?techPrivacy
         ?registrantPrivacy ?adminPrivacy ~techContact ~registrantContact
         ~adminContact ?autoRenew ~nameservers ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusList = field_map json "StatusList" DomainStatusList.of_json in
       let dnsSec = field_map json "DnsSec" DNSSec.of_json in
@@ -5303,6 +5359,7 @@ module GetDomainDetailRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -5373,6 +5430,7 @@ module GetContactReachabilityStatusResponse =
       let domainName =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?status ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" ReachabilityStatus.of_json in
       let domainName = field_map json "domainName" DomainName.of_json in
@@ -5396,6 +5454,7 @@ module GetContactReachabilityStatusRequest =
       let domainName =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map json "domainName" DomainName.of_json in
       make ?domainName ()
@@ -5478,6 +5537,7 @@ module EnableDomainTransferLockResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -5502,6 +5562,7 @@ module EnableDomainTransferLockRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -5557,6 +5618,7 @@ module EnableDomainAutoRenewResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5579,6 +5641,7 @@ module EnableDomainAutoRenewRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -5661,6 +5724,7 @@ module DisableDomainTransferLockResponse =
         OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" OperationId.of_json in
       make ~operationId ()
@@ -5685,6 +5749,7 @@ module DisableDomainTransferLockRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -5731,6 +5796,7 @@ module DisableDomainAutoRenewResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5753,6 +5819,7 @@ module DisableDomainAutoRenewRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -5808,6 +5875,7 @@ module DeleteTagsForDomainResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5836,6 +5904,7 @@ module DeleteTagsForDomainRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~tagsToDelete ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagsToDelete = field_map_exn json "TagsToDelete" TagKeyList.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -5908,6 +5977,7 @@ module DeleteDomainResponse =
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map json "OperationId" OperationId.of_json in
       make ?operationId ()
@@ -5931,6 +6001,7 @@ module DeleteDomainRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -5988,6 +6059,7 @@ module CheckDomainTransferabilityResponse =
         DomainTransferability.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Transferability") in
       make ~transferability ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transferability =
         field_map_exn json "Transferability" DomainTransferability.of_json in
@@ -6020,6 +6092,7 @@ module CheckDomainTransferabilityRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?authCode ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authCode = field_map json "AuthCode" DomainAuthCode.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -6078,6 +6151,7 @@ module CheckDomainAvailabilityResponse =
         DomainAvailability.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Availability") in
       make ~availability ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availability =
         field_map_exn json "Availability" DomainAvailability.of_json in
@@ -6108,6 +6182,7 @@ module CheckDomainAvailabilityRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?idnLangCode ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idnLangCode = field_map json "IdnLangCode" LangCode.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -6172,6 +6247,7 @@ module CancelDomainTransferToAnotherAwsAccountResponse =
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map json "OperationId" OperationId.of_json in
       make ?operationId ()
@@ -6196,6 +6272,7 @@ module CancelDomainTransferToAnotherAwsAccountRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -6268,6 +6345,7 @@ module AcceptDomainTransferFromAnotherAwsAccountResponse =
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map json "OperationId" OperationId.of_json in
       make ?operationId ()
@@ -6299,6 +6377,7 @@ module AcceptDomainTransferFromAnotherAwsAccountRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~password ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let password = field_map_exn json "Password" String_.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in

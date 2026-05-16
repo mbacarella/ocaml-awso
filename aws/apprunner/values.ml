@@ -239,6 +239,7 @@ module CodeConfigurationValues =
         Runtime.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Runtime") in
       make ?runtimeEnvironmentVariables ?port ?startCommand ?buildCommand
         ~runtime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runtimeEnvironmentVariables =
         field_map json "RuntimeEnvironmentVariables"
@@ -420,6 +421,7 @@ module CodeConfiguration =
         ConfigurationSource.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSource") in
       make ?codeConfigurationValues ~configurationSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeConfigurationValues =
         field_map json "CodeConfigurationValues"
@@ -454,6 +456,7 @@ module SourceCodeVersion =
         SourceCodeVersionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String_.of_json in
       let type_ = field_map_exn json "Type" SourceCodeVersionType.of_json in
@@ -496,6 +499,7 @@ module ImageConfiguration =
         (Option.map ~f:RuntimeEnvironmentVariables.of_xml)
           (Xml.child xml_arg0 "RuntimeEnvironmentVariables") in
       make ?port ?startCommand ?runtimeEnvironmentVariables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let port = field_map json "Port" String_.of_json in
       let startCommand = field_map json "StartCommand" StartCommand.of_json in
@@ -585,6 +589,7 @@ module CertificateValidationRecord =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?status ?value ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "Status" CertificateValidationRecordStatus.of_json in
@@ -826,6 +831,7 @@ module EgressConfiguration =
       let egressType =
         (Option.map ~f:EgressType.of_xml) (Xml.child xml_arg0 "EgressType") in
       make ?vpcConnectorArn ?egressType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConnectorArn =
         field_map json "VpcConnectorArn" AppRunnerResourceArn.of_json in
@@ -872,6 +878,7 @@ module AuthenticationConfiguration =
         (Option.map ~f:AppRunnerResourceArn.of_xml)
           (Xml.child xml_arg0 "ConnectionArn") in
       make ?accessRoleArn ?connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessRoleArn = field_map json "AccessRoleArn" RoleArn.of_json in
       let connectionArn =
@@ -917,6 +924,7 @@ module CodeRepository =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RepositoryUrl") in
       make ?codeConfiguration ~sourceCodeVersion ~repositoryUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeConfiguration =
         field_map json "CodeConfiguration" CodeConfiguration.of_json in
@@ -964,6 +972,7 @@ module ImageRepository =
         ImageIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ImageIdentifier") in
       make ~imageRepositoryType ?imageConfiguration ~imageIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageRepositoryType =
         field_map_exn json "ImageRepositoryType" ImageRepositoryType.of_json in
@@ -1545,6 +1554,7 @@ module AutoScalingConfigurationSummary =
           (Xml.child xml_arg0 "AutoScalingConfigurationArn") in
       make ?autoScalingConfigurationRevision ?autoScalingConfigurationName
         ?autoScalingConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingConfigurationRevision =
         field_map json "AutoScalingConfigurationRevision" Integer.of_json in
@@ -1574,6 +1584,7 @@ module EncryptionConfiguration =
       let kmsKey =
         KmsKeyArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KmsKey") in
       make ~kmsKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKey = field_map_exn json "KmsKey" KmsKeyArn.of_json in
       make ~kmsKey ()
@@ -1651,6 +1662,7 @@ module HealthCheckConfiguration =
           (Xml.child xml_arg0 "Protocol") in
       make ?unhealthyThreshold ?healthyThreshold ?timeout ?interval ?path
         ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unhealthyThreshold =
         field_map json "UnhealthyThreshold"
@@ -1696,6 +1708,7 @@ module InstanceConfiguration =
         (Option.map ~f:Memory.of_xml) (Xml.child xml_arg0 "Memory") in
       let cpu = (Option.map ~f:Cpu.of_xml) (Xml.child xml_arg0 "Cpu") in
       make ?instanceRoleArn ?memory ?cpu ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceRoleArn = field_map json "InstanceRoleArn" RoleArn.of_json in
       let memory = field_map json "Memory" Memory.of_json in
@@ -1722,6 +1735,7 @@ module NetworkConfiguration =
         (Option.map ~f:EgressConfiguration.of_xml)
           (Xml.child xml_arg0 "EgressConfiguration") in
       make ?egressConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let egressConfiguration =
         field_map json "EgressConfiguration" EgressConfiguration.of_json in
@@ -1759,6 +1773,7 @@ module ServiceObservabilityConfiguration =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ObservabilityEnabled") in
       make ?observabilityConfigurationArn ~observabilityEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfigurationArn =
         field_map json "ObservabilityConfigurationArn"
@@ -1823,6 +1838,7 @@ module SourceConfiguration =
           (Xml.child xml_arg0 "CodeRepository") in
       make ?authenticationConfiguration ?autoDeploymentsEnabled
         ?imageRepository ?codeRepository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationConfiguration =
         field_map json "AuthenticationConfiguration"
@@ -1855,6 +1871,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -1945,6 +1962,7 @@ module VpcConnector =
           (Xml.child xml_arg0 "VpcConnectorName") in
       make ?deletedAt ?createdAt ?status ?securityGroups ?subnets
         ?vpcConnectorRevision ?vpcConnectorArn ?vpcConnectorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletedAt = field_map json "DeletedAt" Timestamp.of_json in
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
@@ -2031,6 +2049,7 @@ module ServiceSummary =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
       make ?status ?updatedAt ?createdAt ?serviceUrl ?serviceArn ?serviceId
         ?serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ServiceStatus.of_json in
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
@@ -2113,6 +2132,7 @@ module OperationSummary =
         (Option.map ~f:OperationType.of_xml) (Xml.child xml_arg0 "Type") in
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
       make ?updatedAt ?endedAt ?startedAt ?targetArn ?status ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
       let endedAt = field_map json "EndedAt" Timestamp.of_json in
@@ -2171,6 +2191,7 @@ module ObservabilityConfigurationSummary =
           (Xml.child xml_arg0 "ObservabilityConfigurationArn") in
       make ?observabilityConfigurationRevision
         ?observabilityConfigurationName ?observabilityConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfigurationRevision =
         field_map json "ObservabilityConfigurationRevision" Integer.of_json in
@@ -2240,6 +2261,7 @@ module ConnectionSummary =
         (Option.map ~f:ConnectionName.of_xml)
           (Xml.child xml_arg0 "ConnectionName") in
       make ?createdAt ?status ?providerType ?connectionArn ?connectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
       let status = field_map json "Status" ConnectionStatus.of_json in
@@ -2298,6 +2320,7 @@ module TraceConfiguration =
         TracingVendor.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Vendor") in
       make ~vendor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vendor = field_map_exn json "Vendor" TracingVendor.of_json in
       make ~vendor ()
@@ -2356,6 +2379,7 @@ module CustomDomain =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~status ?certificateValidationRecords ~enableWWWSubdomain
         ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "Status" CustomDomainAssociationStatus.of_json in
@@ -2411,6 +2435,7 @@ module InternalServiceErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2429,6 +2454,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2448,6 +2474,7 @@ module InvalidStateException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2467,6 +2494,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2634,6 +2662,7 @@ module Service =
         ?encryptionConfiguration ~instanceConfiguration ~sourceConfiguration
         ~status ?deletedAt ~updatedAt ~createdAt ~serviceUrl ~serviceArn
         ~serviceId ~serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfiguration =
         field_map json "ObservabilityConfiguration"
@@ -3036,6 +3065,7 @@ module ObservabilityConfiguration =
       make ?deletedAt ?createdAt ?status ?latest
         ?observabilityConfigurationRevision ?traceConfiguration
         ?observabilityConfigurationName ?observabilityConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletedAt = field_map json "DeletedAt" Timestamp.of_json in
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
@@ -3205,6 +3235,7 @@ module AutoScalingConfiguration =
       make ?deletedAt ?createdAt ?maxSize ?minSize ?maxConcurrency ?status
         ?latest ?autoScalingConfigurationRevision
         ?autoScalingConfigurationName ?autoScalingConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletedAt = field_map json "DeletedAt" Timestamp.of_json in
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
@@ -3283,6 +3314,7 @@ module Connection =
         (Option.map ~f:ConnectionName.of_xml)
           (Xml.child xml_arg0 "ConnectionName") in
       make ?createdAt ?status ?providerType ?connectionArn ?connectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
       let status = field_map json "Status" ConnectionStatus.of_json in
@@ -3307,6 +3339,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3447,6 +3480,7 @@ module UpdateServiceResponse =
       let service =
         Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
       make ~operationId ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" UUID.of_json in
       let service = field_map_exn json "Service" Service.of_json in
@@ -3541,6 +3575,7 @@ module UpdateServiceRequest =
       make ?observabilityConfiguration ?networkConfiguration
         ?healthCheckConfiguration ?autoScalingConfigurationArn
         ?instanceConfiguration ?sourceConfiguration ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfiguration =
         field_map json "ObservabilityConfiguration"
@@ -3629,6 +3664,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove tags from an App Runner resource."]
@@ -3658,6 +3694,7 @@ module UntagResourceRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -3729,6 +3766,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3758,6 +3796,7 @@ module TagResourceRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -3830,6 +3869,7 @@ module StartDeploymentResponse =
       let operationId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" UUID.of_json in
       make ~operationId ()
@@ -3854,6 +3894,7 @@ module StartDeploymentRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceArn =
         field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
@@ -3941,6 +3982,7 @@ module ResumeServiceResponse =
       let service =
         Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
       make ?operationId ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map json "OperationId" UUID.of_json in
       let service = field_map_exn json "Service" Service.of_json in
@@ -3966,6 +4008,7 @@ module ResumeServiceRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceArn =
         field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
@@ -4053,6 +4096,7 @@ module PauseServiceResponse =
       let service =
         Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
       make ?operationId ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map json "OperationId" UUID.of_json in
       let service = field_map_exn json "Service" Service.of_json in
@@ -4078,6 +4122,7 @@ module PauseServiceRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceArn =
         field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
@@ -4148,6 +4193,7 @@ module ListVpcConnectorsResponse =
         VpcConnectors.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectors") in
       make ?nextToken ~vpcConnectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let vpcConnectors =
@@ -4179,6 +4225,7 @@ module ListVpcConnectorsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4256,6 +4303,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4280,6 +4328,7 @@ module ListTagsForResourceRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" AppRunnerResourceArn.of_json in
@@ -4351,6 +4400,7 @@ module ListServicesResponse =
         ServiceSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceSummaryList") in
       make ?nextToken ~serviceSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let serviceSummaryList =
@@ -4384,6 +4434,7 @@ module ListServicesRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" ServiceMaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4464,6 +4515,7 @@ module ListOperationsResponse =
         (Option.map ~f:OperationSummaryList.of_xml)
           (Xml.child xml_arg0 "OperationSummaryList") in
       make ?nextToken ?operationSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let operationSummaryList =
@@ -4506,6 +4558,7 @@ module ListOperationsRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ?maxResults ?nextToken ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListOperationsMaxResults.of_json in
@@ -4585,6 +4638,7 @@ module ListObservabilityConfigurationsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "ObservabilityConfigurationSummaryList") in
       make ?nextToken ~observabilityConfigurationSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let observabilityConfigurationSummaryList =
@@ -4642,6 +4696,7 @@ module ListObservabilityConfigurationsRequest =
           (Xml.child xml_arg0 "ObservabilityConfigurationName") in
       make ?nextToken ?maxResults ?latestOnly ?observabilityConfigurationName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4719,6 +4774,7 @@ module ListConnectionsResponse =
         ConnectionSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionSummaryList") in
       make ?nextToken ~connectionSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let connectionSummaryList =
@@ -4760,6 +4816,7 @@ module ListConnectionsRequest =
         (Option.map ~f:ConnectionName.of_xml)
           (Xml.child xml_arg0 "ConnectionName") in
       make ?nextToken ?maxResults ?connectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4838,6 +4895,7 @@ module ListAutoScalingConfigurationsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "AutoScalingConfigurationSummaryList") in
       make ?nextToken ~autoScalingConfigurationSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let autoScalingConfigurationSummaryList =
@@ -4895,6 +4953,7 @@ module ListAutoScalingConfigurationsRequest =
           (Xml.child xml_arg0 "AutoScalingConfigurationName") in
       make ?nextToken ?maxResults ?latestOnly ?autoScalingConfigurationName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4997,6 +5056,7 @@ module DisassociateCustomDomainResponse =
       let dNSTarget =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DNSTarget") in
       make ~customDomain ~serviceArn ~dNSTarget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customDomain =
         field_map_exn json "CustomDomain" CustomDomain.of_json in
@@ -5033,6 +5093,7 @@ module DisassociateCustomDomainRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~domainName ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       let serviceArn =
@@ -5106,6 +5167,7 @@ module DescribeVpcConnectorResponse =
         VpcConnector.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnector") in
       make ~vpcConnector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConnector =
         field_map_exn json "VpcConnector" VpcConnector.of_json in
@@ -5132,6 +5194,7 @@ module DescribeVpcConnectorRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectorArn") in
       make ~vpcConnectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConnectorArn =
         field_map_exn json "VpcConnectorArn" AppRunnerResourceArn.of_json in
@@ -5202,6 +5265,7 @@ module DescribeServiceResponse =
       let service =
         Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
       make ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let service = field_map_exn json "Service" Service.of_json in
       make ~service ()
@@ -5225,6 +5289,7 @@ module DescribeServiceRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceArn =
         field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
@@ -5301,6 +5366,7 @@ module DescribeObservabilityConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "ObservabilityConfiguration") in
       make ~observabilityConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfiguration =
         field_map_exn json "ObservabilityConfiguration"
@@ -5331,6 +5397,7 @@ module DescribeObservabilityConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ObservabilityConfigurationArn") in
       make ~observabilityConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfigurationArn =
         field_map_exn json "ObservabilityConfigurationArn"
@@ -5427,6 +5494,7 @@ module DescribeCustomDomainsResponse =
       let dNSTarget =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DNSTarget") in
       make ?nextToken ~customDomains ~serviceArn ~dNSTarget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let customDomains =
@@ -5473,6 +5541,7 @@ module DescribeCustomDomainsRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ?maxResults ?nextToken ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" DescribeCustomDomainsMaxResults.of_json in
@@ -5552,6 +5621,7 @@ module DescribeAutoScalingConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "AutoScalingConfiguration") in
       make ~autoScalingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingConfiguration =
         field_map_exn json "AutoScalingConfiguration"
@@ -5582,6 +5652,7 @@ module DescribeAutoScalingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "AutoScalingConfigurationArn") in
       make ~autoScalingConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingConfigurationArn =
         field_map_exn json "AutoScalingConfigurationArn"
@@ -5655,6 +5726,7 @@ module DeleteVpcConnectorResponse =
         VpcConnector.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnector") in
       make ~vpcConnector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConnector =
         field_map_exn json "VpcConnector" VpcConnector.of_json in
@@ -5681,6 +5753,7 @@ module DeleteVpcConnectorRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectorArn") in
       make ~vpcConnectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConnectorArn =
         field_map_exn json "VpcConnectorArn" AppRunnerResourceArn.of_json in
@@ -5768,6 +5841,7 @@ module DeleteServiceResponse =
       let service =
         Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
       make ~operationId ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" UUID.of_json in
       let service = field_map_exn json "Service" Service.of_json in
@@ -5793,6 +5867,7 @@ module DeleteServiceRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceArn =
         field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
@@ -5870,6 +5945,7 @@ module DeleteObservabilityConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "ObservabilityConfiguration") in
       make ~observabilityConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfiguration =
         field_map_exn json "ObservabilityConfiguration"
@@ -5900,6 +5976,7 @@ module DeleteObservabilityConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ObservabilityConfigurationArn") in
       make ~observabilityConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfigurationArn =
         field_map_exn json "ObservabilityConfigurationArn"
@@ -5971,6 +6048,7 @@ module DeleteConnectionResponse =
       let connection =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map json "Connection" Connection.of_json in
       make ?connection ()
@@ -5996,6 +6074,7 @@ module DeleteConnectionRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
       make ~connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionArn =
         field_map_exn json "ConnectionArn" AppRunnerResourceArn.of_json in
@@ -6072,6 +6151,7 @@ module DeleteAutoScalingConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "AutoScalingConfiguration") in
       make ~autoScalingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingConfiguration =
         field_map_exn json "AutoScalingConfiguration"
@@ -6102,6 +6182,7 @@ module DeleteAutoScalingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "AutoScalingConfigurationArn") in
       make ~autoScalingConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingConfigurationArn =
         field_map_exn json "AutoScalingConfigurationArn"
@@ -6177,6 +6258,7 @@ module CreateVpcConnectorResponse =
         VpcConnector.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnector") in
       make ~vpcConnector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConnector =
         field_map_exn json "VpcConnector" VpcConnector.of_json in
@@ -6226,6 +6308,7 @@ module CreateVpcConnectorRequest =
         VpcConnectorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectorName") in
       make ?tags ?securityGroups ~subnets ~vpcConnectorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let securityGroups = field_map json "SecurityGroups" StringList.of_json in
@@ -6309,6 +6392,7 @@ module CreateServiceResponse =
       let service =
         Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
       make ~operationId ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operationId = field_map_exn json "OperationId" UUID.of_json in
       let service = field_map_exn json "Service" Service.of_json in
@@ -6422,6 +6506,7 @@ module CreateServiceRequest =
         ?autoScalingConfigurationArn ?healthCheckConfiguration
         ?encryptionConfiguration ?tags ?instanceConfiguration
         ~sourceConfiguration ~serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfiguration =
         field_map json "ObservabilityConfiguration"
@@ -6522,6 +6607,7 @@ module CreateObservabilityConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "ObservabilityConfiguration") in
       make ~observabilityConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let observabilityConfiguration =
         field_map_exn json "ObservabilityConfiguration"
@@ -6569,6 +6655,7 @@ module CreateObservabilityConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ObservabilityConfigurationName") in
       make ?tags ?traceConfiguration ~observabilityConfigurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let traceConfiguration =
@@ -6647,6 +6734,7 @@ module CreateConnectionResponse =
         Connection.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Connection") in
       make ~connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map_exn json "Connection" Connection.of_json in
       make ~connection ()
@@ -6685,6 +6773,7 @@ module CreateConnectionRequest =
         ConnectionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionName") in
       make ?tags ~providerType ~connectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let providerType =
@@ -6766,6 +6855,7 @@ module CreateAutoScalingConfigurationResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "AutoScalingConfiguration") in
       make ~autoScalingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingConfiguration =
         field_map_exn json "AutoScalingConfiguration"
@@ -6834,6 +6924,7 @@ module CreateAutoScalingConfigurationRequest =
              "AutoScalingConfigurationName") in
       make ?tags ?maxSize ?minSize ?maxConcurrency
         ~autoScalingConfigurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let maxSize = field_map json "MaxSize" ASConfigMaxSize.of_json in
@@ -6929,6 +7020,7 @@ module AssociateCustomDomainResponse =
       let dNSTarget =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DNSTarget") in
       make ~customDomain ~serviceArn ~dNSTarget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customDomain =
         field_map_exn json "CustomDomain" CustomDomain.of_json in
@@ -6975,6 +7067,7 @@ module AssociateCustomDomainRequest =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ?enableWWWSubdomain ~domainName ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableWWWSubdomain =
         field_map json "EnableWWWSubdomain" NullableBoolean.of_json in

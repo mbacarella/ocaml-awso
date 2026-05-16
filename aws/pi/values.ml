@@ -60,6 +60,7 @@ module DimensionDetail =
       let identifier =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
       make ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map json "Identifier" String_.of_json in
       make ?identifier ()
@@ -155,6 +156,7 @@ module DimensionGroupDetail =
           (Xml.child xml_arg0 "Dimensions") in
       let group = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Group") in
       make ?dimensions ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions =
         field_map json "Dimensions" DimensionDetailList.of_json in
@@ -186,6 +188,7 @@ module DataPoint =
         ISOTimestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
       make ~value ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" Double.of_json in
       let timestamp = field_map_exn json "Timestamp" ISOTimestamp.of_json in
@@ -356,6 +359,7 @@ module ResponseResourceMetricKey =
       let metric =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
       make ?dimensions ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions = field_map json "Dimensions" DimensionMap.of_json in
       let metric = field_map_exn json "Metric" String_.of_json in
@@ -395,6 +399,7 @@ module DimensionGroup =
         RequestString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Group") in
       make ?limit ?dimensions ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" Limit.of_json in
       let dimensions = field_map json "Dimensions" RequestStringList.of_json in
@@ -585,6 +590,7 @@ module ResponseResourceMetric =
       let metric =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Metric") in
       make ?unit ?description ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" String_.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -616,6 +622,7 @@ module MetricDimensionGroups =
       let metric =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Metric") in
       make ?groups ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groups = field_map json "Groups" DimensionGroupDetailList.of_json in
       let metric = field_map json "Metric" String_.of_json in
@@ -645,6 +652,7 @@ module MetricKeyDataPoints =
         (Option.map ~f:ResponseResourceMetricKey.of_xml)
           (Xml.child xml_arg0 "Key") in
       make ?dataPoints ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataPoints = field_map json "DataPoints" DataPointsList.of_json in
       let key = field_map json "Key" ResponseResourceMetricKey.of_json in
@@ -684,6 +692,7 @@ module MetricQuery =
         RequestString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
       make ?filter ?groupBy ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "Filter" MetricQueryFilterMap.of_json in
       let groupBy = field_map json "GroupBy" DimensionGroup.of_json in
@@ -708,6 +717,7 @@ module FeatureMetadata =
       let status =
         (Option.map ~f:FeatureStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" FeatureStatus.of_json in
       make ?status ()
@@ -742,6 +752,7 @@ module DimensionKeyDetail =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Dimension") in
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       make ?status ?dimension ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" DetailStatus.of_json in
       let dimension = field_map json "Dimension" String_.of_json in
@@ -791,6 +802,7 @@ module DimensionKeyDescription =
       let dimensions =
         (Option.map ~f:DimensionMap.of_xml) (Xml.child xml_arg0 "Dimensions") in
       make ?partitions ?additionalMetrics ?total ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partitions = field_map json "Partitions" MetricValuesList.of_json in
       let additionalMetrics =
@@ -819,6 +831,7 @@ module ResponsePartitionKey =
         DimensionMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Dimensions") in
       make ~dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions = field_map_exn json "Dimensions" DimensionMap.of_json in
       make ~dimensions ()
@@ -838,6 +851,7 @@ module InternalServiceError =
       let message =
         (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorString.of_json in
       make ?message ()
@@ -856,6 +870,7 @@ module InvalidArgumentException =
       let message =
         (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorString.of_json in
       make ?message ()
@@ -895,6 +910,7 @@ module NotAuthorizedException =
       let message =
         (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorString.of_json in
       make ?message ()
@@ -1364,6 +1380,7 @@ module ListAvailableResourceMetricsResponse =
         (Option.map ~f:ResponseResourceMetricList.of_xml)
           (Xml.child xml_arg0 "Metrics") in
       make ?nextToken ?metrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let metrics =
@@ -1423,6 +1440,7 @@ module ListAvailableResourceMetricsRequest =
         ServiceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
       make ?maxResults ?nextToken ~metricTypes ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -1504,6 +1522,7 @@ module ListAvailableResourceDimensionsResponse =
         (Option.map ~f:MetricDimensionsList.of_xml)
           (Xml.child xml_arg0 "MetricDimensions") in
       make ?nextToken ?metricDimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let metricDimensions =
@@ -1562,6 +1581,7 @@ module ListAvailableResourceDimensionsRequest =
         ServiceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
       make ?nextToken ?maxResults ~metrics ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1676,6 +1696,7 @@ module GetResourceMetricsResponse =
           (Xml.child xml_arg0 "AlignedStartTime") in
       make ?nextToken ?metricList ?identifier ?alignedEndTime
         ?alignedStartTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let metricList =
@@ -1774,6 +1795,7 @@ module GetResourceMetricsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
       make ?nextToken ?maxResults ?periodInSeconds ~endTime ~startTime
         ~metricQueries ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1858,6 +1880,7 @@ module GetResourceMetadataResponse =
       let identifier =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
       make ?features ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let features = field_map json "Features" FeatureMetadataMap.of_json in
       let identifier = field_map json "Identifier" String_.of_json in
@@ -1891,6 +1914,7 @@ module GetResourceMetadataRequest =
         ServiceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
       make ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map_exn json "Identifier" RequestString.of_json in
       let serviceType = field_map_exn json "ServiceType" ServiceType.of_json in
@@ -1960,6 +1984,7 @@ module GetDimensionKeyDetailsResponse =
         (Option.map ~f:DimensionKeyDetailList.of_xml)
           (Xml.child xml_arg0 "Dimensions") in
       make ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions =
         field_map json "Dimensions" DimensionKeyDetailList.of_json in
@@ -2029,6 +2054,7 @@ module GetDimensionKeyDetailsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
       make ?requestedDimensions ~groupIdentifier ~group ~identifier
         ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestedDimensions =
         field_map json "RequestedDimensions" RequestedDimensionList.of_json in
@@ -2147,6 +2173,7 @@ module DescribeDimensionKeysResponse =
           (Xml.child xml_arg0 "AlignedStartTime") in
       make ?nextToken ?keys ?partitionKeys ?alignedEndTime ?alignedStartTime
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let keys = field_map json "Keys" DimensionKeyDescriptionList.of_json in
@@ -2284,6 +2311,7 @@ module DescribeDimensionKeysRequest =
       make ?nextToken ?maxResults ?filter ?partitionBy ?additionalMetrics
         ~groupBy ?periodInSeconds ~metric ~endTime ~startTime ~identifier
         ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in

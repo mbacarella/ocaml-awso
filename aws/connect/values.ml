@@ -204,6 +204,7 @@ module Threshold =
       let comparison =
         (Option.map ~f:Comparison.of_xml) (Xml.child xml_arg0 "Comparison") in
       make ?thresholdValue ?comparison ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thresholdValue =
         field_map json "ThresholdValue" ThresholdValue.of_json in
@@ -392,6 +393,7 @@ module HistoricalMetric =
         (Option.map ~f:HistoricalMetricName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?unit ?statistic ?threshold ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" Unit.of_json in
       let statistic = field_map json "Statistic" Statistic.of_json in
@@ -431,6 +433,7 @@ module CurrentMetric =
       let name =
         (Option.map ~f:CurrentMetricName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?unit ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" Unit.of_json in
       let name = field_map json "Name" CurrentMetricName.of_json in
@@ -544,6 +547,7 @@ module EncryptionConfig =
         EncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EncryptionType") in
       make ~keyId ~encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyId.of_json in
       let encryptionType =
@@ -729,6 +733,7 @@ module QueueReference =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:QueueId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ARN.of_json in
       let id = field_map json "Id" QueueId.of_json in make ?arn ?id ()
@@ -753,6 +758,7 @@ module HistoricalMetricData =
       let metric =
         (Option.map ~f:HistoricalMetric.of_xml) (Xml.child xml_arg0 "Metric") in
       make ?value ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Value.of_json in
       let metric = field_map json "Metric" HistoricalMetric.of_json in
@@ -777,6 +783,7 @@ module CurrentMetricData =
       let metric =
         (Option.map ~f:CurrentMetric.of_xml) (Xml.child xml_arg0 "Metric") in
       make ?value ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Value.of_json in
       let metric = field_map json "Metric" CurrentMetric.of_json in
@@ -929,6 +936,7 @@ module HoursOfOperationTimeSlice =
         Hours24Format.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Hours") in
       make ~minutes ~hours ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minutes = field_map_exn json "Minutes" MinutesLimit60.of_json in
       let hours = field_map_exn json "Hours" Hours24Format.of_json in
@@ -1003,6 +1011,7 @@ module RoutingProfileQueueReference =
       let queueId =
         QueueId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueId") in
       make ~channel ~queueId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channel = field_map_exn json "Channel" Channel.of_json in
       let queueId = field_map_exn json "QueueId" QueueId.of_json in
@@ -1051,6 +1060,7 @@ module ProblemDetail =
         (Option.map ~f:ProblemMessageString.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ProblemMessageString.of_json in
       make ?message ()
@@ -2573,6 +2583,7 @@ module KinesisFirehoseConfig =
       let firehoseArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FirehoseArn") in
       make ~firehoseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firehoseArn = field_map_exn json "FirehoseArn" ARN.of_json in
       make ~firehoseArn ()
@@ -2594,6 +2605,7 @@ module KinesisStreamConfig =
       let streamArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StreamArn") in
       make ~streamArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamArn = field_map_exn json "StreamArn" ARN.of_json in
       make ~streamArn ()
@@ -2632,6 +2644,7 @@ module KinesisVideoStreamConfig =
       let prefix =
         Prefix.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Prefix") in
       make ~encryptionConfig ~retentionPeriodHours ~prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionConfig =
         field_map_exn json "EncryptionConfig" EncryptionConfig.of_json in
@@ -2672,6 +2685,7 @@ module S3Config =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BucketName") in
       make ?encryptionConfig ~bucketPrefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionConfig =
         field_map json "EncryptionConfig" EncryptionConfig.of_json in
@@ -2828,6 +2842,7 @@ module AttachmentReference =
       let name =
         (Option.map ~f:ReferenceKey.of_xml) (Xml.child xml_arg0 "Name") in
       make ?status ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ReferenceStatus.of_json in
       let value = field_map json "Value" ReferenceValue.of_json in
@@ -2855,6 +2870,7 @@ module UrlReference =
       let name =
         (Option.map ~f:ReferenceKey.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" ReferenceValue.of_json in
       let name = field_map json "Name" ReferenceKey.of_json in
@@ -3029,6 +3045,7 @@ module LexBot =
         (Option.map ~f:LexRegion.of_xml) (Xml.child xml_arg0 "LexRegion") in
       let name = (Option.map ~f:BotName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lexRegion ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexRegion = field_map json "LexRegion" LexRegion.of_json in
       let name = field_map json "Name" BotName.of_json in
@@ -3051,6 +3068,7 @@ module LexV2Bot =
       let aliasArn =
         (Option.map ~f:AliasArn.of_xml) (Xml.child xml_arg0 "AliasArn") in
       make ?aliasArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliasArn = field_map json "AliasArn" AliasArn.of_json in
       make ?aliasArn ()
@@ -3136,6 +3154,7 @@ module Dimensions =
       let queue =
         (Option.map ~f:QueueReference.of_xml) (Xml.child xml_arg0 "Queue") in
       make ?channel ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channel = field_map json "Channel" Channel.of_json in
       let queue = field_map json "Queue" QueueReference.of_json in
@@ -3369,6 +3388,7 @@ module HierarchyGroupSummary =
       let id =
         (Option.map ~f:HierarchyGroupId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" HierarchyGroupName.of_json in
       let arn = field_map json "Arn" ARN.of_json in
@@ -3401,6 +3421,7 @@ module MediaConcurrency =
       let channel =
         Channel.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Channel") in
       make ~concurrency ~channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let concurrency = field_map_exn json "Concurrency" Concurrency.of_json in
       let channel = field_map_exn json "Channel" Channel.of_json in
@@ -3425,6 +3446,7 @@ module PhoneNumberQuickConnectConfig =
         PhoneNumber.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
       make ~phoneNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let phoneNumber = field_map_exn json "PhoneNumber" PhoneNumber.of_json in
       make ~phoneNumber ()
@@ -3453,6 +3475,7 @@ module QueueQuickConnectConfig =
       let queueId =
         QueueId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueId") in
       make ~contactFlowId ~queueId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowId =
         field_map_exn json "ContactFlowId" ContactFlowId.of_json in
@@ -3483,6 +3506,7 @@ module UserQuickConnectConfig =
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ~contactFlowId ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowId =
         field_map_exn json "ContactFlowId" ContactFlowId.of_json in
@@ -3553,6 +3577,7 @@ module HoursOfOperationConfig =
         HoursOfOperationDays.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Day") in
       make ~endTime ~startTime ~day ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime =
         field_map_exn json "EndTime" HoursOfOperationTimeSlice.of_json in
@@ -3598,6 +3623,7 @@ module HierarchyLevelUpdate =
         HierarchyLevelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" HierarchyLevelName.of_json in
       make ~name ()
@@ -3654,6 +3680,7 @@ module RoutingProfileQueueConfig =
         RoutingProfileQueueReference.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueueReference") in
       make ~delay ~priority ~queueReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delay = field_map_exn json "Delay" Delay.of_json in
       let priority = field_map_exn json "Priority" Priority.of_json in
@@ -3702,6 +3729,7 @@ module Reference =
         ReferenceValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ~type_ ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" ReferenceType.of_json in
       let value = field_map_exn json "Value" ReferenceValue.of_json in
@@ -3978,6 +4006,7 @@ module VocabularySummary =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?failureReason ~lastModifiedTime ~state ~languageCode ~arn ~id
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason" VocabularyFailureReason.of_json in
@@ -4018,6 +4047,7 @@ module UserSummary =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?username ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map json "Username" AgentUsername.of_json in
       let arn = field_map json "Arn" ARN.of_json in
@@ -4053,6 +4083,7 @@ module UseCase =
       let useCaseId =
         (Option.map ~f:UseCaseId.of_xml) (Xml.child xml_arg0 "UseCaseId") in
       make ?useCaseType ?useCaseArn ?useCaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useCaseType = field_map json "UseCaseType" UseCaseType.of_json in
       let useCaseArn = field_map json "UseCaseArn" ARN.of_json in
@@ -4086,6 +4117,7 @@ module SecurityProfileSummary =
       let id =
         (Option.map ~f:SecurityProfileId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" SecurityProfileName.of_json in
       let arn = field_map json "Arn" ARN.of_json in
@@ -4123,6 +4155,7 @@ module SecurityKey =
         (Option.map ~f:AssociationId.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
       make ?creationTime ?key ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Timestamp__lc1.of_json in
       let key = field_map json "Key" PEM.of_json in
@@ -4155,6 +4188,7 @@ module RoutingProfileSummary =
       let id =
         (Option.map ~f:RoutingProfileId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" RoutingProfileName.of_json in
       let arn = field_map json "Arn" ARN.of_json in
@@ -4210,6 +4244,7 @@ module RoutingProfileQueueConfigSummary =
       let queueId =
         QueueId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueueId") in
       make ~channel ~delay ~priority ~queueName ~queueArn ~queueId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channel = field_map_exn json "Channel" Channel.of_json in
       let delay = field_map_exn json "Delay" Delay.of_json in
@@ -4257,6 +4292,7 @@ module QuickConnectSummary =
       let id =
         (Option.map ~f:QuickConnectId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?quickConnectType ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectType =
         field_map json "QuickConnectType" QuickConnectType.of_json in
@@ -4292,6 +4328,7 @@ module QueueSummary =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:QueueId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?queueType ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueType = field_map json "QueueType" QueueType.of_json in
       let name = field_map json "Name" QueueName.of_json in
@@ -4321,6 +4358,7 @@ module PromptSummary =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:PromptId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" PromptName.of_json in
       let arn = field_map json "Arn" ARN.of_json in
@@ -4376,6 +4414,7 @@ module PhoneNumberSummary =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:PhoneNumberId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?phoneNumberCountryCode ?phoneNumberType ?phoneNumber ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let phoneNumberCountryCode =
         field_map json "PhoneNumberCountryCode"
@@ -4491,6 +4530,7 @@ module IntegrationAssociationSummary =
       make ?sourceType ?sourceApplicationName ?sourceApplicationUrl
         ?integrationArn ?integrationType ?instanceId
         ?integrationAssociationArn ?integrationAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceType = field_map json "SourceType" SourceType.of_json in
       let sourceApplicationName =
@@ -4596,6 +4636,7 @@ module InstanceSummary =
       make ?outboundCallsEnabled ?inboundCallsEnabled ?instanceStatus
         ?serviceRole ?createdTime ?instanceAlias ?identityManagementType ?arn
         ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outboundCallsEnabled =
         field_map json "OutboundCallsEnabled" OutboundCallsEnabled.of_json in
@@ -4683,6 +4724,7 @@ module InstanceStorageConfig =
           (Xml.child xml_arg0 "AssociationId") in
       make ?kinesisFirehoseConfig ?kinesisStreamConfig
         ?kinesisVideoStreamConfig ?s3Config ~storageType ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kinesisFirehoseConfig =
         field_map json "KinesisFirehoseConfig" KinesisFirehoseConfig.of_json in
@@ -4723,6 +4765,7 @@ module Attribute =
         (Option.map ~f:InstanceAttributeType.of_xml)
           (Xml.child xml_arg0 "AttributeType") in
       make ?value ?attributeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" InstanceAttributeValue.of_json in
       let attributeType =
@@ -4757,6 +4800,7 @@ module HoursOfOperationSummary =
       let id =
         (Option.map ~f:HoursOfOperationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" HoursOfOperationName.of_json in
       let arn = field_map json "Arn" ARN.of_json in
@@ -4808,6 +4852,7 @@ module DefaultVocabulary =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~vocabularyName ~vocabularyId ~languageCode ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyName =
         field_map_exn json "VocabularyName" VocabularyName.of_json in
@@ -4843,6 +4888,7 @@ module ReferenceSummary =
       let url =
         (Option.map ~f:UrlReference.of_xml) (Xml.child xml_arg0 "Url") in
       make ?attachment ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachment =
         field_map json "Attachment" AttachmentReference.of_json in
@@ -4893,6 +4939,7 @@ module ContactFlowSummary =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:ContactFlowId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?contactFlowState ?contactFlowType ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowState =
         field_map json "ContactFlowState" ContactFlowState.of_json in
@@ -4939,6 +4986,7 @@ module ContactFlowModuleSummary =
       let id =
         (Option.map ~f:ContactFlowModuleId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?state ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ContactFlowModuleState.of_json in
       let name = field_map json "Name" ContactFlowModuleName.of_json in
@@ -4966,6 +5014,7 @@ module LexBotConfig =
       let lexBot =
         (Option.map ~f:LexBot.of_xml) (Xml.child xml_arg0 "LexBot") in
       make ?lexV2Bot ?lexBot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexV2Bot = field_map json "LexV2Bot" LexV2Bot.of_json in
       let lexBot = field_map json "LexBot" LexBot.of_json in
@@ -5017,6 +5066,7 @@ module AgentStatusSummary =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:AgentStatusId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?type_ ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" AgentStatusType.of_json in
       let name = field_map json "Name" AgentStatusName.of_json in
@@ -5049,6 +5099,7 @@ module HistoricalMetricResult =
       let dimensions =
         (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
       make ?collections ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let collections =
         field_map json "Collections" HistoricalMetricDataCollections.of_json in
@@ -5170,6 +5221,7 @@ module CurrentMetricResult =
       let dimensions =
         (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
       make ?collections ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let collections =
         field_map json "Collections" CurrentMetricDataCollections.of_json in
@@ -5298,6 +5350,7 @@ module UserIdentityInfo =
         (Option.map ~f:AgentFirstName.of_xml)
           (Xml.child xml_arg0 "FirstName") in
       make ?email ?lastName ?firstName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let email = field_map json "Email" Email.of_json in
       let lastName = field_map json "LastName" AgentLastName.of_json in
@@ -5351,6 +5404,7 @@ module UserPhoneConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneType") in
       make ?deskPhoneNumber ?afterContactWorkTimeLimit ?autoAccept ~phoneType
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deskPhoneNumber =
         field_map json "DeskPhoneNumber" PhoneNumber.of_json in
@@ -5388,6 +5442,7 @@ module HierarchyLevel =
       let id =
         (Option.map ~f:HierarchyLevelId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" HierarchyLevelName.of_json in
       let arn = field_map json "Arn" ARN.of_json in
@@ -5446,6 +5501,7 @@ module HierarchyPath =
         (Option.map ~f:HierarchyGroupSummary.of_xml)
           (Xml.child xml_arg0 "LevelOne") in
       make ?levelFive ?levelFour ?levelThree ?levelTwo ?levelOne ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let levelFive =
         field_map json "LevelFive" HierarchyGroupSummary.of_json in
@@ -5564,6 +5620,7 @@ module QuickConnectConfig =
         QuickConnectType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QuickConnectType") in
       make ?phoneConfig ?queueConfig ?userConfig ~quickConnectType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let phoneConfig =
         field_map json "PhoneConfig" PhoneNumberQuickConnectConfig.of_json in
@@ -5650,6 +5707,7 @@ module OutboundCallerConfig =
         (Option.map ~f:OutboundCallerIdName.of_xml)
           (Xml.child xml_arg0 "OutboundCallerIdName") in
       make ?outboundFlowId ?outboundCallerIdNumberId ?outboundCallerIdName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outboundFlowId =
         field_map json "OutboundFlowId" ContactFlowId.of_json in
@@ -5732,6 +5790,7 @@ module InstanceStatusReason =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -5825,6 +5884,7 @@ module AgentInfo =
       let id =
         (Option.map ~f:AgentResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?connectedToAgentTimestamp ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectedToAgentTimestamp =
         field_map json "ConnectedToAgentTimestamp" Timestamp__lc1.of_json in
@@ -5947,6 +6007,7 @@ module QueueInfo =
           (Xml.child xml_arg0 "EnqueueTimestamp") in
       let id = (Option.map ~f:QueueId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?enqueueTimestamp ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enqueueTimestamp =
         field_map json "EnqueueTimestamp" Timestamp__lc1.of_json in
@@ -6198,6 +6259,7 @@ module HierarchyStructureUpdate =
         (Option.map ~f:HierarchyLevelUpdate.of_xml)
           (Xml.child xml_arg0 "LevelOne") in
       make ?levelFive ?levelFour ?levelThree ?levelTwo ?levelOne ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let levelFive = field_map json "LevelFive" HierarchyLevelUpdate.of_json in
       let levelFour = field_map json "LevelFour" HierarchyLevelUpdate.of_json in
@@ -6361,6 +6423,7 @@ module InternalServiceException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6382,6 +6445,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6401,6 +6465,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6420,6 +6485,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6440,6 +6506,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6458,6 +6525,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6506,6 +6574,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6525,6 +6594,7 @@ module DuplicateResourceException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6543,6 +6613,7 @@ module InvalidContactFlowModuleException =
       let problems =
         (Option.map ~f:Problems.of_xml) (Xml.child xml_arg0 "Problems") in
       make ?problems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let problems = field_map json "Problems" Problems.of_json in
       make ?problems ()
@@ -6654,6 +6725,7 @@ module ContactNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6673,6 +6745,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6707,6 +6780,7 @@ module DestinationNotAllowedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6727,6 +6801,7 @@ module OutboundContactNotPermittedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -6759,6 +6834,7 @@ module AnswerMachineDetectionConfig =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "EnableAnswerMachineDetection") in
       make ?awaitAnswerMachinePrompt ?enableAnswerMachineDetection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let awaitAnswerMachinePrompt =
         field_map json "AwaitAnswerMachinePrompt" Boolean.of_json in
@@ -6829,6 +6905,7 @@ module ChatStreamingConfiguration =
         ChatStreamingEndpointARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamingEndpointArn") in
       make ~streamingEndpointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingEndpointArn =
         field_map_exn json "StreamingEndpointArn"
@@ -6854,6 +6931,7 @@ module VoiceRecordingConfiguration =
         (Option.map ~f:VoiceRecordingTrack.of_xml)
           (Xml.child xml_arg0 "VoiceRecordingTrack") in
       make ?voiceRecordingTrack ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let voiceRecordingTrack =
         field_map json "VoiceRecordingTrack" VoiceRecordingTrack.of_json in
@@ -6940,6 +7018,7 @@ module ChatMessage =
         ChatContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
       make ~content ~contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map_exn json "Content" ChatContent.of_json in
       let contentType =
@@ -6964,6 +7043,7 @@ module ParticipantDetails =
         DisplayName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DisplayName") in
       make ~displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName = field_map_exn json "DisplayName" DisplayName.of_json in
       make ~displayName ()
@@ -8031,6 +8111,7 @@ module Filters =
       let queues =
         (Option.map ~f:Queues.of_xml) (Xml.child xml_arg0 "Queues") in
       make ?channels ?queues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channels = field_map json "Channels" Channels.of_json in
       let queues = field_map json "Queues" Queues.of_json in
@@ -8139,6 +8220,7 @@ module Credentials =
           (Xml.child xml_arg0 "AccessToken") in
       make ?refreshTokenExpiration ?refreshToken ?accessTokenExpiration
         ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let refreshTokenExpiration =
         field_map json "RefreshTokenExpiration" Timestamp__lc1.of_json in
@@ -8163,6 +8245,7 @@ module UserNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -8363,6 +8446,7 @@ module Vocabulary =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?content ?failureReason ~lastModifiedTime ~state
         ~languageCode ~arn ~id ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let content = field_map json "Content" VocabularyContent.of_json in
@@ -8473,6 +8557,7 @@ module User =
       let id = (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?tags ?hierarchyGroupId ?routingProfileId ?securityProfileIds
         ?directoryUserId ?phoneConfig ?identityInfo ?username ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let hierarchyGroupId =
@@ -8538,6 +8623,7 @@ module HierarchyStructure =
       let levelOne =
         (Option.map ~f:HierarchyLevel.of_xml) (Xml.child xml_arg0 "LevelOne") in
       make ?levelFive ?levelFour ?levelThree ?levelTwo ?levelOne ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let levelFive = field_map json "LevelFive" HierarchyLevel.of_json in
       let levelFour = field_map json "LevelFour" HierarchyLevel.of_json in
@@ -8595,6 +8681,7 @@ module HierarchyGroup =
       let id =
         (Option.map ~f:HierarchyGroupId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?tags ?hierarchyPath ?levelId ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let hierarchyPath =
@@ -8668,6 +8755,7 @@ module SecurityProfile =
         (Option.map ~f:SecurityProfileId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?tags ?description ?securityProfileName ?arn
         ?organizationResourceId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let description =
@@ -8761,6 +8849,7 @@ module RoutingProfile =
         (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
       make ?tags ?defaultOutboundQueueId ?mediaConcurrencies ?description
         ?routingProfileId ?routingProfileArn ?name ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let defaultOutboundQueueId =
@@ -8839,6 +8928,7 @@ module QuickConnect =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "QuickConnectARN") in
       make ?tags ?quickConnectConfig ?description ?name ?quickConnectId
         ?quickConnectARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let quickConnectConfig =
@@ -8938,6 +9028,7 @@ module Queue =
           (Xml.child xml_arg0 "Name") in
       make ?tags ?status ?maxContacts ?hoursOfOperationId
         ?outboundCallerConfig ?description ?queueId ?queueArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let status = field_map json "Status" QueueStatus.of_json in
@@ -9050,6 +9141,7 @@ module Instance =
       make ?outboundCallsEnabled ?inboundCallsEnabled ?statusReason
         ?instanceStatus ?serviceRole ?createdTime ?instanceAlias
         ?identityManagementType ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outboundCallsEnabled =
         field_map json "OutboundCallsEnabled" OutboundCallsEnabled.of_json in
@@ -9143,6 +9235,7 @@ module HoursOfOperation =
           (Xml.child xml_arg0 "HoursOfOperationId") in
       make ?tags ?config ?timeZone ?description ?name ?hoursOfOperationArn
         ?hoursOfOperationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let config = field_map json "Config" HoursOfOperationConfigList.of_json in
@@ -9286,6 +9379,7 @@ module Contact =
         ?initiationTimestamp ?agentInfo ?queueInfo ?channel ?description
         ?name ?initiationMethod ?previousContactId ?initialContactId ?id ?arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledTimestamp =
         field_map json "ScheduledTimestamp" Timestamp__lc1.of_json in
@@ -9382,6 +9476,7 @@ module ContactFlow =
       let id = (Option.map ~f:ContactFlowId.of_xml) (Xml.child xml_arg0 "Id") in
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?content ?description ?state ?type_ ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let content = field_map json "Content" ContactFlowContent.of_json in
@@ -9408,6 +9503,7 @@ module ContactFlowNotPublishedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -9486,6 +9582,7 @@ module ContactFlowModule =
         (Option.map ~f:ContactFlowModuleId.of_xml) (Xml.child xml_arg0 "Id") in
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?status ?state ?description ?content ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let status = field_map json "Status" ContactFlowModuleStatus.of_json in
@@ -9574,6 +9671,7 @@ module AgentStatus =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "AgentStatusARN") in
       make ?tags ?state ?displayOrder ?type_ ?description ?name
         ?agentStatusId ?agentStatusARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" AgentStatusState.of_json in
@@ -9618,6 +9716,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceId ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map json "ResourceId" ARN.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -9638,6 +9737,7 @@ module ResourceConflictException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -9697,6 +9797,7 @@ module InvalidContactFlowException =
       let problems =
         (Option.map ~f:Problems.of_xml) (Xml.child xml_arg0 "problems") in
       make ?problems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let problems = field_map json "problems" Problems.of_json in
       make ?problems ()
@@ -9715,6 +9816,7 @@ module IdempotencyException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -9752,6 +9854,7 @@ module UpdateUserSecurityProfilesRequest =
         SecurityProfileIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityProfileIds") in
       make ~instanceId ~userId ~securityProfileIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let userId = field_map_exn json "UserId" UserId.of_json in
@@ -9792,6 +9895,7 @@ module UpdateUserRoutingProfileRequest =
         RoutingProfileId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingProfileId") in
       make ~instanceId ~userId ~routingProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let userId = field_map_exn json "UserId" UserId.of_json in
@@ -9832,6 +9936,7 @@ module UpdateUserPhoneConfigRequest =
         UserPhoneConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneConfig") in
       make ~instanceId ~userId ~phoneConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let userId = field_map_exn json "UserId" UserId.of_json in
@@ -9871,6 +9976,7 @@ module UpdateUserIdentityInfoRequest =
         UserIdentityInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityInfo") in
       make ~instanceId ~userId ~identityInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let userId = field_map_exn json "UserId" UserId.of_json in
@@ -9906,6 +10012,7 @@ module UpdateUserHierarchyStructureRequest =
         HierarchyStructureUpdate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HierarchyStructure") in
       make ~instanceId ~hierarchyStructure ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let hierarchyStructure =
@@ -9946,6 +10053,7 @@ module UpdateUserHierarchyRequest =
         (Option.map ~f:HierarchyGroupId.of_xml)
           (Xml.child xml_arg0 "HierarchyGroupId") in
       make ~instanceId ~userId ?hierarchyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let userId = field_map_exn json "UserId" UserId.of_json in
@@ -9989,6 +10097,7 @@ module UpdateUserHierarchyGroupNameRequest =
         HierarchyGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~instanceId ~hierarchyGroupId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let hierarchyGroupId =
@@ -10041,6 +10150,7 @@ module UpdateSecurityProfileRequest =
         (Option.map ~f:SecurityProfileDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ~instanceId ~securityProfileId ?permissions ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let securityProfileId =
@@ -10088,6 +10198,7 @@ module UpdateRoutingProfileQueuesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~queueConfigs ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueConfigs =
         field_map_exn json "QueueConfigs"
@@ -10142,6 +10253,7 @@ module UpdateRoutingProfileNameRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?description ?name ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" RoutingProfileDescription.of_json in
@@ -10188,6 +10300,7 @@ module UpdateRoutingProfileDefaultOutboundQueueRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~defaultOutboundQueueId ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultOutboundQueueId =
         field_map_exn json "DefaultOutboundQueueId" QueueId.of_json in
@@ -10233,6 +10346,7 @@ module UpdateRoutingProfileConcurrencyRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~mediaConcurrencies ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mediaConcurrencies =
         field_map_exn json "MediaConcurrencies" MediaConcurrencies.of_json in
@@ -10283,6 +10397,7 @@ module UpdateQuickConnectNameRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?description ?name ~quickConnectId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" UpdateQuickConnectDescription.of_json in
@@ -10329,6 +10444,7 @@ module UpdateQuickConnectConfigRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~quickConnectConfig ~quickConnectId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectConfig =
         field_map_exn json "QuickConnectConfig" QuickConnectConfig.of_json in
@@ -10368,6 +10484,7 @@ module UpdateQueueStatusRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~status ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" QueueStatus.of_json in
       let queueId = field_map_exn json "QueueId" QueueId.of_json in
@@ -10409,6 +10526,7 @@ module UpdateQueueOutboundCallerConfigRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~outboundCallerConfig ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outboundCallerConfig =
         field_map_exn json "OutboundCallerConfig"
@@ -10458,6 +10576,7 @@ module UpdateQueueNameRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?description ?name ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" QueueDescription.of_json in
       let name = field_map json "Name" CommonNameLength127.of_json in
@@ -10499,6 +10618,7 @@ module UpdateQueueMaxContactsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxContacts ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxContacts = field_map json "MaxContacts" QueueMaxContacts.of_json in
       let queueId = field_map_exn json "QueueId" QueueId.of_json in
@@ -10539,6 +10659,7 @@ module UpdateQueueHoursOfOperationRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~hoursOfOperationId ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hoursOfOperationId =
         field_map_exn json "HoursOfOperationId" HoursOfOperationId.of_json in
@@ -10591,6 +10712,7 @@ module UpdateInstanceStorageConfigRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~storageConfig ~resourceType ~associationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageConfig =
         field_map_exn json "StorageConfig" InstanceStorageConfig.of_json in
@@ -10638,6 +10760,7 @@ module UpdateInstanceAttributeRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~value ~attributeType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" InstanceAttributeValue.of_json in
       let attributeType =
@@ -10713,6 +10836,7 @@ module UpdateHoursOfOperationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?config ?timeZone ?description ?name ~hoursOfOperationId
         ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let config = field_map json "Config" HoursOfOperationConfigList.of_json in
       let timeZone = field_map json "TimeZone" TimeZone.of_json in
@@ -10808,6 +10932,7 @@ module UpdateContactScheduleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10845,6 +10970,7 @@ module UpdateContactScheduleRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~scheduledTime ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledTime =
         field_map_exn json "ScheduledTime" Timestamp.of_json in
@@ -10925,6 +11051,7 @@ module UpdateContactResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10976,6 +11103,7 @@ module UpdateContactRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?references ?description ?name ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let references = field_map json "References" ContactReferences.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -11025,6 +11153,7 @@ module UpdateContactFlowNameRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?description ?name ~contactFlowId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" ContactFlowDescription.of_json in
@@ -11126,6 +11255,7 @@ module UpdateContactFlowModuleMetadataResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates metadata about specified contact flow module."]
@@ -11179,6 +11309,7 @@ module UpdateContactFlowModuleMetadataRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?state ?description ?name ~contactFlowModuleId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ContactFlowModuleState.of_json in
       let description =
@@ -11273,6 +11404,7 @@ module UpdateContactFlowModuleContentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11311,6 +11443,7 @@ module UpdateContactFlowModuleContentRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~content ~contactFlowModuleId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content =
         field_map_exn json "Content" ContactFlowModuleContent.of_json in
@@ -11376,6 +11509,7 @@ module UpdateContactFlowMetadataRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?contactFlowState ?description ?name ~contactFlowId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowState =
         field_map json "ContactFlowState" ContactFlowState.of_json in
@@ -11420,6 +11554,7 @@ module UpdateContactFlowContentRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~content ~contactFlowId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map_exn json "Content" ContactFlowContent.of_json in
       let contactFlowId =
@@ -11491,6 +11626,7 @@ module UpdateContactAttributesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11530,6 +11666,7 @@ module UpdateContactAttributesRequest =
         ContactId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InitialContactId") in
       make ~attributes ~instanceId ~initialContactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map_exn json "Attributes" Attributes.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -11612,6 +11749,7 @@ module UpdateAgentStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?resetOrderNumber ?displayOrder ?state ?description ?name
         ~agentStatusId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resetOrderNumber =
         field_map json "ResetOrderNumber" Boolean.of_json in
@@ -11651,6 +11789,7 @@ module UntagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -11679,6 +11818,7 @@ module TagResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
@@ -11739,6 +11879,7 @@ module SuspendContactRecordingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11776,6 +11917,7 @@ module SuspendContactRecordingRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~initialContactId ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initialContactId =
         field_map_exn json "InitialContactId" ContactId.of_json in
@@ -11847,6 +11989,7 @@ module StopContactStreamingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11884,6 +12027,7 @@ module StopContactStreamingRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~streamingId ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingId = field_map_exn json "StreamingId" StreamingId.of_json in
       let contactId = field_map_exn json "ContactId" ContactId.of_json in
@@ -11963,6 +12107,7 @@ module StopContactResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11991,6 +12136,7 @@ module StopContactRequest =
         ContactId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ContactId") in
       make ~instanceId ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let contactId = field_map_exn json "ContactId" ContactId.of_json in
@@ -12051,6 +12197,7 @@ module StopContactRecordingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12088,6 +12235,7 @@ module StopContactRecordingRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~initialContactId ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initialContactId =
         field_map_exn json "InitialContactId" ContactId.of_json in
@@ -12187,6 +12335,7 @@ module StartTaskContactResponse =
       let contactId =
         (Option.map ~f:ContactId.of_xml) (Xml.child xml_arg0 "ContactId") in
       make ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map json "ContactId" ContactId.of_json in
       make ?contactId ()
@@ -12284,6 +12433,7 @@ module StartTaskContactRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?scheduledTime ?clientToken ?description ?references ~name
         ?attributes ~contactFlowId ?previousContactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledTime = field_map json "ScheduledTime" Timestamp.of_json in
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
@@ -12402,6 +12552,7 @@ module StartOutboundVoiceContactResponse =
       let contactId =
         (Option.map ~f:ContactId.of_xml) (Xml.child xml_arg0 "ContactId") in
       make ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map json "ContactId" ContactId.of_json in
       make ?contactId ()
@@ -12510,6 +12661,7 @@ module StartOutboundVoiceContactRequest =
       make ?trafficType ?campaignId ?answerMachineDetectionConfig ?attributes
         ?queueId ?sourcePhoneNumber ?clientToken ~instanceId ~contactFlowId
         ~destinationPhoneNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficType = field_map json "TrafficType" TrafficType.of_json in
       let campaignId = field_map json "CampaignId" CampaignId.of_json in
@@ -12612,6 +12764,7 @@ module StartContactStreamingResponse =
         StreamingId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamingId") in
       make ~streamingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingId = field_map_exn json "StreamingId" StreamingId.of_json in
       make ~streamingId ()
@@ -12671,6 +12824,7 @@ module StartContactStreamingRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~clientToken ~chatStreamingConfiguration ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
       let chatStreamingConfiguration =
@@ -12744,6 +12898,7 @@ module StartContactRecordingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12799,6 +12954,7 @@ module StartContactRecordingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~voiceRecordingConfiguration ~initialContactId ~contactId
         ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let voiceRecordingConfiguration =
         field_map_exn json "VoiceRecordingConfiguration"
@@ -12910,6 +13066,7 @@ module StartChatContactResponse =
       let contactId =
         (Option.map ~f:ContactId.of_xml) (Xml.child xml_arg0 "ContactId") in
       make ?participantToken ?participantId ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let participantToken =
         field_map json "ParticipantToken" ParticipantToken.of_json in
@@ -13010,6 +13167,7 @@ module StartChatContactRequest =
       make ?supportedMessagingContentTypes ?chatDurationInMinutes
         ?clientToken ?initialMessage ~participantDetails ?attributes
         ~contactFlowId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedMessagingContentTypes =
         field_map json "SupportedMessagingContentTypes"
@@ -13112,6 +13270,7 @@ module SearchVocabulariesResponse =
         (Option.map ~f:VocabularySummaryList.of_xml)
           (Xml.child xml_arg0 "VocabularySummaryList") in
       make ?nextToken ?vocabularySummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" VocabularyNextToken.of_json in
       let vocabularySummaryList =
@@ -13186,6 +13345,7 @@ module SearchVocabulariesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?languageCode ?nameStartsWith ?state ?nextToken ?maxResults
         ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageCode =
         field_map json "LanguageCode" VocabularyLanguageCode.of_json in
@@ -13253,6 +13413,7 @@ module ResumeContactRecordingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13290,6 +13451,7 @@ module ResumeContactRecordingRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~initialContactId ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initialContactId =
         field_map_exn json "InitialContactId" ContactId.of_json in
@@ -13386,6 +13548,7 @@ module ListUsersResponse =
         (Option.map ~f:UserSummaryList.of_xml)
           (Xml.child xml_arg0 "UserSummaryList") in
       make ?nextToken ?userSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let userSummaryList =
@@ -13426,6 +13589,7 @@ module ListUsersRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -13523,6 +13687,7 @@ module ListUserHierarchyGroupsResponse =
         (Option.map ~f:HierarchyGroupSummaryList.of_xml)
           (Xml.child xml_arg0 "UserHierarchyGroupSummaryList") in
       make ?nextToken ?userHierarchyGroupSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let userHierarchyGroupSummaryList =
@@ -13564,6 +13729,7 @@ module ListUserHierarchyGroupsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -13650,6 +13816,7 @@ module ListUseCasesResponse =
         (Option.map ~f:UseCaseSummaryList.of_xml)
           (Xml.child xml_arg0 "UseCaseSummaryList") in
       make ?nextToken ?useCaseSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let useCaseSummaryList =
@@ -13700,6 +13867,7 @@ module ListUseCasesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~integrationAssociationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult100.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -13786,6 +13954,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -13807,6 +13976,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -13901,6 +14071,7 @@ module ListSecurityProfilesResponse =
         (Option.map ~f:SecurityProfileSummaryList.of_xml)
           (Xml.child xml_arg0 "SecurityProfileSummaryList") in
       make ?nextToken ?securityProfileSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let securityProfileSummaryList =
@@ -13942,6 +14113,7 @@ module ListSecurityProfilesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14037,6 +14209,7 @@ module ListSecurityProfilePermissionsResponse =
         (Option.map ~f:PermissionsList.of_xml)
           (Xml.child xml_arg0 "Permissions") in
       make ?nextToken ?permissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let permissions = field_map json "Permissions" PermissionsList.of_json in
@@ -14086,6 +14259,7 @@ module ListSecurityProfilePermissionsRequest =
         SecurityProfileId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityProfileId") in
       make ?maxResults ?nextToken ~instanceId ~securityProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14183,6 +14357,7 @@ module ListSecurityKeysResponse =
         (Option.map ~f:SecurityKeysList.of_xml)
           (Xml.child xml_arg0 "SecurityKeys") in
       make ?nextToken ?securityKeys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let securityKeys =
@@ -14222,6 +14397,7 @@ module ListSecurityKeysRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult2.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14318,6 +14494,7 @@ module ListRoutingProfilesResponse =
         (Option.map ~f:RoutingProfileSummaryList.of_xml)
           (Xml.child xml_arg0 "RoutingProfileSummaryList") in
       make ?nextToken ?routingProfileSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let routingProfileSummaryList =
@@ -14359,6 +14536,7 @@ module ListRoutingProfilesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14457,6 +14635,7 @@ module ListRoutingProfileQueuesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?routingProfileQueueConfigSummaryList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingProfileQueueConfigSummaryList =
         field_map json "RoutingProfileQueueConfigSummaryList"
@@ -14505,6 +14684,7 @@ module ListRoutingProfileQueuesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult100.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14602,6 +14782,7 @@ module ListQuickConnectsResponse =
         (Option.map ~f:QuickConnectSummaryList.of_xml)
           (Xml.child xml_arg0 "QuickConnectSummaryList") in
       make ?nextToken ?quickConnectSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let quickConnectSummaryList =
@@ -14654,6 +14835,7 @@ module ListQuickConnectsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?quickConnectTypes ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectTypes =
         field_map json "QuickConnectTypes" QuickConnectTypes.of_json in
@@ -14751,6 +14933,7 @@ module ListQueuesResponse =
         (Option.map ~f:QueueSummaryList.of_xml)
           (Xml.child xml_arg0 "QueueSummaryList") in
       make ?nextToken ?queueSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let queueSummaryList =
@@ -14797,6 +14980,7 @@ module ListQueuesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ?queueTypes ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -14895,6 +15079,7 @@ module ListQueueQuickConnectsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?quickConnectSummaryList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectSummaryList =
         field_map json "QuickConnectSummaryList"
@@ -14941,6 +15126,7 @@ module ListQueueQuickConnectsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult100.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15037,6 +15223,7 @@ module ListPromptsResponse =
         (Option.map ~f:PromptSummaryList.of_xml)
           (Xml.child xml_arg0 "PromptSummaryList") in
       make ?nextToken ?promptSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let promptSummaryList =
@@ -15076,6 +15263,7 @@ module ListPromptsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15172,6 +15360,7 @@ module ListPhoneNumbersResponse =
         (Option.map ~f:PhoneNumberSummaryList.of_xml)
           (Xml.child xml_arg0 "PhoneNumberSummaryList") in
       make ?nextToken ?phoneNumberSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let phoneNumberSummaryList =
@@ -15239,6 +15428,7 @@ module ListPhoneNumbersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ?phoneNumberCountryCodes ?phoneNumberTypes
         ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15338,6 +15528,7 @@ module ListLexBotsResponse =
       let lexBots =
         (Option.map ~f:LexBotsList.of_xml) (Xml.child xml_arg0 "LexBots") in
       make ?nextToken ?lexBots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lexBots = field_map json "LexBots" LexBotsList.of_json in
@@ -15377,6 +15568,7 @@ module ListLexBotsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult25.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15473,6 +15665,7 @@ module ListLambdaFunctionsResponse =
         (Option.map ~f:FunctionArnsList.of_xml)
           (Xml.child xml_arg0 "LambdaFunctions") in
       make ?nextToken ?lambdaFunctions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lambdaFunctions =
@@ -15512,6 +15705,7 @@ module ListLambdaFunctionsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult25.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15601,6 +15795,7 @@ module ListIntegrationAssociationsResponse =
         (Option.map ~f:IntegrationAssociationSummaryList.of_xml)
           (Xml.child xml_arg0 "IntegrationAssociationSummaryList") in
       make ?nextToken ?integrationAssociationSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let integrationAssociationSummaryList =
@@ -15650,6 +15845,7 @@ module ListIntegrationAssociationsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ?integrationType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult100.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15720,6 +15916,7 @@ module ListInstancesResponse =
         (Option.map ~f:InstanceSummaryList.of_xml)
           (Xml.child xml_arg0 "InstanceSummaryList") in
       make ?nextToken ?instanceSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let instanceSummaryList =
@@ -15750,6 +15947,7 @@ module ListInstancesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult10.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15844,6 +16042,7 @@ module ListInstanceStorageConfigsResponse =
         (Option.map ~f:InstanceStorageConfigs.of_xml)
           (Xml.child xml_arg0 "StorageConfigs") in
       make ?nextToken ?storageConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let storageConfigs =
@@ -15892,6 +16091,7 @@ module ListInstanceStorageConfigsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~resourceType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult10.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -15987,6 +16187,7 @@ module ListInstanceAttributesResponse =
         (Option.map ~f:AttributesList.of_xml)
           (Xml.child xml_arg0 "Attributes") in
       make ?nextToken ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let attributes = field_map json "Attributes" AttributesList.of_json in
@@ -16025,6 +16226,7 @@ module ListInstanceAttributesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult7.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -16121,6 +16323,7 @@ module ListHoursOfOperationsResponse =
         (Option.map ~f:HoursOfOperationSummaryList.of_xml)
           (Xml.child xml_arg0 "HoursOfOperationSummaryList") in
       make ?nextToken ?hoursOfOperationSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let hoursOfOperationSummaryList =
@@ -16162,6 +16365,7 @@ module ListHoursOfOperationsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -16252,6 +16456,7 @@ module ListDefaultVocabulariesResponse =
         DefaultVocabularyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DefaultVocabularyList") in
       make ?nextToken ~defaultVocabularyList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" VocabularyNextToken.of_json in
       let defaultVocabularyList =
@@ -16304,6 +16509,7 @@ module ListDefaultVocabulariesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?nextToken ?maxResults ?languageCode ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" VocabularyNextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResult100.of_json in
@@ -16402,6 +16608,7 @@ module ListContactReferencesResponse =
         (Option.map ~f:ReferenceSummaryList.of_xml)
           (Xml.child xml_arg0 "ReferenceSummaryList") in
       make ?nextToken ?referenceSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let referenceSummaryList =
@@ -16449,6 +16656,7 @@ module ListContactReferencesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?nextToken ~referenceTypes ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let referenceTypes =
@@ -16547,6 +16755,7 @@ module ListContactFlowsResponse =
         (Option.map ~f:ContactFlowSummaryList.of_xml)
           (Xml.child xml_arg0 "ContactFlowSummaryList") in
       make ?nextToken ?contactFlowSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let contactFlowSummaryList =
@@ -16597,6 +16806,7 @@ module ListContactFlowsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ?contactFlowTypes ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult1000.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -16705,6 +16915,7 @@ module ListContactFlowModulesResponse =
         (Option.map ~f:ContactFlowModulesSummaryList.of_xml)
           (Xml.child xml_arg0 "ContactFlowModulesSummaryList") in
       make ?nextToken ?contactFlowModulesSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let contactFlowModulesSummaryList =
@@ -16757,6 +16968,7 @@ module ListContactFlowModulesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?contactFlowModuleState ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowModuleState =
         field_map json "ContactFlowModuleState"
@@ -16845,6 +17057,7 @@ module ListBotsResponse =
         (Option.map ~f:LexBotConfigList.of_xml)
           (Xml.child xml_arg0 "LexBots") in
       make ?nextToken ?lexBots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let lexBots = field_map json "LexBots" LexBotConfigList.of_json in
@@ -16891,6 +17104,7 @@ module ListBotsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~lexVersion ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexVersion = field_map_exn json "LexVersion" LexVersion.of_json in
       let maxResults = field_map json "MaxResults" MaxResult25.of_json in
@@ -16983,6 +17197,7 @@ module ListApprovedOriginsResponse =
       let origins =
         (Option.map ~f:OriginsList.of_xml) (Xml.child xml_arg0 "Origins") in
       make ?nextToken ?origins ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let origins = field_map json "Origins" OriginsList.of_json in
@@ -17021,6 +17236,7 @@ module ListApprovedOriginsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult25.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -17118,6 +17334,7 @@ module ListAgentStatusResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?agentStatusSummaryList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentStatusSummaryList =
         field_map json "AgentStatusSummaryList"
@@ -17168,6 +17385,7 @@ module ListAgentStatusRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?agentStatusTypes ?maxResults ?nextToken ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentStatusTypes =
         field_map json "AgentStatusTypes" AgentStatusTypes.of_json in
@@ -17266,6 +17484,7 @@ module GetMetricDataResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?metricResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricResults =
         field_map json "MetricResults" HistoricalMetricResults.of_json in
@@ -17356,6 +17575,7 @@ module GetMetricDataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~historicalMetrics ?groupings ~filters
         ~endTime ~startTime ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult100.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -17459,6 +17679,7 @@ module GetFederationTokenResponse =
       let credentials =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let credentials = field_map json "Credentials" Credentials.of_json in
       make ?credentials ()
@@ -17483,6 +17704,7 @@ module GetFederationTokenRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       make ~instanceId ()
@@ -17586,6 +17808,7 @@ module GetCurrentMetricDataResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?dataSnapshotTime ?metricResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSnapshotTime =
         field_map json "DataSnapshotTime" Timestamp__lc1.of_json in
@@ -17659,6 +17882,7 @@ module GetCurrentMetricDataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ~currentMetrics ?groupings ~filters
         ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResult100.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -17732,6 +17956,7 @@ module GetContactAttributesResponse =
       let attributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" Attributes.of_json in
       make ?attributes ()
@@ -17762,6 +17987,7 @@ module GetContactAttributesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~initialContactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let initialContactId =
         field_map_exn json "InitialContactId" ContactId.of_json in
@@ -17796,6 +18022,7 @@ module DisassociateSecurityKeyRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~associationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationId =
         field_map_exn json "AssociationId" AssociationId.of_json in
@@ -17839,6 +18066,7 @@ module DisassociateRoutingProfileQueuesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~queueReferences ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueReferences =
         field_map_exn json "QueueReferences"
@@ -17881,6 +18109,7 @@ module DisassociateQueueQuickConnectsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~quickConnectIds ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectIds =
         field_map_exn json "QuickConnectIds" QuickConnectsList.of_json in
@@ -17923,6 +18152,7 @@ module DisassociateLexBotRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~lexRegion ~botName ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexRegion = field_map_exn json "LexRegion" LexRegion.of_json in
       let botName = field_map_exn json "BotName" BotName.of_json in
@@ -17957,6 +18187,7 @@ module DisassociateLambdaFunctionRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~functionArn ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionArn = field_map_exn json "FunctionArn" FunctionArn.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -17999,6 +18230,7 @@ module DisassociateInstanceStorageConfigRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~resourceType ~associationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" InstanceStorageResourceType.of_json in
@@ -18039,6 +18271,7 @@ module DisassociateBotRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?lexV2Bot ?lexBot ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexV2Bot = field_map json "LexV2Bot" LexV2Bot.of_json in
       let lexBot = field_map json "LexBot" LexBot.of_json in
@@ -18070,6 +18303,7 @@ module DisassociateApprovedOriginRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~origin ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let origin = field_map_exn json "Origin" Origin.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -18158,6 +18392,7 @@ module DescribeVocabularyResponse =
         Vocabulary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Vocabulary") in
       make ~vocabulary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabulary = field_map_exn json "Vocabulary" Vocabulary.of_json in
       make ~vocabulary ()
@@ -18188,6 +18423,7 @@ module DescribeVocabularyRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~vocabularyId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyId =
         field_map_exn json "VocabularyId" VocabularyId.of_json in
@@ -18272,6 +18508,7 @@ module DescribeUserResponse =
     let of_xml xml_arg0 =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map json "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
@@ -18299,6 +18536,7 @@ module DescribeUserRequest =
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ~instanceId ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let userId = field_map_exn json "UserId" UserId.of_json in
@@ -18386,6 +18624,7 @@ module DescribeUserHierarchyStructureResponse =
         (Option.map ~f:HierarchyStructure.of_xml)
           (Xml.child xml_arg0 "HierarchyStructure") in
       make ?hierarchyStructure ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hierarchyStructure =
         field_map json "HierarchyStructure" HierarchyStructure.of_json in
@@ -18411,6 +18650,7 @@ module DescribeUserHierarchyStructureRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       make ~instanceId ()
@@ -18497,6 +18737,7 @@ module DescribeUserHierarchyGroupResponse =
         (Option.map ~f:HierarchyGroup.of_xml)
           (Xml.child xml_arg0 "HierarchyGroup") in
       make ?hierarchyGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hierarchyGroup =
         field_map json "HierarchyGroup" HierarchyGroup.of_json in
@@ -18529,6 +18770,7 @@ module DescribeUserHierarchyGroupRequest =
         HierarchyGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HierarchyGroupId") in
       make ~instanceId ~hierarchyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let hierarchyGroupId =
@@ -18616,6 +18858,7 @@ module DescribeSecurityProfileResponse =
         (Option.map ~f:SecurityProfile.of_xml)
           (Xml.child xml_arg0 "SecurityProfile") in
       make ?securityProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityProfile =
         field_map json "SecurityProfile" SecurityProfile.of_json in
@@ -18649,6 +18892,7 @@ module DescribeSecurityProfileRequest =
         SecurityProfileId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityProfileId") in
       make ~instanceId ~securityProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let securityProfileId =
@@ -18737,6 +18981,7 @@ module DescribeRoutingProfileResponse =
         (Option.map ~f:RoutingProfile.of_xml)
           (Xml.child xml_arg0 "RoutingProfile") in
       make ?routingProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingProfile =
         field_map json "RoutingProfile" RoutingProfile.of_json in
@@ -18769,6 +19014,7 @@ module DescribeRoutingProfileRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingProfileId =
         field_map_exn json "RoutingProfileId" RoutingProfileId.of_json in
@@ -18856,6 +19102,7 @@ module DescribeQuickConnectResponse =
         (Option.map ~f:QuickConnect.of_xml)
           (Xml.child xml_arg0 "QuickConnect") in
       make ?quickConnect ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnect = field_map json "QuickConnect" QuickConnect.of_json in
       make ?quickConnect ()
@@ -18886,6 +19133,7 @@ module DescribeQuickConnectRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~quickConnectId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectId =
         field_map_exn json "QuickConnectId" QuickConnectId.of_json in
@@ -18968,6 +19216,7 @@ module DescribeQueueResponse =
     let of_xml xml_arg0 =
       let queue = (Option.map ~f:Queue.of_xml) (Xml.child xml_arg0 "Queue") in
       make ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queue = field_map json "Queue" Queue.of_json in make ?queue ()
     let to_json v = composed_to_json to_value v
@@ -18995,6 +19244,7 @@ module DescribeQueueRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueId = field_map_exn json "QueueId" QueueId.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -19082,6 +19332,7 @@ module DescribeInstanceStorageConfigResponse =
         (Option.map ~f:InstanceStorageConfig.of_xml)
           (Xml.child xml_arg0 "StorageConfig") in
       make ?storageConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageConfig =
         field_map json "StorageConfig" InstanceStorageConfig.of_json in
@@ -19124,6 +19375,7 @@ module DescribeInstanceStorageConfigRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~resourceType ~associationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" InstanceStorageResourceType.of_json in
@@ -19193,6 +19445,7 @@ module DescribeInstanceResponse =
       let instance =
         (Option.map ~f:Instance.of_xml) (Xml.child xml_arg0 "Instance") in
       make ?instance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instance = field_map json "Instance" Instance.of_json in
       make ?instance ()
@@ -19217,6 +19470,7 @@ module DescribeInstanceRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       make ~instanceId ()
@@ -19300,6 +19554,7 @@ module DescribeInstanceAttributeResponse =
       let attribute =
         (Option.map ~f:Attribute.of_xml) (Xml.child xml_arg0 "Attribute") in
       make ?attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attribute = field_map json "Attribute" Attribute.of_json in
       make ?attribute ()
@@ -19332,6 +19587,7 @@ module DescribeInstanceAttributeRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~attributeType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeType =
         field_map_exn json "AttributeType" InstanceAttributeType.of_json in
@@ -19420,6 +19676,7 @@ module DescribeHoursOfOperationResponse =
         (Option.map ~f:HoursOfOperation.of_xml)
           (Xml.child xml_arg0 "HoursOfOperation") in
       make ?hoursOfOperation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hoursOfOperation =
         field_map json "HoursOfOperation" HoursOfOperation.of_json in
@@ -19453,6 +19710,7 @@ module DescribeHoursOfOperationRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~hoursOfOperationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hoursOfOperationId =
         field_map_exn json "HoursOfOperationId" HoursOfOperationId.of_json in
@@ -19538,6 +19796,7 @@ module DescribeContactResponse =
       let contact =
         (Option.map ~f:Contact.of_xml) (Xml.child xml_arg0 "Contact") in
       make ?contact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contact = field_map json "Contact" Contact.of_json in
       make ?contact ()
@@ -19568,6 +19827,7 @@ module DescribeContactRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~contactId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map_exn json "ContactId" ContactId.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -19666,6 +19926,7 @@ module DescribeContactFlowResponse =
       let contactFlow =
         (Option.map ~f:ContactFlow.of_xml) (Xml.child xml_arg0 "ContactFlow") in
       make ?contactFlow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlow = field_map json "ContactFlow" ContactFlow.of_json in
       make ?contactFlow ()
@@ -19696,6 +19957,7 @@ module DescribeContactFlowRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~contactFlowId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowId =
         field_map_exn json "ContactFlowId" ContactFlowId.of_json in
@@ -19793,6 +20055,7 @@ module DescribeContactFlowModuleResponse =
         (Option.map ~f:ContactFlowModule.of_xml)
           (Xml.child xml_arg0 "ContactFlowModule") in
       make ?contactFlowModule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowModule =
         field_map json "ContactFlowModule" ContactFlowModule.of_json in
@@ -19826,6 +20089,7 @@ module DescribeContactFlowModuleRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~contactFlowModuleId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowModuleId =
         field_map_exn json "ContactFlowModuleId" ContactFlowModuleId.of_json in
@@ -19910,6 +20174,7 @@ module DescribeAgentStatusResponse =
       let agentStatus =
         (Option.map ~f:AgentStatus.of_xml) (Xml.child xml_arg0 "AgentStatus") in
       make ?agentStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentStatus = field_map json "AgentStatus" AgentStatus.of_json in
       make ?agentStatus ()
@@ -19941,6 +20206,7 @@ module DescribeAgentStatusRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~agentStatusId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentStatusId =
         field_map_exn json "AgentStatusId" AgentStatusId.of_json in
@@ -20052,6 +20318,7 @@ module DeleteVocabularyResponse =
       let vocabularyArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VocabularyArn") in
       make ~state ~vocabularyId ~vocabularyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map_exn json "State" VocabularyState.of_json in
       let vocabularyId =
@@ -20085,6 +20352,7 @@ module DeleteVocabularyRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~vocabularyId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyId =
         field_map_exn json "VocabularyId" VocabularyId.of_json in
@@ -20114,6 +20382,7 @@ module DeleteUserRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~userId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map_exn json "UserId" UserId.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -20147,6 +20416,7 @@ module DeleteUserHierarchyGroupRequest =
         HierarchyGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HierarchyGroupId") in
       make ~instanceId ~hierarchyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let hierarchyGroupId =
@@ -20190,6 +20460,7 @@ module DeleteUseCaseRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~useCaseId ~integrationAssociationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useCaseId = field_map_exn json "UseCaseId" UseCaseId.of_json in
       let integrationAssociationId =
@@ -20225,6 +20496,7 @@ module DeleteSecurityProfileRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~securityProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityProfileId =
         field_map_exn json "SecurityProfileId" SecurityProfileId.of_json in
@@ -20258,6 +20530,7 @@ module DeleteQuickConnectRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~quickConnectId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectId =
         field_map_exn json "QuickConnectId" QuickConnectId.of_json in
@@ -20294,6 +20567,7 @@ module DeleteIntegrationAssociationRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~integrationAssociationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let integrationAssociationId =
         field_map_exn json "IntegrationAssociationId"
@@ -20321,6 +20595,7 @@ module DeleteInstanceRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       make ~instanceId ()
@@ -20353,6 +20628,7 @@ module DeleteHoursOfOperationRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~hoursOfOperationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hoursOfOperationId =
         field_map_exn json "HoursOfOperationId" HoursOfOperationId.of_json in
@@ -20386,6 +20662,7 @@ module DeleteContactFlowRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~contactFlowId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowId =
         field_map_exn json "ContactFlowId" ContactFlowId.of_json in
@@ -20474,6 +20751,7 @@ module DeleteContactFlowModuleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified contact flow module."]
@@ -20504,6 +20782,7 @@ module DeleteContactFlowModuleRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~contactFlowModuleId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowModuleId =
         field_map_exn json "ContactFlowModuleId" ContactFlowModuleId.of_json in
@@ -20625,6 +20904,7 @@ module CreateVocabularyResponse =
       let vocabularyArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VocabularyArn") in
       make ~state ~vocabularyId ~vocabularyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map_exn json "State" VocabularyState.of_json in
       let vocabularyId =
@@ -20699,6 +20979,7 @@ module CreateVocabularyRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~content ~languageCode ~vocabularyName ~instanceId
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let content = field_map_exn json "Content" VocabularyContent.of_json in
@@ -20814,6 +21095,7 @@ module CreateUserResponse =
       let userId =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
       make ?userArn ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map json "UserArn" ARN.of_json in
       let userId = field_map json "UserId" UserId.of_json in
@@ -20921,6 +21203,7 @@ module CreateUserRequest =
       make ?tags ~instanceId ?hierarchyGroupId ~routingProfileId
         ~securityProfileIds ?directoryUserId ~phoneConfig ?identityInfo
         ?password ~username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -21051,6 +21334,7 @@ module CreateUserHierarchyGroupResponse =
         (Option.map ~f:HierarchyGroupId.of_xml)
           (Xml.child xml_arg0 "HierarchyGroupId") in
       make ?hierarchyGroupArn ?hierarchyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hierarchyGroupArn = field_map json "HierarchyGroupArn" ARN.of_json in
       let hierarchyGroupId =
@@ -21100,6 +21384,7 @@ module CreateUserHierarchyGroupRequest =
         HierarchyGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~instanceId ?parentGroupId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -21194,6 +21479,7 @@ module CreateUseCaseResponse =
       let useCaseId =
         (Option.map ~f:UseCaseId.of_xml) (Xml.child xml_arg0 "UseCaseId") in
       make ?useCaseArn ?useCaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useCaseArn = field_map json "UseCaseArn" ARN.of_json in
       let useCaseId = field_map json "UseCaseId" UseCaseId.of_json in
@@ -21244,6 +21530,7 @@ module CreateUseCaseRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ~useCaseType ~integrationAssociationId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let useCaseType = field_map_exn json "UseCaseType" UseCaseType.of_json in
@@ -21362,6 +21649,7 @@ module CreateSecurityProfileResponse =
         (Option.map ~f:SecurityProfileId.of_xml)
           (Xml.child xml_arg0 "SecurityProfileId") in
       make ?securityProfileArn ?securityProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityProfileArn =
         field_map json "SecurityProfileArn" ARN.of_json in
@@ -21428,6 +21716,7 @@ module CreateSecurityProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityProfileName") in
       make ?tags ~instanceId ?permissions ?description ~securityProfileName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -21548,6 +21837,7 @@ module CreateRoutingProfileResponse =
       let routingProfileArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "RoutingProfileArn") in
       make ?routingProfileId ?routingProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingProfileId =
         field_map json "RoutingProfileId" RoutingProfileId.of_json in
@@ -21632,6 +21922,7 @@ module CreateRoutingProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ~mediaConcurrencies ?queueConfigs ~defaultOutboundQueueId
         ~description ~name ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let mediaConcurrencies =
@@ -21753,6 +22044,7 @@ module CreateQuickConnectResponse =
       let quickConnectARN =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "QuickConnectARN") in
       make ?quickConnectId ?quickConnectARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectId =
         field_map json "QuickConnectId" QuickConnectId.of_json in
@@ -21809,6 +22101,7 @@ module CreateQuickConnectRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ~quickConnectConfig ?description ~name ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let quickConnectConfig =
@@ -21922,6 +22215,7 @@ module CreateQueueResponse =
       let queueArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "QueueArn") in
       make ?queueId ?queueArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueId = field_map json "QueueId" QueueId.of_json in
       let queueArn = field_map json "QueueArn" ARN.of_json in
@@ -22014,6 +22308,7 @@ module CreateQueueRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ?quickConnectIds ?maxContacts ~hoursOfOperationId
         ?outboundCallerConfig ?description ~name ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let quickConnectIds =
@@ -22122,6 +22417,7 @@ module CreateIntegrationAssociationResponse =
         (Option.map ~f:IntegrationAssociationId.of_xml)
           (Xml.child xml_arg0 "IntegrationAssociationId") in
       make ?integrationAssociationArn ?integrationAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let integrationAssociationArn =
         field_map json "IntegrationAssociationArn" ARN.of_json in
@@ -22208,6 +22504,7 @@ module CreateIntegrationAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ?sourceType ?sourceApplicationName ?sourceApplicationUrl
         ~integrationArn ~integrationType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let sourceType = field_map json "SourceType" SourceType.of_json in
@@ -22306,6 +22603,7 @@ module CreateInstanceResponse =
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ARN.of_json in
       let id = field_map json "Id" InstanceId.of_json in make ?arn ?id ()
@@ -22376,6 +22674,7 @@ module CreateInstanceRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ~outboundCallsEnabled ~inboundCallsEnabled ?directoryId
         ?instanceAlias ~identityManagementType ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outboundCallsEnabled =
         field_map_exn json "OutboundCallsEnabled"
@@ -22501,6 +22800,7 @@ module CreateHoursOfOperationResponse =
         (Option.map ~f:HoursOfOperationId.of_xml)
           (Xml.child xml_arg0 "HoursOfOperationId") in
       make ?hoursOfOperationArn ?hoursOfOperationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hoursOfOperationArn =
         field_map json "HoursOfOperationArn" ARN.of_json in
@@ -22565,6 +22865,7 @@ module CreateHoursOfOperationRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ~config ~timeZone ?description ~name ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let config =
@@ -22694,6 +22995,7 @@ module CreateContactFlowResponse =
         (Option.map ~f:ContactFlowId.of_xml)
           (Xml.child xml_arg0 "ContactFlowId") in
       make ?contactFlowArn ?contactFlowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactFlowArn = field_map json "ContactFlowArn" ARN.of_json in
       let contactFlowId =
@@ -22754,6 +23056,7 @@ module CreateContactFlowRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ~content ?description ~type_ ~name ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let content = field_map_exn json "Content" ContactFlowContent.of_json in
@@ -22898,6 +23201,7 @@ module CreateContactFlowModuleResponse =
       let id =
         (Option.map ~f:ContactFlowModuleId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ARN.of_json in
       let id = field_map json "Id" ContactFlowModuleId.of_json in
@@ -22961,6 +23265,7 @@ module CreateContactFlowModuleRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?clientToken ?tags ~content ?description ~name ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -23079,6 +23384,7 @@ module CreateAgentStatusResponse =
       let agentStatusARN =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "AgentStatusARN") in
       make ?agentStatusId ?agentStatusARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agentStatusId =
         field_map json "AgentStatusId" AgentStatusId.of_json in
@@ -23142,6 +23448,7 @@ module CreateAgentStatusRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tags ?displayOrder ~state ?description ~name ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let displayOrder =
@@ -23256,6 +23563,7 @@ module AssociateSecurityKeyResponse =
         (Option.map ~f:AssociationId.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
       make ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationId =
         field_map json "AssociationId" AssociationId.of_json in
@@ -23284,6 +23592,7 @@ module AssociateSecurityKeyRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~key ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map_exn json "Key" PEM.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -23326,6 +23635,7 @@ module AssociateRoutingProfileQueuesRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~queueConfigs ~routingProfileId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queueConfigs =
         field_map_exn json "QueueConfigs"
@@ -23368,6 +23678,7 @@ module AssociateQueueQuickConnectsRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~quickConnectIds ~queueId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quickConnectIds =
         field_map_exn json "QuickConnectIds" QuickConnectsList.of_json in
@@ -23400,6 +23711,7 @@ module AssociateLexBotRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~lexBot ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexBot = field_map_exn json "LexBot" LexBot.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -23433,6 +23745,7 @@ module AssociateLambdaFunctionRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~functionArn ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionArn = field_map_exn json "FunctionArn" FunctionArn.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -23530,6 +23843,7 @@ module AssociateInstanceStorageConfigResponse =
         (Option.map ~f:AssociationId.of_xml)
           (Xml.child xml_arg0 "AssociationId") in
       make ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationId =
         field_map json "AssociationId" AssociationId.of_json in
@@ -23572,6 +23886,7 @@ module AssociateInstanceStorageConfigRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~storageConfig ~resourceType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageConfig =
         field_map_exn json "StorageConfig" InstanceStorageConfig.of_json in
@@ -23653,6 +23968,7 @@ module AssociateDefaultVocabularyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23694,6 +24010,7 @@ module AssociateDefaultVocabularyRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?vocabularyId ~languageCode ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyId = field_map json "VocabularyId" VocabularyId.of_json in
       let languageCode =
@@ -23732,6 +24049,7 @@ module AssociateBotRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?lexV2Bot ?lexBot ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lexV2Bot = field_map json "LexV2Bot" LexV2Bot.of_json in
       let lexBot = field_map json "LexBot" LexBot.of_json in
@@ -23762,6 +24080,7 @@ module AssociateApprovedOriginRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~origin ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let origin = field_map_exn json "Origin" Origin.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in

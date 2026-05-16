@@ -168,6 +168,7 @@ module MacSecKey =
       let secretARN =
         (Option.map ~f:SecretARN.of_xml) (Xml.child xml_arg0 "secretARN") in
       make ?startOn ?state ?ckn ?secretARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startOn = field_map json "startOn" StartOnDate.of_json in
       let state = field_map json "state" State.of_json in
@@ -195,6 +196,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -497,6 +499,7 @@ module DirectConnectClientException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -515,6 +518,7 @@ module DirectConnectServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -528,6 +532,7 @@ module DuplicateTagKeysException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A tag key was specified more than once."]
@@ -758,6 +763,7 @@ module TooManyTagsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -873,6 +879,7 @@ module BGPPeer =
       make ?awsLogicalDeviceId ?awsDeviceV2 ?bgpStatus ?bgpPeerState
         ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asn
         ?bgpPeerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let awsLogicalDeviceId =
         field_map json "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
@@ -907,6 +914,7 @@ module RouteFilterPrefix =
     let of_xml xml_arg0 =
       let cidr = (Option.map ~f:CIDR.of_xml) (Xml.child xml_arg0 "cidr") in
       make ?cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map json "cidr" CIDR.of_json in make ?cidr ()
     let to_json v = composed_to_json to_value v
@@ -1170,6 +1178,7 @@ module Connection =
         ?awsDeviceV2 ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime
         ?partnerName ?vlan ?bandwidth ?location ?region ?connectionState
         ?connectionName ?connectionId ?ownerAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
       let encryptionMode =
@@ -2001,6 +2010,7 @@ module AssociatedGateway =
       let id =
         (Option.map ~f:GatewayIdentifier.of_xml) (Xml.child xml_arg0 "id") in
       make ?region ?ownerAccount ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map json "region" Region.of_json in
       let ownerAccount = field_map json "ownerAccount" OwnerAccount.of_json in
@@ -2451,6 +2461,7 @@ module VirtualInterface =
         ?authKey ?amazonSideAsn ?asn ?vlan ?virtualInterfaceName
         ?virtualInterfaceType ?connectionId ?location ?virtualInterfaceId
         ?ownerAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let siteLinkEnabled =
         field_map json "siteLinkEnabled" SiteLinkEnabled.of_json in
@@ -2529,6 +2540,7 @@ module VirtualGateway =
         (Option.map ~f:VirtualGatewayId.of_xml)
           (Xml.child xml_arg0 "virtualGatewayId") in
       make ?virtualGatewayState ?virtualGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayState =
         field_map json "virtualGatewayState" VirtualGatewayState.of_json in
@@ -2606,6 +2618,7 @@ module Location =
           (Xml.child xml_arg0 "locationCode") in
       make ?availableMacSecPortSpeeds ?availableProviders
         ?availablePortSpeeds ?region ?locationName ?locationCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availableMacSecPortSpeeds =
         field_map json "availableMacSecPortSpeeds"
@@ -2702,6 +2715,7 @@ module VirtualInterfaceTestHistory =
         (Option.map ~f:TestId.of_xml) (Xml.child xml_arg0 "testId") in
       make ?endTime ?startTime ?testDurationInMinutes ?ownerAccount ?status
         ?bgpPeers ?virtualInterfaceId ?testId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map json "endTime" EndTime.of_json in
       let startTime = field_map json "startTime" StartTime.of_json in
@@ -2968,6 +2982,7 @@ module Lag =
         ?connections ?awsLogicalDeviceId ?awsDeviceV2 ?awsDevice
         ?minimumLinks ?region ?location ?lagState ?lagName ?ownerAccount
         ?lagId ?numberOfConnections ?connectionsBandwidth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
       let encryptionMode =
@@ -3205,6 +3220,7 @@ module Interconnect =
         ?awsDeviceV2 ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime
         ?bandwidth ?location ?region ?interconnectState ?interconnectName
         ?interconnectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerName = field_map json "providerName" ProviderName.of_json in
       let tags = field_map json "tags" TagList.of_json in
@@ -3251,6 +3267,7 @@ module ResourceTag =
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       make ?tags ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let resourceArn = field_map json "resourceArn" ResourceArn.of_json in
@@ -3438,6 +3455,7 @@ module DirectConnectGateway =
           (Xml.child xml_arg0 "directConnectGatewayId") in
       make ?stateChangeError ?directConnectGatewayState ?ownerAccount
         ?amazonSideAsn ?directConnectGatewayName ?directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateChangeError =
         field_map json "stateChangeError" StateChangeError.of_json in
@@ -3542,6 +3560,7 @@ module DirectConnectGatewayAttachment =
       make ?stateChangeError ?attachmentType ?attachmentState
         ?virtualInterfaceOwnerAccount ?virtualInterfaceRegion
         ?virtualInterfaceId ?directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateChangeError =
         field_map json "stateChangeError" StateChangeError.of_json in
@@ -3684,6 +3703,7 @@ module DirectConnectGatewayAssociation =
         ?virtualGatewayId ?allowedPrefixesToDirectConnectGateway
         ?associationId ?associatedGateway ?stateChangeError ?associationState
         ?directConnectGatewayOwnerAccount ?directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayOwnerAccount =
         field_map json "virtualGatewayOwnerAccount" OwnerAccount.of_json in
@@ -3808,6 +3828,7 @@ module DirectConnectGatewayAssociationProposal =
         ?existingAllowedPrefixesToDirectConnectGateway ?associatedGateway
         ?proposalState ?directConnectGatewayOwnerAccount
         ?directConnectGatewayId ?proposalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestedAllowedPrefixesToDirectConnectGateway =
         field_map json "requestedAllowedPrefixesToDirectConnectGateway"
@@ -3860,6 +3881,7 @@ module CustomerAgreement =
         (Option.map ~f:AgreementName.of_xml)
           (Xml.child xml_arg0 "agreementName") in
       make ?status ?agreementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" Status.of_json in
       let agreementName =
@@ -4188,6 +4210,7 @@ module RouterType =
         (Option.map ~f:Vendor.of_xml) (Xml.child xml_arg0 "vendor") in
       make ?routerTypeIdentifier ?xsltTemplateNameForMacSec ?xsltTemplateName
         ?software ?platform ?vendor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routerTypeIdentifier =
         field_map json "routerTypeIdentifier" RouterTypeIdentifier.of_json in
@@ -4267,6 +4290,7 @@ module Loa =
       let loaContent =
         (Option.map ~f:LoaContent.of_xml) (Xml.child xml_arg0 "loaContent") in
       make ?loaContentType ?loaContent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loaContentType =
         field_map json "loaContentType" LoaContentType.of_json in
@@ -4550,6 +4574,7 @@ module NewTransitVirtualInterface =
       make ?enableSiteLink ?tags ?directConnectGatewayId ?addressFamily
         ?customerAddress ?amazonAddress ?authKey ?mtu ?asn ?vlan
         ?virtualInterfaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableSiteLink =
         field_map json "enableSiteLink" EnableSiteLink.of_json in
@@ -4662,6 +4687,7 @@ module NewPublicVirtualInterface =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceName") in
       make ?tags ?routeFilterPrefixes ?addressFamily ?customerAddress
         ?amazonAddress ?authKey ~asn ~vlan ~virtualInterfaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let routeFilterPrefixes =
@@ -4797,6 +4823,7 @@ module NewPrivateVirtualInterface =
       make ?enableSiteLink ?tags ?directConnectGatewayId ?virtualGatewayId
         ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu ~asn
         ~vlan ~virtualInterfaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableSiteLink =
         field_map json "enableSiteLink" EnableSiteLink.of_json in
@@ -4899,6 +4926,7 @@ module NewBGPPeer =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
       let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       make ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerAddress =
         field_map json "customerAddress" CustomerAddress.of_json in
@@ -5009,6 +5037,7 @@ module NewTransitVirtualInterfaceAllocation =
           (Xml.child xml_arg0 "virtualInterfaceName") in
       make ?tags ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu
         ?asn ?vlan ?virtualInterfaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let addressFamily =
@@ -5116,6 +5145,7 @@ module NewPublicVirtualInterfaceAllocation =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceName") in
       make ?tags ?routeFilterPrefixes ?addressFamily ?customerAddress
         ?amazonAddress ?authKey ~asn ~vlan ~virtualInterfaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let routeFilterPrefixes =
@@ -5223,6 +5253,7 @@ module NewPrivateVirtualInterfaceAllocation =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceName") in
       make ?tags ?customerAddress ?addressFamily ?amazonAddress ?authKey ?mtu
         ~asn ~vlan ~virtualInterfaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let customerAddress =
@@ -5300,6 +5331,7 @@ module VirtualInterfaces =
         (Option.map ~f:VirtualInterfaceList.of_xml)
           (Xml.child xml_arg0 "virtualInterfaces") in
       make ?virtualInterfaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaces =
         field_map json "virtualInterfaces" VirtualInterfaceList.of_json in
@@ -5364,6 +5396,7 @@ module VirtualGateways =
         (Option.map ~f:VirtualGatewayList.of_xml)
           (Xml.child xml_arg0 "virtualGateways") in
       make ?virtualGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGateways =
         field_map json "virtualGateways" VirtualGatewayList.of_json in
@@ -5414,6 +5447,7 @@ module UpdateVirtualInterfaceAttributesRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?virtualInterfaceName ?enableSiteLink ?mtu ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceName =
         field_map json "virtualInterfaceName" VirtualInterfaceName.of_json in
@@ -5463,6 +5497,7 @@ module UpdateLagRequest =
       let lagId =
         LagId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "lagId") in
       make ?encryptionMode ?minimumLinks ?lagName ~lagId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionMode =
         field_map json "encryptionMode" EncryptionMode.of_json in
@@ -5529,6 +5564,7 @@ module UpdateDirectConnectGatewayResponse =
         (Option.map ~f:DirectConnectGateway.of_xml)
           (Xml.child xml_arg0 "directConnectGateway") in
       make ?directConnectGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGateway =
         field_map json "directConnectGateway" DirectConnectGateway.of_json in
@@ -5564,6 +5600,7 @@ module UpdateDirectConnectGatewayRequest =
         DirectConnectGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "directConnectGatewayId") in
       make ~newDirectConnectGatewayName ~directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newDirectConnectGatewayName =
         field_map_exn json "newDirectConnectGatewayName"
@@ -5633,6 +5670,7 @@ module UpdateDirectConnectGatewayAssociationResult =
         (Option.map ~f:DirectConnectGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayAssociation =
         field_map json "directConnectGatewayAssociation"
@@ -5688,6 +5726,7 @@ module UpdateDirectConnectGatewayAssociationRequest =
           (Xml.child xml_arg0 "associationId") in
       make ?removeAllowedPrefixesToDirectConnectGateway
         ?addAllowedPrefixesToDirectConnectGateway ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeAllowedPrefixesToDirectConnectGateway =
         field_map json "removeAllowedPrefixesToDirectConnectGateway"
@@ -5739,6 +5778,7 @@ module UpdateConnectionRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?encryptionMode ?connectionName ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionMode =
         field_map json "encryptionMode" EncryptionMode.of_json in
@@ -5798,6 +5838,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5826,6 +5867,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -5899,6 +5941,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5924,6 +5967,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -5989,6 +6033,7 @@ module StopBgpFailoverTestResponse =
         (Option.map ~f:VirtualInterfaceTestHistory.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceTest") in
       make ?virtualInterfaceTest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceTest =
         field_map json "virtualInterfaceTest"
@@ -6015,6 +6060,7 @@ module StopBgpFailoverTestRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceId =
         field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
@@ -6079,6 +6125,7 @@ module StartBgpFailoverTestResponse =
         (Option.map ~f:VirtualInterfaceTestHistory.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceTest") in
       make ?virtualInterfaceTest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceTest =
         field_map json "virtualInterfaceTest"
@@ -6121,6 +6168,7 @@ module StartBgpFailoverTestRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?testDurationInMinutes ?bgpPeers ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testDurationInMinutes =
         field_map json "testDurationInMinutes" TestDuration.of_json in
@@ -6185,6 +6233,7 @@ module Locations =
       let locations =
         (Option.map ~f:LocationList.of_xml) (Xml.child xml_arg0 "locations") in
       make ?locations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locations = field_map json "locations" LocationList.of_json in
       make ?locations ()
@@ -6257,6 +6306,7 @@ module ListVirtualInterfaceTestHistoryResponse =
         (Option.map ~f:VirtualInterfaceTestHistoryList.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceTestHistory") in
       make ?nextToken ?virtualInterfaceTestHistory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let virtualInterfaceTestHistory =
@@ -6329,6 +6379,7 @@ module ListVirtualInterfaceTestHistoryRequest =
         (Option.map ~f:TestId.of_xml) (Xml.child xml_arg0 "testId") in
       make ?nextToken ?maxResults ?status ?bgpPeers ?virtualInterfaceId
         ?testId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
@@ -6392,6 +6443,7 @@ module Lags =
     let of_xml xml_arg0 =
       let lags = (Option.map ~f:LagList.of_xml) (Xml.child xml_arg0 "lags") in
       make ?lags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lags = field_map json "lags" LagList.of_json in make ?lags ()
     let to_json v = composed_to_json to_value v
@@ -6454,6 +6506,7 @@ module Interconnects =
         (Option.map ~f:InterconnectList.of_xml)
           (Xml.child xml_arg0 "interconnects") in
       make ?interconnects ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interconnects =
         field_map json "interconnects" InterconnectList.of_json in
@@ -6527,6 +6580,7 @@ module DisassociateMacSecKeyResponse =
         (Option.map ~f:ConnectionId.of_xml)
           (Xml.child xml_arg0 "connectionId") in
       make ?macSecKeys ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
       let connectionId = field_map json "connectionId" ConnectionId.of_json in
@@ -6560,6 +6614,7 @@ module DisassociateMacSecKeyRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~secretARN ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretARN = field_map_exn json "secretARN" SecretARN.of_json in
       let connectionId =
@@ -6588,6 +6643,7 @@ module DisassociateConnectionFromLagRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~lagId ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lagId = field_map_exn json "lagId" LagId.of_json in
       let connectionId =
@@ -6622,6 +6678,7 @@ module DescribeVirtualInterfacesRequest =
         (Option.map ~f:ConnectionId.of_xml)
           (Xml.child xml_arg0 "connectionId") in
       make ?virtualInterfaceId ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceId =
         field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
@@ -6687,6 +6744,7 @@ module DescribeTagsResponse =
         (Option.map ~f:ResourceTagList.of_xml)
           (Xml.child xml_arg0 "resourceTags") in
       make ?resourceTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags =
         field_map json "resourceTags" ResourceTagList.of_json in
@@ -6711,6 +6769,7 @@ module DescribeTagsRequest =
         ResourceArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArns") in
       make ~resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArns =
         field_map_exn json "resourceArns" ResourceArnList.of_json in
@@ -6806,6 +6865,7 @@ module DescribeRouterConfigurationResponse =
           (Xml.child xml_arg0 "customerRouterConfig") in
       make ?virtualInterfaceName ?virtualInterfaceId ?router
         ?customerRouterConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceName =
         field_map json "virtualInterfaceName" VirtualInterfaceName.of_json in
@@ -6846,6 +6906,7 @@ module DescribeRouterConfigurationRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?routerTypeIdentifier ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routerTypeIdentifier =
         field_map json "routerTypeIdentifier" RouterTypeIdentifier.of_json in
@@ -6890,6 +6951,7 @@ module DescribeLoaRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?loaContentType ?providerName ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loaContentType =
         field_map json "loaContentType" LoaContentType.of_json in
@@ -6911,6 +6973,7 @@ module DescribeLagsRequest =
     let of_xml xml_arg0 =
       let lagId = (Option.map ~f:LagId.of_xml) (Xml.child xml_arg0 "lagId") in
       make ?lagId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lagId = field_map json "lagId" LagId.of_json in make ?lagId ()
     let to_json v = composed_to_json to_value v
@@ -6933,6 +6996,7 @@ module DescribeInterconnectsRequest =
         (Option.map ~f:InterconnectId.of_xml)
           (Xml.child xml_arg0 "interconnectId") in
       make ?interconnectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interconnectId =
         field_map json "interconnectId" InterconnectId.of_json in
@@ -6994,6 +7058,7 @@ module DescribeInterconnectLoaResponse =
     let of_xml xml_arg0 =
       let loa = (Option.map ~f:Loa.of_xml) (Xml.child xml_arg0 "loa") in
       make ?loa ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loa = field_map json "loa" Loa.of_json in make ?loa ()
     let to_json v = composed_to_json to_value v
@@ -7036,6 +7101,7 @@ module DescribeInterconnectLoaRequest =
         InterconnectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectId") in
       make ?loaContentType ?providerName ~interconnectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loaContentType =
         field_map json "loaContentType" LoaContentType.of_json in
@@ -7063,6 +7129,7 @@ module DescribeHostedConnectionsRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId =
         field_map_exn json "connectionId" ConnectionId.of_json in
@@ -7135,6 +7202,7 @@ module DescribeDirectConnectGatewaysResult =
         (Option.map ~f:DirectConnectGatewayList.of_xml)
           (Xml.child xml_arg0 "directConnectGateways") in
       make ?nextToken ?directConnectGateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let directConnectGateways =
@@ -7180,6 +7248,7 @@ module DescribeDirectConnectGatewaysRequest =
         (Option.map ~f:DirectConnectGatewayId.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayId") in
       make ?nextToken ?maxResults ?directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
@@ -7257,6 +7326,7 @@ module DescribeDirectConnectGatewayAttachmentsResult =
         (Option.map ~f:DirectConnectGatewayAttachmentList.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAttachments") in
       make ?nextToken ?directConnectGatewayAttachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let directConnectGatewayAttachments =
@@ -7317,6 +7387,7 @@ module DescribeDirectConnectGatewayAttachmentsRequest =
           (Xml.child xml_arg0 "directConnectGatewayId") in
       make ?nextToken ?maxResults ?virtualInterfaceId ?directConnectGatewayId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
@@ -7397,6 +7468,7 @@ module DescribeDirectConnectGatewayAssociationsResult =
         (Option.map ~f:DirectConnectGatewayAssociationList.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociations") in
       make ?nextToken ?directConnectGatewayAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let directConnectGatewayAssociations =
@@ -7477,6 +7549,7 @@ module DescribeDirectConnectGatewayAssociationsRequest =
           (Xml.child xml_arg0 "associationId") in
       make ?virtualGatewayId ?nextToken ?maxResults ?directConnectGatewayId
         ?associatedGatewayId ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayId =
         field_map json "virtualGatewayId" VirtualGatewayId.of_json in
@@ -7564,6 +7637,7 @@ module DescribeDirectConnectGatewayAssociationProposalsResult =
         (Option.map ~f:DirectConnectGatewayAssociationProposalList.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociationProposals") in
       make ?nextToken ?directConnectGatewayAssociationProposals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let directConnectGatewayAssociationProposals =
@@ -7633,6 +7707,7 @@ module DescribeDirectConnectGatewayAssociationProposalsRequest =
           (Xml.child xml_arg0 "directConnectGatewayId") in
       make ?nextToken ?maxResults ?associatedGatewayId ?proposalId
         ?directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
@@ -7714,6 +7789,7 @@ module DescribeCustomerMetadataResponse =
         (Option.map ~f:AgreementList.of_xml)
           (Xml.child xml_arg0 "agreements") in
       make ?nniPartnerType ?agreements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nniPartnerType =
         field_map json "nniPartnerType" NniPartnerType.of_json in
@@ -7739,6 +7815,7 @@ module DescribeConnectionsRequest =
         (Option.map ~f:ConnectionId.of_xml)
           (Xml.child xml_arg0 "connectionId") in
       make ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId = field_map json "connectionId" ConnectionId.of_json in
       make ?connectionId ()
@@ -7763,6 +7840,7 @@ module DescribeConnectionsOnInterconnectRequest =
         InterconnectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectId") in
       make ~interconnectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interconnectId =
         field_map_exn json "interconnectId" InterconnectId.of_json in
@@ -7824,6 +7902,7 @@ module DescribeConnectionLoaResponse =
     let of_xml xml_arg0 =
       let loa = (Option.map ~f:Loa.of_xml) (Xml.child xml_arg0 "loa") in
       make ?loa ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loa = field_map json "loa" Loa.of_json in make ?loa ()
     let to_json v = composed_to_json to_value v
@@ -7864,6 +7943,7 @@ module DescribeConnectionLoaRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?loaContentType ?providerName ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loaContentType =
         field_map json "loaContentType" LoaContentType.of_json in
@@ -7933,6 +8013,7 @@ module DeleteVirtualInterfaceResponse =
         (Option.map ~f:VirtualInterfaceState.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceState =
         field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
@@ -7957,6 +8038,7 @@ module DeleteVirtualInterfaceRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceId =
         field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
@@ -7976,6 +8058,7 @@ module DeleteLagRequest =
       let lagId =
         LagId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "lagId") in
       make ~lagId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lagId = field_map_exn json "lagId" LagId.of_json in make ~lagId ()
     let to_json v = composed_to_json to_value v
@@ -8039,6 +8122,7 @@ module DeleteInterconnectResponse =
         (Option.map ~f:InterconnectState.of_xml)
           (Xml.child xml_arg0 "interconnectState") in
       make ?interconnectState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interconnectState =
         field_map json "interconnectState" InterconnectState.of_json in
@@ -8064,6 +8148,7 @@ module DeleteInterconnectRequest =
         InterconnectId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectId") in
       make ~interconnectId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interconnectId =
         field_map_exn json "interconnectId" InterconnectId.of_json in
@@ -8129,6 +8214,7 @@ module DeleteDirectConnectGatewayResult =
         (Option.map ~f:DirectConnectGateway.of_xml)
           (Xml.child xml_arg0 "directConnectGateway") in
       make ?directConnectGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGateway =
         field_map json "directConnectGateway" DirectConnectGateway.of_json in
@@ -8154,6 +8240,7 @@ module DeleteDirectConnectGatewayRequest =
         DirectConnectGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "directConnectGatewayId") in
       make ~directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayId =
         field_map_exn json "directConnectGatewayId"
@@ -8222,6 +8309,7 @@ module DeleteDirectConnectGatewayAssociationResult =
         (Option.map ~f:DirectConnectGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayAssociation =
         field_map json "directConnectGatewayAssociation"
@@ -8267,6 +8355,7 @@ module DeleteDirectConnectGatewayAssociationRequest =
         (Option.map ~f:DirectConnectGatewayAssociationId.of_xml)
           (Xml.child xml_arg0 "associationId") in
       make ?virtualGatewayId ?directConnectGatewayId ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayId =
         field_map json "virtualGatewayId" VirtualGatewayId.of_json in
@@ -8340,6 +8429,7 @@ module DeleteDirectConnectGatewayAssociationProposalResult =
         (Option.map ~f:DirectConnectGatewayAssociationProposal.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociationProposal") in
       make ?directConnectGatewayAssociationProposal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayAssociationProposal =
         field_map json "directConnectGatewayAssociationProposal"
@@ -8368,6 +8458,7 @@ module DeleteDirectConnectGatewayAssociationProposalRequest =
         DirectConnectGatewayAssociationProposalId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "proposalId") in
       make ~proposalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let proposalId =
         field_map_exn json "proposalId"
@@ -8392,6 +8483,7 @@ module DeleteConnectionRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId =
         field_map_exn json "connectionId" ConnectionId.of_json in
@@ -8456,6 +8548,7 @@ module DeleteBGPPeerResponse =
         (Option.map ~f:VirtualInterface.of_xml)
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterface =
         field_map json "virtualInterface" VirtualInterface.of_json in
@@ -8500,6 +8593,7 @@ module DeleteBGPPeerRequest =
         (Option.map ~f:VirtualInterfaceId.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceId") in
       make ?bgpPeerId ?customerAddress ?asn ?virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bgpPeerId = field_map json "bgpPeerId" BGPPeerId.of_json in
       let customerAddress =
@@ -8584,6 +8678,7 @@ module CreateTransitVirtualInterfaceResult =
         (Option.map ~f:VirtualInterface.of_xml)
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterface =
         field_map json "virtualInterface" VirtualInterface.of_json in
@@ -8619,6 +8714,7 @@ module CreateTransitVirtualInterfaceRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newTransitVirtualInterface ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newTransitVirtualInterface =
         field_map_exn json "newTransitVirtualInterface"
@@ -8656,6 +8752,7 @@ module CreatePublicVirtualInterfaceRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newPublicVirtualInterface ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newPublicVirtualInterface =
         field_map_exn json "newPublicVirtualInterface"
@@ -8694,6 +8791,7 @@ module CreatePrivateVirtualInterfaceRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newPrivateVirtualInterface ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newPrivateVirtualInterface =
         field_map_exn json "newPrivateVirtualInterface"
@@ -8798,6 +8896,7 @@ module CreateLagRequest =
       make ?requestMACSec ?providerName ?childConnectionTags ?tags
         ?connectionId ~lagName ~connectionsBandwidth ~location
         ~numberOfConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestMACSec =
         field_map json "requestMACSec" RequestMACSec.of_json in
@@ -8879,6 +8978,7 @@ module CreateInterconnectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectName") in
       make ?providerName ?tags ?lagId ~location ~bandwidth ~interconnectName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let providerName = field_map json "providerName" ProviderName.of_json in
       let tags = field_map json "tags" TagList.of_json in
@@ -8950,6 +9050,7 @@ module CreateDirectConnectGatewayResult =
         (Option.map ~f:DirectConnectGateway.of_xml)
           (Xml.child xml_arg0 "directConnectGateway") in
       make ?directConnectGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGateway =
         field_map json "directConnectGateway" DirectConnectGateway.of_json in
@@ -8985,6 +9086,7 @@ module CreateDirectConnectGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "directConnectGatewayName") in
       make ?amazonSideAsn ~directConnectGatewayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let amazonSideAsn = field_map json "amazonSideAsn" LongAsn.of_json in
       let directConnectGatewayName =
@@ -9054,6 +9156,7 @@ module CreateDirectConnectGatewayAssociationResult =
         (Option.map ~f:DirectConnectGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayAssociation =
         field_map json "directConnectGatewayAssociation"
@@ -9116,6 +9219,7 @@ module CreateDirectConnectGatewayAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "directConnectGatewayId") in
       make ?virtualGatewayId ?addAllowedPrefixesToDirectConnectGateway
         ?gatewayId ~directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayId =
         field_map json "virtualGatewayId" VirtualGatewayId.of_json in
@@ -9191,6 +9295,7 @@ module CreateDirectConnectGatewayAssociationProposalResult =
         (Option.map ~f:DirectConnectGatewayAssociationProposal.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociationProposal") in
       make ?directConnectGatewayAssociationProposal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayAssociationProposal =
         field_map json "directConnectGatewayAssociationProposal"
@@ -9267,6 +9372,7 @@ module CreateDirectConnectGatewayAssociationProposalRequest =
       make ?removeAllowedPrefixesToDirectConnectGateway
         ?addAllowedPrefixesToDirectConnectGateway ~gatewayId
         ~directConnectGatewayOwnerAccount ~directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeAllowedPrefixesToDirectConnectGateway =
         field_map json "removeAllowedPrefixesToDirectConnectGateway"
@@ -9355,6 +9461,7 @@ module CreateConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "location") in
       make ?requestMACSec ?providerName ?tags ?lagId ~connectionName
         ~bandwidth ~location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestMACSec =
         field_map json "requestMACSec" RequestMACSec.of_json in
@@ -9427,6 +9534,7 @@ module CreateBGPPeerResponse =
         (Option.map ~f:VirtualInterface.of_xml)
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterface =
         field_map json "virtualInterface" VirtualInterface.of_json in
@@ -9457,6 +9565,7 @@ module CreateBGPPeerRequest =
         (Option.map ~f:VirtualInterfaceId.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceId") in
       make ?newBGPPeer ?virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newBGPPeer = field_map json "newBGPPeer" NewBGPPeer.of_json in
       let virtualInterfaceId =
@@ -9521,6 +9630,7 @@ module Connections =
         (Option.map ~f:ConnectionList.of_xml)
           (Xml.child xml_arg0 "connections") in
       make ?connections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connections = field_map json "connections" ConnectionList.of_json in
       make ?connections ()
@@ -9586,6 +9696,7 @@ module ConfirmTransitVirtualInterfaceResponse =
         (Option.map ~f:VirtualInterfaceState.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceState =
         field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
@@ -9620,6 +9731,7 @@ module ConfirmTransitVirtualInterfaceRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~directConnectGatewayId ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayId =
         field_map_exn json "directConnectGatewayId"
@@ -9689,6 +9801,7 @@ module ConfirmPublicVirtualInterfaceResponse =
         (Option.map ~f:VirtualInterfaceState.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceState =
         field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
@@ -9714,6 +9827,7 @@ module ConfirmPublicVirtualInterfaceRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceId =
         field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
@@ -9780,6 +9894,7 @@ module ConfirmPrivateVirtualInterfaceResponse =
         (Option.map ~f:VirtualInterfaceState.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterfaceState =
         field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
@@ -9824,6 +9939,7 @@ module ConfirmPrivateVirtualInterfaceRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?directConnectGatewayId ?virtualGatewayId ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayId =
         field_map json "directConnectGatewayId"
@@ -9892,6 +10008,7 @@ module ConfirmCustomerAgreementResponse =
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" Status.of_json in make ?status ()
     let to_json v = composed_to_json to_value v
@@ -9914,6 +10031,7 @@ module ConfirmCustomerAgreementRequest =
         (Option.map ~f:AgreementName.of_xml)
           (Xml.child xml_arg0 "agreementName") in
       make ?agreementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let agreementName =
         field_map json "agreementName" AgreementName.of_json in
@@ -9979,6 +10097,7 @@ module ConfirmConnectionResponse =
         (Option.map ~f:ConnectionState.of_xml)
           (Xml.child xml_arg0 "connectionState") in
       make ?connectionState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionState =
         field_map json "connectionState" ConnectionState.of_json in
@@ -10003,6 +10122,7 @@ module ConfirmConnectionRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId =
         field_map_exn json "connectionId" ConnectionId.of_json in
@@ -10035,6 +10155,7 @@ module AssociateVirtualInterfaceRequest =
         VirtualInterfaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~connectionId ~virtualInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId =
         field_map_exn json "connectionId" ConnectionId.of_json in
@@ -10110,6 +10231,7 @@ module AssociateMacSecKeyResponse =
         (Option.map ~f:ConnectionId.of_xml)
           (Xml.child xml_arg0 "connectionId") in
       make ?macSecKeys ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
       let connectionId = field_map json "connectionId" ConnectionId.of_json in
@@ -10155,6 +10277,7 @@ module AssociateMacSecKeyRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?cak ?ckn ?secretARN ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cak = field_map json "cak" Cak.of_json in
       let ckn = field_map json "ckn" Ckn.of_json in
@@ -10191,6 +10314,7 @@ module AssociateHostedConnectionRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~parentConnectionId ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parentConnectionId =
         field_map_exn json "parentConnectionId" ConnectionId.of_json in
@@ -10222,6 +10346,7 @@ module AssociateConnectionWithLagRequest =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~lagId ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lagId = field_map_exn json "lagId" LagId.of_json in
       let connectionId =
@@ -10303,6 +10428,7 @@ module AllocateTransitVirtualInterfaceResult =
         (Option.map ~f:VirtualInterface.of_xml)
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualInterface =
         field_map json "virtualInterface" VirtualInterface.of_json in
@@ -10355,6 +10481,7 @@ module AllocateTransitVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newTransitVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newTransitVirtualInterfaceAllocation =
         field_map_exn json "newTransitVirtualInterfaceAllocation"
@@ -10410,6 +10537,7 @@ module AllocatePublicVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newPublicVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newPublicVirtualInterfaceAllocation =
         field_map_exn json "newPublicVirtualInterfaceAllocation"
@@ -10468,6 +10596,7 @@ module AllocatePrivateVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newPrivateVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newPrivateVirtualInterfaceAllocation =
         field_map_exn json "newPrivateVirtualInterfaceAllocation"
@@ -10543,6 +10672,7 @@ module AllocateHostedConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?tags ~vlan ~connectionName ~bandwidth ~ownerAccount ~connectionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let vlan = field_map_exn json "vlan" VLAN.of_json in
@@ -10613,6 +10743,7 @@ module AllocateConnectionOnInterconnectRequest =
         Bandwidth.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bandwidth") in
       make ~vlan ~interconnectId ~ownerAccount ~connectionName ~bandwidth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vlan = field_map_exn json "vlan" VLAN.of_json in
       let interconnectId =
@@ -10685,6 +10816,7 @@ module AcceptDirectConnectGatewayAssociationProposalResult =
         (Option.map ~f:DirectConnectGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let directConnectGatewayAssociation =
         field_map json "directConnectGatewayAssociation"
@@ -10749,6 +10881,7 @@ module AcceptDirectConnectGatewayAssociationProposalRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "directConnectGatewayId") in
       make ?overrideAllowedPrefixesToDirectConnectGateway
         ~associatedGatewayOwnerAccount ~proposalId ~directConnectGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrideAllowedPrefixesToDirectConnectGateway =
         field_map json "overrideAllowedPrefixesToDirectConnectGateway"

@@ -280,12 +280,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   match endpoint with
   | CreateComponent ->
       if is_success
-      then Ok (CreateComponentResponse.of_json (response_to_json resp))
+      then
+        let body = Component.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateComponentResponse.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateComponentResponse.error_of_json))
   | CreateTheme ->
       if is_success
-      then Ok (CreateThemeResponse.of_json (response_to_json resp))
+      then
+        let body = Theme.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateThemeResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CreateThemeResponse.error_of_json))
   | DeleteComponent ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -307,11 +315,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some ExportThemesResponse.error_of_json))
   | GetComponent ->
       if is_success
-      then Ok (GetComponentResponse.of_json (response_to_json resp))
+      then
+        let body = Component.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetComponentResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetComponentResponse.error_of_json))
   | GetTheme ->
       if is_success
-      then Ok (GetThemeResponse.of_json (response_to_json resp))
+      then
+        let body = Theme.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetThemeResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetThemeResponse.error_of_json))
   | ListComponents ->
       if is_success
@@ -328,10 +344,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some RefreshTokenResponse.error_of_json))
   | UpdateComponent ->
       if is_success
-      then Ok (UpdateComponentResponse.of_json (response_to_json resp))
+      then
+        let body = Component.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateComponentResponse.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some UpdateComponentResponse.error_of_json))
   | UpdateTheme ->
       if is_success
-      then Ok (UpdateThemeResponse.of_json (response_to_json resp))
+      then
+        let body = Theme.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateThemeResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some UpdateThemeResponse.error_of_json))

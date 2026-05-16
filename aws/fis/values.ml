@@ -270,6 +270,7 @@ module ExperimentTemplateTargetFilter =
         (Option.map ~f:ExperimentTemplateTargetFilterPath.of_xml)
           (Xml.child xml_arg0 "path") in
       make ?values ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map json "values" ExperimentTemplateTargetFilterValues.of_json in
@@ -553,6 +554,7 @@ module ExperimentTargetFilter =
         (Option.map ~f:ExperimentTargetFilterPath.of_xml)
           (Xml.child xml_arg0 "path") in
       make ?values ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map json "values" ExperimentTargetFilterValues.of_json in
@@ -1004,6 +1006,7 @@ module ExperimentTemplateTargetInputFilter =
         ExperimentTemplateTargetFilterPath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "path") in
       make ~values ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map_exn json "values"
@@ -1136,6 +1139,7 @@ module ExperimentActionState =
         (Option.map ~f:ExperimentActionStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "reason" ExperimentActionStatusReason.of_json in
@@ -1324,6 +1328,7 @@ module ActionTarget =
         (Option.map ~f:TargetResourceTypeId.of_xml)
           (Xml.child xml_arg0 "resourceType") in
       make ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map json "resourceType" TargetResourceTypeId.of_json in
@@ -1463,6 +1468,7 @@ module ExperimentTemplateAction =
       let actionId =
         (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "actionId") in
       make ?startAfter ?targets ?parameters ?description ?actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startAfter =
         field_map json "startAfter"
@@ -1515,6 +1521,7 @@ module ExperimentTemplateCloudWatchLogsLogConfiguration =
         (Option.map ~f:CloudWatchLogGroupArn.of_xml)
           (Xml.child xml_arg0 "logGroupArn") in
       make ?logGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupArn =
         field_map json "logGroupArn" CloudWatchLogGroupArn.of_json in
@@ -1541,6 +1548,7 @@ module ExperimentTemplateS3LogConfiguration =
       let bucketName =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?prefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" S3ObjectKey.of_json in
       let bucketName = field_map json "bucketName" S3BucketName.of_json in
@@ -1585,6 +1593,7 @@ module ExperimentTemplateStopCondition =
         (Option.map ~f:StopConditionSource.of_xml)
           (Xml.child xml_arg0 "source") in
       make ?value ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" StopConditionValue.of_json in
       let source = field_map json "source" StopConditionSource.of_json in
@@ -1661,6 +1670,7 @@ module ExperimentTemplateTarget =
           (Xml.child xml_arg0 "resourceType") in
       make ?parameters ?selectionMode ?filters ?resourceTags ?resourceArns
         ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "parameters"
@@ -1788,6 +1798,7 @@ module ExperimentAction =
         (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "actionId") in
       make ?endTime ?startTime ?state ?startAfter ?targets ?parameters
         ?description ?actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map json "endTime" ExperimentActionEndTime.of_json in
       let startTime =
@@ -1842,6 +1853,7 @@ module ExperimentCloudWatchLogsLogConfiguration =
         (Option.map ~f:CloudWatchLogGroupArn.of_xml)
           (Xml.child xml_arg0 "logGroupArn") in
       make ?logGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupArn =
         field_map json "logGroupArn" CloudWatchLogGroupArn.of_json in
@@ -1868,6 +1880,7 @@ module ExperimentS3LogConfiguration =
       let bucketName =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?prefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" S3ObjectKey.of_json in
       let bucketName = field_map json "bucketName" S3BucketName.of_json in
@@ -1898,6 +1911,7 @@ module ExperimentStopCondition =
         (Option.map ~f:StopConditionSource.of_xml)
           (Xml.child xml_arg0 "source") in
       make ?value ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" StopConditionValue.of_json in
       let source = field_map json "source" StopConditionSource.of_json in
@@ -1972,6 +1986,7 @@ module ExperimentTarget =
           (Xml.child xml_arg0 "resourceType") in
       make ?parameters ?selectionMode ?filters ?resourceTags ?resourceArns
         ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "parameters" ExperimentTargetParameterMap.of_json in
@@ -2057,6 +2072,7 @@ module ExperimentState =
       let status =
         (Option.map ~f:ExperimentStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ExperimentStatusReason.of_json in
       let status = field_map json "status" ExperimentStatus.of_json in
@@ -2186,6 +2202,7 @@ module TargetResourceTypeParameter =
         (Option.map ~f:TargetResourceTypeParameterDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       make ?required ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let required =
         field_map json "required" TargetResourceTypeParameterRequired.of_json in
@@ -2239,6 +2256,7 @@ module ActionParameter =
         (Option.map ~f:ActionParameterDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       make ?required ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let required =
         field_map json "required" ActionParameterRequired.of_json in
@@ -2339,6 +2357,7 @@ module ExperimentTemplateLogConfiguration =
            ~f:ExperimentTemplateCloudWatchLogsLogConfiguration.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logSchemaVersion =
         field_map json "logSchemaVersion" LogSchemaVersion.of_json in
@@ -2500,6 +2519,7 @@ module UpdateExperimentTemplateActionInputItem =
       let actionId =
         (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "actionId") in
       make ?startAfter ?targets ?parameters ?description ?actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startAfter =
         field_map json "startAfter"
@@ -2535,6 +2555,7 @@ module ExperimentTemplateCloudWatchLogsLogConfigurationInput =
         CloudWatchLogGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupArn") in
       make ~logGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupArn =
         field_map_exn json "logGroupArn" CloudWatchLogGroupArn.of_json in
@@ -2563,6 +2584,7 @@ module ExperimentTemplateS3LogConfigurationInput =
         S3BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ?prefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" S3ObjectKey.of_json in
       let bucketName = field_map_exn json "bucketName" S3BucketName.of_json in
@@ -2595,6 +2617,7 @@ module UpdateExperimentTemplateStopConditionInput =
         StopConditionSource.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?value ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" StopConditionValue.of_json in
       let source = field_map_exn json "source" StopConditionSource.of_json in
@@ -2674,6 +2697,7 @@ module UpdateExperimentTemplateTargetInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?parameters ~selectionMode ?filters ?resourceTags ?resourceArns
         ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "parameters"
@@ -2777,6 +2801,7 @@ module ExperimentLogConfiguration =
         (Option.map ~f:ExperimentCloudWatchLogsLogConfiguration.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logSchemaVersion =
         field_map json "logSchemaVersion" LogSchemaVersion.of_json in
@@ -2882,6 +2907,7 @@ module TargetResourceTypeSummary =
         (Option.map ~f:TargetResourceTypeId.of_xml)
           (Xml.child xml_arg0 "resourceType") in
       make ?description ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "description" TargetResourceTypeDescription.of_json in
@@ -2931,6 +2957,7 @@ module ExperimentSummary =
           (Xml.child xml_arg0 "experimentTemplateId") in
       let id = (Option.map ~f:ExperimentId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?creationTime ?state ?experimentTemplateId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let creationTime = field_map json "creationTime" CreationTime.of_json in
@@ -2988,6 +3015,7 @@ module ExperimentTemplateSummary =
       let id =
         (Option.map ~f:ExperimentTemplateId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?lastUpdateTime ?creationTime ?description ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let lastUpdateTime =
@@ -3030,6 +3058,7 @@ module ActionSummary =
           (Xml.child xml_arg0 "description") in
       let id = (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?targets ?description ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let targets = field_map json "targets" ActionTargetMap.of_json in
@@ -3159,6 +3188,7 @@ module CreateExperimentTemplateActionInput =
       let actionId =
         ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "actionId") in
       make ?startAfter ?targets ?parameters ?description ~actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startAfter =
         field_map json "startAfter"
@@ -3201,6 +3231,7 @@ module CreateExperimentTemplateStopConditionInput =
         StopConditionSource.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?value ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" StopConditionValue.of_json in
       let source = field_map_exn json "source" StopConditionSource.of_json in
@@ -3279,6 +3310,7 @@ module CreateExperimentTemplateTargetInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?parameters ~selectionMode ?filters ?resourceTags ?resourceArns
         ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "parameters"
@@ -3397,6 +3429,7 @@ module ExperimentTemplate =
         (Option.map ~f:ExperimentTemplateId.of_xml) (Xml.child xml_arg0 "id") in
       make ?logConfiguration ?tags ?roleArn ?lastUpdateTime ?creationTime
         ?stopConditions ?actions ?targets ?description ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logConfiguration =
         field_map json "logConfiguration"
@@ -3434,6 +3467,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -3453,6 +3487,7 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -3472,6 +3507,7 @@ module ValidationException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -3553,6 +3589,7 @@ module UpdateExperimentTemplateLogConfigurationInput =
            ~f:ExperimentTemplateCloudWatchLogsLogConfigurationInput.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logSchemaVersion =
         field_map json "logSchemaVersion" LogSchemaVersion.of_json in
@@ -3760,6 +3797,7 @@ module Experiment =
       make ?logConfiguration ?tags ?endTime ?startTime ?creationTime
         ?stopConditions ?actions ?targets ?state ?roleArn
         ?experimentTemplateId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logConfiguration =
         field_map json "logConfiguration" ExperimentLogConfiguration.of_json in
@@ -3795,6 +3833,7 @@ module ConflictException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       make ?message ()
@@ -4051,6 +4090,7 @@ module TargetResourceType =
         (Option.map ~f:TargetResourceTypeId.of_xml)
           (Xml.child xml_arg0 "resourceType") in
       make ?parameters ?description ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "parameters" TargetResourceTypeParameterMap.of_json in
@@ -4101,6 +4141,7 @@ module Action =
           (Xml.child xml_arg0 "description") in
       let id = (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "id") in
       make ?tags ?targets ?parameters ?description ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let targets = field_map json "targets" ActionTargetMap.of_json in
@@ -4187,6 +4228,7 @@ module CreateExperimentTemplateLogConfigurationInput =
            ~f:ExperimentTemplateCloudWatchLogsLogConfigurationInput.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ~logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logSchemaVersion =
         field_map_exn json "logSchemaVersion" LogSchemaVersion.of_json in
@@ -4325,6 +4367,7 @@ module UpdateExperimentTemplateResponse =
         (Option.map ~f:ExperimentTemplate.of_xml)
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let experimentTemplate =
         field_map json "experimentTemplate" ExperimentTemplate.of_json in
@@ -4411,6 +4454,7 @@ module UpdateExperimentTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?logConfiguration ?roleArn ?actions ?targets ?stopConditions
         ?description ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logConfiguration =
         field_map json "logConfiguration"
@@ -4458,6 +4502,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -4483,6 +4528,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -4515,6 +4561,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies the specified tags to the specified resource."]
@@ -4539,6 +4586,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -4596,6 +4644,7 @@ module StopExperimentResponse =
       let experiment =
         (Option.map ~f:Experiment.of_xml) (Xml.child xml_arg0 "experiment") in
       make ?experiment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let experiment = field_map json "experiment" Experiment.of_json in
       make ?experiment ()
@@ -4615,6 +4664,7 @@ module StopExperimentRequest =
       let id =
         ExperimentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ExperimentId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -4690,6 +4740,7 @@ module StartExperimentResponse =
       let experiment =
         (Option.map ~f:Experiment.of_xml) (Xml.child xml_arg0 "experiment") in
       make ?experiment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let experiment = field_map json "experiment" Experiment.of_json in
       make ?experiment ()
@@ -4728,6 +4779,7 @@ module StartExperimentRequest =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       make ?tags ~experimentTemplateId ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let experimentTemplateId =
@@ -4790,6 +4842,7 @@ module ListTargetResourceTypesResponse =
         (Option.map ~f:TargetResourceTypeSummaryList.of_xml)
           (Xml.child xml_arg0 "targetResourceTypes") in
       make ?nextToken ?targetResourceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let targetResourceTypes =
@@ -4823,6 +4876,7 @@ module ListTargetResourceTypesRequest =
         (Option.map ~f:ListTargetResourceTypesMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults =
@@ -4860,6 +4914,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -4881,6 +4936,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -4937,6 +4993,7 @@ module ListExperimentsResponse =
         (Option.map ~f:ExperimentSummaryList.of_xml)
           (Xml.child xml_arg0 "experiments") in
       make ?nextToken ?experiments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let experiments =
@@ -4968,6 +5025,7 @@ module ListExperimentsRequest =
         (Option.map ~f:ListExperimentsMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults =
@@ -5027,6 +5085,7 @@ module ListExperimentTemplatesResponse =
         (Option.map ~f:ExperimentTemplateSummaryList.of_xml)
           (Xml.child xml_arg0 "experimentTemplates") in
       make ?nextToken ?experimentTemplates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let experimentTemplates =
@@ -5060,6 +5119,7 @@ module ListExperimentTemplatesRequest =
         (Option.map ~f:ListExperimentTemplatesMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults =
@@ -5115,6 +5175,7 @@ module ListActionsResponse =
         (Option.map ~f:ActionSummaryList.of_xml)
           (Xml.child xml_arg0 "actions") in
       make ?nextToken ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let actions = field_map json "actions" ActionSummaryList.of_json in
@@ -5145,6 +5206,7 @@ module ListActionsRequest =
         (Option.map ~f:ListActionsMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults =
@@ -5205,6 +5267,7 @@ module GetTargetResourceTypeResponse =
         (Option.map ~f:TargetResourceType.of_xml)
           (Xml.child xml_arg0 "targetResourceType") in
       make ?targetResourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetResourceType =
         field_map json "targetResourceType" TargetResourceType.of_json in
@@ -5228,6 +5291,7 @@ module GetTargetResourceTypeRequest =
         TargetResourceTypeId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "resourceType" TargetResourceTypeId.of_json in
@@ -5287,6 +5351,7 @@ module GetExperimentTemplateResponse =
         (Option.map ~f:ExperimentTemplate.of_xml)
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let experimentTemplate =
         field_map json "experimentTemplate" ExperimentTemplate.of_json in
@@ -5311,6 +5376,7 @@ module GetExperimentTemplateRequest =
         ExperimentTemplateId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ExperimentTemplateId.of_json in
       make ~id ()
@@ -5368,6 +5434,7 @@ module GetExperimentResponse =
       let experiment =
         (Option.map ~f:Experiment.of_xml) (Xml.child xml_arg0 "experiment") in
       make ?experiment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let experiment = field_map json "experiment" Experiment.of_json in
       make ?experiment ()
@@ -5387,6 +5454,7 @@ module GetExperimentRequest =
       let id =
         ExperimentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ExperimentId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5441,6 +5509,7 @@ module GetActionResponse =
       let action =
         (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "action") in
       make ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map json "action" Action.of_json in make ?action ()
     let to_json v = composed_to_json to_value v
@@ -5458,6 +5527,7 @@ module GetActionRequest =
       let id =
         ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ActionId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -5515,6 +5585,7 @@ module DeleteExperimentTemplateResponse =
         (Option.map ~f:ExperimentTemplate.of_xml)
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let experimentTemplate =
         field_map json "experimentTemplate" ExperimentTemplate.of_json in
@@ -5538,6 +5609,7 @@ module DeleteExperimentTemplateRequest =
         ExperimentTemplateId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" ExperimentTemplateId.of_json in
       make ~id ()
@@ -5616,6 +5688,7 @@ module CreateExperimentTemplateResponse =
         (Option.map ~f:ExperimentTemplate.of_xml)
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let experimentTemplate =
         field_map json "experimentTemplate" ExperimentTemplate.of_json in
@@ -5710,6 +5783,7 @@ module CreateExperimentTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       make ?logConfiguration ?tags ~roleArn ~actions ?targets ~stopConditions
         ~description ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logConfiguration =
         field_map json "logConfiguration"

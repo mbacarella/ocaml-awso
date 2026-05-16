@@ -201,6 +201,7 @@ module SavingsPlanOfferingProperty =
         (Option.map ~f:SavingsPlanOfferingPropertyKey.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" JsonSafeFilterValueString.of_json in
       let name = field_map json "name" SavingsPlanOfferingPropertyKey.of_json in
@@ -350,6 +351,7 @@ module SavingsPlanOfferingRateProperty =
         (Option.map ~f:JsonSafeFilterValueString.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" JsonSafeFilterValueString.of_json in
       let name = field_map json "name" JsonSafeFilterValueString.of_json in
@@ -378,6 +380,7 @@ module SavingsPlanRateProperty =
         (Option.map ~f:SavingsPlanRatePropertyKey.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" JsonSafeFilterValueString.of_json in
       let name = field_map json "name" SavingsPlanRatePropertyKey.of_json in
@@ -836,6 +839,7 @@ module ParentSavingsPlanOffering =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "offeringId") in
       make ?planDescription ?currency ?durationSeconds ?planType
         ?paymentOption ?offeringId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let planDescription =
         field_map json "planDescription" SavingsPlanDescription.of_json in
@@ -1254,6 +1258,7 @@ module SavingsPlan =
         ?paymentOption ?savingsPlanType ?ec2InstanceFamily ?region ?state
         ?end_ ?start ?description ?savingsPlanArn ?savingsPlanId ?offeringId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let termDurationInSeconds =
@@ -1309,6 +1314,7 @@ module SavingsPlanFilter =
         (Option.map ~f:SavingsPlansFilterName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" ListOfStrings.of_json in
       let name = field_map json "name" SavingsPlansFilterName.of_json in
@@ -1423,6 +1429,7 @@ module SavingsPlanOffering =
       make ?properties ?operation ?usageType ?serviceCode ?currency
         ?durationSeconds ?paymentOption ?description ?planType ?productTypes
         ?offeringId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map json "properties" SavingsPlanOfferingPropertyList.of_json in
@@ -1467,6 +1474,7 @@ module SavingsPlanOfferingFilterElement =
         (Option.map ~f:SavingsPlanOfferingFilterAttribute.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValuesList.of_json in
       let name =
@@ -1560,6 +1568,7 @@ module SavingsPlanOfferingRate =
           (Xml.child xml_arg0 "savingsPlanOffering") in
       make ?properties ?operation ?usageType ?serviceCode ?productType ?unit
         ?rate ?savingsPlanOffering ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map json "properties"
@@ -1602,6 +1611,7 @@ module SavingsPlanOfferingRateFilterElement =
         (Option.map ~f:SavingsPlanRateFilterAttribute.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValuesList.of_json in
       let name = field_map json "name" SavingsPlanRateFilterAttribute.of_json in
@@ -1686,6 +1696,7 @@ module SavingsPlanRate =
       let rate = (Option.map ~f:Amount.of_xml) (Xml.child xml_arg0 "rate") in
       make ?properties ?operation ?usageType ?serviceCode ?productType ?unit
         ?currency ?rate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map json "properties" SavingsPlanRatePropertyList.of_json in
@@ -1724,6 +1735,7 @@ module SavingsPlanRateFilter =
         (Option.map ~f:SavingsPlanRateFilterName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" ListOfStrings.of_json in
       let name = field_map json "name" SavingsPlanRateFilterName.of_json in
@@ -1743,6 +1755,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1761,6 +1774,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1779,6 +1793,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1820,6 +1835,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -2543,6 +2559,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -2569,6 +2586,7 @@ module UntagResourceRequest =
         SavingsPlanArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -2640,6 +2658,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
@@ -2666,6 +2685,7 @@ module TagResourceRequest =
         SavingsPlanArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn =
@@ -2730,6 +2750,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2751,6 +2772,7 @@ module ListTagsForResourceRequest =
         SavingsPlanArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" SavingsPlanArn.of_json in
@@ -2818,6 +2840,7 @@ module DescribeSavingsPlansResponse =
         (Option.map ~f:SavingsPlanList.of_xml)
           (Xml.child xml_arg0 "savingsPlans") in
       make ?nextToken ?savingsPlans ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let savingsPlans =
@@ -2886,6 +2909,7 @@ module DescribeSavingsPlansRequest =
           (Xml.child xml_arg0 "savingsPlanArns") in
       make ?filters ?states ?maxResults ?nextToken ?savingsPlanIds
         ?savingsPlanArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" SavingsPlanFilterList.of_json in
       let states = field_map json "states" SavingsPlanStateList.of_json in
@@ -2960,6 +2984,7 @@ module DescribeSavingsPlansOfferingsResponse =
         (Option.map ~f:SavingsPlanOfferingsList.of_xml)
           (Xml.child xml_arg0 "searchResults") in
       make ?nextToken ?searchResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let searchResults =
@@ -3090,6 +3115,7 @@ module DescribeSavingsPlansOfferingsRequest =
       make ?maxResults ?nextToken ?filters ?operations ?usageTypes
         ?serviceCodes ?descriptions ?currencies ?durations ?planTypes
         ?productType ?paymentOptions ?offeringIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" PageSize.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3178,6 +3204,7 @@ module DescribeSavingsPlansOfferingRatesResponse =
         (Option.map ~f:SavingsPlanOfferingRatesList.of_xml)
           (Xml.child xml_arg0 "searchResults") in
       make ?nextToken ?searchResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let searchResults =
@@ -3292,6 +3319,7 @@ module DescribeSavingsPlansOfferingRatesRequest =
       make ?maxResults ?nextToken ?filters ?operations ?usageTypes
         ?serviceCodes ?products ?savingsPlanTypes ?savingsPlanPaymentOptions
         ?savingsPlanOfferingIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" PageSize.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3387,6 +3415,7 @@ module DescribeSavingsPlanRatesResponse =
         (Option.map ~f:SavingsPlanId.of_xml)
           (Xml.child xml_arg0 "savingsPlanId") in
       make ?nextToken ?searchResults ?savingsPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let searchResults =
@@ -3435,6 +3464,7 @@ module DescribeSavingsPlanRatesRequest =
         SavingsPlanId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "savingsPlanId") in
       make ?maxResults ?nextToken ?filters ~savingsPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3509,6 +3539,7 @@ module DeleteQueuedSavingsPlanResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3530,6 +3561,7 @@ module DeleteQueuedSavingsPlanRequest =
         SavingsPlanId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "savingsPlanId") in
       make ~savingsPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let savingsPlanId =
         field_map_exn json "savingsPlanId" SavingsPlanId.of_json in
@@ -3610,6 +3642,7 @@ module CreateSavingsPlanResponse =
         (Option.map ~f:SavingsPlanId.of_xml)
           (Xml.child xml_arg0 "savingsPlanId") in
       make ?savingsPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let savingsPlanId =
         field_map json "savingsPlanId" SavingsPlanId.of_json in
@@ -3678,6 +3711,7 @@ module CreateSavingsPlanRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "savingsPlanOfferingId") in
       make ?tags ?clientToken ?purchaseTime ?upfrontPaymentAmount ~commitment
         ~savingsPlanOfferingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in

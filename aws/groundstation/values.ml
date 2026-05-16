@@ -143,6 +143,7 @@ module SocketAddress =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~port ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let port = field_map_exn json "port" Integer.of_json in
       let name = field_map_exn json "name" String_.of_json in
@@ -242,6 +243,7 @@ module DataflowEndpoint =
       let address =
         (Option.map ~f:SocketAddress.of_xml) (Xml.child xml_arg0 "address") in
       make ?status ?name ?mtu ?address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" EndpointStatus.of_json in
       let name = field_map json "name" SafeName.of_json in
@@ -284,6 +286,7 @@ module SecurityDetails =
       let roleArn =
         RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~subnetIds ~securityGroupIds ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetIds = field_map_exn json "subnetIds" SubnetList.of_json in
       let securityGroupIds =
@@ -390,6 +393,7 @@ module AntennaDemodDecodeDetails =
       let outputNode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "outputNode") in
       make ?outputNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputNode = field_map json "outputNode" String_.of_json in
       make ?outputNode ()
@@ -419,6 +423,7 @@ module EndpointDetails =
         (Option.map ~f:DataflowEndpoint.of_xml)
           (Xml.child xml_arg0 "endpoint") in
       make ?securityDetails ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityDetails =
         field_map json "securityDetails" SecurityDetails.of_json in
@@ -446,6 +451,7 @@ module S3RecordingDetails =
       let bucketArn =
         (Option.map ~f:BucketArn.of_xml) (Xml.child xml_arg0 "bucketArn") in
       make ?keyTemplate ?bucketArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyTemplate = field_map json "keyTemplate" String_.of_json in
       let bucketArn = field_map json "bucketArn" BucketArn.of_json in
@@ -474,6 +480,7 @@ module Frequency =
         FrequencyUnits.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "units") in
       make ~value ~units ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" Double.of_json in
       let units = field_map_exn json "units" FrequencyUnits.of_json in
@@ -502,6 +509,7 @@ module FrequencyBandwidth =
         BandwidthUnits.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "units") in
       make ~value ~units ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" Double.of_json in
       let units = field_map_exn json "units" BandwidthUnits.of_json in
@@ -676,6 +684,7 @@ module ConfigDetails =
         (Option.map ~f:AntennaDemodDecodeDetails.of_xml)
           (Xml.child xml_arg0 "antennaDemodDecodeDetails") in
       make ?s3RecordingDetails ?endpointDetails ?antennaDemodDecodeDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3RecordingDetails =
         field_map json "s3RecordingDetails" S3RecordingDetails.of_json in
@@ -736,6 +745,7 @@ module SpectrumConfig =
         FrequencyBandwidth.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bandwidth") in
       make ?polarization ~centerFrequency ~bandwidth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let polarization = field_map json "polarization" Polarization.of_json in
       let centerFrequency =
@@ -762,6 +772,7 @@ module DecodeConfig =
         JsonString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unvalidatedJSON") in
       make ~unvalidatedJSON ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unvalidatedJSON =
         field_map_exn json "unvalidatedJSON" JsonString.of_json in
@@ -785,6 +796,7 @@ module DemodulationConfig =
         JsonString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "unvalidatedJSON") in
       make ~unvalidatedJSON ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unvalidatedJSON =
         field_map_exn json "unvalidatedJSON" JsonString.of_json in
@@ -825,6 +837,7 @@ module Eirp =
       let units =
         EirpUnits.of_xml (Xml.child_exn ~context:context_ xml_arg0 "units") in
       make ~value ~units ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" Double.of_json in
       let units = field_map_exn json "units" EirpUnits.of_json in
@@ -858,6 +871,7 @@ module UplinkSpectrumConfig =
         Frequency.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "centerFrequency") in
       make ?polarization ~centerFrequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let polarization = field_map json "polarization" Polarization.of_json in
       let centerFrequency =
@@ -1096,6 +1110,7 @@ module Elevation =
       let unit =
         AngleUnits.of_xml (Xml.child_exn ~context:context_ xml_arg0 "unit") in
       make ~value ~unit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" Double.of_json in
       let unit = field_map_exn json "unit" AngleUnits.of_json in
@@ -1189,6 +1204,7 @@ module Destination =
         (Option.map ~f:ConfigDetails.of_xml)
           (Xml.child xml_arg0 "configDetails") in
       make ?dataflowDestinationRegion ?configType ?configId ?configDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataflowDestinationRegion =
         field_map json "dataflowDestinationRegion" String_.of_json in
@@ -1241,6 +1257,7 @@ module Source =
         (Option.map ~f:ConfigDetails.of_xml)
           (Xml.child xml_arg0 "configDetails") in
       make ?dataflowSourceRegion ?configType ?configId ?configDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataflowSourceRegion =
         field_map json "dataflowSourceRegion" String_.of_json in
@@ -1298,6 +1315,7 @@ module AntennaDownlinkConfig =
         SpectrumConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "spectrumConfig") in
       make ~spectrumConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spectrumConfig =
         field_map_exn json "spectrumConfig" SpectrumConfig.of_json in
@@ -1338,6 +1356,7 @@ module AntennaDownlinkDemodDecodeConfig =
         DecodeConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "decodeConfig") in
       make ~spectrumConfig ~demodulationConfig ~decodeConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spectrumConfig =
         field_map_exn json "spectrumConfig" SpectrumConfig.of_json in
@@ -1381,6 +1400,7 @@ module AntennaUplinkConfig =
         UplinkSpectrumConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "spectrumConfig") in
       make ?transmitDisabled ~targetEirp ~spectrumConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transmitDisabled =
         field_map json "transmitDisabled" Boolean.of_json in
@@ -1417,6 +1437,7 @@ module DataflowEndpointConfig =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataflowEndpointName") in
       make ?dataflowEndpointRegion ~dataflowEndpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataflowEndpointRegion =
         field_map json "dataflowEndpointRegion" String_.of_json in
@@ -1454,6 +1475,7 @@ module S3RecordingConfig =
         BucketArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketArn") in
       make ~roleArn ?prefix ~bucketArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
       let prefix = field_map json "prefix" S3KeyPrefix.of_json in
@@ -1477,6 +1499,7 @@ module TrackingConfig =
         Criticality.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "autotrack") in
       make ~autotrack ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autotrack = field_map_exn json "autotrack" Criticality.of_json in
       make ~autotrack ()
@@ -1507,6 +1530,7 @@ module UplinkEchoConfig =
         ConfigArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "antennaUplinkConfigArn") in
       make ~enabled ~antennaUplinkConfigArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "enabled" Boolean.of_json in
       let antennaUplinkConfigArn =
@@ -1555,6 +1579,7 @@ module SatelliteListItem =
         (Option.map ~f:GroundStationIdList.of_xml)
           (Xml.child xml_arg0 "groundStations") in
       make ?satelliteId ?satelliteArn ?noradSatelliteID ?groundStations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let satelliteId = field_map json "satelliteId" Uuid.of_json in
       let satelliteArn = field_map json "satelliteArn" SatelliteArn.of_json in
@@ -1600,6 +1625,7 @@ module MissionProfileListItem =
         (Option.map ~f:MissionProfileArn.of_xml)
           (Xml.child xml_arg0 "missionProfileArn") in
       make ?region ?name ?missionProfileId ?missionProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map json "region" String_.of_json in
       let name = field_map json "name" String_.of_json in
@@ -1640,6 +1666,7 @@ module GroundStationData =
       let groundStationId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groundStationId") in
       make ?region ?groundStationName ?groundStationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map json "region" String_.of_json in
       let groundStationName =
@@ -1675,6 +1702,7 @@ module DataflowEndpointListItem =
         (Option.map ~f:DataflowEndpointGroupArn.of_xml)
           (Xml.child xml_arg0 "dataflowEndpointGroupArn") in
       make ?dataflowEndpointGroupId ?dataflowEndpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataflowEndpointGroupId =
         field_map json "dataflowEndpointGroupId" String_.of_json in
@@ -1796,6 +1824,7 @@ module ContactData =
       make ?tags ?startTime ?satelliteArn ?region ?prePassStartTime
         ?postPassEndTime ?missionProfileArn ?maximumElevation ?groundStation
         ?errorMessage ?endTime ?contactStatus ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let startTime = field_map json "startTime" Timestamp.of_json in
@@ -1851,6 +1880,7 @@ module ConfigListItem =
       let configArn =
         (Option.map ~f:ConfigArn.of_xml) (Xml.child xml_arg0 "configArn") in
       make ?name ?configType ?configId ?configArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" String_.of_json in
       let configType =
@@ -1885,6 +1915,7 @@ module DataflowDetail =
       let destination =
         (Option.map ~f:Destination.of_xml) (Xml.child xml_arg0 "destination") in
       make ?source ?errorMessage ?destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let source = field_map json "source" Source.of_json in
       let errorMessage = field_map json "errorMessage" String_.of_json in
@@ -2021,6 +2052,7 @@ module ConfigTypeData =
       make ?uplinkEchoConfig ?trackingConfig ?s3RecordingConfig
         ?dataflowEndpointConfig ?antennaUplinkConfig
         ?antennaDownlinkDemodDecodeConfig ?antennaDownlinkConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uplinkEchoConfig =
         field_map json "uplinkEchoConfig" UplinkEchoConfig.of_json in
@@ -2063,6 +2095,7 @@ module DependencyException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?parameterName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterName = field_map json "parameterName" String_.of_json in
       let message = field_map json "message" String_.of_json in
@@ -2088,6 +2121,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?parameterName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterName = field_map json "parameterName" String_.of_json in
       let message = field_map json "message" String_.of_json in
@@ -2107,6 +2141,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2376,6 +2411,7 @@ module ResourceLimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?parameterName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterName = field_map json "parameterName" String_.of_json in
       let message = field_map json "message" String_.of_json in
@@ -2461,6 +2497,7 @@ module UpdateMissionProfileRequest =
       make ?trackingConfigArn ?name ~missionProfileId
         ?minimumViableContactDurationSeconds ?dataflowEdges
         ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackingConfigArn =
         field_map json "trackingConfigArn" ConfigArn.of_json in
@@ -2515,6 +2552,7 @@ module UpdateConfigRequest =
         ConfigTypeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configData") in
       make ~name ~configType ~configId ~configData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" SafeName.of_json in
       let configType =
@@ -2577,6 +2615,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -2601,6 +2640,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -2660,6 +2700,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -2683,6 +2724,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagsMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -2744,6 +2786,7 @@ module ReserveContactRequest =
         Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
       make ?tags ~startTime ~satelliteArn ~missionProfileArn ~groundStation
         ~endTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let startTime = field_map_exn json "startTime" Timestamp.of_json in
@@ -2819,6 +2862,7 @@ module MissionProfileIdResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "missionProfileId") in
       make ?missionProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let missionProfileId =
         field_map json "missionProfileId" String_.of_json in
@@ -2882,6 +2926,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2902,6 +2947,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -2974,6 +3020,7 @@ module ListSatellitesResponse =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?satellites ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let satellites = field_map json "satellites" SatelliteList.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -3002,6 +3049,7 @@ module ListSatellitesRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -3077,6 +3125,7 @@ module ListMissionProfilesResponse =
         (Option.map ~f:MissionProfileList.of_xml)
           (Xml.child xml_arg0 "missionProfileList") in
       make ?nextToken ?missionProfileList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let missionProfileList =
@@ -3106,6 +3155,7 @@ module ListMissionProfilesRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -3181,6 +3231,7 @@ module ListGroundStationsResponse =
         (Option.map ~f:GroundStationList.of_xml)
           (Xml.child xml_arg0 "groundStationList") in
       make ?nextToken ?groundStationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let groundStationList =
@@ -3216,6 +3267,7 @@ module ListGroundStationsRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?satelliteId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let satelliteId = field_map json "satelliteId" String_.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -3293,6 +3345,7 @@ module ListDataflowEndpointGroupsResponse =
         (Option.map ~f:DataflowEndpointGroupList.of_xml)
           (Xml.child xml_arg0 "dataflowEndpointGroupList") in
       make ?nextToken ?dataflowEndpointGroupList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let dataflowEndpointGroupList =
@@ -3323,6 +3376,7 @@ module ListDataflowEndpointGroupsRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -3395,6 +3449,7 @@ module ListContactsResponse =
       let contactList =
         (Option.map ~f:ContactList.of_xml) (Xml.child xml_arg0 "contactList") in
       make ?nextToken ?contactList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let contactList = field_map json "contactList" ContactList.of_json in
@@ -3475,6 +3530,7 @@ module ListContactsRequest =
         Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
       make ~statusList ~startTime ?satelliteArn ?nextToken ?missionProfileArn
         ?maxResults ?groundStation ~endTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusList = field_map_exn json "statusList" StatusList.of_json in
       let startTime = field_map_exn json "startTime" Timestamp.of_json in
@@ -3555,6 +3611,7 @@ module ListConfigsResponse =
       let configList =
         (Option.map ~f:ConfigList.of_xml) (Xml.child xml_arg0 "configList") in
       make ?nextToken ?configList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let configList = field_map json "configList" ConfigList.of_json in
@@ -3583,6 +3640,7 @@ module ListConfigsRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -3674,6 +3732,7 @@ module GetSatelliteResponse =
         (Option.map ~f:GroundStationIdList.of_xml)
           (Xml.child xml_arg0 "groundStations") in
       make ?satelliteId ?satelliteArn ?noradSatelliteID ?groundStations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let satelliteId = field_map json "satelliteId" Uuid.of_json in
       let satelliteArn = field_map json "satelliteArn" SatelliteArn.of_json in
@@ -3700,6 +3759,7 @@ module GetSatelliteRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "satelliteId") in
       make ~satelliteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let satelliteId = field_map_exn json "satelliteId" String_.of_json in
       make ~satelliteId ()
@@ -3852,6 +3912,7 @@ module GetMissionProfileResponse =
         ?missionProfileArn ?minimumViableContactDurationSeconds
         ?dataflowEdges ?contactPrePassDurationSeconds
         ?contactPostPassDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackingConfigArn =
         field_map json "trackingConfigArn" ConfigArn.of_json in
@@ -3895,6 +3956,7 @@ module GetMissionProfileRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "missionProfileId") in
       make ~missionProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let missionProfileId =
         field_map_exn json "missionProfileId" String_.of_json in
@@ -4010,6 +4072,7 @@ module GetMinuteUsageResponse =
       make ?upcomingMinutesScheduled ?totalScheduledMinutes
         ?totalReservedMinuteAllocation ?isReservedMinutesCustomer
         ?estimatedMinutesRemaining ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let upcomingMinutesScheduled =
         field_map json "upcomingMinutesScheduled" Integer.of_json in
@@ -4047,6 +4110,7 @@ module GetMinuteUsageRequest =
       let month =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "month") in
       make ~year ~month ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let year = field_map_exn json "year" Integer.of_json in
       let month = field_map_exn json "month" Integer.of_json in
@@ -4145,6 +4209,7 @@ module GetDataflowEndpointGroupResponse =
           (Xml.child xml_arg0 "dataflowEndpointGroupArn") in
       make ?tags ?endpointsDetails ?dataflowEndpointGroupId
         ?dataflowEndpointGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let endpointsDetails =
@@ -4176,6 +4241,7 @@ module GetDataflowEndpointGroupRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataflowEndpointGroupId") in
       make ~dataflowEndpointGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataflowEndpointGroupId =
         field_map_exn json "dataflowEndpointGroupId" String_.of_json in
@@ -4273,6 +4339,7 @@ module GetConfigResponse =
         ConfigArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configArn") in
       make ?tags ~name ?configType ~configId ~configData ~configArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let name = field_map_exn json "name" String_.of_json in
@@ -4305,6 +4372,7 @@ module GetConfigRequest =
       let configId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
       make ~configType ~configId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configType =
         field_map_exn json "configType" ConfigCapabilityType.of_json in
@@ -4479,6 +4547,7 @@ module DescribeContactResponse =
       make ?tags ?startTime ?satelliteArn ?region ?prePassStartTime
         ?postPassEndTime ?missionProfileArn ?maximumElevation ?groundStation
         ?errorMessage ?endTime ?dataflowList ?contactStatus ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let startTime = field_map json "startTime" Timestamp.of_json in
@@ -4518,6 +4587,7 @@ module DescribeContactRequest =
       let contactId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
       make ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map_exn json "contactId" String_.of_json in
       make ~contactId ()
@@ -4539,6 +4609,7 @@ module DeleteMissionProfileRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "missionProfileId") in
       make ~missionProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let missionProfileId =
         field_map_exn json "missionProfileId" String_.of_json in
@@ -4563,6 +4634,7 @@ module DeleteDataflowEndpointGroupRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataflowEndpointGroupId") in
       make ~dataflowEndpointGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataflowEndpointGroupId =
         field_map_exn json "dataflowEndpointGroupId" String_.of_json in
@@ -4590,6 +4662,7 @@ module DeleteConfigRequest =
       let configId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "configId") in
       make ~configType ~configId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configType =
         field_map_exn json "configType" ConfigCapabilityType.of_json in
@@ -4659,6 +4732,7 @@ module DataflowEndpointGroupIdResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "dataflowEndpointGroupId") in
       make ?dataflowEndpointGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataflowEndpointGroupId =
         field_map json "dataflowEndpointGroupId" String_.of_json in
@@ -4744,6 +4818,7 @@ module CreateMissionProfileRequest =
       make ~trackingConfigArn ?tags ~name
         ~minimumViableContactDurationSeconds ~dataflowEdges
         ?contactPrePassDurationSeconds ?contactPostPassDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackingConfigArn =
         field_map_exn json "trackingConfigArn" ConfigArn.of_json in
@@ -4789,6 +4864,7 @@ module CreateDataflowEndpointGroupRequest =
         EndpointDetailsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointDetails") in
       make ?tags ~endpointDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let endpointDetails =
@@ -4820,6 +4896,7 @@ module CreateConfigRequest =
         ConfigTypeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configData") in
       make ?tags ~name ~configData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in
       let name = field_map_exn json "name" SafeName.of_json in
@@ -4886,6 +4963,7 @@ module ContactIdResponse =
       let contactId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "contactId") in
       make ?contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map json "contactId" String_.of_json in
       make ?contactId ()
@@ -4974,6 +5052,7 @@ module ConfigIdResponse =
       let configArn =
         (Option.map ~f:ConfigArn.of_xml) (Xml.child xml_arg0 "configArn") in
       make ?configType ?configId ?configArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configType =
         field_map json "configType" ConfigCapabilityType.of_json in
@@ -4996,6 +5075,7 @@ module CancelContactRequest =
       let contactId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contactId") in
       make ~contactId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contactId = field_map_exn json "contactId" String_.of_json in
       make ~contactId ()

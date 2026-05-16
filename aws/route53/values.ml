@@ -167,6 +167,7 @@ module ResourceRecord =
       let value =
         RData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" RData.of_json in make ~value ()
     let to_json v = composed_to_json to_value v
@@ -225,6 +226,7 @@ module Dimension =
         DimensionField.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" DimensionField.of_json in
       let name = field_map_exn json "Name" DimensionField.of_json in
@@ -449,6 +451,7 @@ module AliasTarget =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~evaluateTargetHealth ~dNSName ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let evaluateTargetHealth =
         field_map_exn json "EvaluateTargetHealth" AliasHealthEnabled.of_json in
@@ -496,6 +499,7 @@ module GeoLocation =
         (Option.map ~f:GeoLocationContinentCode.of_xml)
           (Xml.child xml_arg0 "ContinentCode") in
       make ?subdivisionCode ?countryCode ?continentCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subdivisionCode =
         field_map json "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
@@ -816,6 +820,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -1083,6 +1088,7 @@ module AlarmIdentifier =
         CloudWatchRegion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Region") in
       make ~name ~region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" AlarmName.of_json in
       let region = field_map_exn json "Region" CloudWatchRegion.of_json in
@@ -1610,6 +1616,7 @@ module ResourceRecordSet =
       make ?trafficPolicyInstanceId ?healthCheckId ?aliasTarget
         ?resourceRecords ?tTL ?multiValueAnswer ?failover ?geoLocation
         ?region ?weight ?setIdentifier ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyInstanceId =
         field_map json "TrafficPolicyInstanceId"
@@ -2027,6 +2034,7 @@ module HostedZoneConfig =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Comment") in
       make ?privateZone ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateZone = field_map json "PrivateZone" IsPrivateZone.of_json in
       let comment = field_map json "Comment" ResourceDescription.of_json in
@@ -2074,6 +2082,7 @@ module LinkedService =
         (Option.map ~f:ServicePrincipal.of_xml)
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?description ?servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" ResourceDescription.of_json in
@@ -2110,6 +2119,7 @@ module HostedZoneOwner =
         (Option.map ~f:AWSAccountID.of_xml)
           (Xml.child xml_arg0 "OwningAccount") in
       make ?owningService ?owningAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owningService =
         field_map json "OwningService" HostedZoneOwningService.of_json in
@@ -2205,6 +2215,7 @@ module CloudWatchAlarmConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationPeriods") in
       make ?dimensions ~statistic ~namespace ~metricName ~period
         ~comparisonOperator ~threshold ~evaluationPeriods ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions = field_map json "Dimensions" DimensionList.of_json in
       let statistic = field_map_exn json "Statistic" Statistic.of_json in
@@ -2407,6 +2418,7 @@ module HealthCheckConfig =
         ?inverted ?measureLatency ?failureThreshold ?requestInterval
         ?searchString ?fullyQualifiedDomainName ?resourcePath ~type_ ?port
         ?iPAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlArn =
         field_map json "RoutingControlArn" RoutingControlArn.of_json in
@@ -2553,6 +2565,7 @@ module StatusReport =
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       make ?checkedTime ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checkedTime = field_map json "CheckedTime" TimeStamp.of_json in
       let status = field_map json "Status" Status.of_json in
@@ -2700,6 +2713,7 @@ module Change =
         ChangeAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~resourceRecordSet ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceRecordSet =
         field_map_exn json "ResourceRecordSet" ResourceRecordSet.of_json in
@@ -2780,6 +2794,7 @@ module VPC =
       let vPCRegion =
         (Option.map ~f:VPCRegion.of_xml) (Xml.child xml_arg0 "VPCRegion") in
       make ?vPCId ?vPCRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPCId = field_map json "VPCId" VPCId.of_json in
       let vPCRegion = field_map json "VPCRegion" VPCRegion.of_json in
@@ -2845,6 +2860,7 @@ module TrafficPolicy =
         TrafficPolicyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~document ~type_ ~name ~version ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" TrafficPolicyComment.of_json in
       let document =
@@ -2950,6 +2966,7 @@ module TrafficPolicyInstance =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~trafficPolicyType ~trafficPolicyVersion ~trafficPolicyId ~message
         ~state ~tTL ~name ~hostedZoneId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyType =
         field_map_exn json "TrafficPolicyType" RRType.of_json in
@@ -3023,6 +3040,7 @@ module TrafficPolicySummary =
         TrafficPolicyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~trafficPolicyCount ~latestVersion ~type_ ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyCount =
         field_map_exn json "TrafficPolicyCount" TrafficPolicyVersion.of_json in
@@ -3065,6 +3083,7 @@ module ResourceTagSet =
         (Option.map ~f:TagResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?tags ?resourceId ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let resourceId = field_map json "ResourceId" TagResourceId.of_json in
@@ -3106,6 +3125,7 @@ module DelegationSet =
         (Option.map ~f:Nonce.of_xml) (Xml.child xml_arg0 "CallerReference") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ~nameServers ?callerReference ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameServers =
         field_map_exn json "NameServers" DelegationSetNameServers.of_json in
@@ -3152,6 +3172,7 @@ module QueryLoggingConfig =
         QueryLoggingConfigId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~cloudWatchLogsLogGroupArn ~hostedZoneId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLogsLogGroupArn =
         field_map_exn json "CloudWatchLogsLogGroupArn"
@@ -3229,6 +3250,7 @@ module HostedZone =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?linkedService ?resourceRecordSetCount ?config ~callerReference
         ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkedService =
         field_map json "LinkedService" LinkedService.of_json in
@@ -3276,6 +3298,7 @@ module HostedZoneSummary =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~owner ~name ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map_exn json "Owner" HostedZoneOwner.of_json in
       let name = field_map_exn json "Name" DNSName.of_json in
@@ -3357,6 +3380,7 @@ module HealthCheck =
         HealthCheckId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?cloudWatchAlarmConfiguration ~healthCheckVersion
         ~healthCheckConfig ?linkedService ~callerReference ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchAlarmConfiguration =
         field_map json "CloudWatchAlarmConfiguration"
@@ -3446,6 +3470,7 @@ module GeoLocationDetails =
           (Xml.child xml_arg0 "ContinentCode") in
       make ?subdivisionName ?subdivisionCode ?countryName ?countryCode
         ?continentName ?continentCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subdivisionName =
         field_map json "SubdivisionName" GeoLocationSubdivisionName.of_json in
@@ -3564,6 +3589,7 @@ module HealthCheckObservation =
         (Option.map ~f:HealthCheckRegion.of_xml)
           (Xml.child xml_arg0 "Region") in
       make ?statusReport ?iPAddress ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReport = field_map json "StatusReport" StatusReport.of_json in
       let iPAddress = field_map json "IPAddress" IPAddress.of_json in
@@ -3749,6 +3775,7 @@ module KeySigningKey =
         ?dNSKEYRecord ?dSRecord ?publicKey ?digestValue ?keyTag
         ?digestAlgorithmType ?digestAlgorithmMnemonic ?signingAlgorithmType
         ?signingAlgorithmMnemonic ?flag ?kmsArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedDate =
         field_map json "LastModifiedDate" TimeStamp.of_json in
@@ -3917,6 +3944,7 @@ module ConflictingTypes =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3936,6 +3964,7 @@ module InvalidInput =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3954,6 +3983,7 @@ module NoSuchTrafficPolicy =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3972,6 +4002,7 @@ module NoSuchTrafficPolicyInstance =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -3990,6 +4021,7 @@ module PriorRequestNotComplete =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4009,6 +4041,7 @@ module ConcurrentModification =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4028,6 +4061,7 @@ module NoSuchHostedZone =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4046,6 +4080,7 @@ module HealthCheckVersionMismatch =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4065,6 +4100,7 @@ module NoSuchHealthCheck =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4196,6 +4232,7 @@ module InvalidPaginationToken =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4407,6 +4444,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4542,6 +4580,7 @@ module DelegationSetNotReusable =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4585,6 +4624,7 @@ module NoSuchDelegationSet =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4629,6 +4669,7 @@ module InvalidDomainName =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4671,6 +4712,7 @@ module IncompatibleVersion =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4741,6 +4783,7 @@ module ReusableDelegationSetLimit =
         ReusableDelegationSetLimitType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" LimitValue.of_json in
       let type_ =
@@ -4776,6 +4819,7 @@ module NoSuchQueryLoggingConfig =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4806,6 +4850,7 @@ module HostedZoneLimit =
         HostedZoneLimitType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" LimitValue.of_json in
       let type_ = field_map_exn json "Type" HostedZoneLimitType.of_json in
@@ -4826,6 +4871,7 @@ module HostedZoneNotPrivate =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4897,6 +4943,7 @@ module NoSuchGeoLocation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4930,6 +4977,7 @@ module DNSSECStatus =
         (Option.map ~f:ServeSignature.of_xml)
           (Xml.child xml_arg0 "ServeSignature") in
       make ?statusMessage ?serveSignature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusMessage =
         field_map json "StatusMessage" SigningKeyStatusMessage.of_json in
@@ -4951,6 +4999,7 @@ module InvalidArgument =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5044,6 +5093,7 @@ module ChangeInfo =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~submittedAt ~status ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" ResourceDescription.of_json in
       let submittedAt = field_map_exn json "SubmittedAt" TimeStamp.of_json in
@@ -5066,6 +5116,7 @@ module NoSuchChange =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5095,6 +5146,7 @@ module AccountLimit =
         AccountLimitType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" LimitValue.of_json in
       let type_ = field_map_exn json "Type" AccountLimitType.of_json in
@@ -5115,6 +5167,7 @@ module DNSSECNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5133,6 +5186,7 @@ module HostedZonePartiallyDelegated =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5152,6 +5206,7 @@ module InvalidKMSArn =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5171,6 +5226,7 @@ module InvalidKeySigningKeyStatus =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5190,6 +5246,7 @@ module KeySigningKeyWithActiveStatusNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5208,6 +5265,7 @@ module InvalidVPCId =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5227,6 +5285,7 @@ module LastVPCAssociation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5248,6 +5307,7 @@ module VPCAssociationNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5280,6 +5340,7 @@ module KeySigningKeyInParentDSRecord =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5299,6 +5360,7 @@ module VPCAssociationAuthorizationNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5318,6 +5380,7 @@ module TrafficPolicyInUse =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5337,6 +5400,7 @@ module DelegationSetInUse =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5356,6 +5420,7 @@ module InvalidSigningStatus =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5375,6 +5440,7 @@ module NoSuchKeySigningKey =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5393,6 +5459,7 @@ module HostedZoneNotEmpty =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5412,6 +5479,7 @@ module HealthCheckInUse =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5430,6 +5498,7 @@ module KeySigningKeyInUse =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5449,6 +5518,7 @@ module TooManyVPCAssociationAuthorizations =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5468,6 +5538,7 @@ module InvalidTrafficPolicyDocument =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5501,6 +5572,7 @@ module TooManyTrafficPolicyVersionsForCurrentPolicy =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5520,6 +5592,7 @@ module TooManyTrafficPolicies =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5539,6 +5612,7 @@ module TrafficPolicyAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5558,6 +5632,7 @@ module TooManyTrafficPolicyInstances =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5577,6 +5652,7 @@ module TrafficPolicyInstanceAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5596,6 +5672,7 @@ module DelegationSetAlreadyCreated =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5615,6 +5692,7 @@ module DelegationSetAlreadyReusable =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5634,6 +5712,7 @@ module DelegationSetNotAvailable =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5653,6 +5732,7 @@ module HostedZoneNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5671,6 +5751,7 @@ module LimitsExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5690,6 +5771,7 @@ module InsufficientCloudWatchLogsResourcePolicy =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5709,6 +5791,7 @@ module NoSuchCloudWatchLogsLogGroup =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5728,6 +5811,7 @@ module QueryLoggingConfigAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5747,6 +5831,7 @@ module InvalidKeySigningKeyName =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5766,6 +5851,7 @@ module KeySigningKeyAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5785,6 +5871,7 @@ module TooManyKeySigningKeys =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5804,6 +5891,7 @@ module ConflictingDomainExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5823,6 +5911,7 @@ module HostedZoneAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5842,6 +5931,7 @@ module TooManyHostedZones =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5861,6 +5951,7 @@ module HealthCheckAlreadyExists =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5880,6 +5971,7 @@ module TooManyHealthChecks =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5931,6 +6023,7 @@ module InvalidChangeBatch =
       let messages =
         (Option.map ~f:ErrorMessages.of_xml) (Xml.child xml_arg0 "messages") in
       make ?message ?messages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let messages = field_map json "messages" ErrorMessages.of_json in
@@ -5962,6 +6055,7 @@ module ChangeBatch =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Comment") in
       make ~changes ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changes = field_map_exn json "Changes" Changes.of_json in
       let comment = field_map json "Comment" ResourceDescription.of_json in
@@ -5981,6 +6075,7 @@ module NotAuthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -6000,6 +6095,7 @@ module PublicZoneVPCAssociation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -6100,6 +6196,7 @@ module UpdateTrafficPolicyInstanceResponse =
         TrafficPolicyInstance.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstance") in
       make ~trafficPolicyInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyInstance =
         field_map_exn json "TrafficPolicyInstance"
@@ -6151,6 +6248,7 @@ module UpdateTrafficPolicyInstanceRequest =
         TrafficPolicyInstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~trafficPolicyVersion ~trafficPolicyId ~tTL ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyVersion =
         field_map_exn json "TrafficPolicyVersion"
@@ -6224,6 +6322,7 @@ module UpdateTrafficPolicyCommentResponse =
         TrafficPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
       make ~trafficPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicy =
         field_map_exn json "TrafficPolicy" TrafficPolicy.of_json in
@@ -6264,6 +6363,7 @@ module UpdateTrafficPolicyCommentRequest =
         TrafficPolicyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~comment ~version ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map_exn json "Comment" TrafficPolicyComment.of_json in
       let version = field_map_exn json "Version" TrafficPolicyVersion.of_json in
@@ -6332,6 +6432,7 @@ module UpdateHostedZoneCommentResponse =
         HostedZone.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZone") in
       make ~hostedZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZone = field_map_exn json "HostedZone" HostedZone.of_json in
       make ~hostedZone ()
@@ -6362,6 +6463,7 @@ module UpdateHostedZoneCommentRequest =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" ResourceDescription.of_json in
       let id = field_map_exn json "Id" ResourceId.of_json in
@@ -6430,6 +6532,7 @@ module UpdateHealthCheckResponse =
         HealthCheck.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheck") in
       make ~healthCheck ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
       make ~healthCheck ()
@@ -6611,6 +6714,7 @@ module UpdateHealthCheckRequest =
         ?regions ?enableSNI ?childHealthChecks ?healthThreshold ?disabled
         ?inverted ?failureThreshold ?searchString ?fullyQualifiedDomainName
         ?resourcePath ?port ?iPAddress ?healthCheckVersion ~healthCheckId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resetElements =
         field_map json "ResetElements" ResettableElementNameList.of_json in
@@ -6747,6 +6851,7 @@ module TestDNSAnswerResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "Nameserver") in
       make ~protocol ~responseCode ~recordData ~recordType ~recordName
         ~nameserver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol = field_map_exn json "Protocol" TransportProtocol.of_json in
       let responseCode = field_map_exn json "ResponseCode" DNSRCode.of_json in
@@ -6826,6 +6931,7 @@ module TestDNSAnswerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "hostedzoneid") in
       make ?eDNS0ClientSubnetMask ?eDNS0ClientSubnetIP ?resolverIP
         ~recordType ~recordName ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eDNS0ClientSubnetMask =
         field_map json "EDNS0ClientSubnetMask" SubnetMask.of_json in
@@ -6915,6 +7021,7 @@ module ListVPCAssociationAuthorizationsResponse =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~vPCs ?nextToken ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPCs = field_map_exn json "VPCs" VPCs.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -6956,6 +7063,7 @@ module ListVPCAssociationAuthorizationsRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxResults ?nextToken ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -7053,6 +7161,7 @@ module ListTrafficPolicyVersionsResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicies") in
       make ~maxItems ~trafficPolicyVersionMarker ~isTruncated
         ~trafficPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let trafficPolicyVersionMarker =
@@ -7102,6 +7211,7 @@ module ListTrafficPolicyVersionsRequest =
         TrafficPolicyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxItems ?trafficPolicyVersionMarker ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let trafficPolicyVersionMarker =
@@ -7221,6 +7331,7 @@ module ListTrafficPolicyInstancesResponse =
       make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
         ~trafficPolicyInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let isTruncated =
@@ -7290,6 +7401,7 @@ module ListTrafficPolicyInstancesRequest =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "hostedzoneid") in
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let trafficPolicyInstanceTypeMarker =
@@ -7421,6 +7533,7 @@ module ListTrafficPolicyInstancesByPolicyResponse =
       make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
         ~trafficPolicyInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let isTruncated =
@@ -7511,6 +7624,7 @@ module ListTrafficPolicyInstancesByPolicyRequest =
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
         ~trafficPolicyVersion ~trafficPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let trafficPolicyInstanceTypeMarker =
@@ -7636,6 +7750,7 @@ module ListTrafficPolicyInstancesByHostedZoneResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstances") in
       make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ~trafficPolicyInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let isTruncated =
@@ -7702,6 +7817,7 @@ module ListTrafficPolicyInstancesByHostedZoneRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let trafficPolicyInstanceTypeMarker =
@@ -7791,6 +7907,7 @@ module ListTrafficPoliciesResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicySummaries") in
       make ~maxItems ~trafficPolicyIdMarker ~isTruncated
         ~trafficPolicySummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let trafficPolicyIdMarker =
@@ -7830,6 +7947,7 @@ module ListTrafficPoliciesRequest =
         (Option.map ~f:TrafficPolicyId.of_xml)
           (Xml.child xml_arg0 "trafficpolicyid") in
       make ?maxItems ?trafficPolicyIdMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let trafficPolicyIdMarker =
@@ -7917,6 +8035,7 @@ module ListTagsForResourcesResponse =
         ResourceTagSetList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceTagSets") in
       make ~resourceTagSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTagSets =
         field_map_exn json "ResourceTagSets" ResourceTagSetList.of_json in
@@ -7950,6 +8069,7 @@ module ListTagsForResourcesRequest =
         TagResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~resourceIds ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceIds =
         field_map_exn json "ResourceIds" TagResourceIdList.of_json in
@@ -8038,6 +8158,7 @@ module ListTagsForResourceResponse =
         ResourceTagSet.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceTagSet") in
       make ~resourceTagSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTagSet =
         field_map_exn json "ResourceTagSet" ResourceTagSet.of_json in
@@ -8071,6 +8192,7 @@ module ListTagsForResourceRequest =
         TagResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~resourceId ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map_exn json "ResourceId" TagResourceId.of_json in
       let resourceType =
@@ -8155,6 +8277,7 @@ module ListReusableDelegationSetsResponse =
         DelegationSets.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DelegationSets") in
       make ~maxItems ?nextMarker ~isTruncated ?marker ~delegationSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let nextMarker = field_map json "NextMarker" PageMarker.of_json in
@@ -8189,6 +8312,7 @@ module ListReusableDelegationSetsRequest =
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let marker = field_map json "Marker" PageMarker.of_json in
@@ -8296,6 +8420,7 @@ module ListResourceRecordSetsResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceRecordSets") in
       make ~maxItems ?nextRecordIdentifier ?nextRecordType ?nextRecordName
         ~isTruncated ~resourceRecordSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let nextRecordIdentifier =
@@ -8369,6 +8494,7 @@ module ListResourceRecordSetsRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxItems ?startRecordIdentifier ?startRecordType ?startRecordName
         ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let startRecordIdentifier =
@@ -8452,6 +8578,7 @@ module ListQueryLoggingConfigsResponse =
         QueryLoggingConfigs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryLoggingConfigs") in
       make ?nextToken ~queryLoggingConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let queryLoggingConfigs =
@@ -8491,6 +8618,7 @@ module ListQueryLoggingConfigsRequest =
       let hostedZoneId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "hostedzoneid") in
       make ?maxResults ?nextToken ?hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -8592,6 +8720,7 @@ module ListHostedZonesResponse =
         HostedZones.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZones") in
       make ~maxItems ?nextMarker ~isTruncated ?marker ~hostedZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let nextMarker = field_map json "NextMarker" PageMarker.of_json in
@@ -8636,6 +8765,7 @@ module ListHostedZonesRequest =
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "marker") in
       make ?delegationSetId ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegationSetId =
         field_map json "DelegationSetId" ResourceId.of_json in
@@ -8715,6 +8845,7 @@ module ListHostedZonesByVPCResponse =
         HostedZoneSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneSummaries") in
       make ?nextToken ~maxItems ~hostedZoneSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
@@ -8765,6 +8896,7 @@ module ListHostedZonesByVPCRequest =
       let vPCId =
         VPCId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpcid") in
       make ?nextToken ?maxItems ~vPCRegion ~vPCId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
@@ -8883,6 +9015,7 @@ module ListHostedZonesByNameResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZones") in
       make ~maxItems ?nextHostedZoneId ?nextDNSName ~isTruncated
         ?hostedZoneId ?dNSName ~hostedZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let nextHostedZoneId =
@@ -8928,6 +9061,7 @@ module ListHostedZonesByNameRequest =
       let dNSName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "dnsname") in
       make ?maxItems ?hostedZoneId ?dNSName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let hostedZoneId = field_map json "HostedZoneId" ResourceId.of_json in
@@ -9020,6 +9154,7 @@ module ListHealthChecksResponse =
         HealthChecks.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthChecks") in
       make ~maxItems ?nextMarker ~isTruncated ?marker ~healthChecks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let nextMarker = field_map json "NextMarker" PageMarker.of_json in
@@ -9054,6 +9189,7 @@ module ListHealthChecksRequest =
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let marker = field_map json "Marker" PageMarker.of_json in
@@ -9160,6 +9296,7 @@ module ListGeoLocationsResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "GeoLocationDetailsList") in
       make ~maxItems ?nextSubdivisionCode ?nextCountryCode ?nextContinentCode
         ~isTruncated ~geoLocationDetailsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
       let nextSubdivisionCode =
@@ -9232,6 +9369,7 @@ module ListGeoLocationsRequest =
           (Xml.child xml_arg0 "startcontinentcode") in
       make ?maxItems ?startSubdivisionCode ?startCountryCode
         ?startContinentCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
       let startSubdivisionCode =
@@ -9298,6 +9436,7 @@ module GetTrafficPolicyResponse =
         TrafficPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
       make ~trafficPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicy =
         field_map_exn json "TrafficPolicy" TrafficPolicy.of_json in
@@ -9330,6 +9469,7 @@ module GetTrafficPolicyRequest =
         TrafficPolicyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~version ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "Version" TrafficPolicyVersion.of_json in
       let id = field_map_exn json "Id" TrafficPolicyId.of_json in
@@ -9392,6 +9532,7 @@ module GetTrafficPolicyInstanceResponse =
         TrafficPolicyInstance.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstance") in
       make ~trafficPolicyInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyInstance =
         field_map_exn json "TrafficPolicyInstance"
@@ -9418,6 +9559,7 @@ module GetTrafficPolicyInstanceRequest =
         TrafficPolicyInstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" TrafficPolicyInstanceId.of_json in
       make ~id ()
@@ -9465,6 +9607,7 @@ module GetTrafficPolicyInstanceCountResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "TrafficPolicyInstanceCount") in
       make ~trafficPolicyInstanceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyInstanceCount =
         field_map_exn json "TrafficPolicyInstanceCount"
@@ -9481,6 +9624,7 @@ module GetTrafficPolicyInstanceCountRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9546,6 +9690,7 @@ module GetReusableDelegationSetResponse =
         DelegationSet.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DelegationSet") in
       make ~delegationSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegationSet =
         field_map_exn json "DelegationSet" DelegationSet.of_json in
@@ -9569,6 +9714,7 @@ module GetReusableDelegationSetRequest =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -9632,6 +9778,7 @@ module GetReusableDelegationSetLimitResponse =
         ReusableDelegationSetLimit.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
       make ~count ~limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map_exn json "Count" UsageCount.of_json in
       let limit =
@@ -9664,6 +9811,7 @@ module GetReusableDelegationSetLimitRequest =
         ReusableDelegationSetLimitType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~delegationSetId ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegationSetId =
         field_map_exn json "DelegationSetId" ResourceId.of_json in
@@ -9726,6 +9874,7 @@ module GetQueryLoggingConfigResponse =
         QueryLoggingConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryLoggingConfig") in
       make ~queryLoggingConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryLoggingConfig =
         field_map_exn json "QueryLoggingConfig" QueryLoggingConfig.of_json in
@@ -9751,6 +9900,7 @@ module GetQueryLoggingConfigRequest =
         QueryLoggingConfigId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" QueryLoggingConfigId.of_json in
       make ~id ()
@@ -9823,6 +9973,7 @@ module GetHostedZoneResponse =
         HostedZone.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZone") in
       make ?vPCs ?delegationSet ~hostedZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPCs = field_map json "VPCs" VPCs.of_json in
       let delegationSet =
@@ -9848,6 +9999,7 @@ module GetHostedZoneRequest =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -9919,6 +10071,7 @@ module GetHostedZoneLimitResponse =
         HostedZoneLimit.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
       make ~count ~limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map_exn json "Count" UsageCount.of_json in
       let limit = field_map_exn json "Limit" HostedZoneLimit.of_json in
@@ -9949,6 +10102,7 @@ module GetHostedZoneLimitRequest =
         HostedZoneLimitType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~hostedZoneId ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
       let type_ = field_map_exn json "Type" HostedZoneLimitType.of_json in
@@ -10000,6 +10154,7 @@ module GetHostedZoneCountResponse =
         HostedZoneCount.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneCount") in
       make ~hostedZoneCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZoneCount =
         field_map_exn json "HostedZoneCount" HostedZoneCount.of_json in
@@ -10015,6 +10170,7 @@ module GetHostedZoneCountRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10072,6 +10228,7 @@ module GetHealthCheckStatusResponse =
         HealthCheckObservations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckObservations") in
       make ~healthCheckObservations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckObservations =
         field_map_exn json "HealthCheckObservations"
@@ -10098,6 +10255,7 @@ module GetHealthCheckStatusRequest =
         HealthCheckId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckId =
         field_map_exn json "HealthCheckId" HealthCheckId.of_json in
@@ -10165,6 +10323,7 @@ module GetHealthCheckResponse =
         HealthCheck.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheck") in
       make ~healthCheck ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
       make ~healthCheck ()
@@ -10189,6 +10348,7 @@ module GetHealthCheckRequest =
         HealthCheckId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckId =
         field_map_exn json "HealthCheckId" HealthCheckId.of_json in
@@ -10249,6 +10409,7 @@ module GetHealthCheckLastFailureReasonResponse =
         HealthCheckObservations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckObservations") in
       make ~healthCheckObservations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckObservations =
         field_map_exn json "HealthCheckObservations"
@@ -10275,6 +10436,7 @@ module GetHealthCheckLastFailureReasonRequest =
         HealthCheckId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckId =
         field_map_exn json "HealthCheckId" HealthCheckId.of_json in
@@ -10319,6 +10481,7 @@ module GetHealthCheckCountResponse =
         HealthCheckCount.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckCount") in
       make ~healthCheckCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckCount =
         field_map_exn json "HealthCheckCount" HealthCheckCount.of_json in
@@ -10334,6 +10497,7 @@ module GetHealthCheckCountRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10391,6 +10555,7 @@ module GetGeoLocationResponse =
         GeoLocationDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GeoLocationDetails") in
       make ~geoLocationDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geoLocationDetails =
         field_map_exn json "GeoLocationDetails" GeoLocationDetails.of_json in
@@ -10436,6 +10601,7 @@ module GetGeoLocationRequest =
         (Option.map ~f:GeoLocationContinentCode.of_xml)
           (Xml.child xml_arg0 "continentcode") in
       make ?subdivisionCode ?countryCode ?continentCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subdivisionCode =
         field_map json "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
@@ -10511,6 +10677,7 @@ module GetDNSSECResponse =
         DNSSECStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~keySigningKeys ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keySigningKeys =
         field_map_exn json "KeySigningKeys" KeySigningKeys.of_json in
@@ -10535,6 +10702,7 @@ module GetDNSSECRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
       make ~hostedZoneId ()
@@ -10578,6 +10746,7 @@ module GetCheckerIpRangesResponse =
         CheckerIpRanges.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CheckerIpRanges") in
       make ~checkerIpRanges ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checkerIpRanges =
         field_map_exn json "CheckerIpRanges" CheckerIpRanges.of_json in
@@ -10593,6 +10762,7 @@ module GetCheckerIpRangesRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Empty request."]
@@ -10645,6 +10815,7 @@ module GetChangeResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -10666,6 +10837,7 @@ module GetChangeRequest =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -10719,6 +10891,7 @@ module GetAccountLimitResponse =
         AccountLimit.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
       make ~count ~limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map_exn json "Count" UsageCount.of_json in
       let limit = field_map_exn json "Limit" AccountLimit.of_json in
@@ -10743,6 +10916,7 @@ module GetAccountLimitRequest =
         AccountLimitType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" AccountLimitType.of_json in
       make ~type_ ()
@@ -10859,6 +11033,7 @@ module EnableHostedZoneDNSSECResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -10880,6 +11055,7 @@ module EnableHostedZoneDNSSECRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
       make ~hostedZoneId ()
@@ -10960,6 +11136,7 @@ module DisassociateVPCFromHostedZoneResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -10997,6 +11174,7 @@ module DisassociateVPCFromHostedZoneRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~vPC ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" DisassociateVPCComment.of_json in
       let vPC = field_map_exn json "VPC" VPC.of_json in
@@ -11103,6 +11281,7 @@ module DisableHostedZoneDNSSECResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -11125,6 +11304,7 @@ module DisableHostedZoneDNSSECRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
       make ~hostedZoneId ()
@@ -11199,6 +11379,7 @@ module DeleteVPCAssociationAuthorizationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Empty response for the request."]
@@ -11224,6 +11405,7 @@ module DeleteVPCAssociationAuthorizationRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~vPC ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPC = field_map_exn json "VPC" VPC.of_json in
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
@@ -11291,6 +11473,7 @@ module DeleteTrafficPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element."]
@@ -11318,6 +11501,7 @@ module DeleteTrafficPolicyRequest =
         TrafficPolicyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~version ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "Version" TrafficPolicyVersion.of_json in
       let id = field_map_exn json "Id" TrafficPolicyId.of_json in
@@ -11377,6 +11561,7 @@ module DeleteTrafficPolicyInstanceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element."]
@@ -11398,6 +11583,7 @@ module DeleteTrafficPolicyInstanceRequest =
         TrafficPolicyInstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" TrafficPolicyInstanceId.of_json in
       make ~id ()
@@ -11463,6 +11649,7 @@ module DeleteReusableDelegationSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element."]
@@ -11482,6 +11669,7 @@ module DeleteReusableDelegationSetRequest =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -11537,6 +11725,7 @@ module DeleteQueryLoggingConfigResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11558,6 +11747,7 @@ module DeleteQueryLoggingConfigRequest =
         QueryLoggingConfigId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" QueryLoggingConfigId.of_json in
       make ~id ()
@@ -11647,6 +11837,7 @@ module DeleteKeySigningKeyResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -11676,6 +11867,7 @@ module DeleteKeySigningKeyRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~name ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" SigningKeyName.of_json in
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
@@ -11761,6 +11953,7 @@ module DeleteHostedZoneResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -11782,6 +11975,7 @@ module DeleteHostedZoneRequest =
       let id =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -11836,6 +12030,7 @@ module DeleteHealthCheckResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element."]
@@ -11856,6 +12051,7 @@ module DeleteHealthCheckRequest =
         HealthCheckId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckId =
         field_map_exn json "HealthCheckId" HealthCheckId.of_json in
@@ -11959,6 +12155,7 @@ module DeactivateKeySigningKeyResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -11988,6 +12185,7 @@ module DeactivateKeySigningKeyRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~name ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" SigningKeyName.of_json in
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
@@ -12078,6 +12276,7 @@ module CreateVPCAssociationAuthorizationResponse =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~vPC ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPC = field_map_exn json "VPC" VPC.of_json in
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
@@ -12107,6 +12306,7 @@ module CreateVPCAssociationAuthorizationRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~vPC ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vPC = field_map_exn json "VPC" VPC.of_json in
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
@@ -12208,6 +12408,7 @@ module CreateTrafficPolicyVersionResponse =
         TrafficPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
       make ~location ~trafficPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let trafficPolicy =
@@ -12249,6 +12450,7 @@ module CreateTrafficPolicyVersionRequest =
         TrafficPolicyId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~document ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" TrafficPolicyComment.of_json in
       let document =
@@ -12338,6 +12540,7 @@ module CreateTrafficPolicyResponse =
         TrafficPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
       make ~location ~trafficPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let trafficPolicy =
@@ -12378,6 +12581,7 @@ module CreateTrafficPolicyRequest =
         TrafficPolicyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?comment ~document ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" TrafficPolicyComment.of_json in
       let document =
@@ -12479,6 +12683,7 @@ module CreateTrafficPolicyInstanceResponse =
         TrafficPolicyInstance.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstance") in
       make ~location ~trafficPolicyInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let trafficPolicyInstance =
@@ -12545,6 +12750,7 @@ module CreateTrafficPolicyInstanceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~trafficPolicyVersion ~trafficPolicyId ~tTL ~name ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficPolicyVersion =
         field_map_exn json "TrafficPolicyVersion"
@@ -12662,6 +12868,7 @@ module CreateReusableDelegationSetResponse =
         DelegationSet.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DelegationSet") in
       make ~location ~delegationSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let delegationSet =
@@ -12695,6 +12902,7 @@ module CreateReusableDelegationSetRequest =
         Nonce.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ?hostedZoneId ~callerReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostedZoneId = field_map json "HostedZoneId" ResourceId.of_json in
       let callerReference =
@@ -12806,6 +13014,7 @@ module CreateQueryLoggingConfigResponse =
         QueryLoggingConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryLoggingConfig") in
       make ~location ~queryLoggingConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let queryLoggingConfig =
@@ -12844,6 +13053,7 @@ module CreateQueryLoggingConfigRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~cloudWatchLogsLogGroupArn ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudWatchLogsLogGroupArn =
         field_map_exn json "CloudWatchLogsLogGroupArn"
@@ -12986,6 +13196,7 @@ module CreateKeySigningKeyResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~location ~keySigningKey ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let keySigningKey =
@@ -13053,6 +13264,7 @@ module CreateKeySigningKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ~status ~name ~keyManagementServiceArn ~hostedZoneId
         ~callerReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" SigningKeyStatus.of_json in
       let name = field_map_exn json "Name" SigningKeyName.of_json in
@@ -13209,6 +13421,7 @@ module CreateHostedZoneResponse =
         HostedZone.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZone") in
       make ~location ?vPC ~delegationSet ~changeInfo ~hostedZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let vPC = field_map json "VPC" VPC.of_json in
@@ -13277,6 +13490,7 @@ module CreateHostedZoneRequest =
       let name =
         DNSName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?delegationSetId ?hostedZoneConfig ~callerReference ?vPC ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delegationSetId =
         field_map json "DelegationSetId" ResourceId.of_json in
@@ -13358,6 +13572,7 @@ module CreateHealthCheckResponse =
         HealthCheck.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheck") in
       make ~location ~healthCheck ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map_exn json "Location" ResourceURI.of_json in
       let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
@@ -13394,6 +13609,7 @@ module CreateHealthCheckRequest =
         HealthCheckNonce.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ~healthCheckConfig ~callerReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheckConfig =
         field_map_exn json "HealthCheckConfig" HealthCheckConfig.of_json in
@@ -13471,6 +13687,7 @@ module ChangeTagsForResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Empty response for the request."]
@@ -13517,6 +13734,7 @@ module ChangeTagsForResourceRequest =
         TagResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ?removeTagKeys ?addTags ~resourceId ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeTagKeys = field_map json "RemoveTagKeys" TagKeyList.of_json in
       let addTags = field_map json "AddTags" TagList.of_json in
@@ -13605,6 +13823,7 @@ module ChangeResourceRecordSetsResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -13635,6 +13854,7 @@ module ChangeResourceRecordSetsRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~changeBatch ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeBatch = field_map_exn json "ChangeBatch" ChangeBatch.of_json in
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
@@ -13742,6 +13962,7 @@ module AssociateVPCWithHostedZoneResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -13778,6 +13999,7 @@ module AssociateVPCWithHostedZoneRequest =
       let hostedZoneId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~vPC ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" AssociateVPCComment.of_json in
       let vPC = field_map_exn json "VPC" VPC.of_json in
@@ -13869,6 +14091,7 @@ module ActivateKeySigningKeyResponse =
         ChangeInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
       make ~changeInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
       make ~changeInfo ()
@@ -13899,6 +14122,7 @@ module ActivateKeySigningKeyRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~name ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" SigningKeyName.of_json in
       let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in

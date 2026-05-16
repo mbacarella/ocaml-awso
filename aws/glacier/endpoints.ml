@@ -578,11 +578,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some GetDataRetrievalPolicyOutput.error_of_json))
   | GetJobOutput ->
       if is_success
-      then Ok (GetJobOutputOutput.of_json (response_to_json resp))
+      then
+        let body = Stream.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetJobOutputOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetJobOutputOutput.error_of_json))
   | GetVaultAccessPolicy ->
       if is_success
-      then Ok (GetVaultAccessPolicyOutput.of_json (response_to_json resp))
+      then
+        let body = VaultAccessPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetVaultAccessPolicyOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetVaultAccessPolicyOutput.error_of_json))
@@ -592,7 +600,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some GetVaultLockOutput.error_of_json))
   | GetVaultNotifications ->
       if is_success
-      then Ok (GetVaultNotificationsOutput.of_json (response_to_json resp))
+      then
+        let body =
+          VaultNotificationConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetVaultNotificationsOutput.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetVaultNotificationsOutput.error_of_json))

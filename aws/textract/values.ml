@@ -57,6 +57,7 @@ module Point =
       let y = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Y") in
       let x = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "X") in
       make ?y ?x ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let y = field_map json "Y" Float.of_json in
       let x = field_map json "X" Float.of_json in make ?y ?x ()
@@ -95,6 +96,7 @@ module BoundingBox =
       let height = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Height") in
       let width = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Width") in
       make ?top ?left ?height ?width ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let top = field_map json "Top" Float.of_json in
       let left = field_map json "Left" Float.of_json in
@@ -150,6 +152,7 @@ module Geometry =
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?polygon ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let polygon = field_map json "Polygon" Polygon.of_json in
       let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
@@ -213,6 +216,7 @@ module ExpenseDetection =
         (Option.map ~f:Geometry.of_xml) (Xml.child xml_arg0 "Geometry") in
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       make ?confidence ?geometry ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let geometry = field_map json "Geometry" Geometry.of_json in
@@ -240,6 +244,7 @@ module ExpenseType =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       make ?confidence ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let text = field_map json "Text" String_.of_json in
@@ -301,6 +306,7 @@ module ExpenseField =
       let type_ =
         (Option.map ~f:ExpenseType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?pageNumber ?valueDetection ?labelDetection ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pageNumber = field_map json "PageNumber" UInteger.of_json in
       let valueDetection =
@@ -370,6 +376,7 @@ module LineItemFields =
         (Option.map ~f:ExpenseFieldList.of_xml)
           (Xml.child xml_arg0 "LineItemExpenseFields") in
       make ?lineItemExpenseFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lineItemExpenseFields =
         field_map json "LineItemExpenseFields" ExpenseFieldList.of_json in
@@ -413,6 +420,7 @@ module NormalizedValue =
         (Option.map ~f:ValueType.of_xml) (Xml.child xml_arg0 "ValueType") in
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       make ?valueType ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valueType = field_map json "ValueType" ValueType.of_json in
       let value = field_map json "Value" String_.of_json in
@@ -534,6 +542,7 @@ module AnalyzeIDDetections =
       let text =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ?confidence ?normalizedValue ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let confidence = field_map json "Confidence" Percent.of_json in
       let normalizedValue =
@@ -568,6 +577,7 @@ module LineItemGroup =
         (Option.map ~f:UInteger.of_xml)
           (Xml.child xml_arg0 "LineItemGroupIndex") in
       make ?lineItems ?lineItemGroupIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lineItems = field_map json "LineItems" LineItemList.of_json in
       let lineItemGroupIndex =
@@ -625,6 +635,7 @@ module Relationship =
       let type_ =
         (Option.map ~f:RelationshipType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?ids ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ids = field_map json "Ids" IdList.of_json in
       let type_ = field_map json "Type" RelationshipType.of_json in
@@ -654,6 +665,7 @@ module IdentityDocumentField =
         (Option.map ~f:AnalyzeIDDetections.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?valueDetection ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valueDetection =
         field_map json "ValueDetection" AnalyzeIDDetections.of_json in
@@ -1021,6 +1033,7 @@ module S3Object =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?version ?name ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" S3ObjectVersion.of_json in
       let name = field_map json "Name" S3ObjectName.of_json in
@@ -1166,6 +1179,7 @@ module ExpenseDocument =
       let expenseIndex =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "ExpenseIndex") in
       make ?lineItemGroups ?summaryFields ?expenseIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lineItemGroups =
         field_map json "LineItemGroups" LineItemGroupList.of_json in
@@ -1195,6 +1209,7 @@ module Warning =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?pages ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pages = field_map json "Pages" Pages.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -1330,6 +1345,7 @@ module Block =
       make ?page ?selectionStatus ?entityTypes ?relationships ?id ?geometry
         ?columnSpan ?rowSpan ?columnIndex ?rowIndex ?textType ?text
         ?confidence ?blockType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let page = field_map json "Page" UInteger.of_json in
       let selectionStatus =
@@ -1380,6 +1396,7 @@ module IdentityDocument =
       let documentIndex =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "DocumentIndex") in
       make ?identityDocumentFields ?documentIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityDocumentFields =
         field_map json "IdentityDocumentFields"
@@ -1411,6 +1428,7 @@ module Document =
       let bytes =
         (Option.map ~f:ImageBlob.of_xml) (Xml.child xml_arg0 "Bytes") in
       make ?s3Object ?bytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Object = field_map json "S3Object" S3Object.of_json in
       let bytes = field_map json "Bytes" ImageBlob.of_json in
@@ -1506,6 +1524,7 @@ module HumanLoopDataAttributes =
         (Option.map ~f:ContentClassifiers.of_xml)
           (Xml.child xml_arg0 "ContentClassifiers") in
       make ?contentClassifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentClassifiers =
         field_map json "ContentClassifiers" ContentClassifiers.of_json in
@@ -1542,6 +1561,7 @@ module AccessDeniedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1554,6 +1574,7 @@ module BadDocumentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1566,6 +1587,7 @@ module DocumentTooLargeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1578,6 +1600,7 @@ module IdempotentParameterMismatchException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1590,6 +1613,7 @@ module InternalServerError =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1602,6 +1626,7 @@ module InvalidKMSKeyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1614,6 +1639,7 @@ module InvalidParameterException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1626,6 +1652,7 @@ module InvalidS3ObjectException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1658,6 +1685,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1670,6 +1698,7 @@ module ProvisionedThroughputExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1682,6 +1711,7 @@ module ThrottlingException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1694,6 +1724,7 @@ module UnsupportedDocumentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1733,6 +1764,7 @@ module DocumentLocation =
       let s3Object =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Object = field_map json "S3Object" S3Object.of_json in
       make ?s3Object ()
@@ -1806,6 +1838,7 @@ module NotificationChannel =
         SNSTopicArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SNSTopicArn") in
       make ~roleArn ~sNSTopicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
       let sNSTopicArn = field_map_exn json "SNSTopicArn" SNSTopicArn.of_json in
@@ -1835,6 +1868,7 @@ module OutputConfig =
       let s3Bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Prefix ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Prefix = field_map json "S3Prefix" S3ObjectName.of_json in
       let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
@@ -1881,6 +1915,7 @@ module DocumentMetadata =
       let pages =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Pages") in
       make ?pages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pages = field_map json "Pages" UInteger.of_json in make ?pages ()
     let to_json v = composed_to_json to_value v
@@ -1918,6 +1953,7 @@ module InvalidJobIdException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2146,6 +2182,7 @@ module HumanLoopActivationOutput =
           (Xml.child xml_arg0 "HumanLoopArn") in
       make ?humanLoopActivationConditionsEvaluationResults
         ?humanLoopActivationReasons ?humanLoopArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let humanLoopActivationConditionsEvaluationResults =
         field_map json "HumanLoopActivationConditionsEvaluationResults"
@@ -2184,6 +2221,7 @@ module HumanLoopQuotaExceededException =
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       make ?serviceCode ?quotaCode ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "ServiceCode" String_.of_json in
       let quotaCode = field_map json "QuotaCode" String_.of_json in
@@ -2227,6 +2265,7 @@ module HumanLoopConfig =
         HumanLoopName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
       make ?dataAttributes ~flowDefinitionArn ~humanLoopName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataAttributes =
         field_map json "DataAttributes" HumanLoopDataAttributes.of_json in
@@ -2386,6 +2425,7 @@ module StartExpenseAnalysisResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -2460,6 +2500,7 @@ module StartExpenseAnalysisRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentLocation") in
       make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
         ?clientRequestToken ~documentLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSKeyId = field_map json "KMSKeyId" KMSKeyId.of_json in
       let outputConfig = field_map json "OutputConfig" OutputConfig.of_json in
@@ -2623,6 +2664,7 @@ module StartDocumentTextDetectionResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -2697,6 +2739,7 @@ module StartDocumentTextDetectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentLocation") in
       make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
         ?clientRequestToken ~documentLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSKeyId = field_map json "KMSKeyId" KMSKeyId.of_json in
       let outputConfig = field_map json "OutputConfig" OutputConfig.of_json in
@@ -2860,6 +2903,7 @@ module StartDocumentAnalysisResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -2943,6 +2987,7 @@ module StartDocumentAnalysisRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentLocation") in
       make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
         ?clientRequestToken ~featureTypes ~documentLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSKeyId = field_map json "KMSKeyId" KMSKeyId.of_json in
       let outputConfig = field_map json "OutputConfig" OutputConfig.of_json in
@@ -3128,6 +3173,7 @@ module GetExpenseAnalysisResponse =
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?analyzeExpenseModelVersion ?statusMessage ?warnings
         ?expenseDocuments ?nextToken ?jobStatus ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyzeExpenseModelVersion =
         field_map json "AnalyzeExpenseModelVersion" String_.of_json in
@@ -3177,6 +3223,7 @@ module GetExpenseAnalysisRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3350,6 +3397,7 @@ module GetDocumentTextDetectionResponse =
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?detectDocumentTextModelVersion ?statusMessage ?warnings ?blocks
         ?nextToken ?jobStatus ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectDocumentTextModelVersion =
         field_map json "DetectDocumentTextModelVersion" String_.of_json in
@@ -3398,6 +3446,7 @@ module GetDocumentTextDetectionRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3571,6 +3620,7 @@ module GetDocumentAnalysisResponse =
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?analyzeDocumentModelVersion ?statusMessage ?warnings ?blocks
         ?nextToken ?jobStatus ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyzeDocumentModelVersion =
         field_map json "AnalyzeDocumentModelVersion" String_.of_json in
@@ -3619,6 +3669,7 @@ module GetDocumentAnalysisRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3765,6 +3816,7 @@ module DetectDocumentTextResponse =
         (Option.map ~f:DocumentMetadata.of_xml)
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?detectDocumentTextModelVersion ?blocks ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detectDocumentTextModelVersion =
         field_map json "DetectDocumentTextModelVersion" String_.of_json in
@@ -3792,6 +3844,7 @@ module DetectDocumentTextRequest =
       let document =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Document") in
       make ~document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let document = field_map_exn json "Document" Document.of_json in
       make ~document ()
@@ -3938,6 +3991,7 @@ module AnalyzeIDResponse =
         (Option.map ~f:IdentityDocumentList.of_xml)
           (Xml.child xml_arg0 "IdentityDocuments") in
       make ?analyzeIDModelVersion ?documentMetadata ?identityDocuments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyzeIDModelVersion =
         field_map json "AnalyzeIDModelVersion" String_.of_json in
@@ -3966,6 +4020,7 @@ module AnalyzeIDRequest =
         DocumentPages.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentPages") in
       make ~documentPages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let documentPages =
         field_map_exn json "DocumentPages" DocumentPages.of_json in
@@ -4102,6 +4157,7 @@ module AnalyzeExpenseResponse =
         (Option.map ~f:DocumentMetadata.of_xml)
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?expenseDocuments ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expenseDocuments =
         field_map json "ExpenseDocuments" ExpenseDocumentList.of_json in
@@ -4125,6 +4181,7 @@ module AnalyzeExpenseRequest =
       let document =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Document") in
       make ~document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let document = field_map_exn json "Document" Document.of_json in
       make ~document ()
@@ -4296,6 +4353,7 @@ module AnalyzeDocumentResponse =
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?analyzeDocumentModelVersion ?humanLoopActivationOutput ?blocks
         ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyzeDocumentModelVersion =
         field_map json "AnalyzeDocumentModelVersion" String_.of_json in
@@ -4345,6 +4403,7 @@ module AnalyzeDocumentRequest =
       let document =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Document") in
       make ?humanLoopConfig ~featureTypes ~document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let humanLoopConfig =
         field_map json "HumanLoopConfig" HumanLoopConfig.of_json in

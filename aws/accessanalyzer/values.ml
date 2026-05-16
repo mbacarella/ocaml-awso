@@ -180,6 +180,7 @@ module InternetConfiguration =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -200,6 +201,7 @@ module VpcConfiguration =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpcId") in
       make ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "vpcId" VpcId.of_json in make ~vpcId ()
     let to_json v = composed_to_json to_value v
@@ -277,6 +279,7 @@ module Substring =
       let length =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "length") in
       make ~start ~length ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let start = field_map_exn json "start" Integer.of_json in
       let length = field_map_exn json "length" Integer.of_json in
@@ -339,6 +342,7 @@ module KmsGrantConstraints =
         (Option.map ~f:KmsConstraintsMap.of_xml)
           (Xml.child xml_arg0 "encryptionContextEquals") in
       make ?encryptionContextSubset ?encryptionContextEquals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionContextSubset =
         field_map json "encryptionContextSubset" KmsConstraintsMap.of_json in
@@ -426,6 +430,7 @@ module NetworkOriginConfiguration =
         (Option.map ~f:InternetConfiguration.of_xml)
           (Xml.child xml_arg0 "internetConfiguration") in
       make ?vpcConfiguration ?internetConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcConfiguration =
         field_map json "vpcConfiguration" VpcConfiguration.of_json in
@@ -463,6 +468,7 @@ module S3PublicAccessBlockConfiguration =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ignorePublicAcls") in
       make ~restrictPublicBuckets ~ignorePublicAcls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restrictPublicBuckets =
         field_map_exn json "restrictPublicBuckets" Boolean.of_json in
@@ -492,6 +498,7 @@ module AclGrantee =
       let id =
         (Option.map ~f:AclCanonicalId.of_xml) (Xml.child xml_arg0 "id") in
       make ?uri ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uri = field_map json "uri" AclUri.of_json in
       let id = field_map json "id" AclCanonicalId.of_json in make ?uri ?id ()
@@ -563,6 +570,7 @@ module PathElement =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "key") in
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "index") in
       make ?value ?substring ?key ?index ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" String_.of_json in
       let substring = field_map json "substring" Substring.of_json in
@@ -600,6 +608,7 @@ module Position =
       let column =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "column") in
       make ~offset ~line ~column ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offset = field_map_exn json "offset" Integer.of_json in
       let line = field_map_exn json "line" Integer.of_json in
@@ -710,6 +719,7 @@ module KmsGrantConfiguration =
           (Xml.child xml_arg0 "constraints") in
       make ?retiringPrincipal ~operations ~issuingAccount ~granteePrincipal
         ?constraints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retiringPrincipal =
         field_map json "retiringPrincipal" RetiringPrincipal.of_json in
@@ -806,6 +816,7 @@ module S3AccessPointConfiguration =
         (Option.map ~f:AccessPointPolicy.of_xml)
           (Xml.child xml_arg0 "accessPointPolicy") in
       make ?publicAccessBlock ?networkOrigin ?accessPointPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicAccessBlock =
         field_map json "publicAccessBlock"
@@ -842,6 +853,7 @@ module S3BucketAclGrantConfiguration =
         AclGrantee.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "grantee") in
       make ~permission ~grantee ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permission = field_map_exn json "permission" AclPermission.of_json in
       let grantee = field_map_exn json "grantee" AclGrantee.of_json in
@@ -894,6 +906,7 @@ module Span =
       let end_ =
         Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "end") in
       make ~start ~end_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let start = field_map_exn json "start" Position.of_json in
       let end_ = field_map_exn json "end" Position.of_json in
@@ -918,6 +931,7 @@ module FindingSourceDetail =
       let accessPointArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessPointArn") in
       make ?accessPointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPointArn = field_map json "accessPointArn" String_.of_json in
       make ?accessPointArn ()
@@ -1013,6 +1027,7 @@ module TrailProperties =
       let allRegions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "allRegions") in
       make ?regions ~cloudTrailArn ?allRegions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regions = field_map json "regions" RegionList.of_json in
       let cloudTrailArn =
@@ -1221,6 +1236,7 @@ module Location =
         PathElementList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "path") in
       make ~span ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let span = field_map_exn json "span" Span.of_json in
       let path = field_map_exn json "path" PathElementList.of_json in
@@ -1253,6 +1269,7 @@ module FindingSource =
         (Option.map ~f:FindingSourceDetail.of_xml)
           (Xml.child xml_arg0 "detail") in
       make ~type_ ?detail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" FindingSourceType.of_json in
       let detail = field_map json "detail" FindingSourceDetail.of_json in
@@ -1294,6 +1311,7 @@ module Criterion =
       let contains =
         (Option.map ~f:ValueList.of_xml) (Xml.child xml_arg0 "contains") in
       make ?neq ?exists ?eq ?contains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let neq = field_map json "neq" ValueList.of_json in
       let exists = field_map json "exists" Boolean.of_json in
@@ -1420,6 +1438,7 @@ module IamRoleConfiguration =
         (Option.map ~f:IamTrustPolicy.of_xml)
           (Xml.child xml_arg0 "trustPolicy") in
       make ?trustPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trustPolicy = field_map json "trustPolicy" IamTrustPolicy.of_json in
       make ?trustPolicy ()
@@ -1452,6 +1471,7 @@ module KmsKeyConfiguration =
         (Option.map ~f:KmsGrantConfigurationsList.of_xml)
           (Xml.child xml_arg0 "grants") in
       make ?keyPolicies ?grants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPolicies =
         field_map json "keyPolicies" KmsKeyPoliciesMap.of_json in
@@ -1515,6 +1535,7 @@ module S3BucketConfiguration =
           (Xml.child xml_arg0 "accessPoints") in
       make ?bucketPublicAccessBlock ?bucketPolicy ?bucketAclGrants
         ?accessPoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketPublicAccessBlock =
         field_map json "bucketPublicAccessBlock"
@@ -1556,6 +1577,7 @@ module SecretsManagerSecretConfiguration =
         (Option.map ~f:SecretsManagerSecretKmsId.of_xml)
           (Xml.child xml_arg0 "kmsKeyId") in
       make ?secretPolicy ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretPolicy =
         field_map json "secretPolicy" SecretsManagerSecretPolicy.of_json in
@@ -1582,6 +1604,7 @@ module SqsQueueConfiguration =
         (Option.map ~f:SqsQueuePolicy.of_xml)
           (Xml.child xml_arg0 "queuePolicy") in
       make ?queuePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queuePolicy = field_map json "queuePolicy" SqsQueuePolicy.of_json in
       make ?queuePolicy ()
@@ -1691,6 +1714,7 @@ module ValidationExceptionField =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~name ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" String_.of_json in
       let message = field_map_exn json "message" String_.of_json in
@@ -1730,6 +1754,7 @@ module Trail =
       let allRegions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "allRegions") in
       make ?regions ~cloudTrailArn ?allRegions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regions = field_map json "regions" RegionList.of_json in
       let cloudTrailArn =
@@ -2102,6 +2127,7 @@ module StatusReason =
       let code =
         ReasonCode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map_exn json "code" ReasonCode.of_json in
       make ~code ()
@@ -2243,6 +2269,7 @@ module AccessPreviewStatusReason =
         AccessPreviewStatusReasonCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code =
         field_map_exn json "code" AccessPreviewStatusReasonCode.of_json in
@@ -2308,6 +2335,7 @@ module GeneratedPolicy =
       let policy =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "policy" String_.of_json in
       make ~policy ()
@@ -2348,6 +2376,7 @@ module CloudTrailProperties =
       let endTime =
         Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
       make ~trailProperties ~startTime ~endTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trailProperties =
         field_map_exn json "trailProperties" TrailPropertiesList.of_json in
@@ -2440,6 +2469,7 @@ module Configuration =
         (Option.map ~f:IamRoleConfiguration.of_xml)
           (Xml.child xml_arg0 "iamRole") in
       make ?sqsQueue ?secretsManagerSecret ?s3Bucket ?kmsKey ?iamRole ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sqsQueue = field_map json "sqsQueue" SqsQueueConfiguration.of_json in
       let secretsManagerSecret =
@@ -2525,6 +2555,7 @@ module ValidatePolicyFinding =
           (Xml.child_exn ~context:context_ xml_arg0 "findingDetails") in
       make ~locations ~learnMoreLink ~issueCode ~findingType ~findingDetails
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locations = field_map_exn json "locations" LocationList.of_json in
       let learnMoreLink =
@@ -2685,6 +2716,7 @@ module PolicyGeneration =
       let completedOn =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedOn") in
       make ~status ~startedOn ~principalArn ~jobId ?completedOn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" JobStatus.of_json in
       let startedOn = field_map_exn json "startedOn" Timestamp.of_json in
@@ -2825,6 +2857,7 @@ module FindingSummary =
       make ~updatedAt ~status ?sources ~resourceType ~resourceOwnerAccount
         ?resource ?principal ?isPublic ~id ?error ~createdAt ~condition
         ~analyzedAt ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
       let status = field_map_exn json "status" FindingStatus.of_json in
@@ -2903,6 +2936,7 @@ module ArchiveRuleSummary =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
       make ~updatedAt ~ruleName ~filter ~createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
       let ruleName = field_map_exn json "ruleName" Name.of_json in
@@ -2998,6 +3032,7 @@ module AnalyzerSummary =
         AnalyzerArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~type_ ?tags ?statusReason ~status ~name ?lastResourceAnalyzedAt
         ?lastResourceAnalyzed ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" Type.of_json in
       let tags = field_map json "tags" TagsMap.of_json in
@@ -3048,6 +3083,7 @@ module AnalyzedResourceSummary =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceType ~resourceOwnerAccount ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "resourceType" ResourceType.of_json in
@@ -3105,6 +3141,7 @@ module AccessPreviewSummary =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ?statusReason ~status ~id ~createdAt ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason =
         field_map json "statusReason" AccessPreviewStatusReason.of_json in
@@ -3261,6 +3298,7 @@ module AccessPreviewFinding =
       make ~status ?sources ~resourceType ~resourceOwnerAccount ?resource
         ?principal ?isPublic ~id ?existingFindingStatus ?existingFindingId
         ?error ~createdAt ?condition ~changeType ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" FindingStatus.of_json in
       let sources = field_map json "sources" FindingSourceList.of_json in
@@ -3349,6 +3387,7 @@ module GeneratedPolicyProperties =
         (Option.map ~f:CloudTrailProperties.of_xml)
           (Xml.child xml_arg0 "cloudTrailProperties") in
       make ~principalArn ?isComplete ?cloudTrailProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalArn =
         field_map_exn json "principalArn" PrincipalArn.of_json in
@@ -3379,6 +3418,7 @@ module JobError =
       let code =
         JobErrorCode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
       make ~message ~code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       let code = field_map_exn json "code" JobErrorCode.of_json in
@@ -3460,6 +3500,7 @@ module InlineArchiveRule =
         FilterCriteriaMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filter") in
       make ~ruleName ~filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "ruleName" Name.of_json in
       let filter = field_map_exn json "filter" FilterCriteriaMap.of_json in
@@ -3480,6 +3521,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -3507,6 +3549,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" Integer.of_json in
@@ -3535,6 +3578,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" Integer.of_json in
@@ -3610,6 +3654,7 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionFieldList.of_xml)
           (Xml.child xml_arg0 "fieldList") in
       make ~reason ~message ?fieldList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map_exn json "reason" ValidationExceptionReason.of_json in
@@ -3822,6 +3867,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -3879,6 +3925,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -3913,6 +3960,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -3959,6 +4007,7 @@ module CloudTrailDetails =
         RoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessRole") in
       make ~trails ~startTime ?endTime ~accessRole ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trails = field_map_exn json "trails" TrailList.of_json in
       let startTime = field_map_exn json "startTime" Timestamp.of_json in
@@ -3985,6 +4034,7 @@ module PolicyGenerationDetails =
         PrincipalArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
       make ~principalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalArn =
         field_map_exn json "principalArn" PrincipalArn.of_json in
@@ -4079,6 +4129,7 @@ module SortCriteria =
       let attributeName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderBy = field_map json "orderBy" OrderBy.of_json in
       let attributeName = field_map json "attributeName" String_.of_json in
@@ -4240,6 +4291,7 @@ module GeneratedPolicyResult =
         (Option.map ~f:GeneratedPolicyList.of_xml)
           (Xml.child xml_arg0 "generatedPolicies") in
       make ~properties ?generatedPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let properties =
         field_map_exn json "properties" GeneratedPolicyProperties.of_json in
@@ -4291,6 +4343,7 @@ module JobDetails =
       let completedOn =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedOn") in
       make ~status ~startedOn ~jobId ?jobError ?completedOn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" JobStatus.of_json in
       let startedOn = field_map_exn json "startedOn" Timestamp.of_json in
@@ -4425,6 +4478,7 @@ module Finding =
       make ~updatedAt ~status ?sources ~resourceType ~resourceOwnerAccount
         ?resource ?principal ?isPublic ~id ?error ~createdAt ~condition
         ~analyzedAt ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
       let status = field_map_exn json "status" FindingStatus.of_json in
@@ -4548,6 +4602,7 @@ module AnalyzedResource =
         (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "actions") in
       make ~updatedAt ?status ?sharedVia ~resourceType ~resourceOwnerAccount
         ~resourceArn ~isPublic ?error ~createdAt ~analyzedAt ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
       let status = field_map json "status" FindingStatus.of_json in
@@ -4634,6 +4689,7 @@ module AccessPreview =
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ?statusReason ~status ~id ~createdAt ~configurations ~analyzerArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason =
         field_map json "statusReason" AccessPreviewStatusReason.of_json in
@@ -4749,6 +4805,7 @@ module ValidatePolicyResponse =
         ValidatePolicyFindingList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findings") in
       make ?nextToken ~findings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let findings =
@@ -4822,6 +4879,7 @@ module ValidatePolicyRequest =
         (Option.map ~f:Locale.of_xml) (Xml.child xml_arg0 "locale") in
       make ?validatePolicyResourceType ~policyType ~policyDocument ?nextToken
         ?maxResults ?locale ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validatePolicyResourceType =
         field_map json "validatePolicyResourceType"
@@ -4882,6 +4940,7 @@ module UpdateFindingsRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~status ?resourceArn ?ids ?clientToken ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" FindingStatusUpdate.of_json in
       let resourceArn = field_map json "resourceArn" ResourceArn.of_json in
@@ -4928,6 +4987,7 @@ module UpdateArchiveRuleRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~ruleName ~filter ?clientToken ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "ruleName" Name.of_json in
       let filter = field_map_exn json "filter" FilterCriteriaMap.of_json in
@@ -5007,6 +5067,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
@@ -5032,6 +5093,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -5109,6 +5171,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
@@ -5133,6 +5196,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagsMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -5164,6 +5228,7 @@ module StartResourceScanRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~resourceArn ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
@@ -5261,6 +5326,7 @@ module StartPolicyGenerationResponse =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -5302,6 +5368,7 @@ module StartPolicyGenerationRequest =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~policyGenerationDetails ?cloudTrailDetails ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyGenerationDetails =
         field_map_exn json "policyGenerationDetails"
@@ -5388,6 +5455,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5409,6 +5477,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -5494,6 +5563,7 @@ module ListPolicyGenerationsResponse =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~policyGenerations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyGenerations =
         field_map_exn json "policyGenerations" PolicyGenerationList.of_json in
@@ -5537,6 +5607,7 @@ module ListPolicyGenerationsRequest =
         (Option.map ~f:ListPolicyGenerationsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?principalArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalArn = field_map json "principalArn" PrincipalArn.of_json in
       let nextToken = field_map json "nextToken" Token.of_json in
@@ -5633,6 +5704,7 @@ module ListFindingsResponse =
         FindingsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findings") in
       make ?nextToken ~findings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let findings = field_map_exn json "findings" FindingsList.of_json in
@@ -5683,6 +5755,7 @@ module ListFindingsRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ?sort ?nextToken ?maxResults ?filter ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sort = field_map json "sort" SortCriteria.of_json in
       let nextToken = field_map json "nextToken" Token.of_json in
@@ -5771,6 +5844,7 @@ module ListArchiveRulesResponse =
         ArchiveRulesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "archiveRules") in
       make ?nextToken ~archiveRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let archiveRules =
@@ -5808,6 +5882,7 @@ module ListArchiveRulesRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ?nextToken ?maxResults ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -5892,6 +5967,7 @@ module ListAnalyzersResponse =
         AnalyzersList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzers") in
       make ?nextToken ~analyzers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let analyzers = field_map_exn json "analyzers" AnalyzersList.of_json in
@@ -5924,6 +6000,7 @@ module ListAnalyzersRequest =
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?type_ ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" Type.of_json in
       let nextToken = field_map json "nextToken" Token.of_json in
@@ -6018,6 +6095,7 @@ module ListAnalyzedResourcesResponse =
         AnalyzedResourcesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzedResources") in
       make ?nextToken ~analyzedResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let analyzedResources =
@@ -6065,6 +6143,7 @@ module ListAnalyzedResourcesRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ?resourceType ?nextToken ?maxResults ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let nextToken = field_map json "nextToken" Token.of_json in
@@ -6160,6 +6239,7 @@ module ListAccessPreviewsResponse =
         AccessPreviewsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessPreviews") in
       make ?nextToken ~accessPreviews ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let accessPreviews =
@@ -6199,6 +6279,7 @@ module ListAccessPreviewsRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ?nextToken ?maxResults ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -6302,6 +6383,7 @@ module ListAccessPreviewFindingsResponse =
         AccessPreviewFindingsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "findings") in
       make ?nextToken ~findings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let findings =
@@ -6358,6 +6440,7 @@ module ListAccessPreviewFindingsRequest =
         AccessPreviewId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessPreviewId") in
       make ?nextToken ?maxResults ?filter ~analyzerArn ~accessPreviewId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let maxResults = field_map json "maxResults" Integer.of_json in
@@ -6450,6 +6533,7 @@ module GetGeneratedPolicyResponse =
         GeneratedPolicyResult.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "generatedPolicyResult") in
       make ~jobDetails ~generatedPolicyResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobDetails = field_map_exn json "jobDetails" JobDetails.of_json in
       let generatedPolicyResult =
@@ -6498,6 +6582,7 @@ module GetGeneratedPolicyRequest =
           (Xml.child xml_arg0 "includeResourcePlaceholders") in
       make ~jobId ?includeServiceLevelTemplate ?includeResourcePlaceholders
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in
       let includeServiceLevelTemplate =
@@ -6587,6 +6672,7 @@ module GetFindingResponse =
       let finding =
         (Option.map ~f:Finding.of_xml) (Xml.child xml_arg0 "finding") in
       make ?finding ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finding = field_map json "finding" Finding.of_json in
       make ?finding ()
@@ -6613,6 +6699,7 @@ module GetFindingRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~id ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" FindingId.of_json in
       let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
@@ -6697,6 +6784,7 @@ module GetArchiveRuleResponse =
         ArchiveRuleSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "archiveRule") in
       make ~archiveRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let archiveRule =
         field_map_exn json "archiveRule" ArchiveRuleSummary.of_json in
@@ -6724,6 +6812,7 @@ module GetArchiveRuleRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~ruleName ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "ruleName" Name.of_json in
       let analyzerName = field_map_exn json "analyzerName" Name.of_json in
@@ -6811,6 +6900,7 @@ module GetAnalyzerResponse =
         AnalyzerSummary.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzer") in
       make ~analyzer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyzer = field_map_exn json "analyzer" AnalyzerSummary.of_json in
       make ~analyzer ()
@@ -6831,6 +6921,7 @@ module GetAnalyzerRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyzerName = field_map_exn json "analyzerName" Name.of_json in
       make ~analyzerName ()
@@ -6916,6 +7007,7 @@ module GetAnalyzedResourceResponse =
         (Option.map ~f:AnalyzedResource.of_xml)
           (Xml.child xml_arg0 "resource") in
       make ?resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map json "resource" AnalyzedResource.of_json in
       make ?resource ()
@@ -6945,6 +7037,7 @@ module GetAnalyzedResourceRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~resourceArn ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
@@ -7032,6 +7125,7 @@ module GetAccessPreviewResponse =
         AccessPreview.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessPreview") in
       make ~accessPreview ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPreview =
         field_map_exn json "accessPreview" AccessPreview.of_json in
@@ -7065,6 +7159,7 @@ module GetAccessPreviewRequest =
         AccessPreviewId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessPreviewId") in
       make ~analyzerArn ~accessPreviewId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
       let accessPreviewId =
@@ -7100,6 +7195,7 @@ module DeleteArchiveRuleRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~ruleName ?clientToken ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "ruleName" Name.of_json in
       let clientToken = field_map json "clientToken" String_.of_json in
@@ -7127,6 +7223,7 @@ module DeleteAnalyzerRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ?clientToken ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "clientToken" String_.of_json in
       let analyzerName = field_map_exn json "analyzerName" Name.of_json in
@@ -7165,6 +7262,7 @@ module CreateArchiveRuleRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~ruleName ~filter ?clientToken ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "ruleName" Name.of_json in
       let filter = field_map_exn json "filter" FilterCriteriaMap.of_json in
@@ -7262,6 +7360,7 @@ module CreateAnalyzerResponse =
     let of_xml xml_arg0 =
       let arn = (Option.map ~f:AnalyzerArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "arn" AnalyzerArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7309,6 +7408,7 @@ module CreateAnalyzerRequest =
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~type_ ?tags ?clientToken ?archiveRules ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" Type.of_json in
       let tags = field_map json "tags" TagsMap.of_json in
@@ -7418,6 +7518,7 @@ module CreateAccessPreviewResponse =
         AccessPreviewId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "id" AccessPreviewId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -7456,6 +7557,7 @@ module CreateAccessPreviewRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~configurations ?clientToken ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurations =
         field_map_exn json "configurations" ConfigurationsMap.of_json in
@@ -7527,6 +7629,7 @@ module CancelPolicyGenerationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the requested policy generation."]
@@ -7546,6 +7649,7 @@ module CancelPolicyGenerationRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -7577,6 +7681,7 @@ module ApplyArchiveRuleRequest =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~ruleName ?clientToken ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "ruleName" Name.of_json in
       let clientToken = field_map json "clientToken" String_.of_json in

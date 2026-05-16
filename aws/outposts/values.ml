@@ -505,6 +505,7 @@ module EC2Capacity =
       let family =
         (Option.map ~f:Family.of_xml) (Xml.child xml_arg0 "Family") in
       make ?quantity ?maxSize ?family ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantity = field_map json "Quantity" Quantity.of_json in
       let maxSize = field_map json "MaxSize" MaxSize.of_json in
@@ -737,6 +738,7 @@ module RackPhysicalProperties =
       make ?maximumSupportedWeightLbs ?opticalStandard ?fiberOpticCableType
         ?uplinkCount ?uplinkGbps ?powerFeedDrop ?powerConnector ?powerPhase
         ?powerDrawKva ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maximumSupportedWeightLbs =
         field_map json "MaximumSupportedWeightLbs"
@@ -1438,6 +1440,7 @@ module LineItem =
       let catalogItemId =
         (Option.map ~f:SkuCode.of_xml) (Xml.child xml_arg0 "CatalogItemId") in
       make ?status ?quantity ?lineItemId ?catalogItemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" LineItemStatus.of_json in
       let quantity = field_map json "Quantity" LineItemQuantity.of_json in
@@ -1768,6 +1771,7 @@ module Site =
       make ?rackPhysicalProperties ?operatingAddressCity
         ?operatingAddressStateOrRegion ?operatingAddressCountryCode ?notes
         ?siteArn ?tags ?description ?name ?accountId ?siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rackPhysicalProperties =
         field_map json "RackPhysicalProperties"
@@ -1887,6 +1891,7 @@ module Outpost =
       make ?supportedHardwareType ?siteArn ?tags ?availabilityZoneId
         ?availabilityZone ?lifeCycleStatus ?description ?name ?siteId
         ?outpostArn ?ownerId ?outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedHardwareType =
         field_map json "SupportedHardwareType" SupportedHardwareType.of_json in
@@ -1977,6 +1982,7 @@ module OrderSummary =
         (Option.map ~f:OutpostIdOnly.of_xml) (Xml.child xml_arg0 "OutpostId") in
       make ?orderFulfilledDate ?orderSubmissionDate ?lineItemCountsByStatus
         ?status ?orderType ?orderId ?outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderFulfilledDate =
         field_map json "OrderFulfilledDate" ISO8601Timestamp.of_json in
@@ -2067,6 +2073,7 @@ module CatalogItem =
         (Option.map ~f:SkuCode.of_xml) (Xml.child xml_arg0 "CatalogItemId") in
       make ?supportedStorage ?supportedUplinkGbps ?weightLbs ?powerKva
         ?eC2Capacities ?itemStatus ?catalogItemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedStorage =
         field_map json "SupportedStorage" SupportedStorageList.of_json in
@@ -2117,6 +2124,7 @@ module InstanceTypeItem =
         (Option.map ~f:InstanceType.of_xml)
           (Xml.child xml_arg0 "InstanceType") in
       make ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceType = field_map json "InstanceType" InstanceType.of_json in
       make ?instanceType ()
@@ -2196,6 +2204,7 @@ module LineItemRequest =
       let catalogItemId =
         (Option.map ~f:SkuCode.of_xml) (Xml.child xml_arg0 "CatalogItemId") in
       make ?quantity ?catalogItemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let quantity = field_map json "Quantity" LineItemQuantity.of_json in
       let catalogItemId = field_map json "CatalogItemId" SkuCode.of_json in
@@ -2215,6 +2224,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2248,6 +2258,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let resourceId = field_map json "ResourceId" String_.of_json in
@@ -2269,6 +2280,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2287,6 +2299,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2305,6 +2318,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2415,6 +2429,7 @@ module Address =
       make ?municipality ~countryCode ~postalCode ?districtOrCounty
         ~stateOrRegion ~city ?addressLine3 ?addressLine2 ~addressLine1
         ?contactPhoneNumber ?contactName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let municipality = field_map json "Municipality" Municipality.of_json in
       let countryCode = field_map_exn json "CountryCode" CountryCode.of_json in
@@ -2968,6 +2983,7 @@ module Order =
         (Option.map ~f:OutpostIdOnly.of_xml) (Xml.child xml_arg0 "OutpostId") in
       make ?orderFulfilledDate ?orderSubmissionDate ?paymentOption ?lineItems
         ?status ?orderId ?outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderFulfilledDate =
         field_map json "OrderFulfilledDate" ISO8601Timestamp.of_json in
@@ -2997,6 +3013,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3123,6 +3140,7 @@ module UpdateSiteRackPhysicalPropertiesOutput =
     let of_xml xml_arg0 =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let site = field_map json "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
@@ -3235,6 +3253,7 @@ module UpdateSiteRackPhysicalPropertiesInput =
       make ?maximumSupportedWeightLbs ?opticalStandard ?fiberOpticCableType
         ?uplinkCount ?uplinkGbps ?powerFeedDrop ?powerConnector ?powerPhase
         ?powerDrawKva ~siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maximumSupportedWeightLbs =
         field_map json "MaximumSupportedWeightLbs"
@@ -3332,6 +3351,7 @@ module UpdateSiteOutput =
     let of_xml xml_arg0 =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let site = field_map json "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
@@ -3368,6 +3388,7 @@ module UpdateSiteInput =
       let siteId =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ?notes ?description ?name ~siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notes = field_map json "Notes" SiteNotes.of_json in
       let description = field_map json "Description" SiteDescription.of_json in
@@ -3459,6 +3480,7 @@ module UpdateSiteAddressOutput =
       let addressType =
         (Option.map ~f:AddressType.of_xml) (Xml.child xml_arg0 "AddressType") in
       make ?address ?addressType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let address = field_map json "Address" Address.of_json in
       let addressType = field_map json "AddressType" AddressType.of_json in
@@ -3493,6 +3515,7 @@ module UpdateSiteAddressInput =
       let siteId =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~address ~addressType ~siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let address = field_map_exn json "Address" Address.of_json in
       let addressType = field_map_exn json "AddressType" AddressType.of_json in
@@ -3577,6 +3600,7 @@ module UpdateOutpostOutput =
       let outpost =
         (Option.map ~f:Outpost.of_xml) (Xml.child xml_arg0 "Outpost") in
       make ?outpost ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpost = field_map json "Outpost" Outpost.of_json in
       make ?outpost ()
@@ -3622,6 +3646,7 @@ module UpdateOutpostInput =
         OutpostId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ?supportedHardwareType ?description ?name ~outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedHardwareType =
         field_map json "SupportedHardwareType" SupportedHardwareType.of_json in
@@ -3685,6 +3710,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from the specified resource."]
@@ -3710,6 +3736,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -3769,6 +3796,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds tags to the specified resource."]
@@ -3792,6 +3820,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -3854,6 +3883,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3874,6 +3904,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -3943,6 +3974,7 @@ module ListSitesOutput =
         (Option.map ~f:SiteListDefinition.of_xml)
           (Xml.child xml_arg0 "Sites") in
       make ?nextToken ?sites ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let sites = field_map json "Sites" SiteListDefinition.of_json in
@@ -4008,6 +4040,7 @@ module ListSitesInput =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?operatingAddressCityFilter ?operatingAddressStateOrRegionFilter
         ?operatingAddressCountryCodeFilter ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operatingAddressCityFilter =
         field_map json "OperatingAddressCityFilter" CityList.of_json in
@@ -4089,6 +4122,7 @@ module ListOutpostsOutput =
         (Option.map ~f:OutpostListDefinition.of_xml)
           (Xml.child xml_arg0 "Outposts") in
       make ?nextToken ?outposts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let outposts = field_map json "Outposts" OutpostListDefinition.of_json in
@@ -4154,6 +4188,7 @@ module ListOutpostsInput =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?availabilityZoneIdFilter ?availabilityZoneFilter
         ?lifeCycleStatusFilter ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availabilityZoneIdFilter =
         field_map json "AvailabilityZoneIdFilter"
@@ -4244,6 +4279,7 @@ module ListOrdersOutput =
         (Option.map ~f:OrderSummaryListDefinition.of_xml)
           (Xml.child xml_arg0 "Orders") in
       make ?nextToken ?orders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let orders = field_map json "Orders" OrderSummaryListDefinition.of_json in
@@ -4282,6 +4318,7 @@ module ListOrdersInput =
         (Option.map ~f:OutpostIdentifier.of_xml)
           (Xml.child xml_arg0 "OutpostIdentifierFilter") in
       make ?maxResults ?nextToken ?outpostIdentifierFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults1000.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -4358,6 +4395,7 @@ module ListCatalogItemsOutput =
         (Option.map ~f:CatalogItemListDefinition.of_xml)
           (Xml.child xml_arg0 "CatalogItems") in
       make ?nextToken ?catalogItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let catalogItems =
@@ -4423,6 +4461,7 @@ module ListCatalogItemsInput =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?eC2FamilyFilter ?supportedStorageFilter ?itemClassFilter
         ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2FamilyFilter =
         field_map json "EC2FamilyFilter" EC2FamilyList.of_json in
@@ -4502,6 +4541,7 @@ module GetSiteOutput =
     let of_xml xml_arg0 =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let site = field_map json "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
@@ -4521,6 +4561,7 @@ module GetSiteInput =
       let siteId =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let siteId = field_map_exn json "SiteId" SiteId.of_json in
       make ~siteId ()
@@ -4605,6 +4646,7 @@ module GetSiteAddressOutput =
       let siteId =
         (Option.map ~f:SiteId.of_xml) (Xml.child xml_arg0 "SiteId") in
       make ?address ?addressType ?siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let address = field_map json "Address" Address.of_json in
       let addressType = field_map json "AddressType" AddressType.of_json in
@@ -4634,6 +4676,7 @@ module GetSiteAddressInput =
       let siteId =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~addressType ~siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressType = field_map_exn json "AddressType" AddressType.of_json in
       let siteId = field_map_exn json "SiteId" SiteId.of_json in
@@ -4707,6 +4750,7 @@ module GetOutpostOutput =
       let outpost =
         (Option.map ~f:Outpost.of_xml) (Xml.child xml_arg0 "Outpost") in
       make ?outpost ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpost = field_map json "Outpost" Outpost.of_json in
       make ?outpost ()
@@ -4798,6 +4842,7 @@ module GetOutpostInstanceTypesOutput =
         (Option.map ~f:InstanceTypeListDefinition.of_xml)
           (Xml.child xml_arg0 "InstanceTypes") in
       make ?outpostArn ?outpostId ?nextToken ?instanceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpostArn = field_map json "OutpostArn" OutpostArn.of_json in
       let outpostId = field_map json "OutpostId" OutpostId.of_json in
@@ -4836,6 +4881,7 @@ module GetOutpostInstanceTypesInput =
         OutpostId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ?maxResults ?nextToken ~outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults1000.of_json in
       let nextToken = field_map json "NextToken" Token.of_json in
@@ -4861,6 +4907,7 @@ module GetOutpostInput =
         OutpostId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ~outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
       make ~outpostId ()
@@ -4922,6 +4969,7 @@ module GetOrderOutput =
     let of_xml xml_arg0 =
       let order = (Option.map ~f:Order.of_xml) (Xml.child xml_arg0 "Order") in
       make ?order ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let order = field_map json "Order" Order.of_json in make ?order ()
     let to_json v = composed_to_json to_value v
@@ -4939,6 +4987,7 @@ module GetOrderInput =
       let orderId =
         OrderId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OrderId") in
       make ~orderId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderId = field_map_exn json "OrderId" OrderId.of_json in
       make ~orderId ()
@@ -5004,6 +5053,7 @@ module GetCatalogItemOutput =
       let catalogItem =
         (Option.map ~f:CatalogItem.of_xml) (Xml.child xml_arg0 "CatalogItem") in
       make ?catalogItem ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let catalogItem = field_map json "CatalogItem" CatalogItem.of_json in
       make ?catalogItem ()
@@ -5025,6 +5075,7 @@ module GetCatalogItemInput =
         SkuCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CatalogItemId") in
       make ~catalogItemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let catalogItemId = field_map_exn json "CatalogItemId" SkuCode.of_json in
       make ~catalogItemId ()
@@ -5101,6 +5152,7 @@ module DeleteSiteOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the site."]
@@ -5119,6 +5171,7 @@ module DeleteSiteInput =
       let siteId =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let siteId = field_map_exn json "SiteId" SiteId.of_json in
       make ~siteId ()
@@ -5195,6 +5248,7 @@ module DeleteOutpostOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the Outpost."]
@@ -5216,6 +5270,7 @@ module DeleteOutpostInput =
         OutpostId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ~outpostId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
       make ~outpostId ()
@@ -5297,6 +5352,7 @@ module CreateSiteOutput =
     let of_xml xml_arg0 =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let site = field_map json "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
@@ -5372,6 +5428,7 @@ module CreateSiteInput =
         SiteName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?rackPhysicalProperties ?shippingAddress ?operatingAddress ?tags
         ?notes ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rackPhysicalProperties =
         field_map json "RackPhysicalProperties"
@@ -5474,6 +5531,7 @@ module CreateOutpostOutput =
       let outpost =
         (Option.map ~f:Outpost.of_xml) (Xml.child xml_arg0 "Outpost") in
       make ?outpost ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outpost = field_map json "Outpost" Outpost.of_json in
       make ?outpost ()
@@ -5546,6 +5604,7 @@ module CreateOutpostInput =
         OutpostName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?supportedHardwareType ?tags ?availabilityZoneId ?availabilityZone
         ~siteId ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supportedHardwareType =
         field_map json "SupportedHardwareType" SupportedHardwareType.of_json in
@@ -5649,6 +5708,7 @@ module CreateOrderOutput =
     let of_xml xml_arg0 =
       let order = (Option.map ~f:Order.of_xml) (Xml.child xml_arg0 "Order") in
       make ?order ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let order = field_map json "Order" Order.of_json in make ?order ()
     let to_json v = composed_to_json to_value v
@@ -5695,6 +5755,7 @@ module CreateOrderInput =
         OutpostIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostIdentifier") in
       make ?paymentTerm ~paymentOption ~lineItems ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let paymentTerm = field_map json "PaymentTerm" PaymentTerm.of_json in
       let paymentOption =
@@ -5777,6 +5838,7 @@ module CancelOrderOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels an order for an Outpost."]
@@ -5794,6 +5856,7 @@ module CancelOrderInput =
       let orderId =
         OrderId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OrderId") in
       make ~orderId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderId = field_map_exn json "OrderId" OrderId.of_json in
       make ~orderId ()

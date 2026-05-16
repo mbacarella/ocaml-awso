@@ -1279,7 +1279,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error None)
   | CopyObject ->
       if is_success
-      then Ok (CopyObjectOutput.of_xml (response_to_xml resp))
+      then
+        let body = CopyObjectResult.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CopyObjectOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CopyObjectOutput.error_of_xml))
   | CreateBucket ->
       if is_success
@@ -1352,9 +1356,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetBucketAnalyticsConfiguration ->
       if is_success
       then
+        let body =
+          AnalyticsConfiguration.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetBucketAnalyticsConfigurationOutput.of_xml
-             (response_to_xml resp))
+          (GetBucketAnalyticsConfigurationOutput.of_header_and_body
+             (headers, body))
       else Error (parse_aws_error None)
   | GetBucketCors ->
       if is_success
@@ -1362,21 +1370,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error None)
   | GetBucketEncryption ->
       if is_success
-      then Ok (GetBucketEncryptionOutput.of_xml (response_to_xml resp))
+      then
+        let body =
+          ServerSideEncryptionConfiguration.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetBucketEncryptionOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | GetBucketIntelligentTieringConfiguration ->
       if is_success
       then
+        let body =
+          IntelligentTieringConfiguration.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetBucketIntelligentTieringConfigurationOutput.of_xml
-             (response_to_xml resp))
+          (GetBucketIntelligentTieringConfigurationOutput.of_header_and_body
+             (headers, body))
       else Error (parse_aws_error None)
   | GetBucketInventoryConfiguration ->
       if is_success
       then
+        let body =
+          InventoryConfiguration.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetBucketInventoryConfigurationOutput.of_xml
-             (response_to_xml resp))
+          (GetBucketInventoryConfigurationOutput.of_header_and_body
+             (headers, body))
       else Error (parse_aws_error None)
   | GetBucketLifecycle ->
       if is_success
@@ -1400,8 +1423,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetBucketMetricsConfiguration ->
       if is_success
       then
+        let body =
+          MetricsConfiguration.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetBucketMetricsConfigurationOutput.of_xml (response_to_xml resp))
+          (GetBucketMetricsConfigurationOutput.of_header_and_body
+             (headers, body))
       else Error (parse_aws_error None)
   | GetBucketNotification ->
       if is_success
@@ -1416,19 +1444,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetBucketOwnershipControls ->
       if is_success
       then
-        Ok (GetBucketOwnershipControlsOutput.of_xml (response_to_xml resp))
+        let body = OwnershipControls.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetBucketOwnershipControlsOutput.of_header_and_body
+             (headers, body))
       else Error (parse_aws_error None)
   | GetBucketPolicy ->
       if is_success
-      then Ok (GetBucketPolicyOutput.of_xml (response_to_xml resp))
+      then
+        let body = Policy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetBucketPolicyOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | GetBucketPolicyStatus ->
       if is_success
-      then Ok (GetBucketPolicyStatusOutput.of_xml (response_to_xml resp))
+      then
+        let body = PolicyStatus.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetBucketPolicyStatusOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | GetBucketReplication ->
       if is_success
-      then Ok (GetBucketReplicationOutput.of_xml (response_to_xml resp))
+      then
+        let body =
+          ReplicationConfiguration.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetBucketReplicationOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | GetBucketRequestPayment ->
       if is_success
@@ -1465,16 +1511,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some GetObjectAttributesOutput.error_of_xml))
   | GetObjectLegalHold ->
       if is_success
-      then Ok (GetObjectLegalHoldOutput.of_xml (response_to_xml resp))
+      then
+        let body =
+          ObjectLockLegalHold.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetObjectLegalHoldOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | GetObjectLockConfiguration ->
       if is_success
       then
-        Ok (GetObjectLockConfigurationOutput.of_xml (response_to_xml resp))
+        let body =
+          ObjectLockConfiguration.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetObjectLockConfigurationOutput.of_header_and_body
+             (headers, body))
       else Error (parse_aws_error None)
   | GetObjectRetention ->
       if is_success
-      then Ok (GetObjectRetentionOutput.of_xml (response_to_xml resp))
+      then
+        let body =
+          ObjectLockRetention.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetObjectRetentionOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | GetObjectTagging ->
       if is_success
@@ -1490,7 +1552,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error None)
   | GetPublicAccessBlock ->
       if is_success
-      then Ok (GetPublicAccessBlockOutput.of_xml (response_to_xml resp))
+      then
+        let body =
+          PublicAccessBlockConfiguration.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetPublicAccessBlockOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | HeadBucket -> if is_success then Ok () else Error (parse_aws_error None)
   | HeadObject ->
@@ -1646,7 +1714,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some RestoreObjectOutput.error_of_xml))
   | SelectObjectContent ->
       if is_success
-      then Ok (SelectObjectContentOutput.of_xml (response_to_xml resp))
+      then
+        let body =
+          SelectObjectContentEventStream.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (SelectObjectContentOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | UploadPart ->
       if is_success
@@ -1657,7 +1731,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error None)
   | UploadPartCopy ->
       if is_success
-      then Ok (UploadPartCopyOutput.of_xml (response_to_xml resp))
+      then
+        let body = CopyPartResult.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UploadPartCopyOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
   | WriteGetObjectResponse ->
       if is_success then Ok () else Error (parse_aws_error None)

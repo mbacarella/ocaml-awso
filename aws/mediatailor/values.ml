@@ -110,6 +110,7 @@ module AvailMatchingCriteria =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DynamicVariable") in
       make ~operator ~dynamicVariable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let operator = field_map_exn json "Operator" Operator.of_json in
       let dynamicVariable =
@@ -185,6 +186,7 @@ module DashPlaylistSettings =
           (Xml.child xml_arg0 "ManifestWindowSeconds") in
       make ?suggestedPresentationDelaySeconds ?minUpdatePeriodSeconds
         ?minBufferTimeSeconds ?manifestWindowSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggestedPresentationDelaySeconds =
         field_map json "SuggestedPresentationDelaySeconds"
@@ -217,6 +219,7 @@ module HlsPlaylistSettings =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "ManifestWindowSeconds") in
       make ?manifestWindowSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let manifestWindowSeconds =
         field_map json "ManifestWindowSeconds" Zz__integer.of_json in
@@ -280,6 +283,7 @@ module HttpPackageConfiguration =
       let path =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ~type_ ~sourceGroup ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" Type.of_json in
       let sourceGroup = field_map_exn json "SourceGroup" Zz__string.of_json in
@@ -346,6 +350,7 @@ module SecretsManagerAccessTokenConfiguration =
       let headerName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "HeaderName") in
       make ?secretStringKey ?secretArn ?headerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretStringKey =
         field_map json "SecretStringKey" Zz__string.of_json in
@@ -373,6 +378,7 @@ module SegmentDeliveryConfiguration =
       let baseUrl =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "BaseUrl") in
       make ?name ?baseUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" Zz__string.of_json in
       let baseUrl = field_map json "BaseUrl" Zz__string.of_json in
@@ -499,6 +505,7 @@ module AdMarkerPassthrough =
       let enabled =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Zz__boolean.of_json in
       make ?enabled ()
@@ -564,6 +571,7 @@ module ResponseOutputItem =
           (Xml.child xml_arg0 "DashPlaylistSettings") in
       make ~sourceGroup ~playbackUrl ~manifestName ?hlsPlaylistSettings
         ?dashPlaylistSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceGroup = field_map_exn json "SourceGroup" Zz__string.of_json in
       let playbackUrl = field_map_exn json "PlaybackUrl" Zz__string.of_json in
@@ -627,6 +635,7 @@ module ScheduleAdBreak =
           (Xml.child xml_arg0 "ApproximateDurationSeconds") in
       make ?vodSourceName ?sourceLocationName ?approximateStartTime
         ?approximateDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
@@ -693,6 +702,7 @@ module AccessConfiguration =
       let accessType =
         (Option.map ~f:AccessType.of_xml) (Xml.child xml_arg0 "AccessType") in
       make ?secretsManagerAccessTokenConfiguration ?accessType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretsManagerAccessTokenConfiguration =
         field_map json "SecretsManagerAccessTokenConfiguration"
@@ -717,6 +727,7 @@ module DefaultSegmentDeliveryConfiguration =
       let baseUrl =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "BaseUrl") in
       make ?baseUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let baseUrl = field_map json "BaseUrl" Zz__string.of_json in
       make ?baseUrl ()
@@ -741,6 +752,7 @@ module HttpConfiguration =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BaseUrl") in
       make ~baseUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let baseUrl = field_map_exn json "BaseUrl" Zz__string.of_json in
       make ~baseUrl ()
@@ -809,6 +821,7 @@ module PrefetchConsumption =
         (Option.map ~f:Zz__listOfAvailMatchingCriteria.of_xml)
           (Xml.child xml_arg0 "AvailMatchingCriteria") in
       make ?startTime ~endTime ?availMatchingCriteria ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" Zz__timestampUnix.of_json in
       let endTime = field_map_exn json "EndTime" Zz__timestampUnix.of_json in
@@ -854,6 +867,7 @@ module PrefetchRetrieval =
         (Option.map ~f:Zz__mapOf__string.of_xml)
           (Xml.child xml_arg0 "DynamicVariables") in
       make ?startTime ~endTime ?dynamicVariables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" Zz__timestampUnix.of_json in
       let endTime = field_map_exn json "EndTime" Zz__timestampUnix.of_json in
@@ -884,6 +898,7 @@ module AvailSuppression =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Value") in
       let mode = (Option.map ~f:Mode.of_xml) (Xml.child xml_arg0 "Mode") in
       make ?value ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" Zz__string.of_json in
       let mode = field_map json "Mode" Mode.of_json in make ?value ?mode ()
@@ -910,6 +925,7 @@ module Bumper =
       let endUrl =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "EndUrl") in
       make ?startUrl ?endUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startUrl = field_map json "StartUrl" Zz__string.of_json in
       let endUrl = field_map json "EndUrl" Zz__string.of_json in
@@ -945,6 +961,7 @@ module CdnConfiguration =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "AdSegmentUrlPrefix") in
       make ?contentSegmentUrlPrefix ?adSegmentUrlPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentSegmentUrlPrefix =
         field_map json "ContentSegmentUrlPrefix" Zz__string.of_json in
@@ -1021,6 +1038,7 @@ module DashConfiguration =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "ManifestEndpointPrefix") in
       make ?originManifestType ?mpdLocation ?manifestEndpointPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originManifestType =
         field_map json "OriginManifestType" OriginManifestType.of_json in
@@ -1048,6 +1066,7 @@ module HlsConfiguration =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "ManifestEndpointPrefix") in
       make ?manifestEndpointPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let manifestEndpointPrefix =
         field_map json "ManifestEndpointPrefix" Zz__string.of_json in
@@ -1082,6 +1101,7 @@ module LivePreRollConfiguration =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "AdDecisionServerUrl") in
       make ?maxDurationSeconds ?adDecisionServerUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxDurationSeconds =
         field_map json "MaxDurationSeconds" Zz__integer.of_json in
@@ -1108,6 +1128,7 @@ module LogConfiguration =
         Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PercentEnabled") in
       make ~percentEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let percentEnabled =
         field_map_exn json "PercentEnabled" Zz__integer.of_json in
@@ -1133,6 +1154,7 @@ module ManifestProcessingRules =
         (Option.map ~f:AdMarkerPassthrough.of_xml)
           (Xml.child xml_arg0 "AdMarkerPassthrough") in
       make ?adMarkerPassthrough ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adMarkerPassthrough =
         field_map json "AdMarkerPassthrough" AdMarkerPassthrough.of_json in
@@ -1207,6 +1229,7 @@ module SlateSource =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "SourceLocationName") in
       make ?vodSourceName ?sourceLocationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
@@ -1352,6 +1375,7 @@ module SpliceInsertMessage =
       let availNum =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "AvailNum") in
       make ?uniqueProgramId ?spliceEventId ?availsExpected ?availNum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uniqueProgramId =
         field_map json "UniqueProgramId" Zz__integer.of_json in
@@ -1438,6 +1462,7 @@ module RequestOutputItem =
           (Xml.child xml_arg0 "DashPlaylistSettings") in
       make ~sourceGroup ~manifestName ?hlsPlaylistSettings
         ?dashPlaylistSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceGroup = field_map_exn json "SourceGroup" Zz__string.of_json in
       let manifestName = field_map_exn json "ManifestName" Zz__string.of_json in
@@ -1524,6 +1549,7 @@ module VodSource =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~vodSourceName ?tags ~sourceLocationName ?lastModifiedTime
         ~httpPackageConfigurations ?creationTime ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName =
         field_map_exn json "VodSourceName" Zz__string.of_json in
@@ -1639,6 +1665,7 @@ module SourceLocation =
         ?lastModifiedTime ~httpConfiguration
         ?defaultSegmentDeliveryConfiguration ?creationTime ~arn
         ?accessConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
@@ -1732,6 +1759,7 @@ module PrefetchSchedule =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?streamId ~retrieval ~playbackConfigurationName ~name ~consumption
         ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "StreamId" Zz__string.of_json in
       let retrieval =
@@ -1946,6 +1974,7 @@ module PlaybackConfiguration =
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
         ?hlsConfiguration ?dashConfiguration ?configurationAliases
         ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoContentSourceUrl =
         field_map json "VideoContentSourceUrl" Zz__string.of_json in
@@ -2081,6 +2110,7 @@ module Channel =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?tags ~playbackMode ~outputs ?lastModifiedTime ?fillerSlate
         ?creationTime ~channelState ~channelName ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let playbackMode = field_map_exn json "PlaybackMode" Zz__string.of_json in
@@ -2155,6 +2185,7 @@ module Alert =
           (Xml.child_exn ~context:context_ xml_arg0 "AlertCode") in
       make ~resourceArn ~relatedResourceArns ~lastModifiedTime ~alertMessage
         ~alertCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
       let relatedResourceArns =
@@ -2258,6 +2289,7 @@ module ScheduleEntry =
       make ~vodSourceName ~sourceLocationName ?scheduleEntryType
         ?scheduleAdBreaks ~programName ~channelName ~arn
         ?approximateStartTime ?approximateDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName =
         field_map_exn json "VodSourceName" Zz__string.of_json in
@@ -2319,6 +2351,7 @@ module AdBreak =
       let messageType =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "MessageType") in
       make ?spliceInsertMessage ?slate ?offsetMillis ?messageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spliceInsertMessage =
         field_map json "SpliceInsertMessage" SpliceInsertMessage.of_json in
@@ -2380,6 +2413,7 @@ module Transition =
           (Xml.child_exn ~context:context_ xml_arg0 "RelativePosition") in
       make ~type_ ?scheduledStartTimeMillis ?relativeProgram
         ~relativePosition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" Zz__string.of_json in
       let scheduledStartTimeMillis =
@@ -2499,6 +2533,7 @@ module DashConfigurationForPut =
       let mpdLocation =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MpdLocation") in
       make ?originManifestType ?mpdLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originManifestType =
         field_map json "OriginManifestType" OriginManifestType.of_json in
@@ -2561,6 +2596,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Zz__string.of_json in
       make ?message ()
@@ -2774,6 +2810,7 @@ module ScheduleConfiguration =
         Transition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Transition") in
       make ~transition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transition = field_map_exn json "Transition" Transition.of_json in
       make ~transition ()
@@ -2890,6 +2927,7 @@ module UpdateVodSourceResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
         ?httpPackageConfigurations ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
@@ -2947,6 +2985,7 @@ module UpdateVodSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "HttpPackageConfigurations") in
       make ~vodSourceName ~sourceLocationName ~httpPackageConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName =
         field_map_exn json "VodSourceName" Zz__string.of_json in
@@ -3073,6 +3112,7 @@ module UpdateSourceLocationResponse =
         ?lastModifiedTime ?httpConfiguration
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
@@ -3164,6 +3204,7 @@ module UpdateSourceLocationRequest =
       make ~sourceLocationName ?segmentDeliveryConfigurations
         ~httpConfiguration ?defaultSegmentDeliveryConfiguration
         ?accessConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceLocationName =
         field_map_exn json "SourceLocationName" Zz__string.of_json in
@@ -3282,6 +3323,7 @@ module UpdateChannelResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
         ?creationTime ?channelState ?channelName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let playbackMode = field_map json "PlaybackMode" Zz__string.of_json in
@@ -3329,6 +3371,7 @@ module UpdateChannelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~outputs ?fillerSlate ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputs = field_map_exn json "Outputs" RequestOutputs.of_json in
       let fillerSlate = field_map json "FillerSlate" SlateSource.of_json in
@@ -3362,6 +3405,7 @@ module UntagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
@@ -3393,6 +3437,7 @@ module TagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
@@ -3426,6 +3471,7 @@ module StopChannelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a specific channel."]
@@ -3446,6 +3492,7 @@ module StopChannelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
       make ~channelName ()
@@ -3477,6 +3524,7 @@ module StartChannelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a specific channel."]
@@ -3497,6 +3545,7 @@ module StartChannelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
       make ~channelName ()
@@ -3719,6 +3768,7 @@ module PutPlaybackConfigurationResponse =
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
         ?hlsConfiguration ?dashConfiguration ?configurationAliases
         ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoContentSourceUrl =
         field_map json "VideoContentSourceUrl" Zz__string.of_json in
@@ -3915,6 +3965,7 @@ module PutPlaybackConfigurationRequest =
         ?personalizationThresholdSeconds ?name ?manifestProcessingRules
         ?livePreRollConfiguration ?dashConfiguration ?configurationAliases
         ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoContentSourceUrl =
         field_map json "VideoContentSourceUrl" Zz__string.of_json in
@@ -3977,6 +4028,7 @@ module PutChannelPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an IAM policy for the channel."]
@@ -4003,6 +4055,7 @@ module PutChannelPolicyRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~policy ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" Zz__string.of_json in
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
@@ -4049,6 +4102,7 @@ module ListVodSourcesResponse =
         (Option.map ~f:Zz__listOfVodSource.of_xml)
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let items = field_map json "Items" Zz__listOfVodSource.of_json in
@@ -4089,6 +4143,7 @@ module ListVodSourcesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~sourceLocationName ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceLocationName =
         field_map_exn json "SourceLocationName" Zz__string.of_json in
@@ -4139,6 +4194,7 @@ module ListTagsForResourceResponse =
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       make ?tags ()
@@ -4163,6 +4219,7 @@ module ListTagsForResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
@@ -4209,6 +4266,7 @@ module ListSourceLocationsResponse =
         (Option.map ~f:Zz__listOfSourceLocation.of_xml)
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let items = field_map json "Items" Zz__listOfSourceLocation.of_json in
@@ -4238,6 +4296,7 @@ module ListSourceLocationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4286,6 +4345,7 @@ module ListPrefetchSchedulesResponse =
         (Option.map ~f:Zz__listOfPrefetchSchedule.of_xml)
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let items = field_map json "Items" Zz__listOfPrefetchSchedule.of_json in
@@ -4336,6 +4396,7 @@ module ListPrefetchSchedulesRequest =
         (Option.map ~f:Zz__integerMin1Max100.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?streamId ~playbackConfigurationName ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "StreamId" Zz__string.of_json in
       let playbackConfigurationName =
@@ -4388,6 +4449,7 @@ module ListPlaybackConfigurationsResponse =
         (Option.map ~f:Zz__listOfPlaybackConfiguration.of_xml)
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let items =
@@ -4418,6 +4480,7 @@ module ListPlaybackConfigurationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4465,6 +4528,7 @@ module ListChannelsResponse =
       let items =
         (Option.map ~f:Zz__listOfChannel.of_xml) (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let items = field_map json "Items" Zz__listOfChannel.of_json in
@@ -4495,6 +4559,7 @@ module ListChannelsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4542,6 +4607,7 @@ module ListAlertsResponse =
       let items =
         (Option.map ~f:Zz__listOfAlert.of_xml) (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let items = field_map json "Items" Zz__listOfAlert.of_json in
@@ -4579,6 +4645,7 @@ module ListAlertsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~resourceArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
       let nextToken = field_map json "NextToken" Zz__string.of_json in
@@ -4669,6 +4736,7 @@ module GetPrefetchScheduleResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?streamId ?retrieval ?playbackConfigurationName ?name ?consumption
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "StreamId" Zz__string.of_json in
       let retrieval = field_map json "Retrieval" PrefetchRetrieval.of_json in
@@ -4709,6 +4777,7 @@ module GetPrefetchScheduleRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~playbackConfigurationName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playbackConfigurationName =
         field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
@@ -4934,6 +5003,7 @@ module GetPlaybackConfigurationResponse =
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
         ?hlsConfiguration ?dashConfiguration ?configurationAliases
         ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoContentSourceUrl =
         field_map json "VideoContentSourceUrl" Zz__string.of_json in
@@ -4998,6 +5068,7 @@ module GetPlaybackConfigurationRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -5044,6 +5115,7 @@ module GetChannelScheduleResponse =
         (Option.map ~f:Zz__listOfScheduleEntry.of_xml)
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let items = field_map json "Items" Zz__listOfScheduleEntry.of_json in
@@ -5091,6 +5163,7 @@ module GetChannelScheduleRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ?nextToken ?maxResults ?durationMinutes ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5133,6 +5206,7 @@ module GetChannelPolicyResponse =
       let policy =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Zz__string.of_json in
       make ?policy ()
@@ -5155,6 +5229,7 @@ module GetChannelPolicyRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
       make ~channelName ()
@@ -5251,6 +5326,7 @@ module DescribeVodSourceResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
         ?httpPackageConfigurations ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
@@ -5295,6 +5371,7 @@ module DescribeVodSourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
       make ~vodSourceName ~sourceLocationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName =
         field_map_exn json "VodSourceName" Zz__string.of_json in
@@ -5418,6 +5495,7 @@ module DescribeSourceLocationResponse =
         ?lastModifiedTime ?httpConfiguration
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
@@ -5463,6 +5541,7 @@ module DescribeSourceLocationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
       make ~sourceLocationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceLocationName =
         field_map_exn json "SourceLocationName" Zz__string.of_json in
@@ -5565,6 +5644,7 @@ module DescribeProgramResponse =
           (Xml.child xml_arg0 "AdBreaks") in
       make ?vodSourceName ?sourceLocationName ?scheduledStartTime
         ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
@@ -5605,6 +5685,7 @@ module DescribeProgramRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~programName ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let programName = field_map_exn json "ProgramName" Zz__string.of_json in
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
@@ -5711,6 +5792,7 @@ module DescribeChannelResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
         ?creationTime ?channelState ?channelName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let playbackMode = field_map json "PlaybackMode" Zz__string.of_json in
@@ -5744,6 +5826,7 @@ module DescribeChannelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
       make ~channelName ()
@@ -5775,6 +5858,7 @@ module DeleteVodSourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5805,6 +5889,7 @@ module DeleteVodSourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
       make ~vodSourceName ~sourceLocationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName =
         field_map_exn json "VodSourceName" Zz__string.of_json in
@@ -5840,6 +5925,7 @@ module DeleteSourceLocationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a source location on a specific channel."]
@@ -5862,6 +5948,7 @@ module DeleteSourceLocationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
       make ~sourceLocationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceLocationName =
         field_map_exn json "SourceLocationName" Zz__string.of_json in
@@ -5894,6 +5981,7 @@ module DeleteProgramResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a specific program on a specific channel."]
@@ -5921,6 +6009,7 @@ module DeleteProgramRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~programName ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let programName = field_map_exn json "ProgramName" Zz__string.of_json in
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
@@ -5953,6 +6042,7 @@ module DeletePrefetchScheduleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5983,6 +6073,7 @@ module DeletePrefetchScheduleRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~playbackConfigurationName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playbackConfigurationName =
         field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
@@ -6017,6 +6108,7 @@ module DeletePlaybackConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6036,6 +6128,7 @@ module DeletePlaybackConfigurationRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Zz__string.of_json in
       make ~name ()
@@ -6068,6 +6161,7 @@ module DeleteChannelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6089,6 +6183,7 @@ module DeleteChannelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
       make ~channelName ()
@@ -6121,6 +6216,7 @@ module DeleteChannelPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a channel's IAM policy."]
@@ -6141,6 +6237,7 @@ module DeleteChannelPolicyRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
       make ~channelName ()
@@ -6237,6 +6334,7 @@ module CreateVodSourceResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
         ?httpPackageConfigurations ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
@@ -6306,6 +6404,7 @@ module CreateVodSourceRequest =
              "HttpPackageConfigurations") in
       make ~vodSourceName ?tags ~sourceLocationName
         ~httpPackageConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName =
         field_map_exn json "VodSourceName" Zz__string.of_json in
@@ -6434,6 +6533,7 @@ module CreateSourceLocationResponse =
         ?lastModifiedTime ?httpConfiguration
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
@@ -6532,6 +6632,7 @@ module CreateSourceLocationRequest =
       make ?tags ~sourceLocationName ?segmentDeliveryConfigurations
         ~httpConfiguration ?defaultSegmentDeliveryConfiguration
         ?accessConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
@@ -6646,6 +6747,7 @@ module CreateProgramResponse =
           (Xml.child xml_arg0 "AdBreaks") in
       make ?vodSourceName ?sourceLocationName ?scheduledStartTime
         ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
@@ -6726,6 +6828,7 @@ module CreateProgramRequest =
           (Xml.child xml_arg0 "AdBreaks") in
       make ~vodSourceName ~sourceLocationName ~scheduleConfiguration
         ~programName ~channelName ?adBreaks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vodSourceName =
         field_map_exn json "VodSourceName" Zz__string.of_json in
@@ -6824,6 +6927,7 @@ module CreatePrefetchScheduleResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?streamId ?retrieval ?playbackConfigurationName ?name ?consumption
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "StreamId" Zz__string.of_json in
       let retrieval = field_map json "Retrieval" PrefetchRetrieval.of_json in
@@ -6895,6 +6999,7 @@ module CreatePrefetchScheduleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Consumption") in
       make ?streamId ~retrieval ~playbackConfigurationName ~name ~consumption
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "StreamId" Zz__string.of_json in
       let retrieval =
@@ -7009,6 +7114,7 @@ module CreateChannelResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
         ?creationTime ?channelState ?channelName ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let playbackMode = field_map json "PlaybackMode" Zz__string.of_json in
@@ -7072,6 +7178,7 @@ module CreateChannelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ?tags ~playbackMode ~outputs ?fillerSlate ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Zz__mapOf__string.of_json in
       let playbackMode =
@@ -7127,6 +7234,7 @@ module ConfigureLogsForPlaybackConfigurationResponse =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "PercentEnabled") in
       make ?playbackConfigurationName ?percentEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playbackConfigurationName =
         field_map json "PlaybackConfigurationName" Zz__string.of_json in
@@ -7164,6 +7272,7 @@ module ConfigureLogsForPlaybackConfigurationRequest =
         Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PercentEnabled") in
       make ~playbackConfigurationName ~percentEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playbackConfigurationName =
         field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in

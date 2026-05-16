@@ -239,6 +239,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -321,6 +322,7 @@ module Block =
       let blockIndex =
         (Option.map ~f:BlockIndex.of_xml) (Xml.child xml_arg0 "BlockIndex") in
       make ?blockToken ?blockIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blockToken = field_map json "BlockToken" BlockToken.of_json in
       let blockIndex = field_map json "BlockIndex" BlockIndex.of_json in
@@ -361,6 +363,7 @@ module ChangedBlock =
       let blockIndex =
         (Option.map ~f:BlockIndex.of_xml) (Xml.child xml_arg0 "BlockIndex") in
       make ?secondBlockToken ?firstBlockToken ?blockIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secondBlockToken =
         field_map json "SecondBlockToken" BlockToken.of_json in
@@ -392,6 +395,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ~reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map_exn json "Reason" AccessDeniedExceptionReason.of_json in
@@ -426,6 +430,7 @@ module ConcurrentLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -445,6 +450,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -482,6 +488,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -550,6 +557,7 @@ module RequestThrottledException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" RequestThrottledExceptionReason.of_json in
@@ -579,6 +587,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" ResourceNotFoundExceptionReason.of_json in
@@ -608,6 +617,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" ServiceQuotaExceededExceptionReason.of_json in
@@ -720,6 +730,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" ValidationExceptionReason.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -1165,6 +1176,7 @@ module StartSnapshotResponse =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       make ?kmsKeyArn ?parentSnapshotId ?tags ?blockSize ?volumeSize
         ?startTime ?status ?ownerId ?snapshotId ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
       let parentSnapshotId =
@@ -1261,6 +1273,7 @@ module StartSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeSize") in
       make ?timeout ?kmsKeyArn ?encrypted ?clientToken ?description ?tags
         ?parentSnapshotId ~volumeSize ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeout = field_map json "Timeout" Timeout.of_json in
       let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
@@ -1387,6 +1400,7 @@ module PutSnapshotBlockResponse =
       let checksum =
         (Option.map ~f:Checksum.of_xml) (Xml.child xml_arg0 "x-amz-Checksum") in
       make ?checksumAlgorithm ?checksum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -1437,6 +1451,29 @@ module PutSnapshotBlockRequest =
                       checksum;
                       checksumAlgorithm
                     }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~snapshotId:(SnapshotId.of_string
+                           ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                              xs "snapshotId"))
+            ~blockIndex:(BlockIndex.of_string
+                           ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                              xs "blockIndex")) ~blockData:pipe
+            ~dataLength:(DataLength.of_string
+                           ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                              xs "x-amz-Data-Length"))
+            ?progress:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "x-amz-Progress") ~f:Progress.of_string)
+            ~checksum:(Checksum.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "x-amz-Checksum"))
+            ~checksumAlgorithm:(ChecksumAlgorithm.of_string
+                                  ((List.Assoc.find_exn
+                                      ~equal:String.Caseless.equal) xs
+                                     "x-amz-Checksum-Algorithm")) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("snapshotId", (Some (SnapshotId.to_value x.snapshotId)));
@@ -1472,6 +1509,7 @@ module PutSnapshotBlockRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "snapshotId") in
       make ~checksumAlgorithm ~checksum ?progress ~dataLength ~blockData
         ~blockIndex ~snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map_exn json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -1603,6 +1641,7 @@ module ListSnapshotBlocksResponse =
       let blocks =
         (Option.map ~f:Blocks.of_xml) (Xml.child xml_arg0 "Blocks") in
       make ?nextToken ?blockSize ?volumeSize ?expiryTime ?blocks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PageToken.of_json in
       let blockSize = field_map json "BlockSize" BlockSize.of_json in
@@ -1656,6 +1695,7 @@ module ListSnapshotBlocksRequest =
         SnapshotId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "snapshotId") in
       make ?startingBlockIndex ?maxResults ?nextToken ~snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startingBlockIndex =
         field_map json "StartingBlockIndex" BlockIndex.of_json in
@@ -1786,6 +1826,7 @@ module ListChangedBlocksResponse =
         (Option.map ~f:ChangedBlocks.of_xml)
           (Xml.child xml_arg0 "ChangedBlocks") in
       make ?nextToken ?blockSize ?volumeSize ?expiryTime ?changedBlocks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PageToken.of_json in
       let blockSize = field_map json "BlockSize" BlockSize.of_json in
@@ -1856,6 +1897,7 @@ module ListChangedBlocksRequest =
           (Xml.child xml_arg0 "firstSnapshotId") in
       make ?startingBlockIndex ?maxResults ?nextToken ~secondSnapshotId
         ?firstSnapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startingBlockIndex =
         field_map json "StartingBlockIndex" BlockIndex.of_json in
@@ -2000,6 +2042,7 @@ module GetSnapshotBlockResponse =
         (Option.map ~f:DataLength.of_xml)
           (Xml.child xml_arg0 "x-amz-Data-Length") in
       make ?checksumAlgorithm ?checksum ?blockData ?dataLength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAlgorithm =
         field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
@@ -2044,6 +2087,7 @@ module GetSnapshotBlockRequest =
         SnapshotId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "snapshotId") in
       make ~blockToken ~blockIndex ~snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let blockToken = field_map_exn json "BlockToken" BlockToken.of_json in
       let blockIndex = field_map_exn json "BlockIndex" BlockIndex.of_json in
@@ -2140,6 +2184,7 @@ module CompleteSnapshotResponse =
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in make ?status ()
     let to_json v = composed_to_json to_value v
@@ -2206,6 +2251,7 @@ module CompleteSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "snapshotId") in
       make ?checksumAggregationMethod ?checksumAlgorithm ?checksum
         ~changedBlocksCount ~snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checksumAggregationMethod =
         field_map json "ChecksumAggregationMethod"

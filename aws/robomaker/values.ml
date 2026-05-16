@@ -109,6 +109,7 @@ module PortMapping =
       let jobPort =
         Port.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobPort") in
       make ?enableOnPublicIp ~applicationPort ~jobPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableOnPublicIp =
         field_map json "enableOnPublicIp" Boolean.of_json in
@@ -459,6 +460,7 @@ module PortForwardingConfig =
         (Option.map ~f:PortMappingList.of_xml)
           (Xml.child xml_arg0 "portMappings") in
       make ?portMappings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portMappings =
         field_map json "portMappings" PortMappingList.of_json in
@@ -522,6 +524,7 @@ module Tool =
         (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "streamUI") in
       make ?exitBehavior ?streamOutputToCloudWatch ~command ~name ?streamUI
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exitBehavior = field_map json "exitBehavior" ExitBehavior.of_json in
       let streamOutputToCloudWatch =
@@ -566,6 +569,7 @@ module UploadConfiguration =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~uploadBehavior ~path ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadBehavior =
         field_map_exn json "uploadBehavior" UploadBehavior.of_json in
@@ -588,6 +592,7 @@ module WorldConfig =
     let of_xml xml_arg0 =
       let world = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "world") in
       make ?world ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let world = field_map json "world" Arn.of_json in make ?world ()
     let to_json v = composed_to_json to_value v
@@ -743,6 +748,7 @@ module LaunchConfig =
         (Option.map ~f:Command.of_xml) (Xml.child xml_arg0 "packageName") in
       make ?command ?streamUI ?portForwardingConfig ?environmentVariables
         ?launchFile ?packageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let command = field_map json "command" CommandList.of_json in
       let streamUI = field_map json "streamUI" Boolean.of_json in
@@ -878,6 +884,7 @@ module S3KeyOutput =
       let s3Key =
         (Option.map ~f:S3KeyOrPrefix.of_xml) (Xml.child xml_arg0 "s3Key") in
       make ?etag ?s3Key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let etag = field_map json "etag" S3Etag.of_json in
       let s3Key = field_map json "s3Key" S3KeyOrPrefix.of_json in
@@ -987,6 +994,7 @@ module DataSourceConfig =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?destination ?type_ ~s3Keys ~s3Bucket ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination = field_map json "destination" Path.of_json in
       let type_ = field_map json "type" DataSourceType.of_json in
@@ -1092,6 +1100,7 @@ module RobotApplicationConfig =
       make ?useDefaultTools ?tools ?useDefaultUploadConfigurations
         ?uploadConfigurations ~launchConfig ?applicationVersion ~application
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDefaultTools =
         field_map json "useDefaultTools" BoxedBoolean.of_json in
@@ -1198,6 +1207,7 @@ module SimulationApplicationConfig =
       make ?useDefaultTools ?tools ?useDefaultUploadConfigurations
         ?worldConfigs ?uploadConfigurations ~launchConfig ?applicationVersion
         ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useDefaultTools =
         field_map json "useDefaultTools" BoxedBoolean.of_json in
@@ -1371,6 +1381,7 @@ module DeploymentLaunchConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "packageName") in
       make ?environmentVariables ?postLaunchFile ~launchFile ?preLaunchFile
         ~packageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentVariables =
         field_map json "environmentVariables" EnvironmentVariableMap.of_json in
@@ -1531,6 +1542,7 @@ module Compute =
         (Option.map ~f:SimulationUnit.of_xml)
           (Xml.child xml_arg0 "simulationUnitLimit") in
       make ?gpuUnitLimit ?computeType ?simulationUnitLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gpuUnitLimit = field_map json "gpuUnitLimit" GPUUnit.of_json in
       let computeType = field_map json "computeType" ComputeType.of_json in
@@ -1645,6 +1657,7 @@ module LoggingConfig =
         (Option.map ~f:BoxedBoolean.of_xml)
           (Xml.child xml_arg0 "recordAllRosTopics") in
       make ?recordAllRosTopics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordAllRosTopics =
         field_map json "recordAllRosTopics" BoxedBoolean.of_json in
@@ -1671,6 +1684,7 @@ module OutputLocation =
       let s3Bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       make ?s3Prefix ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Prefix = field_map json "s3Prefix" S3Key.of_json in
       let s3Bucket = field_map json "s3Bucket" S3Bucket.of_json in
@@ -1800,6 +1814,7 @@ module VPCConfig =
       let subnets =
         Subnets.of_xml (Xml.child_exn ~context:context_ xml_arg0 "subnets") in
       make ?assignPublicIp ?securityGroups ~subnets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assignPublicIp = field_map json "assignPublicIp" Boolean.of_json in
       let securityGroups =
@@ -1990,6 +2005,7 @@ module DeploymentApplicationConfig =
       let application =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ~launchConfig ~applicationVersion ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchConfig =
         field_map_exn json "launchConfig" DeploymentLaunchConfig.of_json in
@@ -2053,6 +2069,7 @@ module S3Object =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
       make ?etag ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let etag = field_map json "etag" S3Etag.of_json in
       let key = field_map_exn json "key" S3Key.of_json in
@@ -2094,6 +2111,7 @@ module WorldFailure =
         (Option.map ~f:WorldGenerationJobErrorCode.of_xml)
           (Xml.child xml_arg0 "failureCode") in
       make ?failureCount ?sampleFailureReason ?failureCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureCount = field_map json "failureCount" Integer.of_json in
       let sampleFailureReason =
@@ -2216,6 +2234,7 @@ module DataSource =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?destination ?type_ ?s3Keys ?s3Bucket ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destination = field_map json "destination" Path.of_json in
       let type_ = field_map json "type" DataSourceType.of_json in
@@ -2512,6 +2531,7 @@ module SimulationJobRequest =
       make ?tags ?compute ?vpcConfig ?dataSources ?simulationApplications
         ?robotApplications ?useDefaultApplications ?failureBehavior ?iamRole
         ~maxJobDurationInSeconds ?loggingConfig ?outputLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let compute = field_map json "compute" Compute.of_json in
@@ -2759,6 +2779,7 @@ module WorldCount =
         (Option.map ~f:FloorplanCount.of_xml)
           (Xml.child xml_arg0 "floorplanCount") in
       make ?interiorCountPerFloorplan ?floorplanCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interiorCountPerFloorplan =
         field_map json "interiorCountPerFloorplan"
@@ -2950,6 +2971,7 @@ module RobotSoftwareSuite =
         (Option.map ~f:RobotSoftwareSuiteType.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version =
         field_map json "version" RobotSoftwareSuiteVersionType.of_json in
@@ -2983,6 +3005,7 @@ module SimulationSoftwareSuite =
         (Option.map ~f:SimulationSoftwareSuiteType.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version =
         field_map json "version" SimulationSoftwareSuiteVersionType.of_json in
@@ -3171,6 +3194,7 @@ module DeploymentConfig =
           (Xml.child xml_arg0 "concurrentDeploymentPercentage") in
       make ?downloadConditionFile ?robotDeploymentTimeoutInSeconds
         ?failureThresholdPercentage ?concurrentDeploymentPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downloadConditionFile =
         field_map json "downloadConditionFile" S3Object.of_json in
@@ -3362,6 +3386,7 @@ module ProgressDetail =
           (Xml.child xml_arg0 "currentProgress") in
       make ?targetResource ?estimatedTimeRemainingSeconds ?percentDone
         ?currentProgress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetResource =
         field_map json "targetResource" GenericString.of_json in
@@ -3427,6 +3452,7 @@ module ComputeResponse =
         (Option.map ~f:SimulationUnit.of_xml)
           (Xml.child xml_arg0 "simulationUnitLimit") in
       make ?gpuUnitLimit ?computeType ?simulationUnitLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gpuUnitLimit = field_map json "gpuUnitLimit" GPUUnit.of_json in
       let computeType = field_map json "computeType" ComputeType.of_json in
@@ -3506,6 +3532,7 @@ module NetworkInterface =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "networkInterfaceId") in
       make ?publicIpAddress ?privateIpAddress ?networkInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicIpAddress =
         field_map json "publicIpAddress" GenericString.of_json in
@@ -3567,6 +3594,7 @@ module VPCConfigResponse =
       let subnets =
         (Option.map ~f:Subnets.of_xml) (Xml.child xml_arg0 "subnets") in
       make ?assignPublicIp ?vpcId ?securityGroups ?subnets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assignPublicIp = field_map json "assignPublicIp" Boolean.of_json in
       let vpcId = field_map json "vpcId" GenericString.of_json in
@@ -3678,6 +3706,7 @@ module Source =
       let s3Bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       make ?architecture ?etag ?s3Key ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let architecture = field_map json "architecture" Architecture.of_json in
       let etag = field_map json "etag" S3Etag.of_json in
@@ -3712,6 +3741,7 @@ module SourceConfig =
       let s3Bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       make ?architecture ?s3Key ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let architecture = field_map json "architecture" Architecture.of_json in
       let s3Key = field_map json "s3Key" S3Key.of_json in
@@ -3786,6 +3816,7 @@ module FailedCreateSimulationJobRequest =
         (Option.map ~f:SimulationJobRequest.of_xml)
           (Xml.child xml_arg0 "request") in
       make ?failedAt ?failureCode ?failureReason ?request ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedAt = field_map json "failedAt" FailedAt.of_json in
       let failureCode =
@@ -3875,6 +3906,7 @@ module SimulationJobSummary =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?computeType ?dataSourceNames ?robotApplicationNames
         ?simulationApplicationNames ?status ?name ?lastUpdatedAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let computeType = field_map json "computeType" ComputeType.of_json in
       let dataSourceNames =
@@ -3928,6 +3960,7 @@ module WorldSummary =
         (Option.map ~f:CreatedAt.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?template ?generationJob ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map json "template" Arn.of_json in
       let generationJob = field_map json "generationJob" Arn.of_json in
@@ -3953,6 +3986,7 @@ module Filter =
         (Option.map ~f:FilterValues.of_xml) (Xml.child xml_arg0 "values") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "values" FilterValues.of_json in
       let name = field_map json "name" Name.of_json in make ?values ?name ()
@@ -4000,6 +4034,7 @@ module TemplateSummary =
         (Option.map ~f:CreatedAt.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?version ?name ?lastUpdatedAt ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" GenericString.of_json in
       let name = field_map json "name" TemplateName.of_json in
@@ -4080,6 +4115,7 @@ module WorldGenerationJobSummary =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?failedWorldCount ?succeededWorldCount ?worldCount ?status
         ?createdAt ?template ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedWorldCount =
         field_map json "failedWorldCount" Integer.of_json in
@@ -4136,6 +4172,7 @@ module WorldExportJobSummary =
           (Xml.child xml_arg0 "status") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?outputLocation ?worlds ?createdAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputLocation =
         field_map json "outputLocation" OutputLocation.of_json in
@@ -4220,6 +4257,7 @@ module SimulationJobBatchSummary =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?createdRequestCount ?pendingRequestCount ?failedRequestCount
         ?status ?createdAt ?lastUpdatedAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdRequestCount =
         field_map json "createdRequestCount" Integer.of_json in
@@ -4299,6 +4337,7 @@ module SimulationApplicationSummary =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?simulationSoftwareSuite ?robotSoftwareSuite ?lastUpdatedAt
         ?version ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let simulationSoftwareSuite =
         field_map json "simulationSoftwareSuite"
@@ -4394,6 +4433,7 @@ module Robot =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?lastDeploymentTime ?lastDeploymentJob ?architecture ?createdAt
         ?greenGrassGroupId ?status ?fleetArn ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastDeploymentTime =
         field_map json "lastDeploymentTime" CreatedAt.of_json in
@@ -4453,6 +4493,7 @@ module RobotApplicationSummary =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?robotSoftwareSuite ?lastUpdatedAt ?version ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let robotSoftwareSuite =
         field_map json "robotSoftwareSuite" RobotSoftwareSuite.of_json in
@@ -4523,6 +4564,7 @@ module Fleet =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?lastDeploymentTime ?lastDeploymentJob ?lastDeploymentStatus
         ?createdAt ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastDeploymentTime =
         field_map json "lastDeploymentTime" CreatedAt.of_json in
@@ -4614,6 +4656,7 @@ module DeploymentJob =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?createdAt ?failureCode ?failureReason ?deploymentConfig
         ?deploymentApplicationConfigs ?status ?fleet ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" CreatedAt.of_json in
       let failureCode =
@@ -4654,6 +4697,7 @@ module FailureSummary =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "totalFailureCount") in
       make ?failures ?totalFailureCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failures = field_map json "failures" WorldFailures.of_json in
       let totalFailureCount =
@@ -4735,6 +4779,7 @@ module RobotDeployment =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?failureCode ?failureReason ?progressDetail ?status
         ?deploymentFinishTime ?deploymentStartTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureCode =
         field_map json "failureCode" DeploymentJobErrorCode.of_json in
@@ -4947,6 +4992,7 @@ module SimulationJob =
         ?simulationTimeMillis ?maxJobDurationInSeconds ?loggingConfig
         ?outputLocation ?clientRequestToken ?failureReason ?failureCode
         ?failureBehavior ?lastUpdatedAt ?lastStartedAt ?status ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compute = field_map json "compute" ComputeResponse.of_json in
       let networkInterface =
@@ -5003,6 +5049,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5022,6 +5069,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5041,6 +5089,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5059,6 +5108,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5105,6 +5155,7 @@ module TemplateLocation =
       let s3Bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "s3Bucket") in
       make ~s3Key ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Key = field_map_exn json "s3Key" S3Key.of_json in
       let s3Bucket = field_map_exn json "s3Bucket" S3Bucket.of_json in
@@ -5127,6 +5178,7 @@ module Environment =
       let uri =
         (Option.map ~f:RepositoryUrl.of_xml) (Xml.child xml_arg0 "uri") in
       make ?uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uri = field_map json "uri" RepositoryUrl.of_json in make ?uri ()
     let to_json v = composed_to_json to_value v
@@ -5145,6 +5197,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5174,6 +5227,7 @@ module RenderingEngine =
         (Option.map ~f:RenderingEngineType.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version =
         field_map json "version" RenderingEngineVersionType.of_json in
@@ -5284,6 +5338,7 @@ module ConcurrentDeploymentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5302,6 +5357,7 @@ module IdempotentParameterMismatchException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5335,6 +5391,7 @@ module BatchPolicy =
         (Option.map ~f:BatchTimeoutInSeconds.of_xml)
           (Xml.child xml_arg0 "timeoutInSeconds") in
       make ?maxConcurrency ?timeoutInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxConcurrency =
         field_map json "maxConcurrency" MaxConcurrency.of_json in
@@ -5853,6 +5910,7 @@ module FinishedWorldsSummary =
       let finishedCount =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "finishedCount") in
       make ?failureSummary ?succeededWorlds ?finishedCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureSummary =
         field_map json "failureSummary" FailureSummary.of_json in
@@ -5960,6 +6018,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5978,6 +6037,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -6122,6 +6182,7 @@ module UpdateWorldTemplateResponse =
         (Option.map ~f:TemplateName.of_xml) (Xml.child xml_arg0 "name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?lastUpdatedAt ?createdAt ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedAt =
         field_map json "lastUpdatedAt" LastUpdatedAt.of_json in
@@ -6167,6 +6228,7 @@ module UpdateWorldTemplateRequest =
       let template =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "template") in
       make ?templateLocation ?templateBody ?name ~template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateLocation =
         field_map json "templateLocation" TemplateLocation.of_json in
@@ -6335,6 +6397,7 @@ module UpdateSimulationApplicationResponse =
       make ?environment ?revisionId ?lastUpdatedAt ?renderingEngine
         ?robotSoftwareSuite ?simulationSoftwareSuite ?sources ?version ?name
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let revisionId = field_map json "revisionId" RevisionId.of_json in
@@ -6431,6 +6494,7 @@ module UpdateSimulationApplicationRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?environment ?currentRevisionId ?renderingEngine
         ~robotSoftwareSuite ~simulationSoftwareSuite ?sources ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let currentRevisionId =
@@ -6585,6 +6649,7 @@ module UpdateRobotApplicationResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?environment ?revisionId ?lastUpdatedAt ?robotSoftwareSuite
         ?sources ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let revisionId = field_map json "revisionId" RevisionId.of_json in
@@ -6655,6 +6720,7 @@ module UpdateRobotApplicationRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?environment ?currentRevisionId ~robotSoftwareSuite ?sources
         ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let currentRevisionId =
@@ -6729,6 +6795,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6758,6 +6825,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -6827,6 +6895,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6854,6 +6923,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -7028,6 +7098,7 @@ module SyncDeploymentJobResponse =
       make ?createdAt ?failureCode ?failureReason
         ?deploymentApplicationConfigs ?deploymentConfig ?status ?fleet ?arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "createdAt" CreatedAt.of_json in
       let failureCode =
@@ -7072,6 +7143,7 @@ module SyncDeploymentJobRequest =
         ClientRequestToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientRequestToken") in
       make ~fleet ~clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleet = field_map_exn json "fleet" Arn.of_json in
       let clientRequestToken =
@@ -7257,6 +7329,7 @@ module StartSimulationJobBatchResponse =
       make ?tags ?createdRequests ?pendingRequests ?failedRequests
         ?failureReason ?failureCode ?batchPolicy ?clientRequestToken
         ?createdAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let createdRequests =
@@ -7332,6 +7405,7 @@ module StartSimulationJobBatchRequest =
           (Xml.child xml_arg0 "clientRequestToken") in
       make ?tags ~createSimulationJobRequests ?batchPolicy
         ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let createSimulationJobRequests =
@@ -7416,6 +7490,7 @@ module RestartSimulationJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Restarts a running simulation job."]
@@ -7433,6 +7508,7 @@ module RestartSimulationJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -7519,6 +7595,7 @@ module RegisterRobotResponse =
       let robot = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "robot") in
       let fleet = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "fleet") in
       make ?robot ?fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let robot = field_map json "robot" Arn.of_json in
       let fleet = field_map json "fleet" Arn.of_json in make ?robot ?fleet ()
@@ -7546,6 +7623,7 @@ module RegisterRobotRequest =
       let fleet =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "fleet") in
       make ~robot ~fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let robot = field_map_exn json "robot" Arn.of_json in
       let fleet = field_map_exn json "fleet" Arn.of_json in
@@ -7623,6 +7701,7 @@ module ListWorldsResponse =
         (Option.map ~f:WorldSummaries.of_xml)
           (Xml.child xml_arg0 "worldSummaries") in
       make ?nextToken ?worldSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let worldSummaries =
@@ -7660,6 +7739,7 @@ module ListWorldsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7737,6 +7817,7 @@ module ListWorldTemplatesResponse =
         (Option.map ~f:TemplateSummaries.of_xml)
           (Xml.child xml_arg0 "templateSummaries") in
       make ?nextToken ?templateSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let templateSummaries =
@@ -7768,6 +7849,7 @@ module ListWorldTemplatesRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -7849,6 +7931,7 @@ module ListWorldGenerationJobsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "worldGenerationJobSummaries") in
       make ?nextToken ~worldGenerationJobSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let worldGenerationJobSummaries =
@@ -7888,6 +7971,7 @@ module ListWorldGenerationJobsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -7967,6 +8051,7 @@ module ListWorldExportJobsResponse =
         WorldExportJobSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "worldExportJobSummaries") in
       make ?nextToken ~worldExportJobSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let worldExportJobSummaries =
@@ -8006,6 +8091,7 @@ module ListWorldExportJobsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8080,6 +8166,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -8101,6 +8188,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -8179,6 +8267,7 @@ module ListSimulationJobsResponse =
         SimulationJobSummaries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "simulationJobSummaries") in
       make ?nextToken ~simulationJobSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let simulationJobSummaries =
@@ -8219,6 +8308,7 @@ module ListSimulationJobsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8289,6 +8379,7 @@ module ListSimulationJobBatchesResponse =
         (Option.map ~f:SimulationJobBatchSummaries.of_xml)
           (Xml.child xml_arg0 "simulationJobBatchSummaries") in
       make ?nextToken ?simulationJobBatchSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let simulationJobBatchSummaries =
@@ -8328,6 +8419,7 @@ module ListSimulationJobBatchesRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8409,6 +8501,7 @@ module ListSimulationApplicationsResponse =
         (Option.map ~f:SimulationApplicationSummaries.of_xml)
           (Xml.child xml_arg0 "simulationApplicationSummaries") in
       make ?nextToken ?simulationApplicationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let simulationApplicationSummaries =
@@ -8458,6 +8551,7 @@ module ListSimulationApplicationsRequest =
         (Option.map ~f:VersionQualifier.of_xml)
           (Xml.child xml_arg0 "versionQualifier") in
       make ?filters ?maxResults ?nextToken ?versionQualifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8545,6 +8639,7 @@ module ListRobotsResponse =
       let robots =
         (Option.map ~f:Robots.of_xml) (Xml.child xml_arg0 "robots") in
       make ?nextToken ?robots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let robots = field_map json "robots" Robots.of_json in
@@ -8583,6 +8678,7 @@ module ListRobotsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8663,6 +8759,7 @@ module ListRobotApplicationsResponse =
         (Option.map ~f:RobotApplicationSummaries.of_xml)
           (Xml.child xml_arg0 "robotApplicationSummaries") in
       make ?nextToken ?robotApplicationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let robotApplicationSummaries =
@@ -8712,6 +8809,7 @@ module ListRobotApplicationsRequest =
         (Option.map ~f:VersionQualifier.of_xml)
           (Xml.child xml_arg0 "versionQualifier") in
       make ?filters ?maxResults ?nextToken ?versionQualifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8799,6 +8897,7 @@ module ListFleetsResponse =
       let fleetDetails =
         (Option.map ~f:Fleets.of_xml) (Xml.child xml_arg0 "fleetDetails") in
       make ?nextToken ?fleetDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let fleetDetails = field_map json "fleetDetails" Fleets.of_json in
@@ -8837,6 +8936,7 @@ module ListFleetsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "filters" Filters.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -8925,6 +9025,7 @@ module ListDeploymentJobsResponse =
         (Option.map ~f:DeploymentJobs.of_xml)
           (Xml.child xml_arg0 "deploymentJobs") in
       make ?nextToken ?deploymentJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let deploymentJobs =
@@ -8964,6 +9065,7 @@ module ListDeploymentJobsRequest =
       let filters =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -9040,6 +9142,7 @@ module GetWorldTemplateBodyResponse =
       let templateBody =
         (Option.map ~f:Json.of_xml) (Xml.child xml_arg0 "templateBody") in
       make ?templateBody ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateBody = field_map json "templateBody" Json.of_json in
       make ?templateBody ()
@@ -9067,6 +9170,7 @@ module GetWorldTemplateBodyRequest =
       let template =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "template") in
       make ?generationJob ?template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generationJob = field_map json "generationJob" Arn.of_json in
       let template = field_map json "template" Arn.of_json in
@@ -9195,6 +9299,7 @@ module DescribeWorldTemplateResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?version ?tags ?lastUpdatedAt ?createdAt ?name ?clientRequestToken
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "version" GenericString.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -9225,6 +9330,7 @@ module DescribeWorldTemplateRequest =
       let template =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "template") in
       make ~template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map_exn json "template" Arn.of_json in
       make ~template ()
@@ -9342,6 +9448,7 @@ module DescribeWorldResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?worldDescriptionBody ?tags ?createdAt ?template ?generationJob
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let worldDescriptionBody =
         field_map json "worldDescriptionBody" Json.of_json in
@@ -9370,6 +9477,7 @@ module DescribeWorldRequest =
       let world =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "world") in
       make ~world ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let world = field_map_exn json "world" Arn.of_json in make ~world ()
     let to_json v = composed_to_json to_value v
@@ -9535,6 +9643,7 @@ module DescribeWorldGenerationJobResponse =
       make ?worldTags ?tags ?finishedWorldsSummary ?worldCount ?template
         ?clientRequestToken ?failureReason ?failureCode ?createdAt ?status
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let worldTags = field_map json "worldTags" TagMap.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -9571,6 +9680,7 @@ module DescribeWorldGenerationJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -9725,6 +9835,7 @@ module DescribeWorldExportJobResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?iamRole ?outputLocation ?worlds ?clientRequestToken
         ?failureReason ?failureCode ?createdAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let iamRole = field_map json "iamRole" IamRole.of_json in
@@ -9759,6 +9870,7 @@ module DescribeWorldExportJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -10015,6 +10127,7 @@ module DescribeSimulationJobResponse =
         ?simulationTimeMillis ?maxJobDurationInSeconds ?loggingConfig
         ?outputLocation ?clientRequestToken ?failureReason ?failureCode
         ?failureBehavior ?lastUpdatedAt ?lastStartedAt ?status ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compute = field_map json "compute" ComputeResponse.of_json in
       let networkInterface =
@@ -10073,6 +10186,7 @@ module DescribeSimulationJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -10242,6 +10356,7 @@ module DescribeSimulationJobBatchResponse =
       make ?tags ?createdRequests ?pendingRequests ?failedRequests
         ?failureReason ?failureCode ?batchPolicy ?clientRequestToken
         ?createdAt ?lastUpdatedAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let createdRequests =
@@ -10282,6 +10397,7 @@ module DescribeSimulationJobBatchRequest =
       let batch =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "batch") in
       make ~batch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batch = field_map_exn json "batch" Arn.of_json in make ~batch ()
     let to_json v = composed_to_json to_value v
@@ -10451,6 +10567,7 @@ module DescribeSimulationApplicationResponse =
       make ?imageDigest ?environment ?tags ?lastUpdatedAt ?revisionId
         ?renderingEngine ?robotSoftwareSuite ?simulationSoftwareSuite
         ?sources ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
       let environment = field_map json "environment" Environment.of_json in
@@ -10499,6 +10616,7 @@ module DescribeSimulationApplicationRequest =
       let application =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?applicationVersion ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationVersion =
         field_map json "applicationVersion" Version.of_json in
@@ -10645,6 +10763,7 @@ module DescribeRobotResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?lastDeploymentTime ?lastDeploymentJob ?architecture
         ?createdAt ?greengrassGroupId ?status ?fleetArn ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let lastDeploymentTime =
@@ -10678,6 +10797,7 @@ module DescribeRobotRequest =
       let robot =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "robot") in
       make ~robot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let robot = field_map_exn json "robot" Arn.of_json in make ~robot ()
     let to_json v = composed_to_json to_value v
@@ -10826,6 +10946,7 @@ module DescribeRobotApplicationResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?imageDigest ?environment ?tags ?lastUpdatedAt ?revisionId
         ?robotSoftwareSuite ?sources ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
       let environment = field_map json "environment" Environment.of_json in
@@ -10868,6 +10989,7 @@ module DescribeRobotApplicationRequest =
       let application =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?applicationVersion ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationVersion =
         field_map json "applicationVersion" Version.of_json in
@@ -11000,6 +11122,7 @@ module DescribeFleetResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?tags ?lastDeploymentTime ?lastDeploymentJob ?lastDeploymentStatus
         ?createdAt ?robots ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let lastDeploymentTime =
@@ -11031,6 +11154,7 @@ module DescribeFleetRequest =
       let fleet =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "fleet") in
       make ~fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleet = field_map_exn json "fleet" Arn.of_json in make ~fleet ()
     let to_json v = composed_to_json to_value v
@@ -11186,6 +11310,7 @@ module DescribeDeploymentJobResponse =
       make ?tags ?robotDeploymentSummary ?createdAt ?failureCode
         ?failureReason ?deploymentApplicationConfigs ?deploymentConfig
         ?status ?fleet ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let robotDeploymentSummary =
@@ -11224,6 +11349,7 @@ module DescribeDeploymentJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -11301,6 +11427,7 @@ module DeregisterRobotResponse =
       let robot = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "robot") in
       let fleet = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "fleet") in
       make ?robot ?fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let robot = field_map json "robot" Arn.of_json in
       let fleet = field_map json "fleet" Arn.of_json in make ?robot ?fleet ()
@@ -11328,6 +11455,7 @@ module DeregisterRobotRequest =
       let fleet =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "fleet") in
       make ~robot ~fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let robot = field_map_exn json "robot" Arn.of_json in
       let fleet = field_map_exn json "fleet" Arn.of_json in
@@ -11397,6 +11525,7 @@ module DeleteWorldTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a world template."]
@@ -11416,6 +11545,7 @@ module DeleteWorldTemplateRequest =
       let template =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "template") in
       make ~template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map_exn json "template" Arn.of_json in
       make ~template ()
@@ -11474,6 +11604,7 @@ module DeleteSimulationApplicationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a simulation application."]
@@ -11502,6 +11633,7 @@ module DeleteSimulationApplicationRequest =
       let application =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?applicationVersion ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationVersion =
         field_map json "applicationVersion" Version.of_json in
@@ -11562,6 +11694,7 @@ module DeleteRobotResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11581,6 +11714,7 @@ module DeleteRobotRequest =
       let robot =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "robot") in
       make ~robot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let robot = field_map_exn json "robot" Arn.of_json in make ~robot ()
     let to_json v = composed_to_json to_value v
@@ -11639,6 +11773,7 @@ module DeleteRobotApplicationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a robot application."]
@@ -11667,6 +11802,7 @@ module DeleteRobotApplicationRequest =
       let application =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?applicationVersion ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applicationVersion =
         field_map json "applicationVersion" Version.of_json in
@@ -11727,6 +11863,7 @@ module DeleteFleetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11746,6 +11883,7 @@ module DeleteFleetRequest =
       let fleet =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "fleet") in
       make ~fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleet = field_map_exn json "fleet" Arn.of_json in make ~fleet ()
     let to_json v = composed_to_json to_value v
@@ -11868,6 +12006,7 @@ module CreateWorldTemplateResponse =
           (Xml.child xml_arg0 "clientRequestToken") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?name ?createdAt ?clientRequestToken ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let name = field_map json "name" TemplateName.of_json in
@@ -11929,6 +12068,7 @@ module CreateWorldTemplateRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
       make ?tags ?templateLocation ?templateBody ?name ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let templateLocation =
@@ -12114,6 +12254,7 @@ module CreateWorldGenerationJobResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?worldTags ?tags ?worldCount ?template ?clientRequestToken
         ?failureCode ?createdAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let worldTags = field_map json "worldTags" TagMap.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -12178,6 +12319,7 @@ module CreateWorldGenerationJobRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
       make ?worldTags ?tags ~worldCount ~template ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let worldTags = field_map json "worldTags" TagMap.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -12346,6 +12488,7 @@ module CreateWorldExportJobResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?iamRole ?outputLocation ?clientRequestToken ?failureCode
         ?createdAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let iamRole = field_map json "iamRole" IamRole.of_json in
@@ -12409,6 +12552,7 @@ module CreateWorldExportJobRequest =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
       make ?tags ~iamRole ~outputLocation ~worlds ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let iamRole = field_map_exn json "iamRole" IamRole.of_json in
@@ -12677,6 +12821,7 @@ module CreateSimulationJobResponse =
         ?maxJobDurationInSeconds ?loggingConfig ?outputLocation
         ?clientRequestToken ?failureCode ?failureBehavior ?lastUpdatedAt
         ?lastStartedAt ?status ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compute = field_map json "compute" ComputeResponse.of_json in
       let vpcConfig = field_map json "vpcConfig" VPCConfigResponse.of_json in
@@ -12840,6 +12985,7 @@ module CreateSimulationJobRequest =
       make ?compute ?vpcConfig ?tags ?dataSources ?simulationApplications
         ?robotApplications ?failureBehavior ~iamRole ~maxJobDurationInSeconds
         ?loggingConfig ?outputLocation ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let compute = field_map json "compute" Compute.of_json in
       let vpcConfig = field_map json "vpcConfig" VPCConfig.of_json in
@@ -13031,6 +13177,7 @@ module CreateSimulationApplicationVersionResponse =
       make ?environment ?revisionId ?lastUpdatedAt ?renderingEngine
         ?robotSoftwareSuite ?simulationSoftwareSuite ?sources ?version ?name
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let revisionId = field_map json "revisionId" RevisionId.of_json in
@@ -13095,6 +13242,7 @@ module CreateSimulationApplicationVersionRequest =
       let application =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?imageDigest ?s3Etags ?currentRevisionId ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
       let s3Etags = field_map json "s3Etags" S3Etags.of_json in
@@ -13286,6 +13434,7 @@ module CreateSimulationApplicationResponse =
       make ?environment ?tags ?revisionId ?lastUpdatedAt ?renderingEngine
         ?robotSoftwareSuite ?simulationSoftwareSuite ?sources ?version ?name
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -13379,6 +13528,7 @@ module CreateSimulationApplicationRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?environment ?tags ?renderingEngine ~robotSoftwareSuite
         ~simulationSoftwareSuite ?sources ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -13515,6 +13665,7 @@ module CreateRobotResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?architecture ?greengrassGroupId ?createdAt ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let architecture = field_map json "architecture" Architecture.of_json in
@@ -13561,6 +13712,7 @@ module CreateRobotRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~greengrassGroupId ~architecture ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let greengrassGroupId =
@@ -13713,6 +13865,7 @@ module CreateRobotApplicationVersionResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?environment ?revisionId ?lastUpdatedAt ?robotSoftwareSuite
         ?sources ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let revisionId = field_map json "revisionId" RevisionId.of_json in
@@ -13769,6 +13922,7 @@ module CreateRobotApplicationVersionRequest =
       let application =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "application") in
       make ?imageDigest ?s3Etags ?currentRevisionId ~application ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
       let s3Etags = field_map json "s3Etags" S3Etags.of_json in
@@ -13936,6 +14090,7 @@ module CreateRobotApplicationResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?environment ?tags ?revisionId ?lastUpdatedAt ?robotSoftwareSuite
         ?sources ?version ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -13997,6 +14152,7 @@ module CreateRobotApplicationRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?environment ?tags ~robotSoftwareSuite ?sources ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -14091,6 +14247,7 @@ module CreateFleetResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?createdAt ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let createdAt = field_map json "createdAt" CreatedAt.of_json in
@@ -14120,6 +14277,7 @@ module CreateFleetRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -14297,6 +14455,7 @@ module CreateDeploymentJobResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?deploymentConfig ?createdAt ?failureCode ?failureReason
         ?deploymentApplicationConfigs ?status ?fleet ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let deploymentConfig =
@@ -14376,6 +14535,7 @@ module CreateDeploymentJobRequest =
           (Xml.child xml_arg0 "deploymentConfig") in
       make ?tags ~deploymentApplicationConfigs ~fleet ~clientRequestToken
         ?deploymentConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let deploymentApplicationConfigs =
@@ -14453,6 +14613,7 @@ module CancelWorldGenerationJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the specified world generator job."]
@@ -14471,6 +14632,7 @@ module CancelWorldGenerationJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -14537,6 +14699,7 @@ module CancelWorldExportJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the specified export job."]
@@ -14555,6 +14718,7 @@ module CancelWorldExportJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -14621,6 +14785,7 @@ module CancelSimulationJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the specified simulation job."]
@@ -14637,6 +14802,7 @@ module CancelSimulationJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -14703,6 +14869,7 @@ module CancelSimulationJobBatchResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14721,6 +14888,7 @@ module CancelSimulationJobBatchRequest =
       let batch =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "batch") in
       make ~batch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let batch = field_map_exn json "batch" Arn.of_json in make ~batch ()
     let to_json v = composed_to_json to_value v
@@ -14788,6 +14956,7 @@ module CancelDeploymentJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14805,6 +14974,7 @@ module CancelDeploymentJobRequest =
     let of_xml xml_arg0 =
       let job = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "job") in
       make ~job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let job = field_map_exn json "job" Arn.of_json in make ~job ()
     let to_json v = composed_to_json to_value v
@@ -14885,6 +15055,7 @@ module BatchDescribeSimulationJobResponse =
       let jobs =
         (Option.map ~f:SimulationJobs.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?unprocessedJobs ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedJobs = field_map json "unprocessedJobs" Arns.of_json in
       let jobs = field_map json "jobs" SimulationJobs.of_json in
@@ -14907,6 +15078,7 @@ module BatchDescribeSimulationJobRequest =
       let jobs =
         Arns.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobs") in
       make ~jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobs = field_map_exn json "jobs" Arns.of_json in make ~jobs ()
     let to_json v = composed_to_json to_value v
@@ -14973,6 +15145,7 @@ module BatchDeleteWorldsResponse =
       let unprocessedWorlds =
         (Option.map ~f:Arns.of_xml) (Xml.child xml_arg0 "unprocessedWorlds") in
       make ?unprocessedWorlds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedWorlds = field_map json "unprocessedWorlds" Arns.of_json in
       make ?unprocessedWorlds ()
@@ -14994,6 +15167,7 @@ module BatchDeleteWorldsRequest =
       let worlds =
         Arns.of_xml (Xml.child_exn ~context:context_ xml_arg0 "worlds") in
       make ~worlds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let worlds = field_map_exn json "worlds" Arns.of_json in
       make ~worlds ()

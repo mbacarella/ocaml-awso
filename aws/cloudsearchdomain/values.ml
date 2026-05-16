@@ -91,6 +91,7 @@ module Bucket =
       let count = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "count") in
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       make ?count ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map json "count" Long.of_json in
       let value = field_map json "value" String_.of_json in
@@ -208,6 +209,7 @@ module SuggestionMatch =
       let suggestion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "suggestion") in
       make ?id ?score ?suggestion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "id" String_.of_json in
       let score = field_map json "score" Long.of_json in
@@ -274,6 +276,7 @@ module Hit =
         (Option.map ~f:Fields.of_xml) (Xml.child xml_arg0 "fields") in
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?highlights ?exprs ?fields ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let highlights = field_map json "highlights" Highlights.of_json in
       let exprs = field_map json "exprs" Exprs.of_json in
@@ -312,6 +315,7 @@ module DocumentServiceWarning =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -357,6 +361,7 @@ module BucketInfo =
       let buckets =
         (Option.map ~f:BucketList.of_xml) (Xml.child xml_arg0 "buckets") in
       make ?buckets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buckets = field_map json "buckets" BucketList.of_json in
       make ?buckets ()
@@ -455,6 +460,7 @@ module FieldStats =
       let max = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "max") in
       let min = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "min") in
       make ?stddev ?mean ?sumOfSquares ?sum ?missing ?count ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stddev = field_map json "stddev" Double.of_json in
       let mean = field_map json "mean" String_.of_json in
@@ -515,6 +521,7 @@ module DocumentServiceException =
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       make ?message ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       let status = field_map json "status" String_.of_json in
@@ -601,6 +608,7 @@ module SearchException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -633,6 +641,7 @@ module SuggestModel =
       let found = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "found") in
       let query = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "query") in
       make ?suggestions ?found ?query ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggestions = field_map json "suggestions" Suggestions.of_json in
       let found = field_map json "found" Long.of_json in
@@ -660,6 +669,7 @@ module SuggestStatus =
       let rid = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "rid") in
       let timems = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "timems") in
       make ?rid ?timems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rid = field_map json "rid" String_.of_json in
       let timems = field_map json "timems" Long.of_json in
@@ -767,6 +777,7 @@ module Hits =
       let start = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "start") in
       let found = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "found") in
       make ?hit ?cursor ?start ?found ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hit = field_map json "hit" HitList.of_json in
       let cursor = field_map json "cursor" String_.of_json in
@@ -795,6 +806,7 @@ module SearchStatus =
       let rid = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "rid") in
       let timems = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "timems") in
       make ?rid ?timems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rid = field_map json "rid" String_.of_json in
       let timems = field_map json "timems" Long.of_json in
@@ -1083,6 +1095,7 @@ module UploadDocumentsResponse =
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       make ?warnings ?deletes ?adds ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warnings =
         field_map json "warnings" DocumentServiceWarnings.of_json in
@@ -1124,6 +1137,7 @@ module UploadDocumentsRequest =
       let documents =
         Blob.of_xml (Xml.child_exn ~context:context_ xml_arg0 "documents") in
       make ~contentType ~documents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map_exn json "contentType" ContentType.of_json in
       let documents = field_map_exn json "documents" Blob.of_json in
@@ -1178,6 +1192,7 @@ module SuggestResponse =
       let status =
         (Option.map ~f:SuggestStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?suggest ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggest = field_map json "suggest" SuggestModel.of_json in
       let status = field_map json "status" SuggestStatus.of_json in
@@ -1213,6 +1228,7 @@ module SuggestRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "suggester") in
       let query = Query.of_xml (Xml.child_exn ~context:context_ xml_arg0 "q") in
       make ?size ~suggester ~query ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let size = field_map json "size" SuggestionsSize.of_json in
       let suggester = field_map_exn json "suggester" Suggester.of_json in
@@ -1276,6 +1292,7 @@ module SearchResponse =
       let status =
         (Option.map ~f:SearchStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?stats ?facets ?hits ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stats = field_map json "stats" Stats.of_json in
       let facets = field_map json "facets" Facets.of_json in
@@ -1404,6 +1421,7 @@ module SearchRequest =
         (Option.map ~f:Cursor.of_xml) (Xml.child xml_arg0 "cursor") in
       make ?stats ?start ?sort ?size ?return ?queryParser ?queryOptions
         ~query ?partial ?highlight ?filterQuery ?facet ?expr ?cursor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stats = field_map json "stats" Stat.of_json in
       let start = field_map json "start" Start.of_json in

@@ -129,6 +129,7 @@ module S3LocationDescription =
       let bucketArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucketArn") in
       make ?objectVersion ?fileKey ?bucketArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectVersion = field_map json "objectVersion" Zz__string.of_json in
       let fileKey = field_map json "fileKey" Zz__string.of_json in
@@ -156,6 +157,7 @@ module ScaleInPolicyDescription =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "cpuUtilizationPercentage") in
       make ?cpuUtilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuUtilizationPercentage =
         field_map json "cpuUtilizationPercentage" Zz__integer.of_json in
@@ -182,6 +184,7 @@ module ScaleOutPolicyDescription =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "cpuUtilizationPercentage") in
       make ?cpuUtilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuUtilizationPercentage =
         field_map json "cpuUtilizationPercentage" Zz__integer.of_json in
@@ -213,6 +216,7 @@ module VpcDescription =
         (Option.map ~f:Zz__listOf__string.of_xml)
           (Xml.child xml_arg0 "securityGroups") in
       make ?subnets ?securityGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnets = field_map json "subnets" Zz__listOf__string.of_json in
       let securityGroups =
@@ -243,6 +247,7 @@ module CloudWatchLogsLogDeliveryDescription =
       let enabled =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?logGroup ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroup = field_map json "logGroup" Zz__string.of_json in
       let enabled = field_map json "enabled" Zz__boolean.of_json in
@@ -274,6 +279,7 @@ module FirehoseLogDeliveryDescription =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "deliveryStream") in
       make ?enabled ?deliveryStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "enabled" Zz__boolean.of_json in
       let deliveryStream = field_map json "deliveryStream" Zz__string.of_json in
@@ -310,6 +316,7 @@ module S3LogDeliveryDescription =
       let bucket =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ?enabled ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" Zz__string.of_json in
       let enabled = field_map json "enabled" Zz__boolean.of_json in
@@ -341,6 +348,7 @@ module CustomPluginDescription =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "customPluginArn") in
       make ?revision ?customPluginArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map json "revision" Zz__long.of_json in
       let customPluginArn =
@@ -421,6 +429,7 @@ module CustomPluginFileDescription =
       let fileMd5 =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "fileMd5") in
       make ?fileSize ?fileMd5 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileSize = field_map json "fileSize" Zz__long.of_json in
       let fileMd5 = field_map json "fileMd5" Zz__string.of_json in
@@ -445,6 +454,7 @@ module CustomPluginLocationDescription =
         (Option.map ~f:S3LocationDescription.of_xml)
           (Xml.child xml_arg0 "s3Location") in
       make ?s3Location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Location =
         field_map json "s3Location" S3LocationDescription.of_json in
@@ -510,6 +520,7 @@ module AutoScalingDescription =
           (Xml.child xml_arg0 "maxWorkerCount") in
       make ?scaleOutPolicy ?scaleInPolicy ?minWorkerCount ?mcuCount
         ?maxWorkerCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scaleOutPolicy =
         field_map json "scaleOutPolicy" ScaleOutPolicyDescription.of_json in
@@ -548,6 +559,7 @@ module ProvisionedCapacityDescription =
       let mcuCount =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "mcuCount") in
       make ?workerCount ?mcuCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerCount = field_map json "workerCount" Zz__integer.of_json in
       let mcuCount = field_map json "mcuCount" Zz__integer.of_json in
@@ -601,6 +613,7 @@ module ApacheKafkaClusterDescription =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "bootstrapServers") in
       make ?vpc ?bootstrapServers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpc = field_map json "vpc" VpcDescription.of_json in
       let bootstrapServers =
@@ -672,6 +685,7 @@ module WorkerLogDeliveryDescription =
         (Option.map ~f:CloudWatchLogsLogDeliveryDescription.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogs") in
       make ?s3 ?firehose ?cloudWatchLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "s3" S3LogDeliveryDescription.of_json in
       let firehose =
@@ -700,6 +714,7 @@ module PluginDescription =
         (Option.map ~f:CustomPluginDescription.of_xml)
           (Xml.child xml_arg0 "customPlugin") in
       make ?customPlugin ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customPlugin =
         field_map json "customPlugin" CustomPluginDescription.of_json in
@@ -745,6 +760,7 @@ module ScaleInPolicyUpdate =
           (Xml.child_exn ~context:context_ xml_arg0
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuUtilizationPercentage =
         field_map_exn json "cpuUtilizationPercentage"
@@ -773,6 +789,7 @@ module ScaleOutPolicyUpdate =
           (Xml.child_exn ~context:context_ xml_arg0
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuUtilizationPercentage =
         field_map_exn json "cpuUtilizationPercentage"
@@ -846,6 +863,7 @@ module WorkerConfigurationRevisionSummary =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "creationTime") in
       make ?revision ?description ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map json "revision" Zz__long.of_json in
       let description = field_map json "description" Zz__string.of_json in
@@ -918,6 +936,7 @@ module CustomPluginRevisionSummary =
           (Xml.child xml_arg0 "contentType") in
       make ?revision ?location ?fileDescription ?description ?creationTime
         ?contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map json "revision" Zz__long.of_json in
       let location =
@@ -998,6 +1017,7 @@ module CapacityDescription =
         (Option.map ~f:AutoScalingDescription.of_xml)
           (Xml.child xml_arg0 "autoScaling") in
       make ?provisionedCapacity ?autoScaling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisionedCapacity =
         field_map json "provisionedCapacity"
@@ -1060,6 +1080,7 @@ module KafkaClusterClientAuthenticationDescription =
         (Option.map ~f:KafkaClusterClientAuthenticationType.of_xml)
           (Xml.child xml_arg0 "authenticationType") in
       make ?authenticationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map json "authenticationType"
@@ -1087,6 +1108,7 @@ module KafkaClusterDescription =
         (Option.map ~f:ApacheKafkaClusterDescription.of_xml)
           (Xml.child xml_arg0 "apacheKafkaCluster") in
       make ?apacheKafkaCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apacheKafkaCluster =
         field_map json "apacheKafkaCluster"
@@ -1113,6 +1135,7 @@ module KafkaClusterEncryptionInTransitDescription =
         (Option.map ~f:KafkaClusterEncryptionInTransitType.of_xml)
           (Xml.child xml_arg0 "encryptionType") in
       make ?encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionType =
         field_map json "encryptionType"
@@ -1140,6 +1163,7 @@ module LogDeliveryDescription =
         (Option.map ~f:WorkerLogDeliveryDescription.of_xml)
           (Xml.child xml_arg0 "workerLogDelivery") in
       make ?workerLogDelivery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerLogDelivery =
         field_map json "workerLogDelivery"
@@ -1172,6 +1196,7 @@ module WorkerConfigurationDescription =
       let revision =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "revision") in
       make ?workerConfigurationArn ?revision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfigurationArn =
         field_map json "workerConfigurationArn" Zz__string.of_json in
@@ -1225,6 +1250,7 @@ module ScaleInPolicy =
           (Xml.child_exn ~context:context_ xml_arg0
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuUtilizationPercentage =
         field_map_exn json "cpuUtilizationPercentage"
@@ -1253,6 +1279,7 @@ module ScaleOutPolicy =
           (Xml.child_exn ~context:context_ xml_arg0
              "cpuUtilizationPercentage") in
       make ~cpuUtilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cpuUtilizationPercentage =
         field_map_exn json "cpuUtilizationPercentage"
@@ -1285,6 +1312,7 @@ module Vpc =
         (Option.map ~f:Zz__listOf__string.of_xml)
           (Xml.child xml_arg0 "securityGroups") in
       make ~subnets ?securityGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnets = field_map_exn json "subnets" Zz__listOf__string.of_json in
       let securityGroups =
@@ -1317,6 +1345,7 @@ module CloudWatchLogsLogDelivery =
         Zz__boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "enabled") in
       make ?logGroup ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroup = field_map json "logGroup" Zz__string.of_json in
       let enabled = field_map_exn json "enabled" Zz__boolean.of_json in
@@ -1351,6 +1380,7 @@ module FirehoseLogDelivery =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "deliveryStream") in
       make ~enabled ?deliveryStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "enabled" Zz__boolean.of_json in
       let deliveryStream = field_map json "deliveryStream" Zz__string.of_json in
@@ -1389,6 +1419,7 @@ module S3LogDelivery =
       let bucket =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ~enabled ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" Zz__string.of_json in
       let enabled = field_map_exn json "enabled" Zz__boolean.of_json in
@@ -1420,6 +1451,7 @@ module CustomPlugin =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "customPluginArn") in
       make ~revision ~customPluginArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "revision" Zz__longMin1.of_json in
       let customPluginArn =
@@ -1489,6 +1521,7 @@ module AutoScalingUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "maxWorkerCount") in
       make ~scaleOutPolicy ~scaleInPolicy ~minWorkerCount ~mcuCount
         ~maxWorkerCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scaleOutPolicy =
         field_map_exn json "scaleOutPolicy" ScaleOutPolicyUpdate.of_json in
@@ -1531,6 +1564,7 @@ module ProvisionedCapacityUpdate =
         Zz__integerMin1Max8.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mcuCount") in
       make ~workerCount ~mcuCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerCount =
         field_map_exn json "workerCount" Zz__integerMin1Max10.of_json in
@@ -1595,6 +1629,7 @@ module WorkerConfigurationSummary =
           (Xml.child xml_arg0 "creationTime") in
       make ?workerConfigurationArn ?name ?latestRevision ?description
         ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfigurationArn =
         field_map json "workerConfigurationArn" Zz__string.of_json in
@@ -1672,6 +1707,7 @@ module CustomPluginSummary =
           (Xml.child xml_arg0 "creationTime") in
       make ?name ?latestRevision ?description ?customPluginState
         ?customPluginArn ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" Zz__string.of_json in
       let latestRevision =
@@ -1848,6 +1884,7 @@ module ConnectorSummary =
         ?kafkaClusterClientAuthentication ?kafkaCluster ?currentVersion
         ?creationTime ?connectorState ?connectorName ?connectorDescription
         ?connectorArn ?capacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfiguration =
         field_map json "workerConfiguration"
@@ -1932,6 +1969,7 @@ module S3Location =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketArn") in
       make ?objectVersion ~fileKey ~bucketArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectVersion = field_map json "objectVersion" Zz__string.of_json in
       let fileKey = field_map_exn json "fileKey" Zz__string.of_json in
@@ -2000,6 +2038,7 @@ module AutoScaling =
           (Xml.child_exn ~context:context_ xml_arg0 "maxWorkerCount") in
       make ?scaleOutPolicy ?scaleInPolicy ~minWorkerCount ~mcuCount
         ~maxWorkerCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scaleOutPolicy =
         field_map json "scaleOutPolicy" ScaleOutPolicy.of_json in
@@ -2041,6 +2080,7 @@ module ProvisionedCapacity =
         Zz__integerMin1Max8.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "mcuCount") in
       make ~workerCount ~mcuCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerCount =
         field_map_exn json "workerCount" Zz__integerMin1Max10.of_json in
@@ -2073,6 +2113,7 @@ module ApacheKafkaCluster =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bootstrapServers") in
       make ~vpc ~bootstrapServers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpc = field_map_exn json "vpc" Vpc.of_json in
       let bootstrapServers =
@@ -2111,6 +2152,7 @@ module WorkerLogDelivery =
         (Option.map ~f:CloudWatchLogsLogDelivery.of_xml)
           (Xml.child xml_arg0 "cloudWatchLogs") in
       make ?s3 ?firehose ?cloudWatchLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "s3" S3LogDelivery.of_json in
       let firehose = field_map json "firehose" FirehoseLogDelivery.of_json in
@@ -2137,6 +2179,7 @@ module Plugin =
         CustomPlugin.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "customPlugin") in
       make ~customPlugin ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customPlugin =
         field_map_exn json "customPlugin" CustomPlugin.of_json in
@@ -2157,6 +2200,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2176,6 +2220,7 @@ module ForbiddenException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2195,6 +2240,7 @@ module InternalServerErrorException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2214,6 +2260,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2233,6 +2280,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2252,6 +2300,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2271,6 +2320,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2304,6 +2354,7 @@ module CapacityUpdate =
         (Option.map ~f:AutoScalingUpdate.of_xml)
           (Xml.child xml_arg0 "autoScaling") in
       make ?provisionedCapacity ?autoScaling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisionedCapacity =
         field_map json "provisionedCapacity"
@@ -2453,6 +2504,7 @@ module WorkerConfigurationRevisionDescription =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "creationTime") in
       make ?revision ?propertiesFileContent ?description ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map json "revision" Zz__long.of_json in
       let propertiesFileContent =
@@ -2484,6 +2536,7 @@ module StateDescription =
       let code =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       let code = field_map json "code" Zz__string.of_json in
@@ -2531,6 +2584,7 @@ module ConflictException =
       let message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" Zz__string.of_json in
       make ?message ()
@@ -2606,6 +2660,7 @@ module CustomPluginLocation =
         S3Location.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "s3Location") in
       make ~s3Location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Location = field_map_exn json "s3Location" S3Location.of_json in
       make ~s3Location ()
@@ -2637,6 +2692,7 @@ module Capacity =
       let autoScaling =
         (Option.map ~f:AutoScaling.of_xml) (Xml.child xml_arg0 "autoScaling") in
       make ?provisionedCapacity ?autoScaling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provisionedCapacity =
         field_map json "provisionedCapacity" ProvisionedCapacity.of_json in
@@ -2664,6 +2720,7 @@ module KafkaCluster =
         ApacheKafkaCluster.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "apacheKafkaCluster") in
       make ~apacheKafkaCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let apacheKafkaCluster =
         field_map_exn json "apacheKafkaCluster" ApacheKafkaCluster.of_json in
@@ -2692,6 +2749,7 @@ module KafkaClusterClientAuthentication =
         KafkaClusterClientAuthenticationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "authenticationType") in
       make ~authenticationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationType =
         field_map_exn json "authenticationType"
@@ -2720,6 +2778,7 @@ module KafkaClusterEncryptionInTransit =
         KafkaClusterEncryptionInTransitType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "encryptionType") in
       make ~encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionType =
         field_map_exn json "encryptionType"
@@ -2747,6 +2806,7 @@ module LogDelivery =
         WorkerLogDelivery.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workerLogDelivery") in
       make ~workerLogDelivery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerLogDelivery =
         field_map_exn json "workerLogDelivery" WorkerLogDelivery.of_json in
@@ -2808,6 +2868,7 @@ module WorkerConfiguration =
         Zz__longMin1.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "revision") in
       make ~workerConfigurationArn ~revision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfigurationArn =
         field_map_exn json "workerConfigurationArn" Zz__string.of_json in
@@ -2948,6 +3009,7 @@ module UpdateConnectorResponse =
       let connectorArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
       make ?connectorState ?connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorState =
         field_map json "connectorState" ConnectorState.of_json in
@@ -2988,6 +3050,7 @@ module UpdateConnectorRequest =
         CapacityUpdate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "capacity") in
       make ~currentVersion ~connectorArn ~capacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentVersion =
         field_map_exn json "currentVersion" Zz__string.of_json in
@@ -3107,6 +3170,7 @@ module ListWorkerConfigurationsResponse =
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?workerConfigurations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfigurations =
         field_map json "workerConfigurations"
@@ -3139,6 +3203,7 @@ module ListWorkerConfigurationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Zz__string.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3256,6 +3321,7 @@ module ListCustomPluginsResponse =
         (Option.map ~f:Zz__listOfCustomPluginSummary.of_xml)
           (Xml.child xml_arg0 "customPlugins") in
       make ?nextToken ?customPlugins ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Zz__string.of_json in
       let customPlugins =
@@ -3287,6 +3353,7 @@ module ListCustomPluginsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Zz__string.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3403,6 +3470,7 @@ module ListConnectorsResponse =
         (Option.map ~f:Zz__listOfConnectorSummary.of_xml)
           (Xml.child xml_arg0 "connectors") in
       make ?nextToken ?connectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Zz__string.of_json in
       let connectors =
@@ -3444,6 +3512,7 @@ module ListConnectorsRequest =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "connectorNamePrefix") in
       make ?nextToken ?maxResults ?connectorNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Zz__string.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3594,6 +3663,7 @@ module DescribeWorkerConfigurationResponse =
           (Xml.child xml_arg0 "creationTime") in
       make ?workerConfigurationArn ?name ?latestRevision ?description
         ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfigurationArn =
         field_map json "workerConfigurationArn" Zz__string.of_json in
@@ -3627,6 +3697,7 @@ module DescribeWorkerConfigurationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workerConfigurationArn") in
       make ~workerConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfigurationArn =
         field_map_exn json "workerConfigurationArn" Zz__string.of_json in
@@ -3791,6 +3862,7 @@ module DescribeCustomPluginResponse =
           (Xml.child xml_arg0 "creationTime") in
       make ?stateDescription ?name ?latestRevision ?description
         ?customPluginState ?customPluginArn ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateDescription =
         field_map json "stateDescription" StateDescription.of_json in
@@ -3825,6 +3897,7 @@ module DescribeCustomPluginRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "customPluginArn") in
       make ~customPluginArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customPluginArn =
         field_map_exn json "customPluginArn" Zz__string.of_json in
@@ -4101,6 +4174,7 @@ module DescribeConnectorResponse =
         ?kafkaCluster ?currentVersion ?creationTime ?connectorState
         ?connectorName ?connectorDescription ?connectorConfiguration
         ?connectorArn ?capacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfiguration =
         field_map json "workerConfiguration"
@@ -4162,6 +4236,7 @@ module DescribeConnectorRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorArn") in
       make ~connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorArn = field_map_exn json "connectorArn" Zz__string.of_json in
       make ~connectorArn ()
@@ -4279,6 +4354,7 @@ module DeleteCustomPluginResponse =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "customPluginArn") in
       make ?customPluginState ?customPluginArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customPluginState =
         field_map json "customPluginState" CustomPluginState.of_json in
@@ -4305,6 +4381,7 @@ module DeleteCustomPluginRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "customPluginArn") in
       make ~customPluginArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customPluginArn =
         field_map_exn json "customPluginArn" Zz__string.of_json in
@@ -4421,6 +4498,7 @@ module DeleteConnectorResponse =
       let connectorArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
       make ?connectorState ?connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorState =
         field_map json "connectorState" ConnectorState.of_json in
@@ -4455,6 +4533,7 @@ module DeleteConnectorRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorArn") in
       make ?currentVersion ~connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentVersion = field_map json "currentVersion" Zz__string.of_json in
       let connectorArn = field_map_exn json "connectorArn" Zz__string.of_json in
@@ -4598,6 +4677,7 @@ module CreateWorkerConfigurationResponse =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "creationTime") in
       make ?workerConfigurationArn ?name ?latestRevision ?creationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfigurationArn =
         field_map json "workerConfigurationArn" Zz__string.of_json in
@@ -4649,6 +4729,7 @@ module CreateWorkerConfigurationRequest =
         (Option.map ~f:Zz__stringMax1024.of_xml)
           (Xml.child xml_arg0 "description") in
       make ~propertiesFileContent ~name ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propertiesFileContent =
         field_map_exn json "propertiesFileContent"
@@ -4792,6 +4873,7 @@ module CreateCustomPluginResponse =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "customPluginArn") in
       make ?revision ?name ?customPluginState ?customPluginArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map json "revision" Zz__long.of_json in
       let name = field_map json "name" Zz__string.of_json in
@@ -4842,6 +4924,7 @@ module CreateCustomPluginRequest =
         CustomPluginContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentType") in
       make ~name ~location ?description ~contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" Zz__stringMin1Max128.of_json in
       let location =
@@ -4980,6 +5063,7 @@ module CreateConnectorResponse =
       let connectorArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "connectorArn") in
       make ?connectorState ?connectorName ?connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectorState =
         field_map json "connectorState" ConnectorState.of_json in
@@ -5122,6 +5206,7 @@ module CreateConnectorRequest =
         ?logDelivery ~kafkaConnectVersion ~kafkaClusterEncryptionInTransit
         ~kafkaClusterClientAuthentication ~kafkaCluster ~connectorName
         ?connectorDescription ~connectorConfiguration ~capacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workerConfiguration =
         field_map json "workerConfiguration" WorkerConfiguration.of_json in

@@ -170,6 +170,7 @@ module RuleConfig =
         Zz__boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Inverted") in
       make ~type_ ~threshold ~inverted ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "Type" RuleType.of_json in
       let threshold = field_map_exn json "Threshold" Zz__integer.of_json in
@@ -279,6 +280,7 @@ module ClusterEndpoint =
         (Option.map ~f:Zz__stringMin1Max128PatternAZaZ09.of_xml)
           (Xml.child xml_arg0 "Endpoint") in
       make ?region ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region =
         field_map json "Region" Zz__stringMin1Max32PatternS.of_json in
@@ -368,6 +370,7 @@ module AssertionRule =
           (Xml.child_exn ~context:context_ xml_arg0 "AssertedControls") in
       make ~waitPeriodMs ~status ~safetyRuleArn ~ruleConfig ~name
         ~controlPanelArn ~assertedControls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitPeriodMs =
         field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
@@ -481,6 +484,7 @@ module GatingRule =
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~waitPeriodMs ~targetControls ~status ~safetyRuleArn ~ruleConfig
         ~name ~gatingControls ~controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitPeriodMs =
         field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
@@ -585,6 +589,7 @@ module Rule =
       let aSSERTION =
         (Option.map ~f:AssertionRule.of_xml) (Xml.child xml_arg0 "ASSERTION") in
       make ?gATING ?aSSERTION ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gATING = field_map json "GATING" GatingRule.of_json in
       let aSSERTION = field_map json "ASSERTION" AssertionRule.of_json in
@@ -635,6 +640,7 @@ module RoutingControl =
         (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
           (Xml.child xml_arg0 "ControlPanelArn") in
       make ?status ?routingControlArn ?name ?controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let routingControlArn =
@@ -718,6 +724,7 @@ module ControlPanel =
           (Xml.child xml_arg0 "ClusterArn") in
       make ?status ?routingControlCount ?name ?defaultControlPanel
         ?controlPanelArn ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let routingControlCount =
@@ -778,6 +785,7 @@ module Cluster =
         (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
           (Xml.child xml_arg0 "ClusterArn") in
       make ?status ?name ?clusterEndpoints ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" Status.of_json in
       let name = field_map json "Name" Zz__stringMin1Max64PatternS.of_json in
@@ -822,6 +830,7 @@ module InternalServerException =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Zz__string.of_json in
       make ~message ()
@@ -843,6 +852,7 @@ module ResourceNotFoundException =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Zz__string.of_json in
       make ~message ()
@@ -864,6 +874,7 @@ module ValidationException =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Zz__string.of_json in
       make ~message ()
@@ -904,6 +915,7 @@ module AssertionRuleUpdate =
         Zz__stringMin1Max64PatternS.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~waitPeriodMs ~safetyRuleArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitPeriodMs =
         field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
@@ -950,6 +962,7 @@ module GatingRuleUpdate =
         Zz__stringMin1Max64PatternS.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~waitPeriodMs ~safetyRuleArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitPeriodMs =
         field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
@@ -977,6 +990,7 @@ module AccessDeniedException =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Zz__string.of_json in
       make ~message ()
@@ -998,6 +1012,7 @@ module ConflictException =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Zz__string.of_json in
       make ~message ()
@@ -1019,6 +1034,7 @@ module ThrottlingException =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Zz__string.of_json in
       make ~message ()
@@ -1303,6 +1319,7 @@ module NewAssertionRule =
           (Xml.child_exn ~context:context_ xml_arg0 "AssertedControls") in
       make ~waitPeriodMs ~ruleConfig ~name ~controlPanelArn ~assertedControls
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitPeriodMs =
         field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
@@ -1393,6 +1410,7 @@ module NewGatingRule =
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~waitPeriodMs ~targetControls ~ruleConfig ~name ~gatingControls
         ~controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitPeriodMs =
         field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
@@ -1427,6 +1445,7 @@ module ServiceQuotaExceededException =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Zz__string.of_json in
       make ~message ()
@@ -1550,6 +1569,7 @@ module UpdateSafetyRuleResponse =
         (Option.map ~f:AssertionRule.of_xml)
           (Xml.child xml_arg0 "AssertionRule") in
       make ?gatingRule ?assertionRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatingRule = field_map json "GatingRule" GatingRule.of_json in
       let assertionRule =
@@ -1584,6 +1604,7 @@ module UpdateSafetyRuleRequest =
         (Option.map ~f:AssertionRuleUpdate.of_xml)
           (Xml.child xml_arg0 "AssertionRuleUpdate") in
       make ?gatingRuleUpdate ?assertionRuleUpdate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatingRuleUpdate =
         field_map json "GatingRuleUpdate" GatingRuleUpdate.of_json in
@@ -1682,6 +1703,7 @@ module UpdateRoutingControlResponse =
         (Option.map ~f:RoutingControl.of_xml)
           (Xml.child xml_arg0 "RoutingControl") in
       make ?routingControl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControl =
         field_map json "RoutingControl" RoutingControl.of_json in
@@ -1717,6 +1739,7 @@ module UpdateRoutingControlRequest =
         Zz__stringMin1Max256PatternAZaZ09.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlName ~routingControlArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlName =
         field_map_exn json "RoutingControlName"
@@ -1816,6 +1839,7 @@ module UpdateControlPanelResponse =
         (Option.map ~f:ControlPanel.of_xml)
           (Xml.child xml_arg0 "ControlPanel") in
       make ?controlPanel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let controlPanel = field_map json "ControlPanel" ControlPanel.of_json in
       make ?controlPanel ()
@@ -1850,6 +1874,7 @@ module UpdateControlPanelRequest =
         Zz__stringMin1Max256PatternAZaZ09.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~controlPanelName ~controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let controlPanelName =
         field_map_exn json "ControlPanelName"
@@ -1913,6 +1938,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -1941,6 +1967,7 @@ module UntagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
@@ -2000,6 +2027,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to a resource."]
@@ -2028,6 +2056,7 @@ module TagResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags =
         field_map_exn json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
@@ -2097,6 +2126,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:Zz__mapOf__stringMin0Max256PatternS.of_xml)
           (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags =
         field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
@@ -2121,6 +2151,7 @@ module ListTagsForResourceRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
@@ -2215,6 +2246,7 @@ module ListSafetyRulesResponse =
         (Option.map ~f:Zz__stringMin1Max8096PatternS.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?safetyRules ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let safetyRules = field_map json "SafetyRules" Zz__listOfRule.of_json in
       let nextToken =
@@ -2255,6 +2287,7 @@ module ListSafetyRulesRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ?nextToken ?maxResults ~controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2353,6 +2386,7 @@ module ListRoutingControlsResponse =
         (Option.map ~f:Zz__stringMin1Max8096PatternS.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?routingControls ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControls =
         field_map json "RoutingControls" Zz__listOfRoutingControl.of_json in
@@ -2394,6 +2428,7 @@ module ListRoutingControlsRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ?nextToken ?maxResults ~controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2492,6 +2527,7 @@ module ListControlPanelsResponse =
         (Option.map ~f:Zz__listOfControlPanel.of_xml)
           (Xml.child xml_arg0 "ControlPanels") in
       make ?nextToken ?controlPanels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
@@ -2530,6 +2566,7 @@ module ListControlPanelsRequest =
       let clusterArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ClusterArn") in
       make ?nextToken ?maxResults ?clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2625,6 +2662,7 @@ module ListClustersResponse =
         (Option.map ~f:Zz__listOfCluster.of_xml)
           (Xml.child xml_arg0 "Clusters") in
       make ?nextToken ?clusters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
@@ -2655,6 +2693,7 @@ module ListClustersRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Zz__string.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2732,6 +2771,7 @@ module ListAssociatedRoute53HealthChecksResponse =
         (Option.map ~f:Zz__listOf__stringMax36PatternS.of_xml)
           (Xml.child xml_arg0 "HealthCheckIds") in
       make ?nextToken ?healthCheckIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken =
         field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
@@ -2775,6 +2815,7 @@ module ListAssociatedRoute53HealthChecksRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~routingControlArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlArn =
         field_map_exn json "RoutingControlArn" Zz__string.of_json in
@@ -2843,6 +2884,7 @@ module DescribeSafetyRuleResponse =
         (Option.map ~f:AssertionRule.of_xml)
           (Xml.child xml_arg0 "AssertionRule") in
       make ?gatingRule ?assertionRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatingRule = field_map json "GatingRule" GatingRule.of_json in
       let assertionRule =
@@ -2866,6 +2908,7 @@ module DescribeSafetyRuleRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SafetyRuleArn") in
       make ~safetyRuleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let safetyRuleArn =
         field_map_exn json "SafetyRuleArn" Zz__string.of_json in
@@ -2961,6 +3004,7 @@ module DescribeRoutingControlResponse =
         (Option.map ~f:RoutingControl.of_xml)
           (Xml.child xml_arg0 "RoutingControl") in
       make ?routingControl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControl =
         field_map json "RoutingControl" RoutingControl.of_json in
@@ -2986,6 +3030,7 @@ module DescribeRoutingControlRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlArn =
         field_map_exn json "RoutingControlArn" Zz__string.of_json in
@@ -3082,6 +3127,7 @@ module DescribeControlPanelResponse =
         (Option.map ~f:ControlPanel.of_xml)
           (Xml.child xml_arg0 "ControlPanel") in
       make ?controlPanel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let controlPanel = field_map json "ControlPanel" ControlPanel.of_json in
       make ?controlPanel ()
@@ -3104,6 +3150,7 @@ module DescribeControlPanelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let controlPanelArn =
         field_map_exn json "ControlPanelArn" Zz__string.of_json in
@@ -3197,6 +3244,7 @@ module DescribeClusterResponse =
       let cluster =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cluster = field_map json "Cluster" Cluster.of_json in
       make ?cluster ()
@@ -3220,6 +3268,7 @@ module DescribeClusterRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterArn") in
       make ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
       make ~clusterArn ()
@@ -3279,6 +3328,7 @@ module DeleteSafetyRuleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a safety rule./>"]
@@ -3298,6 +3348,7 @@ module DeleteSafetyRuleRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SafetyRuleArn") in
       make ~safetyRuleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let safetyRuleArn =
         field_map_exn json "SafetyRuleArn" Zz__string.of_json in
@@ -3384,6 +3435,7 @@ module DeleteRoutingControlResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a routing control."]
@@ -3406,6 +3458,7 @@ module DeleteRoutingControlRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlArn =
         field_map_exn json "RoutingControlArn" Zz__string.of_json in
@@ -3492,6 +3545,7 @@ module DeleteControlPanelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a control panel."]
@@ -3512,6 +3566,7 @@ module DeleteControlPanelRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let controlPanelArn =
         field_map_exn json "ControlPanelArn" Zz__string.of_json in
@@ -3598,6 +3653,7 @@ module DeleteClusterResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a cluster."]
@@ -3619,6 +3675,7 @@ module DeleteClusterRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterArn") in
       make ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
       make ~clusterArn ()
@@ -3682,6 +3739,7 @@ module CreateSafetyRuleResponse =
         (Option.map ~f:AssertionRule.of_xml)
           (Xml.child xml_arg0 "AssertionRule") in
       make ?gatingRule ?assertionRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatingRule = field_map json "GatingRule" GatingRule.of_json in
       let assertionRule =
@@ -3732,6 +3790,7 @@ module CreateSafetyRuleRequest =
         (Option.map ~f:NewAssertionRule.of_xml)
           (Xml.child xml_arg0 "AssertionRule") in
       make ?tags ?gatingRule ?clientToken ?assertionRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags =
         field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
@@ -3844,6 +3903,7 @@ module CreateRoutingControlResponse =
         (Option.map ~f:RoutingControl.of_xml)
           (Xml.child xml_arg0 "RoutingControl") in
       make ?routingControl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControl =
         field_map json "RoutingControl" RoutingControl.of_json in
@@ -3900,6 +3960,7 @@ module CreateRoutingControlRequest =
         (Option.map ~f:Zz__stringMin1Max64PatternS.of_xml)
           (Xml.child xml_arg0 "ClientToken") in
       make ~routingControlName ?controlPanelArn ~clusterArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingControlName =
         field_map_exn json "RoutingControlName"
@@ -4015,6 +4076,7 @@ module CreateControlPanelResponse =
         (Option.map ~f:ControlPanel.of_xml)
           (Xml.child xml_arg0 "ControlPanel") in
       make ?controlPanel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let controlPanel = field_map json "ControlPanel" ControlPanel.of_json in
       make ?controlPanel ()
@@ -4066,6 +4128,7 @@ module CreateControlPanelRequest =
         (Option.map ~f:Zz__stringMin1Max64PatternS.of_xml)
           (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~controlPanelName ~clusterArn ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags =
         field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
@@ -4177,6 +4240,7 @@ module CreateClusterResponse =
       let cluster =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cluster = field_map json "Cluster" Cluster.of_json in
       make ?cluster ()
@@ -4218,6 +4282,7 @@ module CreateClusterRequest =
         (Option.map ~f:Zz__stringMin1Max64PatternS.of_xml)
           (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~clusterName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags =
         field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in

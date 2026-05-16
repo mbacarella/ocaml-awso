@@ -215,6 +215,7 @@ module RepositoryExternalConnectionInfo =
         (Option.map ~f:ExternalConnectionName.of_xml)
           (Xml.child xml_arg0 "externalConnectionName") in
       make ?status ?packageFormat ?externalConnectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" ExternalConnectionStatus.of_json in
       let packageFormat =
@@ -243,6 +244,7 @@ module UpstreamRepositoryInfo =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repositoryName") in
       make ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map json "repositoryName" RepositoryName.of_json in
@@ -649,6 +651,7 @@ module LicenseInfo =
       let url = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "url") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?url ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "url" String_.of_json in
       let name = field_map json "name" String_.of_json in make ?url ?name ()
@@ -809,6 +812,7 @@ module UpstreamRepository =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryName =
         field_map_exn json "repositoryName" RepositoryName.of_json in
@@ -842,6 +846,7 @@ module PackageVersionError =
         (Option.map ~f:PackageVersionErrorCode.of_xml)
           (Xml.child xml_arg0 "errorCode") in
       make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
       let errorCode =
@@ -871,6 +876,7 @@ module SuccessfulPackageVersionInfo =
       let revision =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revision") in
       make ?status ?revision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" PackageVersionStatus.of_json in
       let revision = field_map json "revision" String_.of_json in
@@ -896,6 +902,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -997,6 +1004,7 @@ module RepositorySummary =
         (Option.map ~f:RepositoryName.of_xml) (Xml.child xml_arg0 "name") in
       make ?description ?arn ?domainOwner ?domainName ?administratorAccount
         ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "description" Description.of_json in
       let arn = field_map json "arn" Arn.of_json in
@@ -1039,6 +1047,7 @@ module PackageSummary =
       let format =
         (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
       make ?package ?namespace ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let package = field_map json "package" PackageName.of_json in
       let namespace = field_map json "namespace" PackageNamespace.of_json in
@@ -1079,6 +1088,7 @@ module PackageVersionSummary =
         PackageVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "version") in
       make ~status ?revision ~version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" PackageVersionStatus.of_json in
       let revision = field_map json "revision" PackageVersionRevision.of_json in
@@ -1128,6 +1138,7 @@ module PackageDependency =
         (Option.map ~f:PackageNamespace.of_xml)
           (Xml.child xml_arg0 "namespace") in
       make ?versionRequirement ?dependencyType ?package ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionRequirement =
         field_map json "versionRequirement" String_.of_json in
@@ -1161,6 +1172,7 @@ module AssetSummary =
       let name =
         AssetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?hashes ?size ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hashes = field_map json "hashes" AssetHashes.of_json in
       let size = field_map json "size" LongOptional.of_json in
@@ -1215,6 +1227,7 @@ module DomainSummary =
       let name =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "name") in
       make ?encryptionKey ?createdTime ?status ?arn ?owner ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKey = field_map json "encryptionKey" Arn.of_json in
       let createdTime = field_map json "createdTime" Timestamp.of_json in
@@ -1307,6 +1320,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1341,6 +1355,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceId = field_map json "resourceId" String_.of_json in
@@ -1362,6 +1377,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1447,6 +1463,7 @@ module RepositoryDescription =
         (Option.map ~f:RepositoryName.of_xml) (Xml.child xml_arg0 "name") in
       make ?externalConnections ?upstreams ?description ?arn ?domainOwner
         ?domainName ?administratorAccount ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalConnections =
         field_map json "externalConnections"
@@ -1493,6 +1510,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceId = field_map json "resourceId" String_.of_json in
@@ -1529,6 +1547,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let resourceId = field_map json "resourceId" String_.of_json in
@@ -1561,6 +1580,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
@@ -1590,6 +1610,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?reason ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "reason" ValidationExceptionReason.of_json in
       let message = field_map_exn json "message" String_.of_json in
@@ -1825,6 +1846,7 @@ module ResourcePolicy =
       let resourceArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       make ?document ?revision ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let document = field_map json "document" PolicyDocument.of_json in
       let revision = field_map json "revision" PolicyRevision.of_json in
@@ -2277,6 +2299,7 @@ module PackageVersionDescription =
       make ?status ?revision ?licenses ?publishedTime ?sourceCodeRepository
         ?homePage ?summary ?version ?displayName ?packageName ?namespace
         ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" PackageVersionStatus.of_json in
       let revision = field_map json "revision" PackageVersionRevision.of_json in
@@ -2375,6 +2398,7 @@ module DomainDescription =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "name") in
       make ?s3BucketArn ?assetSizeBytes ?repositoryCount ?encryptionKey
         ?createdTime ?status ?arn ?owner ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3BucketArn = field_map json "s3BucketArn" Arn.of_json in
       let assetSizeBytes = field_map json "assetSizeBytes" Long.of_json in
@@ -2503,6 +2527,7 @@ module UpdateRepositoryResult =
         (Option.map ~f:RepositoryDescription.of_xml)
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository =
         field_map json "repository" RepositoryDescription.of_json in
@@ -2557,6 +2582,7 @@ module UpdateRepositoryRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?upstreams ?description ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let upstreams =
         field_map json "upstreams" UpstreamRepositoryList.of_json in
@@ -2667,6 +2693,7 @@ module UpdatePackageVersionsStatusResult =
         (Option.map ~f:SuccessfulPackageVersionInfoMap.of_xml)
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedVersions =
         field_map json "failedVersions" PackageVersionErrorMap.of_json in
@@ -2782,6 +2809,7 @@ module UpdatePackageVersionsStatusRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~targetStatus ?expectedStatus ?versionRevisions ~versions ~package
         ?namespace ~format ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetStatus =
         field_map_exn json "targetStatus" PackageVersionStatus.of_json in
@@ -2862,6 +2890,7 @@ module UntagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a resource in AWS CodeArtifact."]
@@ -2890,6 +2919,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -2969,6 +2999,7 @@ module TagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds or updates tags for a resource in AWS CodeArtifact."]
@@ -2994,6 +3025,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -3099,6 +3131,7 @@ module PutRepositoryPermissionsPolicyResult =
       let policy =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicy.of_json in
       make ?policy ()
@@ -3163,6 +3196,7 @@ module PutRepositoryPermissionsPolicyRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~policyDocument ?policyRevision ~repository ?domainOwner ~domain
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "policyDocument" PolicyDocument.of_json in
@@ -3275,6 +3309,7 @@ module PutDomainPermissionsPolicyResult =
       let policy =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicy.of_json in
       make ?policy ()
@@ -3323,6 +3358,7 @@ module PutDomainPermissionsPolicyRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~policyDocument ?policyRevision ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "policyDocument" PolicyDocument.of_json in
@@ -3402,6 +3438,7 @@ module ListTagsForResourceResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3424,6 +3461,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -3509,6 +3547,7 @@ module ListRepositoriesResult =
         (Option.map ~f:RepositorySummaryList.of_xml)
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let repositories =
@@ -3552,6 +3591,7 @@ module ListRepositoriesRequest =
         (Option.map ~f:RepositoryName.of_xml)
           (Xml.child xml_arg0 "repository-prefix") in
       make ?nextToken ?maxResults ?repositoryPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -3650,6 +3690,7 @@ module ListRepositoriesInDomainResult =
         (Option.map ~f:RepositorySummaryList.of_xml)
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let repositories =
@@ -3727,6 +3768,7 @@ module ListRepositoriesInDomainRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?nextToken ?maxResults ?repositoryPrefix ?administratorAccount
         ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -3829,6 +3871,7 @@ module ListPackagesResult =
         (Option.map ~f:PackageSummaryList.of_xml)
           (Xml.child xml_arg0 "packages") in
       make ?nextToken ?packages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let packages = field_map json "packages" PackageSummaryList.of_json in
@@ -3920,6 +3963,7 @@ module ListPackagesRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?nextToken ?maxResults ?packagePrefix ?namespace ?format
         ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -4062,6 +4106,7 @@ module ListPackageVersionsResult =
           (Xml.child xml_arg0 "defaultDisplayVersion") in
       make ?nextToken ?versions ?package ?namespace ?format
         ?defaultDisplayVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let versions =
@@ -4176,6 +4221,7 @@ module ListPackageVersionsRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?nextToken ?maxResults ?sortBy ?status ~package ?namespace ~format
         ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -4330,6 +4376,7 @@ module ListPackageVersionDependenciesResult =
         (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
       make ?dependencies ?nextToken ?versionRevision ?version ?package
         ?namespace ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dependencies =
         field_map json "dependencies" PackageDependencyList.of_json in
@@ -4428,6 +4475,7 @@ module ListPackageVersionDependenciesRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?nextToken ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let packageVersion =
@@ -4578,6 +4626,7 @@ module ListPackageVersionAssetsResult =
         (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
       make ?assets ?nextToken ?versionRevision ?version ?package ?namespace
         ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assets = field_map json "assets" AssetSummaryList.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -4686,6 +4735,7 @@ module ListPackageVersionAssetsRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?nextToken ?maxResults ~packageVersion ~package ?namespace ~format
         ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -4781,6 +4831,7 @@ module ListDomainsResult =
         (Option.map ~f:DomainSummaryList.of_xml)
           (Xml.child xml_arg0 "domains") in
       make ?nextToken ?domains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let domains = field_map json "domains" DomainSummaryList.of_json in
@@ -4813,6 +4864,7 @@ module ListDomainsRequest =
         (Option.map ~f:ListDomainsMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -4899,6 +4951,7 @@ module GetRepositoryPermissionsPolicyResult =
       let policy =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicy.of_json in
       make ?policy ()
@@ -4936,6 +4989,7 @@ module GetRepositoryPermissionsPolicyRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository = field_map_exn json "repository" RepositoryName.of_json in
       let domainOwner = field_map json "domainOwner" AccountId.of_json in
@@ -5024,6 +5078,7 @@ module GetRepositoryEndpointResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "repositoryEndpoint") in
       make ?repositoryEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repositoryEndpoint =
         field_map json "repositoryEndpoint" String_.of_json in
@@ -5069,6 +5124,7 @@ module GetRepositoryEndpointRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~format ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let format = field_map_exn json "format" PackageFormat.of_json in
       let repository = field_map_exn json "repository" RepositoryName.of_json in
@@ -5203,6 +5259,7 @@ module GetPackageVersionReadmeResult =
       let format =
         (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
       make ?readme ?versionRevision ?version ?package ?namespace ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let readme = field_map json "readme" String_.of_json in
       let versionRevision =
@@ -5290,6 +5347,7 @@ module GetPackageVersionReadmeRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let packageVersion =
         field_map_exn json "packageVersion" PackageVersion.of_json in
@@ -5434,6 +5492,7 @@ module GetPackageVersionAssetResult =
         (Option.map ~f:AssetName.of_xml) (Xml.child xml_arg0 "X-AssetName") in
       let asset = (Option.map ~f:Asset.of_xml) (Xml.child xml_arg0 "asset") in
       make ?packageVersionRevision ?packageVersion ?assetName ?asset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let packageVersionRevision =
         field_map json "packageVersionRevision"
@@ -5538,6 +5597,7 @@ module GetPackageVersionAssetRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?packageVersionRevision ~asset ~packageVersion ~package ?namespace
         ~format ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let packageVersionRevision =
         field_map json "packageVersionRevision"
@@ -5634,6 +5694,7 @@ module GetDomainPermissionsPolicyResult =
       let policy =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicy.of_json in
       make ?policy ()
@@ -5663,6 +5724,7 @@ module GetDomainPermissionsPolicyRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainOwner = field_map json "domainOwner" AccountId.of_json in
       let domain = field_map_exn json "domain" DomainName.of_json in
@@ -5757,6 +5819,7 @@ module GetAuthorizationTokenResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "authorizationToken") in
       make ?expiration ?authorizationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiration = field_map json "expiration" Timestamp.of_json in
       let authorizationToken =
@@ -5799,6 +5862,7 @@ module GetAuthorizationTokenRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?durationSeconds ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let durationSeconds =
         field_map json "durationSeconds"
@@ -5909,6 +5973,7 @@ module DisposePackageVersionsResult =
         (Option.map ~f:SuccessfulPackageVersionInfoMap.of_xml)
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedVersions =
         field_map json "failedVersions" PackageVersionErrorMap.of_json in
@@ -6014,6 +6079,7 @@ module DisposePackageVersionsRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?expectedStatus ?versionRevisions ~versions ~package ?namespace
         ~format ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedStatus =
         field_map json "expectedStatus" PackageVersionStatus.of_json in
@@ -6132,6 +6198,7 @@ module DisassociateExternalConnectionResult =
         (Option.map ~f:RepositoryDescription.of_xml)
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository =
         field_map json "repository" RepositoryDescription.of_json in
@@ -6181,6 +6248,7 @@ module DisassociateExternalConnectionRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~externalConnection ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalConnection =
         field_map_exn json "externalConnection"
@@ -6273,6 +6341,7 @@ module DescribeRepositoryResult =
         (Option.map ~f:RepositoryDescription.of_xml)
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository =
         field_map json "repository" RepositoryDescription.of_json in
@@ -6312,6 +6381,7 @@ module DescribeRepositoryRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository = field_map_exn json "repository" RepositoryName.of_json in
       let domainOwner = field_map json "domainOwner" AccountId.of_json in
@@ -6411,6 +6481,7 @@ module DescribePackageVersionResult =
         PackageVersionDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "packageVersion") in
       make ~packageVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let packageVersion =
         field_map_exn json "packageVersion" PackageVersionDescription.of_json in
@@ -6492,6 +6563,7 @@ module DescribePackageVersionRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let packageVersion =
         field_map_exn json "packageVersion" PackageVersion.of_json in
@@ -6583,6 +6655,7 @@ module DescribeDomainResult =
         (Option.map ~f:DomainDescription.of_xml)
           (Xml.child xml_arg0 "domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "domain" DomainDescription.of_json in
       make ?domain ()
@@ -6612,6 +6685,7 @@ module DescribeDomainRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainOwner = field_map json "domainOwner" AccountId.of_json in
       let domain = field_map_exn json "domain" DomainName.of_json in
@@ -6709,6 +6783,7 @@ module DeleteRepositoryResult =
         (Option.map ~f:RepositoryDescription.of_xml)
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository =
         field_map json "repository" RepositoryDescription.of_json in
@@ -6746,6 +6821,7 @@ module DeleteRepositoryRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository = field_map_exn json "repository" RepositoryName.of_json in
       let domainOwner = field_map json "domainOwner" AccountId.of_json in
@@ -6841,6 +6917,7 @@ module DeleteRepositoryPermissionsPolicyResult =
       let policy =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicy.of_json in
       make ?policy ()
@@ -6889,6 +6966,7 @@ module DeleteRepositoryPermissionsPolicyRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?policyRevision ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyRevision =
         field_map json "policyRevision" PolicyRevision.of_json in
@@ -6999,6 +7077,7 @@ module DeletePackageVersionsResult =
         (Option.map ~f:SuccessfulPackageVersionInfoMap.of_xml)
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedVersions =
         field_map json "failedVersions" PackageVersionErrorMap.of_json in
@@ -7093,6 +7172,7 @@ module DeletePackageVersionsRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?expectedStatus ~versions ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expectedStatus =
         field_map json "expectedStatus" PackageVersionStatus.of_json in
@@ -7188,6 +7268,7 @@ module DeleteDomainResult =
         (Option.map ~f:DomainDescription.of_xml)
           (Xml.child xml_arg0 "domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "domain" DomainDescription.of_json in
       make ?domain ()
@@ -7215,6 +7296,7 @@ module DeleteDomainRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainOwner = field_map json "domainOwner" AccountId.of_json in
       let domain = field_map_exn json "domain" DomainName.of_json in
@@ -7310,6 +7392,7 @@ module DeleteDomainPermissionsPolicyResult =
       let policy =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "policy" ResourcePolicy.of_json in
       make ?policy ()
@@ -7348,6 +7431,7 @@ module DeleteDomainPermissionsPolicyRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?policyRevision ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyRevision =
         field_map json "policyRevision" PolicyRevision.of_json in
@@ -7457,6 +7541,7 @@ module CreateRepositoryResult =
         (Option.map ~f:RepositoryDescription.of_xml)
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository =
         field_map json "repository" RepositoryDescription.of_json in
@@ -7523,6 +7608,7 @@ module CreateRepositoryRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?tags ?upstreams ?description ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let upstreams =
@@ -7634,6 +7720,7 @@ module CreateDomainResult =
         (Option.map ~f:DomainDescription.of_xml)
           (Xml.child xml_arg0 "domain") in
       make ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map json "domain" DomainDescription.of_json in
       make ?domain ()
@@ -7668,6 +7755,7 @@ module CreateDomainRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?tags ?encryptionKey ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let encryptionKey = field_map json "encryptionKey" Arn.of_json in
@@ -7787,6 +7875,7 @@ module CopyPackageVersionsResult =
         (Option.map ~f:SuccessfulPackageVersionInfoMap.of_xml)
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedVersions =
         field_map json "failedVersions" PackageVersionErrorMap.of_json in
@@ -7914,6 +8003,7 @@ module CopyPackageVersionsRequest =
       make ?includeFromUpstream ?allowOverwrite ?versionRevisions ?versions
         ~package ?namespace ~format ~destinationRepository ~sourceRepository
         ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeFromUpstream =
         field_map json "includeFromUpstream" BooleanOptional.of_json in
@@ -8038,6 +8128,7 @@ module AssociateExternalConnectionResult =
         (Option.map ~f:RepositoryDescription.of_xml)
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let repository =
         field_map json "repository" RepositoryDescription.of_json in
@@ -8086,6 +8177,7 @@ module AssociateExternalConnectionRequest =
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~externalConnection ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalConnection =
         field_map_exn json "externalConnection"

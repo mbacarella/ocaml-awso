@@ -72,6 +72,7 @@ module MetricDimension =
         MetricDimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" MetricDimensionValue.of_json in
       let name = field_map_exn json "Name" MetricDimensionName.of_json in
@@ -162,6 +163,7 @@ module Metric =
         MetricNamespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
       make ?dimensions ~metricName ~namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions = field_map json "Dimensions" MetricDimensions.of_json in
       let metricName = field_map_exn json "MetricName" MetricName.of_json in
@@ -459,6 +461,7 @@ module MetricStat =
       let metric =
         Metric.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
       make ?unit ~stat ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" MetricUnit.of_json in
       let stat = field_map_exn json "Stat" XmlStringMetricStat.of_json in
@@ -564,6 +567,7 @@ module AcceleratorCountRequest =
         (Option.map ~f:NullablePositiveInteger.of_xml)
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveInteger.of_json in
       let min = field_map json "Min" NullablePositiveInteger.of_json in
@@ -644,6 +648,7 @@ module AcceleratorTotalMemoryMiBRequest =
         (Option.map ~f:NullablePositiveInteger.of_xml)
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveInteger.of_json in
       let min = field_map json "Min" NullablePositiveInteger.of_json in
@@ -726,6 +731,7 @@ module BaselineEbsBandwidthMbpsRequest =
         (Option.map ~f:NullablePositiveInteger.of_xml)
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveInteger.of_json in
       let min = field_map json "Min" NullablePositiveInteger.of_json in
@@ -913,6 +919,7 @@ module MemoryGiBPerVCpuRequest =
         (Option.map ~f:NullablePositiveDouble.of_xml)
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveDouble.of_json in
       let min = field_map json "Min" NullablePositiveDouble.of_json in
@@ -943,6 +950,7 @@ module MemoryMiBRequest =
         NullablePositiveInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Min") in
       make ?max ~min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveInteger.of_json in
       let min = field_map_exn json "Min" NullablePositiveInteger.of_json in
@@ -972,6 +980,7 @@ module NetworkInterfaceCountRequest =
         (Option.map ~f:NullablePositiveInteger.of_xml)
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveInteger.of_json in
       let min = field_map json "Min" NullablePositiveInteger.of_json in
@@ -1014,6 +1023,7 @@ module TotalLocalStorageGBRequest =
         (Option.map ~f:NullablePositiveDouble.of_xml)
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveDouble.of_json in
       let min = field_map json "Min" NullablePositiveDouble.of_json in
@@ -1044,6 +1054,7 @@ module VCpuCountRequest =
         NullablePositiveInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Min") in
       make ?max ~min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let max = field_map json "Max" NullablePositiveInteger.of_json in
       let min = field_map_exn json "Min" NullablePositiveInteger.of_json in
@@ -1122,6 +1133,7 @@ module MetricDataQuery =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?returnData ?label ?metricStat ?expression ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnData = field_map json "ReturnData" ReturnData.of_json in
       let label = field_map json "Label" XmlStringMetricLabel.of_json in
@@ -1369,6 +1381,7 @@ module InstanceRequirements =
         ?spotMaxPricePercentageOverLowestPrice ?instanceGenerations
         ?excludedInstanceTypes ?memoryGiBPerVCpu ?cpuManufacturers ~memoryMiB
         ~vCpuCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceleratorTotalMemoryMiB =
         field_map json "AcceleratorTotalMemoryMiB"
@@ -1463,6 +1476,7 @@ module LaunchTemplateSpecification =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "LaunchTemplateId") in
       make ?version ?launchTemplateName ?launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" XmlStringMaxLen255.of_json in
       let launchTemplateName =
@@ -1674,6 +1688,7 @@ module LaunchTemplateOverrides =
           (Xml.child xml_arg0 "InstanceType") in
       make ?instanceRequirements ?launchTemplateSpecification
         ?weightedCapacity ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceRequirements =
         field_map json "InstanceRequirements" InstanceRequirements.of_json in
@@ -1721,6 +1736,7 @@ module PredictiveScalingCustomizedCapacityMetric =
         MetricDataQueries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
       make ~metricDataQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricDataQueries =
         field_map_exn json "MetricDataQueries" MetricDataQueries.of_json in
@@ -1747,6 +1763,7 @@ module PredictiveScalingCustomizedLoadMetric =
         MetricDataQueries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
       make ~metricDataQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricDataQueries =
         field_map_exn json "MetricDataQueries" MetricDataQueries.of_json in
@@ -1773,6 +1790,7 @@ module PredictiveScalingCustomizedScalingMetric =
         MetricDataQueries.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
       make ~metricDataQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricDataQueries =
         field_map_exn json "MetricDataQueries" MetricDataQueries.of_json in
@@ -1808,6 +1826,7 @@ module PredictiveScalingPredefinedLoadMetric =
         PredefinedLoadMetricType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceLabel =
         field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
@@ -1847,6 +1866,7 @@ module PredictiveScalingPredefinedMetricPair =
         PredefinedMetricPairType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceLabel =
         field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
@@ -1886,6 +1906,7 @@ module PredictiveScalingPredefinedScalingMetric =
         PredefinedScalingMetricType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceLabel =
         field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
@@ -2221,6 +2242,7 @@ module PredictiveScalingMetricSpecification =
         ?predefinedLoadMetricSpecification
         ?predefinedScalingMetricSpecification
         ?predefinedMetricPairSpecification ~targetValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customizedCapacityMetricSpecification =
         field_map json "CustomizedCapacityMetricSpecification"
@@ -2410,6 +2432,7 @@ module Ebs =
           (Xml.child xml_arg0 "SnapshotId") in
       make ?throughput ?encrypted ?iops ?deleteOnTermination ?volumeType
         ?volumeSize ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let throughput =
         field_map json "Throughput" BlockDeviceEbsThroughput.of_json in
@@ -2518,6 +2541,7 @@ module InstancesDistribution =
       make ?spotMaxPrice ?spotInstancePools ?spotAllocationStrategy
         ?onDemandPercentageAboveBaseCapacity ?onDemandBaseCapacity
         ?onDemandAllocationStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotMaxPrice =
         field_map json "SpotMaxPrice" MixedInstanceSpotPrice.of_json in
@@ -2563,6 +2587,7 @@ module LaunchTemplate =
         (Option.map ~f:LaunchTemplateSpecification.of_xml)
           (Xml.child xml_arg0 "LaunchTemplateSpecification") in
       make ?overrides ?launchTemplateSpecification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let overrides = field_map json "Overrides" Overrides.of_json in
       let launchTemplateSpecification =
@@ -2838,6 +2863,7 @@ module Alarm =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "AlarmName") in
       make ?alarmARN ?alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmARN = field_map json "AlarmARN" ResourceName.of_json in
       let alarmName = field_map json "AlarmName" XmlStringMaxLen255.of_json in
@@ -3008,6 +3034,7 @@ module StepAdjustment =
           (Xml.child xml_arg0 "MetricIntervalLowerBound") in
       make ~scalingAdjustment ?metricIntervalUpperBound
         ?metricIntervalLowerBound ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingAdjustment =
         field_map_exn json "ScalingAdjustment" PolicyIncrement.of_json in
@@ -3070,6 +3097,7 @@ module CustomizedMetricSpecification =
         MetricName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
       make ?unit ~statistic ?dimensions ~namespace ~metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" MetricUnit.of_json in
       let statistic = field_map_exn json "Statistic" MetricStatistic.of_json in
@@ -3122,6 +3150,7 @@ module PredefinedMetricSpecification =
         MetricType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceLabel =
         field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
@@ -3172,6 +3201,7 @@ module BlockDeviceMapping =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "VirtualName") in
       make ?noDevice ?ebs ~deviceName ?virtualName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let noDevice = field_map json "NoDevice" NoDevice.of_json in
       let ebs = field_map json "Ebs" Ebs.of_json in
@@ -3311,6 +3341,7 @@ module MixedInstancesPolicy =
         (Option.map ~f:LaunchTemplate.of_xml)
           (Xml.child xml_arg0 "LaunchTemplate") in
       make ?instancesDistribution ?launchTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instancesDistribution =
         field_map json "InstancesDistribution" InstancesDistribution.of_json in
@@ -3347,6 +3378,7 @@ module InstanceRefreshLivePoolProgress =
         (Option.map ~f:IntPercent.of_xml)
           (Xml.child xml_arg0 "PercentageComplete") in
       make ?instancesToUpdate ?percentageComplete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instancesToUpdate =
         field_map json "InstancesToUpdate" InstancesToUpdate.of_json in
@@ -3383,6 +3415,7 @@ module InstanceRefreshWarmPoolProgress =
         (Option.map ~f:IntPercent.of_xml)
           (Xml.child xml_arg0 "PercentageComplete") in
       make ?instancesToUpdate ?percentageComplete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instancesToUpdate =
         field_map json "InstancesToUpdate" InstancesToUpdate.of_json in
@@ -3489,6 +3522,7 @@ module EnabledMetric =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Metric") in
       make ?granularity ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let granularity =
         field_map json "Granularity" XmlStringMaxLen255.of_json in
@@ -3595,6 +3629,7 @@ module Instance =
       make ?weightedCapacity ~protectedFromScaleIn ?launchTemplate
         ?launchConfigurationName ~healthStatus ~lifecycleState
         ~availabilityZone ?instanceType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weightedCapacity =
         field_map json "WeightedCapacity" XmlStringMaxLen32.of_json in
@@ -3644,6 +3679,7 @@ module SuspendedProcess =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "ProcessName") in
       make ?suspensionReason ?processName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suspensionReason =
         field_map json "SuspensionReason" XmlStringMaxLen255.of_json in
@@ -3694,6 +3730,7 @@ module TagDescription =
       let resourceId =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?propagateAtLaunch ?value ?key ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propagateAtLaunch =
         field_map json "PropagateAtLaunch" PropagateAtLaunch.of_json in
@@ -3766,6 +3803,7 @@ module InstanceReusePolicy =
         (Option.map ~f:ReuseOnScaleIn.of_xml)
           (Xml.child xml_arg0 "ReuseOnScaleIn") in
       make ?reuseOnScaleIn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reuseOnScaleIn =
         field_map json "ReuseOnScaleIn" ReuseOnScaleIn.of_json in
@@ -4043,6 +4081,7 @@ module PredictiveScalingConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricSpecifications") in
       make ?maxCapacityBuffer ?maxCapacityBreachBehavior
         ?schedulingBufferTime ?mode ~metricSpecifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxCapacityBuffer =
         field_map json "MaxCapacityBuffer"
@@ -4154,6 +4193,7 @@ module TargetTrackingConfiguration =
           (Xml.child xml_arg0 "PredefinedMetricSpecification") in
       make ?disableScaleIn ~targetValue ?customizedMetricSpecification
         ?predefinedMetricSpecification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disableScaleIn =
         field_map json "DisableScaleIn" DisableScaleIn.of_json in
@@ -4308,6 +4348,7 @@ module InstanceMetadataOptions =
         (Option.map ~f:InstanceMetadataHttpTokensState.of_xml)
           (Xml.child xml_arg0 "HttpTokens") in
       make ?httpEndpoint ?httpPutResponseHopLimit ?httpTokens ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let httpEndpoint =
         field_map json "HttpEndpoint" InstanceMetadataEndpointState.of_json in
@@ -4337,6 +4378,7 @@ module InstanceMonitoring =
         (Option.map ~f:MonitoringEnabled.of_xml)
           (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" MonitoringEnabled.of_json in
       make ?enabled ()
@@ -4687,6 +4729,7 @@ module DesiredConfiguration =
         (Option.map ~f:LaunchTemplateSpecification.of_xml)
           (Xml.child xml_arg0 "LaunchTemplate") in
       make ?mixedInstancesPolicy ?launchTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mixedInstancesPolicy =
         field_map json "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
@@ -4726,6 +4769,7 @@ module InstanceRefreshProgressDetails =
         (Option.map ~f:InstanceRefreshLivePoolProgress.of_xml)
           (Xml.child xml_arg0 "LivePoolProgress") in
       make ?warmPoolProgress ?livePoolProgress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warmPoolProgress =
         field_map json "WarmPoolProgress"
@@ -4840,6 +4884,7 @@ module RefreshPreferences =
           (Xml.child xml_arg0 "MinHealthyPercentage") in
       make ?skipMatching ?checkpointDelay ?checkpointPercentages
         ?instanceWarmup ?minHealthyPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let skipMatching = field_map json "SkipMatching" SkipMatching.of_json in
       let checkpointDelay =
@@ -5178,6 +5223,7 @@ module WarmPoolConfiguration =
           (Xml.child xml_arg0 "MaxGroupPreparedCapacity") in
       make ?instanceReusePolicy ?status ?poolState ?minSize
         ?maxGroupPreparedCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceReusePolicy =
         field_map json "InstanceReusePolicy" InstanceReusePolicy.of_json in
@@ -5339,6 +5385,7 @@ module ScheduledUpdateGroupAction =
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ?time ?scheduledActionARN ?scheduledActionName
         ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeZone = field_map json "TimeZone" XmlStringMaxLen255.of_json in
       let desiredCapacity =
@@ -5379,6 +5426,7 @@ module ProcessType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProcessName") in
       make ~processName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processName =
         field_map_exn json "ProcessName" XmlStringMaxLen255.of_json in
@@ -5553,6 +5601,7 @@ module ScalingPolicy =
         ?metricAggregationType ?stepAdjustments ?cooldown ?scalingAdjustment
         ?minAdjustmentMagnitude ?minAdjustmentStep ?adjustmentType
         ?policyType ?policyARN ?policyName ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictiveScalingConfiguration =
         field_map json "PredictiveScalingConfiguration"
@@ -5800,6 +5849,7 @@ module LaunchConfiguration =
         ~instanceType ?userData ?classicLinkVPCSecurityGroups
         ?classicLinkVPCId ?securityGroups ?keyName ~imageId
         ?launchConfigurationARN ~launchConfigurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadataOptions =
         field_map json "MetadataOptions" InstanceMetadataOptions.of_json in
@@ -5882,6 +5932,7 @@ module LoadForecast =
         PredictiveScalingForecastTimestamps.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamps") in
       make ~metricSpecification ~values ~timestamps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricSpecification =
         field_map_exn json "MetricSpecification"
@@ -6011,6 +6062,7 @@ module Activity =
       make ?autoScalingGroupARN ?autoScalingGroupState ?details ?progress
         ?statusMessage ~statusCode ?endTime ~startTime ~cause ?description
         ~autoScalingGroupName ~activityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingGroupARN =
         field_map json "AutoScalingGroupARN" ResourceName.of_json in
@@ -6056,6 +6108,7 @@ module Filter =
         (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "Values") in
       let name = (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" Values.of_json in
       let name = field_map json "Name" XmlString.of_json in
@@ -6098,6 +6151,7 @@ module NotificationConfiguration =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       make ?notificationType ?topicARN ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationType =
         field_map json "NotificationType" XmlStringMaxLen255.of_json in
@@ -6124,6 +6178,7 @@ module MetricCollectionType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Metric") in
       make ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metric = field_map json "Metric" XmlStringMaxLen255.of_json in
       make ?metric ()
@@ -6146,6 +6201,7 @@ module MetricGranularityType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Granularity") in
       make ?granularity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let granularity =
         field_map json "Granularity" XmlStringMaxLen255.of_json in
@@ -6177,6 +6233,7 @@ module LoadBalancerState =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "LoadBalancerName") in
       make ?state ?loadBalancerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" XmlStringMaxLen255.of_json in
       let loadBalancerName =
@@ -6210,6 +6267,7 @@ module LoadBalancerTargetGroupState =
         (Option.map ~f:XmlStringMaxLen511.of_xml)
           (Xml.child xml_arg0 "LoadBalancerTargetGroupARN") in
       make ?state ?loadBalancerTargetGroupARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" XmlStringMaxLen255.of_json in
       let loadBalancerTargetGroupARN =
@@ -6321,6 +6379,7 @@ module LifecycleHook =
       make ?defaultResult ?globalTimeout ?heartbeatTimeout
         ?notificationMetadata ?roleARN ?notificationTargetARN
         ?lifecycleTransition ?autoScalingGroupName ?lifecycleHookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultResult =
         field_map json "DefaultResult" LifecycleActionResult.of_json in
@@ -6459,6 +6518,7 @@ module InstanceRefresh =
       make ?desiredConfiguration ?preferences ?progressDetails
         ?instancesToUpdate ?percentageComplete ?endTime ?startTime
         ?statusReason ?status ?autoScalingGroupName ?instanceRefreshId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredConfiguration =
         field_map json "DesiredConfiguration" DesiredConfiguration.of_json in
@@ -6503,6 +6563,7 @@ module AdjustmentType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "AdjustmentType") in
       make ?adjustmentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adjustmentType =
         field_map json "AdjustmentType" XmlStringMaxLen255.of_json in
@@ -6553,6 +6614,7 @@ module Tag =
       let resourceId =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?propagateAtLaunch ?value ~key ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let propagateAtLaunch =
         field_map json "PropagateAtLaunch" PropagateAtLaunch.of_json in
@@ -6646,6 +6708,7 @@ module LifecycleHookSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "LifecycleHookName") in
       make ?roleARN ?notificationTargetARN ?defaultResult ?heartbeatTimeout
         ?notificationMetadata ~lifecycleTransition ~lifecycleHookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleARN = field_map json "RoleARN" XmlStringMaxLen255.of_json in
       let notificationTargetARN =
@@ -6753,6 +6816,7 @@ module ScheduledUpdateGroupActionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledActionName") in
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ~scheduledActionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeZone = field_map json "TimeZone" XmlStringMaxLen255.of_json in
       let desiredCapacity =
@@ -6801,6 +6865,7 @@ module FailedScheduledUpdateGroupActionRequest =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledActionName") in
       make ?errorMessage ?errorCode ~scheduledActionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" XmlString.of_json in
       let errorCode = field_map json "ErrorCode" XmlStringMaxLen64.of_json in
@@ -6919,6 +6984,7 @@ module AutoScalingInstanceDetails =
       make ?weightedCapacity ~protectedFromScaleIn ?launchTemplate
         ?launchConfigurationName ~healthStatus ~lifecycleState
         ~availabilityZone ~autoScalingGroupName ?instanceType ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weightedCapacity =
         field_map json "WeightedCapacity" XmlStringMaxLen32.of_json in
@@ -7275,6 +7341,7 @@ module AutoScalingGroup =
         ~desiredCapacity ~maxSize ~minSize ?mixedInstancesPolicy
         ?launchTemplate ?launchConfigurationName ?autoScalingGroupARN
         ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredCapacityType =
         field_map json "DesiredCapacityType" XmlStringMaxLen255.of_json in
@@ -7378,6 +7445,7 @@ module InvalidNextToken =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -7397,6 +7465,7 @@ module ResourceContentionFault =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -7433,6 +7502,7 @@ module InstanceRefreshInProgressFault =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -7453,6 +7523,7 @@ module LimitExceededFault =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -7653,6 +7724,7 @@ module ServiceLinkedRoleFailure =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -7772,6 +7844,7 @@ module CapacityForecast =
         PredictiveScalingForecastTimestamps.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamps") in
       make ~values ~timestamps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map_exn json "Values" PredictiveScalingForecastValues.of_json in
@@ -8353,6 +8426,7 @@ module ResourceInUseFault =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -8373,6 +8447,7 @@ module ScalingActivityInProgressFault =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -8442,6 +8517,7 @@ module ActiveInstanceRefreshNotFoundFault =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -8489,6 +8565,7 @@ module AlreadyExistsFault =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" XmlStringMaxLen255.of_json in
       make ?message ()
@@ -8791,6 +8868,7 @@ module UpdateAutoScalingGroupType =
         ?healthCheckType ?availabilityZones ?defaultCooldown ?desiredCapacity
         ?maxSize ?minSize ?mixedInstancesPolicy ?launchTemplate
         ?launchConfigurationName ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredCapacityType =
         field_map json "DesiredCapacityType" XmlStringMaxLen255.of_json in
@@ -8870,6 +8948,7 @@ module TerminateInstanceInAutoScalingGroupType =
         XmlStringMaxLen19.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~shouldDecrementDesiredCapacity ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shouldDecrementDesiredCapacity =
         field_map_exn json "ShouldDecrementDesiredCapacity"
@@ -8947,6 +9026,7 @@ module TagsType =
       let tags =
         (Option.map ~f:TagDescriptionList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let tags = field_map json "Tags" TagDescriptionList.of_json in
@@ -9006,6 +9086,7 @@ module StartInstanceRefreshType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?preferences ?desiredConfiguration ?strategy ~autoScalingGroupName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferences =
         field_map json "Preferences" RefreshPreferences.of_json in
@@ -9098,6 +9179,7 @@ module StartInstanceRefreshAnswer =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "InstanceRefreshId") in
       make ?instanceRefreshId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceRefreshId =
         field_map json "InstanceRefreshId" XmlStringMaxLen255.of_json in
@@ -9142,6 +9224,7 @@ module SetInstanceProtectionQuery =
         InstanceIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
       make ~protectedFromScaleIn ~autoScalingGroupName ~instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectedFromScaleIn =
         field_map_exn json "ProtectedFromScaleIn"
@@ -9202,6 +9285,7 @@ module SetInstanceProtectionAnswer =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9241,6 +9325,7 @@ module SetInstanceHealthQuery =
         XmlStringMaxLen19.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?shouldRespectGracePeriod ~healthStatus ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shouldRespectGracePeriod =
         field_map json "ShouldRespectGracePeriod"
@@ -9290,6 +9375,7 @@ module SetDesiredCapacityType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?honorCooldown ~desiredCapacity ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let honorCooldown =
         field_map json "HonorCooldown" HonorCooldown.of_json in
@@ -9379,6 +9465,7 @@ module ScheduledActionsType =
         (Option.map ~f:ScheduledUpdateGroupActions.of_xml)
           (Xml.child xml_arg0 "ScheduledUpdateGroupActions") in
       make ?nextToken ?scheduledUpdateGroupActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let scheduledUpdateGroupActions =
@@ -9416,6 +9503,7 @@ module ScalingProcessQuery =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?scalingProcesses ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingProcesses =
         field_map json "ScalingProcesses" ProcessNames.of_json in
@@ -9476,6 +9564,7 @@ module RecordLifecycleActionHeartbeatType =
           (Xml.child_exn ~context:context_ xml_arg0 "LifecycleHookName") in
       make ?instanceId ?lifecycleActionToken ~autoScalingGroupName
         ~lifecycleHookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map json "InstanceId" XmlStringMaxLen19.of_json in
       let lifecycleActionToken =
@@ -9531,6 +9620,7 @@ module RecordLifecycleActionHeartbeatAnswer =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9595,6 +9685,7 @@ module PutWarmPoolType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?instanceReusePolicy ?poolState ?minSize ?maxGroupPreparedCapacity
         ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceReusePolicy =
         field_map json "InstanceReusePolicy" InstanceReusePolicy.of_json in
@@ -9659,6 +9750,7 @@ module PutWarmPoolAnswer =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9766,6 +9858,7 @@ module PutScheduledUpdateGroupActionType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ?time ~scheduledActionName ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeZone = field_map json "TimeZone" XmlStringMaxLen255.of_json in
       let desiredCapacity =
@@ -9940,6 +10033,7 @@ module PutScalingPolicyType =
         ?stepAdjustments ?metricAggregationType ?cooldown ?scalingAdjustment
         ?minAdjustmentMagnitude ?minAdjustmentStep ?adjustmentType
         ?policyType ~policyName ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictiveScalingConfiguration =
         field_map json "PredictiveScalingConfiguration"
@@ -10014,6 +10108,7 @@ module PutNotificationConfigurationType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~notificationTypes ~topicARN ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationTypes =
         field_map_exn json "NotificationTypes"
@@ -10118,6 +10213,7 @@ module PutLifecycleHookType =
       make ?defaultResult ?heartbeatTimeout ?notificationMetadata
         ?notificationTargetARN ?roleARN ?lifecycleTransition
         ~autoScalingGroupName ~lifecycleHookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultResult =
         field_map json "DefaultResult" LifecycleActionResult.of_json in
@@ -10190,6 +10286,7 @@ module PutLifecycleHookAnswer =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10252,6 +10349,7 @@ module ProcessesType =
       let processes =
         (Option.map ~f:Processes.of_xml) (Xml.child xml_arg0 "Processes") in
       make ?processes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processes = field_map json "Processes" Processes.of_json in
       make ?processes ()
@@ -10340,6 +10438,7 @@ module PolicyARNType =
       let policyARN =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "PolicyARN") in
       make ?alarms ?policyARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarms = field_map json "Alarms" Alarms.of_json in
       let policyARN = field_map json "PolicyARN" ResourceName.of_json in
@@ -10429,6 +10528,7 @@ module PoliciesType =
         (Option.map ~f:ScalingPolicies.of_xml)
           (Xml.child xml_arg0 "ScalingPolicies") in
       make ?nextToken ?scalingPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let scalingPolicies =
@@ -10514,6 +10614,7 @@ module LaunchConfigurationsType =
         LaunchConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LaunchConfigurations") in
       make ?nextToken ~launchConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let launchConfigurations =
@@ -10557,6 +10658,7 @@ module LaunchConfigurationNamesType =
         (Option.map ~f:LaunchConfigurationNames.of_xml)
           (Xml.child xml_arg0 "LaunchConfigurationNames") in
       make ?maxRecords ?nextToken ?launchConfigurationNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -10585,6 +10687,7 @@ module LaunchConfigurationNameType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LaunchConfigurationName") in
       make ~launchConfigurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchConfigurationName =
         field_map_exn json "LaunchConfigurationName"
@@ -10635,6 +10738,7 @@ module GetPredictiveScalingForecastType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~endTime ~startTime ~policyName ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map_exn json "EndTime" TimestampType.of_json in
       let startTime = field_map_exn json "StartTime" TimestampType.of_json in
@@ -10721,6 +10825,7 @@ module GetPredictiveScalingForecastAnswer =
         LoadForecasts.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LoadForecast") in
       make ~updateTime ~capacityForecast ~loadForecast ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateTime = field_map_exn json "UpdateTime" TimestampType.of_json in
       let capacityForecast =
@@ -10757,6 +10862,7 @@ module ExitStandbyQuery =
       let instanceIds =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ~autoScalingGroupName ?instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingGroupName =
         field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
@@ -10818,6 +10924,7 @@ module ExitStandbyAnswer =
       let activities =
         (Option.map ~f:Activities.of_xml) (Xml.child xml_arg0 "Activities") in
       make ?activities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activities = field_map json "Activities" Activities.of_json in
       make ?activities ()
@@ -10883,6 +10990,7 @@ module ExecutePolicyType =
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       make ?breachThreshold ?metricValue ?honorCooldown ~policyName
         ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let breachThreshold =
         field_map json "BreachThreshold" MetricScale.of_json in
@@ -10941,6 +11049,7 @@ module EnterStandbyQuery =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ~shouldDecrementDesiredCapacity ~autoScalingGroupName ?instanceIds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shouldDecrementDesiredCapacity =
         field_map_exn json "ShouldDecrementDesiredCapacity"
@@ -11007,6 +11116,7 @@ module EnterStandbyAnswer =
       let activities =
         (Option.map ~f:Activities.of_xml) (Xml.child xml_arg0 "Activities") in
       make ?activities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activities = field_map json "Activities" Activities.of_json in
       make ?activities ()
@@ -11047,6 +11157,7 @@ module EnableMetricsCollectionQuery =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~granularity ?metrics ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let granularity =
         field_map_exn json "Granularity" XmlStringMaxLen255.of_json in
@@ -11083,6 +11194,7 @@ module DisableMetricsCollectionQuery =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?metrics ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metrics = field_map json "Metrics" Metrics.of_json in
       let autoScalingGroupName =
@@ -11119,6 +11231,7 @@ module DetachLoadBalancersType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~loadBalancerNames ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loadBalancerNames =
         field_map_exn json "LoadBalancerNames" LoadBalancerNames.of_json in
@@ -11168,6 +11281,7 @@ module DetachLoadBalancersResultType =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11200,6 +11314,7 @@ module DetachLoadBalancerTargetGroupsType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~targetGroupARNs ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetGroupARNs =
         field_map_exn json "TargetGroupARNs" TargetGroupARNs.of_json in
@@ -11251,6 +11366,7 @@ module DetachLoadBalancerTargetGroupsResultType =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11299,6 +11415,7 @@ module DetachInstancesQuery =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ~shouldDecrementDesiredCapacity ~autoScalingGroupName ?instanceIds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shouldDecrementDesiredCapacity =
         field_map_exn json "ShouldDecrementDesiredCapacity"
@@ -11366,6 +11483,7 @@ module DetachInstancesAnswer =
       let activities =
         (Option.map ~f:Activities.of_xml) (Xml.child xml_arg0 "Activities") in
       make ?activities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activities = field_map json "Activities" Activities.of_json in
       make ?activities ()
@@ -11405,6 +11523,7 @@ module DescribeWarmPoolType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?nextToken ?maxRecords ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
@@ -11505,6 +11624,7 @@ module DescribeWarmPoolAnswer =
         (Option.map ~f:WarmPoolConfiguration.of_xml)
           (Xml.child xml_arg0 "WarmPoolConfiguration") in
       make ?nextToken ?instances ?warmPoolConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let instances = field_map json "Instances" Instances.of_json in
@@ -11578,6 +11698,7 @@ module DescribeTerminationPolicyTypesAnswer =
         (Option.map ~f:TerminationPolicies.of_xml)
           (Xml.child xml_arg0 "TerminationPolicyTypes") in
       make ?terminationPolicyTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminationPolicyTypes =
         field_map json "TerminationPolicyTypes" TerminationPolicies.of_json in
@@ -11615,6 +11736,7 @@ module DescribeTagsType =
       let filters =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxRecords ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -11687,6 +11809,7 @@ module DescribeScheduledActionsType =
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       make ?maxRecords ?nextToken ?endTime ?startTime ?scheduledActionNames
         ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -11757,6 +11880,7 @@ module DescribeScalingActivitiesType =
         (Option.map ~f:ActivityIds.of_xml) (Xml.child xml_arg0 "ActivityIds") in
       make ?nextToken ?maxRecords ?includeDeletedGroups ?autoScalingGroupName
         ?activityIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
@@ -11824,6 +11948,7 @@ module DescribePoliciesType =
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       make ?maxRecords ?nextToken ?policyTypes ?policyNames
         ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -11869,6 +11994,7 @@ module DescribeNotificationConfigurationsType =
         (Option.map ~f:AutoScalingGroupNames.of_xml)
           (Xml.child xml_arg0 "AutoScalingGroupNames") in
       make ?maxRecords ?nextToken ?autoScalingGroupNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -11959,6 +12085,7 @@ module DescribeNotificationConfigurationsAnswer =
           (Xml.child_exn ~context:context_ xml_arg0
              "NotificationConfigurations") in
       make ?nextToken ~notificationConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let notificationConfigurations =
@@ -12038,6 +12165,7 @@ module DescribeMetricCollectionTypesAnswer =
         (Option.map ~f:MetricCollectionTypes.of_xml)
           (Xml.child xml_arg0 "Metrics") in
       make ?granularities ?metrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let granularities =
         field_map json "Granularities" MetricGranularityTypes.of_json in
@@ -12120,6 +12248,7 @@ module DescribeLoadBalancersResponse =
         (Option.map ~f:LoadBalancerStates.of_xml)
           (Xml.child xml_arg0 "LoadBalancers") in
       make ?nextToken ?loadBalancers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let loadBalancers =
@@ -12161,6 +12290,7 @@ module DescribeLoadBalancersRequest =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?maxRecords ?nextToken ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -12249,6 +12379,7 @@ module DescribeLoadBalancerTargetGroupsResponse =
         (Option.map ~f:LoadBalancerTargetGroupStates.of_xml)
           (Xml.child xml_arg0 "LoadBalancerTargetGroups") in
       make ?nextToken ?loadBalancerTargetGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let loadBalancerTargetGroups =
@@ -12291,6 +12422,7 @@ module DescribeLoadBalancerTargetGroupsRequest =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?maxRecords ?nextToken ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -12328,6 +12460,7 @@ module DescribeLifecycleHooksType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?lifecycleHookNames ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycleHookNames =
         field_map json "LifecycleHookNames" LifecycleHookNames.of_json in
@@ -12396,6 +12529,7 @@ module DescribeLifecycleHooksAnswer =
         (Option.map ~f:LifecycleHooks.of_xml)
           (Xml.child xml_arg0 "LifecycleHooks") in
       make ?lifecycleHooks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycleHooks =
         field_map json "LifecycleHooks" LifecycleHooks.of_json in
@@ -12464,6 +12598,7 @@ module DescribeLifecycleHookTypesAnswer =
         (Option.map ~f:AutoScalingNotificationTypes.of_xml)
           (Xml.child xml_arg0 "LifecycleHookTypes") in
       make ?lifecycleHookTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycleHookTypes =
         field_map json "LifecycleHookTypes"
@@ -12520,6 +12655,7 @@ module DescribeInstanceRefreshesType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?maxRecords ?nextToken ?instanceRefreshIds ~autoScalingGroupName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let nextToken = field_map json "NextToken" XmlString.of_json in
@@ -12608,6 +12744,7 @@ module DescribeInstanceRefreshesAnswer =
         (Option.map ~f:InstanceRefreshes.of_xml)
           (Xml.child xml_arg0 "InstanceRefreshes") in
       make ?nextToken ?instanceRefreshes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let instanceRefreshes =
@@ -12680,6 +12817,7 @@ module DescribeAutoScalingNotificationTypesAnswer =
         (Option.map ~f:AutoScalingNotificationTypes.of_xml)
           (Xml.child xml_arg0 "AutoScalingNotificationTypes") in
       make ?autoScalingNotificationTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingNotificationTypes =
         field_map json "AutoScalingNotificationTypes"
@@ -12718,6 +12856,7 @@ module DescribeAutoScalingInstancesType =
       let instanceIds =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ?nextToken ?maxRecords ?instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
@@ -12785,6 +12924,7 @@ module DescribeAdjustmentTypesAnswer =
         (Option.map ~f:AdjustmentTypes.of_xml)
           (Xml.child xml_arg0 "AdjustmentTypes") in
       make ?adjustmentTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adjustmentTypes =
         field_map json "AdjustmentTypes" AdjustmentTypes.of_json in
@@ -12890,6 +13030,7 @@ module DescribeAccountLimitsAnswer =
           (Xml.child xml_arg0 "MaxNumberOfAutoScalingGroups") in
       make ?numberOfLaunchConfigurations ?numberOfAutoScalingGroups
         ?maxNumberOfLaunchConfigurations ?maxNumberOfAutoScalingGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfLaunchConfigurations =
         field_map json "NumberOfLaunchConfigurations"
@@ -12934,6 +13075,7 @@ module DeleteWarmPoolType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?forceDelete ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "ForceDelete" ForceDelete.of_json in
       let autoScalingGroupName =
@@ -13011,6 +13153,7 @@ module DeleteWarmPoolAnswer =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13028,6 +13171,7 @@ module DeleteTagsType =
       let tags =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
@@ -13059,6 +13203,7 @@ module DeleteScheduledActionType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~scheduledActionName ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledActionName =
         field_map_exn json "ScheduledActionName" XmlStringMaxLen255.of_json in
@@ -13092,6 +13237,7 @@ module DeletePolicyType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       make ~policyName ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" ResourceName.of_json in
       let autoScalingGroupName =
@@ -13126,6 +13272,7 @@ module DeleteNotificationConfigurationType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~topicARN ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicARN = field_map_exn json "TopicARN" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
@@ -13160,6 +13307,7 @@ module DeleteLifecycleHookType =
         AsciiStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LifecycleHookName") in
       make ~autoScalingGroupName ~lifecycleHookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingGroupName =
         field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
@@ -13209,6 +13357,7 @@ module DeleteLifecycleHookAnswer =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13239,6 +13388,7 @@ module DeleteAutoScalingGroupType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?forceDelete ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceDelete = field_map json "ForceDelete" ForceDelete.of_json in
       let autoScalingGroupName =
@@ -13260,6 +13410,7 @@ module CreateOrUpdateTagsType =
       let tags =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
@@ -13466,6 +13617,7 @@ module CreateLaunchConfigurationType =
         ?blockDeviceMappings ?ramdiskId ?kernelId ?instanceType ?instanceId
         ?userData ?classicLinkVPCSecurityGroups ?classicLinkVPCId
         ?securityGroups ?keyName ?imageId ~launchConfigurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadataOptions =
         field_map json "MetadataOptions" InstanceMetadataOptions.of_json in
@@ -13775,6 +13927,7 @@ module CreateAutoScalingGroupType =
         ?loadBalancerNames ?availabilityZones ?defaultCooldown
         ?desiredCapacity ~maxSize ~minSize ?instanceId ?mixedInstancesPolicy
         ?launchTemplate ?launchConfigurationName ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredCapacityType =
         field_map json "DesiredCapacityType" XmlStringMaxLen255.of_json in
@@ -13898,6 +14051,7 @@ module CompleteLifecycleActionType =
           (Xml.child_exn ~context:context_ xml_arg0 "LifecycleHookName") in
       make ?instanceId ~lifecycleActionResult ?lifecycleActionToken
         ~autoScalingGroupName ~lifecycleHookName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map json "InstanceId" XmlStringMaxLen19.of_json in
       let lifecycleActionResult =
@@ -13955,6 +14109,7 @@ module CompleteLifecycleActionAnswer =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13977,6 +14132,7 @@ module CancelInstanceRefreshType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingGroupName =
         field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
@@ -14065,6 +14221,7 @@ module CancelInstanceRefreshAnswer =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "InstanceRefreshId") in
       make ?instanceRefreshId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceRefreshId =
         field_map json "InstanceRefreshId" XmlStringMaxLen255.of_json in
@@ -14103,6 +14260,7 @@ module BatchPutScheduledUpdateGroupActionType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~scheduledUpdateGroupActions ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledUpdateGroupActions =
         field_map_exn json "ScheduledUpdateGroupActions"
@@ -14197,6 +14355,7 @@ module BatchPutScheduledUpdateGroupActionAnswer =
         (Option.map ~f:FailedScheduledUpdateGroupActionRequests.of_xml)
           (Xml.child xml_arg0 "FailedScheduledUpdateGroupActions") in
       make ?failedScheduledUpdateGroupActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedScheduledUpdateGroupActions =
         field_map json "FailedScheduledUpdateGroupActions"
@@ -14233,6 +14392,7 @@ module BatchDeleteScheduledActionType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~scheduledActionNames ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduledActionNames =
         field_map_exn json "ScheduledActionNames"
@@ -14306,6 +14466,7 @@ module BatchDeleteScheduledActionAnswer =
         (Option.map ~f:FailedScheduledUpdateGroupActionRequests.of_xml)
           (Xml.child xml_arg0 "FailedScheduledActions") in
       make ?failedScheduledActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedScheduledActions =
         field_map json "FailedScheduledActions"
@@ -14392,6 +14553,7 @@ module AutoScalingInstancesType =
         (Option.map ~f:AutoScalingInstances.of_xml)
           (Xml.child xml_arg0 "AutoScalingInstances") in
       make ?nextToken ?autoScalingInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let autoScalingInstances =
@@ -14475,6 +14637,7 @@ module AutoScalingGroupsType =
         AutoScalingGroups.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroups") in
       make ?nextToken ~autoScalingGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let autoScalingGroups =
@@ -14525,6 +14688,7 @@ module AutoScalingGroupNamesType =
         (Option.map ~f:AutoScalingGroupNames.of_xml)
           (Xml.child xml_arg0 "AutoScalingGroupNames") in
       make ?filters ?maxRecords ?nextToken ?autoScalingGroupNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
@@ -14563,6 +14727,7 @@ module AttachLoadBalancersType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~loadBalancerNames ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loadBalancerNames =
         field_map_exn json "LoadBalancerNames" LoadBalancerNames.of_json in
@@ -14621,6 +14786,7 @@ module AttachLoadBalancersResultType =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14653,6 +14819,7 @@ module AttachLoadBalancerTargetGroupsType =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~targetGroupARNs ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetGroupARNs =
         field_map_exn json "TargetGroupARNs" TargetGroupARNs.of_json in
@@ -14713,6 +14880,7 @@ module AttachLoadBalancerTargetGroupsResultType =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14743,6 +14911,7 @@ module AttachInstancesQuery =
       let instanceIds =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ~autoScalingGroupName ?instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoScalingGroupName =
         field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
@@ -14821,6 +14990,7 @@ module ActivityType =
       let activity =
         (Option.map ~f:Activity.of_xml) (Xml.child xml_arg0 "Activity") in
       make ?activity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let activity = field_map json "Activity" Activity.of_json in
       make ?activity ()
@@ -14902,6 +15072,7 @@ module ActivitiesType =
         Activities.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Activities") in
       make ?nextToken ~activities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" XmlString.of_json in
       let activities = field_map_exn json "Activities" Activities.of_json in

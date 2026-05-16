@@ -123,6 +123,7 @@ module EdgeMetric =
       let dimension =
         (Option.map ~f:Dimension.of_xml) (Xml.child xml_arg0 "Dimension") in
       make ?timestamp ?value ?metricName ?dimension ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
       let value = field_map json "Value" Value.of_json in
@@ -247,6 +248,7 @@ module Model =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
       make ?modelMetrics ?latestInference ?latestSampleTime ?modelVersion
         ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelMetrics = field_map json "ModelMetrics" EdgeMetrics.of_json in
       let latestInference =
@@ -389,6 +391,7 @@ module InternalServiceException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -450,6 +453,7 @@ module SendHeartbeatRequest =
           (Xml.child xml_arg0 "AgentMetrics") in
       make ~deviceFleetName ~deviceName ~agentVersion ?models ?agentMetrics
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceFleetName =
         field_map_exn json "DeviceFleetName" DeviceFleetName.of_json in
@@ -515,6 +519,7 @@ module GetDeviceRegistrationResult =
         (Option.map ~f:DeviceRegistration.of_xml)
           (Xml.child xml_arg0 "DeviceRegistration") in
       make ?cacheTTL ?deviceRegistration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cacheTTL = field_map json "CacheTTL" CacheTTLSeconds.of_json in
       let deviceRegistration =
@@ -549,6 +554,7 @@ module GetDeviceRegistrationRequest =
         DeviceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceName") in
       make ~deviceFleetName ~deviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceFleetName =
         field_map_exn json "DeviceFleetName" DeviceFleetName.of_json in

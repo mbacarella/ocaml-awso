@@ -136,6 +136,7 @@ module Filter =
       let type_ =
         FilterType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~field ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" String_.of_json in
       let field = field_map_exn json "Field" String_.of_json in
@@ -158,6 +159,7 @@ module AttributeValue =
     let of_xml xml_arg0 =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       make ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in make ?value ()
     let to_json v = composed_to_json to_value v
@@ -186,6 +188,7 @@ module Service =
       let serviceCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?attributeNames ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeNames =
         field_map json "AttributeNames" AttributeNameList.of_json in
@@ -207,6 +210,7 @@ module ExpiredNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -226,6 +230,7 @@ module InternalErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -245,6 +250,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -264,6 +270,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -282,6 +289,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -494,6 +502,7 @@ module GetProductsResponse =
       let formatVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FormatVersion") in
       make ?nextToken ?priceList ?formatVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let priceList = field_map json "PriceList" PriceList.of_json in
@@ -549,6 +558,7 @@ module GetProductsRequest =
       let serviceCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ?formatVersion ?filters ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -647,6 +657,7 @@ module GetAttributeValuesResponse =
         (Option.map ~f:AttributeValueList.of_xml)
           (Xml.child xml_arg0 "AttributeValues") in
       make ?nextToken ?attributeValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let attributeValues =
@@ -695,6 +706,7 @@ module GetAttributeValuesRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ~attributeName ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -797,6 +809,7 @@ module DescribeServicesResponse =
       let services =
         (Option.map ~f:ServiceList.of_xml) (Xml.child xml_arg0 "Services") in
       make ?nextToken ?formatVersion ?services ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let formatVersion = field_map json "FormatVersion" String_.of_json in
@@ -843,6 +856,7 @@ module DescribeServicesRequest =
       let serviceCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ?formatVersion ?serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in

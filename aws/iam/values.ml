@@ -191,6 +191,7 @@ module Tag =
       let key =
         TagKeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValueType.of_json in
       let key = field_map_exn json "Key" TagKeyType.of_json in
@@ -273,6 +274,7 @@ module Position =
       let line =
         (Option.map ~f:LineNumber.of_xml) (Xml.child xml_arg0 "Line") in
       make ?column ?line ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let column = field_map json "Column" ColumnNumber.of_json in
       let line = field_map json "Line" LineNumber.of_json in
@@ -309,6 +311,7 @@ module AttachedPermissionsBoundary =
         (Option.map ~f:PermissionsBoundaryAttachmentType.of_xml)
           (Xml.child xml_arg0 "PermissionsBoundaryType") in
       make ?permissionsBoundaryArn ?permissionsBoundaryType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionsBoundaryArn =
         field_map json "PermissionsBoundaryArn" ArnType.of_json in
@@ -342,6 +345,7 @@ module RoleLastUsed =
       let lastUsedDate =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "LastUsedDate") in
       make ?region ?lastUsedDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map json "Region" StringType.of_json in
       let lastUsedDate = field_map json "LastUsedDate" DateType.of_json in
@@ -620,6 +624,7 @@ module Statement =
         (Option.map ~f:PolicyIdentifierType.of_xml)
           (Xml.child xml_arg0 "SourcePolicyId") in
       make ?endPosition ?startPosition ?sourcePolicyType ?sourcePolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endPosition = field_map json "EndPosition" Position.of_json in
       let startPosition = field_map json "StartPosition" Position.of_json in
@@ -747,6 +752,7 @@ module Role =
       make ?roleLastUsed ?tags ?permissionsBoundary ?maxSessionDuration
         ?description ?assumeRolePolicyDocument ~createDate ~arn ~roleId
         ~roleName ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleLastUsed = field_map json "RoleLastUsed" RoleLastUsed.of_json in
       let tags = field_map json "Tags" TagListType.of_json in
@@ -846,6 +852,7 @@ module PermissionsBoundaryDecisionDetail =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "AllowedByPermissionsBoundary") in
       make ?allowedByPermissionsBoundary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowedByPermissionsBoundary =
         field_map json "AllowedByPermissionsBoundary" BooleanType.of_json in
@@ -1143,6 +1150,7 @@ module ResourceSpecificResult =
       make ?permissionsBoundaryDecisionDetail ?evalDecisionDetails
         ?missingContextValues ?matchedStatements ~evalResourceDecision
         ~evalResourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionsBoundaryDecisionDetail =
         field_map json "PermissionsBoundaryDecisionDetail"
@@ -1233,6 +1241,7 @@ module PolicyGrantingServiceAccess =
         PolicyNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       make ?entityName ?entityType ?policyArn ~policyType ~policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entityName = field_map json "EntityName" EntityNameType.of_json in
       let entityType =
@@ -1335,6 +1344,7 @@ module TrackedActionLastAccessed =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "ActionName") in
       make ?lastAccessedRegion ?lastAccessedTime ?lastAccessedEntity
         ?actionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastAccessedRegion =
         field_map json "LastAccessedRegion" StringType.of_json in
@@ -1391,6 +1401,7 @@ module PolicyVersion =
         (Option.map ~f:PolicyDocumentType.of_xml)
           (Xml.child xml_arg0 "Document") in
       make ?createDate ?isDefaultVersion ?versionId ?document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createDate = field_map json "CreateDate" DateType.of_json in
       let isDefaultVersion =
@@ -1422,6 +1433,7 @@ module AttachedPolicy =
         (Option.map ~f:PolicyNameType.of_xml)
           (Xml.child xml_arg0 "PolicyName") in
       make ?policyArn ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map json "PolicyArn" ArnType.of_json in
       let policyName = field_map json "PolicyName" PolicyNameType.of_json in
@@ -1453,6 +1465,7 @@ module PolicyDetail =
         (Option.map ~f:PolicyNameType.of_xml)
           (Xml.child xml_arg0 "PolicyName") in
       make ?policyDocument ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map json "PolicyDocument" PolicyDocumentType.of_json in
@@ -1533,6 +1546,7 @@ module InstanceProfile =
         PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ?tags ~roles ~createDate ~arn ~instanceProfileId
         ~instanceProfileName ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let roles = field_map_exn json "Roles" RoleListType.of_json in
@@ -1687,6 +1701,7 @@ module OrganizationsDecisionDetail =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "AllowedByOrganizations") in
       make ?allowedByOrganizations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowedByOrganizations =
         field_map json "AllowedByOrganizations" BooleanType.of_json in
@@ -1816,6 +1831,7 @@ module User =
         PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ?tags ?permissionsBoundary ?passwordLastUsed ~createDate ~arn
         ~userId ~userName ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let permissionsBoundary =
@@ -2151,6 +2167,7 @@ module RoleUsageType =
       let region =
         (Option.map ~f:RegionNameType.of_xml) (Xml.child xml_arg0 "Region") in
       make ?resources ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resources = field_map json "Resources" ArnListType.of_json in
       let region = field_map json "Region" RegionNameType.of_json in
@@ -2196,6 +2213,7 @@ module EntityInfo =
       let arn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?path ~id ~type_ ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "Path" PathType.of_json in
       let id = field_map_exn json "Id" IdType.of_json in
@@ -2687,6 +2705,7 @@ module ContextEntry =
         (Option.map ~f:ContextKeyNameType.of_xml)
           (Xml.child xml_arg0 "ContextKeyName") in
       make ?contextKeyType ?contextKeyValues ?contextKeyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contextKeyType =
         field_map json "ContextKeyType" ContextKeyTypeEnum.of_json in
@@ -2809,6 +2828,7 @@ module EvaluationResult =
         ?permissionsBoundaryDecisionDetail ?organizationsDecisionDetail
         ?missingContextValues ?matchedStatements ~evalDecision
         ?evalResourceName ~evalActionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceSpecificResults =
         field_map json "ResourceSpecificResults"
@@ -2929,6 +2949,7 @@ module VirtualMFADevice =
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ?tags ?enableDate ?user ?qRCodePNG ?base32StringSeed ~serialNumber
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let enableDate = field_map json "EnableDate" DateType.of_json in
@@ -2997,6 +3018,7 @@ module SigningCertificate =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?uploadDate ~status ~certificateBody ~certificateId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadDate = field_map json "UploadDate" DateType.of_json in
       let status = field_map_exn json "Status" StatusType.of_json in
@@ -3094,6 +3116,7 @@ module ServiceSpecificCredentialMetadata =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~serviceName ~serviceSpecificCredentialId ~createDate
         ~serviceUserName ~status ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
       let serviceSpecificCredentialId =
@@ -3172,6 +3195,7 @@ module ServerCertificateMetadata =
         PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ?expiration ?uploadDate ~arn ~serverCertificateId
         ~serverCertificateName ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiration = field_map json "Expiration" DateType.of_json in
       let uploadDate = field_map json "UploadDate" DateType.of_json in
@@ -3229,6 +3253,7 @@ module SSHPublicKeyMetadata =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~uploadDate ~status ~sSHPublicKeyId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadDate = field_map_exn json "UploadDate" DateType.of_json in
       let status = field_map_exn json "Status" StatusType.of_json in
@@ -3265,6 +3290,7 @@ module SAMLProviderListEntry =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "ValidUntil") in
       let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?createDate ?validUntil ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createDate = field_map json "CreateDate" DateType.of_json in
       let validUntil = field_map json "ValidUntil" DateType.of_json in
@@ -3389,6 +3415,7 @@ module Policy =
       make ?tags ?updateDate ?createDate ?description ?isAttachable
         ?permissionsBoundaryUsageCount ?attachmentCount ?defaultVersionId
         ?path ?arn ?policyId ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let updateDate = field_map json "UpdateDate" DateType.of_json in
@@ -3441,6 +3468,7 @@ module ListPoliciesGrantingServiceAccessEntry =
         (Option.map ~f:ServiceNamespaceType.of_xml)
           (Xml.child xml_arg0 "ServiceNamespace") in
       make ?policies ?serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policies =
         field_map json "Policies" PolicyGrantingServiceAccessListType.of_json in
@@ -3461,6 +3489,7 @@ module OpenIDConnectProviderListEntry =
     let of_xml xml_arg0 =
       let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ArnType.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -3498,6 +3527,7 @@ module MFADevice =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~enableDate ~serialNumber ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableDate = field_map_exn json "EnableDate" DateType.of_json in
       let serialNumber =
@@ -3554,6 +3584,7 @@ module Group =
       let path =
         PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ~createDate ~arn ~groupId ~groupName ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createDate = field_map_exn json "CreateDate" DateType.of_json in
       let arn = field_map_exn json "Arn" ArnType.of_json in
@@ -3586,6 +3617,7 @@ module PolicyGroup =
       let groupName =
         (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?groupId ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupId = field_map json "GroupId" IdType.of_json in
       let groupName = field_map json "GroupName" GroupNameType.of_json in
@@ -3615,6 +3647,7 @@ module PolicyRole =
       let roleName =
         (Option.map ~f:RoleNameType.of_xml) (Xml.child xml_arg0 "RoleName") in
       make ?roleId ?roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleId = field_map json "RoleId" IdType.of_json in
       let roleName = field_map json "RoleName" RoleNameType.of_json in
@@ -3644,6 +3677,7 @@ module PolicyUser =
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?userId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "UserId" IdType.of_json in
       let userName = field_map json "UserName" UserNameType.of_json in
@@ -3711,6 +3745,7 @@ module AccessKeyMetadata =
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?createDate ?status ?accessKeyId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createDate = field_map json "CreateDate" DateType.of_json in
       let status = field_map json "Status" StatusType.of_json in
@@ -3785,6 +3820,7 @@ module EntityDetails =
         EntityInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityInfo") in
       make ?lastAuthenticated ~entityInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastAuthenticated =
         field_map json "LastAuthenticated" DateType.of_json in
@@ -3877,6 +3913,7 @@ module ServiceLastAccessed =
       make ?trackedActionsLastAccessed ?totalAuthenticatedEntities
         ?lastAuthenticatedRegion ?lastAuthenticatedEntity ~serviceNamespace
         ?lastAuthenticated ~serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackedActionsLastAccessed =
         field_map json "TrackedActionsLastAccessed"
@@ -3991,6 +4028,7 @@ module AccessDetail =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
       make ?totalAuthenticatedEntities ?lastAuthenticatedTime ?entityPath
         ?region ~serviceNamespace ~serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalAuthenticatedEntities =
         field_map json "TotalAuthenticatedEntities" IntegerType.of_json in
@@ -4369,6 +4407,7 @@ module ManagedPolicyDetail =
       make ?policyVersionList ?updateDate ?createDate ?description
         ?isAttachable ?permissionsBoundaryUsageCount ?attachmentCount
         ?defaultVersionId ?path ?arn ?policyId ?policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyVersionList =
         field_map json "PolicyVersionList"
@@ -4462,6 +4501,7 @@ module GroupDetail =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?attachedManagedPolicies ?groupPolicyList ?createDate ?arn
         ?groupId ?groupName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachedManagedPolicies =
         field_map json "AttachedManagedPolicies"
@@ -4598,6 +4638,7 @@ module RoleDetail =
       make ?roleLastUsed ?tags ?permissionsBoundary ?attachedManagedPolicies
         ?rolePolicyList ?instanceProfileList ?assumeRolePolicyDocument
         ?createDate ?arn ?roleId ?roleName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleLastUsed = field_map json "RoleLastUsed" RoleLastUsed.of_json in
       let tags = field_map json "Tags" TagListType.of_json in
@@ -4718,6 +4759,7 @@ module UserDetail =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?tags ?permissionsBoundary ?attachedManagedPolicies ?groupList
         ?userPolicyList ?createDate ?arn ?userId ?userName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let permissionsBoundary =
@@ -4841,6 +4883,7 @@ module DuplicateCertificateException =
         (Option.map ~f:DuplicateCertificateMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" DuplicateCertificateMessage.of_json in
@@ -4863,6 +4906,7 @@ module EntityAlreadyExistsException =
         (Option.map ~f:EntityAlreadyExistsMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" EntityAlreadyExistsMessage.of_json in
@@ -4885,6 +4929,7 @@ module InvalidCertificateException =
         (Option.map ~f:InvalidCertificateMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" InvalidCertificateMessage.of_json in
@@ -4906,6 +4951,7 @@ module LimitExceededException =
         (Option.map ~f:LimitExceededMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" LimitExceededMessage.of_json in
       make ?message ()
@@ -4927,6 +4973,7 @@ module MalformedCertificateException =
         (Option.map ~f:MalformedCertificateMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" MalformedCertificateMessage.of_json in
@@ -4948,6 +4995,7 @@ module NoSuchEntityException =
         (Option.map ~f:NoSuchEntityMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" NoSuchEntityMessage.of_json in
       make ?message ()
@@ -4969,6 +5017,7 @@ module ServiceFailureException =
         (Option.map ~f:ServiceFailureExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" ServiceFailureExceptionMessage.of_json in
@@ -5011,6 +5060,7 @@ module ConcurrentModificationException =
         (Option.map ~f:ConcurrentModificationMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" ConcurrentModificationMessage.of_json in
@@ -5032,6 +5082,7 @@ module InvalidInputException =
         (Option.map ~f:InvalidInputMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" InvalidInputMessage.of_json in
       make ?message ()
@@ -5053,6 +5104,7 @@ module KeyPairMismatchException =
         (Option.map ~f:KeyPairMismatchMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" KeyPairMismatchMessage.of_json in
       make ?message ()
@@ -5096,6 +5148,7 @@ module DuplicateSSHPublicKeyException =
         (Option.map ~f:DuplicateSSHPublicKeyMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" DuplicateSSHPublicKeyMessage.of_json in
@@ -5118,6 +5171,7 @@ module InvalidPublicKeyException =
         (Option.map ~f:InvalidPublicKeyMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" InvalidPublicKeyMessage.of_json in
       make ?message ()
@@ -5190,6 +5244,7 @@ module SSHPublicKey =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?uploadDate ~status ~sSHPublicKeyBody ~fingerprint ~sSHPublicKeyId
         ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadDate = field_map json "UploadDate" DateType.of_json in
       let status = field_map_exn json "Status" StatusType.of_json in
@@ -5221,6 +5276,7 @@ module UnrecognizedPublicKeyEncodingException =
         (Option.map ~f:UnrecognizedPublicKeyEncodingMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" UnrecognizedPublicKeyEncodingMessage.of_json in
@@ -5261,6 +5317,7 @@ module UnmodifiableEntityException =
         (Option.map ~f:UnmodifiableEntityMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" UnmodifiableEntityMessage.of_json in
@@ -5536,6 +5593,7 @@ module PolicyEvaluationException =
         (Option.map ~f:PolicyEvaluationErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" PolicyEvaluationErrorMessage.of_json in
@@ -5686,6 +5744,7 @@ module ServiceSpecificCredential =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
       make ~status ~userName ~serviceSpecificCredentialId ~servicePassword
         ~serviceUserName ~serviceName ~createDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" StatusType.of_json in
       let userName = field_map_exn json "UserName" UserNameType.of_json in
@@ -5878,6 +5937,7 @@ module ServiceNotSupportedException =
         (Option.map ~f:ServiceNotSupportedMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" ServiceNotSupportedMessage.of_json in
@@ -6372,6 +6432,7 @@ module DeletionTaskFailureReasonType =
       let reason =
         (Option.map ~f:ReasonType.of_xml) (Xml.child xml_arg0 "Reason") in
       make ?roleUsageList ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleUsageList =
         field_map json "RoleUsageList" RoleUsageListType.of_json in
@@ -6454,6 +6515,7 @@ module ErrorDetails =
         StringType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~code ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map_exn json "Code" StringType.of_json in
       let message = field_map_exn json "Message" StringType.of_json in
@@ -6638,6 +6700,7 @@ module ServerCertificate =
              "ServerCertificateMetadata") in
       make ?tags ?certificateChain ~certificateBody
         ~serverCertificateMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let certificateChain =
@@ -6809,6 +6872,7 @@ module LoginProfile =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?passwordResetRequired ~createDate ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let passwordResetRequired =
         field_map json "PasswordResetRequired" BooleanType.of_json in
@@ -6835,6 +6899,7 @@ module CredentialReportExpiredException =
         (Option.map ~f:CredentialReportExpiredExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message"
@@ -6860,6 +6925,7 @@ module CredentialReportNotPresentException =
         (Option.map ~f:CredentialReportNotPresentExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message"
@@ -6885,6 +6951,7 @@ module CredentialReportNotReadyException =
         (Option.map ~f:CredentialReportNotReadyExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message"
@@ -7065,6 +7132,7 @@ module PasswordPolicy =
         ?expirePasswords ?allowUsersToChangePassword
         ?requireLowercaseCharacters ?requireUppercaseCharacters
         ?requireNumbers ?requireSymbols ?minimumPasswordLength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hardExpiry = field_map json "HardExpiry" BooleanObjectType.of_json in
       let passwordReusePrevention =
@@ -7249,6 +7317,7 @@ module AccessKeyLastUsed =
         DateType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LastUsedDate") in
       make ~region ~serviceName ~lastUsedDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map_exn json "Region" StringType.of_json in
       let serviceName = field_map_exn json "ServiceName" StringType.of_json in
@@ -7273,6 +7342,7 @@ module ReportGenerationLimitExceededException =
         (Option.map ~f:ReportGenerationLimitExceededMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" ReportGenerationLimitExceededMessage.of_json in
@@ -7437,6 +7507,7 @@ module MalformedPolicyDocumentException =
         (Option.map ~f:MalformedPolicyDocumentMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" MalformedPolicyDocumentMessage.of_json in
@@ -7459,6 +7530,7 @@ module PasswordPolicyViolationException =
         (Option.map ~f:PasswordPolicyViolationMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" PasswordPolicyViolationMessage.of_json in
@@ -7515,6 +7587,7 @@ module AccessKey =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?createDate ~secretAccessKey ~status ~accessKeyId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createDate = field_map json "CreateDate" DateType.of_json in
       let secretAccessKey =
@@ -7648,6 +7721,7 @@ module UploadSigningCertificateResponse =
         SigningCertificate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Certificate") in
       make ~certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificate =
         field_map_exn json "Certificate" SigningCertificate.of_json in
@@ -7683,6 +7757,7 @@ module UploadSigningCertificateRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ~certificateBody ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateBody =
         field_map_exn json "CertificateBody" CertificateBodyType.of_json in
@@ -7821,6 +7896,7 @@ module UploadServerCertificateResponse =
         (Option.map ~f:ServerCertificateMetadata.of_xml)
           (Xml.child xml_arg0 "ServerCertificateMetadata") in
       make ?tags ?serverCertificateMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let serverCertificateMetadata =
@@ -7898,6 +7974,7 @@ module UploadServerCertificateRequest =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?tags ?certificateChain ~privateKey ~certificateBody
         ~serverCertificateName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let certificateChain =
@@ -8012,6 +8089,7 @@ module UploadSSHPublicKeyResponse =
         (Option.map ~f:SSHPublicKey.of_xml)
           (Xml.child xml_arg0 "SSHPublicKey") in
       make ?sSHPublicKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSHPublicKey = field_map json "SSHPublicKey" SSHPublicKey.of_json in
       make ?sSHPublicKey ()
@@ -8045,6 +8123,7 @@ module UploadSSHPublicKeyRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~sSHPublicKeyBody ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSHPublicKeyBody =
         field_map_exn json "SSHPublicKeyBody" PublicKeyMaterialType.of_json in
@@ -8086,6 +8165,7 @@ module UpdateUserRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?newUserName ?newPath ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newUserName = field_map json "NewUserName" UserNameType.of_json in
       let newPath = field_map json "NewPath" PathType.of_json in
@@ -8130,6 +8210,7 @@ module UpdateSigningCertificateRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ~status ~certificateId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" StatusType.of_json in
       let certificateId =
@@ -8176,6 +8257,7 @@ module UpdateServiceSpecificCredentialRequest =
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ~status ~serviceSpecificCredentialId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" StatusType.of_json in
       let serviceSpecificCredentialId =
@@ -8224,6 +8306,7 @@ module UpdateServerCertificateRequest =
         ServerCertificateNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ?newServerCertificateName ?newPath ~serverCertificateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newServerCertificateName =
         field_map json "NewServerCertificateName"
@@ -8270,6 +8353,7 @@ module UpdateSSHPublicKeyRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~status ~sSHPublicKeyId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" StatusType.of_json in
       let sSHPublicKeyId =
@@ -8365,6 +8449,7 @@ module UpdateSAMLProviderResponse =
       let sAMLProviderArn =
         (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "SAMLProviderArn") in
       make ?sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sAMLProviderArn = field_map json "SAMLProviderArn" ArnType.of_json in
       make ?sAMLProviderArn ()
@@ -8399,6 +8484,7 @@ module UpdateSAMLProviderRequest =
         SAMLMetadataDocumentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLMetadataDocument") in
       make ~sAMLProviderArn ~sAMLMetadataDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sAMLProviderArn =
         field_map_exn json "SAMLProviderArn" ArnType.of_json in
@@ -8469,6 +8555,7 @@ module UpdateRoleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8510,6 +8597,7 @@ module UpdateRoleRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxSessionDuration ?description ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxSessionDuration =
         field_map json "MaxSessionDuration"
@@ -8595,6 +8683,7 @@ module UpdateRoleDescriptionResponse =
         Xml.child_exn ~context:context_ t "UpdateRoleDescriptionResult" in
       let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
       make ?role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let role = field_map json "Role" Role.of_json in make ?role ()
     let to_json v = composed_to_json to_value v
@@ -8625,6 +8714,7 @@ module UpdateRoleDescriptionRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~description ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map_exn json "Description" RoleDescriptionType.of_json in
@@ -8663,6 +8753,7 @@ module UpdateOpenIDConnectProviderThumbprintRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ~thumbprintList ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbprintList =
         field_map_exn json "ThumbprintList" ThumbprintListType.of_json in
@@ -8707,6 +8798,7 @@ module UpdateLoginProfileRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?passwordResetRequired ?password ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let passwordResetRequired =
         field_map json "PasswordResetRequired" BooleanObjectType.of_json in
@@ -8750,6 +8842,7 @@ module UpdateGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?newGroupName ?newPath ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newGroupName = field_map json "NewGroupName" GroupNameType.of_json in
       let newPath = field_map json "NewPath" PathType.of_json in
@@ -8785,6 +8878,7 @@ module UpdateAssumeRolePolicyRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyDocument ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
@@ -8900,6 +8994,7 @@ module UpdateAccountPasswordPolicyRequest =
         ?allowUsersToChangePassword ?requireLowercaseCharacters
         ?requireUppercaseCharacters ?requireNumbers ?requireSymbols
         ?minimumPasswordLength ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hardExpiry = field_map json "HardExpiry" BooleanObjectType.of_json in
       let passwordReusePrevention =
@@ -8961,6 +9056,7 @@ module UpdateAccessKeyRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ~status ~accessKeyId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" StatusType.of_json in
       let accessKeyId =
@@ -8995,6 +9091,7 @@ module UntagUserRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~tagKeys ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let userName =
@@ -9030,6 +9127,7 @@ module UntagServerCertificateRequest =
         ServerCertificateNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~tagKeys ~serverCertificateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let serverCertificateName =
@@ -9065,6 +9163,7 @@ module UntagSAMLProviderRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~tagKeys ~sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let sAMLProviderArn =
@@ -9098,6 +9197,7 @@ module UntagRoleRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~tagKeys ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
@@ -9129,6 +9229,7 @@ module UntagPolicyRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~tagKeys ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
@@ -9164,6 +9265,7 @@ module UntagOpenIDConnectProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ~tagKeys ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let openIDConnectProviderArn =
@@ -9198,6 +9300,7 @@ module UntagMFADeviceRequest =
         SerialNumberType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ~tagKeys ~serialNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let serialNumber =
@@ -9233,6 +9336,7 @@ module UntagInstanceProfileRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~tagKeys ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
       let instanceProfileName =
@@ -9266,6 +9370,7 @@ module TagUserRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~tags ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let userName =
@@ -9300,6 +9405,7 @@ module TagServerCertificateRequest =
         ServerCertificateNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~tags ~serverCertificateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let serverCertificateName =
@@ -9334,6 +9440,7 @@ module TagSAMLProviderRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~tags ~sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let sAMLProviderArn =
@@ -9366,6 +9473,7 @@ module TagRoleRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~tags ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
@@ -9396,6 +9504,7 @@ module TagPolicyRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~tags ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
@@ -9430,6 +9539,7 @@ module TagOpenIDConnectProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ~tags ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let openIDConnectProviderArn =
@@ -9462,6 +9572,7 @@ module TagMFADeviceRequest =
         SerialNumberType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ~tags ~serialNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let serialNumber =
@@ -9496,6 +9607,7 @@ module TagInstanceProfileRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~tags ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagListType.of_json in
       let instanceProfileName =
@@ -9636,6 +9748,7 @@ module SimulatePrincipalPolicyRequest =
         ?callerArn ?resourceOwner ?resourcePolicy ?resourceArns ~actionNames
         ?permissionsBoundaryPolicyInputList ?policyInputList ~policySourceArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
@@ -9752,6 +9865,7 @@ module SimulatePolicyResponse =
         (Option.map ~f:EvaluationResultsListType.of_xml)
           (Xml.child xml_arg0 "EvaluationResults") in
       make ?marker ?isTruncated ?evaluationResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -9882,6 +9996,7 @@ module SimulateCustomPolicyRequest =
       make ?marker ?maxItems ?resourceHandlingOption ?contextEntries
         ?callerArn ?resourceOwner ?resourcePolicy ?resourceArns ~actionNames
         ?permissionsBoundaryPolicyInputList ~policyInputList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
@@ -9933,6 +10048,7 @@ module SetSecurityTokenServicePreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "GlobalEndpointTokenVersion") in
       make ~globalEndpointTokenVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalEndpointTokenVersion =
         field_map_exn json "GlobalEndpointTokenVersion"
@@ -9966,6 +10082,7 @@ module SetDefaultPolicyVersionRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~versionId ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId =
         field_map_exn json "VersionId" PolicyVersionIdType.of_json in
@@ -10026,6 +10143,7 @@ module ResyncMFADeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~authenticationCode2 ~authenticationCode1 ~serialNumber ~userName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationCode2 =
         field_map_exn json "AuthenticationCode2"
@@ -10107,6 +10225,7 @@ module ResetServiceSpecificCredentialResponse =
         (Option.map ~f:ServiceSpecificCredential.of_xml)
           (Xml.child xml_arg0 "ServiceSpecificCredential") in
       make ?serviceSpecificCredential ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceSpecificCredential =
         field_map json "ServiceSpecificCredential"
@@ -10145,6 +10264,7 @@ module ResetServiceSpecificCredentialRequest =
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ~serviceSpecificCredentialId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceSpecificCredentialId =
         field_map_exn json "ServiceSpecificCredentialId"
@@ -10179,6 +10299,7 @@ module RemoveUserFromGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~userName ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName =
         field_map_exn json "UserName" ExistingUserNameType.of_json in
@@ -10213,6 +10334,7 @@ module RemoveRoleFromInstanceProfileRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~roleName ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
       let instanceProfileName =
@@ -10250,6 +10372,7 @@ module RemoveClientIDFromOpenIDConnectProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ~clientID ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientID = field_map_exn json "ClientID" ClientIDType.of_json in
       let openIDConnectProviderArn =
@@ -10294,6 +10417,7 @@ module PutUserPolicyRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyDocument ~policyName ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
@@ -10331,6 +10455,7 @@ module PutUserPermissionsBoundaryRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~permissionsBoundary ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionsBoundary =
         field_map_exn json "PermissionsBoundary" ArnType.of_json in
@@ -10375,6 +10500,7 @@ module PutRolePolicyRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyDocument ~policyName ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
@@ -10411,6 +10537,7 @@ module PutRolePermissionsBoundaryRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~permissionsBoundary ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionsBoundary =
         field_map_exn json "PermissionsBoundary" ArnType.of_json in
@@ -10455,6 +10582,7 @@ module PutGroupPolicyRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyDocument ~policyName ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
@@ -10479,6 +10607,7 @@ module PolicyNotAttachableException =
         (Option.map ~f:PolicyNotAttachableMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" PolicyNotAttachableMessage.of_json in
@@ -10552,6 +10681,7 @@ module ListVirtualMFADevicesResponse =
         VirtualMFADeviceListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VirtualMFADevices") in
       make ?marker ?isTruncated ~virtualMFADevices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -10594,6 +10724,7 @@ module ListVirtualMFADevicesRequest =
         (Option.map ~f:AssignmentStatusType.of_xml)
           (Xml.child xml_arg0 "AssignmentStatus") in
       make ?maxItems ?marker ?assignmentStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -10674,6 +10805,7 @@ module ListUsersResponse =
         UserListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Users") in
       make ?marker ?isTruncated ~users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -10712,6 +10844,7 @@ module ListUsersRequest =
         (Option.map ~f:PathPrefixType.of_xml)
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -10801,6 +10934,7 @@ module ListUserTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -10841,6 +10975,7 @@ module ListUserTagsRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -10932,6 +11067,7 @@ module ListUserPoliciesResponse =
         PolicyNameListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
       make ?marker ?isTruncated ~policyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -10973,6 +11109,7 @@ module ListUserPoliciesRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -11066,6 +11203,7 @@ module ListSigningCertificatesResponse =
         CertificateListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Certificates") in
       make ?marker ?isTruncated ~certificates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -11107,6 +11245,7 @@ module ListSigningCertificatesRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -11191,6 +11330,7 @@ module ListServiceSpecificCredentialsResponse =
         (Option.map ~f:ServiceSpecificCredentialsListType.of_xml)
           (Xml.child xml_arg0 "ServiceSpecificCredentials") in
       make ?serviceSpecificCredentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceSpecificCredentials =
         field_map json "ServiceSpecificCredentials"
@@ -11222,6 +11362,7 @@ module ListServiceSpecificCredentialsRequest =
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?serviceName ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceName = field_map json "ServiceName" ServiceName.of_json in
       let userName = field_map json "UserName" UserNameType.of_json in
@@ -11307,6 +11448,7 @@ module ListServerCertificatesResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "ServerCertificateMetadataList") in
       make ?marker ?isTruncated ~serverCertificateMetadataList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -11348,6 +11490,7 @@ module ListServerCertificatesRequest =
         (Option.map ~f:PathPrefixType.of_xml)
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -11439,6 +11582,7 @@ module ListServerCertificateTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -11481,6 +11625,7 @@ module ListServerCertificateTagsRequest =
         ServerCertificateNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ?maxItems ?marker ~serverCertificateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -11566,6 +11711,7 @@ module ListSSHPublicKeysResponse =
         (Option.map ~f:SSHPublicKeyListType.of_xml)
           (Xml.child xml_arg0 "SSHPublicKeys") in
       make ?marker ?isTruncated ?sSHPublicKeys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -11605,6 +11751,7 @@ module ListSSHPublicKeysRequest =
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -11673,6 +11820,7 @@ module ListSAMLProvidersResponse =
         (Option.map ~f:SAMLProviderListType.of_xml)
           (Xml.child xml_arg0 "SAMLProviderList") in
       make ?sAMLProviderList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sAMLProviderList =
         field_map json "SAMLProviderList" SAMLProviderListType.of_json in
@@ -11688,6 +11836,7 @@ module ListSAMLProvidersRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11783,6 +11932,7 @@ module ListSAMLProviderTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -11824,6 +11974,7 @@ module ListSAMLProviderTagsRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ?maxItems ?marker ~sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -11904,6 +12055,7 @@ module ListRolesResponse =
         RoleListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Roles") in
       make ?marker ?isTruncated ~roles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -11942,6 +12094,7 @@ module ListRolesRequest =
         (Option.map ~f:PathPrefixType.of_xml)
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -12031,6 +12184,7 @@ module ListRoleTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -12071,6 +12225,7 @@ module ListRoleTagsRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -12161,6 +12316,7 @@ module ListRolePoliciesResponse =
         PolicyNameListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
       make ?marker ?isTruncated ~policyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -12202,6 +12358,7 @@ module ListRolePoliciesRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -12303,6 +12460,7 @@ module ListPolicyVersionsResponse =
         (Option.map ~f:PolicyDocumentVersionListType.of_xml)
           (Xml.child xml_arg0 "Versions") in
       make ?marker ?isTruncated ?versions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -12343,6 +12501,7 @@ module ListPolicyVersionsRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?maxItems ?marker ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -12441,6 +12600,7 @@ module ListPolicyTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -12480,6 +12640,7 @@ module ListPolicyTagsRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?maxItems ?marker ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -12558,6 +12719,7 @@ module ListPoliciesResponse =
       let policies =
         (Option.map ~f:PolicyListType.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?marker ?isTruncated ?policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -12631,6 +12793,7 @@ module ListPoliciesRequest =
         (Option.map ~f:PolicyScopeType.of_xml) (Xml.child xml_arg0 "Scope") in
       make ?maxItems ?marker ?policyUsageFilter ?pathPrefix ?onlyAttached
         ?scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -12736,6 +12899,7 @@ module ListPoliciesGrantingServiceAccessResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "PoliciesGrantingServiceAccess") in
       make ?marker ?isTruncated ~policiesGrantingServiceAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -12780,6 +12944,7 @@ module ListPoliciesGrantingServiceAccessRequest =
       let marker =
         (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
       make ~serviceNamespaces ~arn ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceNamespaces =
         field_map_exn json "ServiceNamespaces"
@@ -12852,6 +13017,7 @@ module ListOpenIDConnectProvidersResponse =
         (Option.map ~f:OpenIDConnectProviderListType.of_xml)
           (Xml.child xml_arg0 "OpenIDConnectProviderList") in
       make ?openIDConnectProviderList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openIDConnectProviderList =
         field_map json "OpenIDConnectProviderList"
@@ -12868,6 +13034,7 @@ module ListOpenIDConnectProvidersRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12967,6 +13134,7 @@ module ListOpenIDConnectProviderTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13010,6 +13178,7 @@ module ListOpenIDConnectProviderTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ?maxItems ?marker ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -13099,6 +13268,7 @@ module ListMFADevicesResponse =
         MfaDeviceListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MFADevices") in
       make ?marker ?isTruncated ~mFADevices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13140,6 +13310,7 @@ module ListMFADevicesRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -13239,6 +13410,7 @@ module ListMFADeviceTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13279,6 +13451,7 @@ module ListMFADeviceTagsRequest =
         SerialNumberType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ?maxItems ?marker ~serialNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -13363,6 +13536,7 @@ module ListInstanceProfilesResponse =
         InstanceProfileListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfiles") in
       make ?marker ?isTruncated ~instanceProfiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13403,6 +13577,7 @@ module ListInstanceProfilesRequest =
         (Option.map ~f:PathPrefixType.of_xml)
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -13496,6 +13671,7 @@ module ListInstanceProfilesForRoleResponse =
         InstanceProfileListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfiles") in
       make ?marker ?isTruncated ~instanceProfiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13537,6 +13713,7 @@ module ListInstanceProfilesForRoleRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -13627,6 +13804,7 @@ module ListInstanceProfileTagsResponse =
       let tags =
         TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ?marker ?isTruncated ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13669,6 +13847,7 @@ module ListInstanceProfileTagsRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ?maxItems ?marker ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -13750,6 +13929,7 @@ module ListGroupsResponse =
         GroupListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Groups") in
       make ?marker ?isTruncated ~groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13789,6 +13969,7 @@ module ListGroupsRequest =
         (Option.map ~f:PathPrefixType.of_xml)
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -13878,6 +14059,7 @@ module ListGroupsForUserResponse =
         GroupListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Groups") in
       make ?marker ?isTruncated ~groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -13918,6 +14100,7 @@ module ListGroupsForUserRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14010,6 +14193,7 @@ module ListGroupPoliciesResponse =
         PolicyNameListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
       make ?marker ?isTruncated ~policyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -14051,6 +14235,7 @@ module ListGroupPoliciesRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?maxItems ?marker ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14174,6 +14359,7 @@ module ListEntitiesForPolicyResponse =
         (Option.map ~f:PolicyGroupListType.of_xml)
           (Xml.child xml_arg0 "PolicyGroups") in
       make ?marker ?isTruncated ?policyRoles ?policyUsers ?policyGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -14251,6 +14437,7 @@ module ListEntitiesForPolicyRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?maxItems ?marker ?policyUsageFilter ?pathPrefix ?entityFilter
         ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14359,6 +14546,7 @@ module ListAttachedUserPoliciesResponse =
         (Option.map ~f:AttachedPoliciesListType.of_xml)
           (Xml.child xml_arg0 "AttachedPolicies") in
       make ?marker ?isTruncated ?attachedPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -14409,6 +14597,7 @@ module ListAttachedUserPoliciesRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ?pathPrefix ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14513,6 +14702,7 @@ module ListAttachedRolePoliciesResponse =
         (Option.map ~f:AttachedPoliciesListType.of_xml)
           (Xml.child xml_arg0 "AttachedPolicies") in
       make ?marker ?isTruncated ?attachedPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -14563,6 +14753,7 @@ module ListAttachedRolePoliciesRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ?pathPrefix ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14667,6 +14858,7 @@ module ListAttachedGroupPoliciesResponse =
         (Option.map ~f:AttachedPoliciesListType.of_xml)
           (Xml.child xml_arg0 "AttachedPolicies") in
       make ?marker ?isTruncated ?attachedPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -14717,6 +14909,7 @@ module ListAttachedGroupPoliciesRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?maxItems ?marker ?pathPrefix ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14802,6 +14995,7 @@ module ListAccountAliasesResponse =
         AccountAliasListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountAliases") in
       make ?marker ?isTruncated ~accountAliases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -14833,6 +15027,7 @@ module ListAccountAliasesRequest =
       let marker =
         (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14924,6 +15119,7 @@ module ListAccessKeysResponse =
         AccessKeyMetadataListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyMetadata") in
       make ?marker ?isTruncated ~accessKeyMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -14966,6 +15162,7 @@ module ListAccessKeysRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -14989,6 +15186,7 @@ module InvalidUserTypeException =
         (Option.map ~f:InvalidUserTypeMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" InvalidUserTypeMessage.of_json in
       make ?message ()
@@ -15010,6 +15208,7 @@ module InvalidAuthenticationCodeException =
         (Option.map ~f:InvalidAuthenticationCodeMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" InvalidAuthenticationCodeMessage.of_json in
@@ -15078,6 +15277,7 @@ module GetUserResponse =
       let user =
         User.of_xml (Xml.child_exn ~context:context_ xml_arg0 "User") in
       make ~user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map_exn json "User" User.of_json in make ~user ()
     let to_json v = composed_to_json to_value v
@@ -15100,6 +15300,7 @@ module GetUserRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map json "UserName" ExistingUserNameType.of_json in
       make ?userName ()
@@ -15187,6 +15388,7 @@ module GetUserPolicyResponse =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyDocument ~policyName ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
@@ -15223,6 +15425,7 @@ module GetUserPolicyRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyName ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
       let userName =
@@ -15319,6 +15522,7 @@ module GetServiceLinkedRoleDeletionStatusResponse =
         DeletionTaskStatusType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?reason ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" DeletionTaskFailureReasonType.of_json in
@@ -15346,6 +15550,7 @@ module GetServiceLinkedRoleDeletionStatusRequest =
         DeletionTaskIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeletionTaskId") in
       make ~deletionTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletionTaskId =
         field_map_exn json "DeletionTaskId" DeletionTaskIdType.of_json in
@@ -15479,6 +15684,7 @@ module GetServiceLastAccessedDetailsWithEntitiesResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
       make ?error ?marker ?isTruncated ~entityDetailsList ~jobCompletionDate
         ~jobCreationDate ~jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" ErrorDetails.of_json in
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
@@ -15536,6 +15742,7 @@ module GetServiceLastAccessedDetailsWithEntitiesRequest =
       let jobId =
         JobIDType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?marker ?maxItems ~serviceNamespace ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
@@ -15682,6 +15889,7 @@ module GetServiceLastAccessedDetailsResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
       make ?error ?marker ?isTruncated ~jobCompletionDate
         ~servicesLastAccessed ~jobCreationDate ?jobType ~jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" ErrorDetails.of_json in
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
@@ -15731,6 +15939,7 @@ module GetServiceLastAccessedDetailsRequest =
       let jobId =
         JobIDType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?marker ?maxItems ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
@@ -15808,6 +16017,7 @@ module GetServerCertificateResponse =
         ServerCertificate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificate") in
       make ~serverCertificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverCertificate =
         field_map_exn json "ServerCertificate" ServerCertificate.of_json in
@@ -15834,6 +16044,7 @@ module GetServerCertificateRequest =
         ServerCertificateNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~serverCertificateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverCertificateName =
         field_map_exn json "ServerCertificateName"
@@ -15911,6 +16122,7 @@ module GetSSHPublicKeyResponse =
         (Option.map ~f:SSHPublicKey.of_xml)
           (Xml.child xml_arg0 "SSHPublicKey") in
       make ?sSHPublicKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSHPublicKey = field_map json "SSHPublicKey" SSHPublicKey.of_json in
       make ?sSHPublicKey ()
@@ -15952,6 +16164,7 @@ module GetSSHPublicKeyRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~encoding ~sSHPublicKeyId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encoding = field_map_exn json "Encoding" EncodingType.of_json in
       let sSHPublicKeyId =
@@ -16060,6 +16273,7 @@ module GetSAMLProviderResponse =
         (Option.map ~f:SAMLMetadataDocumentType.of_xml)
           (Xml.child xml_arg0 "SAMLMetadataDocument") in
       make ?tags ?validUntil ?createDate ?sAMLMetadataDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let validUntil = field_map json "ValidUntil" DateType.of_json in
@@ -16089,6 +16303,7 @@ module GetSAMLProviderRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sAMLProviderArn =
         field_map_exn json "SAMLProviderArn" ArnType.of_json in
@@ -16156,6 +16371,7 @@ module GetRoleResponse =
       let role =
         Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Role") in
       make ~role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let role = field_map_exn json "Role" Role.of_json in make ~role ()
     let to_json v = composed_to_json to_value v
@@ -16178,6 +16394,7 @@ module GetRoleRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
       make ~roleName ()
@@ -16265,6 +16482,7 @@ module GetRolePolicyResponse =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyDocument ~policyName ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
@@ -16300,6 +16518,7 @@ module GetRolePolicyRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyName ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
@@ -16382,6 +16601,7 @@ module GetPolicyVersionResponse =
         (Option.map ~f:PolicyVersion.of_xml)
           (Xml.child xml_arg0 "PolicyVersion") in
       make ?policyVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyVersion =
         field_map json "PolicyVersion" PolicyVersion.of_json in
@@ -16414,6 +16634,7 @@ module GetPolicyVersionRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~versionId ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId =
         field_map_exn json "VersionId" PolicyVersionIdType.of_json in
@@ -16492,6 +16713,7 @@ module GetPolicyResponse =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -16513,6 +16735,7 @@ module GetPolicyRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       make ~policyArn ()
@@ -16656,6 +16879,7 @@ module GetOrganizationsAccessReportResponse =
       make ?errorDetails ?marker ?isTruncated ?accessDetails
         ?numberOfServicesNotAccessed ?numberOfServicesAccessible
         ?jobCompletionDate ~jobCreationDate ~jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -16715,6 +16939,7 @@ module GetOrganizationsAccessReportRequest =
       let jobId =
         JobIDType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortKey ?marker ?maxItems ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortKey = field_map json "SortKey" SortKeyType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -16835,6 +17060,7 @@ module GetOpenIDConnectProviderResponse =
         (Option.map ~f:OpenIDConnectProviderUrlType.of_xml)
           (Xml.child xml_arg0 "Url") in
       make ?tags ?createDate ?thumbprintList ?clientIDList ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let createDate = field_map json "CreateDate" DateType.of_json in
@@ -16868,6 +17094,7 @@ module GetOpenIDConnectProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openIDConnectProviderArn =
         field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
@@ -16940,6 +17167,7 @@ module GetLoginProfileResponse =
         LoginProfile.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LoginProfile") in
       make ~loginProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loginProfile =
         field_map_exn json "LoginProfile" LoginProfile.of_json in
@@ -16965,6 +17193,7 @@ module GetLoginProfileRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserNameType.of_json in
       make ~userName ()
@@ -17040,6 +17269,7 @@ module GetInstanceProfileResponse =
         InstanceProfile.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfile") in
       make ~instanceProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfile =
         field_map_exn json "InstanceProfile" InstanceProfile.of_json in
@@ -17066,6 +17296,7 @@ module GetInstanceProfileRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfileName =
         field_map_exn json "InstanceProfileName"
@@ -17160,6 +17391,7 @@ module GetGroupResponse =
       let group =
         Group.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
       make ?marker ?isTruncated ~users ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -17200,6 +17432,7 @@ module GetGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?maxItems ?marker ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
       let marker = field_map json "Marker" MarkerType.of_json in
@@ -17290,6 +17523,7 @@ module GetGroupPolicyResponse =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyDocument ~policyName ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
@@ -17325,6 +17559,7 @@ module GetGroupPolicyRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyName ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
@@ -17444,6 +17679,7 @@ module GetCredentialReportResponse =
         (Option.map ~f:ReportContentType.of_xml)
           (Xml.child xml_arg0 "Content") in
       make ?generatedTime ?reportFormat ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generatedTime = field_map json "GeneratedTime" DateType.of_json in
       let reportFormat =
@@ -17480,6 +17716,7 @@ module GetContextKeysForPrincipalPolicyRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicySourceArn") in
       make ?policyInputList ~policySourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyInputList =
         field_map json "PolicyInputList" SimulationPolicyListType.of_json in
@@ -17553,6 +17790,7 @@ module GetContextKeysForPolicyResponse =
         (Option.map ~f:ContextKeyNamesResultListType.of_xml)
           (Xml.child xml_arg0 "ContextKeyNames") in
       make ?contextKeyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contextKeyNames =
         field_map json "ContextKeyNames"
@@ -17580,6 +17818,7 @@ module GetContextKeysForCustomPolicyRequest =
         SimulationPolicyListType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyInputList") in
       make ~policyInputList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyInputList =
         field_map_exn json "PolicyInputList" SimulationPolicyListType.of_json in
@@ -17643,6 +17882,7 @@ module GetAccountSummaryResponse =
         (Option.map ~f:SummaryMapType.of_xml)
           (Xml.child xml_arg0 "SummaryMap") in
       make ?summaryMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summaryMap = field_map json "SummaryMap" SummaryMapType.of_json in
       make ?summaryMap ()
@@ -17719,6 +17959,7 @@ module GetAccountPasswordPolicyResponse =
         PasswordPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PasswordPolicy") in
       make ~passwordPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let passwordPolicy =
         field_map_exn json "PasswordPolicy" PasswordPolicy.of_json in
@@ -17836,6 +18077,7 @@ module GetAccountAuthorizationDetailsResponse =
           (Xml.child xml_arg0 "UserDetailList") in
       make ?marker ?isTruncated ?policies ?roleDetailList ?groupDetailList
         ?userDetailList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" ResponseMarkerType.of_json in
       let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
@@ -17881,6 +18123,7 @@ module GetAccountAuthorizationDetailsRequest =
       let filter =
         (Option.map ~f:EntityListType.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?marker ?maxItems ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
@@ -17957,6 +18200,7 @@ module GetAccessKeyLastUsedResponse =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ?accessKeyLastUsed ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessKeyLastUsed =
         field_map json "AccessKeyLastUsed" AccessKeyLastUsed.of_json in
@@ -17983,6 +18227,7 @@ module GetAccessKeyLastUsedRequest =
         AccessKeyIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyId") in
       make ~accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessKeyId =
         field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
@@ -18060,6 +18305,7 @@ module GenerateServiceLastAccessedDetailsResponse =
       let jobId =
         (Option.map ~f:JobIDType.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobIDType.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -18091,6 +18337,7 @@ module GenerateServiceLastAccessedDetailsRequest =
       let arn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?granularity ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let granularity =
         field_map json "Granularity"
@@ -18165,6 +18412,7 @@ module GenerateOrganizationsAccessReportResponse =
       let jobId =
         (Option.map ~f:JobIDType.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobIDType.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -18199,6 +18447,7 @@ module GenerateOrganizationsAccessReportRequest =
         OrganizationsEntityPathType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityPath") in
       make ?organizationsPolicyId ~entityPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationsPolicyId =
         field_map json "OrganizationsPolicyId"
@@ -18284,6 +18533,7 @@ module GenerateCredentialReportResponse =
       let state =
         (Option.map ~f:ReportStateType.of_xml) (Xml.child xml_arg0 "State") in
       make ?description ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" ReportStateDescriptionType.of_json in
@@ -18308,6 +18558,7 @@ module EntityTemporarilyUnmodifiableException =
         (Option.map ~f:EntityTemporarilyUnmodifiableMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map json "message" EntityTemporarilyUnmodifiableMessage.of_json in
@@ -18367,6 +18618,7 @@ module EnableMFADeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~authenticationCode2 ~authenticationCode1 ~serialNumber ~userName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authenticationCode2 =
         field_map_exn json "AuthenticationCode2"
@@ -18407,6 +18659,7 @@ module DetachUserPolicyRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyArn ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       let userName = field_map_exn json "UserName" UserNameType.of_json in
@@ -18438,6 +18691,7 @@ module DetachRolePolicyRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyArn ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
@@ -18470,6 +18724,7 @@ module DetachGroupPolicyRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyArn ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
@@ -18495,6 +18750,7 @@ module DeleteVirtualMFADeviceRequest =
         SerialNumberType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ~serialNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serialNumber =
         field_map_exn json "SerialNumber" SerialNumberType.of_json in
@@ -18520,6 +18776,7 @@ module DeleteUserRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName =
         field_map_exn json "UserName" ExistingUserNameType.of_json in
@@ -18553,6 +18810,7 @@ module DeleteUserPolicyRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyName ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
       let userName =
@@ -18579,6 +18837,7 @@ module DeleteUserPermissionsBoundaryRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserNameType.of_json in
       make ~userName ()
@@ -18613,6 +18872,7 @@ module DeleteSigningCertificateRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ~certificateId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateId =
         field_map_exn json "CertificateId" CertificateIdType.of_json in
@@ -18651,6 +18911,7 @@ module DeleteServiceSpecificCredentialRequest =
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ~serviceSpecificCredentialId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceSpecificCredentialId =
         field_map_exn json "ServiceSpecificCredentialId"
@@ -18737,6 +18998,7 @@ module DeleteServiceLinkedRoleResponse =
         DeletionTaskIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeletionTaskId") in
       make ~deletionTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletionTaskId =
         field_map_exn json "DeletionTaskId" DeletionTaskIdType.of_json in
@@ -18761,6 +19023,7 @@ module DeleteServiceLinkedRoleRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
       make ~roleName ()
@@ -18786,6 +19049,7 @@ module DeleteServerCertificateRequest =
         ServerCertificateNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~serverCertificateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverCertificateName =
         field_map_exn json "ServerCertificateName"
@@ -18821,6 +19085,7 @@ module DeleteSSHPublicKeyRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~sSHPublicKeyId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSHPublicKeyId =
         field_map_exn json "SSHPublicKeyId" PublicKeyIdType.of_json in
@@ -18847,6 +19112,7 @@ module DeleteSAMLProviderRequest =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sAMLProviderArn =
         field_map_exn json "SAMLProviderArn" ArnType.of_json in
@@ -18872,6 +19138,7 @@ module DeleteRoleRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
       make ~roleName ()
@@ -18904,6 +19171,7 @@ module DeleteRolePolicyRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyName ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
@@ -18929,6 +19197,7 @@ module DeleteRolePermissionsBoundaryRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
       make ~roleName ()
@@ -18960,6 +19229,7 @@ module DeletePolicyVersionRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~versionId ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId =
         field_map_exn json "VersionId" PolicyVersionIdType.of_json in
@@ -18985,6 +19255,7 @@ module DeletePolicyRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       make ~policyArn ()
@@ -19012,6 +19283,7 @@ module DeleteOpenIDConnectProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let openIDConnectProviderArn =
         field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
@@ -19037,6 +19309,7 @@ module DeleteLoginProfileRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserNameType.of_json in
       make ~userName ()
@@ -19062,6 +19335,7 @@ module DeleteInstanceProfileRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfileName =
         field_map_exn json "InstanceProfileName"
@@ -19088,6 +19362,7 @@ module DeleteGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
       make ~groupName ()
@@ -19120,6 +19395,7 @@ module DeleteGroupPolicyRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyName ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
@@ -19142,6 +19418,7 @@ module DeleteConflictException =
         (Option.map ~f:DeleteConflictMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" DeleteConflictMessage.of_json in
       make ?message ()
@@ -19166,6 +19443,7 @@ module DeleteAccountAliasRequest =
         AccountAliasType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountAlias") in
       make ~accountAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAlias =
         field_map_exn json "AccountAlias" AccountAliasType.of_json in
@@ -19200,6 +19478,7 @@ module DeleteAccessKeyRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ~accessKeyId ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessKeyId =
         field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
@@ -19234,6 +19513,7 @@ module DeactivateMFADeviceRequest =
         ExistingUserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~serialNumber ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serialNumber =
         field_map_exn json "SerialNumber" SerialNumberType.of_json in
@@ -19344,6 +19624,7 @@ module CreateVirtualMFADeviceResponse =
         VirtualMFADevice.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VirtualMFADevice") in
       make ~virtualMFADevice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualMFADevice =
         field_map_exn json "VirtualMFADevice" VirtualMFADevice.of_json in
@@ -19384,6 +19665,7 @@ module CreateVirtualMFADeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VirtualMFADeviceName") in
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?tags ~virtualMFADeviceName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let virtualMFADeviceName =
@@ -19495,6 +19777,7 @@ module CreateUserResponse =
       let xml_arg0 = Xml.child_exn ~context:context_ t "CreateUserResult" in
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map json "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
@@ -19541,6 +19824,7 @@ module CreateUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?tags ?permissionsBoundary ~userName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let permissionsBoundary =
@@ -19636,6 +19920,7 @@ module CreateServiceSpecificCredentialResponse =
         (Option.map ~f:ServiceSpecificCredential.of_xml)
           (Xml.child xml_arg0 "ServiceSpecificCredential") in
       make ?serviceSpecificCredential ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceSpecificCredential =
         field_map json "ServiceSpecificCredential"
@@ -19670,6 +19955,7 @@ module CreateServiceSpecificCredentialRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~serviceName ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
       let userName = field_map_exn json "UserName" UserNameType.of_json in
@@ -19758,6 +20044,7 @@ module CreateServiceLinkedRoleResponse =
         Xml.child_exn ~context:context_ t "CreateServiceLinkedRoleResult" in
       let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
       make ?role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let role = field_map json "Role" Role.of_json in make ?role ()
     let to_json v = composed_to_json to_value v
@@ -19799,6 +20086,7 @@ module CreateServiceLinkedRoleRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AWSServiceName") in
       make ?customSuffix ?description ~aWSServiceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customSuffix =
         field_map json "CustomSuffix" CustomSuffixType.of_json in
@@ -19917,6 +20205,7 @@ module CreateSAMLProviderResponse =
       let sAMLProviderArn =
         (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "SAMLProviderArn") in
       make ?tags ?sAMLProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let sAMLProviderArn = field_map json "SAMLProviderArn" ArnType.of_json in
@@ -19958,6 +20247,7 @@ module CreateSAMLProviderRequest =
         SAMLMetadataDocumentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLMetadataDocument") in
       make ?tags ~name ~sAMLMetadataDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let name = field_map_exn json "Name" SAMLProviderNameType.of_json in
@@ -20072,6 +20362,7 @@ module CreateRoleResponse =
       let role =
         Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Role") in
       make ~role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let role = field_map_exn json "Role" Role.of_json in make ~role ()
     let to_json v = composed_to_json to_value v
@@ -20156,6 +20447,7 @@ module CreateRoleRequest =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?tags ?permissionsBoundary ?maxSessionDuration ?description
         ~assumeRolePolicyDocument ~roleName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let permissionsBoundary =
@@ -20274,6 +20566,7 @@ module CreatePolicyVersionResponse =
         (Option.map ~f:PolicyVersion.of_xml)
           (Xml.child xml_arg0 "PolicyVersion") in
       make ?policyVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyVersion =
         field_map json "PolicyVersion" PolicyVersion.of_json in
@@ -20316,6 +20609,7 @@ module CreatePolicyVersionRequest =
       let policyArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?setAsDefault ~policyDocument ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let setAsDefault = field_map json "SetAsDefault" BooleanType.of_json in
       let policyDocument =
@@ -20430,6 +20724,7 @@ module CreatePolicyResponse =
       let policy =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" Policy.of_json in make ?policy ()
     let to_json v = composed_to_json to_value v
@@ -20487,6 +20782,7 @@ module CreatePolicyRequest =
         PolicyNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       make ?tags ?description ~policyDocument ?path ~policyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let description =
@@ -20609,6 +20905,7 @@ module CreateOpenIDConnectProviderResponse =
         (Option.map ~f:ArnType.of_xml)
           (Xml.child xml_arg0 "OpenIDConnectProviderArn") in
       make ?tags ?openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let openIDConnectProviderArn =
@@ -20661,6 +20958,7 @@ module CreateOpenIDConnectProviderRequest =
         OpenIDConnectProviderUrlType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Url") in
       make ?tags ~thumbprintList ?clientIDList ~url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let thumbprintList =
@@ -20770,6 +21068,7 @@ module CreateLoginProfileResponse =
         LoginProfile.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LoginProfile") in
       make ~loginProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loginProfile =
         field_map_exn json "LoginProfile" LoginProfile.of_json in
@@ -20813,6 +21112,7 @@ module CreateLoginProfileRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?passwordResetRequired ~password ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let passwordResetRequired =
         field_map json "PasswordResetRequired" BooleanType.of_json in
@@ -20923,6 +21223,7 @@ module CreateInstanceProfileResponse =
         InstanceProfile.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfile") in
       make ~instanceProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceProfile =
         field_map_exn json "InstanceProfile" InstanceProfile.of_json in
@@ -20963,6 +21264,7 @@ module CreateInstanceProfileRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ?tags ?path ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagListType.of_json in
       let path = field_map json "Path" PathType.of_json in
@@ -21053,6 +21355,7 @@ module CreateGroupResponse =
       let group =
         Group.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
       make ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map_exn json "Group" Group.of_json in make ~group ()
     let to_json v = composed_to_json to_value v
@@ -21081,6 +21384,7 @@ module CreateGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ~groupName ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
       let path = field_map json "Path" PathType.of_json in
@@ -21106,6 +21410,7 @@ module CreateAccountAliasRequest =
         AccountAliasType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountAlias") in
       make ~accountAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountAlias =
         field_map_exn json "AccountAlias" AccountAliasType.of_json in
@@ -21186,6 +21491,7 @@ module CreateAccessKeyResponse =
         AccessKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessKey") in
       make ~accessKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessKey = field_map_exn json "AccessKey" AccessKey.of_json in
       make ~accessKey ()
@@ -21210,6 +21516,7 @@ module CreateAccessKeyRequest =
         (Option.map ~f:ExistingUserNameType.of_xml)
           (Xml.child xml_arg0 "UserName") in
       make ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map json "UserName" ExistingUserNameType.of_json in
       make ?userName ()
@@ -21241,6 +21548,7 @@ module ChangePasswordRequest =
         PasswordType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OldPassword") in
       make ~newPassword ~oldPassword ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newPassword = field_map_exn json "NewPassword" PasswordType.of_json in
       let oldPassword = field_map_exn json "OldPassword" PasswordType.of_json in
@@ -21272,6 +21580,7 @@ module AttachUserPolicyRequest =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyArn ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       let userName = field_map_exn json "UserName" UserNameType.of_json in
@@ -21303,6 +21612,7 @@ module AttachRolePolicyRequest =
         RoleNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyArn ~roleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
@@ -21335,6 +21645,7 @@ module AttachGroupPolicyRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyArn ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
       let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
@@ -21367,6 +21678,7 @@ module AddUserToGroupRequest =
         GroupNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~userName ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName =
         field_map_exn json "UserName" ExistingUserNameType.of_json in
@@ -21401,6 +21713,7 @@ module AddRoleToInstanceProfileRequest =
         InstanceProfileNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~roleName ~instanceProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
       let instanceProfileName =
@@ -21438,6 +21751,7 @@ module AddClientIDToOpenIDConnectProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OpenIDConnectProviderArn") in
       make ~clientID ~openIDConnectProviderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientID = field_map_exn json "ClientID" ClientIDType.of_json in
       let openIDConnectProviderArn =

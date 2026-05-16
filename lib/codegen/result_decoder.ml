@@ -10,15 +10,19 @@ let of_botodata ~default (op : Botodata.operation) ~shapes =
     let (output_shape : Botodata.shape) =
       List.Assoc.find_exn shapes ~equal:String.equal output_shape_name
     in
-    match Shape.shape_is_header_structure' ~shapes output_shape with
-    | false -> default
-    | true ->
-      let has_body =
-        match output_shape with
-        | Structure_shape { payload; _ } -> payload
-        | _ -> None
-      in
-      Of_header_and_body has_body)
+    let payload =
+      match output_shape with
+      | Structure_shape { payload; _ } -> payload
+      | _ -> None
+    in
+    match Shape.shape_is_header_structure' ~shapes output_shape, payload with
+    | true, _ -> Of_header_and_body payload
+    | false, Some _ ->
+      (* Mixed: some members are headers, the [payload] member is the
+         body and may itself be a structure. The runtime parses the body
+         via the payload shape's of_string. *)
+      Of_header_and_body payload
+    | false, None -> default)
 ;;
 
 let of_botodata_xml (op : Botodata.operation) ~shapes =

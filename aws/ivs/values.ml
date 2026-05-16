@@ -99,6 +99,7 @@ module S3DestinationConfiguration =
         S3DestinationBucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketName =
         field_map_exn json "bucketName" S3DestinationBucketName.of_json in
@@ -385,6 +386,7 @@ module DestinationConfiguration =
         (Option.map ~f:S3DestinationConfiguration.of_xml)
           (Xml.child xml_arg0 "s3") in
       make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3 = field_map json "s3" S3DestinationConfiguration.of_json in
       make ?s3 ()
@@ -665,6 +667,7 @@ module AudioConfiguration =
       let channels =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "channels") in
       make ?targetBitrate ?sampleRate ?codec ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetBitrate = field_map json "targetBitrate" Integer.of_json in
       let sampleRate = field_map json "sampleRate" Integer.of_json in
@@ -747,6 +750,7 @@ module VideoConfiguration =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "avcLevel") in
       make ?videoWidth ?videoHeight ?targetFramerate ?targetBitrate ?encoder
         ?codec ?avcProfile ?avcLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let videoWidth = field_map json "videoWidth" Integer.of_json in
       let videoHeight = field_map json "videoHeight" Integer.of_json in
@@ -789,6 +793,7 @@ module ThumbnailConfiguration =
         (Option.map ~f:RecordingMode.of_xml)
           (Xml.child xml_arg0 "recordingMode") in
       make ?targetIntervalSeconds ?recordingMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetIntervalSeconds =
         field_map json "targetIntervalSeconds" TargetIntervalSeconds.of_json in
@@ -823,6 +828,7 @@ module StreamEvent =
       let eventTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "eventTime") in
       make ?type_ ?name ?eventTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" String_.of_json in
       let name = field_map json "name" String_.of_json in
@@ -952,6 +958,7 @@ module StreamSummary =
       let channelArn =
         (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "channelArn") in
       make ?viewerCount ?streamId ?state ?startTime ?health ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let viewerCount =
         field_map json "viewerCount" StreamViewerCount.of_json in
@@ -1001,6 +1008,7 @@ module StreamSessionSummary =
       let endTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "endTime") in
       make ?streamId ?startTime ?hasErrorEvent ?endTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "streamId" StreamId.of_json in
       let startTime = field_map json "startTime" Time.of_json in
@@ -1034,6 +1042,7 @@ module StreamKeySummary =
       let arn =
         (Option.map ~f:StreamKeyArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?channelArn ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let channelArn = field_map json "channelArn" ChannelArn.of_json in
@@ -1092,6 +1101,7 @@ module RecordingConfigurationSummary =
         RecordingConfigurationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tags ~state ?name ~destinationConfiguration ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let state =
@@ -1130,6 +1140,7 @@ module PlaybackKeyPairSummary =
       let arn =
         (Option.map ~f:PlaybackKeyPairArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let name = field_map json "name" PlaybackKeyPairName.of_json in
@@ -1197,6 +1208,7 @@ module ChannelSummary =
       let arn = (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?recordingConfigurationArn ?name ?latencyMode ?authorized
         ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let recordingConfigurationArn =
@@ -1308,6 +1320,7 @@ module Channel =
       let arn = (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?type_ ?tags ?recordingConfigurationArn ?playbackUrl ?name
         ?latencyMode ?ingestEndpoint ?authorized ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" ChannelType.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -1348,6 +1361,7 @@ module IngestConfiguration =
         (Option.map ~f:AudioConfiguration.of_xml)
           (Xml.child xml_arg0 "audio") in
       make ?video ?audio ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let video = field_map json "video" VideoConfiguration.of_json in
       let audio = field_map json "audio" AudioConfiguration.of_json in
@@ -1425,6 +1439,7 @@ module RecordingConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?thumbnailConfiguration ?tags ~state ?name
         ~destinationConfiguration ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbnailConfiguration =
         field_map json "thumbnailConfiguration"
@@ -1493,6 +1508,7 @@ module BatchError =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "code") in
       let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?message ?code ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       let code = field_map json "code" ErrorCode.of_json in
@@ -1531,6 +1547,7 @@ module StreamKey =
       let arn =
         (Option.map ~f:StreamKeyArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?value ?tags ?channelArn ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" StreamKeyValue.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -1557,6 +1574,7 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1581,6 +1599,7 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1604,6 +1623,7 @@ module PendingVerification =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1627,6 +1647,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1651,6 +1672,7 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1674,6 +1696,7 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1724,6 +1747,7 @@ module ChannelNotBroadcasting =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1747,6 +1771,7 @@ module StreamUnavailable =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -1842,6 +1867,7 @@ module StreamFilters =
       let health =
         (Option.map ~f:StreamHealth.of_xml) (Xml.child xml_arg0 "health") in
       make ?health ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let health = field_map json "health" StreamHealth.of_json in
       make ?health ()
@@ -2083,6 +2109,7 @@ module PlaybackKeyPair =
       let arn =
         (Option.map ~f:PlaybackKeyPairArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?name ?fingerprint ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let name = field_map json "name" PlaybackKeyPairName.of_json in
@@ -2110,6 +2137,7 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -2204,6 +2232,7 @@ module StreamSession =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
       make ?truncatedEvents ?streamId ?startTime ?recordingConfiguration
         ?ingestConfiguration ?endTime ?channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncatedEvents =
         field_map json "truncatedEvents" StreamEvents.of_json in
@@ -2290,6 +2319,7 @@ module Stream =
         (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "channelArn") in
       make ?viewerCount ?streamId ?state ?startTime ?playbackUrl ?health
         ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let viewerCount =
         field_map json "viewerCount" StreamViewerCount.of_json in
@@ -2507,6 +2537,7 @@ module UpdateChannelResponse =
       let channel =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
       make ?channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channel = field_map json "channel" Channel.of_json in
       make ?channel ()
@@ -2576,6 +2607,7 @@ module UpdateChannelRequest =
         ChannelArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?type_ ?recordingConfigurationArn ?name ?latencyMode ?authorized
         ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" ChannelType.of_json in
       let recordingConfigurationArn =
@@ -2644,6 +2676,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from the resource with the specified ARN."]
@@ -2670,6 +2703,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -2693,6 +2727,7 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
       make ?exceptionMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exceptionMessage =
         field_map json "exceptionMessage" ErrorMessage.of_json in
@@ -2752,6 +2787,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2778,6 +2814,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" Tags.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -2856,6 +2893,7 @@ module StopStreamResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2878,6 +2916,7 @@ module StopStreamRequest =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
       make ~channelArn ()
@@ -2910,6 +2949,7 @@ module PutMetadataRequest =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~metadata ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata = field_map_exn json "metadata" StreamMetadata.of_json in
       let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
@@ -2975,6 +3015,7 @@ module ListTagsForResourceResponse =
       let tags =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" Tags.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
@@ -2997,6 +3038,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -3062,6 +3104,7 @@ module ListStreamsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~streams ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streams = field_map_exn json "streams" StreamList.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3101,6 +3144,7 @@ module ListStreamsRequest =
       let filterBy =
         (Option.map ~f:StreamFilters.of_xml) (Xml.child xml_arg0 "filterBy") in
       make ?nextToken ?maxResults ?filterBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxStreamResults.of_json in
@@ -3180,6 +3224,7 @@ module ListStreamSessionsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~streamSessions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamSessions =
         field_map_exn json "streamSessions" StreamSessionList.of_json in
@@ -3221,6 +3266,7 @@ module ListStreamSessionsRequest =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ?nextToken ?maxResults ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxStreamResults.of_json in
@@ -3298,6 +3344,7 @@ module ListStreamKeysResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~streamKeys ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamKeys = field_map_exn json "streamKeys" StreamKeyList.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3338,6 +3385,7 @@ module ListStreamKeysRequest =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ?nextToken ?maxResults ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -3420,6 +3468,7 @@ module ListRecordingConfigurationsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~recordingConfigurations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordingConfigurations =
         field_map_exn json "recordingConfigurations"
@@ -3456,6 +3505,7 @@ module ListRecordingConfigurationsRequest =
         (Option.map ~f:MaxRecordingConfigurationResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -3523,6 +3573,7 @@ module ListPlaybackKeyPairsResponse =
         PlaybackKeyPairList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyPairs") in
       make ?nextToken ~keyPairs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let keyPairs =
@@ -3556,6 +3607,7 @@ module ListPlaybackKeyPairsRequest =
         (Option.map ~f:MaxPlaybackKeyPairResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -3632,6 +3684,7 @@ module ListChannelsResponse =
         ChannelList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channels") in
       make ?nextToken ~channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let channels = field_map_exn json "channels" ChannelList.of_json in
@@ -3691,6 +3744,7 @@ module ListChannelsRequest =
           (Xml.child xml_arg0 "filterByName") in
       make ?nextToken ?maxResults ?filterByRecordingConfigurationArn
         ?filterByName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxChannelResults.of_json in
@@ -3781,6 +3835,7 @@ module ImportPlaybackKeyPairResponse =
       let keyPair =
         (Option.map ~f:PlaybackKeyPair.of_xml) (Xml.child xml_arg0 "keyPair") in
       make ?keyPair ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPair = field_map json "keyPair" PlaybackKeyPair.of_json in
       make ?keyPair ()
@@ -3819,6 +3874,7 @@ module ImportPlaybackKeyPairRequest =
         (Option.map ~f:PlaybackKeyPairName.of_xml)
           (Xml.child xml_arg0 "name") in
       make ?tags ~publicKeyMaterial ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let publicKeyMaterial =
@@ -3891,6 +3947,7 @@ module GetStreamSessionResponse =
         (Option.map ~f:StreamSession.of_xml)
           (Xml.child xml_arg0 "streamSession") in
       make ?streamSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamSession =
         field_map json "streamSession" StreamSession.of_json in
@@ -3920,6 +3977,7 @@ module GetStreamSessionRequest =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ?streamId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "streamId" StreamId.of_json in
       let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
@@ -3993,6 +4051,7 @@ module GetStreamResponse =
       let stream =
         (Option.map ~f:Stream.of_xml) (Xml.child xml_arg0 "stream") in
       make ?stream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stream = field_map json "stream" Stream.of_json in make ?stream ()
     let to_json v = composed_to_json to_value v
@@ -4015,6 +4074,7 @@ module GetStreamRequest =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
       make ~channelArn ()
@@ -4079,6 +4139,7 @@ module GetStreamKeyResponse =
       let streamKey =
         (Option.map ~f:StreamKey.of_xml) (Xml.child xml_arg0 "streamKey") in
       make ?streamKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamKey = field_map json "streamKey" StreamKey.of_json in
       make ?streamKey ()
@@ -4099,6 +4160,7 @@ module GetStreamKeyRequest =
       let arn =
         StreamKeyArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" StreamKeyArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -4174,6 +4236,7 @@ module GetRecordingConfigurationResponse =
         (Option.map ~f:RecordingConfiguration.of_xml)
           (Xml.child xml_arg0 "recordingConfiguration") in
       make ?recordingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordingConfiguration =
         field_map json "recordingConfiguration"
@@ -4198,6 +4261,7 @@ module GetRecordingConfigurationRequest =
         RecordingConfigurationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" RecordingConfigurationArn.of_json in
       make ~arn ()
@@ -4261,6 +4325,7 @@ module GetPlaybackKeyPairResponse =
       let keyPair =
         (Option.map ~f:PlaybackKeyPair.of_xml) (Xml.child xml_arg0 "keyPair") in
       make ?keyPair ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPair = field_map json "keyPair" PlaybackKeyPair.of_json in
       make ?keyPair ()
@@ -4284,6 +4349,7 @@ module GetPlaybackKeyPairRequest =
         PlaybackKeyPairArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" PlaybackKeyPairArn.of_json in
       make ~arn ()
@@ -4348,6 +4414,7 @@ module GetChannelResponse =
       let channel =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
       make ?channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channel = field_map json "channel" Channel.of_json in
       make ?channel ()
@@ -4370,6 +4437,7 @@ module GetChannelRequest =
       let arn =
         ChannelArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" ChannelArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -4389,6 +4457,7 @@ module DeleteStreamKeyRequest =
       let arn =
         StreamKeyArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" StreamKeyArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -4411,6 +4480,7 @@ module DeleteRecordingConfigurationRequest =
         RecordingConfigurationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" RecordingConfigurationArn.of_json in
       make ~arn ()
@@ -4479,6 +4549,7 @@ module DeletePlaybackKeyPairResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4500,6 +4571,7 @@ module DeletePlaybackKeyPairRequest =
         PlaybackKeyPairArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" PlaybackKeyPairArn.of_json in
       make ~arn ()
@@ -4520,6 +4592,7 @@ module DeleteChannelRequest =
       let arn =
         ChannelArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "arn" ChannelArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -4606,6 +4679,7 @@ module CreateStreamKeyResponse =
       let streamKey =
         (Option.map ~f:StreamKey.of_xml) (Xml.child xml_arg0 "streamKey") in
       make ?streamKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamKey = field_map json "streamKey" StreamKey.of_json in
       make ?streamKey ()
@@ -4634,6 +4708,7 @@ module CreateStreamKeyRequest =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ?tags ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
@@ -4732,6 +4807,7 @@ module CreateRecordingConfigurationResponse =
         (Option.map ~f:RecordingConfiguration.of_xml)
           (Xml.child xml_arg0 "recordingConfiguration") in
       make ?recordingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recordingConfiguration =
         field_map json "recordingConfiguration"
@@ -4788,6 +4864,7 @@ module CreateRecordingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "destinationConfiguration") in
       make ?thumbnailConfiguration ?tags ?name ~destinationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thumbnailConfiguration =
         field_map json "thumbnailConfiguration"
@@ -4884,6 +4961,7 @@ module CreateChannelResponse =
       let channel =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
       make ?streamKey ?channel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamKey = field_map json "streamKey" StreamKey.of_json in
       let channel = field_map json "channel" Channel.of_json in
@@ -4954,6 +5032,7 @@ module CreateChannelRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "authorized") in
       make ?type_ ?tags ?recordingConfigurationArn ?name ?latencyMode
         ?authorized ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "type" ChannelType.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -5005,6 +5084,7 @@ module BatchGetStreamKeyResponse =
       let errors =
         (Option.map ~f:BatchErrors.of_xml) (Xml.child xml_arg0 "errors") in
       make ?streamKeys ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamKeys = field_map json "streamKeys" StreamKeys.of_json in
       let errors = field_map json "errors" BatchErrors.of_json in
@@ -5027,6 +5107,7 @@ module BatchGetStreamKeyRequest =
         StreamKeyArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arns") in
       make ~arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arns = field_map_exn json "arns" StreamKeyArnList.of_json in
       make ~arns ()
@@ -5070,6 +5151,7 @@ module BatchGetChannelResponse =
       let channels =
         (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "channels") in
       make ?errors ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "errors" BatchErrors.of_json in
       let channels = field_map json "channels" Channels.of_json in
@@ -5091,6 +5173,7 @@ module BatchGetChannelRequest =
         ChannelArnList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arns") in
       make ~arns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arns = field_map_exn json "arns" ChannelArnList.of_json in
       make ~arns ()

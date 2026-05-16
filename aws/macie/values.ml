@@ -143,6 +143,7 @@ module S3Resource =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ?prefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "prefix" Prefix.of_json in
       let bucketName = field_map_exn json "bucketName" BucketName.of_json in
@@ -176,6 +177,7 @@ module ClassificationTypeUpdate =
         (Option.map ~f:S3OneTimeClassificationType.of_xml)
           (Xml.child xml_arg0 "oneTime") in
       make ?continuous ?oneTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let continuous =
         field_map json "continuous" S3ContinuousClassificationType.of_json in
@@ -211,6 +213,7 @@ module ClassificationType =
         S3OneTimeClassificationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "oneTime") in
       make ~continuous ~oneTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let continuous =
         field_map_exn json "continuous"
@@ -281,6 +284,7 @@ module FailedS3Resource =
       let failedItem =
         (Option.map ~f:S3Resource.of_xml) (Xml.child xml_arg0 "failedItem") in
       make ?errorMessage ?errorCode ?failedItem ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage =
         field_map json "errorMessage" ExceptionMessage.of_json in
@@ -341,6 +345,7 @@ module S3ResourceClassificationUpdate =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~classificationTypeUpdate ?prefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let classificationTypeUpdate =
         field_map_exn json "classificationTypeUpdate"
@@ -386,6 +391,7 @@ module S3ResourceClassification =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~classificationType ?prefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let classificationType =
         field_map_exn json "classificationType" ClassificationType.of_json in
@@ -411,6 +417,7 @@ module MemberAccount =
       let accountId =
         (Option.map ~f:AWSAccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "accountId" AWSAccountId.of_json in
       make ?accountId ()
@@ -439,6 +446,7 @@ module AccessDeniedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let message = field_map json "message" ExceptionMessage.of_json in
@@ -490,6 +498,7 @@ module InternalException =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ExceptionMessage.of_json in
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
@@ -521,6 +530,7 @@ module InvalidInputException =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?fieldName ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldName = field_map json "fieldName" FieldName.of_json in
       let message = field_map json "message" ExceptionMessage.of_json in
@@ -685,6 +695,7 @@ module LimitExceededException =
       let errorCode =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?resourceType ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "resourceType" ResourceType.of_json in
       let message = field_map json "message" ExceptionMessage.of_json in
@@ -756,6 +767,7 @@ module UpdateS3ResourcesResult =
         (Option.map ~f:FailedS3Resources.of_xml)
           (Xml.child xml_arg0 "failedS3Resources") in
       make ?failedS3Resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedS3Resources =
         field_map json "failedS3Resources" FailedS3Resources.of_json in
@@ -793,6 +805,7 @@ module UpdateS3ResourcesRequest =
         (Option.map ~f:AWSAccountId.of_xml)
           (Xml.child xml_arg0 "memberAccountId") in
       make ~s3ResourcesUpdate ?memberAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3ResourcesUpdate =
         field_map_exn json "s3ResourcesUpdate"
@@ -873,6 +886,7 @@ module ListS3ResourcesResult =
         (Option.map ~f:S3ResourcesClassification.of_xml)
           (Xml.child xml_arg0 "s3Resources") in
       make ?nextToken ?s3Resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let s3Resources =
@@ -914,6 +928,7 @@ module ListS3ResourcesRequest =
         (Option.map ~f:AWSAccountId.of_xml)
           (Xml.child xml_arg0 "memberAccountId") in
       make ?maxResults ?nextToken ?memberAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -984,6 +999,7 @@ module ListMemberAccountsResult =
         (Option.map ~f:MemberAccounts.of_xml)
           (Xml.child xml_arg0 "memberAccounts") in
       make ?nextToken ?memberAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let memberAccounts =
@@ -1015,6 +1031,7 @@ module ListMemberAccountsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -1085,6 +1102,7 @@ module DisassociateS3ResourcesResult =
         (Option.map ~f:FailedS3Resources.of_xml)
           (Xml.child xml_arg0 "failedS3Resources") in
       make ?failedS3Resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedS3Resources =
         field_map json "failedS3Resources" FailedS3Resources.of_json in
@@ -1121,6 +1139,7 @@ module DisassociateS3ResourcesRequest =
         (Option.map ~f:AWSAccountId.of_xml)
           (Xml.child xml_arg0 "memberAccountId") in
       make ~associatedS3Resources ?memberAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associatedS3Resources =
         field_map_exn json "associatedS3Resources" S3Resources.of_json in
@@ -1149,6 +1168,7 @@ module DisassociateMemberAccountRequest =
         AWSAccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "memberAccountId") in
       make ~memberAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberAccountId =
         field_map_exn json "memberAccountId" AWSAccountId.of_json in
@@ -1228,6 +1248,7 @@ module AssociateS3ResourcesResult =
         (Option.map ~f:FailedS3Resources.of_xml)
           (Xml.child xml_arg0 "failedS3Resources") in
       make ?failedS3Resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedS3Resources =
         field_map json "failedS3Resources" FailedS3Resources.of_json in
@@ -1263,6 +1284,7 @@ module AssociateS3ResourcesRequest =
         (Option.map ~f:AWSAccountId.of_xml)
           (Xml.child xml_arg0 "memberAccountId") in
       make ~s3Resources ?memberAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Resources =
         field_map_exn json "s3Resources" S3ResourcesClassification.of_json in
@@ -1291,6 +1313,7 @@ module AssociateMemberAccountRequest =
         AWSAccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "memberAccountId") in
       make ~memberAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let memberAccountId =
         field_map_exn json "memberAccountId" AWSAccountId.of_json in

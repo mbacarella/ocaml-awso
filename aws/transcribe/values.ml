@@ -153,6 +153,7 @@ module AbsoluteTimeRange =
         (Option.map ~f:TimestampMilliseconds.of_xml)
           (Xml.child xml_arg0 "StartTime") in
       make ?last ?first ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let last = field_map json "Last" TimestampMilliseconds.of_json in
       let first = field_map json "First" TimestampMilliseconds.of_json in
@@ -243,6 +244,7 @@ module RelativeTimeRange =
         (Option.map ~f:Percentage.of_xml)
           (Xml.child xml_arg0 "StartPercentage") in
       make ?last ?first ?endPercentage ?startPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let last = field_map json "Last" Percentage.of_json in
       let first = field_map json "First" Percentage.of_json in
@@ -496,6 +498,7 @@ module InterruptionFilter =
           (Xml.child xml_arg0 "Threshold") in
       make ?negate ?relativeTimeRange ?absoluteTimeRange ?participantRole
         ?threshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let negate = field_map json "Negate" Boolean.of_json in
       let relativeTimeRange =
@@ -556,6 +559,7 @@ module NonTalkTimeFilter =
         (Option.map ~f:TimestampMilliseconds.of_xml)
           (Xml.child xml_arg0 "Threshold") in
       make ?negate ?relativeTimeRange ?absoluteTimeRange ?threshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let negate = field_map json "Negate" Boolean.of_json in
       let relativeTimeRange =
@@ -628,6 +632,7 @@ module SentimentFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Sentiments") in
       make ?negate ?participantRole ?relativeTimeRange ?absoluteTimeRange
         ~sentiments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let negate = field_map json "Negate" Boolean.of_json in
       let participantRole =
@@ -714,6 +719,7 @@ module TranscriptFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "TranscriptFilterType") in
       make ~targets ?negate ?participantRole ?relativeTimeRange
         ?absoluteTimeRange ~transcriptFilterType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targets = field_map_exn json "Targets" StringTargetList.of_json in
       let negate = field_map json "Negate" Boolean.of_json in
@@ -1052,6 +1058,7 @@ module LanguageIdSettings =
         (Option.map ~f:VocabularyName.of_xml)
           (Xml.child xml_arg0 "VocabularyName") in
       make ?languageModelName ?vocabularyFilterName ?vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageModelName =
         field_map json "LanguageModelName" ModelName.of_json in
@@ -1155,6 +1162,7 @@ module Rule =
           (Xml.child xml_arg0 "NonTalkTimeFilter") in
       make ?sentimentFilter ?transcriptFilter ?interruptionFilter
         ?nonTalkTimeFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sentimentFilter =
         field_map json "SentimentFilter" SentimentFilter.of_json in
@@ -1325,6 +1333,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1369,6 +1378,7 @@ module ContentRedaction =
         RedactionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RedactionType") in
       make ?piiEntityTypes ~redactionOutput ~redactionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let piiEntityTypes =
         field_map json "PiiEntityTypes" PiiEntityTypes.of_json in
@@ -1464,6 +1474,7 @@ module ChannelDefinition =
       let channelId =
         (Option.map ~f:ChannelId.of_xml) (Xml.child xml_arg0 "ChannelId") in
       make ?participantRole ?channelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let participantRole =
         field_map json "ParticipantRole" ParticipantRole.of_json in
@@ -1555,6 +1566,7 @@ module ModelSettings =
         (Option.map ~f:ModelName.of_xml)
           (Xml.child xml_arg0 "LanguageModelName") in
       make ?languageModelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageModelName =
         field_map json "LanguageModelName" ModelName.of_json in
@@ -1796,6 +1808,7 @@ module InputDataConfig =
       let s3Uri =
         Uri_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~dataAccessRoleArn ?tuningDataS3Uri ~s3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataAccessRoleArn =
         field_map_exn json "DataAccessRoleArn" DataAccessRoleArn.of_json in
@@ -2012,6 +2025,7 @@ module JobExecutionSettings =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "AllowDeferredExecution") in
       make ?dataAccessRoleArn ?allowDeferredExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataAccessRoleArn =
         field_map json "DataAccessRoleArn" DataAccessRoleArn.of_json in
@@ -2047,6 +2061,7 @@ module Media =
       let mediaFileUri =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "MediaFileUri") in
       make ?redactedMediaFileUri ?mediaFileUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redactedMediaFileUri =
         field_map json "RedactedMediaFileUri" Uri_.of_json in
@@ -2209,6 +2224,7 @@ module Settings =
       make ?vocabularyFilterMethod ?vocabularyFilterName ?maxAlternatives
         ?showAlternatives ?channelIdentification ?maxSpeakerLabels
         ?showSpeakerLabels ?vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyFilterMethod =
         field_map json "VocabularyFilterMethod"
@@ -2268,6 +2284,7 @@ module SubtitlesOutput =
       let formats =
         (Option.map ~f:SubtitleFormats.of_xml) (Xml.child xml_arg0 "Formats") in
       make ?outputStartIndex ?subtitleFileUris ?formats ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputStartIndex =
         field_map json "OutputStartIndex" SubtitleOutputStartIndex.of_json in
@@ -2333,6 +2350,7 @@ module Transcript =
       let transcriptFileUri =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "TranscriptFileUri") in
       make ?redactedTranscriptFileUri ?transcriptFileUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let redactedTranscriptFileUri =
         field_map json "RedactedTranscriptFileUri" Uri_.of_json in
@@ -2377,6 +2395,7 @@ module MedicalTranscript =
       let transcriptFileUri =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "TranscriptFileUri") in
       make ?transcriptFileUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transcriptFileUri = field_map json "TranscriptFileUri" Uri_.of_json in
       make ?transcriptFileUri ()
@@ -2455,6 +2474,7 @@ module MedicalTranscriptionSetting =
           (Xml.child xml_arg0 "ShowSpeakerLabels") in
       make ?vocabularyName ?maxAlternatives ?showAlternatives
         ?channelIdentification ?maxSpeakerLabels ?showSpeakerLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyName =
         field_map json "VocabularyName" VocabularyName.of_json in
@@ -2556,6 +2576,7 @@ module CallAnalyticsJobSettings =
       make ?languageIdSettings ?languageOptions ?contentRedaction
         ?languageModelName ?vocabularyFilterMethod ?vocabularyFilterName
         ?vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageIdSettings =
         field_map json "LanguageIdSettings" LanguageIdSettingsMap.of_json in
@@ -2645,6 +2666,7 @@ module VocabularyFilterInfo =
         (Option.map ~f:VocabularyFilterName.of_xml)
           (Xml.child xml_arg0 "VocabularyFilterName") in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" DateTime.of_json in
@@ -2705,6 +2727,7 @@ module VocabularyInfo =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyState =
         field_map json "VocabularyState" VocabularyState.of_json in
@@ -2844,6 +2867,7 @@ module TranscriptionJobSummary =
         ?contentRedaction ?outputLocationType ?failureReason
         ?transcriptionJobStatus ?languageCode ?completionTime ?startTime
         ?creationTime ?transcriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifiedLanguageScore =
         field_map json "IdentifiedLanguageScore"
@@ -2986,6 +3010,7 @@ module MedicalTranscriptionJobSummary =
       make ?type_ ?contentIdentificationType ?specialty ?outputLocationType
         ?failureReason ?transcriptionJobStatus ?languageCode ?completionTime
         ?startTime ?creationTime ?medicalTranscriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" Type.of_json in
       let contentIdentificationType =
@@ -3107,6 +3132,7 @@ module LanguageModel =
       make ?inputDataConfig ?failureReason ?upgradeAvailability ?modelStatus
         ?baseModelName ?languageCode ?lastModifiedTime ?createTime ?modelName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inputDataConfig =
         field_map json "InputDataConfig" InputDataConfig.of_json in
@@ -3204,6 +3230,7 @@ module CallAnalyticsJobSummary =
           (Xml.child xml_arg0 "CallAnalyticsJobName") in
       make ?failureReason ?callAnalyticsJobStatus ?languageCode
         ?completionTime ?startTime ?creationTime ?callAnalyticsJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason" FailureReason.of_json in
@@ -3259,6 +3286,7 @@ module CategoryProperties =
         (Option.map ~f:CategoryName.of_xml)
           (Xml.child xml_arg0 "CategoryName") in
       make ?lastUpdateTime ?createTime ?rules ?categoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateTime = field_map json "LastUpdateTime" DateTime.of_json in
       let createTime = field_map json "CreateTime" DateTime.of_json in
@@ -3281,6 +3309,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" FailureReason.of_json in
       make ?message ()
@@ -3300,6 +3329,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -3318,6 +3348,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -3337,6 +3368,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -3356,6 +3388,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -3664,6 +3697,7 @@ module TranscriptionJob =
         ?completionTime ?creationTime ?startTime ?transcript ?media
         ?mediaFormat ?mediaSampleRateHertz ?languageCode
         ?transcriptionJobStatus ?transcriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageIdSettings =
         field_map json "LanguageIdSettings" LanguageIdSettingsMap.of_json in
@@ -3829,6 +3863,7 @@ module Subtitles =
       let formats =
         (Option.map ~f:SubtitleFormats.of_xml) (Xml.child xml_arg0 "Formats") in
       make ?outputStartIndex ?formats ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputStartIndex =
         field_map json "OutputStartIndex" SubtitleOutputStartIndex.of_json in
@@ -3990,6 +4025,7 @@ module MedicalTranscriptionJob =
         ?failureReason ?completionTime ?creationTime ?startTime ?transcript
         ?media ?mediaFormat ?mediaSampleRateHertz ?languageCode
         ?transcriptionJobStatus ?medicalTranscriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let type_ = field_map json "Type" Type.of_json in
@@ -4173,6 +4209,7 @@ module CallAnalyticsJob =
         ?dataAccessRoleArn ?failureReason ?completionTime ?creationTime
         ?startTime ?transcript ?media ?mediaFormat ?mediaSampleRateHertz
         ?languageCode ?callAnalyticsJobStatus ?callAnalyticsJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelDefinitions =
         field_map json "ChannelDefinitions" ChannelDefinitions.of_json in
@@ -4532,6 +4569,7 @@ module UpdateVocabularyResponse =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyState =
         field_map json "VocabularyState" VocabularyState.of_json in
@@ -4588,6 +4626,7 @@ module UpdateVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ?vocabularyFileUri ?phrases ~languageCode ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyFileUri = field_map json "VocabularyFileUri" Uri_.of_json in
       let phrases = field_map json "Phrases" Phrases.of_json in
@@ -4690,6 +4729,7 @@ module UpdateVocabularyFilterResponse =
         (Option.map ~f:VocabularyFilterName.of_xml)
           (Xml.child xml_arg0 "VocabularyFilterName") in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" DateTime.of_json in
@@ -4735,6 +4775,7 @@ module UpdateVocabularyFilterRequest =
         VocabularyFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
       make ?vocabularyFilterFileUri ?words ~vocabularyFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyFilterFileUri =
         field_map json "VocabularyFilterFileUri" Uri_.of_json in
@@ -4860,6 +4901,7 @@ module UpdateMedicalVocabularyResponse =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyState =
         field_map json "VocabularyState" VocabularyState.of_json in
@@ -4909,6 +4951,7 @@ module UpdateMedicalVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ?vocabularyFileUri ~languageCode ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyFileUri = field_map json "VocabularyFileUri" Uri_.of_json in
       let languageCode =
@@ -5000,6 +5043,7 @@ module UpdateCallAnalyticsCategoryResponse =
         (Option.map ~f:CategoryProperties.of_xml)
           (Xml.child xml_arg0 "CategoryProperties") in
       make ?categoryProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categoryProperties =
         field_map json "CategoryProperties" CategoryProperties.of_json in
@@ -5031,6 +5075,7 @@ module UpdateCallAnalyticsCategoryRequest =
         CategoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
       make ~rules ~categoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map_exn json "Rules" RuleList.of_json in
       let categoryName =
@@ -5110,6 +5155,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5140,6 +5186,7 @@ module UntagResourceRequest =
         TranscribeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -5219,6 +5266,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5247,6 +5295,7 @@ module TagResourceRequest =
         TranscribeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -5327,6 +5376,7 @@ module StartTranscriptionJobResponse =
         (Option.map ~f:TranscriptionJob.of_xml)
           (Xml.child xml_arg0 "TranscriptionJob") in
       make ?transcriptionJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transcriptionJob =
         field_map json "TranscriptionJob" TranscriptionJob.of_json in
@@ -5516,6 +5566,7 @@ module StartTranscriptionJobRequest =
         ?outputEncryptionKMSKeyId ?outputKey ?outputBucketName ~media
         ?mediaFormat ?mediaSampleRateHertz ?languageCode
         ~transcriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageIdSettings =
         field_map json "LanguageIdSettings" LanguageIdSettingsMap.of_json in
@@ -5628,6 +5679,7 @@ module StartMedicalTranscriptionJobResponse =
         (Option.map ~f:MedicalTranscriptionJob.of_xml)
           (Xml.child xml_arg0 "MedicalTranscriptionJob") in
       make ?medicalTranscriptionJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let medicalTranscriptionJob =
         field_map json "MedicalTranscriptionJob"
@@ -5779,6 +5831,7 @@ module StartMedicalTranscriptionJobRequest =
         ?kMSEncryptionContext ?outputEncryptionKMSKeyId ?outputKey
         ~outputBucketName ~media ?mediaFormat ?mediaSampleRateHertz
         ~languageCode ~medicalTranscriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let type_ = field_map_exn json "Type" Type.of_json in
@@ -5883,6 +5936,7 @@ module StartCallAnalyticsJobResponse =
         (Option.map ~f:CallAnalyticsJob.of_xml)
           (Xml.child xml_arg0 "CallAnalyticsJob") in
       make ?callAnalyticsJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callAnalyticsJob =
         field_map json "CallAnalyticsJob" CallAnalyticsJob.of_json in
@@ -5969,6 +6023,7 @@ module StartCallAnalyticsJobRequest =
       make ?channelDefinitions ?settings ~dataAccessRoleArn
         ?outputEncryptionKMSKeyId ?outputLocation ~media
         ~callAnalyticsJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let channelDefinitions =
         field_map json "ChannelDefinitions" ChannelDefinitions.of_json in
@@ -6059,6 +6114,7 @@ module ListVocabularyFiltersResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?vocabularyFilters ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyFilters =
         field_map json "VocabularyFilters" VocabularyFilters.of_json in
@@ -6099,6 +6155,7 @@ module ListVocabularyFiltersRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nameContains ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains =
         field_map json "NameContains" VocabularyFilterName.of_json in
@@ -6183,6 +6240,7 @@ module ListVocabulariesResponse =
       let status =
         (Option.map ~f:VocabularyState.of_xml) (Xml.child xml_arg0 "Status") in
       make ?vocabularies ?nextToken ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularies = field_map json "Vocabularies" Vocabularies.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6233,6 +6291,7 @@ module ListVocabulariesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nameContains ?stateEquals ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains = field_map json "NameContains" VocabularyName.of_json in
       let stateEquals = field_map json "StateEquals" VocabularyState.of_json in
@@ -6321,6 +6380,7 @@ module ListTranscriptionJobsResponse =
         (Option.map ~f:TranscriptionJobStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?transcriptionJobSummaries ?nextToken ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transcriptionJobSummaries =
         field_map json "TranscriptionJobSummaries"
@@ -6371,6 +6431,7 @@ module ListTranscriptionJobsRequest =
         (Option.map ~f:TranscriptionJobStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6457,6 +6518,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:TranscribeArn.of_xml)
           (Xml.child xml_arg0 "ResourceArn") in
       make ?tags ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let resourceArn = field_map json "ResourceArn" TranscribeArn.of_json in
@@ -6482,6 +6544,7 @@ module ListTagsForResourceRequest =
         TranscribeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" TranscribeArn.of_json in
@@ -6565,6 +6628,7 @@ module ListMedicalVocabulariesResponse =
       let status =
         (Option.map ~f:VocabularyState.of_xml) (Xml.child xml_arg0 "Status") in
       make ?vocabularies ?nextToken ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularies = field_map json "Vocabularies" Vocabularies.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6615,6 +6679,7 @@ module ListMedicalVocabulariesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nameContains ?stateEquals ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nameContains = field_map json "NameContains" VocabularyName.of_json in
       let stateEquals = field_map json "StateEquals" VocabularyState.of_json in
@@ -6705,6 +6770,7 @@ module ListMedicalTranscriptionJobsResponse =
         (Option.map ~f:TranscriptionJobStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?medicalTranscriptionJobSummaries ?nextToken ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let medicalTranscriptionJobSummaries =
         field_map json "MedicalTranscriptionJobSummaries"
@@ -6756,6 +6822,7 @@ module ListMedicalTranscriptionJobsRequest =
         (Option.map ~f:TranscriptionJobStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6833,6 +6900,7 @@ module ListLanguageModelsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?models ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let models = field_map json "Models" Models.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6880,6 +6948,7 @@ module ListLanguageModelsRequest =
         (Option.map ~f:ModelStatus.of_xml)
           (Xml.child xml_arg0 "StatusEquals") in
       make ?maxResults ?nextToken ?nameContains ?statusEquals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6969,6 +7038,7 @@ module ListCallAnalyticsJobsResponse =
         (Option.map ~f:CallAnalyticsJobStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?callAnalyticsJobSummaries ?nextToken ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callAnalyticsJobSummaries =
         field_map json "CallAnalyticsJobSummaries"
@@ -7020,6 +7090,7 @@ module ListCallAnalyticsJobsRequest =
         (Option.map ~f:CallAnalyticsJobStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7100,6 +7171,7 @@ module ListCallAnalyticsCategoriesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?categories ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categories =
         field_map json "Categories" CategoryPropertiesList.of_json in
@@ -7131,6 +7203,7 @@ module ListCallAnalyticsCategoriesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7260,6 +7333,7 @@ module GetVocabularyResponse =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?downloadUri ?failureReason ?lastModifiedTime ?vocabularyState
         ?languageCode ?vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downloadUri = field_map json "DownloadUri" Uri_.of_json in
       let failureReason =
@@ -7294,6 +7368,7 @@ module GetVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyName =
         field_map_exn json "VocabularyName" VocabularyName.of_json in
@@ -7405,6 +7480,7 @@ module GetVocabularyFilterResponse =
           (Xml.child xml_arg0 "VocabularyFilterName") in
       make ?downloadUri ?lastModifiedTime ?languageCode ?vocabularyFilterName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downloadUri = field_map json "DownloadUri" Uri_.of_json in
       let lastModifiedTime =
@@ -7435,6 +7511,7 @@ module GetVocabularyFilterRequest =
         VocabularyFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
       make ~vocabularyFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyFilterName =
         field_map_exn json "VocabularyFilterName"
@@ -7514,6 +7591,7 @@ module GetTranscriptionJobResponse =
         (Option.map ~f:TranscriptionJob.of_xml)
           (Xml.child xml_arg0 "TranscriptionJob") in
       make ?transcriptionJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transcriptionJob =
         field_map json "TranscriptionJob" TranscriptionJob.of_json in
@@ -7539,6 +7617,7 @@ module GetTranscriptionJobRequest =
         TranscriptionJobName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TranscriptionJobName") in
       make ~transcriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transcriptionJobName =
         field_map_exn json "TranscriptionJobName"
@@ -7671,6 +7750,7 @@ module GetMedicalVocabularyResponse =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?downloadUri ?failureReason ?lastModifiedTime ?vocabularyState
         ?languageCode ?vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downloadUri = field_map json "DownloadUri" Uri_.of_json in
       let failureReason =
@@ -7705,6 +7785,7 @@ module GetMedicalVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyName =
         field_map_exn json "VocabularyName" VocabularyName.of_json in
@@ -7784,6 +7865,7 @@ module GetMedicalTranscriptionJobResponse =
         (Option.map ~f:MedicalTranscriptionJob.of_xml)
           (Xml.child xml_arg0 "MedicalTranscriptionJob") in
       make ?medicalTranscriptionJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let medicalTranscriptionJob =
         field_map json "MedicalTranscriptionJob"
@@ -7814,6 +7896,7 @@ module GetMedicalTranscriptionJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "MedicalTranscriptionJobName") in
       make ~medicalTranscriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let medicalTranscriptionJobName =
         field_map_exn json "MedicalTranscriptionJobName"
@@ -7894,6 +7977,7 @@ module GetCallAnalyticsJobResponse =
         (Option.map ~f:CallAnalyticsJob.of_xml)
           (Xml.child xml_arg0 "CallAnalyticsJob") in
       make ?callAnalyticsJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callAnalyticsJob =
         field_map json "CallAnalyticsJob" CallAnalyticsJob.of_json in
@@ -7920,6 +8004,7 @@ module GetCallAnalyticsJobRequest =
         CallAnalyticsJobName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallAnalyticsJobName") in
       make ~callAnalyticsJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callAnalyticsJobName =
         field_map_exn json "CallAnalyticsJobName"
@@ -8000,6 +8085,7 @@ module GetCallAnalyticsCategoryResponse =
         (Option.map ~f:CategoryProperties.of_xml)
           (Xml.child xml_arg0 "CategoryProperties") in
       make ?categoryProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categoryProperties =
         field_map json "CategoryProperties" CategoryProperties.of_json in
@@ -8024,6 +8110,7 @@ module GetCallAnalyticsCategoryRequest =
         CategoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
       make ~categoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categoryName =
         field_map_exn json "CategoryName" CategoryName.of_json in
@@ -8102,6 +8189,7 @@ module DescribeLanguageModelResponse =
         (Option.map ~f:LanguageModel.of_xml)
           (Xml.child xml_arg0 "LanguageModel") in
       make ?languageModel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageModel =
         field_map json "LanguageModel" LanguageModel.of_json in
@@ -8127,6 +8215,7 @@ module DescribeLanguageModelRequest =
         ModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelName = field_map_exn json "ModelName" ModelName.of_json in
       make ~modelName ()
@@ -8152,6 +8241,7 @@ module DeleteVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyName =
         field_map_exn json "VocabularyName" VocabularyName.of_json in
@@ -8178,6 +8268,7 @@ module DeleteVocabularyFilterRequest =
         VocabularyFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
       make ~vocabularyFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyFilterName =
         field_map_exn json "VocabularyFilterName"
@@ -8205,6 +8296,7 @@ module DeleteTranscriptionJobRequest =
         TranscriptionJobName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TranscriptionJobName") in
       make ~transcriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transcriptionJobName =
         field_map_exn json "TranscriptionJobName"
@@ -8232,6 +8324,7 @@ module DeleteMedicalVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vocabularyName =
         field_map_exn json "VocabularyName" VocabularyName.of_json in
@@ -8261,6 +8354,7 @@ module DeleteMedicalTranscriptionJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "MedicalTranscriptionJobName") in
       make ~medicalTranscriptionJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let medicalTranscriptionJobName =
         field_map_exn json "MedicalTranscriptionJobName"
@@ -8287,6 +8381,7 @@ module DeleteLanguageModelRequest =
         ModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelName = field_map_exn json "ModelName" ModelName.of_json in
       make ~modelName ()
@@ -8346,6 +8441,7 @@ module DeleteCallAnalyticsJobResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8369,6 +8465,7 @@ module DeleteCallAnalyticsJobRequest =
         CallAnalyticsJobName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallAnalyticsJobName") in
       make ~callAnalyticsJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callAnalyticsJobName =
         field_map_exn json "CallAnalyticsJobName"
@@ -8439,6 +8536,7 @@ module DeleteCallAnalyticsCategoryResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8461,6 +8559,7 @@ module DeleteCallAnalyticsCategoryRequest =
         CategoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
       make ~categoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categoryName =
         field_map_exn json "CategoryName" CategoryName.of_json in
@@ -8582,6 +8681,7 @@ module CreateVocabularyResponse =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?failureReason ?lastModifiedTime ?vocabularyState ?languageCode
         ?vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason" FailureReason.of_json in
@@ -8653,6 +8753,7 @@ module CreateVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ?tags ?vocabularyFileUri ?phrases ~languageCode ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let vocabularyFileUri = field_map json "VocabularyFileUri" Uri_.of_json in
@@ -8755,6 +8856,7 @@ module CreateVocabularyFilterResponse =
         (Option.map ~f:VocabularyFilterName.of_xml)
           (Xml.child xml_arg0 "VocabularyFilterName") in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map json "LastModifiedTime" DateTime.of_json in
@@ -8822,6 +8924,7 @@ module CreateVocabularyFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
       make ?tags ?vocabularyFilterFileUri ?words ~languageCode
         ~vocabularyFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let vocabularyFilterFileUri =
@@ -8953,6 +9056,7 @@ module CreateMedicalVocabularyResponse =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?failureReason ?lastModifiedTime ?vocabularyState ?languageCode
         ?vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason" FailureReason.of_json in
@@ -9011,6 +9115,7 @@ module CreateMedicalVocabularyRequest =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ?tags ~vocabularyFileUri ~languageCode ~vocabularyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let vocabularyFileUri =
@@ -9136,6 +9241,7 @@ module CreateLanguageModelResponse =
           (Xml.child xml_arg0 "LanguageCode") in
       make ?modelStatus ?inputDataConfig ?modelName ?baseModelName
         ?languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelStatus = field_map json "ModelStatus" ModelStatus.of_json in
       let inputDataConfig =
@@ -9207,6 +9313,7 @@ module CreateLanguageModelRequest =
         CLMLanguageCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
       make ?tags ~inputDataConfig ~modelName ~baseModelName ~languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let inputDataConfig =
@@ -9292,6 +9399,7 @@ module CreateCallAnalyticsCategoryResponse =
         (Option.map ~f:CategoryProperties.of_xml)
           (Xml.child xml_arg0 "CategoryProperties") in
       make ?categoryProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categoryProperties =
         field_map json "CategoryProperties" CategoryProperties.of_json in
@@ -9323,6 +9431,7 @@ module CreateCallAnalyticsCategoryRequest =
         CategoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
       make ~rules ~categoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map_exn json "Rules" RuleList.of_json in
       let categoryName =

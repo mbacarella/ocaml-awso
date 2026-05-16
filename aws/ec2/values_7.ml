@@ -37,6 +37,7 @@ module DeprovisionIpamPoolCidrRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?cidr ~ipamPoolId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map json "Cidr" String_.of_json in
       let ipamPoolId = field_map_exn json "IpamPoolId" IpamPoolId.of_json in
@@ -78,6 +79,7 @@ module DeprovisionByoipCidrResult =
       let byoipCidr =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "byoipCidr") in
       make ?byoipCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
@@ -107,6 +109,7 @@ module DeprovisionByoipCidrRequest =
       let cidr =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ?dryRun ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let cidr = field_map_exn json "Cidr" String_.of_json in
@@ -138,6 +141,7 @@ module DeleteVpnGatewayRequest =
         VpnGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpnGatewayId") in
       make ?dryRun ~vpnGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpnGatewayId =
@@ -173,6 +177,7 @@ module DeleteVpnConnectionRouteRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationCidrBlock") in
       make ~vpnConnectionId ~destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnConnectionId =
         field_map_exn json "VpnConnectionId" VpnConnectionId.of_json in
@@ -206,6 +211,7 @@ module DeleteVpnConnectionRequest =
         VpnConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VpnConnectionId") in
       make ?dryRun ~vpnConnectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpnConnectionId =
@@ -234,6 +240,7 @@ module DeleteVpcRequest =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ?dryRun ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
@@ -275,6 +282,7 @@ module DeleteVpcPeeringConnectionResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -306,6 +314,7 @@ module DeleteVpcPeeringConnectionRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~vpcPeeringConnectionId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnectionId =
         field_map_exn json "VpcPeeringConnectionId"
@@ -351,6 +360,7 @@ module DeleteVpcEndpointsResult =
         (Option.map ~f:UnsuccessfulItemSet.of_xml)
           (Xml.child xml_arg0 "unsuccessful") in
       make ?unsuccessful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful" UnsuccessfulItemSet.of_json in
@@ -382,6 +392,7 @@ module DeleteVpcEndpointsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~vpcEndpointIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcEndpointIds =
         field_map_exn json "VpcEndpointIds" VpcEndpointIdList.of_json in
@@ -425,6 +436,7 @@ module DeleteVpcEndpointServiceConfigurationsResult =
         (Option.map ~f:UnsuccessfulItemSet.of_xml)
           (Xml.child xml_arg0 "unsuccessful") in
       make ?unsuccessful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful" UnsuccessfulItemSet.of_json in
@@ -456,6 +468,7 @@ module DeleteVpcEndpointServiceConfigurationsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~serviceIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceIds =
         field_map_exn json "ServiceIds" VpcEndpointServiceIdList.of_json in
@@ -500,6 +513,7 @@ module DeleteVpcEndpointConnectionNotificationsResult =
         (Option.map ~f:UnsuccessfulItemSet.of_xml)
           (Xml.child xml_arg0 "unsuccessful") in
       make ?unsuccessful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful" UnsuccessfulItemSet.of_json in
@@ -536,6 +550,7 @@ module DeleteVpcEndpointConnectionNotificationsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~connectionNotificationIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionNotificationIds =
         field_map_exn json "ConnectionNotificationIds"
@@ -566,6 +581,7 @@ module DeleteVolumeRequest =
       let volumeId =
         VolumeId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VolumeId") in
       make ?dryRun ~volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
@@ -610,6 +626,7 @@ module DeleteTransitGatewayVpcAttachmentResult =
         (Option.map ~f:TransitGatewayVpcAttachment.of_xml)
           (Xml.child xml_arg0 "transitGatewayVpcAttachment") in
       make ?transitGatewayVpcAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayVpcAttachment =
         field_map json "TransitGatewayVpcAttachment"
@@ -646,6 +663,7 @@ module DeleteTransitGatewayVpcAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayAttachmentId") in
       make ?dryRun ~transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -692,6 +710,7 @@ module DeleteTransitGatewayRouteTableResult =
         (Option.map ~f:TransitGatewayRouteTable.of_xml)
           (Xml.child xml_arg0 "transitGatewayRouteTable") in
       make ?transitGatewayRouteTable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayRouteTable =
         field_map json "TransitGatewayRouteTable"
@@ -729,6 +748,7 @@ module DeleteTransitGatewayRouteTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayRouteTableId") in
       make ?dryRun ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayRouteTableId =
@@ -772,6 +792,7 @@ module DeleteTransitGatewayRouteResult =
         (Option.map ~f:TransitGatewayRoute.of_xml)
           (Xml.child xml_arg0 "route") in
       make ?route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map json "Route" TransitGatewayRoute.of_json in
       make ?route ()
@@ -817,6 +838,7 @@ module DeleteTransitGatewayRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayRouteTableId") in
       make ?dryRun ~destinationCidrBlock ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let destinationCidrBlock =
@@ -863,6 +885,7 @@ module DeleteTransitGatewayResult =
         (Option.map ~f:TransitGateway.of_xml)
           (Xml.child xml_arg0 "transitGateway") in
       make ?transitGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGateway =
         field_map json "TransitGateway" TransitGateway.of_json in
@@ -894,6 +917,7 @@ module DeleteTransitGatewayRequest =
         TransitGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TransitGatewayId") in
       make ?dryRun ~transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayId =
@@ -939,6 +963,7 @@ module DeleteTransitGatewayPrefixListReferenceResult =
         (Option.map ~f:TransitGatewayPrefixListReference.of_xml)
           (Xml.child xml_arg0 "transitGatewayPrefixListReference") in
       make ?transitGatewayPrefixListReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayPrefixListReference =
         field_map json "TransitGatewayPrefixListReference"
@@ -984,6 +1009,7 @@ module DeleteTransitGatewayPrefixListReferenceRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayRouteTableId") in
       make ?dryRun ~prefixListId ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let prefixListId =
@@ -1033,6 +1059,7 @@ module DeleteTransitGatewayPeeringAttachmentResult =
         (Option.map ~f:TransitGatewayPeeringAttachment.of_xml)
           (Xml.child xml_arg0 "transitGatewayPeeringAttachment") in
       make ?transitGatewayPeeringAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayPeeringAttachment =
         field_map json "TransitGatewayPeeringAttachment"
@@ -1069,6 +1096,7 @@ module DeleteTransitGatewayPeeringAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayAttachmentId") in
       make ?dryRun ~transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -1115,6 +1143,7 @@ module DeleteTransitGatewayMulticastDomainResult =
         (Option.map ~f:TransitGatewayMulticastDomain.of_xml)
           (Xml.child xml_arg0 "transitGatewayMulticastDomain") in
       make ?transitGatewayMulticastDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayMulticastDomain =
         field_map json "TransitGatewayMulticastDomain"
@@ -1151,6 +1180,7 @@ module DeleteTransitGatewayMulticastDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayMulticastDomainId") in
       make ?dryRun ~transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayMulticastDomainId =
@@ -1195,6 +1225,7 @@ module DeleteTransitGatewayConnectResult =
         (Option.map ~f:TransitGatewayConnect.of_xml)
           (Xml.child xml_arg0 "transitGatewayConnect") in
       make ?transitGatewayConnect ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayConnect =
         field_map json "TransitGatewayConnect" TransitGatewayConnect.of_json in
@@ -1231,6 +1262,7 @@ module DeleteTransitGatewayConnectRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayAttachmentId") in
       make ?dryRun ~transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -1277,6 +1309,7 @@ module DeleteTransitGatewayConnectPeerResult =
         (Option.map ~f:TransitGatewayConnectPeer.of_xml)
           (Xml.child xml_arg0 "transitGatewayConnectPeer") in
       make ?transitGatewayConnectPeer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayConnectPeer =
         field_map json "TransitGatewayConnectPeer"
@@ -1313,6 +1346,7 @@ module DeleteTransitGatewayConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayConnectPeerId") in
       make ?dryRun ~transitGatewayConnectPeerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayConnectPeerId =
@@ -1356,6 +1390,7 @@ module DeleteTrafficMirrorTargetResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "trafficMirrorTargetId") in
       make ?trafficMirrorTargetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficMirrorTargetId =
         field_map json "TrafficMirrorTargetId" String_.of_json in
@@ -1389,6 +1424,7 @@ module DeleteTrafficMirrorTargetRequest =
         TrafficMirrorTargetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficMirrorTargetId") in
       make ?dryRun ~trafficMirrorTargetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let trafficMirrorTargetId =
@@ -1433,6 +1469,7 @@ module DeleteTrafficMirrorSessionResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "trafficMirrorSessionId") in
       make ?trafficMirrorSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficMirrorSessionId =
         field_map json "TrafficMirrorSessionId" String_.of_json in
@@ -1465,6 +1502,7 @@ module DeleteTrafficMirrorSessionRequest =
         TrafficMirrorSessionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficMirrorSessionId") in
       make ?dryRun ~trafficMirrorSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let trafficMirrorSessionId =
@@ -1509,6 +1547,7 @@ module DeleteTrafficMirrorFilterRuleResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "trafficMirrorFilterRuleId") in
       make ?trafficMirrorFilterRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficMirrorFilterRuleId =
         field_map json "TrafficMirrorFilterRuleId" String_.of_json in
@@ -1543,6 +1582,7 @@ module DeleteTrafficMirrorFilterRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TrafficMirrorFilterRuleId") in
       make ?dryRun ~trafficMirrorFilterRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let trafficMirrorFilterRuleId =
@@ -1586,6 +1626,7 @@ module DeleteTrafficMirrorFilterResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "trafficMirrorFilterId") in
       make ?trafficMirrorFilterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trafficMirrorFilterId =
         field_map json "TrafficMirrorFilterId" String_.of_json in
@@ -1619,6 +1660,7 @@ module DeleteTrafficMirrorFilterRequest =
         TrafficMirrorFilterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrafficMirrorFilterId") in
       make ?dryRun ~trafficMirrorFilterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let trafficMirrorFilterId =
@@ -1658,6 +1700,7 @@ module DeleteTagsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?tags ~resources ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let resources = field_map_exn json "Resources" ResourceIdList.of_json in
@@ -1687,6 +1730,7 @@ module DeleteSubnetRequest =
       let subnetId =
         SubnetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SubnetId") in
       make ?dryRun ~subnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let subnetId = field_map_exn json "SubnetId" SubnetId.of_json in
@@ -1731,6 +1775,7 @@ module DeleteSubnetCidrReservationResult =
         (Option.map ~f:SubnetCidrReservation.of_xml)
           (Xml.child xml_arg0 "deletedSubnetCidrReservation") in
       make ?deletedSubnetCidrReservation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletedSubnetCidrReservation =
         field_map json "DeletedSubnetCidrReservation"
@@ -1764,6 +1809,7 @@ module DeleteSubnetCidrReservationRequest =
         SubnetCidrReservationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetCidrReservationId") in
       make ?dryRun ~subnetCidrReservationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let subnetCidrReservationId =
@@ -1788,6 +1834,7 @@ module DeleteSpotDatafeedSubscriptionRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -1815,6 +1862,7 @@ module DeleteSnapshotRequest =
         SnapshotId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotId") in
       make ?dryRun ~snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
@@ -1853,6 +1901,7 @@ module DeleteSecurityGroupRequest =
       let groupId =
         (Option.map ~f:SecurityGroupId.of_xml) (Xml.child xml_arg0 "GroupId") in
       make ?dryRun ?groupName ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let groupName = field_map json "GroupName" SecurityGroupName.of_json in
@@ -1884,6 +1933,7 @@ module DeleteRouteTableRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~routeTableId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeTableId =
         field_map_exn json "RouteTableId" RouteTableId.of_json in
@@ -1951,6 +2001,7 @@ module DeleteRouteRequest =
           (Xml.child xml_arg0 "destinationCidrBlock") in
       make ~routeTableId ?dryRun ?destinationPrefixListId
         ?destinationIpv6CidrBlock ?destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeTableId =
         field_map_exn json "RouteTableId" RouteTableId.of_json in
@@ -2018,6 +2069,7 @@ module DeleteQueuedReservedInstancesResult =
           (Xml.child xml_arg0 "successfulQueuedPurchaseDeletionSet") in
       make ?failedQueuedPurchaseDeletions ?successfulQueuedPurchaseDeletions
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedQueuedPurchaseDeletions =
         field_map json "FailedQueuedPurchaseDeletions"
@@ -2057,6 +2109,7 @@ module DeleteQueuedReservedInstancesRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~reservedInstancesIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesIds =
         field_map_exn json "ReservedInstancesIds"
@@ -2100,6 +2153,7 @@ module DeletePublicIpv4PoolResult =
       let returnValue =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnValue") in
       make ?returnValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnValue = field_map json "ReturnValue" Boolean.of_json in
       make ?returnValue ()
@@ -2129,6 +2183,7 @@ module DeletePublicIpv4PoolRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~poolId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolId = field_map_exn json "PoolId" Ipv4PoolEc2Id.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -2159,6 +2214,7 @@ module DeletePlacementGroupRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~groupName ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupName =
         field_map_exn json "GroupName" PlacementGroupName.of_json in
@@ -2192,6 +2248,7 @@ module DeleteNetworkInterfaceRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~networkInterfaceId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaceId =
         field_map_exn json "NetworkInterfaceId" NetworkInterfaceId.of_json in
@@ -2233,6 +2290,7 @@ module DeleteNetworkInterfacePermissionResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -2273,6 +2331,7 @@ module DeleteNetworkInterfacePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "NetworkInterfacePermissionId") in
       make ?dryRun ?force ~networkInterfacePermissionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let force = field_map json "Force" Boolean.of_json in
@@ -2319,6 +2378,7 @@ module DeleteNetworkInsightsPathResult =
         (Option.map ~f:NetworkInsightsPathId.of_xml)
           (Xml.child xml_arg0 "networkInsightsPathId") in
       make ?networkInsightsPathId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsPathId =
         field_map json "NetworkInsightsPathId" NetworkInsightsPathId.of_json in
@@ -2351,6 +2411,7 @@ module DeleteNetworkInsightsPathRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~networkInsightsPathId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsPathId =
         field_map_exn json "NetworkInsightsPathId"
@@ -2396,6 +2457,7 @@ module DeleteNetworkInsightsAnalysisResult =
         (Option.map ~f:NetworkInsightsAnalysisId.of_xml)
           (Xml.child xml_arg0 "networkInsightsAnalysisId") in
       make ?networkInsightsAnalysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsAnalysisId =
         field_map json "NetworkInsightsAnalysisId"
@@ -2431,6 +2493,7 @@ module DeleteNetworkInsightsAnalysisRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~networkInsightsAnalysisId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsAnalysisId =
         field_map_exn json "NetworkInsightsAnalysisId"
@@ -2476,6 +2539,7 @@ module DeleteNetworkInsightsAccessScopeResult =
         (Option.map ~f:NetworkInsightsAccessScopeId.of_xml)
           (Xml.child xml_arg0 "networkInsightsAccessScopeId") in
       make ?networkInsightsAccessScopeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsAccessScopeId =
         field_map json "NetworkInsightsAccessScopeId"
@@ -2512,6 +2576,7 @@ module DeleteNetworkInsightsAccessScopeRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~networkInsightsAccessScopeId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsAccessScopeId =
         field_map_exn json "NetworkInsightsAccessScopeId"
@@ -2558,6 +2623,7 @@ module DeleteNetworkInsightsAccessScopeAnalysisResult =
         (Option.map ~f:NetworkInsightsAccessScopeAnalysisId.of_xml)
           (Xml.child xml_arg0 "networkInsightsAccessScopeAnalysisId") in
       make ?networkInsightsAccessScopeAnalysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsAccessScopeAnalysisId =
         field_map json "NetworkInsightsAccessScopeAnalysisId"
@@ -2595,6 +2661,7 @@ module DeleteNetworkInsightsAccessScopeAnalysisRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "NetworkInsightsAccessScopeAnalysisId") in
       make ?dryRun ~networkInsightsAccessScopeAnalysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let networkInsightsAccessScopeAnalysisId =
@@ -2626,6 +2693,7 @@ module DeleteNetworkAclRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~networkAclId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkAclId =
         field_map_exn json "NetworkAclId" NetworkAclId.of_json in
@@ -2671,6 +2739,7 @@ module DeleteNetworkAclEntryRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~ruleNumber ~networkAclId ~egress ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleNumber = field_map_exn json "RuleNumber" Integer.of_json in
       let networkAclId =
@@ -2714,6 +2783,7 @@ module DeleteNatGatewayResult =
       let natGatewayId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "natGatewayId") in
       make ?natGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let natGatewayId = field_map json "NatGatewayId" String_.of_json in
       make ?natGatewayId ()
@@ -2743,6 +2813,7 @@ module DeleteNatGatewayRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~natGatewayId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let natGatewayId =
         field_map_exn json "NatGatewayId" NatGatewayId.of_json in
@@ -2786,6 +2857,7 @@ module DeleteManagedPrefixListResult =
         (Option.map ~f:ManagedPrefixList.of_xml)
           (Xml.child xml_arg0 "prefixList") in
       make ?prefixList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixList = field_map json "PrefixList" ManagedPrefixList.of_json in
       make ?prefixList ()
@@ -2817,6 +2889,7 @@ module DeleteManagedPrefixListRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~prefixListId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixListId =
         field_map_exn json "PrefixListId" PrefixListResourceId.of_json in
@@ -2863,6 +2936,7 @@ module DeleteLocalGatewayRouteTableVpcAssociationResult =
         (Option.map ~f:LocalGatewayRouteTableVpcAssociation.of_xml)
           (Xml.child xml_arg0 "localGatewayRouteTableVpcAssociation") in
       make ?localGatewayRouteTableVpcAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let localGatewayRouteTableVpcAssociation =
         field_map json "LocalGatewayRouteTableVpcAssociation"
@@ -2901,6 +2975,7 @@ module DeleteLocalGatewayRouteTableVpcAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "LocalGatewayRouteTableVpcAssociationId") in
       make ?dryRun ~localGatewayRouteTableVpcAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let localGatewayRouteTableVpcAssociationId =
@@ -2943,6 +3018,7 @@ module DeleteLocalGatewayRouteResult =
       let route =
         (Option.map ~f:LocalGatewayRoute.of_xml) (Xml.child xml_arg0 "route") in
       make ?route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map json "Route" LocalGatewayRoute.of_json in
       make ?route ()
@@ -2987,6 +3063,7 @@ module DeleteLocalGatewayRouteRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationCidrBlock") in
       make ?dryRun ~localGatewayRouteTableId ~destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let localGatewayRouteTableId =
@@ -3053,6 +3130,7 @@ module DeleteLaunchTemplateVersionsResult =
           (Xml.child xml_arg0 "successfullyDeletedLaunchTemplateVersionSet") in
       make ?unsuccessfullyDeletedLaunchTemplateVersions
         ?successfullyDeletedLaunchTemplateVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessfullyDeletedLaunchTemplateVersions =
         field_map json "UnsuccessfullyDeletedLaunchTemplateVersions"
@@ -3111,6 +3189,7 @@ module DeleteLaunchTemplateVersionsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~versions ?launchTemplateName ?launchTemplateId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versions = field_map_exn json "Versions" VersionStringList.of_json in
       let launchTemplateName =
@@ -3157,6 +3236,7 @@ module DeleteLaunchTemplateResult =
         (Option.map ~f:LaunchTemplate.of_xml)
           (Xml.child xml_arg0 "launchTemplate") in
       make ?launchTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchTemplate =
         field_map json "LaunchTemplate" LaunchTemplate.of_json in
@@ -3199,6 +3279,7 @@ module DeleteLaunchTemplateRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?launchTemplateName ?launchTemplateId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchTemplateName =
         field_map json "LaunchTemplateName" LaunchTemplateName.of_json in
@@ -3235,6 +3316,7 @@ module DeleteKeyPairRequest =
       let keyName =
         (Option.map ~f:KeyPairName.of_xml) (Xml.child xml_arg0 "KeyName") in
       make ?dryRun ?keyPairId ?keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let keyPairId = field_map json "KeyPairId" KeyPairId.of_json in
@@ -3276,6 +3358,7 @@ module DeleteIpamScopeResult =
       let ipamScope =
         (Option.map ~f:IpamScope.of_xml) (Xml.child xml_arg0 "ipamScope") in
       make ?ipamScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamScope = field_map json "IpamScope" IpamScope.of_json in
       make ?ipamScope ()
@@ -3305,6 +3388,7 @@ module DeleteIpamScopeRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~ipamScopeId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamScopeId = field_map_exn json "IpamScopeId" IpamScopeId.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -3343,6 +3427,7 @@ module DeleteIpamResult =
     let of_xml xml_arg0 =
       let ipam = (Option.map ~f:Ipam.of_xml) (Xml.child xml_arg0 "ipam") in
       make ?ipam ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipam = field_map json "Ipam" Ipam.of_json in make ?ipam ()
     let to_json v = composed_to_json to_value v
@@ -3376,6 +3461,7 @@ module DeleteIpamRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?cascade ~ipamId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cascade = field_map json "Cascade" Boolean.of_json in
       let ipamId = field_map_exn json "IpamId" IpamId.of_json in
@@ -3417,6 +3503,7 @@ module DeleteIpamPoolResult =
       let ipamPool =
         (Option.map ~f:IpamPool.of_xml) (Xml.child xml_arg0 "ipamPool") in
       make ?ipamPool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamPool = field_map json "IpamPool" IpamPool.of_json in
       make ?ipamPool ()
@@ -3445,6 +3532,7 @@ module DeleteIpamPoolRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~ipamPoolId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamPoolId = field_map_exn json "IpamPoolId" IpamPoolId.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -3477,6 +3565,7 @@ module DeleteInternetGatewayRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~internetGatewayId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let internetGatewayId =
         field_map_exn json "InternetGatewayId" InternetGatewayId.of_json in
@@ -3522,6 +3611,7 @@ module DeleteInstanceEventWindowResult =
         (Option.map ~f:InstanceEventWindowStateChange.of_xml)
           (Xml.child xml_arg0 "instanceEventWindowState") in
       make ?instanceEventWindowState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceEventWindowState =
         field_map json "InstanceEventWindowState"
@@ -3563,6 +3653,7 @@ module DeleteInstanceEventWindowRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~instanceEventWindowId ?forceDelete ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceEventWindowId =
         field_map_exn json "InstanceEventWindowId"
@@ -3607,6 +3698,7 @@ module DeleteFpgaImageResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -3633,6 +3725,7 @@ module DeleteFpgaImageRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~fpgaImageId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fpgaImageId = field_map_exn json "FpgaImageId" FpgaImageId.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -3675,6 +3768,7 @@ module DeleteFlowLogsResult =
         (Option.map ~f:UnsuccessfulItemSet.of_xml)
           (Xml.child xml_arg0 "unsuccessful") in
       make ?unsuccessful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful" UnsuccessfulItemSet.of_json in
@@ -3705,6 +3799,7 @@ module DeleteFlowLogsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~flowLogIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flowLogIds = field_map_exn json "FlowLogIds" FlowLogIdList.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -3759,6 +3854,7 @@ module DeleteFleetsResult =
         (Option.map ~f:DeleteFleetSuccessSet.of_xml)
           (Xml.child xml_arg0 "successfulFleetDeletionSet") in
       make ?unsuccessfulFleetDeletions ?successfulFleetDeletions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessfulFleetDeletions =
         field_map json "UnsuccessfulFleetDeletions"
@@ -3803,6 +3899,7 @@ module DeleteFleetsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~terminateInstances ~fleetIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminateInstances =
         field_map_exn json "TerminateInstances" Boolean.of_json in
@@ -3846,6 +3943,7 @@ module DeleteEgressOnlyInternetGatewayResult =
       let returnCode =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "returnCode") in
       make ?returnCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnCode = field_map json "ReturnCode" Boolean.of_json in
       make ?returnCode ()
@@ -3880,6 +3978,7 @@ module DeleteEgressOnlyInternetGatewayRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~egressOnlyInternetGatewayId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let egressOnlyInternetGatewayId =
         field_map_exn json "EgressOnlyInternetGatewayId"
@@ -3912,6 +4011,7 @@ module DeleteDhcpOptionsRequest =
         DhcpOptionsId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DhcpOptionsId") in
       make ?dryRun ~dhcpOptionsId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let dhcpOptionsId =
@@ -3945,6 +4045,7 @@ module DeleteCustomerGatewayRequest =
         CustomerGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomerGatewayId") in
       make ?dryRun ~customerGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let customerGatewayId =
@@ -3986,6 +4087,7 @@ module DeleteClientVpnRouteResult =
         (Option.map ~f:ClientVpnRouteStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ClientVpnRouteStatus.of_json in
       make ?status ()
@@ -4043,6 +4145,7 @@ module DeleteClientVpnRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ~destinationCidrBlock ?targetVpcSubnetId
         ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let destinationCidrBlock =
@@ -4091,6 +4194,7 @@ module DeleteClientVpnEndpointResult =
         (Option.map ~f:ClientVpnEndpointStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ClientVpnEndpointStatus.of_json in
       make ?status ()
@@ -4122,6 +4226,7 @@ module DeleteClientVpnEndpointRequest =
         ClientVpnEndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let clientVpnEndpointId =
@@ -4165,6 +4270,7 @@ module DeleteCarrierGatewayResult =
         (Option.map ~f:CarrierGateway.of_xml)
           (Xml.child xml_arg0 "carrierGateway") in
       make ?carrierGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let carrierGateway =
         field_map json "CarrierGateway" CarrierGateway.of_json in
@@ -4197,6 +4303,7 @@ module DeleteCarrierGatewayRequest =
         CarrierGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CarrierGatewayId") in
       make ?dryRun ~carrierGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let carrierGatewayId =
@@ -4238,6 +4345,7 @@ module CreateVpnGatewayResult =
       let vpnGateway =
         (Option.map ~f:VpnGateway.of_xml) (Xml.child xml_arg0 "vpnGateway") in
       make ?vpnGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnGateway = field_map json "VpnGateway" VpnGateway.of_json in
       make ?vpnGateway ()
@@ -4299,6 +4407,7 @@ module CreateVpnGatewayRequest =
           (Xml.child xml_arg0 "AvailabilityZone") in
       make ?dryRun ?amazonSideAsn ?tagSpecifications ~type_ ?availabilityZone
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let amazonSideAsn = field_map json "AmazonSideAsn" Long.of_json in
@@ -4339,6 +4448,7 @@ module CreateVpnConnectionRouteRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationCidrBlock") in
       make ~vpnConnectionId ~destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnConnectionId =
         field_map_exn json "VpnConnectionId" VpnConnectionId.of_json in
@@ -4382,6 +4492,7 @@ module CreateVpnConnectionResult =
         (Option.map ~f:VpnConnection.of_xml)
           (Xml.child xml_arg0 "vpnConnection") in
       make ?vpnConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnConnection =
         field_map json "VpnConnection" VpnConnection.of_json in
@@ -4463,6 +4574,7 @@ module CreateVpnConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CustomerGatewayId") in
       make ?tagSpecifications ?options ?dryRun ?transitGatewayId
         ?vpnGatewayId ~type_ ~customerGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -4509,6 +4621,7 @@ module CreateVpcResult =
     let of_xml xml_arg0 =
       let vpc = (Option.map ~f:Vpc.of_xml) (Xml.child xml_arg0 "vpc") in
       make ?vpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpc = field_map json "Vpc" Vpc.of_json in make ?vpc ()
     let to_json v = composed_to_json to_value v
@@ -4639,6 +4752,7 @@ module CreateVpcRequest =
         ?instanceTenancy ?dryRun ?ipv6NetmaskLength ?ipv6IpamPoolId
         ?ipv4NetmaskLength ?ipv4IpamPoolId ?ipv6CidrBlock ?ipv6Pool
         ?amazonProvidedIpv6CidrBlock ?cidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -4700,6 +4814,7 @@ module CreateVpcPeeringConnectionResult =
         (Option.map ~f:VpcPeeringConnection.of_xml)
           (Xml.child xml_arg0 "vpcPeeringConnection") in
       make ?vpcPeeringConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnection =
         field_map json "VpcPeeringConnection" VpcPeeringConnection.of_json in
@@ -4768,6 +4883,7 @@ module CreateVpcPeeringConnectionRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?tagSpecifications ?peerRegion ?vpcId ?peerVpcId ?peerOwnerId
         ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -4824,6 +4940,7 @@ module CreateVpcEndpointServiceConfigurationResult =
         (Option.map ~f:ServiceConfiguration.of_xml)
           (Xml.child xml_arg0 "serviceConfiguration") in
       make ?clientToken ?serviceConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let serviceConfiguration =
@@ -4909,6 +5026,7 @@ module CreateVpcEndpointServiceConfigurationRequest =
       make ?tagSpecifications ?clientToken ?gatewayLoadBalancerArns
         ?networkLoadBalancerArns ?privateDnsName ?acceptanceRequired ?dryRun
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -4967,6 +5085,7 @@ module CreateVpcEndpointResult =
       let vpcEndpoint =
         (Option.map ~f:VpcEndpoint.of_xml) (Xml.child xml_arg0 "vpcEndpoint") in
       make ?clientToken ?vpcEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let vpcEndpoint = field_map json "VpcEndpoint" VpcEndpoint.of_json in
@@ -5086,6 +5205,7 @@ module CreateVpcEndpointRequest =
       make ?tagSpecifications ?privateDnsEnabled ?clientToken
         ?securityGroupIds ?subnetIds ?routeTableIds ?policyDocument
         ~serviceName ~vpcId ?vpcEndpointType ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -5153,6 +5273,7 @@ module CreateVpcEndpointConnectionNotificationResult =
         (Option.map ~f:ConnectionNotification.of_xml)
           (Xml.child xml_arg0 "connectionNotification") in
       make ?clientToken ?connectionNotification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let connectionNotification =
@@ -5230,6 +5351,7 @@ module CreateVpcEndpointConnectionNotificationRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?clientToken ~connectionEvents ~connectionNotificationArn
         ?vpcEndpointId ?serviceId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let connectionEvents =
@@ -5364,6 +5486,7 @@ module CreateVolumeRequest =
       make ?clientToken ?throughput ?multiAttachEnabled ?tagSpecifications
         ?dryRun ?volumeType ?snapshotId ?size ?outpostArn ?kmsKeyId ?iops
         ?encrypted ~availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let throughput = field_map json "Throughput" Integer.of_json in
@@ -5424,6 +5547,7 @@ module CreateTransitGatewayVpcAttachmentResult =
         (Option.map ~f:TransitGatewayVpcAttachment.of_xml)
           (Xml.child xml_arg0 "transitGatewayVpcAttachment") in
       make ?transitGatewayVpcAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayVpcAttachment =
         field_map json "TransitGatewayVpcAttachment"
@@ -5498,6 +5622,7 @@ module CreateTransitGatewayVpcAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TransitGatewayId") in
       make ?dryRun ?tagSpecifications ?options ~subnetIds ~vpcId
         ~transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -5552,6 +5677,7 @@ module CreateTransitGatewayRouteTableResult =
         (Option.map ~f:TransitGatewayRouteTable.of_xml)
           (Xml.child xml_arg0 "transitGatewayRouteTable") in
       make ?transitGatewayRouteTable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayRouteTable =
         field_map json "TransitGatewayRouteTable"
@@ -5593,6 +5719,7 @@ module CreateTransitGatewayRouteTableRequest =
         TransitGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TransitGatewayId") in
       make ?dryRun ?tagSpecifications ~transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -5636,6 +5763,7 @@ module CreateTransitGatewayRouteResult =
         (Option.map ~f:TransitGatewayRoute.of_xml)
           (Xml.child xml_arg0 "route") in
       make ?route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map json "Route" TransitGatewayRoute.of_json in
       make ?route ()
@@ -5704,6 +5832,7 @@ module CreateTransitGatewayRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationCidrBlock") in
       make ?dryRun ?blackhole ?transitGatewayAttachmentId
         ~transitGatewayRouteTableId ~destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let blackhole = field_map json "Blackhole" Boolean.of_json in
@@ -5755,6 +5884,7 @@ module CreateTransitGatewayResult =
         (Option.map ~f:TransitGateway.of_xml)
           (Xml.child xml_arg0 "transitGateway") in
       make ?transitGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGateway =
         field_map json "TransitGateway" TransitGateway.of_json in
@@ -5801,6 +5931,7 @@ module CreateTransitGatewayRequest =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?dryRun ?tagSpecifications ?options ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -5850,6 +5981,7 @@ module CreateTransitGatewayPrefixListReferenceResult =
         (Option.map ~f:TransitGatewayPrefixListReference.of_xml)
           (Xml.child xml_arg0 "transitGatewayPrefixListReference") in
       make ?transitGatewayPrefixListReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayPrefixListReference =
         field_map json "TransitGatewayPrefixListReference"
@@ -5920,6 +6052,7 @@ module CreateTransitGatewayPrefixListReferenceRequest =
              "TransitGatewayRouteTableId") in
       make ?dryRun ?blackhole ?transitGatewayAttachmentId ~prefixListId
         ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let blackhole = field_map json "Blackhole" Boolean.of_json in
@@ -5974,6 +6107,7 @@ module CreateTransitGatewayPeeringAttachmentResult =
         (Option.map ~f:TransitGatewayPeeringAttachment.of_xml)
           (Xml.child xml_arg0 "transitGatewayPeeringAttachment") in
       make ?transitGatewayPeeringAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayPeeringAttachment =
         field_map json "TransitGatewayPeeringAttachment"
@@ -6050,6 +6184,7 @@ module CreateTransitGatewayPeeringAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TransitGatewayId") in
       make ?dryRun ?tagSpecifications ~peerRegion ~peerAccountId
         ~peerTransitGatewayId ~transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -6104,6 +6239,7 @@ module CreateTransitGatewayMulticastDomainResult =
         (Option.map ~f:TransitGatewayMulticastDomain.of_xml)
           (Xml.child xml_arg0 "transitGatewayMulticastDomain") in
       make ?transitGatewayMulticastDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayMulticastDomain =
         field_map json "TransitGatewayMulticastDomain"
@@ -6157,6 +6293,7 @@ module CreateTransitGatewayMulticastDomainRequest =
         TransitGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TransitGatewayId") in
       make ?dryRun ?tagSpecifications ?options ~transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -6206,6 +6343,7 @@ module CreateTransitGatewayConnectResult =
         (Option.map ~f:TransitGatewayConnect.of_xml)
           (Xml.child xml_arg0 "transitGatewayConnect") in
       make ?transitGatewayConnect ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayConnect =
         field_map json "TransitGatewayConnect" TransitGatewayConnect.of_json in
@@ -6267,6 +6405,7 @@ module CreateTransitGatewayConnectRequest =
              "TransportTransitGatewayAttachmentId") in
       make ?dryRun ?tagSpecifications ~options
         ~transportTransitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -6319,6 +6458,7 @@ module CreateTransitGatewayConnectPeerResult =
         (Option.map ~f:TransitGatewayConnectPeer.of_xml)
           (Xml.child xml_arg0 "transitGatewayConnectPeer") in
       make ?transitGatewayConnectPeer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayConnectPeer =
         field_map json "TransitGatewayConnectPeer"
@@ -6409,6 +6549,7 @@ module CreateTransitGatewayConnectPeerRequest =
              "TransitGatewayAttachmentId") in
       make ?dryRun ?tagSpecifications ~insideCidrBlocks ?bgpOptions
         ~peerAddress ?transitGatewayAddress ~transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -6472,6 +6613,7 @@ module CreateTrafficMirrorTargetResult =
         (Option.map ~f:TrafficMirrorTarget.of_xml)
           (Xml.child xml_arg0 "trafficMirrorTarget") in
       make ?clientToken ?trafficMirrorTarget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let trafficMirrorTarget =
@@ -6545,6 +6687,7 @@ module CreateTrafficMirrorTargetRequest =
           (Xml.child xml_arg0 "NetworkInterfaceId") in
       make ?clientToken ?dryRun ?tagSpecifications ?description
         ?networkLoadBalancerArn ?networkInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -6603,6 +6746,7 @@ module CreateTrafficMirrorSessionResult =
         (Option.map ~f:TrafficMirrorSession.of_xml)
           (Xml.child xml_arg0 "trafficMirrorSession") in
       make ?clientToken ?trafficMirrorSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let trafficMirrorSession =
@@ -6712,6 +6856,7 @@ module CreateTrafficMirrorSessionRequest =
       make ?clientToken ?dryRun ?tagSpecifications ?description
         ?virtualNetworkId ~sessionNumber ?packetLength ~trafficMirrorFilterId
         ~trafficMirrorTargetId ~networkInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -6779,6 +6924,7 @@ module CreateTrafficMirrorFilterRuleResult =
         (Option.map ~f:TrafficMirrorFilterRule.of_xml)
           (Xml.child xml_arg0 "trafficMirrorFilterRule") in
       make ?clientToken ?trafficMirrorFilterRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let trafficMirrorFilterRule =
@@ -6911,6 +7057,7 @@ module CreateTrafficMirrorFilterRuleRequest =
         ~destinationCidrBlock ?protocol ?sourcePortRange
         ?destinationPortRange ~ruleAction ~ruleNumber ~trafficDirection
         ~trafficMirrorFilterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -6983,6 +7130,7 @@ module CreateTrafficMirrorFilterResult =
         (Option.map ~f:TrafficMirrorFilter.of_xml)
           (Xml.child xml_arg0 "trafficMirrorFilter") in
       make ?clientToken ?trafficMirrorFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let trafficMirrorFilter =
@@ -7029,6 +7177,7 @@ module CreateTrafficMirrorFilterRequest =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?clientToken ?dryRun ?tagSpecifications ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -7070,6 +7219,7 @@ module CreateTagsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~tags ~resources ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resources = field_map_exn json "Resources" ResourceIdList.of_json in
@@ -7110,6 +7260,7 @@ module CreateSubnetResult =
       let subnet =
         (Option.map ~f:Subnet.of_xml) (Xml.child xml_arg0 "subnet") in
       make ?subnet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnet = field_map json "Subnet" Subnet.of_json in make ?subnet ()
     let to_json v = composed_to_json to_value v
@@ -7202,6 +7353,7 @@ module CreateSubnetRequest =
           (Xml.child xml_arg0 "TagSpecification") in
       make ?ipv6Native ?dryRun ~vpcId ?outpostArn ?ipv6CidrBlock ?cidrBlock
         ?availabilityZoneId ?availabilityZone ?tagSpecifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv6Native = field_map json "Ipv6Native" Boolean.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -7256,6 +7408,7 @@ module CreateSubnetCidrReservationResult =
         (Option.map ~f:SubnetCidrReservation.of_xml)
           (Xml.child xml_arg0 "subnetCidrReservation") in
       make ?subnetCidrReservation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetCidrReservation =
         field_map json "SubnetCidrReservation" SubnetCidrReservation.of_json in
@@ -7324,6 +7477,7 @@ module CreateSubnetCidrReservationRequest =
           (Xml.child xml_arg0 "TagSpecification") in
       make ?dryRun ?description ~reservationType ~cidr ~subnetId
         ?tagSpecifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let description = field_map json "Description" String_.of_json in
@@ -7372,6 +7526,7 @@ module CreateStoreImageTaskResult =
       let objectKey =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "objectKey") in
       make ?objectKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectKey = field_map json "ObjectKey" String_.of_json in
       make ?objectKey ()
@@ -7416,6 +7571,7 @@ module CreateStoreImageTaskRequest =
       let imageId =
         ImageId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ImageId") in
       make ?dryRun ?s3ObjectTags ~bucket ~imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let s3ObjectTags =
@@ -7463,6 +7619,7 @@ module CreateSpotDatafeedSubscriptionResult =
         (Option.map ~f:SpotDatafeedSubscription.of_xml)
           (Xml.child xml_arg0 "spotDatafeedSubscription") in
       make ?spotDatafeedSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotDatafeedSubscription =
         field_map json "SpotDatafeedSubscription"
@@ -7499,6 +7656,7 @@ module CreateSpotDatafeedSubscriptionRequest =
       let bucket =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
       make ?prefix ?dryRun ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -7539,6 +7697,7 @@ module CreateSnapshotsResult =
       let snapshots =
         (Option.map ~f:SnapshotSet.of_xml) (Xml.child xml_arg0 "snapshotSet") in
       make ?snapshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snapshots = field_map json "Snapshots" SnapshotSet.of_json in
       make ?snapshots ()
@@ -7613,6 +7772,7 @@ module CreateSnapshotsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?copyTagsFromSource ?dryRun ?tagSpecifications ?outpostArn
         ~instanceSpecification ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyTagsFromSource =
         field_map json "CopyTagsFromSource" CopyTagsFromSource.of_json in
@@ -7680,6 +7840,7 @@ module CreateSnapshotRequest =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?dryRun ?tagSpecifications ~volumeId ?outpostArn ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -7727,6 +7888,7 @@ module CreateSecurityGroupResult =
       let groupId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupId") in
       make ?tags ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let groupId = field_map json "GroupId" String_.of_json in
@@ -7781,6 +7943,7 @@ module CreateSecurityGroupRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupDescription") in
       make ?dryRun ?tagSpecifications ?vpcId ~groupName ~description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -7825,6 +7988,7 @@ module CreateRouteTableResult =
       let routeTable =
         (Option.map ~f:RouteTable.of_xml) (Xml.child xml_arg0 "routeTable") in
       make ?routeTable ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeTable = field_map json "RouteTable" RouteTable.of_json in
       make ?routeTable ()
@@ -7861,6 +8025,7 @@ module CreateRouteTableRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?tagSpecifications ~vpcId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -7904,6 +8069,7 @@ module CreateRouteResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -8077,6 +8243,7 @@ module CreateRouteRequest =
         ?egressOnlyInternetGatewayId ?vpcEndpointId ?dryRun
         ?destinationPrefixListId ?destinationIpv6CidrBlock
         ?destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkArn =
         field_map json "CoreNetworkArn" CoreNetworkArn.of_json in
@@ -8148,6 +8315,7 @@ module CreateRestoreImageTaskResult =
       let imageId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageId") in
       make ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageId = field_map json "ImageId" String_.of_json in
       make ?imageId ()
@@ -8201,6 +8369,7 @@ module CreateRestoreImageTaskRequest =
       let bucket =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?dryRun ?tagSpecifications ?name ~objectKey ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -8250,6 +8419,7 @@ module CreateReservedInstancesListingResult =
         (Option.map ~f:ReservedInstancesListingList.of_xml)
           (Xml.child xml_arg0 "reservedInstancesListingsSet") in
       make ?reservedInstancesListings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesListings =
         field_map json "ReservedInstancesListings"
@@ -8308,6 +8478,7 @@ module CreateReservedInstancesListingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       make ~reservedInstancesId ~priceSchedules ~instanceCount ~clientToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesId =
         field_map_exn json "ReservedInstancesId" ReservationId.of_json in
@@ -8357,6 +8528,7 @@ module CreateReplaceRootVolumeTaskResult =
         (Option.map ~f:ReplaceRootVolumeTask.of_xml)
           (Xml.child xml_arg0 "replaceRootVolumeTask") in
       make ?replaceRootVolumeTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replaceRootVolumeTask =
         field_map json "ReplaceRootVolumeTask" ReplaceRootVolumeTask.of_json in
@@ -8419,6 +8591,7 @@ module CreateReplaceRootVolumeTaskRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?tagSpecifications ?dryRun ?clientToken ?snapshotId ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -8463,6 +8636,7 @@ module CreatePublicIpv4PoolResult =
       let poolId =
         (Option.map ~f:Ipv4PoolEc2Id.of_xml) (Xml.child xml_arg0 "poolId") in
       make ?poolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let poolId = field_map json "PoolId" Ipv4PoolEc2Id.of_json in
       make ?poolId ()
@@ -8494,6 +8668,7 @@ module CreatePublicIpv4PoolRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?tagSpecifications ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -8535,6 +8710,7 @@ module CreatePlacementGroupResult =
         (Option.map ~f:PlacementGroup.of_xml)
           (Xml.child xml_arg0 "placementGroup") in
       make ?placementGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementGroup =
         field_map json "PlacementGroup" PlacementGroup.of_json in
@@ -8595,6 +8771,7 @@ module CreatePlacementGroupRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?tagSpecifications ?partitionCount ?strategy ?groupName ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -8648,6 +8825,7 @@ module CreateNetworkInterfaceResult =
         (Option.map ~f:NetworkInterface.of_xml)
           (Xml.child xml_arg0 "networkInterface") in
       make ?clientToken ?networkInterface ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let networkInterface =
@@ -8819,6 +8997,7 @@ module CreateNetworkInterfaceRequest =
         ?ipv6PrefixCount ?ipv6Prefixes ?ipv4PrefixCount ?ipv4Prefixes
         ?secondaryPrivateIpAddressCount ?privateIpAddresses ?privateIpAddress
         ?ipv6Addresses ?ipv6AddressCount ?groups ?dryRun ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let tagSpecifications =
@@ -8887,6 +9066,7 @@ module CreateNetworkInterfacePermissionResult =
         (Option.map ~f:NetworkInterfacePermission.of_xml)
           (Xml.child xml_arg0 "interfacePermission") in
       make ?interfacePermission ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let interfacePermission =
         field_map json "InterfacePermission"
@@ -8948,6 +9128,7 @@ module CreateNetworkInterfacePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "NetworkInterfaceId") in
       make ?dryRun ~permission ?awsService ?awsAccountId ~networkInterfaceId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let permission =
@@ -8996,6 +9177,7 @@ module CreateNetworkInsightsPathResult =
         (Option.map ~f:NetworkInsightsPath.of_xml)
           (Xml.child xml_arg0 "networkInsightsPath") in
       make ?networkInsightsPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsPath =
         field_map json "NetworkInsightsPath" NetworkInsightsPath.of_json in
@@ -9090,6 +9272,7 @@ module CreateNetworkInsightsPathRequest =
         (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "SourceIp") in
       make ~clientToken ?dryRun ?tagSpecifications ?destinationPort ~protocol
         ~destination ~source ?destinationIp ?sourceIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "ClientToken" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -9156,6 +9339,7 @@ module CreateNetworkInsightsAccessScopeResult =
         (Option.map ~f:NetworkInsightsAccessScope.of_xml)
           (Xml.child xml_arg0 "networkInsightsAccessScope") in
       make ?networkInsightsAccessScopeContent ?networkInsightsAccessScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInsightsAccessScopeContent =
         field_map json "NetworkInsightsAccessScopeContent"
@@ -9225,6 +9409,7 @@ module CreateNetworkInsightsAccessScopeRequest =
           (Xml.child xml_arg0 "MatchPath") in
       make ?dryRun ?tagSpecifications ~clientToken ?excludePaths ?matchPaths
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -9272,6 +9457,7 @@ module CreateNetworkAclResult =
       let networkAcl =
         (Option.map ~f:NetworkAcl.of_xml) (Xml.child xml_arg0 "networkAcl") in
       make ?networkAcl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkAcl = field_map json "NetworkAcl" NetworkAcl.of_json in
       make ?networkAcl ()
@@ -9308,6 +9494,7 @@ module CreateNetworkAclRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?tagSpecifications ~vpcId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -9412,6 +9599,7 @@ module CreateNetworkAclEntryRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidrBlock") in
       make ~ruleNumber ~ruleAction ~protocol ?portRange ~networkAclId
         ?ipv6CidrBlock ?icmpTypeCode ~egress ?dryRun ?cidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleNumber = field_map_exn json "RuleNumber" Integer.of_json in
       let ruleAction = field_map_exn json "RuleAction" RuleAction.of_json in
@@ -9469,6 +9657,7 @@ module CreateNatGatewayResult =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?natGateway ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let natGateway = field_map json "NatGateway" NatGateway.of_json in
       let clientToken = field_map json "ClientToken" String_.of_json in
@@ -9542,6 +9731,7 @@ module CreateNatGatewayRequest =
           (Xml.child xml_arg0 "AllocationId") in
       make ?connectivityType ?tagSpecifications ~subnetId ?dryRun
         ?clientToken ?allocationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectivityType =
         field_map json "ConnectivityType" ConnectivityType.of_json in
@@ -9591,6 +9781,7 @@ module CreateManagedPrefixListResult =
         (Option.map ~f:ManagedPrefixList.of_xml)
           (Xml.child xml_arg0 "prefixList") in
       make ?prefixList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefixList = field_map json "PrefixList" ManagedPrefixList.of_json in
       make ?prefixList ()
@@ -9669,6 +9860,7 @@ module CreateManagedPrefixListRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?clientToken ~addressFamily ?tagSpecifications ~maxEntries
         ?entries ~prefixListName ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let addressFamily = field_map_exn json "AddressFamily" String_.of_json in
@@ -9722,6 +9914,7 @@ module CreateLocalGatewayRouteTableVpcAssociationResult =
         (Option.map ~f:LocalGatewayRouteTableVpcAssociation.of_xml)
           (Xml.child xml_arg0 "localGatewayRouteTableVpcAssociation") in
       make ?localGatewayRouteTableVpcAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let localGatewayRouteTableVpcAssociation =
         field_map json "LocalGatewayRouteTableVpcAssociation"
@@ -9773,6 +9966,7 @@ module CreateLocalGatewayRouteTableVpcAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "LocalGatewayRouteTableId") in
       make ?dryRun ?tagSpecifications ~vpcId ~localGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -9818,6 +10012,7 @@ module CreateLocalGatewayRouteResult =
       let route =
         (Option.map ~f:LocalGatewayRoute.of_xml) (Xml.child xml_arg0 "route") in
       make ?route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map json "Route" LocalGatewayRoute.of_json in
       make ?route ()
@@ -9880,6 +10075,7 @@ module CreateLocalGatewayRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationCidrBlock") in
       make ?dryRun ~localGatewayVirtualInterfaceGroupId
         ~localGatewayRouteTableId ~destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let localGatewayVirtualInterfaceGroupId =
@@ -9939,6 +10135,7 @@ module CreateLaunchTemplateVersionResult =
         (Option.map ~f:LaunchTemplateVersion.of_xml)
           (Xml.child xml_arg0 "launchTemplateVersion") in
       make ?warning ?launchTemplateVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warning = field_map json "Warning" ValidationWarning.of_json in
       let launchTemplateVersion =
@@ -10023,6 +10220,7 @@ module CreateLaunchTemplateVersionRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~launchTemplateData ?versionDescription ?sourceVersion
         ?launchTemplateName ?launchTemplateId ?clientToken ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let launchTemplateData =
         field_map_exn json "LaunchTemplateData"
@@ -10084,6 +10282,7 @@ module CreateLaunchTemplateResult =
         (Option.map ~f:LaunchTemplate.of_xml)
           (Xml.child xml_arg0 "launchTemplate") in
       make ?warning ?launchTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let warning = field_map json "Warning" ValidationWarning.of_json in
       let launchTemplate =
@@ -10160,6 +10359,7 @@ module CreateLaunchTemplateRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?tagSpecifications ~launchTemplateData ?versionDescription
         ~launchTemplateName ?clientToken ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -10217,6 +10417,7 @@ module CreateKeyPairRequest =
       let keyName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyName") in
       make ?tagSpecifications ?keyType ?dryRun ~keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -10260,6 +10461,7 @@ module CreateIpamScopeResult =
       let ipamScope =
         (Option.map ~f:IpamScope.of_xml) (Xml.child xml_arg0 "ipamScope") in
       make ?ipamScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamScope = field_map json "IpamScope" IpamScope.of_json in
       make ?ipamScope ()
@@ -10315,6 +10517,7 @@ module CreateIpamScopeRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?clientToken ?tagSpecifications ?description ~ipamId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let tagSpecifications =
@@ -10356,6 +10559,7 @@ module CreateIpamResult =
     let of_xml xml_arg0 =
       let ipam = (Option.map ~f:Ipam.of_xml) (Xml.child xml_arg0 "ipam") in
       make ?ipam ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipam = field_map json "Ipam" Ipam.of_json in make ?ipam ()
     let to_json v = composed_to_json to_value v
@@ -10418,6 +10622,7 @@ module CreateIpamRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?clientToken ?tagSpecifications ?operatingRegions ?description
         ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let tagSpecifications =
@@ -10464,6 +10669,7 @@ module CreateIpamPoolResult =
       let ipamPool =
         (Option.map ~f:IpamPool.of_xml) (Xml.child xml_arg0 "ipamPool") in
       make ?ipamPool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamPool = field_map json "IpamPool" IpamPool.of_json in
       make ?ipamPool ()
@@ -10628,6 +10834,7 @@ module CreateIpamPoolRequest =
         ?allocationMaxNetmaskLength ?allocationMinNetmaskLength
         ?publiclyAdvertisable ?autoImport ~addressFamily ?description
         ?sourceIpamPoolId ?locale ~ipamScopeId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let awsService = field_map json "AwsService" IpamPoolAwsService.of_json in
       let clientToken = field_map json "ClientToken" String_.of_json in
@@ -10697,6 +10904,7 @@ module CreateInternetGatewayResult =
         (Option.map ~f:InternetGateway.of_xml)
           (Xml.child xml_arg0 "internetGateway") in
       make ?internetGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let internetGateway =
         field_map json "InternetGateway" InternetGateway.of_json in
@@ -10728,6 +10936,7 @@ module CreateInternetGatewayRequest =
         (Option.map ~f:TagSpecificationList.of_xml)
           (Xml.child xml_arg0 "TagSpecification") in
       make ?dryRun ?tagSpecifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -10769,6 +10978,7 @@ module CreateInstanceExportTaskResult =
       let exportTask =
         (Option.map ~f:ExportTask.of_xml) (Xml.child xml_arg0 "exportTask") in
       make ?exportTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportTask = field_map json "ExportTask" ExportTask.of_json in
       make ?exportTask ()
@@ -10832,6 +11042,7 @@ module CreateInstanceExportTaskRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       make ?tagSpecifications ~targetEnvironment ~instanceId ~exportToS3Task
         ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -10882,6 +11093,7 @@ module CreateInstanceEventWindowResult =
         (Option.map ~f:InstanceEventWindow.of_xml)
           (Xml.child xml_arg0 "instanceEventWindow") in
       make ?instanceEventWindow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceEventWindow =
         field_map json "InstanceEventWindow" InstanceEventWindow.of_json in
@@ -10940,6 +11152,7 @@ module CreateInstanceEventWindowRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?tagSpecifications ?cronExpression ?timeRanges ?name ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -10987,6 +11200,7 @@ module CreateImageResult =
       let imageId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageId") in
       make ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageId = field_map json "ImageId" String_.of_json in
       make ?imageId ()
@@ -11066,6 +11280,7 @@ module CreateImageRequest =
           (Xml.child xml_arg0 "blockDeviceMapping") in
       make ?tagSpecifications ?noReboot ~name ~instanceId ?dryRun
         ?description ?blockDeviceMappings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -11123,6 +11338,7 @@ module CreateFpgaImageResult =
       let fpgaImageId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "fpgaImageId") in
       make ?fpgaImageGlobalId ?fpgaImageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fpgaImageGlobalId =
         field_map json "FpgaImageGlobalId" String_.of_json in
@@ -11200,6 +11416,7 @@ module CreateFpgaImageRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?tagSpecifications ?clientToken ?name ?description
         ?logsStorageLocation ~inputStorageLocation ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -11268,6 +11485,7 @@ module CreateFlowLogsResult =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?unsuccessful ?flowLogIds ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful" UnsuccessfulItemSet.of_json in
@@ -11410,6 +11628,7 @@ module CreateFlowLogsRequest =
         ?logFormat ?logDestination ?logDestinationType ~trafficType
         ~resourceType ~resourceIds ?logGroupName ?deliverLogsPermissionArn
         ?clientToken ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationOptions =
         field_map json "DestinationOptions" DestinationOptionsRequest.of_json in
@@ -11487,6 +11706,7 @@ module CreateFleetResult =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "fleetId") in
       make ?instances ?errors ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instances =
         field_map json "Instances" CreateFleetInstancesSet.of_json in
@@ -11644,6 +11864,7 @@ module CreateFleetRequest =
         ~targetCapacitySpecification ~launchTemplateConfigs
         ?excessCapacityTerminationPolicy ?onDemandOptions ?spotOptions
         ?clientToken ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let tagSpecifications =
@@ -11722,6 +11943,7 @@ module CreateEgressOnlyInternetGatewayResult =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?egressOnlyInternetGateway ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let egressOnlyInternetGateway =
         field_map json "EgressOnlyInternetGateway"
@@ -11772,6 +11994,7 @@ module CreateEgressOnlyInternetGatewayRequest =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?tagSpecifications ~vpcId ?dryRun ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -11814,6 +12037,7 @@ module CreateDhcpOptionsResult =
       let dhcpOptions =
         (Option.map ~f:DhcpOptions.of_xml) (Xml.child xml_arg0 "dhcpOptions") in
       make ?dhcpOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dhcpOptions = field_map json "DhcpOptions" DhcpOptions.of_json in
       make ?dhcpOptions ()
@@ -11854,6 +12078,7 @@ module CreateDhcpOptionsRequest =
         NewDhcpConfigurationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dhcpConfiguration") in
       make ?dryRun ?tagSpecifications ~dhcpConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -11895,6 +12120,7 @@ module CreateDefaultVpcResult =
     let of_xml xml_arg0 =
       let vpc = (Option.map ~f:Vpc.of_xml) (Xml.child xml_arg0 "vpc") in
       make ?vpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpc = field_map json "Vpc" Vpc.of_json in make ?vpc ()
     let to_json v = composed_to_json to_value v
@@ -11916,6 +12142,7 @@ module CreateDefaultVpcRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in make ?dryRun ()
     let to_json v = composed_to_json to_value v
@@ -11953,6 +12180,7 @@ module CreateDefaultSubnetResult =
       let subnet =
         (Option.map ~f:Subnet.of_xml) (Xml.child xml_arg0 "subnet") in
       make ?subnet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnet = field_map json "Subnet" Subnet.of_json in make ?subnet ()
     let to_json v = composed_to_json to_value v
@@ -11991,6 +12219,7 @@ module CreateDefaultSubnetRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AvailabilityZone") in
       make ?ipv6Native ?dryRun ~availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv6Native = field_map json "Ipv6Native" Boolean.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -12035,6 +12264,7 @@ module CreateCustomerGatewayResult =
         (Option.map ~f:CustomerGateway.of_xml)
           (Xml.child xml_arg0 "customerGateway") in
       make ?customerGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerGateway =
         field_map json "CustomerGateway" CustomerGateway.of_json in
@@ -12112,6 +12342,7 @@ module CreateCustomerGatewayRequest =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BgpAsn") in
       make ?dryRun ?deviceName ?tagSpecifications ~type_ ?certificateArn
         ?publicIp ~bgpAsn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let deviceName = field_map json "DeviceName" String_.of_json in
@@ -12159,6 +12390,7 @@ module CreateClientVpnRouteResult =
         (Option.map ~f:ClientVpnRouteStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ClientVpnRouteStatus.of_json in
       make ?status ()
@@ -12231,6 +12463,7 @@ module CreateClientVpnRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ?clientToken ?description ~targetVpcSubnetId
         ~destinationCidrBlock ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let clientToken = field_map json "ClientToken" String_.of_json in
@@ -12295,6 +12528,7 @@ module CreateClientVpnEndpointResult =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "clientVpnEndpointId") in
       make ?dnsName ?status ?clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dnsName = field_map json "DnsName" String_.of_json in
       let status = field_map json "Status" ClientVpnEndpointStatus.of_json in
@@ -12489,6 +12723,7 @@ module CreateClientVpnEndpointRequest =
         ?tagSpecifications ?clientToken ?dryRun ?splitTunnel ?description
         ?vpnPort ?transportProtocol ?dnsServers ~connectionLogOptions
         ~authenticationOptions ~serverCertificateArn ~clientCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientLoginBannerOptions =
         field_map json "ClientLoginBannerOptions"
@@ -12565,6 +12800,7 @@ module CreateCarrierGatewayResult =
         (Option.map ~f:CarrierGateway.of_xml)
           (Xml.child xml_arg0 "carrierGateway") in
       make ?carrierGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let carrierGateway =
         field_map json "CarrierGateway" CarrierGateway.of_json in
@@ -12612,6 +12848,7 @@ module CreateCarrierGatewayRequest =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ?clientToken ?dryRun ?tagSpecifications ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -12657,6 +12894,7 @@ module CreateCapacityReservationResult =
         (Option.map ~f:CapacityReservation.of_xml)
           (Xml.child xml_arg0 "capacityReservation") in
       make ?capacityReservation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capacityReservation =
         field_map json "CapacityReservation" CapacityReservation.of_json in
@@ -12828,6 +13066,7 @@ module CreateCapacityReservationRequest =
         ?instanceMatchCriteria ?endDateType ?endDate ?ephemeralStorage
         ?ebsOptimized ~instanceCount ?tenancy ?availabilityZoneId
         ?availabilityZone ~instancePlatform ~instanceType ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementGroupArn =
         field_map json "PlacementGroupArn" PlacementGroupArn.of_json in
@@ -12998,6 +13237,7 @@ module CreateCapacityReservationFleetResult =
       make ?tags ?fleetCapacityReservations ?tenancy ?endDate ?createTime
         ?allocationStrategy ?instanceMatchCriteria ?totalFulfilledCapacity
         ?totalTargetCapacity ?state ?capacityReservationFleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let fleetCapacityReservations =
@@ -13132,6 +13372,7 @@ module CreateCapacityReservationFleetRequest =
       make ?dryRun ?tagSpecifications ?instanceMatchCriteria ?endDate
         ~totalTargetCapacity ?tenancy ~instanceTypeSpecifications
         ?clientToken ?allocationStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -13192,6 +13433,7 @@ module CopySnapshotResult =
       let snapshotId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?tags ?snapshotId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let snapshotId = field_map json "SnapshotId" String_.of_json in
@@ -13299,6 +13541,7 @@ module CopySnapshotRequest =
       make ?dryRun ?tagSpecifications ~sourceSnapshotId ~sourceRegion
         ?presignedUrl ?kmsKeyId ?encrypted ?destinationRegion
         ?destinationOutpostArn ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tagSpecifications =
@@ -13352,6 +13595,7 @@ module CopyImageResult =
       let imageId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageId") in
       make ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let imageId = field_map json "ImageId" String_.of_json in
       make ?imageId ()
@@ -13443,6 +13687,7 @@ module CopyImageRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?dryRun ?destinationOutpostArn ~sourceRegion ~sourceImageId ~name
         ?kmsKeyId ?encrypted ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let destinationOutpostArn =
@@ -13490,6 +13735,7 @@ module CopyFpgaImageResult =
       let fpgaImageId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "fpgaImageId") in
       make ?fpgaImageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fpgaImageId = field_map json "FpgaImageId" String_.of_json in
       make ?fpgaImageId ()
@@ -13555,6 +13801,7 @@ module CopyFpgaImageRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?clientToken ~sourceRegion ?name ?description ~sourceFpgaImageId
         ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let sourceRegion = field_map_exn json "SourceRegion" String_.of_json in
@@ -13608,6 +13855,7 @@ module ConfirmProductInstanceResult =
       let ownerId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
       make ?return ?ownerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in
       let ownerId = field_map json "OwnerId" String_.of_json in
@@ -13646,6 +13894,7 @@ module ConfirmProductInstanceRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?dryRun ~productCode ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let productCode = field_map_exn json "ProductCode" String_.of_json in
@@ -13692,6 +13941,7 @@ module CancelSpotInstanceRequestsResult =
         (Option.map ~f:CancelledSpotInstanceRequestList.of_xml)
           (Xml.child xml_arg0 "spotInstanceRequestSet") in
       make ?cancelledSpotInstanceRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cancelledSpotInstanceRequests =
         field_map json "CancelledSpotInstanceRequests"
@@ -13725,6 +13975,7 @@ module CancelSpotInstanceRequestsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~spotInstanceRequestIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spotInstanceRequestIds =
         field_map_exn json "SpotInstanceRequestIds"
@@ -13781,6 +14032,7 @@ module CancelSpotFleetRequestsResponse =
         (Option.map ~f:CancelSpotFleetRequestsSuccessSet.of_xml)
           (Xml.child xml_arg0 "successfulFleetRequestSet") in
       make ?unsuccessfulFleetRequests ?successfulFleetRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessfulFleetRequests =
         field_map json "UnsuccessfulFleetRequests"
@@ -13826,6 +14078,7 @@ module CancelSpotFleetRequestsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~terminateInstances ~spotFleetRequestIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let terminateInstances =
         field_map_exn json "TerminateInstances" Boolean.of_json in
@@ -13873,6 +14126,7 @@ module CancelReservedInstancesListingResult =
         (Option.map ~f:ReservedInstancesListingList.of_xml)
           (Xml.child xml_arg0 "reservedInstancesListingsSet") in
       make ?reservedInstancesListings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesListings =
         field_map json "ReservedInstancesListings"
@@ -13902,6 +14156,7 @@ module CancelReservedInstancesListingRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "reservedInstancesListingId") in
       make ~reservedInstancesListingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedInstancesListingId =
         field_map_exn json "ReservedInstancesListingId"
@@ -13954,6 +14209,7 @@ module CancelImportTaskResult =
       let importTaskId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "importTaskId") in
       make ?state ?previousState ?importTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" String_.of_json in
       let previousState = field_map json "PreviousState" String_.of_json in
@@ -13993,6 +14249,7 @@ module CancelImportTaskRequest =
       let cancelReason =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CancelReason") in
       make ?importTaskId ?dryRun ?cancelReason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let importTaskId = field_map json "ImportTaskId" ImportTaskId.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -14019,6 +14276,7 @@ module CancelExportTaskRequest =
         ExportVmTaskId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "exportTaskId") in
       make ~exportTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportTaskId =
         field_map_exn json "ExportTaskId" ExportVmTaskId.of_json in
@@ -14058,6 +14316,7 @@ module CancelConversionRequest =
         ConversionTaskId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "conversionTaskId") in
       make ?reasonMessage ?dryRun ~conversionTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reasonMessage = field_map json "ReasonMessage" String_.of_json in
       let dryRun = field_map json "DryRun" Boolean.of_json in
@@ -14101,6 +14360,7 @@ module CancelCapacityReservationResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -14132,6 +14392,7 @@ module CancelCapacityReservationRequest =
         CapacityReservationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CapacityReservationId") in
       make ?dryRun ~capacityReservationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let capacityReservationId =
@@ -14192,6 +14453,7 @@ module CancelCapacityReservationFleetsResult =
         (Option.map ~f:CapacityReservationFleetCancellationStateSet.of_xml)
           (Xml.child xml_arg0 "successfulFleetCancellationSet") in
       make ?failedFleetCancellations ?successfulFleetCancellations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedFleetCancellations =
         field_map json "FailedFleetCancellations"
@@ -14232,6 +14494,7 @@ module CancelCapacityReservationFleetsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~capacityReservationFleetIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let capacityReservationFleetIds =
         field_map_exn json "CapacityReservationFleetIds"
@@ -14276,6 +14539,7 @@ module CancelBundleTaskResult =
         (Option.map ~f:BundleTask.of_xml)
           (Xml.child xml_arg0 "bundleInstanceTask") in
       make ?bundleTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bundleTask = field_map json "BundleTask" BundleTask.of_json in
       make ?bundleTask ()
@@ -14302,6 +14566,7 @@ module CancelBundleTaskRequest =
       let bundleId =
         BundleId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BundleId") in
       make ?dryRun ~bundleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let bundleId = field_map_exn json "BundleId" BundleId.of_json in
@@ -14343,6 +14608,7 @@ module BundleInstanceResult =
         (Option.map ~f:BundleTask.of_xml)
           (Xml.child xml_arg0 "bundleInstanceTask") in
       make ?bundleTask ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bundleTask = field_map json "BundleTask" BundleTask.of_json in
       make ?bundleTask ()
@@ -14380,6 +14646,7 @@ module BundleInstanceRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?dryRun ~storage ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let storage = field_map_exn json "Storage" Storage.of_json in
@@ -14430,6 +14697,7 @@ module AuthorizeSecurityGroupIngressResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?securityGroupRules ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupRules =
         field_map json "SecurityGroupRules" SecurityGroupRuleList.of_json in
@@ -14548,6 +14816,7 @@ module AuthorizeSecurityGroupIngressRequest =
       make ?tagSpecifications ?dryRun ?toPort ?sourceSecurityGroupOwnerId
         ?sourceSecurityGroupName ?ipProtocol ?ipPermissions ?groupName
         ?groupId ?fromPort ?cidrIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -14613,6 +14882,7 @@ module AuthorizeSecurityGroupEgressResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?securityGroupRules ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupRules =
         field_map json "SecurityGroupRules" SecurityGroupRuleList.of_json in
@@ -14722,6 +14992,7 @@ module AuthorizeSecurityGroupEgressRequest =
       make ?sourceSecurityGroupOwnerId ?sourceSecurityGroupName ?toPort
         ?ipProtocol ?fromPort ?cidrIp ?tagSpecifications ?ipPermissions
         ~groupId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceSecurityGroupOwnerId =
         field_map json "SourceSecurityGroupOwnerId" String_.of_json in
@@ -14778,6 +15049,7 @@ module AuthorizeClientVpnIngressResult =
         (Option.map ~f:ClientVpnAuthorizationRuleStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map json "Status" ClientVpnAuthorizationRuleStatus.of_json in
@@ -14858,6 +15130,7 @@ module AuthorizeClientVpnIngressRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ?clientToken ?description ?authorizeAllGroups
         ?accessGroupId ~targetNetworkCidr ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let clientToken = field_map json "ClientToken" String_.of_json in
@@ -14909,6 +15182,7 @@ module AttachVpnGatewayResult =
         (Option.map ~f:VpcAttachment.of_xml)
           (Xml.child xml_arg0 "attachment") in
       make ?vpcAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcAttachment =
         field_map json "VpcAttachment" VpcAttachment.of_json in
@@ -14944,6 +15218,7 @@ module AttachVpnGatewayRequest =
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ?dryRun ~vpnGatewayId ~vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpnGatewayId =
@@ -14988,6 +15263,7 @@ module AttachVolumeRequest =
       let device =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Device") in
       make ?dryRun ~volumeId ~instanceId ~device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let volumeId = field_map_exn json "VolumeId" VolumeId.of_json in
@@ -15038,6 +15314,7 @@ module AttachNetworkInterfaceResult =
       let attachmentId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attachmentId") in
       make ?networkCardIndex ?attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkCardIndex =
         field_map json "NetworkCardIndex" Integer.of_json in
@@ -15102,6 +15379,7 @@ module AttachNetworkInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "deviceIndex") in
       make ?networkCardIndex ~networkInterfaceId ~instanceId ?dryRun
         ~deviceIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkCardIndex =
         field_map json "NetworkCardIndex" Integer.of_json in
@@ -15144,6 +15422,7 @@ module AttachInternetGatewayRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~vpcId ~internetGatewayId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
       let internetGatewayId =
@@ -15187,6 +15466,7 @@ module AttachClassicLinkVpcResult =
       let return =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "return") in
       make ?return ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
@@ -15230,6 +15510,7 @@ module AttachClassicLinkVpcRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ~vpcId ~instanceId ~groups ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
@@ -15289,6 +15570,7 @@ module AssociateVpcCidrBlockResult =
         (Option.map ~f:VpcIpv6CidrBlockAssociation.of_xml)
           (Xml.child xml_arg0 "ipv6CidrBlockAssociation") in
       make ?vpcId ?cidrBlockAssociation ?ipv6CidrBlockAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" String_.of_json in
       let cidrBlockAssociation =
@@ -15405,6 +15687,7 @@ module AssociateVpcCidrBlockRequest =
         ?ipv4IpamPoolId ?ipv6CidrBlock ?ipv6Pool
         ?ipv6CidrBlockNetworkBorderGroup ~vpcId ?cidrBlock
         ?amazonProvidedIpv6CidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv6NetmaskLength =
         field_map json "Ipv6NetmaskLength" NetmaskLength.of_json in
@@ -15471,6 +15754,7 @@ module AssociateTrunkInterfaceResult =
         (Option.map ~f:TrunkInterfaceAssociation.of_xml)
           (Xml.child xml_arg0 "interfaceAssociation") in
       make ?clientToken ?interfaceAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" String_.of_json in
       let interfaceAssociation =
@@ -15542,6 +15826,7 @@ module AssociateTrunkInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BranchInterfaceId") in
       make ?dryRun ?clientToken ?greKey ?vlanId ~trunkInterfaceId
         ~branchInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let clientToken = field_map json "ClientToken" String_.of_json in
@@ -15591,6 +15876,7 @@ module AssociateTransitGatewayRouteTableResult =
         (Option.map ~f:TransitGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "association") in
       make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let association =
         field_map json "Association" TransitGatewayAssociation.of_json in
@@ -15640,6 +15926,7 @@ module AssociateTransitGatewayRouteTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayRouteTableId") in
       make ?dryRun ~transitGatewayAttachmentId ~transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -15689,6 +15976,7 @@ module AssociateTransitGatewayMulticastDomainResult =
         (Option.map ~f:TransitGatewayMulticastDomainAssociations.of_xml)
           (Xml.child xml_arg0 "associations") in
       make ?associations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associations =
         field_map json "Associations"
@@ -15750,6 +16038,7 @@ module AssociateTransitGatewayMulticastDomainRequest =
           (Xml.child xml_arg0 "TransitGatewayMulticastDomainId") in
       make ?dryRun ?subnetIds ?transitGatewayAttachmentId
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let subnetIds =
@@ -15806,6 +16095,7 @@ module AssociateSubnetCidrBlockResult =
         (Option.map ~f:SubnetIpv6CidrBlockAssociation.of_xml)
           (Xml.child xml_arg0 "ipv6CidrBlockAssociation") in
       make ?subnetId ?ipv6CidrBlockAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetId = field_map json "SubnetId" String_.of_json in
       let ipv6CidrBlockAssociation =
@@ -15838,6 +16128,7 @@ module AssociateSubnetCidrBlockRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ipv6CidrBlock") in
       make ~subnetId ~ipv6CidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetId = field_map_exn json "SubnetId" SubnetId.of_json in
       let ipv6CidrBlock = field_map_exn json "Ipv6CidrBlock" String_.of_json in
@@ -15888,6 +16179,7 @@ module AssociateRouteTableResult =
       let associationId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationId") in
       make ?associationState ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationState =
         field_map json "AssociationState" RouteTableAssociationState.of_json in
@@ -15933,6 +16225,7 @@ module AssociateRouteTableRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?gatewayId ?subnetId ~routeTableId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayId = field_map json "GatewayId" RouteGatewayId.of_json in
       let subnetId = field_map json "SubnetId" SubnetId.of_json in
@@ -15978,6 +16271,7 @@ module AssociateInstanceEventWindowResult =
         (Option.map ~f:InstanceEventWindow.of_xml)
           (Xml.child xml_arg0 "instanceEventWindow") in
       make ?instanceEventWindow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceEventWindow =
         field_map json "InstanceEventWindow" InstanceEventWindow.of_json in
@@ -16022,6 +16316,7 @@ module AssociateInstanceEventWindowRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~associationTarget ~instanceEventWindowId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationTarget =
         field_map_exn json "AssociationTarget"
@@ -16072,6 +16367,7 @@ module AssociateIamInstanceProfileResult =
         (Option.map ~f:IamInstanceProfileAssociation.of_xml)
           (Xml.child xml_arg0 "iamInstanceProfileAssociation") in
       make ?iamInstanceProfileAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamInstanceProfileAssociation =
         field_map json "IamInstanceProfileAssociation"
@@ -16105,6 +16401,7 @@ module AssociateIamInstanceProfileRequest =
         IamInstanceProfileSpecification.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IamInstanceProfile") in
       make ~instanceId ~iamInstanceProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let iamInstanceProfile =
@@ -16175,6 +16472,7 @@ module AssociateEnclaveCertificateIamRoleResult =
           (Xml.child xml_arg0 "certificateS3BucketName") in
       make ?encryptionKmsKeyId ?certificateS3ObjectKey
         ?certificateS3BucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionKmsKeyId =
         field_map json "EncryptionKmsKeyId" String_.of_json in
@@ -16219,6 +16517,7 @@ module AssociateEnclaveCertificateIamRoleRequest =
         (Option.map ~f:ResourceArn.of_xml)
           (Xml.child xml_arg0 "CertificateArn") in
       make ?dryRun ?roleArn ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let roleArn = field_map json "RoleArn" ResourceArn.of_json in
@@ -16259,6 +16558,7 @@ module AssociateDhcpOptionsRequest =
         DefaultingDhcpOptionsId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DhcpOptionsId") in
       make ?dryRun ~vpcId ~dhcpOptionsId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
@@ -16308,6 +16608,7 @@ module AssociateClientVpnTargetNetworkResult =
       let associationId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationId") in
       make ?status ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" AssociationStatus.of_json in
       let associationId = field_map json "AssociationId" String_.of_json in
@@ -16355,6 +16656,7 @@ module AssociateClientVpnTargetNetworkRequest =
         ClientVpnEndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ?clientToken ~subnetId ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let clientToken = field_map json "ClientToken" String_.of_json in
@@ -16399,6 +16701,7 @@ module AssociateAddressResult =
       let associationId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationId") in
       make ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationId = field_map json "AssociationId" String_.of_json in
       make ?associationId ()
@@ -16482,6 +16785,7 @@ module AssociateAddressRequest =
           (Xml.child xml_arg0 "AllocationId") in
       make ?privateIpAddress ?networkInterfaceId ?dryRun ?allowReassociation
         ?publicIp ?instanceId ?allocationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateIpAddress =
         field_map json "PrivateIpAddress" String_.of_json in
@@ -16559,6 +16863,7 @@ module AssignPrivateIpAddressesResult =
           (Xml.child xml_arg0 "networkInterfaceId") in
       make ?assignedIpv4Prefixes ?assignedPrivateIpAddresses
         ?networkInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assignedIpv4Prefixes =
         field_map json "AssignedIpv4Prefixes" Ipv4PrefixesList.of_json in
@@ -16643,6 +16948,7 @@ module AssignPrivateIpAddressesRequest =
           (Xml.child xml_arg0 "allowReassignment") in
       make ?ipv4PrefixCount ?ipv4Prefixes ?secondaryPrivateIpAddressCount
         ?privateIpAddresses ~networkInterfaceId ?allowReassignment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv4PrefixCount = field_map json "Ipv4PrefixCount" Integer.of_json in
       let ipv4Prefixes = field_map json "Ipv4Prefixes" IpPrefixList.of_json in
@@ -16716,6 +17022,7 @@ module AssignIpv6AddressesResult =
           (Xml.child xml_arg0 "assignedIpv6Addresses") in
       make ?networkInterfaceId ?assignedIpv6Prefixes ?assignedIpv6Addresses
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaceId =
         field_map json "NetworkInterfaceId" String_.of_json in
@@ -16788,6 +17095,7 @@ module AssignIpv6AddressesRequest =
           (Xml.child xml_arg0 "ipv6AddressCount") in
       make ~networkInterfaceId ?ipv6Prefixes ?ipv6PrefixCount ?ipv6Addresses
         ?ipv6AddressCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkInterfaceId =
         field_map_exn json "NetworkInterfaceId" NetworkInterfaceId.of_json in
@@ -16838,6 +17146,7 @@ module ApplySecurityGroupsToClientVpnTargetNetworkResult =
         (Option.map ~f:ClientVpnSecurityGroupIdSet.of_xml)
           (Xml.child xml_arg0 "securityGroupIds") in
       make ?securityGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "SecurityGroupIds" ClientVpnSecurityGroupIdSet.of_json in
@@ -16888,6 +17197,7 @@ module ApplySecurityGroupsToClientVpnTargetNetworkRequest =
         ClientVpnEndpointId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientVpnEndpointId") in
       make ?dryRun ~securityGroupIds ~vpcId ~clientVpnEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let securityGroupIds =
@@ -16935,6 +17245,7 @@ module AllocateIpamPoolCidrResult =
         (Option.map ~f:IpamPoolAllocation.of_xml)
           (Xml.child xml_arg0 "ipamPoolAllocation") in
       make ?ipamPoolAllocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipamPoolAllocation =
         field_map json "IpamPoolAllocation" IpamPoolAllocation.of_json in
@@ -17022,6 +17333,7 @@ module AllocateIpamPoolCidrRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?disallowedCidrs ?previewNextCidr ?description ?clientToken
         ?netmaskLength ?cidr ~ipamPoolId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disallowedCidrs =
         field_map json "DisallowedCidrs"
@@ -17073,6 +17385,7 @@ module AllocateHostsResult =
         (Option.map ~f:ResponseHostIdList.of_xml)
           (Xml.child xml_arg0 "hostIdSet") in
       make ?hostIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostIds = field_map json "HostIds" ResponseHostIdList.of_json in
       make ?hostIds ()
@@ -17163,6 +17476,7 @@ module AllocateHostsRequest =
           (Xml.child xml_arg0 "autoPlacement") in
       make ?hostRecovery ?tagSpecifications ~quantity ?instanceFamily
         ?instanceType ?clientToken ~availabilityZone ?autoPlacement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostRecovery = field_map json "HostRecovery" HostRecovery.of_json in
       let tagSpecifications =
@@ -17275,6 +17589,7 @@ module AllocateAddressResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "publicIp") in
       make ?carrierIp ?customerOwnedIpv4Pool ?customerOwnedIp ?domain
         ?networkBorderGroup ?publicIpv4Pool ?allocationId ?publicIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let carrierIp = field_map json "CarrierIp" String_.of_json in
       let customerOwnedIpv4Pool =
@@ -17367,6 +17682,7 @@ module AllocateAddressRequest =
         (Option.map ~f:DomainType.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?tagSpecifications ?dryRun ?customerOwnedIpv4Pool
         ?networkBorderGroup ?publicIpv4Pool ?address ?domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagSpecifications =
         field_map json "TagSpecifications" TagSpecificationList.of_json in
@@ -17417,6 +17733,7 @@ module AdvertiseByoipCidrResult =
       let byoipCidr =
         (Option.map ~f:ByoipCidr.of_xml) (Xml.child xml_arg0 "byoipCidr") in
       make ?byoipCidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byoipCidr = field_map json "ByoipCidr" ByoipCidr.of_json in
       make ?byoipCidr ()
@@ -17446,6 +17763,7 @@ module AdvertiseByoipCidrRequest =
       let cidr =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ?dryRun ~cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let cidr = field_map_exn json "Cidr" String_.of_json in
@@ -17489,6 +17807,7 @@ module AcceptVpcPeeringConnectionResult =
         (Option.map ~f:VpcPeeringConnection.of_xml)
           (Xml.child xml_arg0 "vpcPeeringConnection") in
       make ?vpcPeeringConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnection =
         field_map json "VpcPeeringConnection" VpcPeeringConnection.of_json in
@@ -17523,6 +17842,7 @@ module AcceptVpcPeeringConnectionRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "dryRun") in
       make ?vpcPeeringConnectionId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnectionId =
         field_map json "VpcPeeringConnectionId"
@@ -17568,6 +17888,7 @@ module AcceptVpcEndpointConnectionsResult =
         (Option.map ~f:UnsuccessfulItemSet.of_xml)
           (Xml.child xml_arg0 "unsuccessful") in
       make ?unsuccessful ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unsuccessful =
         field_map json "Unsuccessful" UnsuccessfulItemSet.of_json in
@@ -17608,6 +17929,7 @@ module AcceptVpcEndpointConnectionsRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ~vpcEndpointIds ~serviceId ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcEndpointIds =
         field_map_exn json "VpcEndpointIds" VpcEndpointIdList.of_json in
@@ -17655,6 +17977,7 @@ module AcceptTransitGatewayVpcAttachmentResult =
         (Option.map ~f:TransitGatewayVpcAttachment.of_xml)
           (Xml.child xml_arg0 "transitGatewayVpcAttachment") in
       make ?transitGatewayVpcAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayVpcAttachment =
         field_map json "TransitGatewayVpcAttachment"
@@ -17692,6 +18015,7 @@ module AcceptTransitGatewayVpcAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayAttachmentId") in
       make ?dryRun ~transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -17739,6 +18063,7 @@ module AcceptTransitGatewayPeeringAttachmentResult =
         (Option.map ~f:TransitGatewayPeeringAttachment.of_xml)
           (Xml.child xml_arg0 "transitGatewayPeeringAttachment") in
       make ?transitGatewayPeeringAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayPeeringAttachment =
         field_map json "TransitGatewayPeeringAttachment"
@@ -17776,6 +18101,7 @@ module AcceptTransitGatewayPeeringAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "TransitGatewayAttachmentId") in
       make ?dryRun ~transitGatewayAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let transitGatewayAttachmentId =
@@ -17820,6 +18146,7 @@ module AcceptTransitGatewayMulticastDomainAssociationsResult =
         (Option.map ~f:TransitGatewayMulticastDomainAssociations.of_xml)
           (Xml.child xml_arg0 "associations") in
       make ?associations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associations =
         field_map json "Associations"
@@ -17879,6 +18206,7 @@ module AcceptTransitGatewayMulticastDomainAssociationsRequest =
           (Xml.child xml_arg0 "TransitGatewayMulticastDomainId") in
       make ?dryRun ?subnetIds ?transitGatewayAttachmentId
         ?transitGatewayMulticastDomainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let subnetIds = field_map json "SubnetIds" ValueStringList.of_json in
@@ -17926,6 +18254,7 @@ module AcceptReservedInstancesExchangeQuoteResult =
       let exchangeId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "exchangeId") in
       make ?exchangeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exchangeId = field_map json "ExchangeId" String_.of_json in
       make ?exchangeId ()
@@ -17969,6 +18298,7 @@ module AcceptReservedInstancesExchangeQuoteRequest =
       let dryRun =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DryRun") in
       make ?targetConfigurations ~reservedInstanceIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetConfigurations =
         field_map json "TargetConfigurations"

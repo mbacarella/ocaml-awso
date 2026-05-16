@@ -185,6 +185,7 @@ module InvalidDBClusterCapacityFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -222,6 +223,7 @@ module DBClusterBacktrackNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -260,6 +262,7 @@ module OptionGroupAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -272,6 +275,7 @@ module OptionGroupQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -284,6 +288,7 @@ module GlobalClusterAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -296,6 +301,7 @@ module GlobalClusterQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -308,6 +314,7 @@ module SubscriptionAlreadyExistFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The supplied subscription name already exists."]
@@ -319,6 +326,7 @@ module DBSubnetGroupAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -331,6 +339,7 @@ module DBSubnetGroupQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -343,6 +352,7 @@ module DBSecurityGroupAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -355,6 +365,7 @@ module DBSecurityGroupNotSupportedFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A DB security group isn't allowed for this action."]
@@ -366,6 +377,7 @@ module DBSecurityGroupQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -378,6 +390,7 @@ module DBProxyQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -415,6 +428,7 @@ module DBProxyEndpointQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -427,6 +441,7 @@ module DBParameterGroupAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A DB parameter group with the same name exists."]
@@ -438,6 +453,7 @@ module DBParameterGroupQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -450,6 +466,7 @@ module DBSubnetGroupNotAllowedFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -462,6 +479,7 @@ module InvalidDBSubnetGroupFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -554,6 +572,7 @@ module CustomAvailabilityZoneAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -566,6 +585,7 @@ module CustomAvailabilityZoneQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -602,6 +622,7 @@ module AuthorizationAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -614,6 +635,7 @@ module AuthorizationQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -735,6 +757,7 @@ module TagListMessage =
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       make ?tagList ()
@@ -833,6 +856,7 @@ module StopDBInstanceResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -867,6 +891,7 @@ module StopDBInstanceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ?dBSnapshotIdentifier ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshotIdentifier =
         field_map json "DBSnapshotIdentifier" String_.of_json in
@@ -950,6 +975,7 @@ module StopDBInstanceAutomatedBackupsReplicationResult =
         (Option.map ~f:DBInstanceAutomatedBackup.of_xml)
           (Xml.child xml_arg0 "DBInstanceAutomatedBackup") in
       make ?dBInstanceAutomatedBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceAutomatedBackup =
         field_map json "DBInstanceAutomatedBackup"
@@ -977,6 +1003,7 @@ module StopDBInstanceAutomatedBackupsReplicationMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceDBInstanceArn") in
       make ~sourceDBInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceDBInstanceArn =
         field_map_exn json "SourceDBInstanceArn" String_.of_json in
@@ -1056,6 +1083,7 @@ module StopDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -1081,6 +1109,7 @@ module StopDBClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterIdentifier =
         field_map_exn json "DBClusterIdentifier" String_.of_json in
@@ -1202,6 +1231,7 @@ module StopActivityStreamResponse =
       let kmsKeyId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       make ?status ?kinesisStreamName ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ActivityStreamStatus.of_json in
       let kinesisStreamName =
@@ -1238,6 +1268,7 @@ module StopActivityStreamRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?applyImmediately ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applyImmediately =
         field_map json "ApplyImmediately" BooleanOptional.of_json in
@@ -1320,6 +1351,7 @@ module StartExportTaskMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ExportTaskIdentifier") in
       make ?exportOnly ?s3Prefix ~kmsKeyId ~iamRoleArn ~s3BucketName
         ~sourceArn ~exportTaskIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportOnly = field_map json "ExportOnly" StringList.of_json in
       let s3Prefix = field_map json "S3Prefix" String_.of_json in
@@ -1487,6 +1519,7 @@ module StartDBInstanceResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -1511,6 +1544,7 @@ module StartDBInstanceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceIdentifier =
         field_map_exn json "DBInstanceIdentifier" String_.of_json in
@@ -1627,6 +1661,7 @@ module StartDBInstanceAutomatedBackupsReplicationResult =
         (Option.map ~f:DBInstanceAutomatedBackup.of_xml)
           (Xml.child xml_arg0 "DBInstanceAutomatedBackup") in
       make ?dBInstanceAutomatedBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceAutomatedBackup =
         field_map json "DBInstanceAutomatedBackup"
@@ -1685,6 +1720,7 @@ module StartDBInstanceAutomatedBackupsReplicationMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceDBInstanceArn") in
       make ?preSignedUrl ?kmsKeyId ?backupRetentionPeriod
         ~sourceDBInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preSignedUrl = field_map json "PreSignedUrl" String_.of_json in
       let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
@@ -1769,6 +1805,7 @@ module StartDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -1794,6 +1831,7 @@ module StartDBClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterIdentifier =
         field_map_exn json "DBClusterIdentifier" String_.of_json in
@@ -1957,6 +1995,7 @@ module StartActivityStreamResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       make ?engineNativeAuditFieldsIncluded ?applyImmediately ?mode ?status
         ?kinesisStreamName ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineNativeAuditFieldsIncluded =
         field_map json "EngineNativeAuditFieldsIncluded"
@@ -2034,6 +2073,7 @@ module StartActivityStreamRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?engineNativeAuditFieldsIncluded ?applyImmediately ~kmsKeyId ~mode
         ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineNativeAuditFieldsIncluded =
         field_map json "EngineNativeAuditFieldsIncluded"
@@ -2105,6 +2145,7 @@ module SourceRegionMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?sourceRegions ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceRegions =
         field_map json "SourceRegions" SourceRegionList.of_json in
@@ -2197,6 +2238,7 @@ module RevokeDBSecurityGroupIngressResult =
         (Option.map ~f:DBSecurityGroup.of_xml)
           (Xml.child xml_arg0 "DBSecurityGroup") in
       make ?dBSecurityGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSecurityGroup =
         field_map json "DBSecurityGroup" DBSecurityGroup.of_json in
@@ -2266,6 +2308,7 @@ module RevokeDBSecurityGroupIngressMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBSecurityGroupName") in
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupId ?eC2SecurityGroupName
         ?cIDRIP ~dBSecurityGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2SecurityGroupOwnerId =
         field_map json "EC2SecurityGroupOwnerId" String_.of_json in
@@ -2556,6 +2599,7 @@ module RestoreDBInstanceToPointInTimeResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -2949,6 +2993,7 @@ module RestoreDBInstanceToPointInTimeMessage =
         ?dBSubnetGroupName ?availabilityZone ?port ?dBInstanceClass
         ?useLatestRestorableTime ?restoreTime ~targetDBInstanceIdentifier
         ?sourceDBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupTarget = field_map json "BackupTarget" String_.of_json in
       let customIamInstanceProfile =
@@ -3243,6 +3288,7 @@ module RestoreDBInstanceFromS3Result =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -3725,6 +3771,7 @@ module RestoreDBInstanceFromS3Message =
         ?vpcSecurityGroupIds ?dBSecurityGroups ?masterUserPassword
         ?masterUsername ~engine ~dBInstanceClass ?allocatedStorage
         ~dBInstanceIdentifier ?dBName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxAllocatedStorage =
         field_map json "MaxAllocatedStorage" IntegerOptional.of_json in
@@ -4070,6 +4117,7 @@ module RestoreDBInstanceFromDBSnapshotResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -4403,6 +4451,7 @@ module RestoreDBInstanceFromDBSnapshotMessage =
         ?autoMinorVersionUpgrade ?publiclyAccessible ?multiAZ
         ?dBSubnetGroupName ?availabilityZone ?port ?dBInstanceClass
         ~dBSnapshotIdentifier ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupTarget = field_map json "BackupTarget" String_.of_json in
       let customIamInstanceProfile =
@@ -4701,6 +4750,7 @@ module RestoreDBClusterToPointInTimeResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -4960,6 +5010,7 @@ module RestoreDBClusterToPointInTimeMessage =
         ?optionGroupName ?dBSubnetGroupName ?port ?useLatestRestorableTime
         ?restoreToTime ~sourceDBClusterIdentifier ?restoreType
         ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iops = field_map json "Iops" IntegerOptional.of_json in
       let publiclyAccessible =
@@ -5235,6 +5286,7 @@ module RestoreDBClusterFromSnapshotResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -5502,6 +5554,7 @@ module RestoreDBClusterFromSnapshotMessage =
         ?optionGroupName ?databaseName ?dBSubnetGroupName ?port
         ?engineVersion ~engine ~snapshotIdentifier ~dBClusterIdentifier
         ?availabilityZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publiclyAccessible =
         field_map json "PubliclyAccessible" BooleanOptional.of_json in
@@ -5739,6 +5792,7 @@ module RestoreDBClusterFromS3Result =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -6063,6 +6117,7 @@ module RestoreDBClusterFromS3Message =
         ?dBSubnetGroupName ?vpcSecurityGroupIds ?dBClusterParameterGroupName
         ~dBClusterIdentifier ?databaseName ?characterSetName
         ?backupRetentionPeriod ?availabilityZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainIAMRoleName =
         field_map json "DomainIAMRoleName" String_.of_json in
@@ -6165,6 +6220,7 @@ module ResetDBParameterGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupName") in
       make ?parameters ?resetAllParameters ~dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "Parameters" ParametersList.of_json in
       let resetAllParameters =
@@ -6212,6 +6268,7 @@ module ResetDBClusterParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "DBClusterParameterGroupName") in
       make ?parameters ?resetAllParameters ~dBClusterParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "Parameters" ParametersList.of_json in
       let resetAllParameters =
@@ -6296,6 +6353,7 @@ module ReservedDBInstancesOfferingMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedDBInstancesOfferings ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedDBInstancesOfferings =
         field_map json "ReservedDBInstancesOfferings"
@@ -6377,6 +6435,7 @@ module ReservedDBInstanceMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedDBInstances ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedDBInstances =
         field_map json "ReservedDBInstances" ReservedDBInstanceList.of_json in
@@ -6409,6 +6468,7 @@ module RemoveTagsFromResourceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tagKeys ~resourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" KeyList.of_json in
       let resourceName = field_map_exn json "ResourceName" String_.of_json in
@@ -6486,6 +6546,7 @@ module RemoveSourceIdentifierFromSubscriptionResult =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -6520,6 +6581,7 @@ module RemoveSourceIdentifierFromSubscriptionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~sourceIdentifier ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceIdentifier =
         field_map_exn json "SourceIdentifier" String_.of_json in
@@ -6563,6 +6625,7 @@ module RemoveRoleFromDBInstanceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ~featureName ~roleArn ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureName = field_map_exn json "FeatureName" String_.of_json in
       let roleArn = field_map_exn json "RoleArn" String_.of_json in
@@ -6606,6 +6669,7 @@ module RemoveRoleFromDBClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?featureName ~roleArn ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureName = field_map json "FeatureName" String_.of_json in
       let roleArn = field_map_exn json "RoleArn" String_.of_json in
@@ -6694,6 +6758,7 @@ module RemoveFromGlobalClusterResult =
         (Option.map ~f:GlobalCluster.of_xml)
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalCluster =
         field_map json "GlobalCluster" GlobalCluster.of_json in
@@ -6729,6 +6794,7 @@ module RemoveFromGlobalClusterMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "GlobalClusterIdentifier") in
       make ?dbClusterIdentifier ?globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dbClusterIdentifier =
         field_map json "DbClusterIdentifier" String_.of_json in
@@ -6881,6 +6947,7 @@ module RegisterDBProxyTargetsResponse =
         (Option.map ~f:TargetList.of_xml)
           (Xml.child xml_arg0 "DBProxyTargets") in
       make ?dBProxyTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxyTargets = field_map json "DBProxyTargets" TargetList.of_json in
       make ?dBProxyTargets ()
@@ -6936,6 +7003,7 @@ module RegisterDBProxyTargetsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyName") in
       make ?dBClusterIdentifiers ?dBInstanceIdentifiers ?targetGroupName
         ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterIdentifiers =
         field_map json "DBClusterIdentifiers" StringList.of_json in
@@ -7011,6 +7079,7 @@ module RebootDBInstanceResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -7046,6 +7115,7 @@ module RebootDBInstanceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ?forceFailover ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceFailover =
         field_map json "ForceFailover" BooleanOptional.of_json in
@@ -7127,6 +7197,7 @@ module RebootDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -7152,6 +7223,7 @@ module RebootDBClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterIdentifier =
         field_map_exn json "DBClusterIdentifier" String_.of_json in
@@ -7248,6 +7320,7 @@ module PurchaseReservedDBInstancesOfferingResult =
         (Option.map ~f:ReservedDBInstance.of_xml)
           (Xml.child xml_arg0 "ReservedDBInstance") in
       make ?reservedDBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reservedDBInstance =
         field_map json "ReservedDBInstance" ReservedDBInstance.of_json in
@@ -7303,6 +7376,7 @@ module PurchaseReservedDBInstancesOfferingMessage =
              "ReservedDBInstancesOfferingId") in
       make ?tags ?dBInstanceCount ?reservedDBInstanceId
         ~reservedDBInstancesOfferingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let dBInstanceCount =
@@ -7378,6 +7452,7 @@ module PromoteReadReplicaResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -7428,6 +7503,7 @@ module PromoteReadReplicaMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ?preferredBackupWindow ?backupRetentionPeriod
         ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preferredBackupWindow =
         field_map json "PreferredBackupWindow" String_.of_json in
@@ -7505,6 +7581,7 @@ module PromoteReadReplicaDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -7530,6 +7607,7 @@ module PromoteReadReplicaDBClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterIdentifier =
         field_map_exn json "DBClusterIdentifier" String_.of_json in
@@ -7608,6 +7686,7 @@ module PendingMaintenanceActionsMessage =
         (Option.map ~f:PendingMaintenanceActions.of_xml)
           (Xml.child xml_arg0 "PendingMaintenanceActions") in
       make ?marker ?pendingMaintenanceActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let pendingMaintenanceActions =
@@ -7679,6 +7758,7 @@ module OrderableDBInstanceOptionsMessage =
         (Option.map ~f:OrderableDBInstanceOptionsList.of_xml)
           (Xml.child xml_arg0 "OrderableDBInstanceOptions") in
       make ?marker ?orderableDBInstanceOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let orderableDBInstanceOptions =
@@ -7754,6 +7834,7 @@ module OptionGroups =
         (Option.map ~f:OptionGroupsList.of_xml)
           (Xml.child xml_arg0 "OptionGroupsList") in
       make ?marker ?optionGroupsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let optionGroupsList =
@@ -7818,6 +7899,7 @@ module OptionGroupOptionsMessage =
         (Option.map ~f:OptionGroupOptionsList.of_xml)
           (Xml.child xml_arg0 "OptionGroupOptions") in
       make ?marker ?optionGroupOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let optionGroupOptions =
@@ -7888,6 +7970,7 @@ module ModifyOptionGroupResult =
       let optionGroup =
         (Option.map ~f:OptionGroup.of_xml) (Xml.child xml_arg0 "OptionGroup") in
       make ?optionGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionGroup = field_map json "OptionGroup" OptionGroup.of_json in
       make ?optionGroup ()
@@ -7946,6 +8029,7 @@ module ModifyOptionGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "OptionGroupName") in
       make ?applyImmediately ?optionsToRemove ?optionsToInclude
         ~optionGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let applyImmediately =
         field_map json "ApplyImmediately" Boolean.of_json in
@@ -8049,6 +8133,7 @@ module ModifyGlobalClusterResult =
         (Option.map ~f:GlobalCluster.of_xml)
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalCluster =
         field_map json "GlobalCluster" GlobalCluster.of_json in
@@ -8117,6 +8202,7 @@ module ModifyGlobalClusterMessage =
           (Xml.child xml_arg0 "GlobalClusterIdentifier") in
       make ?allowMajorVersionUpgrade ?engineVersion ?deletionProtection
         ?newGlobalClusterIdentifier ?globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowMajorVersionUpgrade =
         field_map json "AllowMajorVersionUpgrade" BooleanOptional.of_json in
@@ -8242,6 +8328,7 @@ module ModifyEventSubscriptionResult =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -8305,6 +8392,7 @@ module ModifyEventSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ?enabled ?eventCategories ?sourceType ?snsTopicArn
         ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" BooleanOptional.of_json in
       let eventCategories =
@@ -8414,6 +8502,7 @@ module ModifyDBSubnetGroupResult =
         (Option.map ~f:DBSubnetGroup.of_xml)
           (Xml.child xml_arg0 "DBSubnetGroup") in
       make ?dBSubnetGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSubnetGroup =
         field_map json "DBSubnetGroup" DBSubnetGroup.of_json in
@@ -8456,6 +8545,7 @@ module ModifyDBSubnetGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSubnetGroupName") in
       make ~subnetIds ?dBSubnetGroupDescription ~dBSubnetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetIds =
         field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
@@ -8518,6 +8608,7 @@ module ModifyDBSnapshotResult =
       let dBSnapshot =
         (Option.map ~f:DBSnapshot.of_xml) (Xml.child xml_arg0 "DBSnapshot") in
       make ?dBSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshot = field_map json "DBSnapshot" DBSnapshot.of_json in
       make ?dBSnapshot ()
@@ -8558,6 +8649,7 @@ module ModifyDBSnapshotMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSnapshotIdentifier") in
       make ?optionGroupName ?engineVersion ~dBSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionGroupName = field_map json "OptionGroupName" String_.of_json in
       let engineVersion = field_map json "EngineVersion" String_.of_json in
@@ -8650,6 +8742,7 @@ module ModifyDBSnapshotAttributeResult =
         (Option.map ~f:DBSnapshotAttributesResult.of_xml)
           (Xml.child xml_arg0 "DBSnapshotAttributesResult") in
       make ?dBSnapshotAttributesResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshotAttributesResult =
         field_map json "DBSnapshotAttributesResult"
@@ -8711,6 +8804,7 @@ module ModifyDBSnapshotAttributeMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBSnapshotIdentifier") in
       make ?valuesToRemove ?valuesToAdd ~attributeName ~dBSnapshotIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valuesToRemove =
         field_map json "ValuesToRemove" AttributeValueList.of_json in
@@ -8803,6 +8897,7 @@ module ModifyDBProxyTargetGroupResponse =
         (Option.map ~f:DBProxyTargetGroup.of_xml)
           (Xml.child xml_arg0 "DBProxyTargetGroup") in
       make ?dBProxyTargetGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxyTargetGroup =
         field_map json "DBProxyTargetGroup" DBProxyTargetGroup.of_json in
@@ -8854,6 +8949,7 @@ module ModifyDBProxyTargetGroupRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetGroupName") in
       make ?newName ?connectionPoolConfig ~dBProxyName ~targetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newName = field_map json "NewName" String_.of_json in
       let connectionPoolConfig =
@@ -8936,6 +9032,7 @@ module ModifyDBProxyResponse =
       let dBProxy =
         (Option.map ~f:DBProxy.of_xml) (Xml.child xml_arg0 "DBProxy") in
       make ?dBProxy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxy = field_map json "DBProxy" DBProxy.of_json in
       make ?dBProxy ()
@@ -9024,6 +9121,7 @@ module ModifyDBProxyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyName") in
       make ?securityGroups ?roleArn ?debugLogging ?idleClientTimeout
         ?requireTLS ?auth ?newDBProxyName ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroups = field_map json "SecurityGroups" StringList.of_json in
       let roleArn = field_map json "RoleArn" String_.of_json in
@@ -9135,6 +9233,7 @@ module ModifyDBProxyEndpointResponse =
         (Option.map ~f:DBProxyEndpoint.of_xml)
           (Xml.child xml_arg0 "DBProxyEndpoint") in
       make ?dBProxyEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxyEndpoint =
         field_map json "DBProxyEndpoint" DBProxyEndpoint.of_json in
@@ -9186,6 +9285,7 @@ module ModifyDBProxyEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyEndpointName") in
       make ?vpcSecurityGroupIds ?newDBProxyEndpointName ~dBProxyEndpointName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcSecurityGroupIds =
         field_map json "VpcSecurityGroupIds" StringList.of_json in
@@ -9224,6 +9324,7 @@ module ModifyDBParameterGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupName") in
       make ~parameters ~dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map_exn json "Parameters" ParametersList.of_json in
       let dBParameterGroupName =
@@ -9470,6 +9571,7 @@ module ModifyDBInstanceResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -10012,6 +10114,7 @@ module ModifyDBInstanceMessage =
         ?applyImmediately ?vpcSecurityGroupIds ?dBSecurityGroups
         ?dBSubnetGroupName ?dBInstanceClass ?allocatedStorage
         ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resumeFullAutomationModeMinutes =
         field_map json "ResumeFullAutomationModeMinutes"
@@ -10213,6 +10316,7 @@ module ModifyDBClusterSnapshotAttributeResult =
         (Option.map ~f:DBClusterSnapshotAttributesResult.of_xml)
           (Xml.child xml_arg0 "DBClusterSnapshotAttributesResult") in
       make ?dBClusterSnapshotAttributesResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshotAttributesResult =
         field_map json "DBClusterSnapshotAttributesResult"
@@ -10275,6 +10379,7 @@ module ModifyDBClusterSnapshotAttributeMessage =
              "DBClusterSnapshotIdentifier") in
       make ?valuesToRemove ?valuesToAdd ~attributeName
         ~dBClusterSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valuesToRemove =
         field_map json "ValuesToRemove" AttributeValueList.of_json in
@@ -10452,6 +10557,7 @@ module ModifyDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -10486,6 +10592,7 @@ module ModifyDBClusterParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "DBClusterParameterGroupName") in
       make ~parameters ~dBClusterParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map_exn json "Parameters" ParametersList.of_json in
       let dBClusterParameterGroupName =
@@ -10870,6 +10977,7 @@ module ModifyDBClusterMessage =
         ?vpcSecurityGroupIds ?dBClusterParameterGroupName
         ?backupRetentionPeriod ?applyImmediately ?newDBClusterIdentifier
         ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let performanceInsightsRetentionPeriod =
         field_map json "PerformanceInsightsRetentionPeriod"
@@ -11003,6 +11111,7 @@ module ModifyDBClusterEndpointMessage =
              "DBClusterEndpointIdentifier") in
       make ?excludedMembers ?staticMembers ?endpointType
         ~dBClusterEndpointIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let excludedMembers =
         field_map json "ExcludedMembers" StringList.of_json in
@@ -11058,6 +11167,7 @@ module ModifyCustomDBEngineVersionMessage =
         CustomEngineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Engine") in
       make ?status ?description ~engineVersion ~engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" CustomEngineVersionStatus.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -11119,6 +11229,7 @@ module ModifyCurrentDBClusterCapacityMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?timeoutAction ?secondsBeforeTimeout ?capacity
         ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeoutAction = field_map json "TimeoutAction" String_.of_json in
       let secondsBeforeTimeout =
@@ -11183,6 +11294,7 @@ module ModifyCertificatesResult =
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
       make ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificate = field_map json "Certificate" Certificate.of_json in
       make ?certificate ()
@@ -11217,6 +11329,7 @@ module ModifyCertificatesMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CertificateIdentifier") in
       make ?removeCustomerOverride ?certificateIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeCustomerOverride =
         field_map json "RemoveCustomerOverride" BooleanOptional.of_json in
@@ -11250,6 +11363,7 @@ module ListTagsForResourceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ?filters ~resourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let resourceName = field_map_exn json "ResourceName" String_.of_json in
@@ -11264,6 +11378,7 @@ module InvalidDBSubnetStateFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The DB subnet isn't in the available state."]
@@ -11337,6 +11452,7 @@ module InstallationMediaMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?installationMedia ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let installationMedia =
         field_map json "InstallationMedia" InstallationMediaList.of_json in
@@ -11408,6 +11524,7 @@ module ImportInstallationMediaMessage =
              "CustomAvailabilityZoneId") in
       make ~oSInstallationMediaPath ~engineInstallationMediaPath
         ~engineVersion ~engine ~customAvailabilityZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let oSInstallationMediaPath =
         field_map_exn json "OSInstallationMediaPath" String_.of_json in
@@ -11489,6 +11606,7 @@ module GlobalClustersMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?globalClusters ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalClusters =
         field_map json "GlobalClusters" GlobalClusterList.of_json in
@@ -11586,6 +11704,7 @@ module FailoverGlobalClusterResult =
         (Option.map ~f:GlobalCluster.of_xml)
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalCluster =
         field_map json "GlobalCluster" GlobalCluster.of_json in
@@ -11623,6 +11742,7 @@ module FailoverGlobalClusterMessage =
         GlobalClusterIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalClusterIdentifier") in
       make ~targetDbClusterIdentifier ~globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDbClusterIdentifier =
         field_map_exn json "TargetDbClusterIdentifier"
@@ -11707,6 +11827,7 @@ module FailoverDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -11742,6 +11863,7 @@ module FailoverDBClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?targetDBInstanceIdentifier ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetDBInstanceIdentifier =
         field_map json "TargetDBInstanceIdentifier" String_.of_json in
@@ -11817,6 +11939,7 @@ module ExportTasksMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?exportTasks ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportTasks = field_map json "ExportTasks" ExportTasksList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -11874,6 +11997,7 @@ module EventsMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?events ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events = field_map json "Events" EventList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -11950,6 +12074,7 @@ module EventSubscriptionsMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?eventSubscriptionsList ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscriptionsList =
         field_map json "EventSubscriptionsList"
@@ -12008,6 +12133,7 @@ module EventCategoriesMessage =
         (Option.map ~f:EventCategoriesMapList.of_xml)
           (Xml.child xml_arg0 "EventCategoriesMapList") in
       make ?eventCategoriesMapList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventCategoriesMapList =
         field_map json "EventCategoriesMapList"
@@ -12058,6 +12184,7 @@ module DownloadDBLogFilePortionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ?numberOfLines ?marker ~logFileName ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfLines = field_map json "NumberOfLines" Integer.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -12151,6 +12278,7 @@ module DownloadDBLogFilePortionDetails =
       let logFileData =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LogFileData") in
       make ?additionalDataPending ?marker ?logFileData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalDataPending =
         field_map json "AdditionalDataPending" Boolean.of_json in
@@ -12235,6 +12363,7 @@ module DescribeValidDBInstanceModificationsResult =
         (Option.map ~f:ValidDBInstanceModificationsMessage.of_xml)
           (Xml.child xml_arg0 "ValidDBInstanceModificationsMessage") in
       make ?validDBInstanceModificationsMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validDBInstanceModificationsMessage =
         field_map json "ValidDBInstanceModificationsMessage"
@@ -12262,6 +12391,7 @@ module DescribeValidDBInstanceModificationsMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceIdentifier =
         field_map_exn json "DBInstanceIdentifier" String_.of_json in
@@ -12306,6 +12436,7 @@ module DescribeSourceRegionsMessage =
       let regionName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?filters ?marker ?maxRecords ?regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -12405,6 +12536,7 @@ module DescribeReservedDBInstancesOfferingsMessage =
       make ?marker ?maxRecords ?filters ?multiAZ ?offeringType
         ?productDescription ?duration ?dBInstanceClass
         ?reservedDBInstancesOfferingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12531,6 +12663,7 @@ module DescribeReservedDBInstancesMessage =
       make ?marker ?maxRecords ?filters ?leaseId ?multiAZ ?offeringType
         ?productDescription ?duration ?dBInstanceClass
         ?reservedDBInstancesOfferingId ?reservedDBInstanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12592,6 +12725,7 @@ module DescribePendingMaintenanceActionsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ResourceIdentifier") in
       make ?maxRecords ?marker ?filters ?resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -12690,6 +12824,7 @@ module DescribeOrderableDBInstanceOptionsMessage =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Engine") in
       make ?marker ?maxRecords ?filters ?vpc ?availabilityZoneGroup
         ?licenseModel ?dBInstanceClass ?engineVersion ~engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12769,6 +12904,7 @@ module DescribeOptionGroupsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OptionGroupName") in
       make ?majorEngineVersion ?engineName ?maxRecords ?marker ?filters
         ?optionGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let majorEngineVersion =
         field_map json "MajorEngineVersion" String_.of_json in
@@ -12832,6 +12968,7 @@ module DescribeOptionGroupOptionsMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EngineName") in
       make ?marker ?maxRecords ?filters ?majorEngineVersion ~engineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12882,6 +13019,7 @@ module DescribeInstallationMediaMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "InstallationMediaId") in
       make ?marker ?maxRecords ?filters ?installationMediaId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12933,6 +13071,7 @@ module DescribeGlobalClustersMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "GlobalClusterIdentifier") in
       make ?marker ?maxRecords ?filters ?globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -12997,6 +13136,7 @@ module DescribeExportTasksMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ExportTaskIdentifier") in
       make ?maxRecords ?marker ?filters ?sourceArn ?exportTaskIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -13098,6 +13238,7 @@ module DescribeEventsMessage =
           (Xml.child xml_arg0 "SourceIdentifier") in
       make ?marker ?maxRecords ?filters ?eventCategories ?duration ?endTime
         ?startTime ?sourceType ?sourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13154,6 +13295,7 @@ module DescribeEventSubscriptionsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SubscriptionName") in
       make ?marker ?maxRecords ?filters ?subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13184,6 +13326,7 @@ module DescribeEventCategoriesMessage =
       let sourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?filters ?sourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" FilterList.of_json in
       let sourceType = field_map json "SourceType" String_.of_json in
@@ -13241,6 +13384,7 @@ module DescribeEngineDefaultParametersResult =
         (Option.map ~f:EngineDefaults.of_xml)
           (Xml.child xml_arg0 "EngineDefaults") in
       make ?engineDefaults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineDefaults =
         field_map json "EngineDefaults" EngineDefaults.of_json in
@@ -13288,6 +13432,7 @@ module DescribeEngineDefaultParametersMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupFamily") in
       make ?marker ?maxRecords ?filters ~dBParameterGroupFamily ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13348,6 +13493,7 @@ module DescribeEngineDefaultClusterParametersResult =
         (Option.map ~f:EngineDefaults.of_xml)
           (Xml.child xml_arg0 "EngineDefaults") in
       make ?engineDefaults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineDefaults =
         field_map json "EngineDefaults" EngineDefaults.of_json in
@@ -13396,6 +13542,7 @@ module DescribeEngineDefaultClusterParametersMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupFamily") in
       make ?marker ?maxRecords ?filters ~dBParameterGroupFamily ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13444,6 +13591,7 @@ module DescribeDBSubnetGroupsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBSubnetGroupName") in
       make ?marker ?maxRecords ?filters ?dBSubnetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13542,6 +13690,7 @@ module DescribeDBSnapshotsMessage =
           (Xml.child xml_arg0 "DBInstanceIdentifier") in
       make ?dbiResourceId ?includePublic ?includeShared ?marker ?maxRecords
         ?filters ?snapshotType ?dBSnapshotIdentifier ?dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dbiResourceId = field_map json "DbiResourceId" String_.of_json in
       let includePublic = field_map json "IncludePublic" Boolean.of_json in
@@ -13619,6 +13768,7 @@ module DescribeDBSnapshotAttributesResult =
         (Option.map ~f:DBSnapshotAttributesResult.of_xml)
           (Xml.child xml_arg0 "DBSnapshotAttributesResult") in
       make ?dBSnapshotAttributesResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshotAttributesResult =
         field_map json "DBSnapshotAttributesResult"
@@ -13646,6 +13796,7 @@ module DescribeDBSnapshotAttributesMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSnapshotIdentifier") in
       make ~dBSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshotIdentifier =
         field_map_exn json "DBSnapshotIdentifier" String_.of_json in
@@ -13692,6 +13843,7 @@ module DescribeDBSecurityGroupsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBSecurityGroupName") in
       make ?marker ?maxRecords ?filters ?dBSecurityGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -13796,6 +13948,7 @@ module DescribeDBProxyTargetsResponse =
       let targets =
         (Option.map ~f:TargetList.of_xml) (Xml.child xml_arg0 "Targets") in
       make ?marker ?targets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let targets = field_map json "Targets" TargetList.of_json in
@@ -13849,6 +14002,7 @@ module DescribeDBProxyTargetsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyName") in
       make ?maxRecords ?marker ?filters ?targetGroupName ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -13947,6 +14101,7 @@ module DescribeDBProxyTargetGroupsResponse =
         (Option.map ~f:TargetGroupList.of_xml)
           (Xml.child xml_arg0 "TargetGroups") in
       make ?marker ?targetGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let targetGroups =
@@ -14002,6 +14157,7 @@ module DescribeDBProxyTargetGroupsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyName") in
       make ?maxRecords ?marker ?filters ?targetGroupName ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -14091,6 +14247,7 @@ module DescribeDBProxyEndpointsResponse =
         (Option.map ~f:DBProxyEndpointList.of_xml)
           (Xml.child xml_arg0 "DBProxyEndpoints") in
       make ?marker ?dBProxyEndpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let dBProxyEndpoints =
@@ -14151,6 +14308,7 @@ module DescribeDBProxyEndpointsRequest =
       let dBProxyName =
         (Option.map ~f:DBProxyName.of_xml) (Xml.child xml_arg0 "DBProxyName") in
       make ?maxRecords ?marker ?filters ?dBProxyEndpointName ?dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -14226,6 +14384,7 @@ module DescribeDBProxiesResponse =
       let dBProxies =
         (Option.map ~f:DBProxyList.of_xml) (Xml.child xml_arg0 "DBProxies") in
       make ?marker ?dBProxies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let dBProxies = field_map json "DBProxies" DBProxyList.of_json in
@@ -14269,6 +14428,7 @@ module DescribeDBProxiesRequest =
       let dBProxyName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DBProxyName") in
       make ?maxRecords ?marker ?filters ?dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -14326,6 +14486,7 @@ module DescribeDBParametersMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupName") in
       make ?marker ?maxRecords ?filters ?source ~dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -14377,6 +14538,7 @@ module DescribeDBParameterGroupsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBParameterGroupName") in
       make ?marker ?maxRecords ?filters ?dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -14453,6 +14615,7 @@ module DescribeDBLogFilesResponse =
         (Option.map ~f:DescribeDBLogFilesList.of_xml)
           (Xml.child xml_arg0 "DescribeDBLogFiles") in
       make ?marker ?describeDBLogFiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let describeDBLogFiles =
@@ -14534,6 +14697,7 @@ module DescribeDBLogFilesMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ?marker ?maxRecords ?filters ?fileSize ?fileLastWritten
         ?filenameContains ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -14589,6 +14753,7 @@ module DescribeDBInstancesMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBInstanceIdentifier") in
       make ?marker ?maxRecords ?filters ?dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -14664,6 +14829,7 @@ module DescribeDBInstanceAutomatedBackupsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbiResourceId") in
       make ?dBInstanceAutomatedBackupsArn ?marker ?maxRecords ?filters
         ?dBInstanceIdentifier ?dbiResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceAutomatedBackupsArn =
         field_map json "DBInstanceAutomatedBackupsArn" String_.of_json in
@@ -14779,6 +14945,7 @@ module DescribeDBEngineVersionsMessage =
       make ?includeAll ?listSupportedTimezones ?listSupportedCharacterSets
         ?defaultOnly ?marker ?maxRecords ?filters ?dBParameterGroupFamily
         ?engineVersion ?engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeAll = field_map json "IncludeAll" BooleanOptional.of_json in
       let listSupportedTimezones =
@@ -14854,6 +15021,7 @@ module DescribeDBClustersMessage =
           (Xml.child xml_arg0 "DBClusterIdentifier") in
       make ?includeShared ?marker ?maxRecords ?filters ?dBClusterIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeShared = field_map json "IncludeShared" Boolean.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -14947,6 +15115,7 @@ module DescribeDBClusterSnapshotsMessage =
           (Xml.child xml_arg0 "DBClusterIdentifier") in
       make ?includePublic ?includeShared ?marker ?maxRecords ?filters
         ?snapshotType ?dBClusterSnapshotIdentifier ?dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includePublic = field_map json "IncludePublic" Boolean.of_json in
       let includeShared = field_map json "IncludeShared" Boolean.of_json in
@@ -15028,6 +15197,7 @@ module DescribeDBClusterSnapshotAttributesResult =
         (Option.map ~f:DBClusterSnapshotAttributesResult.of_xml)
           (Xml.child xml_arg0 "DBClusterSnapshotAttributesResult") in
       make ?dBClusterSnapshotAttributesResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshotAttributesResult =
         field_map json "DBClusterSnapshotAttributesResult"
@@ -15057,6 +15227,7 @@ module DescribeDBClusterSnapshotAttributesMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "DBClusterSnapshotIdentifier") in
       make ~dBClusterSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshotIdentifier =
         field_map_exn json "DBClusterSnapshotIdentifier" String_.of_json in
@@ -15120,6 +15291,7 @@ module DescribeDBClusterParametersMessage =
              "DBClusterParameterGroupName") in
       make ?marker ?maxRecords ?filters ?source ~dBClusterParameterGroupName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -15172,6 +15344,7 @@ module DescribeDBClusterParameterGroupsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBClusterParameterGroupName") in
       make ?marker ?maxRecords ?filters ?dBClusterParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -15239,6 +15412,7 @@ module DescribeDBClusterEndpointsMessage =
           (Xml.child xml_arg0 "DBClusterIdentifier") in
       make ?marker ?maxRecords ?filters ?dBClusterEndpointIdentifier
         ?dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -15311,6 +15485,7 @@ module DescribeDBClusterBacktracksMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?marker ?maxRecords ?filters ?backtrackIdentifier
         ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -15365,6 +15540,7 @@ module DescribeCustomAvailabilityZonesMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CustomAvailabilityZoneId") in
       make ?marker ?maxRecords ?filters ?customAvailabilityZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -15415,6 +15591,7 @@ module DescribeCertificatesMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CertificateIdentifier") in
       make ?marker ?maxRecords ?filters ?certificateIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
@@ -15432,6 +15609,7 @@ module DescribeAccountAttributesMessage =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -15506,6 +15684,7 @@ module DeregisterDBProxyTargetsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15559,6 +15738,7 @@ module DeregisterDBProxyTargetsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyName") in
       make ?dBClusterIdentifiers ?dBInstanceIdentifiers ?targetGroupName
         ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterIdentifiers =
         field_map json "DBClusterIdentifiers" StringList.of_json in
@@ -15589,6 +15769,7 @@ module DeleteOptionGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OptionGroupName") in
       make ~optionGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionGroupName =
         field_map_exn json "OptionGroupName" String_.of_json in
@@ -15613,6 +15794,7 @@ module DeleteInstallationMediaMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstallationMediaId") in
       make ~installationMediaId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let installationMediaId =
         field_map_exn json "InstallationMediaId" String_.of_json in
@@ -15689,6 +15871,7 @@ module DeleteGlobalClusterResult =
         (Option.map ~f:GlobalCluster.of_xml)
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalCluster =
         field_map json "GlobalCluster" GlobalCluster.of_json in
@@ -15715,6 +15898,7 @@ module DeleteGlobalClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalClusterIdentifier") in
       make ~globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalClusterIdentifier =
         field_map_exn json "GlobalClusterIdentifier" String_.of_json in
@@ -15793,6 +15977,7 @@ module DeleteEventSubscriptionResult =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -15817,6 +16002,7 @@ module DeleteEventSubscriptionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionName =
         field_map_exn json "SubscriptionName" String_.of_json in
@@ -15841,6 +16027,7 @@ module DeleteDBSubnetGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSubnetGroupName") in
       make ~dBSubnetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSubnetGroupName =
         field_map_exn json "DBSubnetGroupName" String_.of_json in
@@ -15910,6 +16097,7 @@ module DeleteDBSnapshotResult =
       let dBSnapshot =
         (Option.map ~f:DBSnapshot.of_xml) (Xml.child xml_arg0 "DBSnapshot") in
       make ?dBSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshot = field_map json "DBSnapshot" DBSnapshot.of_json in
       make ?dBSnapshot ()
@@ -15935,6 +16123,7 @@ module DeleteDBSnapshotMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSnapshotIdentifier") in
       make ~dBSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshotIdentifier =
         field_map_exn json "DBSnapshotIdentifier" String_.of_json in
@@ -15960,6 +16149,7 @@ module DeleteDBSecurityGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSecurityGroupName") in
       make ~dBSecurityGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSecurityGroupName =
         field_map_exn json "DBSecurityGroupName" String_.of_json in
@@ -16028,6 +16218,7 @@ module DeleteDBProxyResponse =
       let dBProxy =
         (Option.map ~f:DBProxy.of_xml) (Xml.child xml_arg0 "DBProxy") in
       make ?dBProxy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxy = field_map json "DBProxy" DBProxy.of_json in
       make ?dBProxy ()
@@ -16050,6 +16241,7 @@ module DeleteDBProxyRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyName") in
       make ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxyName = field_map_exn json "DBProxyName" String_.of_json in
       make ~dBProxyName ()
@@ -16129,6 +16321,7 @@ module DeleteDBProxyEndpointResponse =
         (Option.map ~f:DBProxyEndpoint.of_xml)
           (Xml.child xml_arg0 "DBProxyEndpoint") in
       make ?dBProxyEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxyEndpoint =
         field_map json "DBProxyEndpoint" DBProxyEndpoint.of_json in
@@ -16154,6 +16347,7 @@ module DeleteDBProxyEndpointRequest =
         DBProxyEndpointName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyEndpointName") in
       make ~dBProxyEndpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxyEndpointName =
         field_map_exn json "DBProxyEndpointName" DBProxyEndpointName.of_json in
@@ -16180,6 +16374,7 @@ module DeleteDBParameterGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupName") in
       make ~dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBParameterGroupName =
         field_map_exn json "DBParameterGroupName" String_.of_json in
@@ -16295,6 +16490,7 @@ module DeleteDBInstanceResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -16355,6 +16551,7 @@ module DeleteDBInstanceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ?deleteAutomatedBackups ?finalDBSnapshotIdentifier
         ?skipFinalSnapshot ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteAutomatedBackups =
         field_map json "DeleteAutomatedBackups" BooleanOptional.of_json in
@@ -16449,6 +16646,7 @@ module DeleteDBInstanceAutomatedBackupResult =
         (Option.map ~f:DBInstanceAutomatedBackup.of_xml)
           (Xml.child xml_arg0 "DBInstanceAutomatedBackup") in
       make ?dBInstanceAutomatedBackup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceAutomatedBackup =
         field_map json "DBInstanceAutomatedBackup"
@@ -16483,6 +16681,7 @@ module DeleteDBInstanceAutomatedBackupMessage =
       let dbiResourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbiResourceId") in
       make ?dBInstanceAutomatedBackupsArn ?dbiResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceAutomatedBackupsArn =
         field_map json "DBInstanceAutomatedBackupsArn" String_.of_json in
@@ -16563,6 +16762,7 @@ module DeleteDBClusterSnapshotResult =
         (Option.map ~f:DBClusterSnapshot.of_xml)
           (Xml.child xml_arg0 "DBClusterSnapshot") in
       make ?dBClusterSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshot =
         field_map json "DBClusterSnapshot" DBClusterSnapshot.of_json in
@@ -16591,6 +16791,7 @@ module DeleteDBClusterSnapshotMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "DBClusterSnapshotIdentifier") in
       make ~dBClusterSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshotIdentifier =
         field_map_exn json "DBClusterSnapshotIdentifier" String_.of_json in
@@ -16693,6 +16894,7 @@ module DeleteDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -16720,6 +16922,7 @@ module DeleteDBClusterParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "DBClusterParameterGroupName") in
       make ~dBClusterParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterParameterGroupName =
         field_map_exn json "DBClusterParameterGroupName" String_.of_json in
@@ -16770,6 +16973,7 @@ module DeleteDBClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?finalDBSnapshotIdentifier ?skipFinalSnapshot ~dBClusterIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalDBSnapshotIdentifier =
         field_map json "FinalDBSnapshotIdentifier" String_.of_json in
@@ -16802,6 +17006,7 @@ module DeleteDBClusterEndpointMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "DBClusterEndpointIdentifier") in
       make ~dBClusterEndpointIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterEndpointIdentifier =
         field_map_exn json "DBClusterEndpointIdentifier" String_.of_json in
@@ -16836,6 +17041,7 @@ module DeleteCustomDBEngineVersionMessage =
         CustomEngineName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Engine") in
       make ~engineVersion ~engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let engineVersion =
         field_map_exn json "EngineVersion" CustomEngineVersion.of_json in
@@ -16918,6 +17124,7 @@ module DeleteCustomAvailabilityZoneResult =
         (Option.map ~f:CustomAvailabilityZone.of_xml)
           (Xml.child xml_arg0 "CustomAvailabilityZone") in
       make ?customAvailabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customAvailabilityZone =
         field_map json "CustomAvailabilityZone"
@@ -16946,6 +17153,7 @@ module DeleteCustomAvailabilityZoneMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "CustomAvailabilityZoneId") in
       make ~customAvailabilityZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customAvailabilityZoneId =
         field_map_exn json "CustomAvailabilityZoneId" String_.of_json in
@@ -17020,6 +17228,7 @@ module DBSubnetGroupMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBSubnetGroups ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSubnetGroups =
         field_map json "DBSubnetGroups" DBSubnetGroups.of_json in
@@ -17094,6 +17303,7 @@ module DBSnapshotMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBSnapshots ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshots = field_map json "DBSnapshots" DBSnapshotList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -17170,6 +17380,7 @@ module DBSecurityGroupMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBSecurityGroups ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSecurityGroups =
         field_map json "DBSecurityGroups" DBSecurityGroups.of_json in
@@ -17247,6 +17458,7 @@ module DBParameterGroupsMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBParameterGroups ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBParameterGroups =
         field_map json "DBParameterGroups" DBParameterGroupList.of_json in
@@ -17328,6 +17540,7 @@ module DBParameterGroupNameMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBParameterGroupName") in
       make ?dBParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBParameterGroupName =
         field_map json "DBParameterGroupName" String_.of_json in
@@ -17402,6 +17615,7 @@ module DBParameterGroupDetails =
         (Option.map ~f:ParametersList.of_xml)
           (Xml.child xml_arg0 "Parameters") in
       make ?marker ?parameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let parameters = field_map json "Parameters" ParametersList.of_json in
@@ -17417,6 +17631,7 @@ module DBInstanceRoleQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17429,6 +17644,7 @@ module DBInstanceRoleNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17441,6 +17657,7 @@ module DBInstanceRoleAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17511,6 +17728,7 @@ module DBInstanceMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBInstances ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstances = field_map json "DBInstances" DBInstanceList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -17593,6 +17811,7 @@ module DBInstanceAutomatedBackupMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBInstanceAutomatedBackups ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstanceAutomatedBackups =
         field_map json "DBInstanceAutomatedBackups"
@@ -17659,6 +17878,7 @@ module DBEngineVersionMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBEngineVersions ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBEngineVersions =
         field_map json "DBEngineVersions" DBEngineVersionList.of_json in
@@ -17736,6 +17956,7 @@ module DBClusterSnapshotMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusterSnapshots ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshots =
         field_map json "DBClusterSnapshots" DBClusterSnapshotList.of_json in
@@ -17752,6 +17973,7 @@ module DBClusterRoleQuotaExceededFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17764,6 +17986,7 @@ module DBClusterRoleNotFoundFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17776,6 +17999,7 @@ module DBClusterRoleAlreadyExistsFault =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17853,6 +18077,7 @@ module DBClusterParameterGroupsMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusterParameterGroups ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterParameterGroups =
         field_map json "DBClusterParameterGroups"
@@ -17939,6 +18164,7 @@ module DBClusterParameterGroupNameMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBClusterParameterGroupName") in
       make ?dBClusterParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterParameterGroupName =
         field_map json "DBClusterParameterGroupName" String_.of_json in
@@ -18014,6 +18240,7 @@ module DBClusterParameterGroupDetails =
         (Option.map ~f:ParametersList.of_xml)
           (Xml.child xml_arg0 "Parameters") in
       make ?marker ?parameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let parameters = field_map json "Parameters" ParametersList.of_json in
@@ -18086,6 +18313,7 @@ module DBClusterMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusters ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusters = field_map json "DBClusters" DBClusterList.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -18161,6 +18389,7 @@ module DBClusterEndpointMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusterEndpoints ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterEndpoints =
         field_map json "DBClusterEndpoints" DBClusterEndpointList.of_json in
@@ -18294,6 +18523,7 @@ module DBClusterCapacityInfo =
           (Xml.child xml_arg0 "DBClusterIdentifier") in
       make ?timeoutAction ?secondsBeforeTimeout ?currentCapacity
         ?pendingCapacity ?dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeoutAction = field_map json "TimeoutAction" String_.of_json in
       let secondsBeforeTimeout =
@@ -18390,6 +18620,7 @@ module DBClusterBacktrackMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusterBacktracks ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterBacktracks =
         field_map json "DBClusterBacktracks" DBClusterBacktrackList.of_json in
@@ -18474,6 +18705,7 @@ module CustomAvailabilityZoneMessage =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?customAvailabilityZones ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customAvailabilityZones =
         field_map json "CustomAvailabilityZones"
@@ -18548,6 +18780,7 @@ module CreateOptionGroupResult =
       let optionGroup =
         (Option.map ~f:OptionGroup.of_xml) (Xml.child xml_arg0 "OptionGroup") in
       make ?optionGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionGroup = field_map json "OptionGroup" OptionGroup.of_json in
       make ?optionGroup ()
@@ -18611,6 +18844,7 @@ module CreateOptionGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "OptionGroupName") in
       make ?tags ~optionGroupDescription ~majorEngineVersion ~engineName
         ~optionGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let optionGroupDescription =
@@ -18713,6 +18947,7 @@ module CreateGlobalClusterResult =
         (Option.map ~f:GlobalCluster.of_xml)
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalCluster =
         field_map json "GlobalCluster" GlobalCluster.of_json in
@@ -18796,6 +19031,7 @@ module CreateGlobalClusterMessage =
           (Xml.child xml_arg0 "GlobalClusterIdentifier") in
       make ?storageEncrypted ?databaseName ?deletionProtection ?engineVersion
         ?engine ?sourceDBClusterIdentifier ?globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageEncrypted =
         field_map json "StorageEncrypted" BooleanOptional.of_json in
@@ -18934,6 +19170,7 @@ module CreateEventSubscriptionResult =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -19012,6 +19249,7 @@ module CreateEventSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ?tags ?enabled ?sourceIds ?eventCategories ?sourceType
         ~snsTopicArn ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let enabled = field_map json "Enabled" BooleanOptional.of_json in
@@ -19126,6 +19364,7 @@ module CreateDBSubnetGroupResult =
         (Option.map ~f:DBSubnetGroup.of_xml)
           (Xml.child xml_arg0 "DBSubnetGroup") in
       make ?dBSubnetGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSubnetGroup =
         field_map json "DBSubnetGroup" DBSubnetGroup.of_json in
@@ -19175,6 +19414,7 @@ module CreateDBSubnetGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSubnetGroupName") in
       make ?tags ~subnetIds ~dBSubnetGroupDescription ~dBSubnetGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let subnetIds =
@@ -19270,6 +19510,7 @@ module CreateDBSnapshotResult =
       let dBSnapshot =
         (Option.map ~f:DBSnapshot.of_xml) (Xml.child xml_arg0 "DBSnapshot") in
       make ?dBSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshot = field_map json "DBSnapshot" DBSnapshot.of_json in
       make ?dBSnapshot ()
@@ -19309,6 +19550,7 @@ module CreateDBSnapshotMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSnapshotIdentifier") in
       make ?tags ~dBInstanceIdentifier ~dBSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let dBInstanceIdentifier =
@@ -19404,6 +19646,7 @@ module CreateDBSecurityGroupResult =
         (Option.map ~f:DBSecurityGroup.of_xml)
           (Xml.child xml_arg0 "DBSecurityGroup") in
       make ?dBSecurityGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSecurityGroup =
         field_map json "DBSecurityGroup" DBSecurityGroup.of_json in
@@ -19445,6 +19688,7 @@ module CreateDBSecurityGroupMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBSecurityGroupName") in
       make ?tags ~dBSecurityGroupDescription ~dBSecurityGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let dBSecurityGroupDescription =
@@ -19522,6 +19766,7 @@ module CreateDBProxyResponse =
       let dBProxy =
         (Option.map ~f:DBProxy.of_xml) (Xml.child xml_arg0 "DBProxy") in
       make ?dBProxy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxy = field_map json "DBProxy" DBProxy.of_json in
       make ?dBProxy ()
@@ -19628,6 +19873,7 @@ module CreateDBProxyRequest =
       make ?tags ?debugLogging ?idleClientTimeout ?requireTLS
         ?vpcSecurityGroupIds ~vpcSubnetIds ~roleArn ~auth ~engineFamily
         ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let debugLogging = field_map json "DebugLogging" Boolean.of_json in
@@ -19748,6 +19994,7 @@ module CreateDBProxyEndpointResponse =
         (Option.map ~f:DBProxyEndpoint.of_xml)
           (Xml.child xml_arg0 "DBProxyEndpoint") in
       make ?dBProxyEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBProxyEndpoint =
         field_map json "DBProxyEndpoint" DBProxyEndpoint.of_json in
@@ -19821,6 +20068,7 @@ module CreateDBProxyEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DBProxyName") in
       make ?tags ?targetRole ?vpcSecurityGroupIds ~vpcSubnetIds
         ~dBProxyEndpointName ~dBProxyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let targetRole =
@@ -19910,6 +20158,7 @@ module CreateDBParameterGroupResult =
         (Option.map ~f:DBParameterGroup.of_xml)
           (Xml.child xml_arg0 "DBParameterGroup") in
       make ?dBParameterGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBParameterGroup =
         field_map json "DBParameterGroup" DBParameterGroup.of_json in
@@ -19965,6 +20214,7 @@ module CreateDBParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupName") in
       make ?tags ~description ~dBParameterGroupFamily ~dBParameterGroupName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map_exn json "Description" String_.of_json in
@@ -20211,6 +20461,7 @@ module CreateDBInstanceResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -20458,6 +20709,7 @@ module CreateDBInstanceReadReplicaResult =
       let dBInstance =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBInstance = field_map json "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
@@ -20819,6 +21071,7 @@ module CreateDBInstanceReadReplicaMessage =
         ?publiclyAccessible ?dBParameterGroupName ?optionGroupName ?iops
         ?autoMinorVersionUpgrade ?multiAZ ?port ?availabilityZone
         ?dBInstanceClass ~sourceDBInstanceIdentifier ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customIamInstanceProfile =
         field_map json "CustomIamInstanceProfile" String_.of_json in
@@ -21435,6 +21688,7 @@ module CreateDBInstanceMessage =
         ?vpcSecurityGroupIds ?dBSecurityGroups ?masterUserPassword
         ?masterUsername ~engine ~dBInstanceClass ?allocatedStorage
         ~dBInstanceIdentifier ?dBName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupTarget = field_map json "BackupTarget" String_.of_json in
       let customIamInstanceProfile =
@@ -21643,6 +21897,7 @@ module CreateDBClusterSnapshotResult =
         (Option.map ~f:DBClusterSnapshot.of_xml)
           (Xml.child xml_arg0 "DBClusterSnapshot") in
       make ?dBClusterSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshot =
         field_map json "DBClusterSnapshot" DBClusterSnapshot.of_json in
@@ -21686,6 +21941,7 @@ module CreateDBClusterSnapshotMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "DBClusterSnapshotIdentifier") in
       make ?tags ~dBClusterIdentifier ~dBClusterSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let dBClusterIdentifier =
@@ -21922,6 +22178,7 @@ module CreateDBClusterResult =
       let dBCluster =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBCluster = field_map json "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
@@ -22006,6 +22263,7 @@ module CreateDBClusterParameterGroupResult =
         (Option.map ~f:DBClusterParameterGroup.of_xml)
           (Xml.child xml_arg0 "DBClusterParameterGroup") in
       make ?dBClusterParameterGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterParameterGroup =
         field_map json "DBClusterParameterGroup"
@@ -22063,6 +22321,7 @@ module CreateDBClusterParameterGroupMessage =
              "DBClusterParameterGroupName") in
       make ?tags ~description ~dBParameterGroupFamily
         ~dBClusterParameterGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map_exn json "Description" String_.of_json in
@@ -22560,6 +22819,7 @@ module CreateDBClusterMessage =
         ?dBSubnetGroupName ?vpcSecurityGroupIds ?dBClusterParameterGroupName
         ~dBClusterIdentifier ?databaseName ?characterSetName
         ?backupRetentionPeriod ?availabilityZones ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let performanceInsightsRetentionPeriod =
         field_map json "PerformanceInsightsRetentionPeriod"
@@ -22724,6 +22984,7 @@ module CreateDBClusterEndpointMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?tags ?excludedMembers ?staticMembers ~endpointType
         ~dBClusterEndpointIdentifier ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let excludedMembers =
@@ -22826,6 +23087,7 @@ module CreateCustomDBEngineVersionMessage =
       make ?tags ~manifest ?description ~kMSKeyId
         ?databaseInstallationFilesS3Prefix
         ~databaseInstallationFilesS3BucketName ~engineVersion ~engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let manifest =
@@ -22932,6 +23194,7 @@ module CreateCustomAvailabilityZoneResult =
         (Option.map ~f:CustomAvailabilityZone.of_xml)
           (Xml.child xml_arg0 "CustomAvailabilityZone") in
       make ?customAvailabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customAvailabilityZone =
         field_map json "CustomAvailabilityZone"
@@ -22992,6 +23255,7 @@ module CreateCustomAvailabilityZoneMessage =
              "CustomAvailabilityZoneName") in
       make ?vpnTunnelOriginatorIP ?newVpnTunnelName ?existingVpnId
         ~customAvailabilityZoneName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnTunnelOriginatorIP =
         field_map json "VpnTunnelOriginatorIP" String_.of_json in
@@ -23078,6 +23342,7 @@ module CopyOptionGroupResult =
       let optionGroup =
         (Option.map ~f:OptionGroup.of_xml) (Xml.child xml_arg0 "OptionGroup") in
       make ?optionGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optionGroup = field_map json "OptionGroup" OptionGroup.of_json in
       make ?optionGroup ()
@@ -23134,6 +23399,7 @@ module CopyOptionGroupMessage =
              "SourceOptionGroupIdentifier") in
       make ?tags ~targetOptionGroupDescription ~targetOptionGroupIdentifier
         ~sourceOptionGroupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let targetOptionGroupDescription =
@@ -23251,6 +23517,7 @@ module CopyDBSnapshotResult =
       let dBSnapshot =
         (Option.map ~f:DBSnapshot.of_xml) (Xml.child xml_arg0 "DBSnapshot") in
       make ?dBSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSnapshot = field_map json "DBSnapshot" DBSnapshot.of_json in
       make ?dBSnapshot ()
@@ -23343,6 +23610,7 @@ module CopyDBSnapshotMessage =
       make ?targetCustomAvailabilityZone ?optionGroupName ?preSignedUrl
         ?copyTags ?tags ?kmsKeyId ~targetDBSnapshotIdentifier
         ~sourceDBSnapshotIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetCustomAvailabilityZone =
         field_map json "TargetCustomAvailabilityZone" String_.of_json in
@@ -23445,6 +23713,7 @@ module CopyDBParameterGroupResult =
         (Option.map ~f:DBParameterGroup.of_xml)
           (Xml.child xml_arg0 "DBParameterGroup") in
       make ?dBParameterGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBParameterGroup =
         field_map json "DBParameterGroup" DBParameterGroup.of_json in
@@ -23503,6 +23772,7 @@ module CopyDBParameterGroupMessage =
       make ?tags ~targetDBParameterGroupDescription
         ~targetDBParameterGroupIdentifier ~sourceDBParameterGroupIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let targetDBParameterGroupDescription =
@@ -23631,6 +23901,7 @@ module CopyDBClusterSnapshotResult =
         (Option.map ~f:DBClusterSnapshot.of_xml)
           (Xml.child xml_arg0 "DBClusterSnapshot") in
       make ?dBClusterSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterSnapshot =
         field_map json "DBClusterSnapshot" DBClusterSnapshot.of_json in
@@ -23705,6 +23976,7 @@ module CopyDBClusterSnapshotMessage =
       make ?tags ?copyTags ?preSignedUrl ?kmsKeyId
         ~targetDBClusterSnapshotIdentifier ~sourceDBClusterSnapshotIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let copyTags = field_map json "CopyTags" BooleanOptional.of_json in
@@ -23808,6 +24080,7 @@ module CopyDBClusterParameterGroupResult =
         (Option.map ~f:DBClusterParameterGroup.of_xml)
           (Xml.child xml_arg0 "DBClusterParameterGroup") in
       make ?dBClusterParameterGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBClusterParameterGroup =
         field_map json "DBClusterParameterGroup"
@@ -23868,6 +24141,7 @@ module CopyDBClusterParameterGroupMessage =
       make ?tags ~targetDBClusterParameterGroupDescription
         ~targetDBClusterParameterGroupIdentifier
         ~sourceDBClusterParameterGroupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let targetDBClusterParameterGroupDescription =
@@ -23951,6 +24225,7 @@ module CertificateMessage =
         (Option.map ~f:CertificateList.of_xml)
           (Xml.child xml_arg0 "Certificates") in
       make ?marker ?certificates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let certificates =
@@ -23976,6 +24251,7 @@ module CancelExportTaskMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExportTaskIdentifier") in
       make ~exportTaskIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportTaskIdentifier =
         field_map_exn json "ExportTaskIdentifier" String_.of_json in
@@ -24035,6 +24311,7 @@ module BacktrackDBClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?useEarliestTimeOnPointInTimeUnavailable ?force ~backtrackTo
         ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useEarliestTimeOnPointInTimeUnavailable =
         field_map json "UseEarliestTimeOnPointInTimeUnavailable"
@@ -24145,6 +24422,7 @@ module AuthorizeDBSecurityGroupIngressResult =
         (Option.map ~f:DBSecurityGroup.of_xml)
           (Xml.child xml_arg0 "DBSecurityGroup") in
       make ?dBSecurityGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dBSecurityGroup =
         field_map json "DBSecurityGroup" DBSecurityGroup.of_json in
@@ -24212,6 +24490,7 @@ module AuthorizeDBSecurityGroupIngressMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBSecurityGroupName") in
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupId ?eC2SecurityGroupName
         ?cIDRIP ~dBSecurityGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2SecurityGroupOwnerId =
         field_map json "EC2SecurityGroupOwnerId" String_.of_json in
@@ -24311,6 +24590,7 @@ module ApplyPendingMaintenanceActionResult =
         (Option.map ~f:ResourcePendingMaintenanceActions.of_xml)
           (Xml.child xml_arg0 "ResourcePendingMaintenanceActions") in
       make ?resourcePendingMaintenanceActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcePendingMaintenanceActions =
         field_map json "ResourcePendingMaintenanceActions"
@@ -24354,6 +24634,7 @@ module ApplyPendingMaintenanceActionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~optInType ~applyAction ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optInType = field_map_exn json "OptInType" String_.of_json in
       let applyAction = field_map_exn json "ApplyAction" String_.of_json in
@@ -24385,6 +24666,7 @@ module AddTagsToResourceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tags ~resourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceName = field_map_exn json "ResourceName" String_.of_json in
@@ -24461,6 +24743,7 @@ module AddSourceIdentifierToSubscriptionResult =
         (Option.map ~f:EventSubscription.of_xml)
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventSubscription =
         field_map json "EventSubscription" EventSubscription.of_json in
@@ -24495,6 +24778,7 @@ module AddSourceIdentifierToSubscriptionMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~sourceIdentifier ~subscriptionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceIdentifier =
         field_map_exn json "SourceIdentifier" String_.of_json in
@@ -24538,6 +24822,7 @@ module AddRoleToDBInstanceMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ~featureName ~roleArn ~dBInstanceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureName = field_map_exn json "FeatureName" String_.of_json in
       let roleArn = field_map_exn json "RoleArn" String_.of_json in
@@ -24581,6 +24866,7 @@ module AddRoleToDBClusterMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ?featureName ~roleArn ~dBClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let featureName = field_map json "FeatureName" String_.of_json in
       let roleArn = field_map_exn json "RoleArn" String_.of_json in
@@ -24641,6 +24927,7 @@ module AccountAttributesMessage =
         (Option.map ~f:AccountQuotaList.of_xml)
           (Xml.child xml_arg0 "AccountQuotas") in
       make ?accountQuotas ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountQuotas =
         field_map json "AccountQuotas" AccountQuotaList.of_json in

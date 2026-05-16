@@ -134,6 +134,7 @@ module Target =
       let type_ =
         TargetType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?id ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" TargetId.of_json in
       let type_ = field_map_exn json "Type" TargetType.of_json in
@@ -208,6 +209,7 @@ module HomeRegionControl =
       let controlId =
         (Option.map ~f:ControlId.of_xml) (Xml.child xml_arg0 "ControlId") in
       make ?requestedTime ?target ?homeRegion ?controlId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestedTime =
         field_map json "RequestedTime" RequestedTime.of_json in
@@ -231,6 +233,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -250,6 +253,7 @@ module InternalServerError =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -269,6 +273,7 @@ module InvalidInputException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -288,6 +293,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -319,6 +325,7 @@ module ThrottlingException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -407,6 +414,7 @@ module DryRunOperation =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -506,6 +514,7 @@ module GetHomeRegionResult =
       let homeRegion =
         (Option.map ~f:HomeRegion.of_xml) (Xml.child xml_arg0 "HomeRegion") in
       make ?homeRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let homeRegion = field_map json "HomeRegion" HomeRegion.of_json in
       make ?homeRegion ()
@@ -520,6 +529,7 @@ module GetHomeRegionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -613,6 +623,7 @@ module DescribeHomeRegionControlsResult =
         (Option.map ~f:HomeRegionControls.of_xml)
           (Xml.child xml_arg0 "HomeRegionControls") in
       make ?nextToken ?homeRegionControls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let homeRegionControls =
@@ -669,6 +680,7 @@ module DescribeHomeRegionControlsRequest =
       let controlId =
         (Option.map ~f:ControlId.of_xml) (Xml.child xml_arg0 "ControlId") in
       make ?nextToken ?maxResults ?target ?homeRegion ?controlId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" Token.of_json in
       let maxResults =
@@ -771,6 +783,7 @@ module CreateHomeRegionControlResult =
         (Option.map ~f:HomeRegionControl.of_xml)
           (Xml.child xml_arg0 "HomeRegionControl") in
       make ?homeRegionControl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let homeRegionControl =
         field_map json "HomeRegionControl" HomeRegionControl.of_json in
@@ -809,6 +822,7 @@ module CreateHomeRegionControlRequest =
         HomeRegion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HomeRegion") in
       make ?dryRun ~target ~homeRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" DryRun.of_json in
       let target = field_map_exn json "Target" Target.of_json in

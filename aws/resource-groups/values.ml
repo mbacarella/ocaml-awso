@@ -118,6 +118,7 @@ module GroupConfigurationParameter =
         GroupConfigurationParameterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map json "Values" GroupConfigurationParameterValueList.of_json in
@@ -523,6 +524,7 @@ module ResourceIdentifier =
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?resourceType ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
@@ -545,6 +547,7 @@ module ResourceStatus =
         (Option.map ~f:ResourceStatusValue.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" ResourceStatusValue.of_json in
       make ?name ()
@@ -626,6 +629,7 @@ module GroupConfigurationItem =
         GroupConfigurationType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?parameters ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters = field_map json "Parameters" GroupParameterList.of_json in
       let type_ = field_map_exn json "Type" GroupConfigurationType.of_json in
@@ -655,6 +659,7 @@ module ResourceQuery =
       let type_ =
         QueryType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~query ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let query = field_map_exn json "Query" Query.of_json in
       let type_ = field_map_exn json "Type" QueryType.of_json in
@@ -714,6 +719,7 @@ module FailedResource =
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?errorCode ?errorMessage ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
@@ -738,6 +744,7 @@ module PendingResource =
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
       make ?resourceArn ()
@@ -790,6 +797,7 @@ module QueryError =
         (Option.map ~f:QueryErrorCode.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" QueryErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" QueryErrorCode.of_json in
@@ -817,6 +825,7 @@ module GroupIdentifier =
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?groupArn ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupArn = field_map json "GroupArn" GroupArn.of_json in
       let groupName = field_map json "GroupName" GroupName.of_json in
@@ -848,6 +857,7 @@ module Group =
       let groupArn =
         GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GroupArn") in
       make ?description ~name ~groupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let name = field_map_exn json "Name" GroupName.of_json in
@@ -881,6 +891,7 @@ module GroupFilter =
         GroupFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "Values" GroupFilterValues.of_json in
       let name = field_map_exn json "Name" GroupFilterName.of_json in
@@ -910,6 +921,7 @@ module ListGroupResourcesItem =
         (Option.map ~f:ResourceIdentifier.of_xml)
           (Xml.child xml_arg0 "Identifier") in
       make ?status ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ResourceStatus.of_json in
       let identifier = field_map json "Identifier" ResourceIdentifier.of_json in
@@ -942,6 +954,7 @@ module ResourceFilter =
         ResourceFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map_exn json "Values" ResourceFilterValues.of_json in
       let name = field_map_exn json "Name" ResourceFilterName.of_json in
@@ -1032,6 +1045,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1051,6 +1065,7 @@ module ForbiddenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1083,6 +1098,7 @@ module GroupQuery =
         GroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~resourceQuery ~groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceQuery =
         field_map_exn json "ResourceQuery" ResourceQuery.of_json in
@@ -1104,6 +1120,7 @@ module InternalServerErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1123,6 +1140,7 @@ module MethodNotAllowedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1142,6 +1160,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1160,6 +1179,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1400,6 +1420,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1596,6 +1617,7 @@ module GroupConfiguration =
         (Option.map ~f:GroupConfigurationList.of_xml)
           (Xml.child xml_arg0 "Configuration") in
       make ?failureReason ?status ?proposedConfiguration ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureReason =
         field_map json "FailureReason"
@@ -1699,6 +1721,7 @@ module UpdateGroupQueryOutput =
       let groupQuery =
         (Option.map ~f:GroupQuery.of_xml) (Xml.child xml_arg0 "GroupQuery") in
       make ?groupQuery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupQuery = field_map json "GroupQuery" GroupQuery.of_json in
       make ?groupQuery ()
@@ -1735,6 +1758,7 @@ module UpdateGroupQueryInput =
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ~resourceQuery ?group ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceQuery =
         field_map_exn json "ResourceQuery" ResourceQuery.of_json in
@@ -1831,6 +1855,7 @@ module UpdateGroupOutput =
     let of_xml xml_arg0 =
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" Group.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
@@ -1864,6 +1889,7 @@ module UpdateGroupInput =
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?description ?group ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let group = field_map json "Group" GroupString.of_json in
@@ -1966,6 +1992,7 @@ module UntagOutput =
         (Option.map ~f:TagKeyList.of_xml) (Xml.child xml_arg0 "Keys") in
       let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?keys ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keys = field_map json "Keys" TagKeyList.of_json in
       let arn = field_map json "Arn" GroupArn.of_json in make ?keys ?arn ()
@@ -1993,6 +2020,7 @@ module UntagInput =
       let arn =
         GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~keys ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keys = field_map_exn json "Keys" TagKeyList.of_json in
       let arn = field_map_exn json "Arn" GroupArn.of_json in
@@ -2106,6 +2134,7 @@ module UngroupResourcesOutput =
         (Option.map ~f:ResourceArnList.of_xml)
           (Xml.child xml_arg0 "Succeeded") in
       make ?pending ?failed ?succeeded ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pending = field_map json "Pending" PendingResourceList.of_json in
       let failed = field_map json "Failed" FailedResourceList.of_json in
@@ -2138,6 +2167,7 @@ module UngroupResourcesInput =
       let group =
         GroupString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
       make ~resourceArns ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArns =
         field_map_exn json "ResourceArns" ResourceArnList.of_json in
@@ -2238,6 +2268,7 @@ module TagOutput =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let arn = field_map json "Arn" GroupArn.of_json in make ?tags ?arn ()
@@ -2266,6 +2297,7 @@ module TagInput =
       let arn =
         GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tags ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let arn = field_map_exn json "Arn" GroupArn.of_json in
@@ -2383,6 +2415,7 @@ module SearchResourcesOutput =
         (Option.map ~f:ResourceIdentifierList.of_xml)
           (Xml.child xml_arg0 "ResourceIdentifiers") in
       make ?queryErrors ?nextToken ?resourceIdentifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryErrors = field_map json "QueryErrors" QueryErrorList.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2425,6 +2458,7 @@ module SearchResourcesInput =
         ResourceQuery.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceQuery") in
       make ?nextToken ?maxResults ~resourceQuery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2516,6 +2550,7 @@ module PutGroupConfigurationOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2545,6 +2580,7 @@ module PutGroupConfigurationInput =
       let group =
         (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
       make ?configuration ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "Configuration" GroupConfigurationList.of_json in
@@ -2650,6 +2686,7 @@ module ListGroupsOutput =
         (Option.map ~f:GroupIdentifierList.of_xml)
           (Xml.child xml_arg0 "GroupIdentifiers") in
       make ?nextToken ?groups ?groupIdentifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let groups = field_map json "Groups" GroupList.of_json in
@@ -2689,6 +2726,7 @@ module ListGroupsInput =
       let filters =
         (Option.map ~f:GroupFilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2826,6 +2864,7 @@ module ListGroupResourcesOutput =
         (Option.map ~f:ListGroupResourcesItemList.of_xml)
           (Xml.child xml_arg0 "Resources") in
       make ?queryErrors ?nextToken ?resourceIdentifiers ?resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryErrors = field_map json "QueryErrors" QueryErrorList.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2882,6 +2921,7 @@ module ListGroupResourcesInput =
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?nextToken ?maxResults ?filters ?group ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2998,6 +3038,7 @@ module GroupResourcesOutput =
         (Option.map ~f:ResourceArnList.of_xml)
           (Xml.child xml_arg0 "Succeeded") in
       make ?pending ?failed ?succeeded ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pending = field_map json "Pending" PendingResourceList.of_json in
       let failed = field_map json "Failed" FailedResourceList.of_json in
@@ -3030,6 +3071,7 @@ module GroupResourcesInput =
       let group =
         GroupString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
       make ~resourceArns ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArns =
         field_map_exn json "ResourceArns" ResourceArnList.of_json in
@@ -3130,6 +3172,7 @@ module GetTagsOutput =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let arn = field_map json "Arn" GroupArn.of_json in make ?tags ?arn ()
@@ -3152,6 +3195,7 @@ module GetTagsInput =
       let arn =
         GroupArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" GroupArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -3247,6 +3291,7 @@ module GetGroupQueryOutput =
       let groupQuery =
         (Option.map ~f:GroupQuery.of_xml) (Xml.child xml_arg0 "GroupQuery") in
       make ?groupQuery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupQuery = field_map json "GroupQuery" GroupQuery.of_json in
       make ?groupQuery ()
@@ -3273,6 +3318,7 @@ module GetGroupQueryInput =
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?group ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" GroupString.of_json in
       let groupName = field_map json "GroupName" GroupName.of_json in
@@ -3367,6 +3413,7 @@ module GetGroupOutput =
     let of_xml xml_arg0 =
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" Group.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
@@ -3393,6 +3440,7 @@ module GetGroupInput =
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?group ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" GroupString.of_json in
       let groupName = field_map json "GroupName" GroupName.of_json in
@@ -3492,6 +3540,7 @@ module GetGroupConfigurationOutput =
         (Option.map ~f:GroupConfiguration.of_xml)
           (Xml.child xml_arg0 "GroupConfiguration") in
       make ?groupConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupConfiguration =
         field_map json "GroupConfiguration" GroupConfiguration.of_json in
@@ -3514,6 +3563,7 @@ module GetGroupConfigurationInput =
       let group =
         (Option.map ~f:GroupString.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" GroupString.of_json in
       make ?group ()
@@ -3607,6 +3657,7 @@ module DeleteGroupOutput =
     let of_xml xml_arg0 =
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" Group.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
@@ -3633,6 +3684,7 @@ module DeleteGroupInput =
       let groupName =
         (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?group ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let group = field_map json "Group" GroupString.of_json in
       let groupName = field_map json "GroupName" GroupName.of_json in
@@ -3742,6 +3794,7 @@ module CreateGroupOutput =
           (Xml.child xml_arg0 "ResourceQuery") in
       let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
       make ?groupConfiguration ?tags ?resourceQuery ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let groupConfiguration =
         field_map json "GroupConfiguration" GroupConfiguration.of_json in
@@ -3803,6 +3856,7 @@ module CreateGroupInput =
       let name =
         GroupName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?configuration ?tags ?resourceQuery ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "Configuration" GroupConfigurationList.of_json in

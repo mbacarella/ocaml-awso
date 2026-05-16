@@ -137,6 +137,7 @@ module CodeArtifacts =
           (Xml.child_exn ~context:context_ xml_arg0
              "SourceCodeArtifactsObjectKey") in
       make ?buildArtifactsObjectKey ~sourceCodeArtifactsObjectKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildArtifactsObjectKey =
         field_map json "BuildArtifactsObjectKey"
@@ -245,6 +246,7 @@ module EventInfo =
         (Option.map ~f:EventState.of_xml) (Xml.child xml_arg0 "State") in
       let name = (Option.map ~f:EventName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?state ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" EventState.of_json in
       let name = field_map json "Name" EventName.of_json in
@@ -363,6 +365,7 @@ module S3RepositoryDetails =
       let bucketName =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "BucketName") in
       make ?codeArtifacts ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeArtifacts =
         field_map json "CodeArtifacts" CodeArtifacts.of_json in
@@ -560,6 +563,7 @@ module BranchDiffSourceCodeType =
         BranchName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceBranchName") in
       make ~destinationBranchName ~sourceBranchName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationBranchName =
         field_map_exn json "DestinationBranchName" BranchName.of_json in
@@ -603,6 +607,7 @@ module CommitDiffSourceCodeType =
       let sourceCommit =
         (Option.map ~f:CommitId.of_xml) (Xml.child xml_arg0 "SourceCommit") in
       make ?mergeBaseCommit ?destinationCommit ?sourceCommit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mergeBaseCommit = field_map json "MergeBaseCommit" CommitId.of_json in
       let destinationCommit =
@@ -630,6 +635,7 @@ module RepositoryHeadSourceCodeType =
         BranchName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BranchName") in
       make ~branchName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let branchName = field_map_exn json "BranchName" BranchName.of_json in
       make ~branchName ()
@@ -674,6 +680,7 @@ module RequestMetadata =
       let requestId =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       make ?vendorName ?eventInfo ?requester ?requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vendorName = field_map json "VendorName" VendorName.of_json in
       let eventInfo = field_map json "EventInfo" EventInfo.of_json in
@@ -707,6 +714,7 @@ module S3BucketRepository =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?details ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let details = field_map json "Details" S3RepositoryDetails.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -1032,6 +1040,7 @@ module RuleMetadata =
       let ruleId =
         (Option.map ~f:RuleId.of_xml) (Xml.child xml_arg0 "RuleId") in
       make ?ruleTags ?longDescription ?shortDescription ?ruleName ?ruleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleTags = field_map json "RuleTags" RuleTags.of_json in
       let longDescription =
@@ -1202,6 +1211,7 @@ module MetricsSummary =
         (Option.map ~f:MeteredLinesOfCodeCount.of_xml)
           (Xml.child xml_arg0 "MeteredLinesOfCodeCount") in
       make ?findingsCount ?meteredLinesOfCodeCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingsCount =
         field_map json "FindingsCount" FindingsCount.of_json in
@@ -1291,6 +1301,7 @@ module SourceCodeType =
           (Xml.child xml_arg0 "CommitDiff") in
       make ?requestMetadata ?s3BucketRepository ?branchDiff ?repositoryHead
         ?commitDiff ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let requestMetadata =
         field_map json "RequestMetadata" RequestMetadata.of_json in
@@ -1529,6 +1540,7 @@ module RepositoryAssociationSummary =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AssociationArn") in
       make ?state ?providerType ?owner ?name ?associationId
         ?lastUpdatedTimeStamp ?connectionArn ?associationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" RepositoryAssociationState.of_json in
       let providerType = field_map json "ProviderType" ProviderType.of_json in
@@ -1629,6 +1641,7 @@ module RecommendationSummary =
         (Option.map ~f:FilePath.of_xml) (Xml.child xml_arg0 "FilePath") in
       make ?severity ?ruleMetadata ?recommendationCategory ?description
         ?endLine ?startLine ?recommendationId ?filePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let severity = field_map json "Severity" Severity.of_json in
       let ruleMetadata = field_map json "RuleMetadata" RuleMetadata.of_json in
@@ -1677,6 +1690,7 @@ module RecommendationFeedbackSummary =
         (Option.map ~f:RecommendationId.of_xml)
           (Xml.child xml_arg0 "RecommendationId") in
       make ?userId ?reactions ?recommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "UserId" UserId.of_json in
       let reactions = field_map json "Reactions" Reactions.of_json in
@@ -1794,6 +1808,7 @@ module CodeReviewSummary =
       make ?sourceCodeType ?metricsSummary ?pullRequestId ?type_
         ?lastUpdatedTimeStamp ?createdTimeStamp ?state ?providerType ?owner
         ?repositoryName ?codeReviewArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceCodeType =
         field_map json "SourceCodeType" SourceCodeType.of_json in
@@ -1842,6 +1857,7 @@ module KMSKeyDetails =
       let kMSKeyId =
         (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
       make ?encryptionOption ?kMSKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionOption =
         field_map json "EncryptionOption" EncryptionOption.of_json in
@@ -1943,6 +1959,7 @@ module Metrics =
         (Option.map ~f:MeteredLinesOfCodeCount.of_xml)
           (Xml.child xml_arg0 "MeteredLinesOfCodeCount") in
       make ?findingsCount ?meteredLinesOfCodeCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingsCount =
         field_map json "FindingsCount" FindingsCount.of_json in
@@ -1978,6 +1995,7 @@ module RepositoryAnalysis =
         (Option.map ~f:RepositoryHeadSourceCodeType.of_xml)
           (Xml.child xml_arg0 "RepositoryHead") in
       make ?sourceCodeType ?repositoryHead ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceCodeType =
         field_map json "SourceCodeType" SourceCodeType.of_json in
@@ -2003,6 +2021,7 @@ module CodeCommitRepository =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -2031,6 +2050,7 @@ module S3Repository =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~bucketName ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucketName = field_map_exn json "BucketName" S3BucketName.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -2068,6 +2088,7 @@ module ThirdPartySourceRepository =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~owner ~connectionArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let owner = field_map_exn json "Owner" Owner.of_json in
       let connectionArn =
@@ -2090,6 +2111,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2109,6 +2131,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2127,6 +2150,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2204,6 +2228,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2223,6 +2248,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2645,6 +2671,7 @@ module ConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2664,6 +2691,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2787,6 +2815,7 @@ module RepositoryAssociation =
       make ?s3RepositoryDetails ?kMSKeyDetails ?createdTimeStamp
         ?lastUpdatedTimeStamp ?stateReason ?state ?providerType ?owner ?name
         ?connectionArn ?associationArn ?associationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3RepositoryDetails =
         field_map json "S3RepositoryDetails" S3RepositoryDetails.of_json in
@@ -2877,6 +2906,7 @@ module RecommendationFeedback =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CodeReviewArn") in
       make ?lastUpdatedTimeStamp ?createdTimeStamp ?userId ?reactions
         ?recommendationId ?codeReviewArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTimeStamp =
         field_map json "LastUpdatedTimeStamp" TimeStamp.of_json in
@@ -3028,6 +3058,7 @@ module CodeReview =
         ?pullRequestId ?type_ ?lastUpdatedTimeStamp ?createdTimeStamp
         ?stateReason ?state ?providerType ?owner ?repositoryName
         ?codeReviewArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisTypes =
         field_map json "AnalysisTypes" AnalysisTypes.of_json in
@@ -3126,6 +3157,7 @@ module CodeReviewType =
         RepositoryAnalysis.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RepositoryAnalysis") in
       make ?analysisTypes ~repositoryAnalysis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisTypes =
         field_map json "AnalysisTypes" AnalysisTypes.of_json in
@@ -3178,6 +3210,7 @@ module Repository =
         (Option.map ~f:CodeCommitRepository.of_xml)
           (Xml.child xml_arg0 "CodeCommit") in
       make ?s3Bucket ?gitHubEnterpriseServer ?bitbucket ?codeCommit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Bucket = field_map json "S3Bucket" S3Repository.of_json in
       let gitHubEnterpriseServer =
@@ -3244,6 +3277,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from an associated repository."]
@@ -3273,6 +3307,7 @@ module UntagResourceRequest =
         AssociationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -3333,6 +3368,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more tags to an associated repository."]
@@ -3360,6 +3396,7 @@ module TagResourceRequest =
         AssociationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn =
@@ -3438,6 +3475,7 @@ module PutRecommendationFeedbackResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3477,6 +3515,7 @@ module PutRecommendationFeedbackRequest =
       let codeReviewArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CodeReviewArn") in
       make ~reactions ~recommendationId ~codeReviewArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reactions = field_map_exn json "Reactions" Reactions.of_json in
       let recommendationId =
@@ -3545,6 +3584,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3568,6 +3608,7 @@ module ListTagsForResourceRequest =
         AssociationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" AssociationArn.of_json in
@@ -3647,6 +3688,7 @@ module ListRepositoryAssociationsResponse =
         (Option.map ~f:RepositoryAssociationSummaries.of_xml)
           (Xml.child xml_arg0 "RepositoryAssociationSummaries") in
       make ?nextToken ?repositoryAssociationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let repositoryAssociationSummaries =
@@ -3716,6 +3758,7 @@ module ListRepositoryAssociationsRequest =
         (Option.map ~f:ProviderTypes.of_xml)
           (Xml.child xml_arg0 "ProviderType") in
       make ?nextToken ?maxResults ?owners ?names ?states ?providerTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3815,6 +3858,7 @@ module ListRecommendationsResponse =
         (Option.map ~f:RecommendationSummaries.of_xml)
           (Xml.child xml_arg0 "RecommendationSummaries") in
       make ?nextToken ?recommendationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let recommendationSummaries =
@@ -3856,6 +3900,7 @@ module ListRecommendationsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~codeReviewArn ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeReviewArn = field_map_exn json "CodeReviewArn" Arn.of_json in
       let maxResults =
@@ -3956,6 +4001,7 @@ module ListRecommendationFeedbackResponse =
         (Option.map ~f:RecommendationFeedbackSummaries.of_xml)
           (Xml.child xml_arg0 "RecommendationFeedbackSummaries") in
       make ?nextToken ?recommendationFeedbackSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let recommendationFeedbackSummaries =
@@ -4021,6 +4067,7 @@ module ListRecommendationFeedbackRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?recommendationIds ?userIds ~codeReviewArn ?maxResults ?nextToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationIds =
         field_map json "RecommendationIds" RecommendationIds.of_json in
@@ -4110,6 +4157,7 @@ module ListCodeReviewsResponse =
         (Option.map ~f:CodeReviewSummaries.of_xml)
           (Xml.child xml_arg0 "CodeReviewSummaries") in
       make ?nextToken ?codeReviewSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let codeReviewSummaries =
@@ -4185,6 +4233,7 @@ module ListCodeReviewsRequest =
           (Xml.child xml_arg0 "ProviderTypes") in
       make ?nextToken ?maxResults ~type_ ?repositoryNames ?states
         ?providerTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults =
@@ -4296,6 +4345,7 @@ module DisassociateRepositoryResponse =
         (Option.map ~f:RepositoryAssociation.of_xml)
           (Xml.child xml_arg0 "RepositoryAssociation") in
       make ?tags ?repositoryAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let repositoryAssociation =
@@ -4323,6 +4373,7 @@ module DisassociateRepositoryRequest =
         AssociationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationArn") in
       make ~associationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationArn =
         field_map_exn json "AssociationArn" AssociationArn.of_json in
@@ -4417,6 +4468,7 @@ module DescribeRepositoryAssociationResponse =
         (Option.map ~f:RepositoryAssociation.of_xml)
           (Xml.child xml_arg0 "RepositoryAssociation") in
       make ?tags ?repositoryAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let repositoryAssociation =
@@ -4444,6 +4496,7 @@ module DescribeRepositoryAssociationRequest =
         AssociationArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationArn") in
       make ~associationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationArn =
         field_map_exn json "AssociationArn" AssociationArn.of_json in
@@ -4532,6 +4585,7 @@ module DescribeRecommendationFeedbackResponse =
         (Option.map ~f:RecommendationFeedback.of_xml)
           (Xml.child xml_arg0 "RecommendationFeedback") in
       make ?recommendationFeedback ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationFeedback =
         field_map json "RecommendationFeedback"
@@ -4574,6 +4628,7 @@ module DescribeRecommendationFeedbackRequest =
       let codeReviewArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CodeReviewArn") in
       make ?userId ~recommendationId ~codeReviewArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userId = field_map json "UserId" UserId.of_json in
       let recommendationId =
@@ -4661,6 +4716,7 @@ module DescribeCodeReviewResponse =
       let codeReview =
         (Option.map ~f:CodeReview.of_xml) (Xml.child xml_arg0 "CodeReview") in
       make ?codeReview ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeReview = field_map json "CodeReview" CodeReview.of_json in
       make ?codeReview ()
@@ -4684,6 +4740,7 @@ module DescribeCodeReviewRequest =
       let codeReviewArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CodeReviewArn") in
       make ~codeReviewArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeReviewArn = field_map_exn json "CodeReviewArn" Arn.of_json in
       make ~codeReviewArn ()
@@ -4775,6 +4832,7 @@ module CreateCodeReviewResponse =
       let codeReview =
         (Option.map ~f:CodeReview.of_xml) (Xml.child xml_arg0 "CodeReview") in
       make ?codeReview ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let codeReview = field_map json "CodeReview" CodeReview.of_json in
       make ?codeReview ()
@@ -4828,6 +4886,7 @@ module CreateCodeReviewRequest =
         CodeReviewName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?clientRequestToken ~type_ ~repositoryAssociationArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -4926,6 +4985,7 @@ module AssociateRepositoryResponse =
         (Option.map ~f:RepositoryAssociation.of_xml)
           (Xml.child xml_arg0 "RepositoryAssociation") in
       make ?tags ?repositoryAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let repositoryAssociation =
@@ -4975,6 +5035,7 @@ module AssociateRepositoryRequest =
         Repository.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Repository") in
       make ?kMSKeyDetails ?tags ?clientRequestToken ~repository ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kMSKeyDetails =
         field_map json "KMSKeyDetails" KMSKeyDetails.of_json in

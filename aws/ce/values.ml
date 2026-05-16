@@ -152,6 +152,7 @@ module RootCause =
       let service =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Service") in
       make ?usageType ?linkedAccount ?region ?service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usageType = field_map json "UsageType" GenericString.of_json in
       let linkedAccount =
@@ -225,6 +226,7 @@ module Impact =
         GenericDouble.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MaxImpact") in
       make ?totalImpact ~maxImpact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalImpact = field_map json "TotalImpact" GenericDouble.of_json in
       let maxImpact = field_map_exn json "MaxImpact" GenericDouble.of_json in
@@ -255,6 +257,7 @@ module AnomalyScore =
         GenericDouble.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MaxScore") in
       make ~currentScore ~maxScore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentScore =
         field_map_exn json "CurrentScore" GenericDouble.of_json in
@@ -380,6 +383,7 @@ module Anomaly =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyId") in
       make ?feedback ~monitorArn ~impact ~anomalyScore ?rootCauses
         ?dimensionValue ?anomalyEndDate ?anomalyStartDate ~anomalyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let feedback = field_map json "Feedback" AnomalyFeedbackType.of_json in
       let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
@@ -444,6 +448,7 @@ module AnomalyDateInterval =
         YearMonthDay.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
       make ?endDate ~startDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endDate = field_map json "EndDate" YearMonthDay.of_json in
       let startDate = field_map_exn json "StartDate" YearMonthDay.of_json in
@@ -660,6 +665,7 @@ module TagValues =
         (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "Values") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?matchOptions ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchOptions = field_map json "MatchOptions" MatchOptions.of_json in
       let values = field_map json "Values" Values.of_json in
@@ -814,6 +820,7 @@ module DimensionValues =
         (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "Values") in
       let key = (Option.map ~f:Dimension.of_xml) (Xml.child xml_arg0 "Key") in
       make ?matchOptions ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchOptions = field_map json "MatchOptions" MatchOptions.of_json in
       let values = field_map json "Values" Values.of_json in
@@ -874,6 +881,7 @@ module CostCategoryValues =
       let key =
         (Option.map ~f:CostCategoryName.of_xml) (Xml.child xml_arg0 "Key") in
       make ?matchOptions ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchOptions = field_map json "MatchOptions" MatchOptions.of_json in
       let values = field_map json "Values" Values.of_json in
@@ -962,6 +970,7 @@ module rec
         (Option.map ~f:Expressions.of_xml) (Xml.child xml_arg0 "And") in
       let or_ = (Option.map ~f:Expressions.of_xml) (Xml.child xml_arg0 "Or") in
       make ?costCategories ?tags ?dimensions ?not ?and_ ?or_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let costCategories =
         field_map json "CostCategories" CostCategoryValues.of_json in
@@ -1099,6 +1108,7 @@ module AnomalyMonitor =
       make ?dimensionalValueCount ?monitorSpecification ?monitorDimension
         ~monitorType ?lastEvaluatedDate ?lastUpdatedDate ?creationDate
         ~monitorName ?monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionalValueCount =
         field_map json "DimensionalValueCount" NonNegativeInteger.of_json in
@@ -1239,6 +1249,7 @@ module Subscriber =
         (Option.map ~f:SubscriberAddress.of_xml)
           (Xml.child xml_arg0 "Address") in
       make ?status ?type_ ?address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" SubscriberStatus.of_json in
       let type_ = field_map json "Type" SubscriberType.of_json in
@@ -1436,6 +1447,7 @@ module AnomalySubscription =
           (Xml.child xml_arg0 "SubscriptionArn") in
       make ~subscriptionName ~frequency ~threshold ~subscribers
         ~monitorArnList ?accountId ?subscriptionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionName =
         field_map_exn json "SubscriptionName" GenericString.of_json in
@@ -1561,6 +1573,7 @@ module BillExpirationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -1755,6 +1768,7 @@ module CostCategorySplitChargeRuleParameter =
         CostCategorySplitChargeRuleParameterType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~values ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values =
         field_map_exn json "Values"
@@ -1872,6 +1886,7 @@ module CostCategorySplitChargeRule =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Source") in
       make ?parameters ~method_ ~targets ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "Parameters"
@@ -1999,6 +2014,7 @@ module CostCategoryInheritedValueDimension =
         (Option.map ~f:CostCategoryInheritedValueDimensionName.of_xml)
           (Xml.child xml_arg0 "DimensionName") in
       make ?dimensionKey ?dimensionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionKey = field_map json "DimensionKey" GenericString.of_json in
       let dimensionName =
@@ -2047,6 +2063,7 @@ module CostCategoryRule =
       let value =
         (Option.map ~f:CostCategoryValue.of_xml) (Xml.child xml_arg0 "Value") in
       make ?type_ ?inheritedValue ?rule ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" CostCategoryRuleType.of_json in
       let inheritedValue =
@@ -2183,6 +2200,7 @@ module CostCategoryProcessingStatus =
         (Option.map ~f:CostCategoryStatusComponent.of_xml)
           (Xml.child xml_arg0 "Component") in
       make ?status ?component ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" CostCategoryStatus.of_json in
       let component =
@@ -2310,6 +2328,7 @@ module CostCategory =
           (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
       make ?defaultValue ?processingStatus ?splitChargeRules ~rules
         ~ruleVersion ~name ?effectiveEnd ~effectiveStart ~costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValue =
         field_map json "DefaultValue" CostCategoryValue.of_json in
@@ -2482,6 +2501,7 @@ module CostCategoryReference =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
       make ?defaultValue ?values ?processingStatus ?numberOfRules
         ?effectiveEnd ?effectiveStart ?name ?costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultValue =
         field_map json "DefaultValue" CostCategoryValue.of_json in
@@ -2637,6 +2657,7 @@ module CoverageNormalizedUnits =
           (Xml.child xml_arg0 "OnDemandNormalizedUnits") in
       make ?coverageNormalizedUnitsPercentage ?totalRunningNormalizedUnits
         ?reservedNormalizedUnits ?onDemandNormalizedUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coverageNormalizedUnitsPercentage =
         field_map json "CoverageNormalizedUnitsPercentage"
@@ -2760,6 +2781,7 @@ module CoverageHours =
           (Xml.child xml_arg0 "OnDemandHours") in
       make ?coverageHoursPercentage ?totalRunningHours ?reservedHours
         ?onDemandHours ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coverageHoursPercentage =
         field_map json "CoverageHoursPercentage"
@@ -2805,6 +2827,7 @@ module CoverageCost =
         (Option.map ~f:OnDemandCost.of_xml)
           (Xml.child xml_arg0 "OnDemandCost") in
       make ?onDemandCost ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onDemandCost = field_map json "OnDemandCost" OnDemandCost.of_json in
       make ?onDemandCost ()
@@ -2847,6 +2870,7 @@ module Coverage =
         (Option.map ~f:CoverageHours.of_xml)
           (Xml.child xml_arg0 "CoverageHours") in
       make ?coverageCost ?coverageNormalizedUnits ?coverageHours ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coverageCost = field_map json "CoverageCost" CoverageCost.of_json in
       let coverageNormalizedUnits =
@@ -2879,6 +2903,7 @@ module ReservationCoverageGroup =
       let attributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?coverage ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coverage = field_map json "Coverage" Coverage.of_json in
       let attributes = field_map json "Attributes" Attributes.of_json in
@@ -2935,6 +2960,7 @@ module DateInterval =
         YearMonthDay.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Start") in
       make ~end_ ~start ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let end_ = field_map_exn json "End" YearMonthDay.of_json in
       let start = field_map_exn json "Start" YearMonthDay.of_json in
@@ -2969,6 +2995,7 @@ module CoverageByTime =
       let timePeriod =
         (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       make ?total ?groups ?timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total = field_map json "Total" Coverage.of_json in
       let groups = field_map json "Groups" ReservationCoverageGroups.of_json in
@@ -3067,6 +3094,7 @@ module ResourceTag =
         ResourceTagKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" ResourceTagValue.of_json in
       let key = field_map_exn json "Key" ResourceTagKey.of_json in
@@ -3131,6 +3159,7 @@ module CreateAnomalyMonitorRequest =
         AnomalyMonitor.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyMonitor") in
       make ?resourceTags ~anomalyMonitor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags =
         field_map json "ResourceTags" ResourceTagList.of_json in
@@ -3153,6 +3182,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3204,6 +3234,7 @@ module CreateAnomalyMonitorResponse =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
       make ~monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
       make ~monitorArn ()
@@ -3239,6 +3270,7 @@ module CreateAnomalySubscriptionRequest =
         AnomalySubscription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalySubscription") in
       make ?resourceTags ~anomalySubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags =
         field_map json "ResourceTags" ResourceTagList.of_json in
@@ -3261,6 +3293,7 @@ module UnknownMonitorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3321,6 +3354,7 @@ module CreateAnomalySubscriptionResponse =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ~subscriptionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionArn =
         field_map_exn json "SubscriptionArn" GenericString.of_json in
@@ -3395,6 +3429,7 @@ module CreateCostCategoryDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?resourceTags ?splitChargeRules ?defaultValue ~rules ~ruleVersion
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags =
         field_map json "ResourceTags" ResourceTagList.of_json in
@@ -3425,6 +3460,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3493,6 +3529,7 @@ module CreateCostCategoryDefinitionResponse =
       let costCategoryArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
       make ?effectiveStart ?costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectiveStart =
         field_map json "EffectiveStart" ZonedDateTime.of_json in
@@ -3578,6 +3615,7 @@ module NetworkResourceUtilization =
           (Xml.child xml_arg0 "NetworkInBytesPerSecond") in
       make ?networkPacketsOutPerSecond ?networkPacketsInPerSecond
         ?networkOutBytesPerSecond ?networkInBytesPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkPacketsOutPerSecond =
         field_map json "NetworkPacketsOutPerSecond" GenericString.of_json in
@@ -3641,6 +3679,7 @@ module EBSResourceUtilization =
           (Xml.child xml_arg0 "EbsReadOpsPerSecond") in
       make ?ebsWriteBytesPerSecond ?ebsReadBytesPerSecond
         ?ebsWriteOpsPerSecond ?ebsReadOpsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ebsWriteBytesPerSecond =
         field_map json "EbsWriteBytesPerSecond" GenericString.of_json in
@@ -3704,6 +3743,7 @@ module DiskResourceUtilization =
           (Xml.child xml_arg0 "DiskReadOpsPerSecond") in
       make ?diskWriteBytesPerSecond ?diskReadBytesPerSecond
         ?diskWriteOpsPerSecond ?diskReadOpsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let diskWriteBytesPerSecond =
         field_map json "DiskWriteBytesPerSecond" GenericString.of_json in
@@ -3798,6 +3838,7 @@ module EC2ResourceUtilization =
       make ?networkResourceUtilization ?diskResourceUtilization
         ?eBSResourceUtilization ?maxStorageUtilizationPercentage
         ?maxMemoryUtilizationPercentage ?maxCpuUtilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkResourceUtilization =
         field_map json "NetworkResourceUtilization"
@@ -3838,6 +3879,7 @@ module ResourceUtilization =
         (Option.map ~f:EC2ResourceUtilization.of_xml)
           (Xml.child xml_arg0 "EC2ResourceUtilization") in
       make ?eC2ResourceUtilization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2ResourceUtilization =
         field_map json "EC2ResourceUtilization"
@@ -3932,6 +3974,7 @@ module EC2ResourceDetails =
           (Xml.child xml_arg0 "HourlyOnDemandRate") in
       make ?vcpu ?storage ?networkPerformance ?memory ?sku ?region ?platform
         ?instanceType ?hourlyOnDemandRate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vcpu = field_map json "Vcpu" GenericString.of_json in
       let storage = field_map json "Storage" GenericString.of_json in
@@ -3965,6 +4008,7 @@ module ResourceDetails =
         (Option.map ~f:EC2ResourceDetails.of_xml)
           (Xml.child xml_arg0 "EC2ResourceDetails") in
       make ?eC2ResourceDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2ResourceDetails =
         field_map json "EC2ResourceDetails" EC2ResourceDetails.of_json in
@@ -4095,6 +4139,7 @@ module CurrentInstance =
         ?savingsPlansCoveredHoursInLookbackPeriod
         ?reservationCoveredHoursInLookbackPeriod ?resourceUtilization
         ?resourceDetails ?tags ?instanceName ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
       let monthlyCost = field_map json "MonthlyCost" GenericString.of_json in
@@ -4136,6 +4181,7 @@ module DataUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4159,6 +4205,7 @@ module DeleteAnomalyMonitorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
       make ~monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
       make ~monitorArn ()
@@ -4208,6 +4255,7 @@ module DeleteAnomalyMonitorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a cost anomaly monitor."]
@@ -4230,6 +4278,7 @@ module DeleteAnomalySubscriptionRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ~subscriptionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionArn =
         field_map_exn json "SubscriptionArn" GenericString.of_json in
@@ -4249,6 +4298,7 @@ module UnknownSubscriptionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4301,6 +4351,7 @@ module DeleteAnomalySubscriptionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a cost anomaly subscription."]
@@ -4321,6 +4372,7 @@ module DeleteCostCategoryDefinitionRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
       make ~costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let costCategoryArn = field_map_exn json "CostCategoryArn" Arn.of_json in
       make ~costCategoryArn ()
@@ -4346,6 +4398,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" Arn.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -4412,6 +4465,7 @@ module DeleteCostCategoryDefinitionResponse =
       let costCategoryArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
       make ?effectiveEnd ?costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectiveEnd = field_map json "EffectiveEnd" ZonedDateTime.of_json in
       let costCategoryArn = field_map json "CostCategoryArn" Arn.of_json in
@@ -4443,6 +4497,7 @@ module DescribeCostCategoryDefinitionRequest =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
       make ?effectiveOn ~costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectiveOn = field_map json "EffectiveOn" ZonedDateTime.of_json in
       let costCategoryArn = field_map_exn json "CostCategoryArn" Arn.of_json in
@@ -4501,6 +4556,7 @@ module DescribeCostCategoryDefinitionResponse =
         (Option.map ~f:CostCategory.of_xml)
           (Xml.child xml_arg0 "CostCategory") in
       make ?costCategory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let costCategory = field_map json "CostCategory" CostCategory.of_json in
       make ?costCategory ()
@@ -4526,6 +4582,7 @@ module DimensionValuesWithAttributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "Value") in
       make ?attributes ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" Attributes.of_json in
       let value = field_map json "Value" Value.of_json in
@@ -4655,6 +4712,7 @@ module EC2InstanceDetails =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Family") in
       make ?sizeFlexEligible ?currentGeneration ?tenancy ?platform
         ?availabilityZone ?region ?instanceType ?family ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeFlexEligible =
         field_map json "SizeFlexEligible" GenericBoolean.of_json in
@@ -4715,6 +4773,7 @@ module EC2Specification =
         (Option.map ~f:OfferingClass.of_xml)
           (Xml.child xml_arg0 "OfferingClass") in
       make ?offeringClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringClass =
         field_map json "OfferingClass" OfferingClass.of_json in
@@ -4783,6 +4842,7 @@ module ESInstanceDetails =
           (Xml.child xml_arg0 "InstanceClass") in
       make ?sizeFlexEligible ?currentGeneration ?region ?instanceSize
         ?instanceClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeFlexEligible =
         field_map json "SizeFlexEligible" GenericBoolean.of_json in
@@ -4861,6 +4921,7 @@ module ElastiCacheInstanceDetails =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Family") in
       make ?sizeFlexEligible ?currentGeneration ?productDescription ?region
         ?nodeType ?family ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeFlexEligible =
         field_map json "SizeFlexEligible" GenericBoolean.of_json in
@@ -5052,6 +5113,7 @@ module ForecastResult =
         (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       make ?predictionIntervalUpperBound ?predictionIntervalLowerBound
         ?meanValue ?timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictionIntervalUpperBound =
         field_map json "PredictionIntervalUpperBound" GenericString.of_json in
@@ -5159,6 +5221,7 @@ module TotalImpactFilter =
         NumericOperator.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "NumericOperator") in
       make ?endValue ~startValue ~numericOperator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endValue = field_map json "EndValue" GenericDouble.of_json in
       let startValue = field_map_exn json "StartValue" GenericDouble.of_json in
@@ -5269,6 +5332,7 @@ module GetAnomaliesRequest =
           (Xml.child xml_arg0 "MonitorArn") in
       make ?maxResults ?nextPageToken ?totalImpact ?feedback ~dateInterval
         ?monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" PageSize.of_json in
       let nextPageToken =
@@ -5297,6 +5361,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -5364,6 +5429,7 @@ module GetAnomaliesResponse =
         Anomalies.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Anomalies") in
       make ?nextPageToken ~anomalies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -5404,6 +5470,7 @@ module GetAnomalyMonitorsRequest =
       let monitorArnList =
         (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "MonitorArnList") in
       make ?maxResults ?nextPageToken ?monitorArnList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" PageSize.of_json in
       let nextPageToken =
@@ -5486,6 +5553,7 @@ module GetAnomalyMonitorsResponse =
         AnomalyMonitors.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyMonitors") in
       make ?nextPageToken ~anomalyMonitors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -5536,6 +5604,7 @@ module GetAnomalySubscriptionsRequest =
         (Option.map ~f:Values.of_xml)
           (Xml.child xml_arg0 "SubscriptionArnList") in
       make ?maxResults ?nextPageToken ?monitorArn ?subscriptionArnList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" PageSize.of_json in
       let nextPageToken =
@@ -5623,6 +5692,7 @@ module GetAnomalySubscriptionsResponse =
         AnomalySubscriptions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalySubscriptions") in
       make ?nextPageToken ~anomalySubscriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -5748,6 +5818,7 @@ module GroupDefinition =
         (Option.map ~f:GroupDefinitionType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?key ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map json "Key" GroupDefinitionKey.of_json in
       let type_ = field_map json "Type" GroupDefinitionType.of_json in
@@ -5876,6 +5947,7 @@ module GetCostAndUsageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?nextPageToken ?groupBy ~metrics ?filter ~granularity ~timePeriod
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -5935,6 +6007,7 @@ module MetricValue =
       let amount =
         (Option.map ~f:MetricAmount.of_xml) (Xml.child xml_arg0 "Amount") in
       make ?unit ?amount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" MetricUnit.of_json in
       let amount = field_map json "Amount" MetricAmount.of_json in
@@ -6026,6 +6099,7 @@ module Group =
         (Option.map ~f:Metrics.of_xml) (Xml.child xml_arg0 "Metrics") in
       let keys = (Option.map ~f:Keys.of_xml) (Xml.child xml_arg0 "Keys") in
       make ?metrics ?keys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metrics = field_map json "Metrics" Metrics.of_json in
       let keys = field_map json "Keys" Keys.of_json in make ?metrics ?keys ()
@@ -6088,6 +6162,7 @@ module ResultByTime =
       let timePeriod =
         (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       make ?estimated ?groups ?total ?timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let estimated = field_map json "Estimated" Estimated.of_json in
       let groups = field_map json "Groups" Groups.of_json in
@@ -6133,6 +6208,7 @@ module RequestChangedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -6256,6 +6332,7 @@ module GetCostAndUsageResponse =
           (Xml.child xml_arg0 "NextPageToken") in
       make ?dimensionValueAttributes ?resultsByTime ?groupDefinitions
         ?nextPageToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionValueAttributes =
         field_map json "DimensionValueAttributes"
@@ -6338,6 +6415,7 @@ module GetCostAndUsageWithResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?nextPageToken ?groupBy ?metrics ~filter ~granularity ~timePeriod
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -6468,6 +6546,7 @@ module GetCostAndUsageWithResourcesResponse =
           (Xml.child xml_arg0 "NextPageToken") in
       make ?dimensionValueAttributes ?resultsByTime ?groupDefinitions
         ?nextPageToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionValueAttributes =
         field_map json "DimensionValueAttributes"
@@ -6550,6 +6629,7 @@ module SortDefinition =
         SortDefinitionKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?sortOrder ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortOrder = field_map json "SortOrder" SortOrder.of_json in
       let key = field_map_exn json "Key" SortDefinitionKey.of_json in
@@ -6686,6 +6766,7 @@ module GetCostCategoriesRequest =
           (Xml.child xml_arg0 "SearchString") in
       make ?nextPageToken ?maxResults ?sortBy ?filter ?costCategoryName
         ~timePeriod ?searchString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -6821,6 +6902,7 @@ module GetCostCategoriesResponse =
           (Xml.child xml_arg0 "NextPageToken") in
       make ~totalSize ~returnSize ?costCategoryValues ?costCategoryNames
         ?nextPageToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalSize = field_map_exn json "TotalSize" PageSize.of_json in
       let returnSize = field_map_exn json "ReturnSize" PageSize.of_json in
@@ -6953,6 +7035,7 @@ module GetCostForecastRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?predictionIntervalLevel ?filter ~granularity ~metric ~timePeriod
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictionIntervalLevel =
         field_map json "PredictionIntervalLevel"
@@ -7029,6 +7112,7 @@ module GetCostForecastResponse =
       let total =
         (Option.map ~f:MetricValue.of_xml) (Xml.child xml_arg0 "Total") in
       make ?forecastResultsByTime ?total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastResultsByTime =
         field_map json "ForecastResultsByTime" ForecastResultsByTime.of_json in
@@ -7119,6 +7203,7 @@ module GetDimensionValuesRequest =
           (Xml.child xml_arg0 "SearchString") in
       make ?nextPageToken ?maxResults ?sortBy ?filter ?context ~dimension
         ~timePeriod ?searchString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -7243,6 +7328,7 @@ module GetDimensionValuesResponse =
         DimensionValuesWithAttributesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionValues") in
       make ?nextPageToken ~totalSize ~returnSize ~dimensionValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -7337,6 +7423,7 @@ module GetReservationCoverageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?maxResults ?sortBy ?nextPageToken ?metrics ?filter ?granularity
         ?groupBy ~timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let sortBy = field_map json "SortBy" SortDefinition.of_json in
@@ -7432,6 +7519,7 @@ module GetReservationCoverageResponse =
         CoveragesByTime.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CoveragesByTime") in
       make ?nextPageToken ?total ~coveragesByTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -7485,6 +7573,7 @@ module ServiceSpecification =
         (Option.map ~f:EC2Specification.of_xml)
           (Xml.child xml_arg0 "EC2Specification") in
       make ?eC2Specification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2Specification =
         field_map json "EC2Specification" EC2Specification.of_json in
@@ -7663,6 +7752,7 @@ module GetReservationPurchaseRecommendationRequest =
       make ?nextPageToken ?pageSize ?serviceSpecification ?paymentOption
         ?termInYears ?lookbackPeriodInDays ?accountScope ?filter ~service
         ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -7728,6 +7818,7 @@ module ReservationPurchaseRecommendationSummary =
           (Xml.child xml_arg0 "TotalEstimatedMonthlySavingsAmount") in
       make ?currencyCode ?totalEstimatedMonthlySavingsPercentage
         ?totalEstimatedMonthlySavingsAmount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
       let totalEstimatedMonthlySavingsPercentage =
@@ -7795,6 +7886,7 @@ module RedshiftInstanceDetails =
       let family =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Family") in
       make ?sizeFlexEligible ?currentGeneration ?region ?nodeType ?family ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeFlexEligible =
         field_map json "SizeFlexEligible" GenericBoolean.of_json in
@@ -7906,6 +7998,7 @@ module RDSInstanceDetails =
       make ?sizeFlexEligible ?currentGeneration ?licenseModel
         ?deploymentOption ?databaseEdition ?databaseEngine ?region
         ?instanceType ?family ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sizeFlexEligible =
         field_map json "SizeFlexEligible" GenericBoolean.of_json in
@@ -7992,6 +8085,7 @@ module InstanceDetails =
           (Xml.child xml_arg0 "EC2InstanceDetails") in
       make ?eSInstanceDetails ?elastiCacheInstanceDetails
         ?redshiftInstanceDetails ?rDSInstanceDetails ?eC2InstanceDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eSInstanceDetails =
         field_map json "ESInstanceDetails" ESInstanceDetails.of_json in
@@ -8235,6 +8329,7 @@ module ReservationPurchaseRecommendationDetail =
         ?recommendedNormalizedUnitsToPurchase
         ?recommendedNumberOfInstancesToPurchase ?instanceDetails ?accountId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recurringStandardMonthlyCost =
         field_map json "RecurringStandardMonthlyCost" GenericString.of_json in
@@ -8408,6 +8503,7 @@ module ReservationPurchaseRecommendation =
       make ?recommendationSummary ?recommendationDetails
         ?serviceSpecification ?paymentOption ?termInYears
         ?lookbackPeriodInDays ?accountScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationSummary =
         field_map json "RecommendationSummary"
@@ -8483,6 +8579,7 @@ module ReservationPurchaseRecommendationMetadata =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "RecommendationId") in
       make ?generationTimestamp ?recommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generationTimestamp =
         field_map json "GenerationTimestamp" GenericString.of_json in
@@ -8575,6 +8672,7 @@ module GetReservationPurchaseRecommendationResponse =
         (Option.map ~f:ReservationPurchaseRecommendationMetadata.of_xml)
           (Xml.child xml_arg0 "Metadata") in
       make ?nextPageToken ?recommendations ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -8661,6 +8759,7 @@ module GetReservationUtilizationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?maxResults ?nextPageToken ?sortBy ?filter ?granularity ?groupBy
         ~timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextPageToken =
@@ -9079,6 +9178,7 @@ module ReservationAggregates =
         ?unusedUnits ?unusedHours ?totalActualUnits ?totalActualHours
         ?purchasedUnits ?purchasedHours ?utilizationPercentageInUnits
         ?utilizationPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unrealizedSavings =
         field_map json "UnrealizedSavings" UnrealizedSavings.of_json in
@@ -9159,6 +9259,7 @@ module ReservationUtilizationGroup =
       let key =
         (Option.map ~f:ReservationGroupKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?utilization ?attributes ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let utilization =
         field_map json "Utilization" ReservationAggregates.of_json in
@@ -9223,6 +9324,7 @@ module UtilizationByTime =
       let timePeriod =
         (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       make ?total ?groups ?timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total = field_map json "Total" ReservationAggregates.of_json in
       let groups =
@@ -9336,6 +9438,7 @@ module GetReservationUtilizationResponse =
         UtilizationsByTime.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UtilizationsByTime") in
       make ?nextPageToken ?total ~utilizationsByTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -9401,6 +9504,7 @@ module RightsizingRecommendationConfiguration =
         RecommendationTarget.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RecommendationTarget") in
       make ~benefitsConsidered ~recommendationTarget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let benefitsConsidered =
         field_map_exn json "BenefitsConsidered" GenericBoolean.of_json in
@@ -9463,6 +9567,7 @@ module GetRightsizingRecommendationRequest =
       let filter =
         (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?nextPageToken ?pageSize ~service ?configuration ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -9529,6 +9634,7 @@ module RightsizingRecommendationSummary =
           (Xml.child xml_arg0 "TotalRecommendationCount") in
       make ?savingsPercentage ?savingsCurrencyCode
         ?estimatedTotalMonthlySavingsAmount ?totalRecommendationCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let savingsPercentage =
         field_map json "SavingsPercentage" GenericString.of_json in
@@ -9595,6 +9701,7 @@ module RightsizingRecommendationMetadata =
           (Xml.child xml_arg0 "RecommendationId") in
       make ?additionalMetadata ?lookbackPeriodInDays ?generationTimestamp
         ?recommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalMetadata =
         field_map json "AdditionalMetadata" GenericString.of_json in
@@ -9636,6 +9743,7 @@ module TerminateRecommendationDetail =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "EstimatedMonthlySavings") in
       make ?currencyCode ?estimatedMonthlySavings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
       let estimatedMonthlySavings =
@@ -9812,6 +9920,7 @@ module TargetInstance =
       make ?platformDifferences ?expectedResourceUtilization ?resourceDetails
         ?defaultTargetInstance ?currencyCode ?estimatedMonthlySavings
         ?estimatedMonthlyCost ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let platformDifferences =
         field_map json "PlatformDifferences" PlatformDifferences.of_json in
@@ -9875,6 +9984,7 @@ module ModifyRecommendationDetail =
         (Option.map ~f:TargetInstancesList.of_xml)
           (Xml.child xml_arg0 "TargetInstances") in
       make ?targetInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetInstances =
         field_map json "TargetInstances" TargetInstancesList.of_json in
@@ -9951,6 +10061,7 @@ module RightsizingRecommendation =
       make ?findingReasonCodes ?terminateRecommendationDetail
         ?modifyRecommendationDetail ?rightsizingType ?currentInstance
         ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let findingReasonCodes =
         field_map json "FindingReasonCodes" FindingReasonCodes.of_json in
@@ -10095,6 +10206,7 @@ module GetRightsizingRecommendationResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?configuration ?nextPageToken ?rightsizingRecommendations ?summary
         ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "Configuration"
@@ -10193,6 +10305,7 @@ module GetSavingsPlansCoverageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?sortBy ?maxResults ?nextToken ?metrics ?filter ?granularity
         ?groupBy ~timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" SortDefinition.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -10258,6 +10371,7 @@ module SavingsPlansCoverageData =
           (Xml.child xml_arg0 "SpendCoveredBySavingsPlans") in
       make ?coveragePercentage ?totalCost ?onDemandCost
         ?spendCoveredBySavingsPlans ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coveragePercentage =
         field_map json "CoveragePercentage" GenericString.of_json in
@@ -10299,6 +10413,7 @@ module SavingsPlansCoverage =
       let attributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?timePeriod ?coverage ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timePeriod = field_map json "TimePeriod" DateInterval.of_json in
       let coverage =
@@ -10405,6 +10520,7 @@ module GetSavingsPlansCoverageResponse =
         SavingsPlansCoverages.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SavingsPlansCoverages") in
       make ?nextToken ~savingsPlansCoverages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextPageToken.of_json in
       let savingsPlansCoverages =
@@ -10532,6 +10648,7 @@ module GetSavingsPlansPurchaseRecommendationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SavingsPlansType") in
       make ?filter ~lookbackPeriodInDays ?pageSize ?nextPageToken
         ?accountScope ~paymentOption ~termInYears ~savingsPlansType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map json "Filter" Expression.of_json in
       let lookbackPeriodInDays =
@@ -10589,6 +10706,7 @@ module SavingsPlansPurchaseRecommendationMetadata =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "RecommendationId") in
       make ?additionalMetadata ?generationTimestamp ?recommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalMetadata =
         field_map json "AdditionalMetadata" GenericString.of_json in
@@ -10729,6 +10847,7 @@ module SavingsPlansPurchaseRecommendationSummary =
         ?totalRecommendationCount ?estimatedSavingsAmount
         ?currentOnDemandSpend ?estimatedTotalCost ?currencyCode ?estimatedROI
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let estimatedOnDemandCostWithCurrentCommitment =
         field_map json "EstimatedOnDemandCostWithCurrentCommitment"
@@ -10793,6 +10912,7 @@ module SavingsPlansDetails =
       let region =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
       make ?offeringId ?instanceFamily ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offeringId = field_map json "OfferingId" GenericString.of_json in
       let instanceFamily =
@@ -10979,6 +11099,7 @@ module SavingsPlansPurchaseRecommendationDetail =
         ?estimatedSavingsAmount ?estimatedOnDemandCostWithCurrentCommitment
         ?estimatedOnDemandCost ?estimatedSPCost ?currencyCode ?estimatedROI
         ?upfrontCost ?accountId ?savingsPlansDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentAverageHourlyOnDemandSpend =
         field_map json "CurrentAverageHourlyOnDemandSpend"
@@ -11134,6 +11255,7 @@ module SavingsPlansPurchaseRecommendation =
       make ?savingsPlansPurchaseRecommendationSummary
         ?savingsPlansPurchaseRecommendationDetails ?lookbackPeriodInDays
         ?paymentOption ?termInYears ?savingsPlansType ?accountScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let savingsPlansPurchaseRecommendationSummary =
         field_map json "SavingsPlansPurchaseRecommendationSummary"
@@ -11232,6 +11354,7 @@ module GetSavingsPlansPurchaseRecommendationResponse =
         (Option.map ~f:SavingsPlansPurchaseRecommendationMetadata.of_xml)
           (Xml.child xml_arg0 "Metadata") in
       make ?nextPageToken ?savingsPlansPurchaseRecommendation ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -11365,6 +11488,7 @@ module GetSavingsPlansUtilizationDetailsRequest =
         DateInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?sortBy ?maxResults ?nextToken ?dataType ?filter ~timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" SortDefinition.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11429,6 +11553,7 @@ module SavingsPlansUtilization =
           (Xml.child xml_arg0 "TotalCommitment") in
       make ?utilizationPercentage ?unusedCommitment ?usedCommitment
         ?totalCommitment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let utilizationPercentage =
         field_map json "UtilizationPercentage" GenericString.of_json in
@@ -11470,6 +11595,7 @@ module SavingsPlansSavings =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "NetSavings") in
       make ?onDemandCostEquivalent ?netSavings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onDemandCostEquivalent =
         field_map json "OnDemandCostEquivalent" GenericString.of_json in
@@ -11522,6 +11648,7 @@ module SavingsPlansAmortizedCommitment =
           (Xml.child xml_arg0 "AmortizedRecurringCommitment") in
       make ?totalAmortizedCommitment ?amortizedUpfrontCommitment
         ?amortizedRecurringCommitment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalAmortizedCommitment =
         field_map json "TotalAmortizedCommitment" GenericString.of_json in
@@ -11607,6 +11734,7 @@ module SavingsPlansUtilizationDetail =
           (Xml.child xml_arg0 "SavingsPlanArn") in
       make ?amortizedCommitment ?savings ?utilization ?attributes
         ?savingsPlanArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let amortizedCommitment =
         field_map json "AmortizedCommitment"
@@ -11686,6 +11814,7 @@ module SavingsPlansUtilizationAggregates =
         SavingsPlansUtilization.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Utilization") in
       make ?amortizedCommitment ?savings ~utilization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let amortizedCommitment =
         field_map json "AmortizedCommitment"
@@ -11789,6 +11918,7 @@ module GetSavingsPlansUtilizationDetailsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "SavingsPlansUtilizationDetails") in
       make ?nextToken ~timePeriod ?total ~savingsPlansUtilizationDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextPageToken.of_json in
       let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
@@ -11841,6 +11971,7 @@ module GetSavingsPlansUtilizationRequest =
         DateInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?sortBy ?filter ?granularity ~timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortBy = field_map json "SortBy" SortDefinition.of_json in
       let filter = field_map json "Filter" Expression.of_json in
@@ -11895,6 +12026,7 @@ module SavingsPlansUtilizationByTime =
         DateInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?amortizedCommitment ?savings ~utilization ~timePeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let amortizedCommitment =
         field_map json "AmortizedCommitment"
@@ -11997,6 +12129,7 @@ module GetSavingsPlansUtilizationResponse =
         (Option.map ~f:SavingsPlansUtilizationsByTime.of_xml)
           (Xml.child xml_arg0 "SavingsPlansUtilizationsByTime") in
       make ~total ?savingsPlansUtilizationsByTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let total =
         field_map_exn json "Total" SavingsPlansUtilizationAggregates.of_json in
@@ -12078,6 +12211,7 @@ module GetTagsRequest =
           (Xml.child xml_arg0 "SearchString") in
       make ?nextPageToken ?maxResults ?sortBy ?filter ?tagKey ~timePeriod
         ?searchString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map json "NextPageToken" NextPageToken.of_json in
@@ -12217,6 +12351,7 @@ module GetTagsResponse =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
       make ~totalSize ~returnSize ~tags ?nextPageToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let totalSize = field_map_exn json "TotalSize" PageSize.of_json in
       let returnSize = field_map_exn json "ReturnSize" PageSize.of_json in
@@ -12286,6 +12421,7 @@ module GetUsageForecastRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?predictionIntervalLevel ?filter ~granularity ~metric ~timePeriod
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let predictionIntervalLevel =
         field_map json "PredictionIntervalLevel"
@@ -12312,6 +12448,7 @@ module UnresolvableUsageUnitException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -12392,6 +12529,7 @@ module GetUsageForecastResponse =
       let total =
         (Option.map ~f:MetricValue.of_xml) (Xml.child xml_arg0 "Total") in
       make ?forecastResultsByTime ?total ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastResultsByTime =
         field_map json "ForecastResultsByTime" ForecastResultsByTime.of_json in
@@ -12432,6 +12570,7 @@ module ListCostCategoryDefinitionsRequest =
         (Option.map ~f:ZonedDateTime.of_xml)
           (Xml.child xml_arg0 "EffectiveOn") in
       make ?maxResults ?nextToken ?effectiveOn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" CostCategoryMaxResults.of_json in
@@ -12494,6 +12633,7 @@ module ListCostCategoryDefinitionsResponse =
         (Option.map ~f:CostCategoryReferencesList.of_xml)
           (Xml.child xml_arg0 "CostCategoryReferences") in
       make ?nextToken ?costCategoryReferences ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextPageToken.of_json in
       let costCategoryReferences =
@@ -12520,6 +12660,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -12580,6 +12721,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:ResourceTagList.of_xml)
           (Xml.child xml_arg0 "ResourceTags") in
       make ?resourceTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags =
         field_map json "ResourceTags" ResourceTagList.of_json in
@@ -12610,6 +12752,7 @@ module ProvideAnomalyFeedbackRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyId") in
       make ~feedback ~anomalyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let feedback =
         field_map_exn json "Feedback" AnomalyFeedbackType.of_json in
@@ -12661,6 +12804,7 @@ module ProvideAnomalyFeedbackResponse =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyId") in
       make ~anomalyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyId = field_map_exn json "AnomalyId" GenericString.of_json in
       make ~anomalyId ()
@@ -12721,6 +12865,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceTags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags =
         field_map_exn json "ResourceTags" ResourceTagList.of_json in
@@ -12748,6 +12893,7 @@ module TooManyTagsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" Arn.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -12808,6 +12954,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12838,6 +12985,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceTagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTagKeys =
         field_map_exn json "ResourceTagKeys" ResourceTagKeyList.of_json in
@@ -12890,6 +13038,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12918,6 +13067,7 @@ module UpdateAnomalyMonitorRequest =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
       make ?monitorName ~monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitorName = field_map json "MonitorName" GenericString.of_json in
       let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
@@ -12977,6 +13127,7 @@ module UpdateAnomalyMonitorResponse =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
       make ~monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
       make ~monitorArn ()
@@ -13052,6 +13203,7 @@ module UpdateAnomalySubscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ?subscriptionName ?subscribers ?monitorArnList ?frequency
         ?threshold ~subscriptionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionName =
         field_map json "SubscriptionName" GenericString.of_json in
@@ -13133,6 +13285,7 @@ module UpdateAnomalySubscriptionResponse =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ~subscriptionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriptionArn =
         field_map_exn json "SubscriptionArn" GenericString.of_json in
@@ -13197,6 +13350,7 @@ module UpdateCostCategoryDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
       make ?splitChargeRules ?defaultValue ~rules ~ruleVersion
         ~costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let splitChargeRules =
         field_map json "SplitChargeRules"
@@ -13282,6 +13436,7 @@ module UpdateCostCategoryDefinitionResponse =
       let costCategoryArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
       make ?effectiveStart ?costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let effectiveStart =
         field_map json "EffectiveStart" ZonedDateTime.of_json in

@@ -151,6 +151,7 @@ module MappingRule =
       let claim =
         ClaimName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Claim") in
       make ~roleARN ~value ~matchType ~claim ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleARN = field_map_exn json "RoleARN" ARNString.of_json in
       let value = field_map_exn json "Value" ClaimValue.of_json in
@@ -286,6 +287,7 @@ module RulesConfigurationType =
         MappingRulesList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
       make ~rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map_exn json "Rules" MappingRulesList.of_json in
       make ~rules ()
@@ -378,6 +380,7 @@ module InternalErrorException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -399,6 +402,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -444,6 +448,7 @@ module NotAuthorizedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -465,6 +470,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -486,6 +492,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -697,6 +704,7 @@ module RoleMapping =
         RoleMappingType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?rulesConfiguration ?ambiguousRoleResolution ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rulesConfiguration =
         field_map json "RulesConfiguration" RulesConfigurationType.of_json in
@@ -770,6 +778,7 @@ module IdentityPoolShortDescription =
         (Option.map ~f:IdentityPoolId.of_xml)
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?identityPoolName ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolName =
         field_map json "IdentityPoolName" IdentityPoolName.of_json in
@@ -876,6 +885,7 @@ module IdentityDescription =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?lastModifiedDate ?creationDate ?logins ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedDate =
         field_map json "LastModifiedDate" DateType.of_json in
@@ -922,6 +932,7 @@ module CognitoIdentityProvider =
         (Option.map ~f:CognitoIdentityProviderName.of_xml)
           (Xml.child xml_arg0 "ProviderName") in
       make ?serverSideTokenCheck ?clientId ?providerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverSideTokenCheck =
         field_map json "ServerSideTokenCheck"
@@ -1015,6 +1026,7 @@ module UnprocessedIdentityId =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?errorCode ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
       let identityId = field_map json "IdentityId" IdentityId.of_json in
@@ -1244,6 +1256,7 @@ module ResourceConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1434,6 +1447,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1498,6 +1512,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1567,6 +1582,7 @@ module ExternalServiceException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1602,6 +1618,7 @@ module DeveloperUserAlreadyRegisteredException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1685,6 +1702,7 @@ module Credentials =
         (Option.map ~f:AccessKeyString.of_xml)
           (Xml.child xml_arg0 "AccessKeyId") in
       make ?expiration ?sessionToken ?secretKey ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiration = field_map json "Expiration" DateType.of_json in
       let sessionToken =
@@ -1710,6 +1728,7 @@ module InvalidIdentityPoolConfigurationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1842,6 +1861,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1870,6 +1890,7 @@ module UntagResourceInput =
         ARNString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys =
         field_map_exn json "TagKeys" IdentityPoolTagsListType.of_json in
@@ -1910,6 +1931,7 @@ module UnlinkIdentityInput =
         IdentityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityId") in
       make ~loginsToRemove ~logins ~identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loginsToRemove =
         field_map_exn json "LoginsToRemove" LoginsList.of_json in
@@ -1968,6 +1990,7 @@ module UnlinkDeveloperIdentityInput =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityId") in
       make ~developerUserIdentifier ~developerProviderName ~identityPoolId
         ~identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let developerUserIdentifier =
         field_map_exn json "DeveloperUserIdentifier"
@@ -2053,6 +2076,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2080,6 +2104,7 @@ module TagResourceInput =
         ARNString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" IdentityPoolTagsType.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ARNString.of_json in
@@ -2201,6 +2226,7 @@ module SetPrincipalTagAttributeMapResponse =
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?principalTags ?useDefaults ?identityProviderName ?identityPoolId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalTags =
         field_map json "PrincipalTags" PrincipalTags.of_json in
@@ -2265,6 +2291,7 @@ module SetPrincipalTagAttributeMapInput =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?principalTags ?useDefaults ~identityProviderName ~identityPoolId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalTags =
         field_map json "PrincipalTags" PrincipalTags.of_json in
@@ -2313,6 +2340,7 @@ module SetIdentityPoolRolesInput =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?roleMappings ~roles ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleMappings = field_map json "RoleMappings" RoleMappingMap.of_json in
       let roles = field_map_exn json "Roles" RolesMap.of_json in
@@ -2408,6 +2436,7 @@ module MergeDeveloperIdentitiesResponse =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityId = field_map json "IdentityId" IdentityId.of_json in
       make ?identityId ()
@@ -2468,6 +2497,7 @@ module MergeDeveloperIdentitiesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceUserIdentifier") in
       make ~identityPoolId ~developerProviderName ~destinationUserIdentifier
         ~sourceUserIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -2589,6 +2619,7 @@ module LookupDeveloperIdentityResponse =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?nextToken ?developerUserIdentifierList ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let developerUserIdentifierList =
@@ -2655,6 +2686,7 @@ module LookupDeveloperIdentityInput =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?nextToken ?maxResults ?developerUserIdentifier ?identityId
         ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let maxResults = field_map json "MaxResults" QueryLimit.of_json in
@@ -2747,6 +2779,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:IdentityPoolTagsType.of_xml)
           (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" IdentityPoolTagsType.of_json in
       make ?tags ()
@@ -2771,6 +2804,7 @@ module ListTagsForResourceInput =
         ARNString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ARNString.of_json in
       make ~resourceArn ()
@@ -2863,6 +2897,7 @@ module ListIdentityPoolsResponse =
         (Option.map ~f:IdentityPoolsList.of_xml)
           (Xml.child xml_arg0 "IdentityPools") in
       make ?nextToken ?identityPools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let identityPools =
@@ -2892,6 +2927,7 @@ module ListIdentityPoolsInput =
         QueryLimit.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MaxResults") in
       make ?nextToken ~maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let maxResults = field_map_exn json "MaxResults" QueryLimit.of_json in
@@ -2991,6 +3027,7 @@ module ListIdentitiesResponse =
         (Option.map ~f:IdentityPoolId.of_xml)
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?nextToken ?identities ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
       let identities = field_map json "Identities" IdentitiesList.of_json in
@@ -3039,6 +3076,7 @@ module ListIdentitiesInput =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?hideDisabled ?nextToken ~maxResults ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hideDisabled = field_map json "HideDisabled" HideDisabled.of_json in
       let nextToken = field_map json "NextToken" PaginationKey.of_json in
@@ -3239,6 +3277,7 @@ module IdentityPool =
         ?openIdConnectProviderARNs ?developerProviderName
         ?supportedLoginProviders ?allowClassicFlow
         ~allowUnauthenticatedIdentities ~identityPoolName ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolTags =
         field_map json "IdentityPoolTags" IdentityPoolTagsType.of_json in
@@ -3380,6 +3419,7 @@ module GetPrincipalTagAttributeMapResponse =
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?principalTags ?useDefaults ?identityProviderName ?identityPoolId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let principalTags =
         field_map json "PrincipalTags" PrincipalTags.of_json in
@@ -3421,6 +3461,7 @@ module GetPrincipalTagAttributeMapInput =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityProviderName ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderName =
         field_map_exn json "IdentityProviderName"
@@ -3533,6 +3574,7 @@ module GetOpenIdTokenResponse =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?token ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let token = field_map json "Token" OIDCToken.of_json in
       let identityId = field_map json "IdentityId" IdentityId.of_json in
@@ -3563,6 +3605,7 @@ module GetOpenIdTokenInput =
         IdentityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityId") in
       make ?logins ~identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logins = field_map json "Logins" LoginsMap.of_json in
       let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
@@ -3673,6 +3716,7 @@ module GetOpenIdTokenForDeveloperIdentityResponse =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?token ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let token = field_map json "Token" OIDCToken.of_json in
       let identityId = field_map json "IdentityId" IdentityId.of_json in
@@ -3738,6 +3782,7 @@ module GetOpenIdTokenForDeveloperIdentityInput =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?tokenDuration ?principalTags ~logins ?identityId ~identityPoolId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tokenDuration =
         field_map json "TokenDuration" TokenDuration.of_json in
@@ -3857,6 +3902,7 @@ module GetIdentityPoolRolesResponse =
         (Option.map ~f:IdentityPoolId.of_xml)
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?roleMappings ?roles ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleMappings = field_map json "RoleMappings" RoleMappingMap.of_json in
       let roles = field_map json "Roles" RolesMap.of_json in
@@ -3884,6 +3930,7 @@ module GetIdentityPoolRolesInput =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -3995,6 +4042,7 @@ module GetIdResponse =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityId = field_map json "IdentityId" IdentityId.of_json in
       make ?identityId ()
@@ -4031,6 +4079,7 @@ module GetIdInput =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?logins ~identityPoolId ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logins = field_map json "Logins" LoginsMap.of_json in
       let identityPoolId =
@@ -4154,6 +4203,7 @@ module GetCredentialsForIdentityResponse =
       let identityId =
         (Option.map ~f:IdentityId.of_xml) (Xml.child xml_arg0 "IdentityId") in
       make ?credentials ?identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let credentials = field_map json "Credentials" Credentials.of_json in
       let identityId = field_map json "IdentityId" IdentityId.of_json in
@@ -4192,6 +4242,7 @@ module GetCredentialsForIdentityInput =
         IdentityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityId") in
       make ?customRoleArn ?logins ~identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customRoleArn = field_map json "CustomRoleArn" ARNString.of_json in
       let logins = field_map json "Logins" LoginsMap.of_json in
@@ -4217,6 +4268,7 @@ module DescribeIdentityPoolInput =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -4240,6 +4292,7 @@ module DescribeIdentityInput =
         IdentityId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityId") in
       make ~identityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
       make ~identityId ()
@@ -4263,6 +4316,7 @@ module DeleteIdentityPoolInput =
         IdentityPoolId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolId =
         field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
@@ -4333,6 +4387,7 @@ module DeleteIdentitiesResponse =
         (Option.map ~f:UnprocessedIdentityIdList.of_xml)
           (Xml.child xml_arg0 "UnprocessedIdentityIds") in
       make ?unprocessedIdentityIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unprocessedIdentityIds =
         field_map json "UnprocessedIdentityIds"
@@ -4359,6 +4414,7 @@ module DeleteIdentitiesInput =
         IdentityIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityIdsToDelete") in
       make ~identityIdsToDelete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityIdsToDelete =
         field_map_exn json "IdentityIdsToDelete" IdentityIdList.of_json in
@@ -4476,6 +4532,7 @@ module CreateIdentityPoolInput =
         ?openIdConnectProviderARNs ?developerProviderName
         ?supportedLoginProviders ?allowClassicFlow
         ~allowUnauthenticatedIdentities ~identityPoolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityPoolTags =
         field_map json "IdentityPoolTags" IdentityPoolTagsType.of_json in

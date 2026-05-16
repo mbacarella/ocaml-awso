@@ -77,6 +77,7 @@ module ValueHolder =
       let ionBinary =
         (Option.map ~f:IonBinary.of_xml) (Xml.child xml_arg0 "IonBinary") in
       make ?ionText ?ionBinary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ionText = field_map json "IonText" IonText.of_json in
       let ionBinary = field_map json "IonBinary" IonBinary.of_json in
@@ -187,6 +188,7 @@ module TimingInformation =
         (Option.map ~f:ProcessingTimeMilliseconds.of_xml)
           (Xml.child xml_arg0 "ProcessingTimeMilliseconds") in
       make ?processingTimeMilliseconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let processingTimeMilliseconds =
         field_map json "ProcessingTimeMilliseconds"
@@ -254,6 +256,7 @@ module IOUsage =
       let readIOs =
         (Option.map ~f:ReadIOs.of_xml) (Xml.child xml_arg0 "ReadIOs") in
       make ?writeIOs ?readIOs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let writeIOs = field_map json "WriteIOs" WriteIOs.of_json in
       let readIOs = field_map json "ReadIOs" ReadIOs.of_json in
@@ -303,6 +306,7 @@ module Page =
       let values =
         (Option.map ~f:ValueHolders.of_xml) (Xml.child xml_arg0 "Values") in
       make ?nextPageToken ?values ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
       let values = field_map json "Values" ValueHolders.of_json in
@@ -411,6 +415,7 @@ module AbortTransactionResult =
         (Option.map ~f:TimingInformation.of_xml)
           (Xml.child xml_arg0 "TimingInformation") in
       make ?timingInformation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timingInformation =
         field_map json "TimingInformation" TimingInformation.of_json in
@@ -434,6 +439,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "Code" ErrorCode.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -454,6 +460,7 @@ module CapacityExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -503,6 +510,7 @@ module CommitTransactionResult =
         (Option.map ~f:TransactionId.of_xml)
           (Xml.child xml_arg0 "TransactionId") in
       make ?consumedIOs ?timingInformation ?commitDigest ?transactionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumedIOs = field_map json "ConsumedIOs" IOUsage.of_json in
       let timingInformation =
@@ -531,6 +539,7 @@ module EndSessionResult =
         (Option.map ~f:TimingInformation.of_xml)
           (Xml.child xml_arg0 "TimingInformation") in
       make ?timingInformation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timingInformation =
         field_map json "TimingInformation" TimingInformation.of_json in
@@ -569,6 +578,7 @@ module ExecuteStatementResult =
       let firstPage =
         (Option.map ~f:Page.of_xml) (Xml.child xml_arg0 "FirstPage") in
       make ?consumedIOs ?timingInformation ?firstPage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumedIOs = field_map json "ConsumedIOs" IOUsage.of_json in
       let timingInformation =
@@ -608,6 +618,7 @@ module FetchPageResult =
           (Xml.child xml_arg0 "TimingInformation") in
       let page = (Option.map ~f:Page.of_xml) (Xml.child xml_arg0 "Page") in
       make ?consumedIOs ?timingInformation ?page ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumedIOs = field_map json "ConsumedIOs" IOUsage.of_json in
       let timingInformation =
@@ -633,6 +644,7 @@ module InvalidSessionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?code ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let code = field_map json "Code" ErrorCode.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -653,6 +665,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -672,6 +685,7 @@ module OccConflictException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -691,6 +705,7 @@ module RateExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -724,6 +739,7 @@ module StartSessionResult =
         (Option.map ~f:SessionToken.of_xml)
           (Xml.child xml_arg0 "SessionToken") in
       make ?timingInformation ?sessionToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timingInformation =
         field_map json "TimingInformation" TimingInformation.of_json in
@@ -758,6 +774,7 @@ module StartTransactionResult =
         (Option.map ~f:TransactionId.of_xml)
           (Xml.child xml_arg0 "TransactionId") in
       make ?timingInformation ?transactionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timingInformation =
         field_map json "TimingInformation" TimingInformation.of_json in
@@ -774,6 +791,7 @@ module AbortTransactionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the details of the transaction to abort."]
@@ -803,6 +821,7 @@ module CommitTransactionRequest =
         TransactionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TransactionId") in
       make ~commitDigest ~transactionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let commitDigest =
         field_map_exn json "CommitDigest" CommitDigest.of_json in
@@ -819,6 +838,7 @@ module EndSessionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a request to end the session."]
@@ -855,6 +875,7 @@ module ExecuteStatementRequest =
         TransactionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TransactionId") in
       make ?parameters ~statement ~transactionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameters =
         field_map json "Parameters" StatementParameters.of_json in
@@ -890,6 +911,7 @@ module FetchPageRequest =
         TransactionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TransactionId") in
       make ~nextPageToken ~transactionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextPageToken =
         field_map_exn json "NextPageToken" PageToken.of_json in
@@ -915,6 +937,7 @@ module StartSessionRequest =
         LedgerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LedgerName") in
       make ~ledgerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ledgerName = field_map_exn json "LedgerName" LedgerName.of_json in
       make ~ledgerName ()
@@ -928,6 +951,7 @@ module StartTransactionRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a request to start a transaction."]
@@ -1079,6 +1103,7 @@ module SendCommandResult =
           (Xml.child xml_arg0 "StartSession") in
       make ?fetchPage ?executeStatement ?abortTransaction ?commitTransaction
         ?endSession ?startTransaction ?startSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fetchPage = field_map json "FetchPage" FetchPageResult.of_json in
       let executeStatement =
@@ -1185,6 +1210,7 @@ module SendCommandRequest =
           (Xml.child xml_arg0 "SessionToken") in
       make ?fetchPage ?executeStatement ?abortTransaction ?commitTransaction
         ?endSession ?startTransaction ?startSession ?sessionToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fetchPage = field_map json "FetchPage" FetchPageRequest.of_json in
       let executeStatement =

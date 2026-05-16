@@ -120,6 +120,7 @@ module Tag =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
@@ -219,6 +220,7 @@ module NetworkResourceSummary =
           (Xml.child xml_arg0 "RegisteredGatewayArn") in
       make ?isMiddlebox ?nameTag ?definition ?resourceType ?resourceArn
         ?registeredGatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isMiddlebox = field_map json "IsMiddlebox" Boolean.of_json in
       let nameTag = field_map json "NameTag" ConstrainedString.of_json in
@@ -445,6 +447,7 @@ module PathComponent =
       let sequence =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Sequence") in
       make ?destinationCidrBlock ?resource ?sequence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationCidrBlock =
         field_map json "DestinationCidrBlock" ConstrainedString.of_json in
@@ -732,6 +735,7 @@ module NetworkRouteDestination =
           (Xml.child xml_arg0 "CoreNetworkAttachmentId") in
       make ?resourceId ?resourceType ?edgeLocation ?segmentName
         ?transitGatewayAttachmentId ?coreNetworkAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map json "ResourceId" ConstrainedString.of_json in
       let resourceType =
@@ -807,6 +811,7 @@ module ConnectPeerBgpConfiguration =
       let coreNetworkAsn =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "CoreNetworkAsn") in
       make ?peerAddress ?coreNetworkAddress ?peerAsn ?coreNetworkAsn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerAddress = field_map json "PeerAddress" IPAddress.of_json in
       let coreNetworkAddress =
@@ -863,6 +868,7 @@ module ValidationExceptionField =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~message ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ServerSideString.of_json in
       let name = field_map_exn json "Name" ServerSideString.of_json in
@@ -1033,6 +1039,7 @@ module ProposedSegmentChange =
           (Xml.child xml_arg0 "AttachmentPolicyRuleNumber") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?segmentName ?attachmentPolicyRuleNumber ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let segmentName =
         field_map json "SegmentName" ConstrainedString.of_json in
@@ -1073,6 +1080,7 @@ module CoreNetworkEdge =
         (Option.map ~f:ExternalRegionCode.of_xml)
           (Xml.child xml_arg0 "EdgeLocation") in
       make ?insideCidrBlocks ?asn ?edgeLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let insideCidrBlocks =
         field_map json "InsideCidrBlocks" ConstrainedStringList.of_json in
@@ -1114,6 +1122,7 @@ module CoreNetworkSegment =
       let name =
         (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sharedSegments ?edgeLocations ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedSegments =
         field_map json "SharedSegments" ConstrainedStringList.of_json in
@@ -1223,6 +1232,7 @@ module RouteAnalysisCompletion =
         (Option.map ~f:RouteAnalysisCompletionResultCode.of_xml)
           (Xml.child xml_arg0 "ResultCode") in
       make ?reasonContext ?reasonCode ?resultCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reasonContext =
         field_map json "ReasonContext" ReasonContextMap.of_json in
@@ -1266,6 +1276,7 @@ module CoreNetworkPolicyError =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?path ~message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "Path" ServerSideString.of_json in
       let message = field_map_exn json "Message" ServerSideString.of_json in
@@ -1457,6 +1468,7 @@ module TransitGatewayRegistrationStateReason =
         (Option.map ~f:TransitGatewayRegistrationState.of_xml)
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ConstrainedString.of_json in
       let code =
@@ -1582,6 +1594,7 @@ module Location =
         (Option.map ~f:ConstrainedString.of_xml)
           (Xml.child xml_arg0 "Address") in
       make ?longitude ?latitude ?address ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let longitude = field_map json "Longitude" ConstrainedString.of_json in
       let latitude = field_map json "Latitude" ConstrainedString.of_json in
@@ -1680,6 +1693,7 @@ module ConnectionHealth =
       let type_ =
         (Option.map ~f:ConnectionType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?timestamp ?status ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" DateTime.of_json in
       let status = field_map json "Status" ConnectionStatus.of_json in
@@ -1830,6 +1844,7 @@ module Bandwidth =
       let uploadSpeed =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "UploadSpeed") in
       make ?downloadSpeed ?uploadSpeed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downloadSpeed = field_map json "DownloadSpeed" Integer.of_json in
       let uploadSpeed = field_map json "UploadSpeed" Integer.of_json in
@@ -1939,6 +1954,7 @@ module AWSLocation =
       let zone =
         (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "Zone") in
       make ?subnetArn ?zone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetArn = field_map json "SubnetArn" SubnetArn.of_json in
       let zone = field_map json "Zone" ConstrainedString.of_json in
@@ -2179,6 +2195,7 @@ module CoreNetworkChangeValues =
           (Xml.child xml_arg0 "SegmentName") in
       make ?sharedSegments ?insideCidrBlocks ?destinationIdentifier ?cidr
         ?asn ?edgeLocations ?segmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sharedSegments =
         field_map json "SharedSegments" ConstrainedStringList.of_json in
@@ -2622,6 +2639,7 @@ module Attachment =
         ?attachmentPolicyRuleNumber ?resourceArn ?edgeLocation ?state
         ?attachmentType ?ownerAccountId ?attachmentId ?coreNetworkArn
         ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updatedAt = field_map json "UpdatedAt" DateTime.of_json in
       let createdAt = field_map json "CreatedAt" DateTime.of_json in
@@ -2690,6 +2708,7 @@ module VpcOptions =
       let ipv6Support =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Ipv6Support") in
       make ?ipv6Support ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipv6Support = field_map json "Ipv6Support" Boolean.of_json in
       make ?ipv6Support ()
@@ -2778,6 +2797,7 @@ module RouteAnalysisEndpointOptions =
         (Option.map ~f:TransitGatewayAttachmentArn.of_xml)
           (Xml.child xml_arg0 "TransitGatewayAttachmentArn") in
       make ?ipAddress ?transitGatewayArn ?transitGatewayAttachmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddress = field_map json "IpAddress" IPAddress.of_json in
       let transitGatewayArn =
@@ -2811,6 +2831,7 @@ module RouteAnalysisPath =
         (Option.map ~f:RouteAnalysisCompletion.of_xml)
           (Xml.child xml_arg0 "CompletionStatus") in
       make ?path ?completionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "Path" PathComponentList.of_json in
       let completionStatus =
@@ -2958,6 +2979,7 @@ module CoreNetworkSummary =
           (Xml.child xml_arg0 "CoreNetworkId") in
       make ?tags ?description ?state ?ownerAccountId ?globalNetworkId
         ?coreNetworkArn ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description =
@@ -3040,6 +3062,7 @@ module CoreNetworkPolicyVersion =
           (Xml.child xml_arg0 "CoreNetworkId") in
       make ?changeSetState ?createdAt ?description ?alias ?policyVersionId
         ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeSetState =
         field_map json "ChangeSetState" ChangeSetState.of_json in
@@ -3125,6 +3148,7 @@ module ConnectPeerSummary =
           (Xml.child xml_arg0 "CoreNetworkId") in
       make ?tags ?createdAt ?connectPeerState ?edgeLocation ?connectPeerId
         ?connectAttachmentId ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let createdAt = field_map json "CreatedAt" DateTime.of_json in
@@ -3176,6 +3200,7 @@ module TransitGatewayRegistration =
         (Option.map ~f:GlobalNetworkId.of_xml)
           (Xml.child xml_arg0 "GlobalNetworkId") in
       make ?state ?transitGatewayArn ?globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State" TransitGatewayRegistrationStateReason.of_json in
@@ -3242,6 +3267,7 @@ module TransitGatewayConnectPeerAssociation =
           (Xml.child xml_arg0 "TransitGatewayConnectPeerArn") in
       make ?state ?linkId ?deviceId ?globalNetworkId
         ?transitGatewayConnectPeerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State"
@@ -3325,6 +3351,7 @@ module Site =
         (Option.map ~f:SiteId.of_xml) (Xml.child xml_arg0 "SiteId") in
       make ?tags ?state ?createdAt ?location ?description ?globalNetworkId
         ?siteArn ?siteId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let state = field_map json "State" SiteState.of_json in
@@ -3447,6 +3474,7 @@ module NetworkTelemetry =
           (Xml.child xml_arg0 "RegisteredGatewayArn") in
       make ?health ?address ?resourceArn ?resourceId ?resourceType ?accountId
         ?awsRegion ?coreNetworkId ?registeredGatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let health = field_map json "Health" ConnectionHealth.of_json in
       let address = field_map json "Address" ConstrainedString.of_json in
@@ -3520,6 +3548,7 @@ module NetworkRoute =
         (Option.map ~f:ConstrainedString.of_xml)
           (Xml.child xml_arg0 "DestinationCidrBlock") in
       make ?type_ ?state ?prefixListId ?destinations ?destinationCidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" RouteType.of_json in
       let state = field_map json "State" RouteState.of_json in
@@ -3608,6 +3637,7 @@ module CoreNetworkSegmentEdgeIdentifier =
         (Option.map ~f:CoreNetworkId.of_xml)
           (Xml.child xml_arg0 "CoreNetworkId") in
       make ?edgeLocation ?segmentName ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let edgeLocation =
         field_map json "EdgeLocation" ExternalRegionCode.of_json in
@@ -3742,6 +3772,7 @@ module NetworkResource =
       make ?metadata ?tags ?definitionTimestamp ?definition ?resourceArn
         ?resourceId ?resourceType ?accountId ?awsRegion ?coreNetworkId
         ?registeredGatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata =
         field_map json "Metadata" NetworkResourceMetadataMap.of_json in
@@ -3783,6 +3814,7 @@ module Relationship =
       let from =
         (Option.map ~f:ConstrainedString.of_xml) (Xml.child xml_arg0 "From") in
       make ?to_ ?from ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let to_ = field_map json "To" ConstrainedString.of_json in
       let from = field_map json "From" ConstrainedString.of_json in
@@ -3809,6 +3841,7 @@ module NetworkResourceCount =
         (Option.map ~f:ConstrainedString.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?count ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let count = field_map json "Count" Integer.of_json in
       let resourceType =
@@ -3905,6 +3938,7 @@ module Link =
         (Option.map ~f:LinkId.of_xml) (Xml.child xml_arg0 "LinkId") in
       make ?tags ?state ?createdAt ?provider ?bandwidth ?type_ ?description
         ?siteId ?globalNetworkId ?linkArn ?linkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let state = field_map json "State" LinkState.of_json in
@@ -3961,6 +3995,7 @@ module LinkAssociation =
         (Option.map ~f:GlobalNetworkId.of_xml)
           (Xml.child xml_arg0 "GlobalNetworkId") in
       make ?linkAssociationState ?linkId ?deviceId ?globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkAssociationState =
         field_map json "LinkAssociationState" LinkAssociationState.of_json in
@@ -4081,6 +4116,7 @@ module Device =
       make ?tags ?state ?createdAt ?siteId ?location ?serialNumber ?model
         ?vendor ?type_ ?description ?aWSLocation ?globalNetworkId ?deviceArn
         ?deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let state = field_map json "State" DeviceState.of_json in
@@ -4156,6 +4192,7 @@ module CustomerGatewayAssociation =
         (Option.map ~f:CustomerGatewayArn.of_xml)
           (Xml.child xml_arg0 "CustomerGatewayArn") in
       make ?state ?linkId ?deviceId ?globalNetworkId ?customerGatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state =
         field_map json "State" CustomerGatewayAssociationState.of_json in
@@ -4215,6 +4252,7 @@ module CoreNetworkChange =
       let type_ =
         (Option.map ~f:ChangeType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?newValues ?previousValues ?identifier ?action ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newValues =
         field_map json "NewValues" CoreNetworkChangeValues.of_json in
@@ -4328,6 +4366,7 @@ module Connection =
       make ?tags ?state ?createdAt ?description ?connectedLinkId ?linkId
         ?connectedDeviceId ?deviceId ?globalNetworkId ?connectionArn
         ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let state = field_map json "State" ConnectionState.of_json in
@@ -4405,6 +4444,7 @@ module ConnectPeerConfiguration =
           (Xml.child xml_arg0 "CoreNetworkAddress") in
       make ?bgpConfigurations ?protocol ?insideCidrBlocks ?peerAddress
         ?coreNetworkAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bgpConfigurations =
         field_map json "BgpConfigurations"
@@ -4465,6 +4505,7 @@ module ConnectPeerAssociation =
         (Option.map ~f:ConnectPeerId.of_xml)
           (Xml.child xml_arg0 "ConnectPeerId") in
       make ?state ?linkId ?deviceId ?globalNetworkId ?connectPeerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ConnectPeerAssociationState.of_json in
       let linkId = field_map json "LinkId" LinkId.of_json in
@@ -4491,6 +4532,7 @@ module ConnectAttachmentOptions =
       let protocol =
         (Option.map ~f:TunnelProtocol.of_xml) (Xml.child xml_arg0 "Protocol") in
       make ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol = field_map json "Protocol" TunnelProtocol.of_json in
       make ?protocol ()
@@ -4556,6 +4598,7 @@ module GlobalNetwork =
           (Xml.child xml_arg0 "GlobalNetworkId") in
       make ?tags ?state ?createdAt ?description ?globalNetworkArn
         ?globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let state = field_map json "State" GlobalNetworkState.of_json in
@@ -4586,6 +4629,7 @@ module AccessDeniedException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" ServerSideString.of_json in
       make ~message ()
@@ -4620,6 +4664,7 @@ module ConflictException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" ServerSideString.of_json in
@@ -4654,6 +4699,7 @@ module InternalServerException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -4697,6 +4743,7 @@ module ResourceNotFoundException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?context ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" ExceptionContextMap.of_json in
       let resourceType =
@@ -4731,6 +4778,7 @@ module ThrottlingException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -4769,6 +4817,7 @@ module ValidationException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?fields ?reason ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields =
         field_map json "Fields" ValidationExceptionFieldList.of_json in
@@ -4804,6 +4853,7 @@ module VpcAttachment =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?options ?subnetArns ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options = field_map json "Options" VpcOptions.of_json in
       let subnetArns = field_map json "SubnetArns" SubnetArnList.of_json in
@@ -4857,6 +4907,7 @@ module ServiceQuotaExceededException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode =
         field_map_exn json "ServiceCode" ServerSideString.of_json in
@@ -4955,6 +5006,7 @@ module CoreNetwork =
           (Xml.child xml_arg0 "GlobalNetworkId") in
       make ?tags ?edges ?segments ?state ?createdAt ?description
         ?coreNetworkArn ?coreNetworkId ?globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let edges = field_map json "Edges" CoreNetworkEdgeList.of_json in
@@ -5107,6 +5159,7 @@ module RouteAnalysis =
       make ?returnPath ?forwardPath ?useMiddleboxes ?includeReturnPath
         ?destination ?source ?status ?startTimestamp ?routeAnalysisId
         ?ownerAccountId ?globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnPath = field_map json "ReturnPath" RouteAnalysisPath.of_json in
       let forwardPath =
@@ -5154,6 +5207,7 @@ module RouteAnalysisEndpointOptionsSpecification =
         (Option.map ~f:TransitGatewayAttachmentArn.of_xml)
           (Xml.child xml_arg0 "TransitGatewayAttachmentArn") in
       make ?ipAddress ?transitGatewayAttachmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipAddress = field_map json "IpAddress" IPAddress.of_json in
       let transitGatewayAttachmentArn =
@@ -5244,6 +5298,7 @@ module CoreNetworkPolicy =
           (Xml.child xml_arg0 "CoreNetworkId") in
       make ?policyDocument ?policyErrors ?changeSetState ?createdAt
         ?description ?alias ?policyVersionId ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map json "PolicyDocument" CoreNetworkPolicyDocument.of_json in
@@ -5299,6 +5354,7 @@ module CoreNetworkPolicyException =
         ServerSideString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?errors ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map json "Errors" CoreNetworkPolicyErrorList.of_json in
       let message = field_map_exn json "Message" ServerSideString.of_json in
@@ -5632,6 +5688,7 @@ module SiteToSiteVpnAttachment =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?vpnConnectionArn ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpnConnectionArn =
         field_map json "VpnConnectionArn" VpnConnectionArn.of_json in
@@ -5795,6 +5852,7 @@ module RouteTableIdentifier =
         (Option.map ~f:TransitGatewayRouteTableArn.of_xml)
           (Xml.child xml_arg0 "TransitGatewayRouteTableArn") in
       make ?coreNetworkSegmentEdge ?transitGatewayRouteTableArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkSegmentEdge =
         field_map json "CoreNetworkSegmentEdge"
@@ -6224,6 +6282,7 @@ module ConnectPeer =
           (Xml.child xml_arg0 "CoreNetworkId") in
       make ?tags ?configuration ?createdAt ?state ?edgeLocation
         ?connectPeerId ?connectAttachmentId ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let configuration =
@@ -6323,6 +6382,7 @@ module ConnectAttachment =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?options ?transportAttachmentId ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options = field_map json "Options" ConnectAttachmentOptions.of_json in
       let transportAttachmentId =
@@ -6416,6 +6476,7 @@ module BgpOptions =
       let peerAsn =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "PeerAsn") in
       make ?peerAsn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerAsn = field_map json "PeerAsn" Long.of_json in make ?peerAsn ()
     let to_json v = composed_to_json to_value v
@@ -6509,6 +6570,7 @@ module UpdateVpcAttachmentResponse =
         (Option.map ~f:VpcAttachment.of_xml)
           (Xml.child xml_arg0 "VpcAttachment") in
       make ?vpcAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcAttachment =
         field_map json "VpcAttachment" VpcAttachment.of_json in
@@ -6555,6 +6617,7 @@ module UpdateVpcAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ?options ?removeSubnetArns ?addSubnetArns ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let options = field_map json "Options" VpcOptions.of_json in
       let removeSubnetArns =
@@ -6650,6 +6713,7 @@ module UpdateSiteResponse =
     let of_xml xml_arg0 =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let site = field_map json "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
@@ -6695,6 +6759,7 @@ module UpdateSiteRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?location ?description ~siteId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" Location.of_json in
       let description =
@@ -6801,6 +6866,7 @@ module UpdateNetworkResourceMetadataResponse =
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?metadata ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata =
         field_map json "Metadata" NetworkResourceMetadataMap.of_json in
@@ -6840,6 +6906,7 @@ module UpdateNetworkResourceMetadataRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~metadata ~resourceArn ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata =
         field_map_exn json "Metadata" NetworkResourceMetadataMap.of_json in
@@ -6945,6 +7012,7 @@ module UpdateLinkResponse =
     let of_xml xml_arg0 =
       let link = (Option.map ~f:Link.of_xml) (Xml.child xml_arg0 "Link") in
       make ?link ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let link = field_map json "Link" Link.of_json in make ?link ()
     let to_json v = composed_to_json to_value v
@@ -7013,6 +7081,7 @@ module UpdateLinkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?provider ?bandwidth ?type_ ?description ~linkId ~globalNetworkId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provider = field_map json "Provider" ConstrainedString.of_json in
       let bandwidth = field_map json "Bandwidth" Bandwidth.of_json in
@@ -7116,6 +7185,7 @@ module UpdateGlobalNetworkResponse =
         (Option.map ~f:GlobalNetwork.of_xml)
           (Xml.child xml_arg0 "GlobalNetwork") in
       make ?globalNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalNetwork =
         field_map json "GlobalNetwork" GlobalNetwork.of_json in
@@ -7150,6 +7220,7 @@ module UpdateGlobalNetworkRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?description ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" ConstrainedString.of_json in
@@ -7245,6 +7316,7 @@ module UpdateDeviceResponse =
       let device =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "Device") in
       make ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map json "Device" Device.of_json in make ?device ()
     let to_json v = composed_to_json to_value v
@@ -7343,6 +7415,7 @@ module UpdateDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?siteId ?location ?serialNumber ?model ?vendor ?type_ ?description
         ?aWSLocation ~deviceId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let siteId = field_map json "SiteId" SiteId.of_json in
       let location = field_map json "Location" Location.of_json in
@@ -7449,6 +7522,7 @@ module UpdateCoreNetworkResponse =
       let coreNetwork =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
@@ -7478,6 +7552,7 @@ module UpdateCoreNetworkRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?description ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" ConstrainedString.of_json in
@@ -7573,6 +7648,7 @@ module UpdateConnectionResponse =
       let connection =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map json "Connection" Connection.of_json in
       make ?connection ()
@@ -7636,6 +7712,7 @@ module UpdateConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?description ?connectedLinkId ?linkId ~connectionId
         ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map json "Description" ConstrainedString.of_json in
@@ -7730,6 +7807,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a specified resource."]
@@ -7757,6 +7835,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -7854,6 +7933,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Tags a specified resource."]
@@ -7879,6 +7959,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -7974,6 +8055,7 @@ module StartRouteAnalysisResponse =
         (Option.map ~f:RouteAnalysis.of_xml)
           (Xml.child xml_arg0 "RouteAnalysis") in
       make ?routeAnalysis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeAnalysis =
         field_map json "RouteAnalysis" RouteAnalysis.of_json in
@@ -8042,6 +8124,7 @@ module StartRouteAnalysisRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?useMiddleboxes ?includeReturnPath ~destination ~source
         ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useMiddleboxes = field_map json "UseMiddleboxes" Boolean.of_json in
       let includeReturnPath =
@@ -8148,6 +8231,7 @@ module RestoreCoreNetworkPolicyVersionResponse =
         (Option.map ~f:CoreNetworkPolicy.of_xml)
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkPolicy =
         field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
@@ -8178,6 +8262,7 @@ module RestoreCoreNetworkPolicyVersionRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~policyVersionId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyVersionId =
         field_map_exn json "PolicyVersionId" Integer.of_json in
@@ -8274,6 +8359,7 @@ module RejectAttachmentResponse =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachment = field_map json "Attachment" Attachment.of_json in
       make ?attachment ()
@@ -8295,6 +8381,7 @@ module RejectAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentId =
         field_map_exn json "AttachmentId" AttachmentId.of_json in
@@ -8392,6 +8479,7 @@ module RegisterTransitGatewayResponse =
         (Option.map ~f:TransitGatewayRegistration.of_xml)
           (Xml.child xml_arg0 "TransitGatewayRegistration") in
       make ?transitGatewayRegistration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayRegistration =
         field_map json "TransitGatewayRegistration"
@@ -8427,6 +8515,7 @@ module RegisterTransitGatewayRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~transitGatewayArn ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayArn =
         field_map_exn json "TransitGatewayArn" TransitGatewayArn.of_json in
@@ -8518,6 +8607,7 @@ module PutResourcePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates or updates a resource policy."]
@@ -8546,6 +8636,7 @@ module PutResourcePolicyRequest =
         ResourcePolicyDocument.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyDocument") in
       make ~resourceArn ~policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       let policyDocument =
@@ -8652,6 +8743,7 @@ module PutCoreNetworkPolicyResponse =
         (Option.map ~f:CoreNetworkPolicy.of_xml)
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkPolicy =
         field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
@@ -8713,6 +8805,7 @@ module PutCoreNetworkPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?clientToken ?latestVersionId ?description ~policyDocument
         ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let latestVersionId = field_map json "LatestVersionId" Integer.of_json in
@@ -8804,6 +8897,7 @@ module ListTagsForResourceResponse =
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagList = field_map json "TagList" TagList.of_json in
       make ?tagList ()
@@ -8826,6 +8920,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -8908,6 +9003,7 @@ module ListCoreNetworksResponse =
         (Option.map ~f:CoreNetworkSummaryList.of_xml)
           (Xml.child xml_arg0 "CoreNetworks") in
       make ?nextToken ?coreNetworks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let coreNetworks =
@@ -8936,6 +9032,7 @@ module ListCoreNetworksRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -9029,6 +9126,7 @@ module ListCoreNetworkPolicyVersionsResponse =
         (Option.map ~f:CoreNetworkPolicyVersionList.of_xml)
           (Xml.child xml_arg0 "CoreNetworkPolicyVersions") in
       make ?nextToken ?coreNetworkPolicyVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let coreNetworkPolicyVersions =
@@ -9066,6 +9164,7 @@ module ListCoreNetworkPolicyVersionsRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?nextToken ?maxResults ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -9151,6 +9250,7 @@ module ListConnectPeersResponse =
         (Option.map ~f:ConnectPeerSummaryList.of_xml)
           (Xml.child xml_arg0 "ConnectPeers") in
       make ?nextToken ?connectPeers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let connectPeers =
@@ -9197,6 +9297,7 @@ module ListConnectPeersRequest =
         (Option.map ~f:CoreNetworkId.of_xml)
           (Xml.child xml_arg0 "coreNetworkId") in
       make ?nextToken ?maxResults ?connectAttachmentId ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -9284,6 +9385,7 @@ module ListAttachmentsResponse =
         (Option.map ~f:AttachmentList.of_xml)
           (Xml.child xml_arg0 "Attachments") in
       make ?nextToken ?attachments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let attachments = field_map json "Attachments" AttachmentList.of_json in
@@ -9351,6 +9453,7 @@ module ListAttachmentsRequest =
           (Xml.child xml_arg0 "coreNetworkId") in
       make ?nextToken ?maxResults ?state ?edgeLocation ?attachmentType
         ?coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -9445,6 +9548,7 @@ module GetVpcAttachmentResponse =
         (Option.map ~f:VpcAttachment.of_xml)
           (Xml.child xml_arg0 "VpcAttachment") in
       make ?vpcAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcAttachment =
         field_map json "VpcAttachment" VpcAttachment.of_json in
@@ -9467,6 +9571,7 @@ module GetVpcAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentId =
         field_map_exn json "AttachmentId" AttachmentId.of_json in
@@ -9560,6 +9665,7 @@ module GetTransitGatewayRegistrationsResponse =
         (Option.map ~f:TransitGatewayRegistrationList.of_xml)
           (Xml.child xml_arg0 "TransitGatewayRegistrations") in
       make ?nextToken ?transitGatewayRegistrations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let transitGatewayRegistrations =
@@ -9610,6 +9716,7 @@ module GetTransitGatewayRegistrationsRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?transitGatewayArns ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -9720,6 +9827,7 @@ module GetTransitGatewayConnectPeerAssociationsResponse =
         (Option.map ~f:TransitGatewayConnectPeerAssociationList.of_xml)
           (Xml.child xml_arg0 "TransitGatewayConnectPeerAssociations") in
       make ?nextToken ?transitGatewayConnectPeerAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let transitGatewayConnectPeerAssociations =
@@ -9778,6 +9886,7 @@ module GetTransitGatewayConnectPeerAssociationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?transitGatewayConnectPeerArns
         ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -9873,6 +9982,7 @@ module GetSitesResponse =
       let sites =
         (Option.map ~f:SiteList.of_xml) (Xml.child xml_arg0 "Sites") in
       make ?nextToken ?sites ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let sites = field_map json "Sites" SiteList.of_json in
@@ -9917,6 +10027,7 @@ module GetSitesRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?siteIds ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -10008,6 +10119,7 @@ module GetSiteToSiteVpnAttachmentResponse =
         (Option.map ~f:SiteToSiteVpnAttachment.of_xml)
           (Xml.child xml_arg0 "SiteToSiteVpnAttachment") in
       make ?siteToSiteVpnAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let siteToSiteVpnAttachment =
         field_map json "SiteToSiteVpnAttachment"
@@ -10031,6 +10143,7 @@ module GetSiteToSiteVpnAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentId =
         field_map_exn json "AttachmentId" AttachmentId.of_json in
@@ -10117,6 +10230,7 @@ module GetRouteAnalysisResponse =
         (Option.map ~f:RouteAnalysis.of_xml)
           (Xml.child xml_arg0 "RouteAnalysis") in
       make ?routeAnalysis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeAnalysis =
         field_map json "RouteAnalysis" RouteAnalysis.of_json in
@@ -10149,6 +10263,7 @@ module GetRouteAnalysisRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~routeAnalysisId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeAnalysisId =
         field_map_exn json "RouteAnalysisId" ConstrainedString.of_json in
@@ -10228,6 +10343,7 @@ module GetResourcePolicyResponse =
         (Option.map ~f:ResourcePolicyDocument.of_xml)
           (Xml.child xml_arg0 "PolicyDocument") in
       make ?policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDocument =
         field_map json "PolicyDocument" ResourcePolicyDocument.of_json in
@@ -10250,6 +10366,7 @@ module GetResourcePolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -10341,6 +10458,7 @@ module GetNetworkTelemetryResponse =
         (Option.map ~f:NetworkTelemetryList.of_xml)
           (Xml.child xml_arg0 "NetworkTelemetry") in
       make ?nextToken ?networkTelemetry ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let networkTelemetry =
@@ -10437,6 +10555,7 @@ module GetNetworkTelemetryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -10578,6 +10697,7 @@ module GetNetworkRoutesResponse =
           (Xml.child xml_arg0 "RouteTableArn") in
       make ?networkRoutes ?routeTableTimestamp ?routeTableType
         ?coreNetworkSegmentEdge ?routeTableArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let networkRoutes =
         field_map json "NetworkRoutes" NetworkRouteList.of_json in
@@ -10697,6 +10817,7 @@ module GetNetworkRoutesRequest =
       make ?destinationFilters ?types ?states ?prefixListIds
         ?supernetOfMatches ?subnetOfMatches ?longestPrefixMatches
         ?exactCidrMatches ~routeTableIdentifier ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationFilters =
         field_map json "DestinationFilters" FilterMap.of_json in
@@ -10808,6 +10929,7 @@ module GetNetworkResourcesResponse =
         (Option.map ~f:NetworkResourceList.of_xml)
           (Xml.child xml_arg0 "NetworkResources") in
       make ?nextToken ?networkResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let networkResources =
@@ -10904,6 +11026,7 @@ module GetNetworkResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11009,6 +11132,7 @@ module GetNetworkResourceRelationshipsResponse =
         (Option.map ~f:RelationshipList.of_xml)
           (Xml.child xml_arg0 "Relationships") in
       make ?nextToken ?relationships ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let relationships =
@@ -11105,6 +11229,7 @@ module GetNetworkResourceRelationshipsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?resourceArn ?resourceType ?accountId
         ?awsRegion ?registeredGatewayArn ?coreNetworkId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11202,6 +11327,7 @@ module GetNetworkResourceCountsResponse =
         (Option.map ~f:NetworkResourceCountList.of_xml)
           (Xml.child xml_arg0 "NetworkResourceCounts") in
       make ?nextToken ?networkResourceCounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let networkResourceCounts =
@@ -11252,6 +11378,7 @@ module GetNetworkResourceCountsRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?resourceType ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11345,6 +11472,7 @@ module GetLinksResponse =
       let links =
         (Option.map ~f:LinkList.of_xml) (Xml.child xml_arg0 "Links") in
       make ?nextToken ?links ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let links = field_map json "Links" LinkList.of_json in
@@ -11415,6 +11543,7 @@ module GetLinksRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?provider ?type_ ?siteId ?linkIds
         ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11515,6 +11644,7 @@ module GetLinkAssociationsResponse =
         (Option.map ~f:LinkAssociationList.of_xml)
           (Xml.child xml_arg0 "LinkAssociations") in
       make ?nextToken ?linkAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let linkAssociations =
@@ -11565,6 +11695,7 @@ module GetLinkAssociationsRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?linkId ?deviceId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11658,6 +11789,7 @@ module GetDevicesResponse =
       let devices =
         (Option.map ~f:DeviceList.of_xml) (Xml.child xml_arg0 "Devices") in
       make ?nextToken ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let devices = field_map json "Devices" DeviceList.of_json in
@@ -11708,6 +11840,7 @@ module GetDevicesRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?siteId ?deviceIds ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11815,6 +11948,7 @@ module GetCustomerGatewayAssociationsResponse =
         (Option.map ~f:CustomerGatewayAssociationList.of_xml)
           (Xml.child xml_arg0 "CustomerGatewayAssociations") in
       make ?nextToken ?customerGatewayAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let customerGatewayAssociations =
@@ -11866,6 +12000,7 @@ module GetCustomerGatewayAssociationsRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?customerGatewayArns ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -11955,6 +12090,7 @@ module GetCoreNetworkResponse =
       let coreNetwork =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
@@ -11977,6 +12113,7 @@ module GetCoreNetworkRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkId =
         field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
@@ -12064,6 +12201,7 @@ module GetCoreNetworkPolicyResponse =
         (Option.map ~f:CoreNetworkPolicy.of_xml)
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkPolicy =
         field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
@@ -12102,6 +12240,7 @@ module GetCoreNetworkPolicyRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?alias ?policyVersionId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map json "Alias" CoreNetworkPolicyAlias.of_json in
       let policyVersionId = field_map json "PolicyVersionId" Integer.of_json in
@@ -12197,6 +12336,7 @@ module GetCoreNetworkChangeSetResponse =
         (Option.map ~f:CoreNetworkChangeList.of_xml)
           (Xml.child xml_arg0 "CoreNetworkChanges") in
       make ?nextToken ?coreNetworkChanges ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let coreNetworkChanges =
@@ -12241,6 +12381,7 @@ module GetCoreNetworkChangeSetRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ?nextToken ?maxResults ~policyVersionId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -12338,6 +12479,7 @@ module GetConnectionsResponse =
         (Option.map ~f:ConnectionList.of_xml)
           (Xml.child xml_arg0 "Connections") in
       make ?nextToken ?connections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let connections = field_map json "Connections" ConnectionList.of_json in
@@ -12397,6 +12539,7 @@ module GetConnectionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?deviceId ?connectionIds ~globalNetworkId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -12488,6 +12631,7 @@ module GetConnectPeerResponse =
       let connectPeer =
         (Option.map ~f:ConnectPeer.of_xml) (Xml.child xml_arg0 "ConnectPeer") in
       make ?connectPeer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeer = field_map json "ConnectPeer" ConnectPeer.of_json in
       make ?connectPeer ()
@@ -12510,6 +12654,7 @@ module GetConnectPeerRequest =
         ConnectPeerId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectPeerId") in
       make ~connectPeerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeerId =
         field_map_exn json "ConnectPeerId" ConnectPeerId.of_json in
@@ -12612,6 +12757,7 @@ module GetConnectPeerAssociationsResponse =
         (Option.map ~f:ConnectPeerAssociationList.of_xml)
           (Xml.child xml_arg0 "ConnectPeerAssociations") in
       make ?nextToken ?connectPeerAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let connectPeerAssociations =
@@ -12661,6 +12807,7 @@ module GetConnectPeerAssociationsRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?nextToken ?maxResults ?connectPeerIds ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -12752,6 +12899,7 @@ module GetConnectAttachmentResponse =
         (Option.map ~f:ConnectAttachment.of_xml)
           (Xml.child xml_arg0 "ConnectAttachment") in
       make ?connectAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectAttachment =
         field_map json "ConnectAttachment" ConnectAttachment.of_json in
@@ -12775,6 +12923,7 @@ module GetConnectAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentId =
         field_map_exn json "AttachmentId" AttachmentId.of_json in
@@ -12862,6 +13011,7 @@ module ExecuteCoreNetworkChangeSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12888,6 +13038,7 @@ module ExecuteCoreNetworkChangeSetRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~policyVersionId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyVersionId =
         field_map_exn json "PolicyVersionId" Integer.of_json in
@@ -12989,6 +13140,7 @@ module DisassociateTransitGatewayConnectPeerResponse =
         (Option.map ~f:TransitGatewayConnectPeerAssociation.of_xml)
           (Xml.child xml_arg0 "TransitGatewayConnectPeerAssociation") in
       make ?transitGatewayConnectPeerAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayConnectPeerAssociation =
         field_map json "TransitGatewayConnectPeerAssociation"
@@ -13028,6 +13180,7 @@ module DisassociateTransitGatewayConnectPeerRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~transitGatewayConnectPeerArn ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayConnectPeerArn =
         field_map_exn json "TransitGatewayConnectPeerArn"
@@ -13127,6 +13280,7 @@ module DisassociateLinkResponse =
         (Option.map ~f:LinkAssociation.of_xml)
           (Xml.child xml_arg0 "LinkAssociation") in
       make ?linkAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkAssociation =
         field_map json "LinkAssociation" LinkAssociation.of_json in
@@ -13162,6 +13316,7 @@ module DisassociateLinkRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~linkId ~deviceId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkId = field_map_exn json "LinkId" LinkId.of_json in
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
@@ -13262,6 +13417,7 @@ module DisassociateCustomerGatewayResponse =
         (Option.map ~f:CustomerGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "CustomerGatewayAssociation") in
       make ?customerGatewayAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerGatewayAssociation =
         field_map json "CustomerGatewayAssociation"
@@ -13298,6 +13454,7 @@ module DisassociateCustomerGatewayRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~customerGatewayArn ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerGatewayArn =
         field_map_exn json "CustomerGatewayArn" CustomerGatewayArn.of_json in
@@ -13397,6 +13554,7 @@ module DisassociateConnectPeerResponse =
         (Option.map ~f:ConnectPeerAssociation.of_xml)
           (Xml.child xml_arg0 "ConnectPeerAssociation") in
       make ?connectPeerAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeerAssociation =
         field_map json "ConnectPeerAssociation"
@@ -13431,6 +13589,7 @@ module DisassociateConnectPeerRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~connectPeerId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeerId =
         field_map_exn json "ConnectPeerId" ConnectPeerId.of_json in
@@ -13526,6 +13685,7 @@ module DescribeGlobalNetworksResponse =
         (Option.map ~f:GlobalNetworkList.of_xml)
           (Xml.child xml_arg0 "GlobalNetworks") in
       make ?nextToken ?globalNetworks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let globalNetworks =
@@ -13565,6 +13725,7 @@ module DescribeGlobalNetworksRequest =
         (Option.map ~f:GlobalNetworkIdList.of_xml)
           (Xml.child xml_arg0 "globalNetworkIds") in
       make ?nextToken ?maxResults ?globalNetworkIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -13665,6 +13826,7 @@ module DeregisterTransitGatewayResponse =
         (Option.map ~f:TransitGatewayRegistration.of_xml)
           (Xml.child xml_arg0 "TransitGatewayRegistration") in
       make ?transitGatewayRegistration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayRegistration =
         field_map json "TransitGatewayRegistration"
@@ -13700,6 +13862,7 @@ module DeregisterTransitGatewayRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~transitGatewayArn ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayArn =
         field_map_exn json "TransitGatewayArn" TransitGatewayArn.of_json in
@@ -13793,6 +13956,7 @@ module DeleteSiteResponse =
     let of_xml xml_arg0 =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let site = field_map json "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
@@ -13821,6 +13985,7 @@ module DeleteSiteRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~siteId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let siteId = field_map_exn json "SiteId" SiteId.of_json in
       let globalNetworkId =
@@ -13900,6 +14065,7 @@ module DeleteResourcePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13921,6 +14087,7 @@ module DeleteResourcePolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -14011,6 +14178,7 @@ module DeleteLinkResponse =
     let of_xml xml_arg0 =
       let link = (Option.map ~f:Link.of_xml) (Xml.child xml_arg0 "Link") in
       make ?link ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let link = field_map json "Link" Link.of_json in make ?link ()
     let to_json v = composed_to_json to_value v
@@ -14039,6 +14207,7 @@ module DeleteLinkRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~linkId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkId = field_map_exn json "LinkId" LinkId.of_json in
       let globalNetworkId =
@@ -14136,6 +14305,7 @@ module DeleteGlobalNetworkResponse =
         (Option.map ~f:GlobalNetwork.of_xml)
           (Xml.child xml_arg0 "GlobalNetwork") in
       make ?globalNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalNetwork =
         field_map json "GlobalNetwork" GlobalNetwork.of_json in
@@ -14161,6 +14331,7 @@ module DeleteGlobalNetworkRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalNetworkId =
         field_map_exn json "GlobalNetworkId" GlobalNetworkId.of_json in
@@ -14254,6 +14425,7 @@ module DeleteDeviceResponse =
       let device =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "Device") in
       make ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map json "Device" Device.of_json in make ?device ()
     let to_json v = composed_to_json to_value v
@@ -14282,6 +14454,7 @@ module DeleteDeviceRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~deviceId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
       let globalNetworkId =
@@ -14377,6 +14550,7 @@ module DeleteCoreNetworkResponse =
       let coreNetwork =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
@@ -14400,6 +14574,7 @@ module DeleteCoreNetworkRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkId =
         field_map_exn json "CoreNetworkId" CoreNetworkId.of_json in
@@ -14496,6 +14671,7 @@ module DeleteCoreNetworkPolicyVersionResponse =
         (Option.map ~f:CoreNetworkPolicy.of_xml)
           (Xml.child xml_arg0 "CoreNetworkPolicy") in
       make ?coreNetworkPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetworkPolicy =
         field_map json "CoreNetworkPolicy" CoreNetworkPolicy.of_json in
@@ -14527,6 +14703,7 @@ module DeleteCoreNetworkPolicyVersionRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "coreNetworkId") in
       make ~policyVersionId ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyVersionId =
         field_map_exn json "PolicyVersionId" Integer.of_json in
@@ -14623,6 +14800,7 @@ module DeleteConnectionResponse =
       let connection =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map json "Connection" Connection.of_json in
       make ?connection ()
@@ -14652,6 +14830,7 @@ module DeleteConnectionRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~connectionId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionId =
         field_map_exn json "ConnectionId" ConnectionId.of_json in
@@ -14747,6 +14926,7 @@ module DeleteConnectPeerResponse =
       let connectPeer =
         (Option.map ~f:ConnectPeer.of_xml) (Xml.child xml_arg0 "ConnectPeer") in
       make ?connectPeer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeer = field_map json "ConnectPeer" ConnectPeer.of_json in
       make ?connectPeer ()
@@ -14769,6 +14949,7 @@ module DeleteConnectPeerRequest =
         ConnectPeerId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectPeerId") in
       make ~connectPeerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeerId =
         field_map_exn json "ConnectPeerId" ConnectPeerId.of_json in
@@ -14862,6 +15043,7 @@ module DeleteAttachmentResponse =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachment = field_map json "Attachment" Attachment.of_json in
       make ?attachment ()
@@ -14884,6 +15066,7 @@ module DeleteAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentId =
         field_map_exn json "AttachmentId" AttachmentId.of_json in
@@ -14979,6 +15162,7 @@ module CreateVpcAttachmentResponse =
         (Option.map ~f:VpcAttachment.of_xml)
           (Xml.child xml_arg0 "VpcAttachment") in
       make ?vpcAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcAttachment =
         field_map json "VpcAttachment" VpcAttachment.of_json in
@@ -15041,6 +15225,7 @@ module CreateVpcAttachmentRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
       make ?clientToken ?tags ?options ~subnetArns ~vpcArn ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -15143,6 +15328,7 @@ module CreateSiteToSiteVpnAttachmentResponse =
         (Option.map ~f:SiteToSiteVpnAttachment.of_xml)
           (Xml.child xml_arg0 "SiteToSiteVpnAttachment") in
       make ?siteToSiteVpnAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let siteToSiteVpnAttachment =
         field_map json "SiteToSiteVpnAttachment"
@@ -15189,6 +15375,7 @@ module CreateSiteToSiteVpnAttachmentRequest =
         CoreNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
       make ?clientToken ?tags ~vpnConnectionArn ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -15295,6 +15482,7 @@ module CreateSiteResponse =
     let of_xml xml_arg0 =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let site = field_map json "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
@@ -15339,6 +15527,7 @@ module CreateSiteRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?tags ?location ?description ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let location = field_map json "Location" Location.of_json in
@@ -15444,6 +15633,7 @@ module CreateLinkResponse =
     let of_xml xml_arg0 =
       let link = (Option.map ~f:Link.of_xml) (Xml.child xml_arg0 "Link") in
       make ?link ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let link = field_map json "Link" Link.of_json in make ?link ()
     let to_json v = composed_to_json to_value v
@@ -15518,6 +15708,7 @@ module CreateLinkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?tags ~siteId ?provider ~bandwidth ?type_ ?description
         ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let siteId = field_map_exn json "SiteId" SiteId.of_json in
@@ -15623,6 +15814,7 @@ module CreateGlobalNetworkResponse =
         (Option.map ~f:GlobalNetwork.of_xml)
           (Xml.child xml_arg0 "GlobalNetwork") in
       make ?globalNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalNetwork =
         field_map json "GlobalNetwork" GlobalNetwork.of_json in
@@ -15651,6 +15843,7 @@ module CreateGlobalNetworkRequest =
         (Option.map ~f:ConstrainedString.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ?tags ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description =
@@ -15755,6 +15948,7 @@ module CreateDeviceResponse =
       let device =
         (Option.map ~f:Device.of_xml) (Xml.child xml_arg0 "Device") in
       make ?device ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let device = field_map json "Device" Device.of_json in make ?device ()
     let to_json v = composed_to_json to_value v
@@ -15853,6 +16047,7 @@ module CreateDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?tags ?siteId ?location ?serialNumber ?model ?vendor ?type_
         ?description ?aWSLocation ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let siteId = field_map json "SiteId" SiteId.of_json in
@@ -15971,6 +16166,7 @@ module CreateCoreNetworkResponse =
       let coreNetwork =
         (Option.map ~f:CoreNetwork.of_xml) (Xml.child xml_arg0 "CoreNetwork") in
       make ?coreNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let coreNetwork = field_map json "CoreNetwork" CoreNetwork.of_json in
       make ?coreNetwork ()
@@ -16033,6 +16229,7 @@ module CreateCoreNetworkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalNetworkId") in
       make ?clientToken ?policyDocument ?tags ?description ~globalNetworkId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let policyDocument =
@@ -16136,6 +16333,7 @@ module CreateConnectionResponse =
       let connection =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connection = field_map json "Connection" Connection.of_json in
       make ?connection ()
@@ -16211,6 +16409,7 @@ module CreateConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?tags ?description ?connectedLinkId ?linkId ~connectedDeviceId
         ~deviceId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description =
@@ -16314,6 +16513,7 @@ module CreateConnectPeerResponse =
       let connectPeer =
         (Option.map ~f:ConnectPeer.of_xml) (Xml.child xml_arg0 "ConnectPeer") in
       make ?connectPeer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeer = field_map json "ConnectPeer" ConnectPeer.of_json in
       make ?connectPeer ()
@@ -16388,6 +16588,7 @@ module CreateConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectAttachmentId") in
       make ?clientToken ?tags ~insideCidrBlocks ?bgpOptions ~peerAddress
         ?coreNetworkAddress ~connectAttachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -16493,6 +16694,7 @@ module CreateConnectAttachmentResponse =
         (Option.map ~f:ConnectAttachment.of_xml)
           (Xml.child xml_arg0 "ConnectAttachment") in
       make ?connectAttachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectAttachment =
         field_map json "ConnectAttachment" ConnectAttachment.of_json in
@@ -16562,6 +16764,7 @@ module CreateConnectAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CoreNetworkId") in
       make ?clientToken ?tags ~options ~transportAttachmentId ~edgeLocation
         ~coreNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" ClientToken.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -16681,6 +16884,7 @@ module AssociateTransitGatewayConnectPeerResponse =
         (Option.map ~f:TransitGatewayConnectPeerAssociation.of_xml)
           (Xml.child xml_arg0 "TransitGatewayConnectPeerAssociation") in
       make ?transitGatewayConnectPeerAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayConnectPeerAssociation =
         field_map json "TransitGatewayConnectPeerAssociation"
@@ -16736,6 +16940,7 @@ module AssociateTransitGatewayConnectPeerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?linkId ~deviceId ~transitGatewayConnectPeerArn ~globalNetworkId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkId = field_map json "LinkId" LinkId.of_json in
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
@@ -16849,6 +17054,7 @@ module AssociateLinkResponse =
         (Option.map ~f:LinkAssociation.of_xml)
           (Xml.child xml_arg0 "LinkAssociation") in
       make ?linkAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkAssociation =
         field_map json "LinkAssociation" LinkAssociation.of_json in
@@ -16884,6 +17090,7 @@ module AssociateLinkRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ~linkId ~deviceId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkId = field_map_exn json "LinkId" LinkId.of_json in
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
@@ -16995,6 +17202,7 @@ module AssociateCustomerGatewayResponse =
         (Option.map ~f:CustomerGatewayAssociation.of_xml)
           (Xml.child xml_arg0 "CustomerGatewayAssociation") in
       make ?customerGatewayAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customerGatewayAssociation =
         field_map json "CustomerGatewayAssociation"
@@ -17042,6 +17250,7 @@ module AssociateCustomerGatewayRequest =
         CustomerGatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomerGatewayArn") in
       make ?linkId ~deviceId ~globalNetworkId ~customerGatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkId = field_map json "LinkId" LinkId.of_json in
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
@@ -17154,6 +17363,7 @@ module AssociateConnectPeerResponse =
         (Option.map ~f:ConnectPeerAssociation.of_xml)
           (Xml.child xml_arg0 "ConnectPeerAssociation") in
       make ?connectPeerAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectPeerAssociation =
         field_map json "ConnectPeerAssociation"
@@ -17198,6 +17408,7 @@ module AssociateConnectPeerRequest =
         GlobalNetworkId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "globalNetworkId") in
       make ?linkId ~deviceId ~connectPeerId ~globalNetworkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let linkId = field_map json "LinkId" LinkId.of_json in
       let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
@@ -17296,6 +17507,7 @@ module AcceptAttachmentResponse =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachment = field_map json "Attachment" Attachment.of_json in
       make ?attachment ()
@@ -17318,6 +17530,7 @@ module AcceptAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentId =
         field_map_exn json "AttachmentId" AttachmentId.of_json in

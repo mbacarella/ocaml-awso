@@ -63,6 +63,7 @@ module Highlight =
         (Option.map ~f:HighlightOffset.of_xml)
           (Xml.child xml_arg0 "beginOffsetInclusive") in
       make ?endOffsetExclusive ?beginOffsetInclusive ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endOffsetExclusive =
         field_map json "endOffsetExclusive" HighlightOffset.of_json in
@@ -319,6 +320,7 @@ module ContentReference =
       let contentArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "contentArn") in
       make ?knowledgeBaseId ?knowledgeBaseArn ?contentId ?contentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId = field_map json "knowledgeBaseId" Uuid.of_json in
       let knowledgeBaseArn = field_map json "knowledgeBaseArn" Arn.of_json in
@@ -348,6 +350,7 @@ module DocumentText =
       let highlights =
         (Option.map ~f:Highlights.of_xml) (Xml.child xml_arg0 "highlights") in
       make ?text ?highlights ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text = field_map json "text" SyntheticDocumentTextString.of_json in
       let highlights = field_map json "highlights" Highlights.of_json in
@@ -399,6 +402,7 @@ module AppIntegrationsConfiguration =
         GenericArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appIntegrationArn") in
       make ~objectFields ~appIntegrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectFields =
         field_map_exn json "objectFields" ObjectFieldsList.of_json in
@@ -430,6 +434,7 @@ module KnowledgeBaseAssociationData =
       let knowledgeBaseArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
       make ?knowledgeBaseId ?knowledgeBaseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId = field_map json "knowledgeBaseId" Uuid.of_json in
       let knowledgeBaseArn = field_map json "knowledgeBaseArn" Arn.of_json in
@@ -465,6 +470,7 @@ module Filter =
       let field =
         FilterField.of_xml (Xml.child_exn ~context:context_ xml_arg0 "field") in
       make ~value ~operator ~field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" NonEmptyString.of_json in
       let operator = field_map_exn json "operator" FilterOperator.of_json in
@@ -655,6 +661,7 @@ module Document =
         ContentReference.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentReference") in
       make ?title ?excerpt ~contentReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map json "title" DocumentText.of_json in
       let excerpt = field_map json "excerpt" DocumentText.of_json in
@@ -804,6 +811,7 @@ module RenderingConfiguration =
       let templateUri =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "templateUri") in
       make ?templateUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUri = field_map json "templateUri" Uri_.of_json in
       make ?templateUri ()
@@ -825,6 +833,7 @@ module ServerSideEncryptionConfiguration =
       let kmsKeyId =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
       make ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
       make ?kmsKeyId ()
@@ -849,6 +858,7 @@ module SourceConfiguration =
         (Option.map ~f:AppIntegrationsConfiguration.of_xml)
           (Xml.child xml_arg0 "appIntegrations") in
       make ?appIntegrations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appIntegrations =
         field_map json "appIntegrations" AppIntegrationsConfiguration.of_json in
@@ -928,6 +938,7 @@ module AssistantAssociationOutputData =
         (Option.map ~f:KnowledgeBaseAssociationData.of_xml)
           (Xml.child xml_arg0 "knowledgeBaseAssociation") in
       make ?knowledgeBaseAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseAssociation =
         field_map json "knowledgeBaseAssociation"
@@ -1046,6 +1057,7 @@ module SessionSummary =
       let assistantArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
       make ~sessionId ~sessionArn ~assistantId ~assistantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionId = field_map_exn json "sessionId" Uuid.of_json in
       let sessionArn = field_map_exn json "sessionArn" Arn.of_json in
@@ -1172,6 +1184,7 @@ module ContentSummary =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contentArn") in
       make ~title ?tags ~status ~revisionId ~name ~metadata ~knowledgeBaseId
         ~knowledgeBaseArn ~contentType ~contentId ~contentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map_exn json "title" ContentTitle.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -1217,6 +1230,7 @@ module ResultData =
       let document =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "document") in
       make ~resultId ?relevanceScore ~document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resultId = field_map_exn json "resultId" Uuid.of_json in
       let relevanceScore =
@@ -1251,6 +1265,7 @@ module NotifyRecommendationsReceivedError =
         (Option.map ~f:NotifyRecommendationsReceivedErrorMessage.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?recommendationId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationId =
         field_map json "recommendationId" String_.of_json in
@@ -1358,6 +1373,7 @@ module KnowledgeBaseSummary =
       make ?tags ~status ?sourceConfiguration
         ?serverSideEncryptionConfiguration ?renderingConfiguration ~name
         ~knowledgeBaseType ~knowledgeBaseId ~knowledgeBaseArn ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let status = field_map_exn json "status" KnowledgeBaseStatus.of_json in
@@ -1454,6 +1470,7 @@ module AssistantSummary =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
       make ~type_ ?tags ~status ?serverSideEncryptionConfiguration ~name
         ?description ~assistantId ~assistantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" AssistantType.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -1541,6 +1558,7 @@ module AssistantAssociationSummary =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
       make ?tags ~associationType ~associationData ~assistantId
         ~assistantAssociationId ~assistantAssociationArn ~assistantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let associationType =
@@ -1598,6 +1616,7 @@ module RecommendationData =
       let document =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "document") in
       make ?relevanceScore ?relevanceLevel ~recommendationId ~document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relevanceScore =
         field_map json "relevanceScore" RelevanceScore.of_json in
@@ -1622,6 +1641,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1738,6 +1758,7 @@ module KnowledgeBaseData =
         ?serverSideEncryptionConfiguration ?renderingConfiguration ~name
         ?lastContentModificationTime ~knowledgeBaseType ~knowledgeBaseId
         ~knowledgeBaseArn ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let status = field_map_exn json "status" KnowledgeBaseStatus.of_json in
@@ -1785,6 +1806,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "resourceName" String_.of_json in
       let message = field_map json "message" String_.of_json in
@@ -1804,6 +1826,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -1946,6 +1969,7 @@ module ContentData =
       make ~urlExpiry ~url ~title ?tags ~status ~revisionId ~name ~metadata
         ?linkOutUri ~knowledgeBaseId ~knowledgeBaseArn ~contentType
         ~contentId ~contentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let urlExpiry =
         field_map_exn json "urlExpiry"
@@ -1982,6 +2006,7 @@ module PreconditionFailedException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2048,6 +2073,7 @@ module TooManyTagsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "resourceName" String_.of_json in
       let message = field_map json "message" String_.of_json in
@@ -2179,6 +2205,7 @@ module SearchExpression =
         FilterList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ~filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map_exn json "filters" FilterList.of_json in
       make ~filters ()
@@ -2412,6 +2439,7 @@ module SessionData =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ?tags ~sessionId ~sessionArn ~name ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let sessionId = field_map_exn json "sessionId" Uuid.of_json in
@@ -2536,6 +2564,7 @@ module AssistantData =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
       make ~type_ ?tags ~status ?serverSideEncryptionConfiguration ~name
         ?description ~assistantId ~assistantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" AssistantType.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -2624,6 +2653,7 @@ module AssistantAssociationData =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
       make ?tags ~associationType ~associationData ~assistantId
         ~assistantAssociationId ~assistantAssociationArn ~assistantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let associationType =
@@ -2654,6 +2684,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2691,6 +2722,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -2712,6 +2744,7 @@ module AssistantAssociationInputData =
       let knowledgeBaseId =
         (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
       make ?knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId = field_map json "knowledgeBaseId" Uuid.of_json in
       make ?knowledgeBaseId ()
@@ -2780,6 +2813,7 @@ module UpdateKnowledgeBaseTemplateUriResponse =
         (Option.map ~f:KnowledgeBaseData.of_xml)
           (Xml.child xml_arg0 "knowledgeBase") in
       make ?knowledgeBase ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBase =
         field_map json "knowledgeBase" KnowledgeBaseData.of_json in
@@ -2810,6 +2844,7 @@ module UpdateKnowledgeBaseTemplateUriRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~templateUri ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateUri = field_map_exn json "templateUri" Uri_.of_json in
       let knowledgeBaseId =
@@ -2888,6 +2923,7 @@ module UpdateContentResponse =
       let content =
         (Option.map ~f:ContentData.of_xml) (Xml.child xml_arg0 "content") in
       make ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map json "content" ContentData.of_json in
       make ?content ()
@@ -2975,6 +3011,7 @@ module UpdateContentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
       make ?uploadId ?title ?revisionId ?removeOverrideLinkOutUri
         ?overrideLinkOutUri ?metadata ~knowledgeBaseId ~contentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadId = field_map json "uploadId" NonEmptyString.of_json in
       let title = field_map json "title" ContentTitle.of_json in
@@ -3026,6 +3063,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -3051,6 +3089,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -3101,6 +3140,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
@@ -3126,6 +3166,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" Tags.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -3217,6 +3258,7 @@ module StartContentUploadResponse =
         Headers.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "headersToInclude") in
       make ~urlExpiry ~url ~uploadId ~headersToInclude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let urlExpiry =
         field_map_exn json "urlExpiry"
@@ -3256,6 +3298,7 @@ module StartContentUploadRequest =
         ContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentType") in
       make ~knowledgeBaseId ~contentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId =
         field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
@@ -3334,6 +3377,7 @@ module SearchSessionsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~sessionSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionSummaries =
         field_map_exn json "sessionSummaries" SessionSummaries.of_json in
@@ -3382,6 +3426,7 @@ module SearchSessionsRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~searchExpression ?nextToken ?maxResults ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let searchExpression =
         field_map_exn json "searchExpression" SearchExpression.of_json in
@@ -3461,6 +3506,7 @@ module SearchContentResponse =
         ContentSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentSummaries") in
       make ?nextToken ~contentSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let contentSummaries =
@@ -3510,6 +3556,7 @@ module SearchContentRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~searchExpression ?nextToken ?maxResults ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let searchExpression =
         field_map_exn json "searchExpression" SearchExpression.of_json in
@@ -3574,6 +3621,7 @@ module RemoveKnowledgeBaseTemplateUriResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a URI template from a knowledge base."]
@@ -3595,6 +3643,7 @@ module RemoveKnowledgeBaseTemplateUriRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId =
         field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
@@ -3668,6 +3717,7 @@ module QueryAssistantResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~results ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let results = field_map_exn json "results" QueryResultsList.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -3713,6 +3763,7 @@ module QueryAssistantRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~queryText ?nextToken ?maxResults ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryText = field_map_exn json "queryText" QueryText.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -3794,6 +3845,7 @@ module NotifyRecommendationsReceivedResponse =
         (Option.map ~f:NotifyRecommendationsReceivedErrorList.of_xml)
           (Xml.child xml_arg0 "errors") in
       make ?recommendationIds ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendationIds =
         field_map json "recommendationIds" RecommendationIdList.of_json in
@@ -3839,6 +3891,7 @@ module NotifyRecommendationsReceivedRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~sessionId ~recommendationIds ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionId = field_map_exn json "sessionId" UuidOrArn.of_json in
       let recommendationIds =
@@ -3889,6 +3942,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3909,6 +3963,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -3977,6 +4032,7 @@ module ListKnowledgeBasesResponse =
         KnowledgeBaseList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseSummaries") in
       make ?nextToken ~knowledgeBaseSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NonEmptyString.of_json in
       let knowledgeBaseSummaries =
@@ -4007,6 +4063,7 @@ module ListKnowledgeBasesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NonEmptyString.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4083,6 +4140,7 @@ module ListContentsResponse =
         ContentSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentSummaries") in
       make ?nextToken ~contentSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let contentSummaries =
@@ -4122,6 +4180,7 @@ module ListContentsRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ?nextToken ?maxResults ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4191,6 +4250,7 @@ module ListAssistantsResponse =
         AssistantList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantSummaries") in
       make ?nextToken ~assistantSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assistantSummaries =
@@ -4220,6 +4280,7 @@ module ListAssistantsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4300,6 +4361,7 @@ module ListAssistantAssociationsResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "assistantAssociationSummaries") in
       make ?nextToken ~assistantAssociationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let assistantAssociationSummaries =
@@ -4339,6 +4401,7 @@ module ListAssistantAssociationsRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?nextToken ?maxResults ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4405,6 +4468,7 @@ module GetSessionResponse =
       let session =
         (Option.map ~f:SessionData.of_xml) (Xml.child xml_arg0 "session") in
       make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "session" SessionData.of_json in
       make ?session ()
@@ -4436,6 +4500,7 @@ module GetSessionRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~sessionId ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionId = field_map_exn json "sessionId" UuidOrArn.of_json in
       let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
@@ -4505,6 +4570,7 @@ module GetRecommendationsResponse =
         RecommendationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "recommendations") in
       make ~recommendations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recommendations =
         field_map_exn json "recommendations" RecommendationList.of_json in
@@ -4554,6 +4620,7 @@ module GetRecommendationsRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?waitTimeSeconds ~sessionId ?maxResults ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let waitTimeSeconds =
         field_map json "waitTimeSeconds" WaitTimeSeconds.of_json in
@@ -4626,6 +4693,7 @@ module GetKnowledgeBaseResponse =
         (Option.map ~f:KnowledgeBaseData.of_xml)
           (Xml.child xml_arg0 "knowledgeBase") in
       make ?knowledgeBase ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBase =
         field_map json "knowledgeBase" KnowledgeBaseData.of_json in
@@ -4650,6 +4718,7 @@ module GetKnowledgeBaseRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId =
         field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
@@ -4718,6 +4787,7 @@ module GetContentSummaryResponse =
         (Option.map ~f:ContentSummary.of_xml)
           (Xml.child xml_arg0 "contentSummary") in
       make ?contentSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentSummary =
         field_map json "contentSummary" ContentSummary.of_json in
@@ -4750,6 +4820,7 @@ module GetContentSummaryRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
       make ~knowledgeBaseId ~contentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId =
         field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
@@ -4816,6 +4887,7 @@ module GetContentResponse =
       let content =
         (Option.map ~f:ContentData.of_xml) (Xml.child xml_arg0 "content") in
       make ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map json "content" ContentData.of_json in
       make ?content ()
@@ -4848,6 +4920,7 @@ module GetContentRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
       make ~knowledgeBaseId ~contentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId =
         field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
@@ -4916,6 +4989,7 @@ module GetAssistantResponse =
       let assistant =
         (Option.map ~f:AssistantData.of_xml) (Xml.child xml_arg0 "assistant") in
       make ?assistant ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistant = field_map json "assistant" AssistantData.of_json in
       make ?assistant ()
@@ -4939,6 +5013,7 @@ module GetAssistantRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
       make ~assistantId ()
@@ -5007,6 +5082,7 @@ module GetAssistantAssociationResponse =
         (Option.map ~f:AssistantAssociationData.of_xml)
           (Xml.child xml_arg0 "assistantAssociation") in
       make ?assistantAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistantAssociation =
         field_map json "assistantAssociation"
@@ -5041,6 +5117,7 @@ module GetAssistantAssociationRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationId") in
       make ~assistantId ~assistantAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
       let assistantAssociationId =
@@ -5101,6 +5178,7 @@ module DeleteKnowledgeBaseResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5123,6 +5201,7 @@ module DeleteKnowledgeBaseRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId =
         field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
@@ -5183,6 +5262,7 @@ module DeleteContentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the content."]
@@ -5212,6 +5292,7 @@ module DeleteContentRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
       make ~knowledgeBaseId ~contentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBaseId =
         field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
@@ -5272,6 +5353,7 @@ module DeleteAssistantResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an assistant."]
@@ -5293,6 +5375,7 @@ module DeleteAssistantRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
       make ~assistantId ()
@@ -5351,6 +5434,7 @@ module DeleteAssistantAssociationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an assistant association."]
@@ -5381,6 +5465,7 @@ module DeleteAssistantAssociationRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationId") in
       make ~assistantId ~assistantAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
       let assistantAssociationId =
@@ -5447,6 +5532,7 @@ module CreateSessionResponse =
       let session =
         (Option.map ~f:SessionData.of_xml) (Xml.child xml_arg0 "session") in
       make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let session = field_map json "session" SessionData.of_json in
       make ?session ()
@@ -5495,6 +5581,7 @@ module CreateSessionRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?tags ~name ?description ?clientToken ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -5578,6 +5665,7 @@ module CreateKnowledgeBaseResponse =
         (Option.map ~f:KnowledgeBaseData.of_xml)
           (Xml.child xml_arg0 "knowledgeBase") in
       make ?knowledgeBase ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let knowledgeBase =
         field_map json "knowledgeBase" KnowledgeBaseData.of_json in
@@ -5670,6 +5758,7 @@ module CreateKnowledgeBaseRequest =
       make ?tags ?sourceConfiguration ?serverSideEncryptionConfiguration
         ?renderingConfiguration ~name ~knowledgeBaseType ?description
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let sourceConfiguration =
@@ -5770,6 +5859,7 @@ module CreateContentResponse =
       let content =
         (Option.map ~f:ContentData.of_xml) (Xml.child xml_arg0 "content") in
       make ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let content = field_map json "content" ContentData.of_json in
       make ?content ()
@@ -5859,6 +5949,7 @@ module CreateContentRequest =
           (Xml.child xml_arg0 "clientToken") in
       make ~uploadId ?title ?tags ?overrideLinkOutUri ~name ?metadata
         ~knowledgeBaseId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uploadId = field_map_exn json "uploadId" NonEmptyString.of_json in
       let title = field_map json "title" ContentTitle.of_json in
@@ -5946,6 +6037,7 @@ module CreateAssistantResponse =
       let assistant =
         (Option.map ~f:AssistantData.of_xml) (Xml.child xml_arg0 "assistant") in
       make ?assistant ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistant = field_map json "assistant" AssistantData.of_json in
       make ?assistant ()
@@ -6011,6 +6103,7 @@ module CreateAssistantRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~type_ ?tags ?serverSideEncryptionConfiguration ~name ?description
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" AssistantType.of_json in
       let tags = field_map json "tags" Tags.of_json in
@@ -6107,6 +6200,7 @@ module CreateAssistantAssociationResponse =
         (Option.map ~f:AssistantAssociationData.of_xml)
           (Xml.child xml_arg0 "assistantAssociation") in
       make ?assistantAssociation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let assistantAssociation =
         field_map json "assistantAssociation"
@@ -6170,6 +6264,7 @@ module CreateAssistantAssociationRequest =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?tags ?clientToken ~associationType ~association ~assistantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" Tags.of_json in
       let clientToken = field_map json "clientToken" ClientToken.of_json in

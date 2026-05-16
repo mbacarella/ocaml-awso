@@ -716,6 +716,7 @@ module ErrorResponse =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?resourceType ?resourceIdentifier ?message ?code
         ?additionalDetails ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map json "ResourceType" ErrorResourceType.of_json in
@@ -744,6 +745,7 @@ module LambdaEndpointSummary =
     let of_xml xml_arg0 =
       let arn = (Option.map ~f:LambdaArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" LambdaArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -929,6 +931,7 @@ module UrlEndpointSummary =
       let healthUrl =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "HealthUrl") in
       make ?url ?healthUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" Uri_.of_json in
       let healthUrl = field_map json "HealthUrl" Uri_.of_json in
@@ -1333,6 +1336,7 @@ module ApiGatewayProxySummary =
           (Xml.child xml_arg0 "ApiGatewayId") in
       make ?vpcLinkId ?stageName ?proxyUrl ?nlbName ?nlbArn ?endpointType
         ?apiGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcLinkId = field_map json "VpcLinkId" VpcLinkId.of_json in
       let stageName = field_map json "StageName" StageName.of_json in
@@ -1598,6 +1602,7 @@ module ServiceSummary =
       make ?vpcId ?urlEndpoint ?tags ?state ?serviceId ?ownerAccountId ?name
         ?lastUpdatedTime ?lambdaEndpoint ?error ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let urlEndpoint =
@@ -1779,6 +1784,7 @@ module RouteSummary =
         ?pathResourceToId ?ownerAccountId ?methods ?lastUpdatedTime
         ?includeChildPaths ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" RouteState.of_json in
@@ -1920,6 +1926,7 @@ module EnvironmentSummary =
       make ?transitGatewayId ?tags ?state ?ownerAccountId ?networkFabricType
         ?name ?lastUpdatedTime ?error ?environmentId ?description
         ?createdTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayId =
         field_map json "TransitGatewayId" TransitGatewayId.of_json in
@@ -2012,6 +2019,7 @@ module EnvironmentVpc =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?vpcName ?vpcId ?lastUpdatedTime ?environmentId ?createdTime
         ?cidrBlocks ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcName = field_map json "VpcName" Ec2TagValue.of_json in
       let vpcId = field_map json "VpcId" VpcId.of_json in
@@ -2153,6 +2161,7 @@ module ApplicationSummary =
       make ?vpcId ?tags ?state ?proxyType ?ownerAccountId ?name
         ?lastUpdatedTime ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ?apiGatewayProxy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -2208,6 +2217,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2241,6 +2251,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "ResourceType" String_.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
@@ -2261,6 +2272,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2303,6 +2315,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2322,6 +2335,7 @@ module InvalidResourcePolicyException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" String_.of_json in
       make ~message ()
@@ -2365,6 +2379,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "ServiceCode" String_.of_json in
       let retryAfterSeconds =
@@ -2421,6 +2436,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "ResourceType" String_.of_json in
       let resourceId = field_map_exn json "ResourceId" String_.of_json in
@@ -2494,6 +2510,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~serviceCode ~resourceType ~resourceId ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "ServiceCode" String_.of_json in
       let resourceType = field_map_exn json "ResourceType" String_.of_json in
@@ -2656,6 +2673,7 @@ module LambdaEndpointConfig =
     let of_xml xml_arg0 =
       let arn = (Option.map ~f:LambdaArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" LambdaArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
@@ -2678,6 +2696,7 @@ module UrlEndpointConfig =
       let healthUrl =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "HealthUrl") in
       make ?url ?healthUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map json "Url" Uri_.of_json in
       let healthUrl = field_map json "HealthUrl" Uri_.of_json in
@@ -2775,6 +2794,7 @@ module ApiGatewayProxyConfig =
           (Xml.child xml_arg0 "ApiGatewayId") in
       make ?vpcLinkId ?stageName ?proxyUrl ?nlbName ?nlbArn ?endpointType
         ?apiGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcLinkId = field_map json "VpcLinkId" VpcLinkId.of_json in
       let stageName = field_map json "StageName" StageName.of_json in
@@ -2804,6 +2824,7 @@ module LambdaEndpointInput =
       let arn =
         LambdaArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" LambdaArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
@@ -2830,6 +2851,7 @@ module UrlEndpointInput =
       let healthUrl =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "HealthUrl") in
       make ~url ?healthUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map_exn json "Url" Uri_.of_json in
       let healthUrl = field_map json "HealthUrl" Uri_.of_json in
@@ -2901,6 +2923,7 @@ module UriPathRouteInput =
         RouteActivationState.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActivationState") in
       make ~sourcePath ?methods ?includeChildPaths ~activationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourcePath = field_map_exn json "SourcePath" UriPath.of_json in
       let methods = field_map json "Methods" HttpMethods.of_json in
@@ -2936,6 +2959,7 @@ module ApiGatewayProxyInput =
         (Option.map ~f:ApiGatewayEndpointType.of_xml)
           (Xml.child xml_arg0 "EndpointType") in
       make ?stageName ?endpointType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stageName = field_map json "StageName" StageName.of_json in
       let endpointType =
@@ -2997,6 +3021,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3025,6 +3050,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
@@ -3085,6 +3111,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3111,6 +3138,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
@@ -3200,6 +3228,7 @@ module PutResourcePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3229,6 +3258,7 @@ module PutResourcePolicyRequest =
         PolicyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       make ~resourceArn ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       let policy = field_map_exn json "Policy" PolicyString.of_json in
@@ -3294,6 +3324,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3316,6 +3347,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
       make ~resourceArn ()
@@ -3428,6 +3460,7 @@ module ListServicesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?serviceSummaryList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceSummaryList =
         field_map json "ServiceSummaryList" ServiceSummaries.of_json in
@@ -3483,6 +3516,7 @@ module ListServicesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ?nextToken ?maxResults ~environmentIdentifier
         ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3601,6 +3635,7 @@ module ListRoutesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?routeSummaryList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeSummaryList =
         field_map json "RouteSummaryList" RouteSummaries.of_json in
@@ -3656,6 +3691,7 @@ module ListRoutesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ?nextToken ?maxResults ~environmentIdentifier
         ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3755,6 +3791,7 @@ module ListEnvironmentsResponse =
         (Option.map ~f:EnvironmentSummaries.of_xml)
           (Xml.child xml_arg0 "EnvironmentSummaryList") in
       make ?nextToken ?environmentSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let environmentSummaryList =
@@ -3785,6 +3822,7 @@ module ListEnvironmentsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3878,6 +3916,7 @@ module ListEnvironmentVpcsResponse =
         (Option.map ~f:EnvironmentVpcs.of_xml)
           (Xml.child xml_arg0 "EnvironmentVpcList") in
       make ?nextToken ?environmentVpcList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let environmentVpcList =
@@ -3918,6 +3957,7 @@ module ListEnvironmentVpcsRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ?nextToken ?maxResults ~environmentIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4034,6 +4074,7 @@ module ListApplicationsResponse =
         (Option.map ~f:ApplicationSummaries.of_xml)
           (Xml.child xml_arg0 "ApplicationSummaryList") in
       make ?nextToken ?applicationSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let applicationSummaryList =
@@ -4074,6 +4115,7 @@ module ListApplicationsRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ?nextToken ?maxResults ~environmentIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4297,6 +4339,7 @@ module GetServiceResponse =
       make ?vpcId ?urlEndpoint ?tags ?state ?serviceId ?ownerAccountId ?name
         ?lastUpdatedTime ?lambdaEndpoint ?error ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let urlEndpoint =
@@ -4365,6 +4408,7 @@ module GetServiceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~serviceIdentifier ~environmentIdentifier ~applicationIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceIdentifier =
         field_map_exn json "ServiceIdentifier" ServiceId.of_json in
@@ -4593,6 +4637,7 @@ module GetRouteResponse =
         ?pathResourceToId ?ownerAccountId ?methods ?lastUpdatedTime
         ?includeChildPaths ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" RouteState.of_json in
@@ -4658,6 +4703,7 @@ module GetRouteRequest =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeIdentifier =
         field_map_exn json "RouteIdentifier" RouteId.of_json in
@@ -4748,6 +4794,7 @@ module GetResourcePolicyResponse =
       let policy =
         (Option.map ~f:PolicyString.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" PolicyString.of_json in
       make ?policy ()
@@ -4773,6 +4820,7 @@ module GetResourcePolicyRequest =
         ResourcePolicyIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier =
         field_map_exn json "Identifier" ResourcePolicyIdentifier.of_json in
@@ -4954,6 +5002,7 @@ module GetEnvironmentResponse =
       make ?transitGatewayId ?tags ?state ?ownerAccountId ?networkFabricType
         ?name ?lastUpdatedTime ?error ?environmentId ?description
         ?createdTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let transitGatewayId =
         field_map json "TransitGatewayId" TransitGatewayId.of_json in
@@ -4995,6 +5044,7 @@ module GetEnvironmentRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ~environmentIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentIdentifier =
         field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
@@ -5192,6 +5242,7 @@ module GetApplicationResponse =
       make ?vpcId ?tags ?state ?proxyType ?ownerAccountId ?name
         ?lastUpdatedTime ?error ?environmentId ?createdTime
         ?createdByAccountId ?arn ?applicationId ?apiGatewayProxy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -5245,6 +5296,7 @@ module GetApplicationRequest =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~environmentIdentifier ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentIdentifier =
         field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
@@ -5393,6 +5445,7 @@ module DeleteServiceResponse =
           (Xml.child xml_arg0 "ApplicationId") in
       make ?state ?serviceId ?name ?lastUpdatedTime ?environmentId ?arn
         ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ServiceState.of_json in
       let serviceId = field_map json "ServiceId" ServiceId.of_json in
@@ -5448,6 +5501,7 @@ module DeleteServiceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~serviceIdentifier ~environmentIdentifier ~applicationIdentifier
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceIdentifier =
         field_map_exn json "ServiceIdentifier" ServiceId.of_json in
@@ -5589,6 +5643,7 @@ module DeleteRouteResponse =
         (Option.map ~f:ApplicationId.of_xml)
           (Xml.child xml_arg0 "ApplicationId") in
       make ?state ?serviceId ?routeId ?lastUpdatedTime ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" RouteState.of_json in
       let serviceId = field_map json "ServiceId" ServiceId.of_json in
@@ -5637,6 +5692,7 @@ module DeleteRouteRequest =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~routeIdentifier ~environmentIdentifier ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routeIdentifier =
         field_map_exn json "RouteIdentifier" RouteId.of_json in
@@ -5719,6 +5775,7 @@ module DeleteResourcePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the resource policy set for the environment."]
@@ -5741,6 +5798,7 @@ module DeleteResourcePolicyRequest =
         ResourcePolicyIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier =
         field_map_exn json "Identifier" ResourcePolicyIdentifier.of_json in
@@ -5863,6 +5921,7 @@ module DeleteEnvironmentResponse =
           (Xml.child xml_arg0 "EnvironmentId") in
       let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?state ?name ?lastUpdatedTime ?environmentId ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" EnvironmentState.of_json in
       let name = field_map json "Name" EnvironmentName.of_json in
@@ -5893,6 +5952,7 @@ module DeleteEnvironmentRequest =
         EnvironmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentIdentifier") in
       make ~environmentIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentIdentifier =
         field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
@@ -6034,6 +6094,7 @@ module DeleteApplicationResponse =
           (Xml.child xml_arg0 "ApplicationId") in
       make ?state ?name ?lastUpdatedTime ?environmentId ?arn ?applicationId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" ApplicationState.of_json in
       let name = field_map json "Name" ApplicationName.of_json in
@@ -6076,6 +6137,7 @@ module DeleteApplicationRequest =
         ApplicationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ~environmentIdentifier ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentIdentifier =
         field_map_exn json "EnvironmentIdentifier" EnvironmentId.of_json in
@@ -6311,6 +6373,7 @@ module CreateServiceResponse =
       make ?vpcId ?urlEndpoint ?tags ?state ?serviceId ?ownerAccountId ?name
         ?lastUpdatedTime ?lambdaEndpoint ?environmentId ?endpointType
         ?description ?createdTime ?createdByAccountId ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let urlEndpoint = field_map json "UrlEndpoint" UrlEndpointInput.of_json in
@@ -6436,6 +6499,7 @@ module CreateServiceRequest =
       make ?vpcId ?urlEndpoint ?tags ~name ?lambdaEndpoint
         ~environmentIdentifier ~endpointType ?description ?clientToken
         ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let urlEndpoint = field_map json "UrlEndpoint" UrlEndpointInput.of_json in
@@ -6652,6 +6716,7 @@ module CreateRouteResponse =
       make ?uriPathRoute ?tags ?state ?serviceId ?routeType ?routeId
         ?ownerAccountId ?lastUpdatedTime ?createdTime ?createdByAccountId
         ?arn ?applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uriPathRoute =
         field_map json "UriPathRoute" UriPathRouteInput.of_json in
@@ -6752,6 +6817,7 @@ module CreateRouteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
       make ?uriPathRoute ?tags ~serviceIdentifier ~routeType
         ~environmentIdentifier ?clientToken ~applicationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let uriPathRoute =
         field_map json "UriPathRoute" UriPathRouteInput.of_json in
@@ -6945,6 +7011,7 @@ module CreateEnvironmentResponse =
       let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?state ?ownerAccountId ?networkFabricType ?name
         ?lastUpdatedTime ?environmentId ?description ?createdTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let state = field_map json "State" EnvironmentState.of_json in
@@ -7009,6 +7076,7 @@ module CreateEnvironmentRequest =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~networkFabricType ~name ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let networkFabricType =
@@ -7225,6 +7293,7 @@ module CreateApplicationResponse =
       make ?vpcId ?tags ?state ?proxyType ?ownerAccountId ?name
         ?lastUpdatedTime ?environmentId ?createdTime ?createdByAccountId ?arn
         ?applicationId ?apiGatewayProxy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map json "VpcId" VpcId.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -7322,6 +7391,7 @@ module CreateApplicationRequest =
           (Xml.child xml_arg0 "ApiGatewayProxy") in
       make ~vpcId ?tags ~proxyType ~name ~environmentIdentifier ?clientToken
         ?apiGatewayProxy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcId = field_map_exn json "VpcId" VpcId.of_json in
       let tags = field_map json "Tags" TagMap.of_json in

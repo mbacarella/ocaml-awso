@@ -119,6 +119,7 @@ module S3EncryptionConfiguration =
         S3ObjectEncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectEncryptionType") in
       make ?kmsKeyArn ~objectEncryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" Arn.of_json in
       let objectEncryptionType =
@@ -315,6 +316,7 @@ module S3ExportConfiguration =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ~encryptionConfiguration ~prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionConfiguration =
         field_map_exn json "EncryptionConfiguration"
@@ -396,6 +398,7 @@ module KinesisConfiguration =
       let streamArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StreamArn") in
       make ?aggregationEnabled ~streamArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aggregationEnabled =
         field_map json "AggregationEnabled" Boolean.of_json in
@@ -605,6 +608,7 @@ module LedgerSummary =
       let name =
         (Option.map ~f:LedgerName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?creationDateTime ?state ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDateTime =
         field_map json "CreationDateTime" Timestamp.of_json in
@@ -706,6 +710,7 @@ module JournalS3ExportDescription =
       make ?outputFormat ~roleArn ~s3ExportConfiguration ~exclusiveEndTime
         ~inclusiveStartTime ~status ~exportCreationTime ~exportId ~ledgerName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputFormat = field_map json "OutputFormat" OutputFormat.of_json in
       let roleArn = field_map_exn json "RoleArn" Arn.of_json in
@@ -834,6 +839,7 @@ module JournalKinesisStreamDescription =
       make ~streamName ?errorCause ~kinesisConfiguration ~status ?arn
         ~streamId ~roleArn ?exclusiveEndTime ?inclusiveStartTime
         ?creationTime ~ledgerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamName = field_map_exn json "StreamName" StreamName.of_json in
       let errorCause = field_map json "ErrorCause" ErrorCause.of_json in
@@ -909,6 +915,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?parameterName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterName =
         field_map json "ParameterName" ParameterName.of_json in
@@ -953,6 +960,7 @@ module LedgerEncryptionDescription =
       let kmsKeyArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KmsKeyArn") in
       make ?inaccessibleKmsKeyDateTime ~encryptionStatus ~kmsKeyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inaccessibleKmsKeyDateTime =
         field_map json "InaccessibleKmsKeyDateTime" Timestamp.of_json in
@@ -994,6 +1002,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" ResourceName.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -1132,6 +1141,7 @@ module ResourcePreconditionNotMetException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" ResourceName.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -1270,6 +1280,7 @@ module ValueHolder =
       let ionText =
         (Option.map ~f:IonText.of_xml) (Xml.child xml_arg0 "IonText") in
       make ?ionText ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ionText = field_map json "IonText" IonText.of_json in
       make ?ionText ()
@@ -1310,6 +1321,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -1348,6 +1360,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" ResourceName.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -1386,6 +1399,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?resourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName = field_map json "ResourceName" ResourceName.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -1492,6 +1506,7 @@ module UpdateLedgerResponse =
         (Option.map ~f:LedgerName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?encryptionDescription ?deletionProtection ?creationDateTime
         ?state ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionDescription =
         field_map json "EncryptionDescription"
@@ -1538,6 +1553,7 @@ module UpdateLedgerRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?kmsKey ?deletionProtection ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKey = field_map json "KmsKey" KmsKey.of_json in
       let deletionProtection =
@@ -1609,6 +1625,7 @@ module UpdateLedgerPermissionsModeResponse =
       let name =
         (Option.map ~f:LedgerName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?permissionsMode ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionsMode =
         field_map json "PermissionsMode" PermissionsMode.of_json in
@@ -1642,6 +1659,7 @@ module UpdateLedgerPermissionsModeRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~permissionsMode ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissionsMode =
         field_map_exn json "PermissionsMode" PermissionsMode.of_json in
@@ -1694,6 +1712,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1721,6 +1740,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -1772,6 +1792,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1799,6 +1820,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
@@ -1870,6 +1892,7 @@ module StreamJournalToKinesisResponse =
       let streamId =
         (Option.map ~f:UniqueId.of_xml) (Xml.child xml_arg0 "StreamId") in
       make ?streamId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "StreamId" UniqueId.of_json in
       make ?streamId ()
@@ -1950,6 +1973,7 @@ module StreamJournalToKinesisRequest =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~streamName ~kinesisConfiguration ?exclusiveEndTime
         ~inclusiveStartTime ?tags ~roleArn ~ledgerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamName = field_map_exn json "StreamName" StreamName.of_json in
       let kinesisConfiguration =
@@ -2017,6 +2041,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2038,6 +2063,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -2083,6 +2109,7 @@ module ListLedgersResponse =
       let ledgers =
         (Option.map ~f:LedgerList.of_xml) (Xml.child xml_arg0 "Ledgers") in
       make ?nextToken ?ledgers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let ledgers = field_map json "Ledgers" LedgerList.of_json in
@@ -2113,6 +2140,7 @@ module ListLedgersRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "max_results") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2163,6 +2191,7 @@ module ListJournalS3ExportsResponse =
         (Option.map ~f:JournalS3ExportList.of_xml)
           (Xml.child xml_arg0 "JournalS3Exports") in
       make ?nextToken ?journalS3Exports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let journalS3Exports =
@@ -2194,6 +2223,7 @@ module ListJournalS3ExportsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "max_results") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2244,6 +2274,7 @@ module ListJournalS3ExportsForLedgerResponse =
         (Option.map ~f:JournalS3ExportList.of_xml)
           (Xml.child xml_arg0 "JournalS3Exports") in
       make ?nextToken ?journalS3Exports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let journalS3Exports =
@@ -2281,6 +2312,7 @@ module ListJournalS3ExportsForLedgerRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?nextToken ?maxResults ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2362,6 +2394,7 @@ module ListJournalKinesisStreamsForLedgerResponse =
         (Option.map ~f:JournalKinesisStreamDescriptionList.of_xml)
           (Xml.child xml_arg0 "Streams") in
       make ?nextToken ?streams ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let streams =
@@ -2399,6 +2432,7 @@ module ListJournalKinesisStreamsForLedgerRequest =
       let ledgerName =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?nextToken ?maxResults ~ledgerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2479,6 +2513,7 @@ module GetRevisionResponse =
       let proof =
         (Option.map ~f:ValueHolder.of_xml) (Xml.child xml_arg0 "Proof") in
       make ~revision ?proof ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let revision = field_map_exn json "Revision" ValueHolder.of_json in
       let proof = field_map json "Proof" ValueHolder.of_json in
@@ -2527,6 +2562,7 @@ module GetRevisionRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?digestTipAddress ~documentId ~blockAddress ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let digestTipAddress =
         field_map json "DigestTipAddress" ValueHolder.of_json in
@@ -2612,6 +2648,7 @@ module GetDigestResponse =
       let digest =
         Digest.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Digest") in
       make ~digestTipAddress ~digest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let digestTipAddress =
         field_map_exn json "DigestTipAddress" ValueHolder.of_json in
@@ -2634,6 +2671,7 @@ module GetDigestRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" LedgerName.of_json in
       make ~name ()
@@ -2710,6 +2748,7 @@ module GetBlockResponse =
       let block =
         ValueHolder.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Block") in
       make ?proof ~block ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let proof = field_map json "Proof" ValueHolder.of_json in
       let block = field_map_exn json "Block" ValueHolder.of_json in
@@ -2750,6 +2789,7 @@ module GetBlockRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?digestTipAddress ~blockAddress ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let digestTipAddress =
         field_map json "DigestTipAddress" ValueHolder.of_json in
@@ -2816,6 +2856,7 @@ module ExportJournalToS3Response =
       let exportId =
         UniqueId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ExportId") in
       make ~exportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportId = field_map_exn json "ExportId" UniqueId.of_json in
       make ~exportId ()
@@ -2889,6 +2930,7 @@ module ExportJournalToS3Request =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?outputFormat ~roleArn ~s3ExportConfiguration ~exclusiveEndTime
         ~inclusiveStartTime ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputFormat = field_map json "OutputFormat" OutputFormat.of_json in
       let roleArn = field_map_exn json "RoleArn" Arn.of_json in
@@ -3013,6 +3055,7 @@ module DescribeLedgerResponse =
         (Option.map ~f:LedgerName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?encryptionDescription ?deletionProtection ?permissionsMode
         ?creationDateTime ?state ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionDescription =
         field_map json "EncryptionDescription"
@@ -3046,6 +3089,7 @@ module DescribeLedgerRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" LedgerName.of_json in
       make ~name ()
@@ -3098,6 +3142,7 @@ module DescribeJournalS3ExportResponse =
         JournalS3ExportDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExportDescription") in
       make ~exportDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportDescription =
         field_map_exn json "ExportDescription"
@@ -3127,6 +3172,7 @@ module DescribeJournalS3ExportRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~exportId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exportId = field_map_exn json "ExportId" UniqueId.of_json in
       let name = field_map_exn json "Name" LedgerName.of_json in
@@ -3200,6 +3246,7 @@ module DescribeJournalKinesisStreamResponse =
         (Option.map ~f:JournalKinesisStreamDescription.of_xml)
           (Xml.child xml_arg0 "Stream") in
       make ?stream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stream =
         field_map json "Stream" JournalKinesisStreamDescription.of_json in
@@ -3229,6 +3276,7 @@ module DescribeJournalKinesisStreamRequest =
       let ledgerName =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~streamId ~ledgerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map_exn json "StreamId" UniqueId.of_json in
       let ledgerName = field_map_exn json "LedgerName" LedgerName.of_json in
@@ -3251,6 +3299,7 @@ module DeleteLedgerRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" LedgerName.of_json in
       make ~name ()
@@ -3382,6 +3431,7 @@ module CreateLedgerResponse =
         (Option.map ~f:LedgerName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?kmsKeyArn ?deletionProtection ?permissionsMode ?creationDateTime
         ?state ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" Arn.of_json in
       let deletionProtection =
@@ -3448,6 +3498,7 @@ module CreateLedgerRequest =
       let name =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?kmsKey ?deletionProtection ~permissionsMode ?tags ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKey = field_map json "KmsKey" KmsKey.of_json in
       let deletionProtection =
@@ -3524,6 +3575,7 @@ module CancelJournalKinesisStreamResponse =
       let streamId =
         (Option.map ~f:UniqueId.of_xml) (Xml.child xml_arg0 "StreamId") in
       make ?streamId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map json "StreamId" UniqueId.of_json in
       make ?streamId ()
@@ -3552,6 +3604,7 @@ module CancelJournalKinesisStreamRequest =
       let ledgerName =
         LedgerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~streamId ~ledgerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamId = field_map_exn json "StreamId" UniqueId.of_json in
       let ledgerName = field_map_exn json "LedgerName" LedgerName.of_json in

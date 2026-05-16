@@ -169,6 +169,7 @@ module IceServer =
         (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
       let uris = (Option.map ~f:Uris.of_xml) (Xml.child xml_arg0 "Uris") in
       make ?ttl ?password ?username ?uris ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ttl = field_map json "Ttl" Ttl.of_json in
       let password = field_map json "Password" Password.of_json in
@@ -221,6 +222,7 @@ module ClientLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -240,6 +242,7 @@ module InvalidArgumentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -258,6 +261,7 @@ module NotAuthorizedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -276,6 +280,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -381,6 +386,7 @@ module InvalidClientException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -400,6 +406,7 @@ module SessionExpiredException =
         (Option.map ~f:ErrorMessage__lc1.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage__lc1.of_json in
       make ?message ()
@@ -493,6 +500,7 @@ module SendAlexaOfferToMasterResponse =
       let answer =
         (Option.map ~f:Answer.of_xml) (Xml.child xml_arg0 "Answer") in
       make ?answer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let answer = field_map json "Answer" Answer.of_json in make ?answer ()
     let to_json v = composed_to_json to_value v
@@ -531,6 +539,7 @@ module SendAlexaOfferToMasterRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
       make ~messagePayload ~senderClientId ~channelARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messagePayload =
         field_map_exn json "MessagePayload" MessagePayload.of_json in
@@ -632,6 +641,7 @@ module GetIceServerConfigResponse =
         (Option.map ~f:IceServerList.of_xml)
           (Xml.child xml_arg0 "IceServerList") in
       make ?iceServerList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iceServerList =
         field_map json "IceServerList" IceServerList.of_json in
@@ -679,6 +689,7 @@ module GetIceServerConfigRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
       make ?username ?service ?clientId ~channelARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map json "Username" Username.of_json in
       let service = field_map json "Service" Service.of_json in

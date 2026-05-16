@@ -175,6 +175,7 @@ module ValidationExceptionField =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~name ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" String_.of_json in
       let message = field_map_exn json "message" String_.of_json in
@@ -295,6 +296,7 @@ module WorkspaceStatus =
         WorkspaceStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "statusCode") in
       make ~statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusCode =
         field_map_exn json "statusCode" WorkspaceStatusCode.of_json in
@@ -361,6 +363,7 @@ module RuleGroupsNamespaceStatus =
         RuleGroupsNamespaceStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "statusCode") in
       make ?statusReason ~statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason = field_map json "statusReason" String_.of_json in
       let statusCode =
@@ -527,6 +530,7 @@ module WorkspaceSummary =
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
       make ~workspaceId ?tags ~status ~createdAt ~arn ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -589,6 +593,7 @@ module RuleGroupsNamespaceSummary =
         RuleGroupsNamespaceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tags ~status ~name ~modifiedAt ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let status =
@@ -666,6 +671,7 @@ module AlertManagerDefinitionStatus =
         AlertManagerDefinitionStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "statusCode") in
       make ?statusReason ~statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusReason = field_map json "statusReason" String_.of_json in
       let statusCode =
@@ -710,6 +716,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -738,6 +745,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" Integer.of_json in
@@ -773,6 +781,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -817,6 +826,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "serviceCode" String_.of_json in
       let retryAfterSeconds =
@@ -856,6 +866,7 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionFieldList.of_xml)
           (Xml.child xml_arg0 "fieldList") in
       make ~reason ~message ?fieldList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map_exn json "reason" ValidationExceptionReason.of_json in
@@ -917,6 +928,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -970,6 +982,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~serviceCode ~resourceType ~resourceId ~quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "serviceCode" String_.of_json in
       let resourceType = field_map_exn json "resourceType" String_.of_json in
@@ -1148,6 +1161,7 @@ module WorkspaceDescription =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
       make ~workspaceId ?tags ~status ?prometheusEndpoint ~createdAt ~arn
         ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -1221,6 +1235,7 @@ module RuleGroupsNamespaceDescription =
         RuleGroupsNamespaceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tags ~status ~name ~modifiedAt ~data ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let status =
@@ -1273,6 +1288,7 @@ module AlertManagerDefinitionDescription =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
       make ~status ~modifiedAt ~data ~createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" AlertManagerDefinitionStatus.of_json in
@@ -1315,6 +1331,7 @@ module UpdateWorkspaceAliasRequest =
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
       make ~workspaceId ?clientToken ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
@@ -1394,6 +1411,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes tags from the specified resource."]
@@ -1418,6 +1436,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -1495,6 +1514,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates tags for the specified resource."]
@@ -1518,6 +1538,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -1643,6 +1664,7 @@ module PutRuleGroupsNamespaceResponse =
         RuleGroupsNamespaceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tags ~status ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let status =
@@ -1695,6 +1717,7 @@ module PutRuleGroupsNamespaceRequest =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       make ~workspaceId ~name ~data ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
@@ -1804,6 +1827,7 @@ module PutAlertManagerDefinitionResponse =
         AlertManagerDefinitionStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" AlertManagerDefinitionStatus.of_json in
@@ -1845,6 +1869,7 @@ module PutAlertManagerDefinitionRequest =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       make ~workspaceId ~data ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let data = field_map_exn json "data" AlertManagerDefinitionData.of_json in
@@ -1933,6 +1958,7 @@ module ListWorkspacesResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~workspaces ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaces =
         field_map_exn json "workspaces" WorkspaceSummaryList.of_json in
@@ -1974,6 +2000,7 @@ module ListWorkspacesRequest =
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
       make ?nextToken ?maxResults ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -2057,6 +2084,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2077,6 +2105,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -2173,6 +2202,7 @@ module ListRuleGroupsNamespacesResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~ruleGroupsNamespaces ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroupsNamespaces =
         field_map_exn json "ruleGroupsNamespaces"
@@ -2226,6 +2256,7 @@ module ListRuleGroupsNamespacesRequest =
            ~f:ListRuleGroupsNamespacesRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ~workspaceId ?nextToken ?name ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -2317,6 +2348,7 @@ module DescribeWorkspaceResponse =
         WorkspaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
       make ~workspace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspace =
         field_map_exn json "workspace" WorkspaceDescription.of_json in
@@ -2340,6 +2372,7 @@ module DescribeWorkspaceRequest =
         WorkspaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
@@ -2427,6 +2460,7 @@ module DescribeRuleGroupsNamespaceResponse =
         RuleGroupsNamespaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ruleGroupsNamespace") in
       make ~ruleGroupsNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroupsNamespace =
         field_map_exn json "ruleGroupsNamespace"
@@ -2458,6 +2492,7 @@ module DescribeRuleGroupsNamespaceRequest =
         RuleGroupsNamespaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~workspaceId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
@@ -2549,6 +2584,7 @@ module DescribeAlertManagerDefinitionResponse =
         AlertManagerDefinitionDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "alertManagerDefinition") in
       make ~alertManagerDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alertManagerDefinition =
         field_map_exn json "alertManagerDefinition"
@@ -2574,6 +2610,7 @@ module DescribeAlertManagerDefinitionRequest =
         WorkspaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
@@ -2606,6 +2643,7 @@ module DeleteWorkspaceRequest =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       make ~workspaceId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
@@ -2646,6 +2684,7 @@ module DeleteRuleGroupsNamespaceRequest =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       make ~workspaceId ~name ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let name = field_map_exn json "name" RuleGroupsNamespaceName.of_json in
@@ -2681,6 +2720,7 @@ module DeleteAlertManagerDefinitionRequest =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       make ~workspaceId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
@@ -2798,6 +2838,7 @@ module CreateWorkspaceResponse =
       let arn =
         WorkspaceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~workspaceId ?tags ~status ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -2835,6 +2876,7 @@ module CreateWorkspaceRequest =
       let alias =
         (Option.map ~f:WorkspaceAlias.of_xml) (Xml.child xml_arg0 "alias") in
       make ?tags ?clientToken ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
@@ -2961,6 +3003,7 @@ module CreateRuleGroupsNamespaceResponse =
         RuleGroupsNamespaceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tags ~status ~name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let status =
@@ -3019,6 +3062,7 @@ module CreateRuleGroupsNamespaceRequest =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       make ~workspaceId ?tags ~name ~data ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let tags = field_map json "tags" TagMap.of_json in
@@ -3129,6 +3173,7 @@ module CreateAlertManagerDefinitionResponse =
         AlertManagerDefinitionStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" AlertManagerDefinitionStatus.of_json in
@@ -3170,6 +3215,7 @@ module CreateAlertManagerDefinitionRequest =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "clientToken") in
       make ~workspaceId ~data ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let data = field_map_exn json "data" AlertManagerDefinitionData.of_json in

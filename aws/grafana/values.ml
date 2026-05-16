@@ -196,6 +196,7 @@ module User =
         UserType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       let id = SsoId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~type_ ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" UserType.of_json in
       let id = field_map_exn json "id" SsoId.of_json in make ~type_ ~id ()
@@ -305,6 +306,7 @@ module AssertionAttributes =
         (Option.map ~f:AssertionAttribute.of_xml)
           (Xml.child xml_arg0 "email") in
       make ?role ?org ?name ?login ?groups ?email ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let role = field_map json "role" AssertionAttribute.of_json in
       let org = field_map json "org" AssertionAttribute.of_json in
@@ -335,6 +337,7 @@ module IdpMetadata =
       let url =
         (Option.map ~f:IdpMetadataUrl.of_xml) (Xml.child xml_arg0 "url") in
       make ?xml ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let xml = field_map json "xml" String_.of_json in
       let url = field_map json "url" IdpMetadataUrl.of_json in
@@ -378,6 +381,7 @@ module RoleValues =
       let admin =
         (Option.map ~f:RoleValueList.of_xml) (Xml.child xml_arg0 "admin") in
       make ?editor ?admin ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let editor = field_map json "editor" RoleValueList.of_json in
       let admin = field_map json "admin" RoleValueList.of_json in
@@ -577,6 +581,7 @@ module ValidationExceptionField =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~name ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" String_.of_json in
       let message = field_map_exn json "message" String_.of_json in
@@ -716,6 +721,7 @@ module SamlConfiguration =
           (Xml.child xml_arg0 "allowedOrganizations") in
       make ?roleValues ?loginValidityDuration ~idpMetadata
         ?assertionAttributes ?allowedOrganizations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleValues = field_map json "roleValues" RoleValues.of_json in
       let loginValidityDuration =
@@ -780,6 +786,7 @@ module UpdateInstruction =
         UpdateAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~users ~role ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let users = field_map_exn json "users" UserList.of_json in
       let role = field_map_exn json "role" Role.of_json in
@@ -816,6 +823,7 @@ module AuthenticationSummary =
         AuthenticationProviders.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "providers") in
       make ?samlConfigurationStatus ~providers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let samlConfigurationStatus =
         field_map json "samlConfigurationStatus"
@@ -1309,6 +1317,7 @@ module AwsSsoAuthentication =
       let ssoClientId =
         (Option.map ~f:SSOClientId.of_xml) (Xml.child xml_arg0 "ssoClientId") in
       make ?ssoClientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ssoClientId = field_map json "ssoClientId" SSOClientId.of_json in
       make ?ssoClientId ()
@@ -1342,6 +1351,7 @@ module SamlAuthentication =
         (Option.map ~f:SamlConfiguration.of_xml)
           (Xml.child xml_arg0 "configuration") in
       make ~status ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" SamlConfigurationStatus.of_json in
@@ -1378,6 +1388,7 @@ module UpdateError =
         UpdateInstruction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "causedBy") in
       make ~message ~code ~causedBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       let code = field_map_exn json "code" UpdateErrorCodeInteger.of_json in
@@ -1485,6 +1496,7 @@ module WorkspaceSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "authentication") in
       make ?tags ~status ?notificationDestinations ?name ~modified ~id
         ~grafanaVersion ~endpoint ?description ~created ~authentication ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in
       let status = field_map_exn json "status" WorkspaceStatus.of_json in
@@ -1529,6 +1541,7 @@ module PermissionEntry =
       let role =
         Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "role") in
       make ~user ~role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map_exn json "user" User.of_json in
       let role = field_map_exn json "role" Role.of_json in
@@ -1549,6 +1562,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -1586,6 +1600,7 @@ module ConflictException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -1615,6 +1630,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?retryAfterSeconds ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "retryAfterSeconds" Integer.of_json in
@@ -1656,6 +1672,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~resourceType ~resourceId ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map_exn json "resourceType" String_.of_json in
       let resourceId = field_map_exn json "resourceId" String_.of_json in
@@ -1699,6 +1716,7 @@ module ThrottlingException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map json "serviceCode" String_.of_json in
       let retryAfterSeconds =
@@ -1739,6 +1757,7 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionFieldList.of_xml)
           (Xml.child xml_arg0 "fieldList") in
       make ~reason ~message ?fieldList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map_exn json "reason" ValidationExceptionReason.of_json in
@@ -1958,6 +1977,7 @@ module WorkspaceDescription =
         ?name ~modified ?licenseType ?licenseExpiration ~id ~grafanaVersion
         ?freeTrialExpiration ?freeTrialConsumed ~endpoint ?description
         ~dataSources ~created ~authentication ?accountAccessType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceRoleArn =
         field_map json "workspaceRoleArn" IamRoleArn.of_json in
@@ -2034,6 +2054,7 @@ module AuthenticationDescription =
         (Option.map ~f:AwsSsoAuthentication.of_xml)
           (Xml.child xml_arg0 "awsSso") in
       make ?saml ~providers ?awsSso ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let saml = field_map json "saml" SamlAuthentication.of_json in
       let providers =
@@ -2268,6 +2289,7 @@ module ServiceQuotaExceededException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~serviceCode ~resourceType ~resourceId ~quotaCode ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceCode = field_map_exn json "serviceCode" String_.of_json in
       let resourceType = field_map_exn json "resourceType" String_.of_json in
@@ -2382,6 +2404,7 @@ module UpdateWorkspaceResponse =
         WorkspaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
       make ~workspace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspace =
         field_map_exn json "workspace" WorkspaceDescription.of_json in
@@ -2515,6 +2538,7 @@ module UpdateWorkspaceRequest =
         ?workspaceNotificationDestinations ?workspaceName ~workspaceId
         ?workspaceDescription ?workspaceDataSources ?stackSetName
         ?permissionType ?organizationRoleName ?accountAccessType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceRoleArn =
         field_map json "workspaceRoleArn" IamRoleArn.of_json in
@@ -2636,6 +2660,7 @@ module UpdateWorkspaceAuthenticationResponse =
         AuthenticationDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "authentication") in
       make ~authentication ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authentication =
         field_map_exn json "authentication" AuthenticationDescription.of_json in
@@ -2681,6 +2706,7 @@ module UpdateWorkspaceAuthenticationRequest =
         AuthenticationProviders.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "authenticationProviders") in
       make ~workspaceId ?samlConfiguration ~authenticationProviders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let samlConfiguration =
@@ -2773,6 +2799,7 @@ module UpdatePermissionsResponse =
         UpdateErrorList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "errors") in
       make ~errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errors = field_map_exn json "errors" UpdateErrorList.of_json in
       make ~errors ()
@@ -2805,6 +2832,7 @@ module UpdatePermissionsRequest =
         UpdateInstructionBatch.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "updateInstructionBatch") in
       make ~workspaceId ~updateInstructionBatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let updateInstructionBatch =
@@ -2885,6 +2913,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2914,6 +2943,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -2992,6 +3022,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3019,6 +3050,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
@@ -3097,6 +3129,7 @@ module ListWorkspacesResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~workspaces ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaces = field_map_exn json "workspaces" WorkspaceList.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -3131,6 +3164,7 @@ module ListWorkspacesRequest =
         (Option.map ~f:ListWorkspacesRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults =
@@ -3217,6 +3251,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3240,6 +3275,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" String_.of_json in
       make ~resourceArn ()
@@ -3334,6 +3370,7 @@ module ListPermissionsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ~permissions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let permissions =
         field_map_exn json "permissions" PermissionEntryList.of_json in
@@ -3407,6 +3444,7 @@ module ListPermissionsRequest =
       let groupId =
         (Option.map ~f:SsoId.of_xml) (Xml.child xml_arg0 "groupId") in
       make ~workspaceId ?userType ?userId ?nextToken ?maxResults ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let userType = field_map json "userType" UserType.of_json in
@@ -3501,6 +3539,7 @@ module DisassociateLicenseResponse =
         WorkspaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
       make ~workspace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspace =
         field_map_exn json "workspace" WorkspaceDescription.of_json in
@@ -3532,6 +3571,7 @@ module DisassociateLicenseRequest =
         LicenseType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "licenseType") in
       make ~workspaceId ~licenseType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let licenseType = field_map_exn json "licenseType" LicenseType.of_json in
@@ -3619,6 +3659,7 @@ module DescribeWorkspaceResponse =
         WorkspaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
       make ~workspace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspace =
         field_map_exn json "workspace" WorkspaceDescription.of_json in
@@ -3643,6 +3684,7 @@ module DescribeWorkspaceRequest =
         WorkspaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
@@ -3731,6 +3773,7 @@ module DescribeWorkspaceAuthenticationResponse =
         AuthenticationDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "authentication") in
       make ~authentication ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authentication =
         field_map_exn json "authentication" AuthenticationDescription.of_json in
@@ -3756,6 +3799,7 @@ module DescribeWorkspaceAuthenticationRequest =
         WorkspaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
@@ -3852,6 +3896,7 @@ module DeleteWorkspaceResponse =
         WorkspaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
       make ~workspace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspace =
         field_map_exn json "workspace" WorkspaceDescription.of_json in
@@ -3875,6 +3920,7 @@ module DeleteWorkspaceRequest =
         WorkspaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
@@ -3972,6 +4018,7 @@ module CreateWorkspaceResponse =
         WorkspaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
       make ~workspace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspace =
         field_map_exn json "workspace" WorkspaceDescription.of_json in
@@ -4122,6 +4169,7 @@ module CreateWorkspaceRequest =
         ?workspaceDescription ?workspaceDataSources ?tags ?stackSetName
         ~permissionType ?organizationRoleName ?clientToken
         ~authenticationProviders ~accountAccessType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceRoleArn =
         field_map json "workspaceRoleArn" IamRoleArn.of_json in
@@ -4237,6 +4285,7 @@ module AssociateLicenseResponse =
         WorkspaceDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
       make ~workspace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspace =
         field_map_exn json "workspace" WorkspaceDescription.of_json in
@@ -4268,6 +4317,7 @@ module AssociateLicenseRequest =
         LicenseType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "licenseType") in
       make ~workspaceId ~licenseType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
       let licenseType = field_map_exn json "licenseType" LicenseType.of_json in

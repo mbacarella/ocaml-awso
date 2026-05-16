@@ -171,6 +171,7 @@ module S3Location =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
       make ~prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map_exn json "prefix" S3Prefix.of_json in
       let bucket = field_map_exn json "bucket" S3Bucket.of_json in
@@ -273,6 +274,7 @@ module ReportDefinition =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
       make ?lastUpdatedAt ?createdAt ?destinationS3Location ?format
         ?reportFrequency ?reportDescription ?reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
       let createdAt = field_map json "createdAt" Timestamp.of_json in
@@ -353,6 +355,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -371,6 +374,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -389,6 +393,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -408,6 +413,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -426,6 +432,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -540,6 +547,7 @@ module SourceS3Location =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
       make ?region ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map json "region" S3BucketRegion.of_json in
       let key = field_map_exn json "key" S3Key.of_json in
@@ -616,6 +624,7 @@ module UpdateReportDefinitionResult =
       let reportId =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
       make ?reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportId = field_map json "reportId" ReportId.of_json in
       make ?reportId ()
@@ -678,6 +687,7 @@ module UpdateReportDefinitionRequest =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
       make ~destinationS3Location ~format ~reportFrequency ~reportDescription
         ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationS3Location =
         field_map_exn json "destinationS3Location" S3Location.of_json in
@@ -771,6 +781,7 @@ module PutReportDefinitionResult =
       let reportId =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
       make ?reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportId = field_map json "reportId" ReportId.of_json in
       make ?reportId ()
@@ -834,6 +845,7 @@ module PutReportDefinitionRequest =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
       make ~destinationS3Location ~format ~reportFrequency ~reportDescription
         ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationS3Location =
         field_map_exn json "destinationS3Location" S3Location.of_json in
@@ -926,6 +938,7 @@ module ListReportDefinitionsResult =
         (Option.map ~f:ReportDefinitionList.of_xml)
           (Xml.child xml_arg0 "reportDefinitions") in
       make ?nextToken ?reportDefinitions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" Token.of_json in
       let reportDefinitions =
@@ -956,6 +969,7 @@ module ListReportDefinitionsRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" Integer.of_json in
       let nextToken = field_map json "nextToken" Token.of_json in
@@ -1032,6 +1046,7 @@ module ImportApplicationUsageResult =
       let importId =
         ImportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "importId") in
       make ~importId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let importId = field_map_exn json "importId" ImportId.of_json in
       make ~importId ()
@@ -1057,6 +1072,7 @@ module ImportApplicationUsageRequest =
         SourceS3Location.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceS3Location") in
       make ~sourceS3Location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceS3Location =
         field_map_exn json "sourceS3Location" SourceS3Location.of_json in
@@ -1190,6 +1206,7 @@ module GetReportDefinitionResult =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
       make ~lastUpdated ~createdAt ~destinationS3Location ~format
         ~reportFrequency ~reportDescription ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdated = field_map_exn json "lastUpdated" Timestamp.of_json in
       let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
@@ -1221,6 +1238,7 @@ module GetReportDefinitionRequest =
       let reportId =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
       make ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportId = field_map_exn json "reportId" ReportId.of_json in
       make ~reportId ()
@@ -1296,6 +1314,7 @@ module DeleteReportDefinitionResult =
       let reportId =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
       make ?reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportId = field_map json "reportId" ReportId.of_json in
       make ?reportId ()
@@ -1318,6 +1337,7 @@ module DeleteReportDefinitionRequest =
       let reportId =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
       make ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportId = field_map_exn json "reportId" ReportId.of_json in
       make ~reportId ()

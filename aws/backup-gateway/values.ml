@@ -328,6 +328,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -387,6 +388,7 @@ module VirtualMachine =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "HostName") in
       make ?resourceArn ?path ?name ?lastBackupDate ?hypervisorId ?hostName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
       let path = field_map json "Path" Path.of_json in
@@ -437,6 +439,7 @@ module Hypervisor =
         (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
       let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "Host") in
       make ?state ?name ?kmsKeyArn ?hypervisorArn ?host ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let state = field_map json "State" HypervisorState.of_json in
       let name = field_map json "Name" Name.of_json in
@@ -500,6 +503,7 @@ module Gateway =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?lastSeenTime ?hypervisorId ?gatewayType ?gatewayDisplayName
         ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastSeenTime = field_map json "LastSeenTime" Time.of_json in
       let hypervisorId = field_map json "HypervisorId" HypervisorId.of_json in
@@ -533,6 +537,7 @@ module AccessDeniedException =
       let errorCode =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let errorCode = field_map_exn json "ErrorCode" String_.of_json in
@@ -559,6 +564,7 @@ module InternalServerException =
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let errorCode = field_map json "ErrorCode" String_.of_json in
@@ -585,6 +591,7 @@ module ResourceNotFoundException =
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let errorCode = field_map json "ErrorCode" String_.of_json in
@@ -610,6 +617,7 @@ module ValidationException =
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let errorCode = field_map json "ErrorCode" String_.of_json in
@@ -679,6 +687,7 @@ module ConflictException =
       let errorCode =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?message ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       let errorCode = field_map_exn json "ErrorCode" String_.of_json in
@@ -999,6 +1008,7 @@ module UpdateHypervisorOutput =
       let hypervisorArn =
         (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
       make ?hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hypervisorArn = field_map json "HypervisorArn" ServerArn.of_json in
       make ?hypervisorArn ()
@@ -1042,6 +1052,7 @@ module UpdateHypervisorInput =
           (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
       let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "Host") in
       make ?username ?password ~hypervisorArn ?host ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map json "Username" Username.of_json in
       let password = field_map json "Password" Password.of_json in
@@ -1122,6 +1133,7 @@ module UpdateGatewayInformationOutput =
       let gatewayArn =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
@@ -1153,6 +1165,7 @@ module UpdateGatewayInformationInput =
         GatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ?gatewayDisplayName ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayDisplayName =
         field_map json "GatewayDisplayName" Name.of_json in
@@ -1222,6 +1235,7 @@ module UntagResourceOutput =
       let resourceARN =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map json "ResourceARN" ResourceArn.of_json in
       make ?resourceARN ()
@@ -1251,6 +1265,7 @@ module UntagResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
@@ -1319,6 +1334,7 @@ module TestHypervisorConfigurationOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1360,6 +1376,7 @@ module TestHypervisorConfigurationInput =
         GatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ?username ?password ~host ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map json "Username" Username.of_json in
       let password = field_map json "Password" Password.of_json in
@@ -1430,6 +1447,7 @@ module TagResourceOutput =
       let resourceARN =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN = field_map json "ResourceARN" ResourceArn.of_json in
       make ?resourceARN ()
@@ -1456,6 +1474,7 @@ module TagResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
@@ -1532,6 +1551,7 @@ module PutMaintenanceStartTimeOutput =
       let gatewayArn =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
@@ -1586,6 +1606,7 @@ module PutMaintenanceStartTimeInput =
       let dayOfMonth =
         (Option.map ~f:DayOfMonth.of_xml) (Xml.child xml_arg0 "DayOfMonth") in
       make ~minuteOfHour ~hourOfDay ~gatewayArn ?dayOfWeek ?dayOfMonth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minuteOfHour =
         field_map_exn json "MinuteOfHour" MinuteOfHour.of_json in
@@ -1657,6 +1678,7 @@ module ListVirtualMachinesOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?virtualMachines ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualMachines =
         field_map json "VirtualMachines" VirtualMachines.of_json in
@@ -1686,6 +1708,7 @@ module ListVirtualMachinesInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1756,6 +1779,7 @@ module ListTagsForResourceOutput =
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?tags ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
@@ -1781,6 +1805,7 @@ module ListTagsForResourceInput =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -1846,6 +1871,7 @@ module ListHypervisorsOutput =
       let hypervisors =
         (Option.map ~f:Hypervisors.of_xml) (Xml.child xml_arg0 "Hypervisors") in
       make ?nextToken ?hypervisors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let hypervisors = field_map json "Hypervisors" Hypervisors.of_json in
@@ -1874,6 +1900,7 @@ module ListHypervisorsInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1936,6 +1963,7 @@ module ListGatewaysOutput =
       let gateways =
         (Option.map ~f:Gateways.of_xml) (Xml.child xml_arg0 "Gateways") in
       make ?nextToken ?gateways ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let gateways = field_map json "Gateways" Gateways.of_json in
@@ -1965,6 +1993,7 @@ module ListGatewaysInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2034,6 +2063,7 @@ module ImportHypervisorConfigurationOutput =
       let hypervisorArn =
         (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
       make ?hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hypervisorArn = field_map json "HypervisorArn" ServerArn.of_json in
       make ?hypervisorArn ()
@@ -2085,6 +2115,7 @@ module ImportHypervisorConfigurationInput =
       let host =
         Host.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Host") in
       make ?username ?tags ?password ~name ?kmsKeyArn ~host ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map json "Username" Username.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -2165,6 +2196,7 @@ module DisassociateGatewayFromServerOutput =
       let gatewayArn =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
@@ -2189,6 +2221,7 @@ module DisassociateGatewayFromServerInput =
         GatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
       make ~gatewayArn ()
@@ -2266,6 +2299,7 @@ module DeleteHypervisorOutput =
       let hypervisorArn =
         (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
       make ?hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hypervisorArn = field_map json "HypervisorArn" ServerArn.of_json in
       make ?hypervisorArn ()
@@ -2289,6 +2323,7 @@ module DeleteHypervisorInput =
         ServerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
       make ~hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hypervisorArn =
         field_map_exn json "HypervisorArn" ServerArn.of_json in
@@ -2356,6 +2391,7 @@ module DeleteGatewayOutput =
       let gatewayArn =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
@@ -2379,6 +2415,7 @@ module DeleteGatewayInput =
         GatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
       make ~gatewayArn ()
@@ -2436,6 +2473,7 @@ module CreateGatewayOutput =
       let gatewayArn =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
@@ -2480,6 +2518,7 @@ module CreateGatewayInput =
         ActivationKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActivationKey") in
       make ?tags ~gatewayType ~gatewayDisplayName ~activationKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let gatewayType = field_map_exn json "GatewayType" GatewayType.of_json in
@@ -2551,6 +2590,7 @@ module AssociateGatewayToServerOutput =
       let gatewayArn =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
@@ -2583,6 +2623,7 @@ module AssociateGatewayToServerInput =
         GatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ~serverArn ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverArn = field_map_exn json "ServerArn" ServerArn.of_json in
       let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in

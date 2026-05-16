@@ -488,6 +488,7 @@ module IamActionDefinition =
         PolicyArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?users ?groups ?roles ~policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let users = field_map json "Users" Users.of_json in
       let groups = field_map json "Groups" Groups.of_json in
@@ -517,6 +518,7 @@ module ScpActionDefinition =
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~targetIds ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetIds = field_map_exn json "TargetIds" TargetIds.of_json in
       let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
@@ -551,6 +553,7 @@ module SsmActionDefinition =
         ActionSubType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActionSubType") in
       make ~instanceIds ~region ~actionSubType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceIds = field_map_exn json "InstanceIds" InstanceIds.of_json in
       let region = field_map_exn json "Region" Region.of_json in
@@ -587,6 +590,7 @@ module Subscriber =
         SubscriptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionType") in
       make ~address ~subscriptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let address = field_map_exn json "Address" SubscriberAddress.of_json in
       let subscriptionType =
@@ -860,6 +864,7 @@ module ActionThreshold =
         NotificationThreshold.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActionThresholdValue") in
       make ~actionThresholdType ~actionThresholdValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionThresholdType =
         field_map_exn json "ActionThresholdType" ThresholdType.of_json in
@@ -982,6 +987,7 @@ module Definition =
         (Option.map ~f:IamActionDefinition.of_xml)
           (Xml.child xml_arg0 "IamActionDefinition") in
       make ?ssmActionDefinition ?scpActionDefinition ?iamActionDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ssmActionDefinition =
         field_map json "SsmActionDefinition" SsmActionDefinition.of_json in
@@ -1096,6 +1102,7 @@ module HistoricalOptions =
         AdjustmentPeriod.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BudgetAdjustmentPeriod") in
       make ?lookBackAvailablePeriods ~budgetAdjustmentPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lookBackAvailablePeriods =
         field_map json "LookBackAvailablePeriods" AdjustmentPeriod.of_json in
@@ -1129,6 +1136,7 @@ module Spend =
         NumericValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Amount") in
       make ~unit ~amount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map_exn json "Unit" UnitValue.of_json in
       let amount = field_map_exn json "Amount" NumericValue.of_json in
@@ -1195,6 +1203,7 @@ module TimePeriod =
       let start =
         (Option.map ~f:GenericTimestamp.of_xml) (Xml.child xml_arg0 "Start") in
       make ?end_ ?start ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let end_ = field_map json "End" GenericTimestamp.of_json in
       let start = field_map json "Start" GenericTimestamp.of_json in
@@ -1264,6 +1273,7 @@ module Notification =
           (Xml.child_exn ~context:context_ xml_arg0 "NotificationType") in
       make ?notificationState ?thresholdType ~threshold ~comparisonOperator
         ~notificationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationState =
         field_map json "NotificationState" NotificationState.of_json in
@@ -1376,6 +1386,7 @@ module Action =
       make ~subscribers ~status ~approvalModel ~executionRoleArn ~definition
         ~actionThreshold ~actionType ~notificationType ~budgetName ~actionId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
       let status = field_map_exn json "Status" ActionStatus.of_json in
@@ -1433,6 +1444,7 @@ module AutoAdjustData =
         AutoAdjustType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoAdjustType") in
       make ?lastAutoAdjustTime ?historicalOptions ~autoAdjustType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastAutoAdjustTime =
         field_map json "LastAutoAdjustTime" GenericTimestamp.of_json in
@@ -1505,6 +1517,7 @@ module CalculatedSpend =
       let actualSpend =
         Spend.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActualSpend") in
       make ?forecastedSpend ~actualSpend ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forecastedSpend = field_map json "ForecastedSpend" Spend.of_json in
       let actualSpend = field_map_exn json "ActualSpend" Spend.of_json in
@@ -1667,6 +1680,7 @@ module CostTypes =
         ?includeOtherSubscription ?includeRecurring ?includeUpfront
         ?includeCredit ?includeRefund ?useBlended ?includeSubscription
         ?includeTax ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let useAmortized =
         field_map json "UseAmortized" NullableBoolean.of_json in
@@ -1786,6 +1800,7 @@ module BudgetedAndActualAmounts =
       let budgetedAmount =
         (Option.map ~f:Spend.of_xml) (Xml.child xml_arg0 "BudgetedAmount") in
       make ?timePeriod ?actualAmount ?budgetedAmount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timePeriod = field_map json "TimePeriod" TimePeriod.of_json in
       let actualAmount = field_map json "ActualAmount" Spend.of_json in
@@ -1838,6 +1853,7 @@ module ActionHistoryDetails =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~action ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map_exn json "Action" Action.of_json in
       let message = field_map_exn json "Message" GenericString.of_json in
@@ -2004,6 +2020,7 @@ module Budget =
       make ?autoAdjustData ?lastUpdatedTime ~budgetType ?calculatedSpend
         ?timePeriod ~timeUnit ?costTypes ?costFilters ?plannedBudgetLimits
         ?budgetLimit ~budgetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let autoAdjustData =
         field_map json "AutoAdjustData" AutoAdjustData.of_json in
@@ -2073,6 +2090,7 @@ module BudgetNotificationsForAccount =
         (Option.map ~f:Notifications.of_xml)
           (Xml.child xml_arg0 "Notifications") in
       make ?budgetName ?notifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budgetName = field_map json "BudgetName" BudgetName.of_json in
       let notifications =
@@ -2121,6 +2139,7 @@ module ActionHistory =
         GenericTimestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
       make ~actionHistoryDetails ~eventType ~status ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionHistoryDetails =
         field_map_exn json "ActionHistoryDetails"
@@ -2156,6 +2175,7 @@ module NotificationWithSubscribers =
         Notification.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
       make ~subscribers ~notification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
       let notification =
@@ -2177,6 +2197,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2196,6 +2217,7 @@ module DuplicateRecordException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2215,6 +2237,7 @@ module InternalErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2234,6 +2257,7 @@ module InvalidParameterException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2253,6 +2277,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2293,6 +2318,7 @@ module ResourceLockedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2343,6 +2369,7 @@ module ExpiredNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2361,6 +2388,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2467,6 +2495,7 @@ module BudgetPerformanceHistory =
         (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
       make ?budgetedAndActualAmountsList ?timeUnit ?costTypes ?costFilters
         ?budgetType ?budgetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budgetedAndActualAmountsList =
         field_map json "BudgetedAndActualAmountsList"
@@ -2597,6 +2626,7 @@ module CreationLimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2700,6 +2730,7 @@ module UpdateSubscriberResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of UpdateSubscriber"]
@@ -2761,6 +2792,7 @@ module UpdateSubscriberRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~newSubscriber ~oldSubscriber ~notification ~budgetName ~accountId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newSubscriber =
         field_map_exn json "NewSubscriber" Subscriber.of_json in
@@ -2845,6 +2877,7 @@ module UpdateNotificationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of UpdateNotification"]
@@ -2892,6 +2925,7 @@ module UpdateNotificationRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~newNotification ~oldNotification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newNotification =
         field_map_exn json "NewNotification" Notification.of_json in
@@ -2964,6 +2998,7 @@ module UpdateBudgetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of UpdateBudget"]
@@ -2991,6 +3026,7 @@ module UpdateBudgetRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~newBudget ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newBudget = field_map_exn json "NewBudget" Budget.of_json in
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
@@ -3095,6 +3131,7 @@ module UpdateBudgetActionResponse =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~newAction ~oldAction ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newAction = field_map_exn json "NewAction" Action.of_json in
       let oldAction = field_map_exn json "OldAction" Action.of_json in
@@ -3188,6 +3225,7 @@ module UpdateBudgetActionRequest =
       make ?subscribers ?approvalModel ?executionRoleArn ?definition
         ?actionThreshold ?notificationType ~actionId ~budgetName ~accountId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscribers = field_map json "Subscribers" Subscribers.of_json in
       let approvalModel =
@@ -3306,6 +3344,7 @@ module ExecuteBudgetActionResponse =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~executionType ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionType =
         field_map_exn json "ExecutionType" ExecutionType.of_json in
@@ -3351,6 +3390,7 @@ module ExecuteBudgetActionRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~executionType ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionType =
         field_map_exn json "ExecutionType" ExecutionType.of_json in
@@ -3455,6 +3495,7 @@ module DescribeSubscribersForNotificationResponse =
       let subscribers =
         (Option.map ~f:Subscribers.of_xml) (Xml.child xml_arg0 "Subscribers") in
       make ?nextToken ?subscribers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let subscribers = field_map json "Subscribers" Subscribers.of_json in
@@ -3511,6 +3552,7 @@ module DescribeSubscribersForNotificationRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3618,6 +3660,7 @@ module DescribeNotificationsForBudgetResponse =
         (Option.map ~f:Notifications.of_xml)
           (Xml.child xml_arg0 "Notifications") in
       make ?nextToken ?notifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let notifications =
@@ -3666,6 +3709,7 @@ module DescribeNotificationsForBudgetRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3766,6 +3810,7 @@ module DescribeBudgetsResponse =
       let budgets =
         (Option.map ~f:Budgets.of_xml) (Xml.child xml_arg0 "Budgets") in
       make ?nextToken ?budgets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let budgets = field_map json "Budgets" Budgets.of_json in
@@ -3804,6 +3849,7 @@ module DescribeBudgetsRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -3879,6 +3925,7 @@ module DescribeBudgetResponse =
       let budget =
         (Option.map ~f:Budget.of_xml) (Xml.child xml_arg0 "Budget") in
       make ?budget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budget = field_map json "Budget" Budget.of_json in make ?budget ()
     let to_json v = composed_to_json to_value v
@@ -3908,6 +3955,7 @@ module DescribeBudgetRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
@@ -4010,6 +4058,7 @@ module DescribeBudgetPerformanceHistoryResponse =
         (Option.map ~f:BudgetPerformanceHistory.of_xml)
           (Xml.child xml_arg0 "BudgetPerformanceHistory") in
       make ?nextToken ?budgetPerformanceHistory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let budgetPerformanceHistory =
@@ -4060,6 +4109,7 @@ module DescribeBudgetPerformanceHistoryRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ?timePeriod ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4168,6 +4218,7 @@ module DescribeBudgetNotificationsForAccountResponse =
         (Option.map ~f:BudgetNotificationsForAccountList.of_xml)
           (Xml.child xml_arg0 "BudgetNotificationsForAccount") in
       make ?nextToken ?budgetNotificationsForAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let budgetNotificationsForAccount =
@@ -4207,6 +4258,7 @@ module DescribeBudgetNotificationsForAccountRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults =
@@ -4299,6 +4351,7 @@ module DescribeBudgetActionsForBudgetResponse =
       let actions =
         Actions.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Actions") in
       make ?nextToken ~actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let actions = field_map_exn json "Actions" Actions.of_json in
@@ -4338,6 +4391,7 @@ module DescribeBudgetActionsForBudgetRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4420,6 +4474,7 @@ module DescribeBudgetActionsForAccountResponse =
       let actions =
         Actions.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Actions") in
       make ?nextToken ~actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let actions = field_map_exn json "Actions" Actions.of_json in
@@ -4452,6 +4507,7 @@ module DescribeBudgetActionsForAccountRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4540,6 +4596,7 @@ module DescribeBudgetActionResponse =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~action ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map_exn json "Action" Action.of_json in
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
@@ -4576,6 +4633,7 @@ module DescribeBudgetActionRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionId = field_map_exn json "ActionId" ActionId.of_json in
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
@@ -4669,6 +4727,7 @@ module DescribeBudgetActionHistoriesResponse =
         ActionHistories.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActionHistories") in
       make ?nextToken ~actionHistories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let actionHistories =
@@ -4730,6 +4789,7 @@ module DescribeBudgetActionHistoriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?nextToken ?maxResults ?timePeriod ~actionId ~budgetName
         ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4803,6 +4863,7 @@ module DeleteSubscriberResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of DeleteSubscriber"]
@@ -4847,6 +4908,7 @@ module DeleteSubscriberRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~subscriber ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriber = field_map_exn json "Subscriber" Subscriber.of_json in
       let notification =
@@ -4918,6 +4980,7 @@ module DeleteNotificationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of DeleteNotification"]
@@ -4955,6 +5018,7 @@ module DeleteNotificationRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notification =
         field_map_exn json "Notification" Notification.of_json in
@@ -5025,6 +5089,7 @@ module DeleteBudgetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of DeleteBudget"]
@@ -5053,6 +5118,7 @@ module DeleteBudgetRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
       let accountId = field_map_exn json "AccountId" AccountId.of_json in
@@ -5149,6 +5215,7 @@ module DeleteBudgetActionResponse =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~action ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map_exn json "Action" Action.of_json in
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
@@ -5185,6 +5252,7 @@ module DeleteBudgetActionRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionId = field_map_exn json "ActionId" ActionId.of_json in
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
@@ -5274,6 +5342,7 @@ module CreateSubscriberResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of CreateSubscriber"]
@@ -5320,6 +5389,7 @@ module CreateSubscriberRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~subscriber ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscriber = field_map_exn json "Subscriber" Subscriber.of_json in
       let notification =
@@ -5411,6 +5481,7 @@ module CreateNotificationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of CreateNotification"]
@@ -5456,6 +5527,7 @@ module CreateNotificationRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~subscribers ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
       let notification =
@@ -5538,6 +5610,7 @@ module CreateBudgetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response of CreateBudget"]
@@ -5575,6 +5648,7 @@ module CreateBudgetRequest =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?notificationsWithSubscribers ~budget ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationsWithSubscribers =
         field_map json "NotificationsWithSubscribers"
@@ -5687,6 +5761,7 @@ module CreateBudgetActionResponse =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionId = field_map_exn json "ActionId" ActionId.of_json in
       let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
@@ -5780,6 +5855,7 @@ module CreateBudgetActionRequest =
       make ~subscribers ~approvalModel ~executionRoleArn ~definition
         ~actionThreshold ~actionType ~notificationType ~budgetName ~accountId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
       let approvalModel =

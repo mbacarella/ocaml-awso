@@ -110,6 +110,7 @@ module MultiRegionKey =
         (Option.map ~f:RegionType.of_xml) (Xml.child xml_arg0 "Region") in
       let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?region ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let region = field_map json "Region" RegionType.of_json in
       let arn = field_map json "Arn" ArnType.of_json in make ?region ?arn ()
@@ -433,6 +434,7 @@ module GrantConstraints =
         (Option.map ~f:EncryptionContextType.of_xml)
           (Xml.child xml_arg0 "EncryptionContextSubset") in
       make ?encryptionContextEquals ?encryptionContextSubset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionContextEquals =
         field_map json "EncryptionContextEquals"
@@ -753,6 +755,7 @@ module Tag =
       let tagKey =
         TagKeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagKey") in
       make ~tagValue ~tagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagValue = field_map_exn json "TagValue" TagValueType.of_json in
       let tagKey = field_map_exn json "TagKey" TagKeyType.of_json in
@@ -1067,6 +1070,7 @@ module MultiRegionConfiguration =
         (Option.map ~f:MultiRegionKeyType.of_xml)
           (Xml.child xml_arg0 "MultiRegionKeyType") in
       make ?replicaKeys ?primaryKey ?multiRegionKeyType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicaKeys =
         field_map json "ReplicaKeys" MultiRegionKeyList.of_json in
@@ -1181,6 +1185,7 @@ module KeyListEntry =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?keyArn ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyArn = field_map json "KeyArn" ArnType.of_json in
       let keyId = field_map json "KeyId" KeyIdType.of_json in
@@ -1298,6 +1303,7 @@ module GrantListEntry =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?constraints ?operations ?issuingAccount ?retiringPrincipal
         ?granteePrincipal ?creationDate ?name ?grantId ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let constraints = field_map json "Constraints" GrantConstraints.of_json in
       let operations = field_map json "Operations" GrantOperationList.of_json in
@@ -1369,6 +1375,7 @@ module AliasListEntry =
         (Option.map ~f:AliasNameType.of_xml) (Xml.child xml_arg0 "AliasName") in
       make ?lastUpdatedDate ?creationDate ?targetKeyId ?aliasArn ?aliasName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedDate = field_map json "LastUpdatedDate" DateType.of_json in
       let creationDate = field_map json "CreationDate" DateType.of_json in
@@ -1462,6 +1469,7 @@ module CustomKeyStoresListEntry =
       make ?creationDate ?connectionErrorCode ?connectionState
         ?trustAnchorCertificate ?cloudHsmClusterId ?customKeyStoreName
         ?customKeyStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" DateType.of_json in
       let connectionErrorCode =
@@ -1497,6 +1505,7 @@ module DependencyTimeoutException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1517,6 +1526,7 @@ module DisabledException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1537,6 +1547,7 @@ module InvalidGrantTokenException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1557,6 +1568,7 @@ module InvalidKeyUsageException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1577,6 +1589,7 @@ module KMSInternalException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1597,6 +1610,7 @@ module KMSInvalidSignatureException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1617,6 +1631,7 @@ module KMSInvalidStateException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1637,6 +1652,7 @@ module KeyUnavailableException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1657,6 +1673,7 @@ module NotFoundException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1748,6 +1765,7 @@ module CloudHsmClusterInvalidConfigurationException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1768,6 +1786,7 @@ module CloudHsmClusterNotActiveException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1788,6 +1807,7 @@ module CloudHsmClusterNotFoundException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1808,6 +1828,7 @@ module CloudHsmClusterNotRelatedException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1828,6 +1849,7 @@ module CustomKeyStoreInvalidStateException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1848,6 +1870,7 @@ module CustomKeyStoreNameInUseException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1868,6 +1891,7 @@ module CustomKeyStoreNotFoundException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1953,6 +1977,7 @@ module InvalidArnException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -1973,6 +1998,7 @@ module AlreadyExistsException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2197,6 +2223,7 @@ module KeyMetadata =
         ?cloudHsmClusterId ?customKeyStoreId ?origin ?validTo ?deletionDate
         ?keyState ?keyUsage ?description ?enabled ?creationDate ?arn ~keyId
         ?aWSAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pendingDeletionWindowInDays =
         field_map json "PendingDeletionWindowInDays"
@@ -2256,6 +2283,7 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2276,6 +2304,7 @@ module MalformedPolicyDocumentException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2318,6 +2347,7 @@ module TagException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2338,6 +2368,7 @@ module UnsupportedOperationException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2358,6 +2389,7 @@ module IncorrectKeyException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2378,6 +2410,7 @@ module InvalidCiphertextException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2435,6 +2468,7 @@ module InvalidMarkerException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2527,6 +2561,7 @@ module InvalidGrantIdException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2571,6 +2606,7 @@ module ExpiredImportTokenException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2591,6 +2627,7 @@ module IncorrectKeyMaterialException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2611,6 +2648,7 @@ module InvalidImportTokenException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2796,6 +2834,7 @@ module CustomKeyStoreHasCMKsException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2816,6 +2855,7 @@ module CloudHsmClusterInUseException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2836,6 +2876,7 @@ module IncorrectTrustAnchorException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -2980,6 +3021,7 @@ module VerifyResponse =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?signingAlgorithm ?signatureValid ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signingAlgorithm =
         field_map json "SigningAlgorithm" SigningAlgorithmSpec.of_json in
@@ -3057,6 +3099,7 @@ module VerifyRequest =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?grantTokens ~signingAlgorithm ~signature ?messageType ~message
         ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let signingAlgorithm =
@@ -3095,6 +3138,7 @@ module UpdatePrimaryRegionRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~primaryRegion ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let primaryRegion =
         field_map_exn json "PrimaryRegion" RegionType.of_json in
@@ -3126,6 +3170,7 @@ module UpdateKeyDescriptionRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~description ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description =
         field_map_exn json "Description" DescriptionType.of_json in
@@ -3255,6 +3300,7 @@ module UpdateCustomKeyStoreResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3314,6 +3360,7 @@ module UpdateCustomKeyStoreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CustomKeyStoreId") in
       make ?cloudHsmClusterId ?keyStorePassword ?newCustomKeyStoreName
         ~customKeyStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudHsmClusterId =
         field_map json "CloudHsmClusterId" CloudHsmClusterIdType.of_json in
@@ -3354,6 +3401,7 @@ module UpdateAliasRequest =
         AliasNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AliasName") in
       make ~targetKeyId ~aliasName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetKeyId = field_map_exn json "TargetKeyId" KeyIdType.of_json in
       let aliasName = field_map_exn json "AliasName" AliasNameType.of_json in
@@ -3385,6 +3433,7 @@ module UntagResourceRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~tagKeys ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
@@ -3415,6 +3464,7 @@ module TagResourceRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~tags ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
@@ -3548,6 +3598,7 @@ module SignResponse =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?signingAlgorithm ?signature ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signingAlgorithm =
         field_map json "SigningAlgorithm" SigningAlgorithmSpec.of_json in
@@ -3610,6 +3661,7 @@ module SignRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~signingAlgorithm ?grantTokens ?messageType ~message ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signingAlgorithm =
         field_map_exn json "SigningAlgorithm" SigningAlgorithmSpec.of_json in
@@ -3726,6 +3778,7 @@ module ScheduleKeyDeletionResponse =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?pendingWindowInDays ?keyState ?deletionDate ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pendingWindowInDays =
         field_map json "PendingWindowInDays" PendingWindowInDaysType.of_json in
@@ -3763,6 +3816,7 @@ module ScheduleKeyDeletionRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?pendingWindowInDays ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pendingWindowInDays =
         field_map json "PendingWindowInDays" PendingWindowInDaysType.of_json in
@@ -3795,6 +3849,7 @@ module RevokeGrantRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~grantId ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantId = field_map_exn json "GrantId" GrantIdType.of_json in
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
@@ -3832,6 +3887,7 @@ module RetireGrantRequest =
         (Option.map ~f:GrantTokenType.of_xml)
           (Xml.child xml_arg0 "GrantToken") in
       make ?grantId ?keyId ?grantToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantId = field_map json "GrantId" GrantIdType.of_json in
       let keyId = field_map json "KeyId" KeyIdType.of_json in
@@ -3986,6 +4042,7 @@ module ReplicateKeyResponse =
         (Option.map ~f:KeyMetadata.of_xml)
           (Xml.child xml_arg0 "ReplicaKeyMetadata") in
       make ?replicaTags ?replicaPolicy ?replicaKeyMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replicaTags = field_map json "ReplicaTags" TagList.of_json in
       let replicaPolicy = field_map json "ReplicaPolicy" PolicyType.of_json in
@@ -4062,6 +4119,7 @@ module ReplicateKeyRequest =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?tags ?description ?bypassPolicyLockoutSafetyCheck ?policy
         ~replicaRegion ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map json "Description" DescriptionType.of_json in
@@ -4248,6 +4306,7 @@ module ReEncryptResponse =
           (Xml.child xml_arg0 "CiphertextBlob") in
       make ?destinationEncryptionAlgorithm ?sourceEncryptionAlgorithm ?keyId
         ?sourceKeyId ?ciphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationEncryptionAlgorithm =
         field_map json "DestinationEncryptionAlgorithm"
@@ -4360,6 +4419,7 @@ module ReEncryptRequest =
         ?sourceEncryptionAlgorithm ?destinationEncryptionContext
         ~destinationKeyId ?sourceKeyId ?sourceEncryptionContext
         ~ciphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let destinationEncryptionAlgorithm =
@@ -4430,6 +4490,7 @@ module PutKeyPolicyRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?bypassPolicyLockoutSafetyCheck ~policy ~policyName ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bypassPolicyLockoutSafetyCheck =
         field_map json "BypassPolicyLockoutSafetyCheck" BooleanType.of_json in
@@ -4474,6 +4535,7 @@ module ListRetirableGrantsRequest =
       let limit =
         (Option.map ~f:LimitType.of_xml) (Xml.child xml_arg0 "Limit") in
       make ~retiringPrincipal ?marker ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retiringPrincipal =
         field_map_exn json "RetiringPrincipal" PrincipalIdType.of_json in
@@ -4566,6 +4628,7 @@ module ListResourceTagsResponse =
         (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "NextMarker") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?truncated ?nextMarker ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "Truncated" BooleanType.of_json in
       let nextMarker = field_map json "NextMarker" MarkerType.of_json in
@@ -4604,6 +4667,7 @@ module ListResourceTagsRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?marker ?limit ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -4685,6 +4749,7 @@ module ListKeysResponse =
         (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "NextMarker") in
       let keys = (Option.map ~f:KeyList.of_xml) (Xml.child xml_arg0 "Keys") in
       make ?truncated ?nextMarker ?keys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "Truncated" BooleanType.of_json in
       let nextMarker = field_map json "NextMarker" MarkerType.of_json in
@@ -4715,6 +4780,7 @@ module ListKeysRequest =
       let limit =
         (Option.map ~f:LimitType.of_xml) (Xml.child xml_arg0 "Limit") in
       make ?marker ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -4818,6 +4884,7 @@ module ListKeyPoliciesResponse =
         (Option.map ~f:PolicyNameList.of_xml)
           (Xml.child xml_arg0 "PolicyNames") in
       make ?truncated ?nextMarker ?policyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "Truncated" BooleanType.of_json in
       let nextMarker = field_map json "NextMarker" MarkerType.of_json in
@@ -4856,6 +4923,7 @@ module ListKeyPoliciesRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?marker ?limit ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -4974,6 +5042,7 @@ module ListGrantsResponse =
       let grants =
         (Option.map ~f:GrantList.of_xml) (Xml.child xml_arg0 "Grants") in
       make ?truncated ?nextMarker ?grants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "Truncated" BooleanType.of_json in
       let nextMarker = field_map json "NextMarker" MarkerType.of_json in
@@ -5030,6 +5099,7 @@ module ListGrantsRequest =
       let limit =
         (Option.map ~f:LimitType.of_xml) (Xml.child xml_arg0 "Limit") in
       make ?granteePrincipal ?grantId ~keyId ?marker ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let granteePrincipal =
         field_map json "GranteePrincipal" PrincipalIdType.of_json in
@@ -5133,6 +5203,7 @@ module ListAliasesResponse =
       let aliases =
         (Option.map ~f:AliasList.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?truncated ?nextMarker ?aliases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "Truncated" BooleanType.of_json in
       let nextMarker = field_map json "NextMarker" MarkerType.of_json in
@@ -5170,6 +5241,7 @@ module ListAliasesRequest =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?marker ?limit ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -5192,6 +5264,7 @@ module InvalidAliasNameException =
         (Option.map ~f:ErrorMessageType.of_xml)
           (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessageType.of_json in
       make ?message ()
@@ -5324,6 +5397,7 @@ module ImportKeyMaterialResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5387,6 +5461,7 @@ module ImportKeyMaterialRequest =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?expirationModel ?validTo ~encryptedKeyMaterial ~importToken
         ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expirationModel =
         field_map json "ExpirationModel" ExpirationModelType.of_json in
@@ -5590,6 +5665,7 @@ module GetPublicKeyResponse =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?signingAlgorithms ?encryptionAlgorithms ?keyUsage ?keySpec
         ?customerMasterKeySpec ?publicKey ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signingAlgorithms =
         field_map json "SigningAlgorithms" SigningAlgorithmSpecList.of_json in
@@ -5632,6 +5708,7 @@ module GetPublicKeyRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?grantTokens ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
@@ -5756,6 +5833,7 @@ module GetParametersForImportResponse =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?parametersValidTo ?publicKey ?importToken ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parametersValidTo =
         field_map json "ParametersValidTo" DateType.of_json in
@@ -5802,6 +5880,7 @@ module GetParametersForImportRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~wrappingKeySpec ~wrappingAlgorithm ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wrappingKeySpec =
         field_map_exn json "WrappingKeySpec" WrappingKeySpec.of_json in
@@ -5905,6 +5984,7 @@ module GetKeyRotationStatusResponse =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "KeyRotationEnabled") in
       make ?keyRotationEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyRotationEnabled =
         field_map json "KeyRotationEnabled" BooleanType.of_json in
@@ -5928,6 +6008,7 @@ module GetKeyRotationStatusRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
       make ~keyId ()
@@ -6013,6 +6094,7 @@ module GetKeyPolicyResponse =
       let policy =
         (Option.map ~f:PolicyType.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" PolicyType.of_json in
       make ?policy ()
@@ -6043,6 +6125,7 @@ module GetKeyPolicyRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~policyName ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
@@ -6129,6 +6212,7 @@ module GenerateRandomResponse =
       let plaintext =
         (Option.map ~f:PlaintextType.of_xml) (Xml.child xml_arg0 "Plaintext") in
       make ?plaintext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let plaintext = field_map json "Plaintext" PlaintextType.of_json in
       make ?plaintext ()
@@ -6161,6 +6245,7 @@ module GenerateRandomRequest =
         (Option.map ~f:NumberOfBytesType.of_xml)
           (Xml.child xml_arg0 "NumberOfBytes") in
       make ?customKeyStoreId ?numberOfBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customKeyStoreId =
         field_map json "CustomKeyStoreId" CustomKeyStoreIdType.of_json in
@@ -6287,6 +6372,7 @@ module GenerateDataKeyWithoutPlaintextResponse =
         (Option.map ~f:CiphertextType.of_xml)
           (Xml.child xml_arg0 "CiphertextBlob") in
       make ?keyId ?ciphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map json "KeyId" KeyIdType.of_json in
       let ciphertextBlob =
@@ -6354,6 +6440,7 @@ module GenerateDataKeyWithoutPlaintextRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?grantTokens ?numberOfBytes ?keySpec ?encryptionContext ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let numberOfBytes =
@@ -6490,6 +6577,7 @@ module GenerateDataKeyResponse =
         (Option.map ~f:CiphertextType.of_xml)
           (Xml.child xml_arg0 "CiphertextBlob") in
       make ?keyId ?plaintext ?ciphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map json "KeyId" KeyIdType.of_json in
       let plaintext = field_map json "Plaintext" PlaintextType.of_json in
@@ -6558,6 +6646,7 @@ module GenerateDataKeyRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?grantTokens ?keySpec ?numberOfBytes ?encryptionContext ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let keySpec = field_map json "KeySpec" DataKeySpec.of_json in
@@ -6714,6 +6803,7 @@ module GenerateDataKeyPairWithoutPlaintextResponse =
         (Option.map ~f:CiphertextType.of_xml)
           (Xml.child xml_arg0 "PrivateKeyCiphertextBlob") in
       make ?keyPairSpec ?keyId ?publicKey ?privateKeyCiphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPairSpec = field_map json "KeyPairSpec" DataKeyPairSpec.of_json in
       let keyId = field_map json "KeyId" KeyIdType.of_json in
@@ -6768,6 +6858,7 @@ module GenerateDataKeyPairWithoutPlaintextRequest =
         (Option.map ~f:EncryptionContextType.of_xml)
           (Xml.child xml_arg0 "EncryptionContext") in
       make ?grantTokens ~keyPairSpec ~keyId ?encryptionContext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let keyPairSpec =
@@ -6939,6 +7030,7 @@ module GenerateDataKeyPairResponse =
           (Xml.child xml_arg0 "PrivateKeyCiphertextBlob") in
       make ?keyPairSpec ?keyId ?publicKey ?privateKeyPlaintext
         ?privateKeyCiphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPairSpec = field_map json "KeyPairSpec" DataKeyPairSpec.of_json in
       let keyId = field_map json "KeyId" KeyIdType.of_json in
@@ -6996,6 +7088,7 @@ module GenerateDataKeyPairRequest =
         (Option.map ~f:EncryptionContextType.of_xml)
           (Xml.child xml_arg0 "EncryptionContext") in
       make ?grantTokens ~keyPairSpec ~keyId ?encryptionContext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let keyPairSpec =
@@ -7135,6 +7228,7 @@ module EncryptResponse =
         (Option.map ~f:CiphertextType.of_xml)
           (Xml.child xml_arg0 "CiphertextBlob") in
       make ?encryptionAlgorithm ?keyId ?ciphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionAlgorithm =
         field_map json "EncryptionAlgorithm" EncryptionAlgorithmSpec.of_json in
@@ -7205,6 +7299,7 @@ module EncryptRequest =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?encryptionAlgorithm ?grantTokens ?encryptionContext ~plaintext
         ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionAlgorithm =
         field_map json "EncryptionAlgorithm" EncryptionAlgorithmSpec.of_json in
@@ -7234,6 +7329,7 @@ module EnableKeyRotationRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
       make ~keyId ()
@@ -7256,6 +7352,7 @@ module EnableKeyRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
       make ~keyId ()
@@ -7321,6 +7418,7 @@ module DisconnectCustomKeyStoreResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7344,6 +7442,7 @@ module DisconnectCustomKeyStoreRequest =
         CustomKeyStoreIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomKeyStoreId") in
       make ~customKeyStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customKeyStoreId =
         field_map_exn json "CustomKeyStoreId" CustomKeyStoreIdType.of_json in
@@ -7367,6 +7466,7 @@ module DisableKeyRotationRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
       make ~keyId ()
@@ -7389,6 +7489,7 @@ module DisableKeyRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
       make ~keyId ()
@@ -7465,6 +7566,7 @@ module DescribeKeyResponse =
       let keyMetadata =
         (Option.map ~f:KeyMetadata.of_xml) (Xml.child xml_arg0 "KeyMetadata") in
       make ?keyMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyMetadata = field_map json "KeyMetadata" KeyMetadata.of_json in
       make ?keyMetadata ()
@@ -7496,6 +7598,7 @@ module DescribeKeyRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?grantTokens ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
@@ -7583,6 +7686,7 @@ module DescribeCustomKeyStoresResponse =
         (Option.map ~f:CustomKeyStoresList.of_xml)
           (Xml.child xml_arg0 "CustomKeyStores") in
       make ?truncated ?nextMarker ?customKeyStores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let truncated = field_map json "Truncated" BooleanType.of_json in
       let nextMarker = field_map json "NextMarker" MarkerType.of_json in
@@ -7634,6 +7738,7 @@ module DescribeCustomKeyStoresRequest =
         (Option.map ~f:CustomKeyStoreIdType.of_xml)
           (Xml.child xml_arg0 "CustomKeyStoreId") in
       make ?marker ?limit ?customKeyStoreName ?customKeyStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" MarkerType.of_json in
       let limit = field_map json "Limit" LimitType.of_json in
@@ -7661,6 +7766,7 @@ module DeleteImportedKeyMaterialRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
       make ~keyId ()
@@ -7736,6 +7842,7 @@ module DeleteCustomKeyStoreResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7759,6 +7866,7 @@ module DeleteCustomKeyStoreRequest =
         CustomKeyStoreIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomKeyStoreId") in
       make ~customKeyStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customKeyStoreId =
         field_map_exn json "CustomKeyStoreId" CustomKeyStoreIdType.of_json in
@@ -7784,6 +7892,7 @@ module DeleteAliasRequest =
         AliasNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AliasName") in
       make ~aliasName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliasName = field_map_exn json "AliasName" AliasNameType.of_json in
       make ~aliasName ()
@@ -7935,6 +8044,7 @@ module DecryptResponse =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?encryptionAlgorithm ?plaintext ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionAlgorithm =
         field_map json "EncryptionAlgorithm" EncryptionAlgorithmSpec.of_json in
@@ -8007,6 +8117,7 @@ module DecryptRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CiphertextBlob") in
       make ?encryptionAlgorithm ?keyId ?grantTokens ?encryptionContext
         ~ciphertextBlob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionAlgorithm =
         field_map json "EncryptionAlgorithm" EncryptionAlgorithmSpec.of_json in
@@ -8159,6 +8270,7 @@ module CreateKeyResponse =
       let keyMetadata =
         (Option.map ~f:KeyMetadata.of_xml) (Xml.child xml_arg0 "KeyMetadata") in
       make ?keyMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyMetadata = field_map json "KeyMetadata" KeyMetadata.of_json in
       make ?keyMetadata ()
@@ -8270,6 +8382,7 @@ module CreateKeyRequest =
       make ?multiRegion ?tags ?bypassPolicyLockoutSafetyCheck
         ?customKeyStoreId ?origin ?keySpec ?customerMasterKeySpec ?keyUsage
         ?description ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multiRegion =
         field_map json "MultiRegion" NullableBooleanType.of_json in
@@ -8406,6 +8519,7 @@ module CreateGrantResponse =
         (Option.map ~f:GrantTokenType.of_xml)
           (Xml.child xml_arg0 "GrantToken") in
       make ?grantId ?grantToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantId = field_map json "GrantId" GrantIdType.of_json in
       let grantToken = field_map json "GrantToken" GrantTokenType.of_json in
@@ -8492,6 +8606,7 @@ module CreateGrantRequest =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ?name ?grantTokens ?constraints ~operations ?retiringPrincipal
         ~granteePrincipal ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" GrantNameType.of_json in
       let grantTokens = field_map json "GrantTokens" GrantTokenList.of_json in
@@ -8624,6 +8739,7 @@ module CreateCustomKeyStoreResponse =
         (Option.map ~f:CustomKeyStoreIdType.of_xml)
           (Xml.child xml_arg0 "CustomKeyStoreId") in
       make ?customKeyStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customKeyStoreId =
         field_map json "CustomKeyStoreId" CustomKeyStoreIdType.of_json in
@@ -8686,6 +8802,7 @@ module CreateCustomKeyStoreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CustomKeyStoreName") in
       make ~keyStorePassword ~trustAnchorCertificate ~cloudHsmClusterId
         ~customKeyStoreName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyStorePassword =
         field_map_exn json "KeyStorePassword" KeyStorePasswordType.of_json in
@@ -8728,6 +8845,7 @@ module CreateAliasRequest =
         AliasNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AliasName") in
       make ~targetKeyId ~aliasName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetKeyId = field_map_exn json "TargetKeyId" KeyIdType.of_json in
       let aliasName = field_map_exn json "AliasName" AliasNameType.of_json in
@@ -8820,6 +8938,7 @@ module ConnectCustomKeyStoreResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8843,6 +8962,7 @@ module ConnectCustomKeyStoreRequest =
         CustomKeyStoreIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomKeyStoreId") in
       make ~customKeyStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customKeyStoreId =
         field_map_exn json "CustomKeyStoreId" CustomKeyStoreIdType.of_json in
@@ -8930,6 +9050,7 @@ module CancelKeyDeletionResponse =
       let keyId =
         (Option.map ~f:KeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
       make ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map json "KeyId" KeyIdType.of_json in make ?keyId ()
     let to_json v = composed_to_json to_value v
@@ -8951,6 +9072,7 @@ module CancelKeyDeletionRequest =
       let keyId =
         KeyIdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       make ~keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyIdType.of_json in
       make ~keyId ()

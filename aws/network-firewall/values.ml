@@ -169,6 +169,7 @@ module Dimension =
         DimensionValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" DimensionValue.of_json in
       make ~value ()
@@ -194,6 +195,7 @@ module Address =
         AddressDefinition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AddressDefinition") in
       make ~addressDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addressDefinition =
         field_map_exn json "AddressDefinition" AddressDefinition.of_json in
@@ -226,6 +228,7 @@ module PortRange =
         PortRangeBound.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FromPort") in
       make ~toPort ~fromPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let toPort = field_map_exn json "ToPort" PortRangeBound.of_json in
       let fromPort = field_map_exn json "FromPort" PortRangeBound.of_json in
@@ -273,6 +276,7 @@ module TCPFlagField =
       let flags =
         Flags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Flags") in
       make ?masks ~flags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let masks = field_map json "Masks" Flags.of_json in
       let flags = field_map_exn json "Flags" Flags.of_json in
@@ -494,6 +498,7 @@ module PublishMetricAction =
         Dimensions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Dimensions") in
       make ~dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions = field_map_exn json "Dimensions" Dimensions.of_json in
       make ~dimensions ()
@@ -564,6 +569,7 @@ module MatchAttributes =
         (Option.map ~f:Addresses.of_xml) (Xml.child xml_arg0 "Sources") in
       make ?tCPFlags ?protocols ?destinationPorts ?sourcePorts ?destinations
         ?sources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tCPFlags = field_map json "TCPFlags" TCPFlags.of_json in
       let protocols = field_map json "Protocols" ProtocolNumbers.of_json in
@@ -797,6 +803,7 @@ module RuleOption =
       let keyword =
         Keyword.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Keyword") in
       make ?settings ~keyword ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let settings = field_map json "Settings" Settings.of_json in
       let keyword = field_map_exn json "Keyword" Keyword.of_json in
@@ -822,6 +829,7 @@ module ActionDefinition =
         (Option.map ~f:PublishMetricAction.of_xml)
           (Xml.child xml_arg0 "PublishMetricAction") in
       make ?publishMetricAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publishMetricAction =
         field_map json "PublishMetricAction" PublishMetricAction.of_json in
@@ -894,6 +902,7 @@ module RuleDefinition =
         MatchAttributes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MatchAttributes") in
       make ~actions ~matchAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actions = field_map_exn json "Actions" StatelessActions.of_json in
       let matchAttributes =
@@ -1066,6 +1075,7 @@ module Header =
           (Xml.child_exn ~context:context_ xml_arg0 "Protocol") in
       make ~destinationPort ~destination ~direction ~sourcePort ~source
         ~protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationPort = field_map_exn json "DestinationPort" Port.of_json in
       let destination = field_map_exn json "Destination" Destination.of_json in
@@ -1158,6 +1168,7 @@ module CustomAction =
         ActionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActionName") in
       make ~actionDefinition ~actionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let actionDefinition =
         field_map_exn json "ActionDefinition" ActionDefinition.of_json in
@@ -1192,6 +1203,7 @@ module StatelessRule =
         RuleDefinition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleDefinition") in
       make ~priority ~ruleDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let priority = field_map_exn json "Priority" Priority.of_json in
       let ruleDefinition =
@@ -1348,6 +1360,7 @@ module PerObjectStatus =
         (Option.map ~f:PerObjectSyncStatus.of_xml)
           (Xml.child xml_arg0 "SyncStatus") in
       make ?updateToken ?syncStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateToken = field_map json "UpdateToken" UpdateToken.of_json in
       let syncStatus =
@@ -1435,6 +1448,7 @@ module IPSet =
         VariableDefinitionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Definition") in
       make ~definition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let definition =
         field_map_exn json "Definition" VariableDefinitionList.of_json in
@@ -1480,6 +1494,7 @@ module PortSet =
         (Option.map ~f:VariableDefinitionList.of_xml)
           (Xml.child xml_arg0 "Definition") in
       make ?definition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let definition =
         field_map json "Definition" VariableDefinitionList.of_json in
@@ -1596,6 +1611,7 @@ module StatefulRule =
         StatefulAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~ruleOptions ~header ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleOptions = field_map_exn json "RuleOptions" RuleOptions.of_json in
       let header = field_map_exn json "Header" Header.of_json in
@@ -1764,6 +1780,7 @@ module StatefulRuleGroupOverride =
       let action =
         (Option.map ~f:OverrideAction.of_xml) (Xml.child xml_arg0 "Action") in
       make ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let action = field_map json "Action" OverrideAction.of_json in
       make ?action ()
@@ -1800,6 +1817,7 @@ module Attachment =
       let subnetId =
         (Option.map ~f:AzSubnet.of_xml) (Xml.child xml_arg0 "SubnetId") in
       make ?status ?endpointId ?subnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" AttachmentStatus.of_json in
       let endpointId = field_map json "EndpointId" EndpointId.of_json in
@@ -1862,6 +1880,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1965,6 +1984,7 @@ module RulesSourceList =
         RuleTargets.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Targets") in
       make ~generatedRulesType ~targetTypes ~targets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let generatedRulesType =
         field_map_exn json "GeneratedRulesType" GeneratedRulesType.of_json in
@@ -2044,6 +2064,7 @@ module StatelessRulesAndCustomActions =
         StatelessRules.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StatelessRules") in
       make ?customActions ~statelessRules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customActions =
         field_map json "CustomActions" CustomActions.of_json in
@@ -2114,6 +2135,7 @@ module LogDestinationConfig =
       let logType =
         LogType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LogType") in
       make ~logDestination ~logDestinationType ~logType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logDestination =
         field_map_exn json "LogDestination" LogDestinationMap.of_json in
@@ -2158,6 +2180,7 @@ module StatefulRuleGroupReference =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?override ?priority ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let override =
         field_map json "Override" StatefulRuleGroupOverride.of_json in
@@ -2192,6 +2215,7 @@ module StatelessRuleGroupReference =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~priority ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let priority = field_map_exn json "Priority" Priority.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -2216,6 +2240,7 @@ module SubnetMapping =
         CollectionMember_String.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetId") in
       make ~subnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetId =
         field_map_exn json "SubnetId" CollectionMember_String.of_json in
@@ -2258,6 +2283,7 @@ module SyncState =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "Attachment") in
       make ?config ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let config = field_map json "Config" SyncStateConfig.of_json in
       let attachment = field_map json "Attachment" Attachment.of_json in
@@ -2444,6 +2470,7 @@ module RuleVariables =
       let iPSets =
         (Option.map ~f:IPSets.of_xml) (Xml.child xml_arg0 "IPSets") in
       make ?portSets ?iPSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portSets = field_map json "PortSets" PortSets.of_json in
       let iPSets = field_map json "IPSets" IPSets.of_json in
@@ -2503,6 +2530,7 @@ module RulesSource =
         (Option.map ~f:RulesString.of_xml) (Xml.child xml_arg0 "RulesString") in
       make ?statelessRulesAndCustomActions ?statefulRules ?rulesSourceList
         ?rulesString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statelessRulesAndCustomActions =
         field_map json "StatelessRulesAndCustomActions"
@@ -2533,6 +2561,7 @@ module StatefulRuleOptions =
       let ruleOrder =
         (Option.map ~f:RuleOrder.of_xml) (Xml.child xml_arg0 "RuleOrder") in
       make ?ruleOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleOrder = field_map json "RuleOrder" RuleOrder.of_json in
       make ?ruleOrder ()
@@ -2607,6 +2636,7 @@ module StatefulEngineOptions =
       let ruleOrder =
         (Option.map ~f:RuleOrder.of_xml) (Xml.child xml_arg0 "RuleOrder") in
       make ?ruleOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleOrder = field_map json "RuleOrder" RuleOrder.of_json in
       make ?ruleOrder ()
@@ -2685,6 +2715,7 @@ module RuleGroupMetadata =
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ResourceArn.of_json in
       let name = field_map json "Name" ResourceName.of_json in
@@ -2716,6 +2747,7 @@ module FirewallMetadata =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "FirewallName") in
       make ?firewallArn ?firewallName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallArn = field_map json "FirewallArn" ResourceArn.of_json in
       let firewallName = field_map json "FirewallName" ResourceName.of_json in
@@ -2763,6 +2795,7 @@ module FirewallPolicyMetadata =
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" ResourceArn.of_json in
       let name = field_map json "Name" ResourceName.of_json in
@@ -2906,6 +2939,7 @@ module InternalServerError =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2925,6 +2959,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2944,6 +2979,7 @@ module InvalidTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2963,6 +2999,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -2982,6 +3019,7 @@ module ResourceOwnerCheckException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3001,6 +3039,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3107,6 +3146,7 @@ module RuleGroupResponse =
       make ?numberOfAssociations ?consumedCapacity ?tags ?ruleGroupStatus
         ?capacity ?type_ ?description ~ruleGroupId ~ruleGroupName
         ~ruleGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfAssociations =
         field_map json "NumberOfAssociations" NumberOfAssociations.of_json in
@@ -3166,6 +3206,7 @@ module RuleGroup =
         (Option.map ~f:RuleVariables.of_xml)
           (Xml.child xml_arg0 "RuleVariables") in
       make ?statefulRuleOptions ~rulesSource ?ruleVariables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statefulRuleOptions =
         field_map json "StatefulRuleOptions" StatefulRuleOptions.of_json in
@@ -3189,6 +3230,7 @@ module LogDestinationPermissionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3213,6 +3255,7 @@ module LoggingConfiguration =
         LogDestinationConfigs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LogDestinationConfigs") in
       make ~logDestinationConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logDestinationConfigs =
         field_map_exn json "LogDestinationConfigs"
@@ -3319,6 +3362,7 @@ module FirewallPolicyResponse =
         ?consumedStatelessRuleCapacity ?tags ?firewallPolicyStatus
         ?description ~firewallPolicyId ~firewallPolicyArn ~firewallPolicyName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfAssociations =
         field_map json "NumberOfAssociations" NumberOfAssociations.of_json in
@@ -3433,6 +3477,7 @@ module FirewallPolicy =
         ?statefulRuleGroupReferences ?statelessCustomActions
         ~statelessFragmentDefaultActions ~statelessDefaultActions
         ?statelessRuleGroupReferences ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statefulEngineOptions =
         field_map json "StatefulEngineOptions" StatefulEngineOptions.of_json in
@@ -3499,6 +3544,7 @@ module InvalidResourcePolicyException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3718,6 +3764,7 @@ module InvalidOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3857,6 +3904,7 @@ module Firewall =
       make ?tags ~firewallId ?description ?firewallPolicyChangeProtection
         ?subnetChangeProtection ?deleteProtection ~subnetMappings ~vpcId
         ~firewallPolicyArn ?firewallArn ?firewallName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let firewallId = field_map_exn json "FirewallId" ResourceId.of_json in
@@ -3917,6 +3965,7 @@ module FirewallStatus =
         FirewallStatusValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?syncStates ~configurationSyncStateSummary ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let syncStates = field_map json "SyncStates" SyncStates.of_json in
       let configurationSyncStateSummary =
@@ -3940,6 +3989,7 @@ module UnsupportedOperationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3959,6 +4009,7 @@ module InsufficientCapacityException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -3978,6 +4029,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -4105,6 +4157,7 @@ module UpdateSubnetChangeProtectionResponse =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ?subnetChangeProtection ?firewallName ?firewallArn ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetChangeProtection =
         field_map json "SubnetChangeProtection" Boolean.of_json in
@@ -4163,6 +4216,7 @@ module UpdateSubnetChangeProtectionRequest =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ~subnetChangeProtection ?firewallName ?firewallArn ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetChangeProtection =
         field_map_exn json "SubnetChangeProtection" Boolean.of_json in
@@ -4262,6 +4316,7 @@ module UpdateRuleGroupResponse =
         UpdateToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ~ruleGroupResponse ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroupResponse =
         field_map_exn json "RuleGroupResponse" RuleGroupResponse.of_json in
@@ -4351,6 +4406,7 @@ module UpdateRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ?dryRun ?description ?type_ ?rules ?ruleGroup ?ruleGroupName
         ?ruleGroupArn ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -4472,6 +4528,7 @@ module UpdateLoggingConfigurationResponse =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?loggingConfiguration ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingConfiguration =
         field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
@@ -4516,6 +4573,7 @@ module UpdateLoggingConfigurationRequest =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?loggingConfiguration ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingConfiguration =
         field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
@@ -4616,6 +4674,7 @@ module UpdateFirewallPolicyResponse =
         UpdateToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ~firewallPolicyResponse ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyResponse =
         field_map_exn json "FirewallPolicyResponse"
@@ -4690,6 +4749,7 @@ module UpdateFirewallPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ?dryRun ?description ~firewallPolicy ?firewallPolicyName
         ?firewallPolicyArn ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -4826,6 +4886,7 @@ module UpdateFirewallPolicyChangeProtectionResponse =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ?firewallPolicyChangeProtection ?firewallName ?firewallArn
         ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyChangeProtection =
         field_map json "FirewallPolicyChangeProtection" Boolean.of_json in
@@ -4888,6 +4949,7 @@ module UpdateFirewallPolicyChangeProtectionRequest =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ~firewallPolicyChangeProtection ?firewallName ?firewallArn
         ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyChangeProtection =
         field_map_exn json "FirewallPolicyChangeProtection" Boolean.of_json in
@@ -5000,6 +5062,7 @@ module UpdateFirewallDescriptionResponse =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?updateToken ?description ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateToken = field_map json "UpdateToken" UpdateToken.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -5049,6 +5112,7 @@ module UpdateFirewallDescriptionRequest =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ?description ?firewallName ?firewallArn ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let firewallName = field_map json "FirewallName" ResourceName.of_json in
@@ -5174,6 +5238,7 @@ module UpdateFirewallDeleteProtectionResponse =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?updateToken ?deleteProtection ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateToken = field_map json "UpdateToken" UpdateToken.of_json in
       let deleteProtection =
@@ -5227,6 +5292,7 @@ module UpdateFirewallDeleteProtectionRequest =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ~deleteProtection ?firewallName ?firewallArn ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteProtection =
         field_map_exn json "DeleteProtection" Boolean.of_json in
@@ -5299,6 +5365,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5326,6 +5393,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -5395,6 +5463,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5420,6 +5489,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -5500,6 +5570,7 @@ module PutResourcePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5529,6 +5600,7 @@ module PutResourcePolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~policy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" PolicyString.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
@@ -5611,6 +5683,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?tags ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -5652,6 +5725,7 @@ module ListTagsForResourceRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ~resourceArn ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       let maxResults =
@@ -5730,6 +5804,7 @@ module ListRuleGroupsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?ruleGroups ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroups = field_map json "RuleGroups" RuleGroups.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -5771,6 +5846,7 @@ module ListRuleGroupsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?scope ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scope = field_map json "Scope" ResourceManagedStatus.of_json in
       let maxResults =
@@ -5849,6 +5925,7 @@ module ListFirewallsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?firewalls ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewalls = field_map json "Firewalls" Firewalls.of_json in
       let nextToken = field_map json "NextToken" PaginationToken.of_json in
@@ -5889,6 +5966,7 @@ module ListFirewallsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?vpcIds ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" PaginationMaxResults.of_json in
@@ -5969,6 +6047,7 @@ module ListFirewallPoliciesResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?firewallPolicies ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicies =
         field_map json "FirewallPolicies" FirewallPolicies.of_json in
@@ -6003,6 +6082,7 @@ module ListFirewallPoliciesRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" PaginationMaxResults.of_json in
@@ -6125,6 +6205,7 @@ module DisassociateSubnetsResponse =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?updateToken ?subnetMappings ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateToken = field_map json "UpdateToken" UpdateToken.of_json in
       let subnetMappings =
@@ -6177,6 +6258,7 @@ module DisassociateSubnetsRequest =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ~subnetIds ?firewallName ?firewallArn ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetIds = field_map_exn json "SubnetIds" AzSubnets.of_json in
       let firewallName = field_map json "FirewallName" ResourceName.of_json in
@@ -6275,6 +6357,7 @@ module DescribeRuleGroupResponse =
         UpdateToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ~ruleGroupResponse ?ruleGroup ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroupResponse =
         field_map_exn json "RuleGroupResponse" RuleGroupResponse.of_json in
@@ -6316,6 +6399,7 @@ module DescribeRuleGroupRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "RuleGroupName") in
       make ?type_ ?ruleGroupArn ?ruleGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" RuleGroupType.of_json in
       let ruleGroupArn = field_map json "RuleGroupArn" ResourceArn.of_json in
@@ -6441,6 +6525,7 @@ module DescribeRuleGroupMetadataResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupArn") in
       make ?statefulRuleOptions ?capacity ?type_ ?description ~ruleGroupName
         ~ruleGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statefulRuleOptions =
         field_map json "StatefulRuleOptions" StatefulRuleOptions.of_json in
@@ -6489,6 +6574,7 @@ module DescribeRuleGroupMetadataRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "RuleGroupName") in
       make ?type_ ?ruleGroupArn ?ruleGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" RuleGroupType.of_json in
       let ruleGroupArn = field_map json "RuleGroupArn" ResourceArn.of_json in
@@ -6567,6 +6653,7 @@ module DescribeResourcePolicyResponse =
       let policy =
         (Option.map ~f:PolicyString.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" PolicyString.of_json in
       make ?policy ()
@@ -6591,6 +6678,7 @@ module DescribeResourcePolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -6674,6 +6762,7 @@ module DescribeLoggingConfigurationResponse =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?loggingConfiguration ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loggingConfiguration =
         field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
@@ -6707,6 +6796,7 @@ module DescribeLoggingConfigurationRequest =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallName = field_map json "FirewallName" ResourceName.of_json in
       let firewallArn = field_map json "FirewallArn" ResourceArn.of_json in
@@ -6801,6 +6891,7 @@ module DescribeFirewallResponse =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ?firewallStatus ?firewall ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallStatus =
         field_map json "FirewallStatus" FirewallStatus.of_json in
@@ -6834,6 +6925,7 @@ module DescribeFirewallRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "FirewallName") in
       make ?firewallArn ?firewallName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallArn = field_map json "FirewallArn" ResourceArn.of_json in
       let firewallName = field_map json "FirewallName" ResourceName.of_json in
@@ -6930,6 +7022,7 @@ module DescribeFirewallPolicyResponse =
         UpdateToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ?firewallPolicy ~firewallPolicyResponse ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicy =
         field_map json "FirewallPolicy" FirewallPolicy.of_json in
@@ -6969,6 +7062,7 @@ module DescribeFirewallPolicyRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "FirewallPolicyName") in
       make ?firewallPolicyArn ?firewallPolicyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyArn =
         field_map json "FirewallPolicyArn" ResourceArn.of_json in
@@ -7071,6 +7165,7 @@ module DeleteRuleGroupResponse =
         RuleGroupResponse.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupResponse") in
       make ~ruleGroupResponse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroupResponse =
         field_map_exn json "RuleGroupResponse" RuleGroupResponse.of_json in
@@ -7110,6 +7205,7 @@ module DeleteRuleGroupRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "RuleGroupName") in
       make ?type_ ?ruleGroupArn ?ruleGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map json "Type" RuleGroupType.of_json in
       let ruleGroupArn = field_map json "RuleGroupArn" ResourceArn.of_json in
@@ -7190,6 +7286,7 @@ module DeleteResourcePolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7212,6 +7309,7 @@ module DeleteResourcePolicyRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -7313,6 +7411,7 @@ module DeleteFirewallResponse =
       let firewall =
         (Option.map ~f:Firewall.of_xml) (Xml.child xml_arg0 "Firewall") in
       make ?firewallStatus ?firewall ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallStatus =
         field_map json "FirewallStatus" FirewallStatus.of_json in
@@ -7346,6 +7445,7 @@ module DeleteFirewallRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "FirewallName") in
       make ?firewallArn ?firewallName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallArn = field_map json "FirewallArn" ResourceArn.of_json in
       let firewallName = field_map json "FirewallName" ResourceName.of_json in
@@ -7446,6 +7546,7 @@ module DeleteFirewallPolicyResponse =
         FirewallPolicyResponse.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallPolicyResponse") in
       make ~firewallPolicyResponse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyResponse =
         field_map_exn json "FirewallPolicyResponse"
@@ -7481,6 +7582,7 @@ module DeleteFirewallPolicyRequest =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "FirewallPolicyName") in
       make ?firewallPolicyArn ?firewallPolicyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyArn =
         field_map json "FirewallPolicyArn" ResourceArn.of_json in
@@ -7581,6 +7683,7 @@ module CreateRuleGroupResponse =
         UpdateToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ~ruleGroupResponse ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleGroupResponse =
         field_map_exn json "RuleGroupResponse" RuleGroupResponse.of_json in
@@ -7667,6 +7770,7 @@ module CreateRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleGroupName") in
       make ?dryRun ?tags ~capacity ?description ~type_ ?rules ?ruleGroup
         ~ruleGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -7781,6 +7885,7 @@ module CreateFirewallResponse =
       let firewall =
         (Option.map ~f:Firewall.of_xml) (Xml.child xml_arg0 "Firewall") in
       make ?firewallStatus ?firewall ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallStatus =
         field_map json "FirewallStatus" FirewallStatus.of_json in
@@ -7883,6 +7988,7 @@ module CreateFirewallRequest =
       make ?tags ?description ?firewallPolicyChangeProtection
         ?subnetChangeProtection ?deleteProtection ~subnetMappings ~vpcId
         ~firewallPolicyArn ~firewallName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -7998,6 +8104,7 @@ module CreateFirewallPolicyResponse =
         UpdateToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UpdateToken") in
       make ~firewallPolicyResponse ~updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyResponse =
         field_map_exn json "FirewallPolicyResponse"
@@ -8060,6 +8167,7 @@ module CreateFirewallPolicyRequest =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallPolicyName") in
       make ?dryRun ?tags ?description ~firewallPolicy ~firewallPolicyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -8197,6 +8305,7 @@ module AssociateSubnetsResponse =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?updateToken ?subnetMappings ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateToken = field_map json "UpdateToken" UpdateToken.of_json in
       let subnetMappings =
@@ -8250,6 +8359,7 @@ module AssociateSubnetsRequest =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ~subnetMappings ?firewallName ?firewallArn ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subnetMappings =
         field_map_exn json "SubnetMappings" SubnetMappings.of_json in
@@ -8373,6 +8483,7 @@ module AssociateFirewallPolicyResponse =
       let firewallArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "FirewallArn") in
       make ?updateToken ?firewallPolicyArn ?firewallName ?firewallArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateToken = field_map json "UpdateToken" UpdateToken.of_json in
       let firewallPolicyArn =
@@ -8426,6 +8537,7 @@ module AssociateFirewallPolicyRequest =
       let updateToken =
         (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
       make ~firewallPolicyArn ?firewallName ?firewallArn ?updateToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firewallPolicyArn =
         field_map_exn json "FirewallPolicyArn" ResourceArn.of_json in

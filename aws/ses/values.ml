@@ -335,6 +335,7 @@ module ExtensionField =
         ExtensionFieldName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" ExtensionFieldValue.of_json in
       let name = field_map_exn json "Name" ExtensionFieldName.of_json in
@@ -368,6 +369,7 @@ module AddHeaderAction =
         HeaderName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HeaderName") in
       make ~headerValue ~headerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headerValue = field_map_exn json "HeaderValue" HeaderValue.of_json in
       let headerName = field_map_exn json "HeaderName" HeaderName.of_json in
@@ -425,6 +427,7 @@ module BounceAction =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "TopicArn") in
       make ~sender ~message ?statusCode ~smtpReplyCode ?topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sender = field_map_exn json "Sender" Address.of_json in
       let message = field_map_exn json "Message" BounceMessage.of_json in
@@ -472,6 +475,7 @@ module LambdaAction =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "TopicArn") in
       make ?invocationType ~functionArn ?topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invocationType =
         field_map json "InvocationType" InvocationType.of_json in
@@ -527,6 +531,7 @@ module S3Action =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "TopicArn") in
       make ?kmsKeyArn ?objectKeyPrefix ~bucketName ?topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyArn = field_map json "KmsKeyArn" AmazonResourceName.of_json in
       let objectKeyPrefix =
@@ -562,6 +567,7 @@ module SNSAction =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ?encoding ~topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encoding = field_map json "Encoding" SNSActionEncoding.of_json in
       let topicArn = field_map_exn json "TopicArn" AmazonResourceName.of_json in
@@ -593,6 +599,7 @@ module StopAction =
       let scope =
         StopScope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?topicArn ~scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicArn = field_map json "TopicArn" AmazonResourceName.of_json in
       let scope = field_map_exn json "Scope" StopScope.of_json in
@@ -627,6 +634,7 @@ module WorkmailAction =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "TopicArn") in
       make ~organizationArn ?topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let organizationArn =
         field_map_exn json "OrganizationArn" AmazonResourceName.of_json in
@@ -673,6 +681,7 @@ module CloudWatchDimensionConfiguration =
         DimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionName") in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultDimensionValue =
         field_map_exn json "DefaultDimensionValue"
@@ -761,6 +770,7 @@ module MessageTag =
         MessageTagName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" MessageTagValue.of_json in
       let name = field_map_exn json "Name" MessageTagName.of_json in
@@ -1000,6 +1010,7 @@ module ReceiptAction =
         (Option.map ~f:S3Action.of_xml) (Xml.child xml_arg0 "S3Action") in
       make ?sNSAction ?addHeaderAction ?stopAction ?lambdaAction
         ?workmailAction ?bounceAction ?s3Action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sNSAction = field_map json "SNSAction" SNSAction.of_json in
       let addHeaderAction =
@@ -1118,6 +1129,7 @@ module Content =
       let data =
         MessageData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ?charset ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let charset = field_map json "Charset" Charset.of_json in
       let data = field_map_exn json "Data" MessageData.of_json in
@@ -1244,6 +1256,7 @@ module Destination =
       let toAddresses =
         (Option.map ~f:AddressList.of_xml) (Xml.child xml_arg0 "ToAddresses") in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bccAddresses = field_map json "BccAddresses" AddressList.of_json in
       let ccAddresses = field_map json "CcAddresses" AddressList.of_json in
@@ -1403,6 +1416,7 @@ module RecipientDsnFields =
         (Option.map ~f:Address.of_xml) (Xml.child xml_arg0 "FinalRecipient") in
       make ?extensionFields ?lastAttemptDate ?diagnosticCode ~status
         ?remoteMta ~action ?finalRecipient ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extensionFields =
         field_map json "ExtensionFields" ExtensionFieldList.of_json in
@@ -1494,6 +1508,7 @@ module ReceiptIpFilter =
         ReceiptFilterPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       make ~cidr ~policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cidr = field_map_exn json "Cidr" Cidr.of_json in
       let policy = field_map_exn json "Policy" ReceiptFilterPolicy.of_json in
@@ -1844,6 +1859,7 @@ module CloudWatchDestination =
         CloudWatchDimensionConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionConfigurations") in
       make ~dimensionConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensionConfigurations =
         field_map_exn json "DimensionConfigurations"
@@ -1916,6 +1932,7 @@ module KinesisFirehoseDestination =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IAMRoleARN") in
       make ~deliveryStreamARN ~iAMRoleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryStreamARN =
         field_map_exn json "DeliveryStreamARN" AmazonResourceName.of_json in
@@ -1943,6 +1960,7 @@ module SNSDestination =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TopicARN") in
       make ~topicARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicARN = field_map_exn json "TopicARN" AmazonResourceName.of_json in
       make ~topicARN ()
@@ -2046,6 +2064,7 @@ module Body =
       let html = (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Html") in
       let text = (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Text") in
       make ?html ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let html = field_map json "Html" Content.of_json in
       let text = field_map json "Text" Content.of_json in make ?html ?text ()
@@ -2080,6 +2099,7 @@ module BulkEmailDestinationStatus =
       let status =
         (Option.map ~f:BulkEmailStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?messageId ?error ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" MessageId.of_json in
       let error = field_map json "Error" Error.of_json in
@@ -2123,6 +2143,7 @@ module BulkEmailDestination =
         Destination.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
       make ?replacementTemplateData ?replacementTags ~destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let replacementTemplateData =
         field_map json "ReplacementTemplateData" TemplateData.of_json in
@@ -2177,6 +2198,7 @@ module BouncedRecipientInfo =
       let recipient =
         Address.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Recipient") in
       make ?recipientDsnFields ?bounceType ?recipientArn ~recipient ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recipientDsnFields =
         field_map json "RecipientDsnFields" RecipientDsnFields.of_json in
@@ -2235,6 +2257,7 @@ module TemplateMetadata =
       let name =
         (Option.map ~f:TemplateName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?createdTimestamp ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTimestamp =
         field_map json "CreatedTimestamp" Timestamp.of_json in
@@ -2266,6 +2289,7 @@ module ReceiptRuleSetMetadata =
       let name =
         (Option.map ~f:ReceiptRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?createdTimestamp ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTimestamp =
         field_map json "CreatedTimestamp" Timestamp.of_json in
@@ -2299,6 +2323,7 @@ module ReceiptFilter =
         ReceiptFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~ipFilter ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ipFilter = field_map_exn json "IpFilter" ReceiptIpFilter.of_json in
       let name = field_map_exn json "Name" ReceiptFilterName.of_json in
@@ -2399,6 +2424,7 @@ module CustomVerificationEmailTemplate =
           (Xml.child xml_arg0 "TemplateName") in
       make ?failureRedirectionURL ?successRedirectionURL ?templateSubject
         ?fromEmailAddress ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
@@ -2431,6 +2457,7 @@ module ConfigurationSet =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" ConfigurationSetName.of_json in
       make ~name ()
@@ -2480,6 +2507,7 @@ module SendDataPoint =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?rejects ?complaints ?bounces ?deliveryAttempts ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rejects = field_map json "Rejects" Counter.of_json in
       let complaints = field_map json "Complaints" Counter.of_json in
@@ -2520,6 +2548,7 @@ module IdentityVerificationAttributes =
         VerificationStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VerificationStatus") in
       make ?verificationToken ~verificationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let verificationToken =
         field_map json "VerificationToken" VerificationToken.of_json in
@@ -2630,6 +2659,7 @@ module IdentityNotificationAttributes =
         ?headersInComplaintNotificationsEnabled
         ?headersInBounceNotificationsEnabled ~forwardingEnabled
         ~deliveryTopic ~complaintTopic ~bounceTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headersInDeliveryNotificationsEnabled =
         field_map json "HeadersInDeliveryNotificationsEnabled"
@@ -2693,6 +2723,7 @@ module IdentityMailFromDomainAttributes =
         MailFromDomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomain") in
       make ~behaviorOnMXFailure ~mailFromDomainStatus ~mailFromDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let behaviorOnMXFailure =
         field_map_exn json "BehaviorOnMXFailure" BehaviorOnMXFailure.of_json in
@@ -2742,6 +2773,7 @@ module IdentityDkimAttributes =
         Enabled.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DkimEnabled") in
       make ?dkimTokens ~dkimVerificationStatus ~dkimEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dkimTokens =
         field_map json "DkimTokens" VerificationTokenList.of_json in
@@ -2817,6 +2849,7 @@ module ReceiptRule =
         ReceiptRuleName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?scanEnabled ?actions ?recipients ?tlsPolicy ?enabled ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scanEnabled = field_map json "ScanEnabled" Enabled.of_json in
       let actions = field_map json "Actions" ReceiptActionsList.of_json in
@@ -2901,6 +2934,7 @@ module EventDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?sNSDestination ?cloudWatchDestination ?kinesisFirehoseDestination
         ~matchingEventTypes ?enabled ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sNSDestination =
         field_map json "SNSDestination" SNSDestination.of_json in
@@ -2991,6 +3025,7 @@ module InvalidTemplateException =
         (Option.map ~f:TemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName = field_map json "TemplateName" TemplateName.of_json in
       make ?templateName ()
@@ -3012,6 +3047,7 @@ module TemplateDoesNotExistException =
         (Option.map ~f:TemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName = field_map json "TemplateName" TemplateName.of_json in
       make ?templateName ()
@@ -3055,6 +3091,7 @@ module Template =
         TemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ?htmlPart ?textPart ?subjectPart ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let htmlPart = field_map json "HtmlPart" HtmlPart.of_json in
       let textPart = field_map json "TextPart" TextPart.of_json in
@@ -3082,6 +3119,7 @@ module InvalidLambdaFunctionException =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "FunctionArn") in
       make ?functionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionArn =
         field_map json "FunctionArn" AmazonResourceName.of_json in
@@ -3104,6 +3142,7 @@ module InvalidS3ConfigurationException =
       let bucket =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bucket = field_map json "Bucket" S3BucketName.of_json in
       make ?bucket ()
@@ -3126,6 +3165,7 @@ module InvalidSnsTopicException =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "Topic") in
       make ?topic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topic = field_map json "Topic" AmazonResourceName.of_json in
       make ?topic ()
@@ -3140,6 +3180,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3159,6 +3200,7 @@ module RuleDoesNotExistException =
       let name =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" RuleOrRuleSetName.of_json in
       make ?name ()
@@ -3180,6 +3222,7 @@ module RuleSetDoesNotExistException =
       let name =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" RuleOrRuleSetName.of_json in
       make ?name ()
@@ -3217,6 +3260,7 @@ module ConfigurationSetDoesNotExistException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -3231,6 +3275,7 @@ module InvalidTrackingOptionsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3254,6 +3299,7 @@ module TrackingOptionsDoesNotExistException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -3280,6 +3326,7 @@ module TrackingOptions =
         (Option.map ~f:CustomRedirectDomain.of_xml)
           (Xml.child xml_arg0 "CustomRedirectDomain") in
       make ?customRedirectDomain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customRedirectDomain =
         field_map json "CustomRedirectDomain" CustomRedirectDomain.of_json in
@@ -3314,6 +3361,7 @@ module EventDestinationDoesNotExistException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map json "EventDestinationName" EventDestinationName.of_json in
@@ -3349,6 +3397,7 @@ module InvalidCloudWatchDestinationException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map json "EventDestinationName" EventDestinationName.of_json in
@@ -3385,6 +3434,7 @@ module InvalidFirehoseDestinationException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map json "EventDestinationName" EventDestinationName.of_json in
@@ -3421,6 +3471,7 @@ module InvalidSNSDestinationException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map json "EventDestinationName" EventDestinationName.of_json in
@@ -3445,6 +3496,7 @@ module InvalidRenderingParameterException =
         (Option.map ~f:TemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName = field_map json "TemplateName" TemplateName.of_json in
       make ?templateName ()
@@ -3466,6 +3518,7 @@ module MissingRenderingAttributeException =
         (Option.map ~f:TemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName = field_map json "TemplateName" TemplateName.of_json in
       make ?templateName ()
@@ -3521,6 +3574,7 @@ module AccountSendingPausedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3544,6 +3598,7 @@ module ConfigurationSetSendingPausedException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -3559,6 +3614,7 @@ module MailFromDomainNotVerifiedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3571,6 +3627,7 @@ module MessageRejected =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3594,6 +3651,7 @@ module RawMessage =
         RawMessageData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let data = field_map_exn json "Data" RawMessageData.of_json in
       make ~data ()
@@ -3620,6 +3678,7 @@ module Message =
       let subject =
         Content.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
       make ~body ~subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let body = field_map_exn json "Body" Body.of_json in
       let subject = field_map_exn json "Subject" Content.of_json in
@@ -3647,6 +3706,7 @@ module CustomVerificationEmailTemplateDoesNotExistException =
         (Option.map ~f:TemplateName.of_xml)
           (Xml.child xml_arg0 "CustomVerificationEmailTemplateName") in
       make ?customVerificationEmailTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customVerificationEmailTemplateName =
         field_map json "CustomVerificationEmailTemplateName"
@@ -3673,6 +3733,7 @@ module FromEmailAddressNotVerifiedException =
         (Option.map ~f:FromAddress.of_xml)
           (Xml.child xml_arg0 "FromEmailAddress") in
       make ?fromEmailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fromEmailAddress =
         field_map json "FromEmailAddress" FromAddress.of_json in
@@ -3688,6 +3749,7 @@ module ProductionAccessNotGrantedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3817,6 +3879,7 @@ module MessageDsn =
         ReportingMta.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReportingMta") in
       make ?extensionFields ?arrivalDate ~reportingMta ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extensionFields =
         field_map json "ExtensionFields" ExtensionFieldList.of_json in
@@ -3860,6 +3923,7 @@ module InvalidPolicyException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3872,6 +3936,7 @@ module InvalidDeliveryOptionsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that provided delivery option is invalid."]
@@ -3891,6 +3956,7 @@ module DeliveryOptions =
       let tlsPolicy =
         (Option.map ~f:TlsPolicy.of_xml) (Xml.child xml_arg0 "TlsPolicy") in
       make ?tlsPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
       make ?tlsPolicy ()
@@ -4445,6 +4511,7 @@ module ReputationOptions =
       let sendingEnabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?lastFreshStart ?reputationMetricsEnabled ?sendingEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastFreshStart =
         field_map json "LastFreshStart" LastFreshStart.of_json in
@@ -4497,6 +4564,7 @@ module CannotDeleteException =
       let name =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" RuleOrRuleSetName.of_json in
       make ?name ()
@@ -4519,6 +4587,7 @@ module AlreadyExistsException =
       let name =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" RuleOrRuleSetName.of_json in
       make ?name ()
@@ -4544,6 +4613,7 @@ module TrackingOptionsAlreadyExistsException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -4569,6 +4639,7 @@ module ConfigurationSetAlreadyExistsException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -4584,6 +4655,7 @@ module InvalidConfigurationSetException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4615,6 +4687,7 @@ module EventDestinationAlreadyExistsException =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map json "EventDestinationName" EventDestinationName.of_json in
@@ -4654,6 +4727,7 @@ module VerifyEmailIdentityResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -4674,6 +4748,7 @@ module VerifyEmailIdentityRequest =
         Address.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress = field_map_exn json "EmailAddress" Address.of_json in
       make ~emailAddress ()
@@ -4697,6 +4772,7 @@ module VerifyEmailAddressRequest =
         Address.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress = field_map_exn json "EmailAddress" Address.of_json in
       make ~emailAddress ()
@@ -4753,6 +4829,7 @@ module VerifyDomainIdentityResponse =
         VerificationToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VerificationToken") in
       make ~verificationToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let verificationToken =
         field_map_exn json "VerificationToken" VerificationToken.of_json in
@@ -4774,6 +4851,7 @@ module VerifyDomainIdentityRequest =
       let domain =
         Domain.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map_exn json "Domain" Domain.of_json in
       make ~domain ()
@@ -4826,6 +4904,7 @@ module VerifyDomainDkimResponse =
         VerificationTokenList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DkimTokens") in
       make ~dkimTokens ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dkimTokens =
         field_map_exn json "DkimTokens" VerificationTokenList.of_json in
@@ -4849,6 +4928,7 @@ module VerifyDomainDkimRequest =
       let domain =
         Domain.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domain = field_map_exn json "Domain" Domain.of_json in
       make ~domain ()
@@ -4906,6 +4986,7 @@ module UpdateTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4924,6 +5005,7 @@ module UpdateTemplateRequest =
       let template =
         Template.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Template") in
       make ~template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map_exn json "Template" Template.of_json in
       make ~template ()
@@ -5021,6 +5103,7 @@ module UpdateReceiptRuleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -5048,6 +5131,7 @@ module UpdateReceiptRuleRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~rule ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rule = field_map_exn json "Rule" ReceiptRule.of_json in
       let ruleSetName =
@@ -5129,6 +5213,7 @@ module UpdateCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ?failureRedirectionURL ?successRedirectionURL ?templateContent
         ?templateSubject ?fromEmailAddress ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
@@ -5218,6 +5303,7 @@ module UpdateConfigurationSetTrackingOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -5248,6 +5334,7 @@ module UpdateConfigurationSetTrackingOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~trackingOptions ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackingOptions =
         field_map_exn json "TrackingOptions" TrackingOptions.of_json in
@@ -5284,6 +5371,7 @@ module UpdateConfigurationSetSendingEnabledRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~enabled ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Enabled.of_json in
       let configurationSetName =
@@ -5319,6 +5407,7 @@ module UpdateConfigurationSetReputationMetricsEnabledRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~enabled ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Enabled.of_json in
       let configurationSetName =
@@ -5424,6 +5513,7 @@ module UpdateConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -5456,6 +5546,7 @@ module UpdateConfigurationSetEventDestinationRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestination =
         field_map_exn json "EventDestination" EventDestination.of_json in
@@ -5482,6 +5573,7 @@ module UpdateAccountSendingEnabledRequest =
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Enabled.of_json in
       make ?enabled ()
@@ -5575,6 +5667,7 @@ module TestRenderTemplateResponse =
         (Option.map ~f:RenderedTemplate.of_xml)
           (Xml.child xml_arg0 "RenderedTemplate") in
       make ?renderedTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let renderedTemplate =
         field_map json "RenderedTemplate" RenderedTemplate.of_json in
@@ -5607,6 +5700,7 @@ module TestRenderTemplateRequest =
         TemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateData ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateData =
         field_map_exn json "TemplateData" TemplateData.of_json in
@@ -5668,6 +5762,7 @@ module SetReceiptRulePositionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -5703,6 +5798,7 @@ module SetReceiptRulePositionRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ?after ~ruleName ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let after = field_map json "After" ReceiptRuleName.of_json in
       let ruleName = field_map_exn json "RuleName" ReceiptRuleName.of_json in
@@ -5743,6 +5839,7 @@ module SetIdentityNotificationTopicResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -5781,6 +5878,7 @@ module SetIdentityNotificationTopicRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ?snsTopic ~notificationType ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsTopic = field_map json "SnsTopic" NotificationTopic.of_json in
       let notificationType =
@@ -5821,6 +5919,7 @@ module SetIdentityMailFromDomainResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -5860,6 +5959,7 @@ module SetIdentityMailFromDomainRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ?behaviorOnMXFailure ?mailFromDomain ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let behaviorOnMXFailure =
         field_map json "BehaviorOnMXFailure" BehaviorOnMXFailure.of_json in
@@ -5905,6 +6005,7 @@ module SetIdentityHeadersInNotificationsEnabledResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -5941,6 +6042,7 @@ module SetIdentityHeadersInNotificationsEnabledRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~enabled ~notificationType ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Enabled.of_json in
       let notificationType =
@@ -5985,6 +6087,7 @@ module SetIdentityFeedbackForwardingEnabledResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -6013,6 +6116,7 @@ module SetIdentityFeedbackForwardingEnabledRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~forwardingEnabled ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forwardingEnabled =
         field_map_exn json "ForwardingEnabled" Enabled.of_json in
@@ -6052,6 +6156,7 @@ module SetIdentityDkimEnabledResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -6080,6 +6185,7 @@ module SetIdentityDkimEnabledRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~dkimEnabled ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dkimEnabled = field_map_exn json "DkimEnabled" Enabled.of_json in
       let identity = field_map_exn json "Identity" Identity.of_json in
@@ -6130,6 +6236,7 @@ module SetActiveReceiptRuleSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -6151,6 +6258,7 @@ module SetActiveReceiptRuleSetRequest =
         (Option.map ~f:ReceiptRuleSetName.of_xml)
           (Xml.child xml_arg0 "RuleSetName") in
       make ?ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleSetName =
         field_map json "RuleSetName" ReceiptRuleSetName.of_json in
@@ -6270,6 +6378,7 @@ module SendTemplatedEmailResponse =
         MessageId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
       make ~messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map_exn json "MessageId" MessageId.of_json in
       make ~messageId ()
@@ -6391,6 +6500,7 @@ module SendTemplatedEmailRequest =
       make ~templateData ?templateArn ~template ?configurationSetName ?tags
         ?returnPathArn ?sourceArn ?returnPath ?replyToAddresses ~destination
         ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateData =
         field_map_exn json "TemplateData" TemplateData.of_json in
@@ -6513,6 +6623,7 @@ module SendRawEmailResponse =
         MessageId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
       make ~messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map_exn json "MessageId" MessageId.of_json in
       make ~messageId ()
@@ -6605,6 +6716,7 @@ module SendRawEmailRequest =
         (Option.map ~f:Address.of_xml) (Xml.child xml_arg0 "Source") in
       make ?configurationSetName ?tags ?returnPathArn ?sourceArn ?fromArn
         ~rawMessage ?destinations ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -6720,6 +6832,7 @@ module SendEmailResponse =
         MessageId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
       make ~messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map_exn json "MessageId" MessageId.of_json in
       make ~messageId ()
@@ -6818,6 +6931,7 @@ module SendEmailRequest =
         Address.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Source") in
       make ?configurationSetName ?tags ?returnPathArn ?sourceArn ?returnPath
         ?replyToAddresses ~message ~destination ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -6946,6 +7060,7 @@ module SendCustomVerificationEmailResponse =
       let messageId =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" MessageId.of_json in
       make ?messageId ()
@@ -6986,6 +7101,7 @@ module SendCustomVerificationEmailRequest =
         Address.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ?configurationSetName ~templateName ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
@@ -7109,6 +7225,7 @@ module SendBulkTemplatedEmailResponse =
         BulkEmailDestinationStatusList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "Status" BulkEmailDestinationStatusList.of_json in
@@ -7235,6 +7352,7 @@ module SendBulkTemplatedEmailRequest =
       make ~destinations ?defaultTemplateData ?templateArn ~template
         ?defaultTags ?configurationSetName ?returnPathArn ?returnPath
         ?replyToAddresses ?sourceArn ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinations =
         field_map_exn json "Destinations" BulkEmailDestinationList.of_json in
@@ -7309,6 +7427,7 @@ module SendBounceResponse =
       let messageId =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" MessageId.of_json in
       make ?messageId ()
@@ -7384,6 +7503,7 @@ module SendBounceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OriginalMessageId") in
       make ?bounceSenderArn ~bouncedRecipientInfoList ?messageDsn
         ?explanation ~bounceSender ~originalMessageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let bounceSenderArn =
         field_map json "BounceSenderArn" AmazonResourceName.of_json in
@@ -7451,6 +7571,7 @@ module ReorderReceiptRuleSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -7479,6 +7600,7 @@ module ReorderReceiptRuleSetRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleNames ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleNames =
         field_map_exn json "RuleNames" ReceiptRuleNamesList.of_json in
@@ -7528,6 +7650,7 @@ module PutIdentityPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -7563,6 +7686,7 @@ module PutIdentityPolicyRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~policy ~policyName ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map_exn json "Policy" Policy.of_json in
       let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
@@ -7629,6 +7753,7 @@ module PutConfigurationSetDeliveryOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7662,6 +7787,7 @@ module PutConfigurationSetDeliveryOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?deliveryOptions ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deliveryOptions =
         field_map json "DeliveryOptions" DeliveryOptions.of_json in
@@ -7722,6 +7848,7 @@ module ListVerifiedEmailAddressesResponse =
         (Option.map ~f:AddressList.of_xml)
           (Xml.child xml_arg0 "VerifiedEmailAddresses") in
       make ?verifiedEmailAddresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let verifiedEmailAddresses =
         field_map json "VerifiedEmailAddresses" AddressList.of_json in
@@ -7785,6 +7912,7 @@ module ListTemplatesResponse =
         (Option.map ~f:TemplateMetadataList.of_xml)
           (Xml.child xml_arg0 "TemplatesMetadata") in
       make ?nextToken ?templatesMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let templatesMetadata =
@@ -7815,6 +7943,7 @@ module ListTemplatesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxItems ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -7879,6 +8008,7 @@ module ListReceiptRuleSetsResponse =
         (Option.map ~f:ReceiptRuleSetsLists.of_xml)
           (Xml.child xml_arg0 "RuleSets") in
       make ?nextToken ?ruleSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let ruleSets = field_map json "RuleSets" ReceiptRuleSetsLists.of_json in
@@ -7902,6 +8032,7 @@ module ListReceiptRuleSetsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       make ?nextToken ()
@@ -7954,6 +8085,7 @@ module ListReceiptFiltersResponse =
         (Option.map ~f:ReceiptFilterList.of_xml)
           (Xml.child xml_arg0 "Filters") in
       make ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" ReceiptFilterList.of_json in
       make ?filters ()
@@ -7968,6 +8100,7 @@ module ListReceiptFiltersRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8019,6 +8152,7 @@ module ListIdentityPoliciesResponse =
         PolicyNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
       make ~policyNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyNames =
         field_map_exn json "PolicyNames" PolicyNameList.of_json in
@@ -8043,6 +8177,7 @@ module ListIdentityPoliciesRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identity = field_map_exn json "Identity" Identity.of_json in
       make ~identity ()
@@ -8101,6 +8236,7 @@ module ListIdentitiesResponse =
         IdentityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ?nextToken ~identities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let identities = field_map_exn json "Identities" IdentityList.of_json in
@@ -8139,6 +8275,7 @@ module ListIdentitiesRequest =
         (Option.map ~f:IdentityType.of_xml)
           (Xml.child xml_arg0 "IdentityType") in
       make ?maxItems ?nextToken ?identityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8210,6 +8347,7 @@ module ListCustomVerificationEmailTemplatesResponse =
         (Option.map ~f:CustomVerificationEmailTemplates.of_xml)
           (Xml.child xml_arg0 "CustomVerificationEmailTemplates") in
       make ?nextToken ?customVerificationEmailTemplates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let customVerificationEmailTemplates =
@@ -8241,6 +8379,7 @@ module ListCustomVerificationEmailTemplatesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8304,6 +8443,7 @@ module ListConfigurationSetsResponse =
         (Option.map ~f:ConfigurationSets.of_xml)
           (Xml.child xml_arg0 "ConfigurationSets") in
       make ?nextToken ?configurationSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let configurationSets =
@@ -8333,6 +8473,7 @@ module ListConfigurationSetsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxItems ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" MaxItems.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8392,6 +8533,7 @@ module GetTemplateResponse =
       let template =
         (Option.map ~f:Template.of_xml) (Xml.child xml_arg0 "Template") in
       make ?template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map json "Template" Template.of_json in
       make ?template ()
@@ -8415,6 +8557,7 @@ module GetTemplateRequest =
         TemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" TemplateName.of_json in
@@ -8470,6 +8613,7 @@ module GetSendStatisticsResponse =
         (Option.map ~f:SendDataPointList.of_xml)
           (Xml.child xml_arg0 "SendDataPoints") in
       make ?sendDataPoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sendDataPoints =
         field_map json "SendDataPoints" SendDataPointList.of_json in
@@ -8543,6 +8687,7 @@ module GetSendQuotaResponse =
         (Option.map ~f:Max24HourSend.of_xml)
           (Xml.child xml_arg0 "Max24HourSend") in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sentLast24Hours =
         field_map json "SentLast24Hours" SentLast24Hours.of_json in
@@ -8607,6 +8752,7 @@ module GetIdentityVerificationAttributesResponse =
         VerificationAttributes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VerificationAttributes") in
       make ~verificationAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let verificationAttributes =
         field_map_exn json "VerificationAttributes"
@@ -8631,6 +8777,7 @@ module GetIdentityVerificationAttributesRequest =
         IdentityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identities = field_map_exn json "Identities" IdentityList.of_json in
       make ~identities ()
@@ -8681,6 +8828,7 @@ module GetIdentityPoliciesResponse =
         PolicyMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Policies") in
       make ~policies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policies = field_map_exn json "Policies" PolicyMap.of_json in
       make ~policies ()
@@ -8711,6 +8859,7 @@ module GetIdentityPoliciesRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~policyNames ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyNames =
         field_map_exn json "PolicyNames" PolicyNameList.of_json in
@@ -8772,6 +8921,7 @@ module GetIdentityNotificationAttributesResponse =
         NotificationAttributes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "NotificationAttributes") in
       make ~notificationAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationAttributes =
         field_map_exn json "NotificationAttributes"
@@ -8798,6 +8948,7 @@ module GetIdentityNotificationAttributesRequest =
         IdentityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identities = field_map_exn json "Identities" IdentityList.of_json in
       make ~identities ()
@@ -8859,6 +9010,7 @@ module GetIdentityMailFromDomainAttributesResponse =
           (Xml.child_exn ~context:context_ xml_arg0
              "MailFromDomainAttributes") in
       make ~mailFromDomainAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mailFromDomainAttributes =
         field_map_exn json "MailFromDomainAttributes"
@@ -8884,6 +9036,7 @@ module GetIdentityMailFromDomainAttributesRequest =
         IdentityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identities = field_map_exn json "Identities" IdentityList.of_json in
       make ~identities ()
@@ -8940,6 +9093,7 @@ module GetIdentityDkimAttributesResponse =
         DkimAttributes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DkimAttributes") in
       make ~dkimAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dkimAttributes =
         field_map_exn json "DkimAttributes" DkimAttributes.of_json in
@@ -8965,6 +9119,7 @@ module GetIdentityDkimAttributesRequest =
         IdentityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identities = field_map_exn json "Identities" IdentityList.of_json in
       make ~identities ()
@@ -9094,6 +9249,7 @@ module GetCustomVerificationEmailTemplateResponse =
           (Xml.child xml_arg0 "TemplateName") in
       make ?failureRedirectionURL ?successRedirectionURL ?templateContent
         ?templateSubject ?fromEmailAddress ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
@@ -9127,6 +9283,7 @@ module GetCustomVerificationEmailTemplateRequest =
         TemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" TemplateName.of_json in
@@ -9181,6 +9338,7 @@ module GetAccountSendingEnabledResponse =
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map json "Enabled" Enabled.of_json in
       make ?enabled ()
@@ -9256,6 +9414,7 @@ module DescribeReceiptRuleSetResponse =
         (Option.map ~f:ReceiptRuleSetMetadata.of_xml)
           (Xml.child xml_arg0 "Metadata") in
       make ?rules ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map json "Rules" ReceiptRulesList.of_json in
       let metadata = field_map json "Metadata" ReceiptRuleSetMetadata.of_json in
@@ -9280,6 +9439,7 @@ module DescribeReceiptRuleSetRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleSetName =
         field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
@@ -9353,6 +9513,7 @@ module DescribeReceiptRuleResponse =
       let rule =
         (Option.map ~f:ReceiptRule.of_xml) (Xml.child xml_arg0 "Rule") in
       make ?rule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rule = field_map json "Rule" ReceiptRule.of_json in make ?rule ()
     let to_json v = composed_to_json to_value v
@@ -9382,6 +9543,7 @@ module DescribeReceiptRuleRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleName ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "RuleName" ReceiptRuleName.of_json in
       let ruleSetName =
@@ -9497,6 +9659,7 @@ module DescribeConfigurationSetResponse =
           (Xml.child xml_arg0 "ConfigurationSet") in
       make ?reputationOptions ?deliveryOptions ?trackingOptions
         ?eventDestinations ?configurationSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reputationOptions =
         field_map json "ReputationOptions" ReputationOptions.of_json in
@@ -9541,6 +9704,7 @@ module DescribeConfigurationSetRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?configurationSetAttributeNames ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetAttributeNames =
         field_map json "ConfigurationSetAttributeNames"
@@ -9610,6 +9774,7 @@ module DescribeActiveReceiptRuleSetResponse =
         (Option.map ~f:ReceiptRuleSetMetadata.of_xml)
           (Xml.child xml_arg0 "Metadata") in
       make ?rules ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rules = field_map json "Rules" ReceiptRulesList.of_json in
       let metadata = field_map json "Metadata" ReceiptRuleSetMetadata.of_json in
@@ -9625,6 +9790,7 @@ module DescribeActiveReceiptRuleSetRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9647,6 +9813,7 @@ module DeleteVerifiedEmailAddressRequest =
         Address.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let emailAddress = field_map_exn json "EmailAddress" Address.of_json in
       make ~emailAddress ()
@@ -9683,6 +9850,7 @@ module DeleteTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9704,6 +9872,7 @@ module DeleteTemplateRequest =
         TemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" TemplateName.of_json in
@@ -9751,6 +9920,7 @@ module DeleteReceiptRuleSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -9771,6 +9941,7 @@ module DeleteReceiptRuleSetRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleSetName =
         field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
@@ -9820,6 +9991,7 @@ module DeleteReceiptRuleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -9848,6 +10020,7 @@ module DeleteReceiptRuleRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleName ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleName = field_map_exn json "RuleName" ReceiptRuleName.of_json in
       let ruleSetName =
@@ -9886,6 +10059,7 @@ module DeleteReceiptFilterResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -9906,6 +10080,7 @@ module DeleteReceiptFilterRequest =
         ReceiptFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FilterName") in
       make ~filterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filterName =
         field_map_exn json "FilterName" ReceiptFilterName.of_json in
@@ -9943,6 +10118,7 @@ module DeleteIdentityResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -9963,6 +10139,7 @@ module DeleteIdentityRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identity = field_map_exn json "Identity" Identity.of_json in
       make ~identity ()
@@ -9999,6 +10176,7 @@ module DeleteIdentityPolicyResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10026,6 +10204,7 @@ module DeleteIdentityPolicyRequest =
       let identity =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~policyName ~identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
       let identity = field_map_exn json "Identity" Identity.of_json in
@@ -10051,6 +10230,7 @@ module DeleteCustomVerificationEmailTemplateRequest =
         TemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let templateName =
         field_map_exn json "TemplateName" TemplateName.of_json in
@@ -10119,6 +10299,7 @@ module DeleteConfigurationSetTrackingOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10141,6 +10322,7 @@ module DeleteConfigurationSetTrackingOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map_exn json "ConfigurationSetName"
@@ -10194,6 +10376,7 @@ module DeleteConfigurationSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10215,6 +10398,7 @@ module DeleteConfigurationSetRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map_exn json "ConfigurationSetName"
@@ -10284,6 +10468,7 @@ module DeleteConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10315,6 +10500,7 @@ module DeleteConfigurationSetEventDestinationRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestinationName ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map_exn json "EventDestinationName"
@@ -10346,6 +10532,7 @@ module CustomVerificationEmailTemplateAlreadyExistsException =
         (Option.map ~f:TemplateName.of_xml)
           (Xml.child xml_arg0 "CustomVerificationEmailTemplateName") in
       make ?customVerificationEmailTemplateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customVerificationEmailTemplateName =
         field_map json "CustomVerificationEmailTemplateName"
@@ -10362,6 +10549,7 @@ module CustomVerificationEmailInvalidContentException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10424,6 +10612,7 @@ module CreateTemplateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10445,6 +10634,7 @@ module CreateTemplateRequest =
       let template =
         Template.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Template") in
       make ~template ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let template = field_map_exn json "Template" Template.of_json in
       make ~template ()
@@ -10500,6 +10690,7 @@ module CreateReceiptRuleSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10521,6 +10712,7 @@ module CreateReceiptRuleSetRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleSetName =
         field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
@@ -10628,6 +10820,7 @@ module CreateReceiptRuleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10662,6 +10855,7 @@ module CreateReceiptRuleRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~rule ?after ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rule = field_map_exn json "Rule" ReceiptRule.of_json in
       let after = field_map json "After" ReceiptRuleName.of_json in
@@ -10720,6 +10914,7 @@ module CreateReceiptFilterResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10741,6 +10936,7 @@ module CreateReceiptFilterRequest =
         ReceiptFilter.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Filter") in
       make ~filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filter = field_map_exn json "Filter" ReceiptFilter.of_json in
       make ~filter ()
@@ -10817,6 +11013,7 @@ module CreateCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~failureRedirectionURL ~successRedirectionURL ~templateContent
         ~templateSubject ~fromEmailAddress ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureRedirectionURL =
         field_map_exn json "FailureRedirectionURL"
@@ -10909,6 +11106,7 @@ module CreateConfigurationSetTrackingOptionsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -10939,6 +11137,7 @@ module CreateConfigurationSetTrackingOptionsRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~trackingOptions ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trackingOptions =
         field_map_exn json "TrackingOptions" TrackingOptions.of_json in
@@ -11015,6 +11214,7 @@ module CreateConfigurationSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -11037,6 +11237,7 @@ module CreateConfigurationSetRequest =
         ConfigurationSet.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSet") in
       make ~configurationSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSet =
         field_map_exn json "ConfigurationSet" ConfigurationSet.of_json in
@@ -11149,6 +11350,7 @@ module CreateConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -11181,6 +11383,7 @@ module CreateConfigurationSetEventDestinationRequest =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestination =
         field_map_exn json "EventDestination" EventDestination.of_json in
@@ -11251,6 +11454,7 @@ module CloneReceiptRuleSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An empty element returned on a successful request."]
@@ -11281,6 +11485,7 @@ module CloneReceiptRuleSetRequest =
         ReceiptRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~originalRuleSetName ~ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originalRuleSetName =
         field_map_exn json "OriginalRuleSetName" ReceiptRuleSetName.of_json in

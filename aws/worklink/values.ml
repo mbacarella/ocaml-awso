@@ -411,6 +411,7 @@ module WebsiteCaSummary =
       let websiteCaId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "WebsiteCaId") in
       make ?displayName ?createdTime ?websiteCaId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName = field_map json "DisplayName" DisplayName.of_json in
       let createdTime = field_map json "CreatedTime" DateTime.of_json in
@@ -466,6 +467,7 @@ module WebsiteAuthorizationProviderSummary =
           (Xml.child xml_arg0 "AuthorizationProviderId") in
       make ?createdTime ?domainName ~authorizationProviderType
         ?authorizationProviderId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdTime = field_map json "CreatedTime" DateTime.of_json in
       let domainName = field_map json "DomainName" DomainName.of_json in
@@ -549,6 +551,7 @@ module FleetSummary =
         (Option.map ~f:FleetArn.of_xml) (Xml.child xml_arg0 "FleetArn") in
       make ?tags ?fleetStatus ?companyCode ?displayName ?fleetName
         ?lastUpdatedTime ?createdTime ?fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let fleetStatus = field_map json "FleetStatus" FleetStatus.of_json in
@@ -597,6 +600,7 @@ module DomainSummary =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainStatus ~createdTime ?displayName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainStatus =
         field_map_exn json "DomainStatus" DomainStatus.of_json in
@@ -628,6 +632,7 @@ module DeviceSummary =
       let deviceId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
       make ?deviceStatus ?deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceStatus = field_map json "DeviceStatus" DeviceStatus.of_json in
       let deviceId = field_map json "DeviceId" Id.of_json in
@@ -648,6 +653,7 @@ module InternalServerErrorException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -667,6 +673,7 @@ module InvalidRequestException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -686,6 +693,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -705,6 +713,7 @@ module TooManyRequestsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -724,6 +733,7 @@ module UnauthorizedException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1102,6 +1112,7 @@ module ResourceAlreadyExistsException =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ExceptionMessage.of_json in
       make ?message ()
@@ -1310,6 +1321,7 @@ module UpdateIdentityProviderConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1348,6 +1360,7 @@ module UpdateIdentityProviderConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?identityProviderSamlMetadata ~identityProviderType ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderSamlMetadata =
         field_map json "IdentityProviderSamlMetadata" SamlMetadata.of_json in
@@ -1432,6 +1445,7 @@ module UpdateFleetMetadataResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates fleet metadata, such as DisplayName."]
@@ -1467,6 +1481,7 @@ module UpdateFleetMetadataRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?optimizeForEndUserLocation ?displayName ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let optimizeForEndUserLocation =
         field_map json "OptimizeForEndUserLocation" Boolean.of_json in
@@ -1548,6 +1563,7 @@ module UpdateDomainMetadataResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates domain metadata, such as DisplayName."]
@@ -1577,6 +1593,7 @@ module UpdateDomainMetadataRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?displayName ~domainName ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName = field_map json "DisplayName" DisplayName.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -1657,6 +1674,7 @@ module UpdateDevicePolicyConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the device policy configuration for the fleet."]
@@ -1684,6 +1702,7 @@ module UpdateDevicePolicyConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?deviceCaCertificate ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceCaCertificate =
         field_map json "DeviceCaCertificate" CertificateChain.of_json in
@@ -1764,6 +1783,7 @@ module UpdateCompanyNetworkConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the company network configuration for the fleet."]
@@ -1806,6 +1826,7 @@ module UpdateCompanyNetworkConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~securityGroupIds ~subnetIds ~vpcId ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map_exn json "SecurityGroupIds" SecurityGroupIds.of_json in
@@ -1888,6 +1909,7 @@ module UpdateAuditStreamConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the audit stream configuration for the fleet."]
@@ -1915,6 +1937,7 @@ module UpdateAuditStreamConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?auditStreamArn ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditStreamArn =
         field_map json "AuditStreamArn" AuditStreamArn.of_json in
@@ -1957,6 +1980,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified resource."]
@@ -1984,6 +2008,7 @@ module UntagResourceRequest =
         FleetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" FleetArn.of_json in
@@ -2025,6 +2050,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2052,6 +2078,7 @@ module TagResourceRequest =
         FleetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let resourceArn = field_map_exn json "ResourceArn" FleetArn.of_json in
@@ -2132,6 +2159,7 @@ module SignOutUserResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2155,6 +2183,7 @@ module SignOutUserRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~username ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map_exn json "Username" Username.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -2235,6 +2264,7 @@ module RevokeDomainAccessResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2260,6 +2290,7 @@ module RevokeDomainAccessRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~domainName ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -2340,6 +2371,7 @@ module RestoreDomainAccessResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2365,6 +2397,7 @@ module RestoreDomainAccessRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~domainName ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -2454,6 +2487,7 @@ module ListWebsiteCertificateAuthoritiesResponse =
         (Option.map ~f:WebsiteCaSummaryList.of_xml)
           (Xml.child xml_arg0 "WebsiteCertificateAuthorities") in
       make ?nextToken ?websiteCertificateAuthorities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let websiteCertificateAuthorities =
@@ -2492,6 +2526,7 @@ module ListWebsiteCertificateAuthoritiesRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?nextToken ?maxResults ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -2592,6 +2627,7 @@ module ListWebsiteAuthorizationProvidersResponse =
         (Option.map ~f:WebsiteAuthorizationProvidersSummaryList.of_xml)
           (Xml.child xml_arg0 "WebsiteAuthorizationProviders") in
       make ?nextToken ?websiteAuthorizationProviders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let websiteAuthorizationProviders =
@@ -2630,6 +2666,7 @@ module ListWebsiteAuthorizationProvidersRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?maxResults ?nextToken ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2679,6 +2716,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2700,6 +2738,7 @@ module ListTagsForResourceRequest =
         FleetArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" FleetArn.of_json in
       make ~resourceArn ()
@@ -2785,6 +2824,7 @@ module ListFleetsResponse =
         (Option.map ~f:FleetSummaryList.of_xml)
           (Xml.child xml_arg0 "FleetSummaryList") in
       make ?nextToken ?fleetSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let fleetSummaryList =
@@ -2816,6 +2856,7 @@ module ListFleetsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2910,6 +2951,7 @@ module ListDomainsResponse =
         (Option.map ~f:DomainSummaryList.of_xml)
           (Xml.child xml_arg0 "Domains") in
       make ?nextToken ?domains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let domains = field_map json "Domains" DomainSummaryList.of_json in
@@ -2946,6 +2988,7 @@ module ListDomainsRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?maxResults ?nextToken ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3041,6 +3084,7 @@ module ListDevicesResponse =
         (Option.map ~f:DeviceSummaryList.of_xml)
           (Xml.child xml_arg0 "Devices") in
       make ?nextToken ?devices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let devices = field_map json "Devices" DeviceSummaryList.of_json in
@@ -3077,6 +3121,7 @@ module ListDevicesRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?maxResults ?nextToken ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -3158,6 +3203,7 @@ module DisassociateWebsiteCertificateAuthorityResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a certificate authority (CA)."]
@@ -3181,6 +3227,7 @@ module DisassociateWebsiteCertificateAuthorityRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~websiteCaId ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let websiteCaId = field_map_exn json "WebsiteCaId" Id.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -3271,6 +3318,7 @@ module DisassociateWebsiteAuthorizationProviderResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3299,6 +3347,7 @@ module DisassociateWebsiteAuthorizationProviderRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~authorizationProviderId ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authorizationProviderId =
         field_map_exn json "AuthorizationProviderId" Id.of_json in
@@ -3380,6 +3429,7 @@ module DisassociateDomainResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3405,6 +3455,7 @@ module DisassociateDomainRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~domainName ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -3505,6 +3556,7 @@ module DescribeWebsiteCertificateAuthorityResponse =
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
       make ?displayName ?createdTime ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName = field_map json "DisplayName" DisplayName.of_json in
       let createdTime = field_map json "CreatedTime" DateTime.of_json in
@@ -3533,6 +3585,7 @@ module DescribeWebsiteCertificateAuthorityRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~websiteCaId ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let websiteCaId = field_map_exn json "WebsiteCaId" Id.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -3647,6 +3700,7 @@ module DescribeIdentityProviderConfigurationResponse =
           (Xml.child xml_arg0 "IdentityProviderType") in
       make ?identityProviderSamlMetadata ?serviceProviderSamlMetadata
         ?identityProviderType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identityProviderSamlMetadata =
         field_map json "IdentityProviderSamlMetadata" SamlMetadata.of_json in
@@ -3674,6 +3728,7 @@ module DescribeIdentityProviderConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
       make ~fleetArn ()
@@ -3818,6 +3873,7 @@ module DescribeFleetMetadataResponse =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreatedTime") in
       make ?tags ?fleetStatus ?companyCode ?optimizeForEndUserLocation
         ?displayName ?fleetName ?lastUpdatedTime ?createdTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let fleetStatus = field_map json "FleetStatus" FleetStatus.of_json in
@@ -3849,6 +3905,7 @@ module DescribeFleetMetadataRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
       make ~fleetArn ()
@@ -3971,6 +4028,7 @@ module DescribeDomainResponse =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       make ?acmCertificateArn ?domainStatus ?createdTime ?displayName
         ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acmCertificateArn =
         field_map json "AcmCertificateArn" AcmCertificateArn.of_json in
@@ -4003,6 +4061,7 @@ module DescribeDomainRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~domainName ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -4165,6 +4224,7 @@ module DescribeDeviceResponse =
       make ?username ?lastAccessedTime ?firstAccessedTime ?patchLevel
         ?operatingSystemVersion ?operatingSystem ?manufacturer ?model ?status
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let username = field_map json "Username" Username.of_json in
       let lastAccessedTime =
@@ -4206,6 +4266,7 @@ module DescribeDeviceRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~deviceId ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceId = field_map_exn json "DeviceId" Id.of_json in
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
@@ -4295,6 +4356,7 @@ module DescribeDevicePolicyConfigurationResponse =
         (Option.map ~f:Certificate.of_xml)
           (Xml.child xml_arg0 "DeviceCaCertificate") in
       make ?deviceCaCertificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceCaCertificate =
         field_map json "DeviceCaCertificate" Certificate.of_json in
@@ -4317,6 +4379,7 @@ module DescribeDevicePolicyConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
       make ~fleetArn ()
@@ -4419,6 +4482,7 @@ module DescribeCompanyNetworkConfigurationResponse =
         (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       make ?securityGroupIds ?subnetIds ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
@@ -4443,6 +4507,7 @@ module DescribeCompanyNetworkConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
       make ~fleetArn ()
@@ -4532,6 +4597,7 @@ module DescribeAuditStreamConfigurationResponse =
         (Option.map ~f:AuditStreamArn.of_xml)
           (Xml.child xml_arg0 "AuditStreamArn") in
       make ?auditStreamArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let auditStreamArn =
         field_map json "AuditStreamArn" AuditStreamArn.of_json in
@@ -4554,6 +4620,7 @@ module DescribeAuditStreamConfigurationRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
       make ~fleetArn ()
@@ -4633,6 +4700,7 @@ module DeleteFleetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4652,6 +4720,7 @@ module DeleteFleetRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map_exn json "FleetArn" FleetArn.of_json in
       make ~fleetArn ()
@@ -4749,6 +4818,7 @@ module CreateFleetResponse =
       let fleetArn =
         (Option.map ~f:FleetArn.of_xml) (Xml.child xml_arg0 "FleetArn") in
       make ?fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map json "FleetArn" FleetArn.of_json in
       make ?fleetArn ()
@@ -4794,6 +4864,7 @@ module CreateFleetRequest =
         FleetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetName") in
       make ?tags ?optimizeForEndUserLocation ?displayName ~fleetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let optimizeForEndUserLocation =
@@ -4894,6 +4965,7 @@ module AssociateWebsiteCertificateAuthorityResponse =
       let websiteCaId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "WebsiteCaId") in
       make ?websiteCaId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let websiteCaId = field_map json "WebsiteCaId" Id.of_json in
       make ?websiteCaId ()
@@ -4928,6 +5000,7 @@ module AssociateWebsiteCertificateAuthorityRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?displayName ~certificate ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let displayName = field_map json "DisplayName" DisplayName.of_json in
       let certificate = field_map_exn json "Certificate" Certificate.of_json in
@@ -5029,6 +5102,7 @@ module AssociateWebsiteAuthorizationProviderResponse =
         (Option.map ~f:Id.of_xml)
           (Xml.child xml_arg0 "AuthorizationProviderId") in
       make ?authorizationProviderId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let authorizationProviderId =
         field_map json "AuthorizationProviderId" Id.of_json in
@@ -5069,6 +5143,7 @@ module AssociateWebsiteAuthorizationProviderRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ?domainName ~authorizationProviderType ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map json "DomainName" DomainName.of_json in
       let authorizationProviderType =
@@ -5163,6 +5238,7 @@ module AssociateDomainResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a domain to be associated to Amazon WorkLink."]
@@ -5205,6 +5281,7 @@ module AssociateDomainRequest =
       let fleetArn =
         FleetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetArn") in
       make ~acmCertificateArn ?displayName ~domainName ~fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acmCertificateArn =
         field_map_exn json "AcmCertificateArn" AcmCertificateArn.of_json in

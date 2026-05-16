@@ -367,6 +367,7 @@ module FederationParameters =
           (Xml.child xml_arg0 "samlMetadataDocument") in
       make ?attributeMap ?federationProviderName ?federationURN
         ?applicationCallBackURL ?samlMetadataURL ?samlMetadataDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributeMap = field_map json "attributeMap" AttributeMap.of_json in
       let federationProviderName =
@@ -615,6 +616,7 @@ module Environment =
       make ?federationParameters ?federationMode ?dedicatedServiceAccountId
         ?kmsKeyId ?sageMakerStudioDomainUrl ?environmentArn ?description
         ?environmentUrl ?status ?awsAccountId ?environmentId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let federationParameters =
         field_map json "federationParameters" FederationParameters.of_json in
@@ -711,6 +713,7 @@ module AccessDeniedException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -728,6 +731,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -747,6 +751,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -760,6 +765,7 @@ module ThrottlingException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
@@ -776,6 +782,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -795,6 +802,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -935,6 +943,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -953,6 +962,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1012,6 +1022,7 @@ module SuperuserParameters =
         EmailId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "emailAddress") in
       make ~lastName ~firstName ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastName = field_map_exn json "lastName" NameString.of_json in
       let firstName = field_map_exn json "firstName" NameString.of_json in
@@ -1097,6 +1108,7 @@ module UpdateEnvironmentResponse =
       let environment =
         (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
       make ?environment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       make ?environment ()
@@ -1156,6 +1168,7 @@ module UpdateEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ?federationParameters ?federationMode ?description ?name
         ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let federationParameters =
         field_map json "federationParameters" FederationParameters.of_json in
@@ -1221,6 +1234,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes metadata tags from a FinSpace resource."]
@@ -1250,6 +1264,7 @@ module UntagResourceRequest =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -1310,6 +1325,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds metadata tags to a FinSpace resource."]
@@ -1335,6 +1351,7 @@ module TagResourceRequest =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn =
@@ -1399,6 +1416,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1420,6 +1438,7 @@ module ListTagsForResourceRequest =
         EnvironmentArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "resourceArn" EnvironmentArn.of_json in
@@ -1487,6 +1506,7 @@ module ListEnvironmentsResponse =
         (Option.map ~f:EnvironmentList.of_xml)
           (Xml.child xml_arg0 "environments") in
       make ?nextToken ?environments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let environments =
@@ -1518,6 +1538,7 @@ module ListEnvironmentsRequest =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" ResultLimit.of_json in
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
@@ -1593,6 +1614,7 @@ module GetEnvironmentResponse =
       let environment =
         (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
       make ?environment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environment = field_map json "environment" Environment.of_json in
       make ?environment ()
@@ -1615,6 +1637,7 @@ module GetEnvironmentRequest =
         IdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentId = field_map_exn json "environmentId" IdType.of_json in
       make ~environmentId ()
@@ -1691,6 +1714,7 @@ module DeleteEnvironmentResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete an FinSpace environment."]
@@ -1711,6 +1735,7 @@ module DeleteEnvironmentRequest =
         IdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentId = field_map_exn json "environmentId" IdType.of_json in
       make ~environmentId ()
@@ -1823,6 +1848,7 @@ module CreateEnvironmentResponse =
       let environmentId =
         (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
       make ?environmentUrl ?environmentArn ?environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let environmentUrl = field_map json "environmentUrl" Url.of_json in
       let environmentArn =
@@ -1914,6 +1940,7 @@ module CreateEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?dataBundles ?superuserParameters ?federationParameters
         ?federationMode ?tags ?kmsKeyId ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataBundles = field_map json "dataBundles" DataBundleArns.of_json in
       let superuserParameters =

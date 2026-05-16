@@ -136,6 +136,7 @@ module InferenceInputNameConfiguration =
         (Option.map ~f:FileNameTimestampFormat.of_xml)
           (Xml.child xml_arg0 "TimestampFormat") in
       make ?componentTimestampDelimiter ?timestampFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let componentTimestampDelimiter =
         field_map json "ComponentTimestampDelimiter"
@@ -169,6 +170,7 @@ module InferenceS3InputConfiguration =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" S3Prefix.of_json in
       let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
@@ -216,6 +218,7 @@ module InferenceS3OutputConfiguration =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" S3Prefix.of_json in
       let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
@@ -289,6 +292,7 @@ module IngestionS3InputConfiguration =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" S3Prefix.of_json in
       let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
@@ -689,6 +693,7 @@ module InferenceInputConfiguration =
           (Xml.child xml_arg0 "S3InputConfiguration") in
       make ?inferenceInputNameConfiguration ?inputTimeZoneOffset
         ?s3InputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferenceInputNameConfiguration =
         field_map json "InferenceInputNameConfiguration"
@@ -732,6 +737,7 @@ module InferenceOutputConfiguration =
         InferenceS3OutputConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3OutputConfiguration") in
       make ?kmsKeyId ~s3OutputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kmsKeyId = field_map json "KmsKeyId" NameOrArn.of_json in
       let s3OutputConfiguration =
@@ -761,6 +767,7 @@ module S3Object =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ~key ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map_exn json "Key" S3Key.of_json in
       let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
@@ -815,6 +822,7 @@ module IngestionInputConfiguration =
         IngestionS3InputConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3InputConfiguration") in
       make ~s3InputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3InputConfiguration =
         field_map_exn json "S3InputConfiguration"
@@ -889,6 +897,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -951,6 +960,7 @@ module ModelSummary =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
       make ?createdAt ?status ?datasetArn ?datasetName ?modelArn ?modelName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
       let status = field_map json "Status" ModelStatus.of_json in
@@ -1044,6 +1054,7 @@ module InferenceSchedulerSummary =
       make ?dataUploadFrequency ?dataDelayOffsetInMinutes ?status
         ?inferenceSchedulerArn ?inferenceSchedulerName ?modelArn ?modelName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataUploadFrequency =
         field_map json "DataUploadFrequency" DataUploadFrequency.of_json in
@@ -1192,6 +1203,7 @@ module InferenceExecutionSummary =
         ?dataOutputConfiguration ?dataInputConfiguration ?dataEndTime
         ?dataStartTime ?scheduledStartTime ?inferenceSchedulerArn
         ?inferenceSchedulerName ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedReason =
         field_map json "FailedReason" BoundedLengthString.of_json in
@@ -1258,6 +1270,7 @@ module DatasetSummary =
       let datasetName =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
       make ?createdAt ?status ?datasetArn ?datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" Timestamp.of_json in
       let status = field_map json "Status" DatasetStatus.of_json in
@@ -1322,6 +1335,7 @@ module DataIngestionJobSummary =
         (Option.map ~f:IngestionJobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?status ?ingestionInputConfiguration ?datasetArn ?datasetName
         ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" IngestionJobStatus.of_json in
       let ingestionInputConfiguration =
@@ -1409,6 +1423,7 @@ module LabelsS3InputConfiguration =
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map json "Prefix" S3Prefix.of_json in
       let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
@@ -1492,6 +1507,7 @@ module AccessDeniedException =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" BoundedLengthString.of_json in
       make ~message ()
@@ -1513,6 +1529,7 @@ module InternalServerException =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" BoundedLengthString.of_json in
       make ~message ()
@@ -1534,6 +1551,7 @@ module ResourceNotFoundException =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" BoundedLengthString.of_json in
       make ~message ()
@@ -1555,6 +1573,7 @@ module ThrottlingException =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" BoundedLengthString.of_json in
       make ~message ()
@@ -1575,6 +1594,7 @@ module ValidationException =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" BoundedLengthString.of_json in
       make ~message ()
@@ -1642,6 +1662,7 @@ module ServiceQuotaExceededException =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" BoundedLengthString.of_json in
       make ~message ()
@@ -1690,6 +1711,7 @@ module ConflictException =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" BoundedLengthString.of_json in
       make ~message ()
@@ -1917,6 +1939,7 @@ module DataPreProcessingConfiguration =
         (Option.map ~f:TargetSamplingRate.of_xml)
           (Xml.child xml_arg0 "TargetSamplingRate") in
       make ?targetSamplingRate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetSamplingRate =
         field_map json "TargetSamplingRate" TargetSamplingRate.of_json in
@@ -1965,6 +1988,7 @@ module LabelsInputConfiguration =
         LabelsS3InputConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3InputConfiguration") in
       make ~s3InputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3InputConfiguration =
         field_map_exn json "S3InputConfiguration"
@@ -2024,6 +2048,7 @@ module DatasetSchema =
         (Option.map ~f:InlineDataSchema.of_xml)
           (Xml.child xml_arg0 "InlineDataSchema") in
       make ?inlineDataSchema ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inlineDataSchema =
         field_map json "InlineDataSchema" InlineDataSchema.of_json in
@@ -2107,6 +2132,7 @@ module UpdateInferenceSchedulerRequest =
       make ?roleArn ?dataOutputConfiguration ?dataInputConfiguration
         ?dataUploadFrequency ?dataDelayOffsetInMinutes
         ~inferenceSchedulerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
       let dataOutputConfiguration =
@@ -2199,6 +2225,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2229,6 +2256,7 @@ module UntagResourceRequest =
         AmazonResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -2319,6 +2347,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2347,6 +2376,7 @@ module TagResourceRequest =
         AmazonResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -2486,6 +2516,7 @@ module StopInferenceSchedulerResponse =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       make ?status ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName
         ?modelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerArn =
@@ -2518,6 +2549,7 @@ module StopInferenceSchedulerRequest =
         InferenceSchedulerIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferenceSchedulerName =
         field_map_exn json "InferenceSchedulerName"
@@ -2656,6 +2688,7 @@ module StartInferenceSchedulerResponse =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       make ?status ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName
         ?modelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerArn =
@@ -2688,6 +2721,7 @@ module StartInferenceSchedulerRequest =
         InferenceSchedulerIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferenceSchedulerName =
         field_map_exn json "InferenceSchedulerName"
@@ -2800,6 +2834,7 @@ module StartDataIngestionJobResponse =
       let jobId =
         (Option.map ~f:IngestionJobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?status ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" IngestionJobStatus.of_json in
       let jobId = field_map json "JobId" IngestionJobId.of_json in
@@ -2860,6 +2895,7 @@ module StartDataIngestionJobRequest =
         DatasetIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ~clientToken ~roleArn ~ingestionInputConfiguration ~datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken =
         field_map_exn json "ClientToken" IdempotenceToken.of_json in
@@ -2949,6 +2985,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -2972,6 +3009,7 @@ module ListTagsForResourceRequest =
         AmazonResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" AmazonResourceArn.of_json in
@@ -3058,6 +3096,7 @@ module ListModelsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?modelSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelSummaries =
         field_map json "ModelSummaries" ModelSummaries.of_json in
@@ -3120,6 +3159,7 @@ module ListModelsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?datasetNameBeginsWith ?modelNameBeginsWith ?status ?maxResults
         ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetNameBeginsWith =
         field_map json "DatasetNameBeginsWith" DatasetName.of_json in
@@ -3214,6 +3254,7 @@ module ListInferenceSchedulersResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?inferenceSchedulerSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferenceSchedulerSummaries =
         field_map json "InferenceSchedulerSummaries"
@@ -3271,6 +3312,7 @@ module ListInferenceSchedulersRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?modelName ?inferenceSchedulerNameBeginsWith ?maxResults
         ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelName = field_map json "ModelName" ModelName.of_json in
       let inferenceSchedulerNameBeginsWith =
@@ -3373,6 +3415,7 @@ module ListInferenceExecutionsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?inferenceExecutionSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferenceExecutionSummaries =
         field_map json "InferenceExecutionSummaries"
@@ -3452,6 +3495,7 @@ module ListInferenceExecutionsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?status ?dataEndTimeBefore ?dataStartTimeAfter
         ~inferenceSchedulerName ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" InferenceExecutionStatus.of_json in
       let dataEndTimeBefore =
@@ -3547,6 +3591,7 @@ module ListDatasetsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?datasetSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetSummaries =
         field_map json "DatasetSummaries" DatasetSummaries.of_json in
@@ -3587,6 +3632,7 @@ module ListDatasetsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?datasetNameBeginsWith ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetNameBeginsWith =
         field_map json "DatasetNameBeginsWith" DatasetName.of_json in
@@ -3677,6 +3723,7 @@ module ListDataIngestionJobsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?dataIngestionJobSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataIngestionJobSummaries =
         field_map json "DataIngestionJobSummaries"
@@ -3724,6 +3771,7 @@ module ListDataIngestionJobsRequest =
       let datasetName =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
       make ?status ?maxResults ?nextToken ?datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" IngestionJobStatus.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -4008,6 +4056,7 @@ module DescribeModelResponse =
         ?roleArn ?evaluationDataEndTime ?evaluationDataStartTime
         ?trainingDataEndTime ?trainingDataStartTime ?labelsInputConfiguration
         ?schema ?datasetArn ?datasetName ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offCondition = field_map json "OffCondition" OffCondition.of_json in
       let serverSideKmsKeyId =
@@ -4069,6 +4118,7 @@ module DescribeModelRequest =
         ModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelName = field_map_exn json "ModelName" ModelName.of_json in
       make ~modelName ()
@@ -4276,6 +4326,7 @@ module DescribeInferenceSchedulerResponse =
         ?dataInputConfiguration ?updatedAt ?createdAt ?dataUploadFrequency
         ?dataDelayOffsetInMinutes ?status ?inferenceSchedulerArn
         ?inferenceSchedulerName ?modelName ?modelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverSideKmsKeyId =
         field_map json "ServerSideKmsKeyId" KmsKeyArn.of_json in
@@ -4327,6 +4378,7 @@ module DescribeInferenceSchedulerRequest =
         InferenceSchedulerIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferenceSchedulerName =
         field_map_exn json "InferenceSchedulerName"
@@ -4478,6 +4530,7 @@ module DescribeDatasetResponse =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
       make ?ingestionInputConfiguration ?serverSideKmsKeyId ?schema ?status
         ?lastUpdatedAt ?createdAt ?datasetArn ?datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ingestionInputConfiguration =
         field_map json "IngestionInputConfiguration"
@@ -4512,6 +4565,7 @@ module DescribeDatasetRequest =
         DatasetIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ~datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetName =
         field_map_exn json "DatasetName" DatasetIdentifier.of_json in
@@ -4655,6 +4709,7 @@ module DescribeDataIngestionJobResponse =
         (Option.map ~f:IngestionJobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?failedReason ?status ?createdAt ?roleArn
         ?ingestionInputConfiguration ?datasetArn ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedReason =
         field_map json "FailedReason" BoundedLengthString.of_json in
@@ -4688,6 +4743,7 @@ module DescribeDataIngestionJobRequest =
         IngestionJobId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" IngestionJobId.of_json in
       make ~jobId ()
@@ -4711,6 +4767,7 @@ module DeleteModelRequest =
         ModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelName = field_map_exn json "ModelName" ModelName.of_json in
       make ~modelName ()
@@ -4736,6 +4793,7 @@ module DeleteInferenceSchedulerRequest =
         InferenceSchedulerIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inferenceSchedulerName =
         field_map_exn json "InferenceSchedulerName"
@@ -4761,6 +4819,7 @@ module DeleteDatasetRequest =
         DatasetIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ~datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datasetName =
         field_map_exn json "DatasetName" DatasetIdentifier.of_json in
@@ -4872,6 +4931,7 @@ module CreateModelResponse =
       let modelArn =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       make ?status ?modelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ModelStatus.of_json in
       let modelArn = field_map json "ModelArn" ModelArn.of_json in
@@ -5027,6 +5087,7 @@ module CreateModelRequest =
         ?evaluationDataStartTime ?trainingDataEndTime ?trainingDataStartTime
         ~clientToken ?labelsInputConfiguration ?datasetSchema ~datasetName
         ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let offCondition = field_map json "OffCondition" OffCondition.of_json in
       let tags = field_map json "Tags" TagList.of_json in
@@ -5183,6 +5244,7 @@ module CreateInferenceSchedulerResponse =
         (Option.map ~f:InferenceSchedulerArn.of_xml)
           (Xml.child xml_arg0 "InferenceSchedulerArn") in
       make ?status ?inferenceSchedulerName ?inferenceSchedulerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerName =
@@ -5304,6 +5366,7 @@ module CreateInferenceSchedulerRequest =
       make ?tags ~clientToken ?serverSideKmsKeyId ~roleArn
         ~dataOutputConfiguration ~dataInputConfiguration ~dataUploadFrequency
         ?dataDelayOffsetInMinutes ~inferenceSchedulerName ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientToken =
@@ -5434,6 +5497,7 @@ module CreateDatasetResponse =
       let datasetName =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
       make ?status ?datasetArn ?datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" DatasetStatus.of_json in
       let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
@@ -5499,6 +5563,7 @@ module CreateDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ?tags ~clientToken ?serverSideKmsKeyId ~datasetSchema ~datasetName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientToken =

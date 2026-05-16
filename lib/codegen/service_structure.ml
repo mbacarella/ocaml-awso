@@ -198,6 +198,11 @@ let of_header_converter_of_structure_shape
       (ss : Botodata.structure_shape)
   =
   let loc = !Ast_helper.default_loc in
+  let is_payload_field field_name =
+    match ss.payload with
+    | Some p -> String.equal p field_name
+    | None -> false
+  in
   let arguments =
     List.map ss.members ~f:(fun (field_name, member) ->
       let header_name =
@@ -210,54 +215,62 @@ let of_header_converter_of_structure_shape
           fn_e
           [ Ast_convenience.evar "xs"; Ast_convenience.str header_name ]
       in
-      match
-        List.Assoc.find service.shapes member.shape ~equal:String.equal
-        |> Option.value_exn
-             ~message:(sprintf "%s not found in service.shapes" member.shape)
-      with
-      | Map_shape _ ->
-        let constructor_e =
-          Ast_convenience.evar (Shape.capitalized_id member.shape ^ ".of_header")
-        in
+      if is_payload_field field_name
+      then
+        (* The payload member is bound directly from the body argument [pipe]
+           regardless of whether the underlying shape is a Blob or Structure. *)
         if argument_is_required
-        then (
-          let converted_e = [%expr [%e constructor_e] xs] in
-          let label = Labelled arg_id in
-          label, converted_e)
-        else (
-          let label = Optional arg_id in
-          label, [%expr Some ([%e constructor_e] xs)])
-      | Blob_shape _ ->
-        if argument_is_required
-        then (
-          let label = Labelled arg_id in
-          label, [%expr pipe])
-        else (
-          let label = Optional arg_id in
-          label, [%expr Some pipe])
-      | _ ->
-        let constructor_e =
-          Ast_convenience.evar (Shape.capitalized_id member.shape ^ ".of_string")
-        in
-        let arg_id = Shape.uncapitalized_id field_name in
-        if argument_is_required
-        then (
-          let converted_e =
-            Ast_convenience.app
-              constructor_e
-              [ assoc_e [%expr List.Assoc.find_exn ~equal:String.Caseless.equal] ]
+        then Labelled arg_id, [%expr pipe]
+        else Optional arg_id, [%expr Some pipe]
+      else (
+        match
+          List.Assoc.find service.shapes member.shape ~equal:String.equal
+          |> Option.value_exn
+               ~message:(sprintf "%s not found in service.shapes" member.shape)
+        with
+        | Map_shape _ ->
+          let constructor_e =
+            Ast_convenience.evar (Shape.capitalized_id member.shape ^ ".of_header")
           in
-          let label = Labelled arg_id in
-          label, converted_e)
-        else (
-          let converted_e =
-            [%expr
-              Option.map
-                [%e assoc_e [%expr List.Assoc.find ~equal:String.Caseless.equal]]
-                ~f:[%e constructor_e]]
+          if argument_is_required
+          then (
+            let converted_e = [%expr [%e constructor_e] xs] in
+            let label = Labelled arg_id in
+            label, converted_e)
+          else (
+            let label = Optional arg_id in
+            label, [%expr Some ([%e constructor_e] xs)])
+        | Blob_shape _ ->
+          if argument_is_required
+          then (
+            let label = Labelled arg_id in
+            label, [%expr pipe])
+          else (
+            let label = Optional arg_id in
+            label, [%expr Some pipe])
+        | _ ->
+          let constructor_e =
+            Ast_convenience.evar (Shape.capitalized_id member.shape ^ ".of_string")
           in
-          let label = Optional arg_id in
-          label, converted_e))
+          let arg_id = Shape.uncapitalized_id field_name in
+          if argument_is_required
+          then (
+            let converted_e =
+              Ast_convenience.app
+                constructor_e
+                [ assoc_e [%expr List.Assoc.find_exn ~equal:String.Caseless.equal] ]
+            in
+            let label = Labelled arg_id in
+            label, converted_e)
+          else (
+            let converted_e =
+              [%expr
+                Option.map
+                  [%e assoc_e [%expr List.Assoc.find ~equal:String.Caseless.equal]]
+                  ~f:[%e constructor_e]]
+            in
+            let label = Optional arg_id in
+            label, converted_e)))
   in
   Ast_convenience.lam
     [%pat? xs, pipe]
@@ -560,11 +573,35 @@ let structure_of_shape (service : Botodata.service) sn shape =
            ])
     | List_shape _ | Structure_shape _ | Map_shape _ -> None
   in
+  (* For Structure shapes we also emit an of_string, but it depends on of_xml
+     so it must be placed after of_xml's definition. Suppress the
+     unused-value-declaration warning since most structures don't need it
+     (only those used as a rest-xml/rest-json payload do). *)
+  let opt_structure_of_string_function =
+    match shape with
+    | Structure_shape _ ->
+      let loc = !Ast_helper.default_loc in
+      let unused_attr =
+        Ast_helper.Attr.mk
+          (Ast_convenience.mknoloc "warning")
+          (PStr [%str "-32"])
+      in
+      Some
+        (Ast_helper.Str.value
+           Nonrecursive
+           [ Ast_helper.Vb.mk
+               ~attrs:[ unused_attr ]
+               (Ast_helper.Pat.var (Ast_convenience.mknoloc "of_string"))
+               [%expr fun s -> of_xml (Awso.Xml.parse_response s)]
+           ])
+    | _ -> None
+  in
   let opt_of_header_or_of_header_and_body_function =
     match shape with
     | Structure_shape ss ->
+      let has_payload = Option.is_some ss.payload in
       Option.some_if
-        (Shape.shape_is_header_structure service shape)
+        (Shape.shape_is_header_structure service shape || has_payload)
         (Ast_helper.Str.value
            Nonrecursive
            [ Ast_helper.Vb.mk
@@ -648,6 +685,7 @@ let structure_of_shape (service : Botodata.service) sn shape =
              ; Some to_query_function
              ; opt_to_header_function
              ; Some of_xml_function
+             ; opt_structure_of_string_function
              ; Some of_json_function
              ; Some to_json_function
              ])))

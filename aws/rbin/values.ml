@@ -176,6 +176,7 @@ module RetentionPeriod =
         RetentionPeriodValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodValue") in
       make ~retentionPeriodUnit ~retentionPeriodValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retentionPeriodUnit =
         field_map_exn json "RetentionPeriodUnit" RetentionPeriodUnit.of_json in
@@ -260,6 +261,7 @@ module ResourceTag =
         ResourceTagKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceTagKey") in
       make ?resourceTagValue ~resourceTagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTagValue =
         field_map json "ResourceTagValue" ResourceTagValue.of_json in
@@ -341,6 +343,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -380,6 +383,7 @@ module RuleSummary =
         (Option.map ~f:RuleIdentifier.of_xml)
           (Xml.child xml_arg0 "Identifier") in
       make ?retentionPeriod ?description ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retentionPeriod =
         field_map json "RetentionPeriod" RetentionPeriod.of_json in
@@ -401,6 +405,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -428,6 +433,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" ResourceNotFoundExceptionReason.of_json in
@@ -534,6 +540,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason = field_map json "Reason" ValidationExceptionReason.of_json in
       let message = field_map json "Message" ErrorMessage.of_json in
@@ -613,6 +620,7 @@ module ServiceQuotaExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reason =
         field_map json "Reason" ServiceQuotaExceededExceptionReason.of_json in
@@ -815,6 +823,7 @@ module UpdateRuleResponse =
           (Xml.child xml_arg0 "Identifier") in
       make ?status ?resourceTags ?resourceType ?description ?retentionPeriod
         ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" RuleStatus.of_json in
       let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
@@ -887,6 +896,7 @@ module UpdateRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
       make ?resourceTags ?resourceType ?description ?retentionPeriod
         ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -952,6 +962,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Unassigns a tag from a retention rule."]
@@ -980,6 +991,7 @@ module UntagResourceRequest =
         RuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" RuleArn.of_json in
@@ -1050,6 +1062,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Assigns tags to the specified retention rule."]
@@ -1076,6 +1089,7 @@ module TagResourceRequest =
         RuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" RuleArn.of_json in
@@ -1141,6 +1155,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1162,6 +1177,7 @@ module ListTagsForResourceRequest =
         RuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" RuleArn.of_json in
       make ~resourceArn ()
@@ -1224,6 +1240,7 @@ module ListRulesResponse =
       let rules =
         (Option.map ~f:RuleSummaryList.of_xml) (Xml.child xml_arg0 "Rules") in
       make ?nextToken ?rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let rules = field_map json "Rules" RuleSummaryList.of_json in
@@ -1271,6 +1288,7 @@ module ListRulesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?resourceTags ~resourceType ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
       let resourceType =
@@ -1390,6 +1408,7 @@ module GetRuleResponse =
           (Xml.child xml_arg0 "Identifier") in
       make ?status ?resourceTags ?retentionPeriod ?resourceType ?description
         ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" RuleStatus.of_json in
       let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
@@ -1419,6 +1438,7 @@ module GetRuleRequest =
         RuleIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
       make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map_exn json "Identifier" RuleIdentifier.of_json in
       make ~identifier ()
@@ -1477,6 +1497,7 @@ module DeleteRuleResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1498,6 +1519,7 @@ module DeleteRuleRequest =
         RuleIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
       make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map_exn json "Identifier" RuleIdentifier.of_json in
       make ~identifier ()
@@ -1621,6 +1643,7 @@ module CreateRuleResponse =
           (Xml.child xml_arg0 "Identifier") in
       make ?status ?resourceTags ?resourceType ?tags ?description
         ?retentionPeriod ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" RuleStatus.of_json in
       let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
@@ -1691,6 +1714,7 @@ module CreateRuleRequest =
         RetentionPeriod.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriod") in
       make ?resourceTags ~resourceType ?tags ?description ~retentionPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
       let resourceType =

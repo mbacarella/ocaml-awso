@@ -73,6 +73,7 @@ module AttachmentDetails =
         (Option.map ~f:AttachmentId.of_xml)
           (Xml.child xml_arg0 "attachmentId") in
       make ?fileName ?attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fileName = field_map json "fileName" FileName.of_json in
       let attachmentId = field_map json "attachmentId" AttachmentId.of_json in
@@ -260,6 +261,7 @@ module Communication =
       let caseId =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?attachmentSet ?timeCreated ?submittedBy ?body ?caseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentSet =
         field_map json "attachmentSet" AttachmentSet.of_json in
@@ -301,6 +303,7 @@ module TrustedAdvisorCostOptimizingSummary =
         Double.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "estimatedMonthlySavings") in
       make ~estimatedPercentMonthlySavings ~estimatedMonthlySavings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let estimatedPercentMonthlySavings =
         field_map_exn json "estimatedPercentMonthlySavings" Double.of_json in
@@ -380,6 +383,7 @@ module Category =
       let code =
         (Option.map ~f:CategoryCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?name ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" CategoryName.of_json in
       let code = field_map json "code" CategoryCode.of_json in
@@ -456,6 +460,7 @@ module TrustedAdvisorCategorySpecificSummary =
         (Option.map ~f:TrustedAdvisorCostOptimizingSummary.of_xml)
           (Xml.child xml_arg0 "costOptimizing") in
       make ?costOptimizing ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let costOptimizing =
         field_map json "costOptimizing"
@@ -514,6 +519,7 @@ module TrustedAdvisorResourcesSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "resourcesProcessed") in
       make ~resourcesSuppressed ~resourcesIgnored ~resourcesFlagged
         ~resourcesProcessed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourcesSuppressed =
         field_map_exn json "resourcesSuppressed" Long.of_json in
@@ -576,6 +582,7 @@ module TrustedAdvisorResourceDetail =
       let status =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~metadata ?isSuppressed ~resourceId ?region ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata = field_map_exn json "metadata" StringList.of_json in
       let isSuppressed = field_map json "isSuppressed" Boolean.of_json in
@@ -741,6 +748,7 @@ module RecentCaseCommunications =
         (Option.map ~f:CommunicationList.of_xml)
           (Xml.child xml_arg0 "communications") in
       make ?nextToken ?communications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let communications =
@@ -857,6 +865,7 @@ module TrustedAdvisorCheckDescription =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~metadata ~category ~description ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadata = field_map_exn json "metadata" StringList.of_json in
       let category = field_map_exn json "category" String_.of_json in
@@ -933,6 +942,7 @@ module TrustedAdvisorCheckSummary =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
       make ~categorySpecificSummary ~resourcesSummary ?hasFlaggedResources
         ~status ~timestamp ~checkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categorySpecificSummary =
         field_map_exn json "categorySpecificSummary"
@@ -1010,6 +1020,7 @@ module TrustedAdvisorCheckRefreshStatus =
       let checkId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
       make ~millisUntilNextRefreshable ~status ~checkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let millisUntilNextRefreshable =
         field_map_exn json "millisUntilNextRefreshable" Long.of_json in
@@ -1040,6 +1051,7 @@ module SeverityLevel =
       let code =
         (Option.map ~f:SeverityLevelCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?name ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "name" SeverityLevelName.of_json in
       let code = field_map json "code" SeverityLevelCode.of_json in
@@ -1076,6 +1088,7 @@ module Service =
       let code =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?categories ?name ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let categories = field_map json "categories" CategoryList.of_json in
       let name = field_map json "name" ServiceName.of_json in
@@ -1202,6 +1215,7 @@ module CaseDetails =
       make ?language ?ccEmailAddresses ?recentCommunications ?timeCreated
         ?submittedBy ?severityCode ?categoryCode ?serviceCode ?status
         ?subject ?displayId ?caseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let language = field_map json "language" Language.of_json in
       let ccEmailAddresses =
@@ -1242,6 +1256,7 @@ module Attachment =
       let fileName =
         (Option.map ~f:FileName.of_xml) (Xml.child xml_arg0 "fileName") in
       make ?data ?fileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let data = field_map json "data" Data.of_json in
       let fileName = field_map json "fileName" FileName.of_json in
@@ -1264,6 +1279,7 @@ module CaseIdNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1297,6 +1313,7 @@ module InternalServerError =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1421,6 +1438,7 @@ module TrustedAdvisorCheckResult =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
       make ~flaggedResources ~categorySpecificSummary ~resourcesSummary
         ~status ~timestamp ~checkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flaggedResources =
         field_map_exn json "flaggedResources"
@@ -1682,6 +1700,7 @@ module AttachmentIdNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1703,6 +1722,7 @@ module DescribeAttachmentLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1725,6 +1745,7 @@ module AttachmentSetExpired =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1747,6 +1768,7 @@ module AttachmentSetIdNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1769,6 +1791,7 @@ module CaseCreationLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1830,6 +1853,7 @@ module AttachmentLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1852,6 +1876,7 @@ module AttachmentSetSizeLimitExceeded =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1957,6 +1982,7 @@ module ResolveCaseResponse =
         (Option.map ~f:CaseStatus.of_xml)
           (Xml.child xml_arg0 "initialCaseStatus") in
       make ?finalCaseStatus ?initialCaseStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let finalCaseStatus =
         field_map json "finalCaseStatus" CaseStatus.of_json in
@@ -1982,6 +2008,7 @@ module ResolveCaseRequest =
       let caseId =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?caseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let caseId = field_map json "caseId" CaseId.of_json in make ?caseId ()
     let to_json v = composed_to_json to_value v
@@ -2033,6 +2060,7 @@ module RefreshTrustedAdvisorCheckResponse =
         TrustedAdvisorCheckRefreshStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" TrustedAdvisorCheckRefreshStatus.of_json in
@@ -2055,6 +2083,7 @@ module RefreshTrustedAdvisorCheckRequest =
       let checkId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
       make ~checkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checkId = field_map_exn json "checkId" String_.of_json in
       make ~checkId ()
@@ -2105,6 +2134,7 @@ module DescribeTrustedAdvisorChecksResponse =
         TrustedAdvisorCheckList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "checks") in
       make ~checks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checks =
         field_map_exn json "checks" TrustedAdvisorCheckList.of_json in
@@ -2128,6 +2158,7 @@ module DescribeTrustedAdvisorChecksRequest =
       let language =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "language") in
       make ~language ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let language = field_map_exn json "language" String_.of_json in
       make ~language ()
@@ -2180,6 +2211,7 @@ module DescribeTrustedAdvisorCheckSummariesResponse =
         TrustedAdvisorCheckSummaryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "summaries") in
       make ~summaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let summaries =
         field_map_exn json "summaries" TrustedAdvisorCheckSummaryList.of_json in
@@ -2204,6 +2236,7 @@ module DescribeTrustedAdvisorCheckSummariesRequest =
         StringList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "checkIds") in
       make ~checkIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checkIds = field_map_exn json "checkIds" StringList.of_json in
       make ~checkIds ()
@@ -2254,6 +2287,7 @@ module DescribeTrustedAdvisorCheckResultResponse =
         (Option.map ~f:TrustedAdvisorCheckResult.of_xml)
           (Xml.child xml_arg0 "result") in
       make ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map json "result" TrustedAdvisorCheckResult.of_json in
       make ?result ()
@@ -2282,6 +2316,7 @@ module DescribeTrustedAdvisorCheckResultRequest =
       let checkId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
       make ?language ~checkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let language = field_map json "language" String_.of_json in
       let checkId = field_map_exn json "checkId" String_.of_json in
@@ -2334,6 +2369,7 @@ module DescribeTrustedAdvisorCheckRefreshStatusesResponse =
         TrustedAdvisorCheckRefreshStatusList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "statuses") in
       make ~statuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statuses =
         field_map_exn json "statuses"
@@ -2360,6 +2396,7 @@ module DescribeTrustedAdvisorCheckRefreshStatusesRequest =
         StringList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "checkIds") in
       make ~checkIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checkIds = field_map_exn json "checkIds" StringList.of_json in
       make ~checkIds ()
@@ -2411,6 +2448,7 @@ module DescribeSeverityLevelsResponse =
         (Option.map ~f:SeverityLevelsList.of_xml)
           (Xml.child xml_arg0 "severityLevels") in
       make ?severityLevels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let severityLevels =
         field_map json "severityLevels" SeverityLevelsList.of_json in
@@ -2434,6 +2472,7 @@ module DescribeSeverityLevelsRequest =
       let language =
         (Option.map ~f:Language.of_xml) (Xml.child xml_arg0 "language") in
       make ?language ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let language = field_map json "language" Language.of_json in
       make ?language ()
@@ -2482,6 +2521,7 @@ module DescribeServicesResponse =
       let services =
         (Option.map ~f:ServiceList.of_xml) (Xml.child xml_arg0 "services") in
       make ?services ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let services = field_map json "services" ServiceList.of_json in
       make ?services ()
@@ -2513,6 +2553,7 @@ module DescribeServicesRequest =
         (Option.map ~f:ServiceCodeList.of_xml)
           (Xml.child xml_arg0 "serviceCodeList") in
       make ?language ?serviceCodeList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let language = field_map json "language" Language.of_json in
       let serviceCodeList =
@@ -2578,6 +2619,7 @@ module DescribeCommunicationsResponse =
         (Option.map ~f:CommunicationList.of_xml)
           (Xml.child xml_arg0 "communications") in
       make ?nextToken ?communications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let communications =
@@ -2632,6 +2674,7 @@ module DescribeCommunicationsRequest =
       let caseId =
         CaseId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "caseId") in
       make ?maxResults ?nextToken ?afterTime ?beforeTime ~caseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "maxResults" MaxResults.of_json in
       let nextToken = field_map json "nextToken" NextToken.of_json in
@@ -2696,6 +2739,7 @@ module DescribeCasesResponse =
       let cases =
         (Option.map ~f:CaseList.of_xml) (Xml.child xml_arg0 "cases") in
       make ?nextToken ?cases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" NextToken.of_json in
       let cases = field_map json "cases" CaseList.of_json in
@@ -2793,6 +2837,7 @@ module DescribeCasesRequest =
       make ?includeCommunications ?language ?maxResults ?nextToken
         ?includeResolvedCases ?beforeTime ?afterTime ?displayId ?caseIdList
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeCommunications =
         field_map json "includeCommunications" IncludeCommunications.of_json in
@@ -2874,6 +2919,7 @@ module DescribeAttachmentResponse =
       let attachment =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "attachment") in
       make ?attachment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachment = field_map json "attachment" Attachment.of_json in
       make ?attachment ()
@@ -2898,6 +2944,7 @@ module DescribeAttachmentRequest =
         AttachmentId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentId =
         field_map_exn json "attachmentId" AttachmentId.of_json in
@@ -2975,6 +3022,7 @@ module CreateCaseResponse =
       let caseId =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?caseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let caseId = field_map json "caseId" CaseId.of_json in make ?caseId ()
     let to_json v = composed_to_json to_value v
@@ -3077,6 +3125,7 @@ module CreateCaseRequest =
       make ?attachmentSetId ?issueType ?language ?ccEmailAddresses
         ~communicationBody ?categoryCode ?severityCode ?serviceCode ~subject
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentSetId =
         field_map json "attachmentSetId" AttachmentSetId.of_json in
@@ -3164,6 +3213,7 @@ module AddCommunicationToCaseResponse =
       let result =
         (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "result") in
       make ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map json "result" Result_.of_json in make ?result ()
     let to_json v = composed_to_json to_value v
@@ -3215,6 +3265,7 @@ module AddCommunicationToCaseRequest =
       let caseId =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?attachmentSetId ?ccEmailAddresses ~communicationBody ?caseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachmentSetId =
         field_map json "attachmentSetId" AttachmentSetId.of_json in
@@ -3316,6 +3367,7 @@ module AddAttachmentsToSetResponse =
         (Option.map ~f:AttachmentSetId.of_xml)
           (Xml.child xml_arg0 "attachmentSetId") in
       make ?expiryTime ?attachmentSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiryTime = field_map json "expiryTime" ExpiryTime.of_json in
       let attachmentSetId =
@@ -3351,6 +3403,7 @@ module AddAttachmentsToSetRequest =
         (Option.map ~f:AttachmentSetId.of_xml)
           (Xml.child xml_arg0 "attachmentSetId") in
       make ~attachments ?attachmentSetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attachments = field_map_exn json "attachments" Attachments.of_json in
       let attachmentSetId =

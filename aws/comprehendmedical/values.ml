@@ -187,6 +187,7 @@ module SNOMEDCTConcept =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?score ?code ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Float.of_json in
       let code = field_map json "Code" String_.of_json in
@@ -216,6 +217,7 @@ module SNOMEDCTTrait =
       let name =
         (Option.map ~f:SNOMEDCTTraitName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Float.of_json in
       let name = field_map json "Name" SNOMEDCTTraitName.of_json in
@@ -243,6 +245,7 @@ module RxNormTrait =
       let name =
         (Option.map ~f:RxNormTraitName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Float.of_json in
       let name = field_map json "Name" RxNormTraitName.of_json in
@@ -271,6 +274,7 @@ module ICD10CMTrait =
       let name =
         (Option.map ~f:ICD10CMTraitName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Float.of_json in
       let name = field_map json "Name" ICD10CMTraitName.of_json in
@@ -299,6 +303,7 @@ module Trait =
       let name =
         (Option.map ~f:AttributeName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Float.of_json in
       let name = field_map json "Name" AttributeName.of_json in
@@ -1073,6 +1078,7 @@ module SNOMEDCTAttribute =
           (Xml.child xml_arg0 "Category") in
       make ?sNOMEDCTConcepts ?traits ?text ?endOffset ?beginOffset ?id
         ?relationshipType ?relationshipScore ?score ?type_ ?category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sNOMEDCTConcepts =
         field_map json "SNOMEDCTConcepts" SNOMEDCTConceptList.of_json in
@@ -1169,6 +1175,7 @@ module RxNormAttribute =
           (Xml.child xml_arg0 "Type") in
       make ?traits ?text ?endOffset ?beginOffset ?id ?relationshipScore
         ?score ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let traits = field_map json "Traits" RxNormTraitList.of_json in
       let text = field_map json "Text" String_.of_json in
@@ -1209,6 +1216,7 @@ module RxNormConcept =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?score ?code ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Float.of_json in
       let code = field_map json "Code" String_.of_json in
@@ -1312,6 +1320,7 @@ module ICD10CMAttribute =
           (Xml.child xml_arg0 "Type") in
       make ?relationshipType ?category ?traits ?text ?endOffset ?beginOffset
         ?id ?relationshipScore ?score ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let relationshipType =
         field_map json "RelationshipType" ICD10CMRelationshipType.of_json in
@@ -1357,6 +1366,7 @@ module ICD10CMConcept =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?score ?code ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let score = field_map json "Score" Float.of_json in
       let code = field_map json "Code" String_.of_json in
@@ -1452,6 +1462,7 @@ module Attribute =
         (Option.map ~f:EntitySubType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?traits ?category ?text ?endOffset ?beginOffset ?id
         ?relationshipType ?relationshipScore ?score ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let traits = field_map json "Traits" TraitList.of_json in
       let category = field_map json "Category" EntityType.of_json in
@@ -1526,6 +1537,7 @@ module InputDataConfig =
       let s3Bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Key ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Key = field_map json "S3Key" S3Key.of_json in
       let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
@@ -1706,6 +1718,7 @@ module OutputDataConfig =
       let s3Bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Key ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Key = field_map json "S3Key" S3Key.of_json in
       let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
@@ -2125,6 +2138,7 @@ module ComprehendMedicalAsyncJobProperties =
       make ?modelVersion ?kMSKey ?manifestFilePath ?dataAccessRoleArn
         ?languageCode ?outputDataConfig ?inputDataConfig ?expirationTime
         ?endTime ?submitTime ?message ?jobStatus ?jobName ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelVersion = field_map json "ModelVersion" ModelVersion.of_json in
       let kMSKey = field_map json "KMSKey" KMSKey.of_json in
@@ -2247,6 +2261,7 @@ module SNOMEDCTEntity =
       let id = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Id") in
       make ?sNOMEDCTConcepts ?traits ?attributes ?endOffset ?beginOffset
         ?score ?type_ ?category ?text ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sNOMEDCTConcepts =
         field_map json "SNOMEDCTConcepts" SNOMEDCTConceptList.of_json in
@@ -2364,6 +2379,7 @@ module RxNormEntity =
       let id = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Id") in
       make ?rxNormConcepts ?traits ?attributes ?endOffset ?beginOffset ?score
         ?type_ ?category ?text ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rxNormConcepts =
         field_map json "RxNormConcepts" RxNormConceptList.of_json in
@@ -2482,6 +2498,7 @@ module ICD10CMEntity =
       let id = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Id") in
       make ?iCD10CMConcepts ?traits ?attributes ?endOffset ?beginOffset
         ?score ?type_ ?category ?text ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iCD10CMConcepts =
         field_map json "ICD10CMConcepts" ICD10CMConceptList.of_json in
@@ -2580,6 +2597,7 @@ module Entity =
       let id = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Id") in
       make ?attributes ?traits ?type_ ?category ?text ?score ?endOffset
         ?beginOffset ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attributes = field_map json "Attributes" AttributeList.of_json in
       let traits = field_map json "Traits" TraitList.of_json in
@@ -2616,6 +2634,7 @@ module UnmappedAttribute =
       let type_ =
         (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?attribute ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let attribute = field_map json "Attribute" Attribute.of_json in
       let type_ = field_map json "Type" EntityType.of_json in
@@ -2636,6 +2655,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2654,6 +2674,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2673,6 +2694,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2692,6 +2714,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2758,6 +2781,7 @@ module ValidationException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2806,6 +2830,7 @@ module ComprehendMedicalAsyncJobFilter =
       let jobName =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let submitTimeAfter =
         field_map json "SubmitTimeAfter" Timestamp.of_json in
@@ -2853,6 +2878,7 @@ module Characters =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "OriginalTextCharacters") in
       make ?originalTextCharacters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originalTextCharacters =
         field_map json "OriginalTextCharacters" Integer.of_json in
@@ -2873,6 +2899,7 @@ module InvalidEncodingException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2908,6 +2935,7 @@ module SNOMEDCTDetails =
       let edition =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Edition") in
       make ?versionDate ?language ?edition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionDate = field_map json "VersionDate" String_.of_json in
       let language = field_map json "Language" String_.of_json in
@@ -2954,6 +2982,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -2973,6 +3002,7 @@ module TextSizeLimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -3161,6 +3191,7 @@ module StopSNOMEDCTInferenceJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3181,6 +3212,7 @@ module StopSNOMEDCTInferenceJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -3244,6 +3276,7 @@ module StopRxNormInferenceJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3262,6 +3295,7 @@ module StopRxNormInferenceJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -3325,6 +3359,7 @@ module StopPHIDetectionJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3345,6 +3380,7 @@ module StopPHIDetectionJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -3409,6 +3445,7 @@ module StopICD10CMInferenceJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3427,6 +3464,7 @@ module StopICD10CMInferenceJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -3490,6 +3528,7 @@ module StopEntitiesDetectionV2JobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3509,6 +3548,7 @@ module StopEntitiesDetectionV2JobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -3581,6 +3621,7 @@ module StartSNOMEDCTInferenceJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3662,6 +3703,7 @@ module StartSNOMEDCTInferenceJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageCode =
         field_map_exn json "LanguageCode" LanguageCode.of_json in
@@ -3746,6 +3788,7 @@ module StartRxNormInferenceJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3828,6 +3871,7 @@ module StartRxNormInferenceJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageCode =
         field_map_exn json "LanguageCode" LanguageCode.of_json in
@@ -3914,6 +3958,7 @@ module StartPHIDetectionJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -3996,6 +4041,7 @@ module StartPHIDetectionJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageCode =
         field_map_exn json "LanguageCode" LanguageCode.of_json in
@@ -4082,6 +4128,7 @@ module StartICD10CMInferenceJobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -4164,6 +4211,7 @@ module StartICD10CMInferenceJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageCode =
         field_map_exn json "LanguageCode" LanguageCode.of_json in
@@ -4250,6 +4298,7 @@ module StartEntitiesDetectionV2JobResponse =
     let of_xml xml_arg0 =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -4333,6 +4382,7 @@ module StartEntitiesDetectionV2JobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InputDataConfig") in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let languageCode =
         field_map_exn json "LanguageCode" LanguageCode.of_json in
@@ -4432,6 +4482,7 @@ module ListSNOMEDCTInferenceJobsResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobPropertiesList.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
@@ -4472,6 +4523,7 @@ module ListSNOMEDCTInferenceJobsRequest =
         (Option.map ~f:ComprehendMedicalAsyncJobFilter.of_xml)
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4561,6 +4613,7 @@ module ListRxNormInferenceJobsResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobPropertiesList.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
@@ -4601,6 +4654,7 @@ module ListRxNormInferenceJobsRequest =
         (Option.map ~f:ComprehendMedicalAsyncJobFilter.of_xml)
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4689,6 +4743,7 @@ module ListPHIDetectionJobsResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobPropertiesList.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
@@ -4731,6 +4786,7 @@ module ListPHIDetectionJobsRequest =
         (Option.map ~f:ComprehendMedicalAsyncJobFilter.of_xml)
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4821,6 +4877,7 @@ module ListICD10CMInferenceJobsResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobPropertiesList.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
@@ -4863,6 +4920,7 @@ module ListICD10CMInferenceJobsRequest =
         (Option.map ~f:ComprehendMedicalAsyncJobFilter.of_xml)
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -4952,6 +5010,7 @@ module ListEntitiesDetectionV2JobsResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobPropertiesList.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
@@ -4994,6 +5053,7 @@ module ListEntitiesDetectionV2JobsRequest =
         (Option.map ~f:ComprehendMedicalAsyncJobFilter.of_xml)
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5137,6 +5197,7 @@ module InferSNOMEDCTResponse =
           (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
       make ?characters ?sNOMEDCTDetails ?modelVersion ?paginationToken
         ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let characters = field_map json "Characters" Characters.of_json in
       let sNOMEDCTDetails =
@@ -5168,6 +5229,7 @@ module InferSNOMEDCTRequest =
         OntologyLinkingBoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text =
         field_map_exn json "Text" OntologyLinkingBoundedLengthString.of_json in
@@ -5285,6 +5347,7 @@ module InferRxNormResponse =
         RxNormEntityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
       make ?modelVersion ?paginationToken ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelVersion = field_map json "ModelVersion" String_.of_json in
       let paginationToken = field_map json "PaginationToken" String_.of_json in
@@ -5312,6 +5375,7 @@ module InferRxNormRequest =
         OntologyLinkingBoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text =
         field_map_exn json "Text" OntologyLinkingBoundedLengthString.of_json in
@@ -5429,6 +5493,7 @@ module InferICD10CMResponse =
         ICD10CMEntityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
       make ?modelVersion ?paginationToken ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelVersion = field_map json "ModelVersion" String_.of_json in
       let paginationToken = field_map json "PaginationToken" String_.of_json in
@@ -5456,6 +5521,7 @@ module InferICD10CMRequest =
         OntologyLinkingBoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text =
         field_map_exn json "Text" OntologyLinkingBoundedLengthString.of_json in
@@ -5574,6 +5640,7 @@ module DetectPHIResponse =
         EntityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
       make ~modelVersion ?paginationToken ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelVersion = field_map_exn json "ModelVersion" String_.of_json in
       let paginationToken = field_map json "PaginationToken" String_.of_json in
@@ -5600,6 +5667,7 @@ module DetectPHIRequest =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text = field_map_exn json "Text" BoundedLengthString.of_json in
       make ~text ()
@@ -5727,6 +5795,7 @@ module DetectEntitiesV2Response =
         EntityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
       make ~modelVersion ?paginationToken ?unmappedAttributes ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelVersion = field_map_exn json "ModelVersion" String_.of_json in
       let paginationToken = field_map json "PaginationToken" String_.of_json in
@@ -5755,6 +5824,7 @@ module DetectEntitiesV2Request =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text = field_map_exn json "Text" BoundedLengthString.of_json in
       make ~text ()
@@ -5882,6 +5952,7 @@ module DetectEntitiesResponse =
         EntityList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
       make ~modelVersion ?paginationToken ?unmappedAttributes ~entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let modelVersion = field_map_exn json "ModelVersion" String_.of_json in
       let paginationToken = field_map json "PaginationToken" String_.of_json in
@@ -5910,6 +5981,7 @@ module DetectEntitiesRequest =
         BoundedLengthString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text = field_map_exn json "Text" BoundedLengthString.of_json in
       make ~text ()
@@ -5989,6 +6061,7 @@ module DescribeSNOMEDCTInferenceJobResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobProperties.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comprehendMedicalAsyncJobProperties =
         field_map json "ComprehendMedicalAsyncJobProperties"
@@ -6013,6 +6086,7 @@ module DescribeSNOMEDCTInferenceJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -6093,6 +6167,7 @@ module DescribeRxNormInferenceJobResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobProperties.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comprehendMedicalAsyncJobProperties =
         field_map json "ComprehendMedicalAsyncJobProperties"
@@ -6117,6 +6192,7 @@ module DescribeRxNormInferenceJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -6197,6 +6273,7 @@ module DescribePHIDetectionJobResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobProperties.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comprehendMedicalAsyncJobProperties =
         field_map json "ComprehendMedicalAsyncJobProperties"
@@ -6221,6 +6298,7 @@ module DescribePHIDetectionJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -6301,6 +6379,7 @@ module DescribeICD10CMInferenceJobResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobProperties.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comprehendMedicalAsyncJobProperties =
         field_map json "ComprehendMedicalAsyncJobProperties"
@@ -6325,6 +6404,7 @@ module DescribeICD10CMInferenceJobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -6405,6 +6485,7 @@ module DescribeEntitiesDetectionV2JobResponse =
         (Option.map ~f:ComprehendMedicalAsyncJobProperties.of_xml)
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comprehendMedicalAsyncJobProperties =
         field_map json "ComprehendMedicalAsyncJobProperties"
@@ -6429,6 +6510,7 @@ module DescribeEntitiesDetectionV2JobRequest =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
     let to_json v = composed_to_json to_value v

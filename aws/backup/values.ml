@@ -75,6 +75,7 @@ module Lifecycle =
         (Option.map ~f:Long.of_xml)
           (Xml.child xml_arg0 "MoveToColdStorageAfterDays") in
       make ?deleteAfterDays ?moveToColdStorageAfterDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteAfterDays = field_map json "DeleteAfterDays" Long.of_json in
       let moveToColdStorageAfterDays =
@@ -182,6 +183,7 @@ module CopyAction =
       let lifecycle =
         (Option.map ~f:Lifecycle.of_xml) (Xml.child xml_arg0 "Lifecycle") in
       make ~destinationBackupVaultArn ?lifecycle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationBackupVaultArn =
         field_map_exn json "DestinationBackupVaultArn" ARN.of_json in
@@ -313,6 +315,7 @@ module ControlInputParameter =
         (Option.map ~f:ParameterName.of_xml)
           (Xml.child xml_arg0 "ParameterName") in
       make ?parameterValue ?parameterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parameterValue =
         field_map json "ParameterValue" ParameterValue.of_json in
@@ -628,6 +631,7 @@ module AdvancedBackupSetting =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?backupOptions ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupOptions =
         field_map json "BackupOptions" BackupOptions.of_json in
@@ -662,6 +666,7 @@ module ConditionParameter =
         (Option.map ~f:ConditionKey.of_xml)
           (Xml.child xml_arg0 "ConditionKey") in
       make ?conditionValue ?conditionKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conditionValue =
         field_map json "ConditionValue" ConditionValue.of_json in
@@ -762,6 +767,7 @@ module ControlScope =
         (Option.map ~f:ComplianceResourceIdList.of_xml)
           (Xml.child xml_arg0 "ComplianceResourceIds") in
       make ?tags ?complianceResourceTypes ?complianceResourceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" StringMap.of_json in
       let complianceResourceTypes =
@@ -872,6 +878,7 @@ module BackupRuleInput =
       make ?enableContinuousBackup ?copyActions ?recoveryPointTags ?lifecycle
         ?completionWindowMinutes ?startWindowMinutes ?scheduleExpression
         ~targetBackupVaultName ~ruleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableContinuousBackup =
         field_map json "EnableContinuousBackup" Boolean.of_json in
@@ -987,6 +994,7 @@ module ReportDeliveryChannel =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "S3BucketName") in
       make ?formats ?s3KeyPrefix ~s3BucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let formats = field_map json "Formats" FormatList.of_json in
       let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
@@ -1071,6 +1079,7 @@ module ReportSetting =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReportTemplate") in
       make ?numberOfFrameworks ?frameworkArns ~reportTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfFrameworks =
         field_map json "NumberOfFrameworks" Integer.of_json in
@@ -1103,6 +1112,7 @@ module ReportDestination =
       let s3BucketName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3BucketName") in
       make ?s3Keys ?s3BucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let s3Keys = field_map json "S3Keys" StringList.of_json in
       let s3BucketName = field_map json "S3BucketName" String_.of_json in
@@ -1193,6 +1203,7 @@ module CalculatedLifecycle =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "MoveToColdStorageAt") in
       make ?deleteAt ?moveToColdStorageAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteAt = field_map json "DeleteAt" Timestamp.of_json in
       let moveToColdStorageAt =
@@ -1242,6 +1253,7 @@ module RecoveryPointCreator =
       let backupPlanId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BackupPlanId") in
       make ?backupRuleId ?backupPlanVersion ?backupPlanArn ?backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupRuleId = field_map json "BackupRuleId" String_.of_json in
       let backupPlanVersion =
@@ -1495,6 +1507,7 @@ module Condition =
         ConditionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConditionType") in
       make ~conditionValue ~conditionKey ~conditionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conditionValue =
         field_map_exn json "ConditionValue" ConditionValue.of_json in
@@ -1613,6 +1626,7 @@ module BackupRule =
       make ?enableContinuousBackup ?copyActions ?ruleId ?recoveryPointTags
         ?lifecycle ?completionWindowMinutes ?startWindowMinutes
         ?scheduleExpression ~targetBackupVaultName ~ruleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableContinuousBackup =
         field_map json "EnableContinuousBackup" Boolean.of_json in
@@ -1711,6 +1725,7 @@ module FrameworkControl =
         ControlName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ControlName") in
       make ?controlScope ?controlInputParameters ~controlName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let controlScope = field_map json "ControlScope" ControlScope.of_json in
       let controlInputParameters =
@@ -1967,6 +1982,7 @@ module RestoreJobsListMember =
         ?iamRoleArn ?backupSizeInBytes ?percentDone ?statusMessage ?status
         ?completionDate ?creationDate ?recoveryPointArn ?restoreJobId
         ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let createdResourceArn =
@@ -2091,6 +2107,7 @@ module ReportPlan =
       make ?lastSuccessfulExecutionTime ?lastAttemptedExecutionTime
         ?creationTime ?deploymentStatus ?reportDeliveryChannel ?reportSetting
         ?reportPlanDescription ?reportPlanName ?reportPlanArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastSuccessfulExecutionTime =
         field_map json "LastSuccessfulExecutionTime" Timestamp.of_json in
@@ -2193,6 +2210,7 @@ module ReportJob =
         (Option.map ~f:ReportJobId.of_xml) (Xml.child xml_arg0 "ReportJobId") in
       make ?reportDestination ?statusMessage ?status ?completionTime
         ?creationTime ?reportTemplate ?reportPlanArn ?reportJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportDestination =
         field_map json "ReportDestination" ReportDestination.of_json in
@@ -2280,6 +2298,7 @@ module RecoveryPointByResource =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "RecoveryPointArn") in
       make ?backupVaultName ?backupSizeBytes ?encryptionKeyArn ?statusMessage
         ?status ?creationDate ?recoveryPointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map json "BackupVaultName" BackupVaultName.of_json in
@@ -2471,6 +2490,7 @@ module RecoveryPointByBackupVault =
         ?statusMessage ?status ?iamRoleArn ?createdBy ?resourceType
         ?resourceArn ?sourceBackupVaultArn ?backupVaultArn ?backupVaultName
         ?recoveryPointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastRestoreTime =
         field_map json "LastRestoreTime" Timestamp.of_json in
@@ -2537,6 +2557,7 @@ module ProtectedResource =
       let resourceArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?lastBackupTime ?resourceType ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastBackupTime = field_map json "LastBackupTime" Timestamp.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -2613,6 +2634,7 @@ module Framework =
           (Xml.child xml_arg0 "FrameworkName") in
       make ?deploymentStatus ?creationTime ?numberOfControls
         ?frameworkDescription ?frameworkArn ?frameworkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deploymentStatus =
         field_map json "DeploymentStatus" String_.of_json in
@@ -2774,6 +2796,7 @@ module CopyJob =
         ?destinationRecoveryPointArn ?destinationBackupVaultArn
         ?sourceRecoveryPointArn ?sourceBackupVaultArn ?copyJobId ?accountId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let createdBy = field_map json "CreatedBy" RecoveryPointCreator.of_json in
@@ -2903,6 +2926,7 @@ module BackupVaultListMember =
       make ?lockDate ?maxRetentionDays ?minRetentionDays ?locked
         ?numberOfRecoveryPoints ?creatorRequestId ?encryptionKeyArn
         ?creationDate ?backupVaultArn ?backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lockDate = field_map json "LockDate" Timestamp.of_json in
       let maxRetentionDays = field_map json "MaxRetentionDays" Long.of_json in
@@ -2985,6 +3009,7 @@ module BackupSelectionsListMember =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SelectionId") in
       make ?iamRoleArn ?creatorRequestId ?creationDate ?backupPlanId
         ?selectionName ?selectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamRoleArn = field_map json "IamRoleArn" IAMRoleArn.of_json in
       let creatorRequestId =
@@ -3090,6 +3115,7 @@ module BackupPlansListMember =
       make ?advancedBackupSettings ?lastExecutionDate ?creatorRequestId
         ?backupPlanName ?versionId ?deletionDate ?creationDate ?backupPlanId
         ?backupPlanArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedBackupSettings =
         field_map json "AdvancedBackupSettings"
@@ -3136,6 +3162,7 @@ module BackupPlanTemplatesListMember =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "BackupPlanTemplateId") in
       make ?backupPlanTemplateName ?backupPlanTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanTemplateName =
         field_map json "BackupPlanTemplateName" String_.of_json in
@@ -3331,6 +3358,7 @@ module BackupJob =
         ?backupSizeInBytes ?percentDone ?statusMessage ?state ?completionDate
         ?creationDate ?resourceArn ?recoveryPointArn ?backupVaultArn
         ?backupVaultName ?backupJobId ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupType = field_map json "BackupType" String_.of_json in
       let backupOptions =
@@ -3409,6 +3437,7 @@ module Conditions =
         (Option.map ~f:ConditionParameters.of_xml)
           (Xml.child xml_arg0 "StringEquals") in
       make ?stringNotLike ?stringLike ?stringNotEquals ?stringEquals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stringNotLike =
         field_map json "StringNotLike" ConditionParameters.of_json in
@@ -3520,6 +3549,7 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3556,6 +3586,7 @@ module InvalidParameterValueException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3592,6 +3623,7 @@ module MissingParameterValueException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3627,6 +3659,7 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3663,6 +3696,7 @@ module ServiceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3755,6 +3789,7 @@ module InvalidRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3833,6 +3868,7 @@ module AlreadyExistsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?arn ?creatorRequestId ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3871,6 +3907,7 @@ module LimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -3943,6 +3980,7 @@ module BackupPlanInput =
         BackupPlanName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BackupPlanName") in
       make ?advancedBackupSettings ~rules ~backupPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedBackupSettings =
         field_map json "AdvancedBackupSettings"
@@ -4537,6 +4575,7 @@ module BackupSelection =
           (Xml.child_exn ~context:context_ xml_arg0 "SelectionName") in
       make ?conditions ?notResources ?listOfTags ?resources ~iamRoleArn
         ~selectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conditions = field_map json "Conditions" Conditions.of_json in
       let notResources = field_map json "NotResources" ResourceArns.of_json in
@@ -4586,6 +4625,7 @@ module BackupPlan =
         BackupPlanName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BackupPlanName") in
       make ?advancedBackupSettings ~rules ~backupPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedBackupSettings =
         field_map json "AdvancedBackupSettings"
@@ -4624,6 +4664,7 @@ module DependencyFailureException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -4762,6 +4803,7 @@ module UpdateReportPlanOutput =
         (Option.map ~f:ReportPlanName.of_xml)
           (Xml.child xml_arg0 "ReportPlanName") in
       make ?creationTime ?reportPlanArn ?reportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
       let reportPlanArn = field_map json "ReportPlanArn" ARN.of_json in
@@ -4837,6 +4879,7 @@ module UpdateReportPlanInput =
           (Xml.child_exn ~context:context_ xml_arg0 "reportPlanName") in
       make ?idempotencyToken ?reportSetting ?reportDeliveryChannel
         ?reportPlanDescription ~reportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" String_.of_json in
@@ -4885,6 +4928,7 @@ module UpdateRegionSettingsInput =
         (Option.map ~f:ResourceTypeOptInPreference.of_xml)
           (Xml.child xml_arg0 "ResourceTypeOptInPreference") in
       make ?resourceTypeManagementPreference ?resourceTypeOptInPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTypeManagementPreference =
         field_map json "ResourceTypeManagementPreference"
@@ -5012,6 +5056,7 @@ module UpdateRecoveryPointLifecycleOutput =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "BackupVaultArn") in
       make ?calculatedLifecycle ?lifecycle ?recoveryPointArn ?backupVaultArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let calculatedLifecycle =
         field_map json "CalculatedLifecycle" CalculatedLifecycle.of_json in
@@ -5058,6 +5103,7 @@ module UpdateRecoveryPointLifecycleInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ?lifecycle ~recoveryPointArn ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycle = field_map json "Lifecycle" Lifecycle.of_json in
       let recoveryPointArn =
@@ -5086,6 +5132,7 @@ module UpdateGlobalSettingsInput =
         (Option.map ~f:GlobalSettings.of_xml)
           (Xml.child xml_arg0 "GlobalSettings") in
       make ?globalSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let globalSettings =
         field_map json "GlobalSettings" GlobalSettings.of_json in
@@ -5213,6 +5260,7 @@ module UpdateFrameworkOutput =
         (Option.map ~f:FrameworkName.of_xml)
           (Xml.child xml_arg0 "FrameworkName") in
       make ?creationTime ?frameworkArn ?frameworkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
       let frameworkArn = field_map json "FrameworkArn" ARN.of_json in
@@ -5275,6 +5323,7 @@ module UpdateFrameworkInput =
           (Xml.child_exn ~context:context_ xml_arg0 "frameworkName") in
       make ?idempotencyToken ?frameworkControls ?frameworkDescription
         ~frameworkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" String_.of_json in
@@ -5404,6 +5453,7 @@ module UpdateBackupPlanOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BackupPlanId") in
       make ?advancedBackupSettings ?versionId ?creationDate ?backupPlanArn
         ?backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedBackupSettings =
         field_map json "AdvancedBackupSettings"
@@ -5442,6 +5492,7 @@ module UpdateBackupPlanInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ~backupPlan ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlan =
         field_map_exn json "BackupPlan" BackupPlanInput.of_json in
@@ -5475,6 +5526,7 @@ module UntagResourceInput =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeyList ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeyList = field_map_exn json "TagKeyList" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ARN.of_json in
@@ -5505,6 +5557,7 @@ module TagResourceInput =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resourceArn = field_map_exn json "ResourceArn" ARN.of_json in
@@ -5530,6 +5583,7 @@ module StopBackupJobInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupJobId") in
       make ~backupJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupJobId = field_map_exn json "BackupJobId" String_.of_json in
       make ~backupJobId ()
@@ -5614,6 +5668,7 @@ module StartRestoreJobOutput =
         (Option.map ~f:RestoreJobId.of_xml)
           (Xml.child xml_arg0 "RestoreJobId") in
       make ?restoreJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restoreJobId = field_map json "RestoreJobId" RestoreJobId.of_json in
       make ?restoreJobId ()
@@ -5680,6 +5735,7 @@ module StartRestoreJobInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RecoveryPointArn") in
       make ?resourceType ?idempotencyToken ~iamRoleArn ~metadata
         ~recoveryPointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let idempotencyToken =
@@ -5769,6 +5825,7 @@ module StartReportJobOutput =
       let reportJobId =
         (Option.map ~f:ReportJobId.of_xml) (Xml.child xml_arg0 "ReportJobId") in
       make ?reportJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportJobId = field_map json "ReportJobId" ReportJobId.of_json in
       make ?reportJobId ()
@@ -5802,6 +5859,7 @@ module StartReportJobInput =
         ReportPlanName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportPlanName") in
       make ?idempotencyToken ~reportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" String_.of_json in
@@ -5911,6 +5969,7 @@ module StartCopyJobOutput =
       let copyJobId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CopyJobId") in
       make ?creationDate ?copyJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" Timestamp.of_json in
       let copyJobId = field_map json "CopyJobId" String_.of_json in
@@ -5988,6 +6047,7 @@ module StartCopyJobInput =
       make ?lifecycle ?idempotencyToken ~iamRoleArn
         ~destinationBackupVaultArn ~sourceBackupVaultName ~recoveryPointArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lifecycle = field_map json "Lifecycle" Lifecycle.of_json in
       let idempotencyToken =
@@ -6114,6 +6174,7 @@ module StartBackupJobOutput =
       let backupJobId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BackupJobId") in
       make ?creationDate ?recoveryPointArn ?backupJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" Timestamp.of_json in
       let recoveryPointArn = field_map json "RecoveryPointArn" ARN.of_json in
@@ -6221,6 +6282,7 @@ module StartBackupJobInput =
       make ?backupOptions ?recoveryPointTags ?lifecycle
         ?completeWindowMinutes ?startWindowMinutes ?idempotencyToken
         ~iamRoleArn ~resourceArn ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupOptions =
         field_map json "BackupOptions" BackupOptions.of_json in
@@ -6278,6 +6340,7 @@ module PutBackupVaultNotificationsInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultEvents ~sNSTopicArn ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultEvents =
         field_map_exn json "BackupVaultEvents" BackupVaultEvents.of_json in
@@ -6339,6 +6402,7 @@ module PutBackupVaultLockConfigurationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ?changeableForDays ?maxRetentionDays ?minRetentionDays
         ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let changeableForDays = field_map json "ChangeableForDays" Long.of_json in
       let maxRetentionDays = field_map json "MaxRetentionDays" Long.of_json in
@@ -6376,6 +6440,7 @@ module PutBackupVaultAccessPolicyInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ?policy ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" IAMPolicy.of_json in
       let backupVaultName =
@@ -6465,6 +6530,7 @@ module ListTagsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?tags ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6502,6 +6568,7 @@ module ListTagsInput =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6595,6 +6662,7 @@ module ListRestoreJobsOutput =
         (Option.map ~f:RestoreJobsList.of_xml)
           (Xml.child xml_arg0 "RestoreJobs") in
       make ?nextToken ?restoreJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let restoreJobs = field_map json "RestoreJobs" RestoreJobsList.of_json in
@@ -6663,6 +6731,7 @@ module ListRestoreJobsInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?byStatus ?byCreatedAfter ?byCreatedBefore ?byAccountId
         ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byStatus = field_map json "ByStatus" RestoreJobStatus.of_json in
       let byCreatedAfter = field_map json "ByCreatedAfter" Timestamp.of_json in
@@ -6741,6 +6810,7 @@ module ListReportPlansOutput =
         (Option.map ~f:ReportPlanList.of_xml)
           (Xml.child xml_arg0 "ReportPlans") in
       make ?nextToken ?reportPlans ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let reportPlans = field_map json "ReportPlans" ReportPlanList.of_json in
@@ -6771,6 +6841,7 @@ module ListReportPlansInput =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6841,6 +6912,7 @@ module ListReportJobsOutput =
         (Option.map ~f:ReportJobList.of_xml)
           (Xml.child xml_arg0 "ReportJobs") in
       make ?nextToken ?reportJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let reportJobs = field_map json "ReportJobs" ReportJobList.of_json in
@@ -6913,6 +6985,7 @@ module ListReportJobsInput =
           (Xml.child xml_arg0 "ReportPlanName") in
       make ?nextToken ?maxResults ?byStatus ?byCreationAfter
         ?byCreationBefore ?byReportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -7013,6 +7086,7 @@ module ListRecoveryPointsByResourceOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?recoveryPoints ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recoveryPoints =
         field_map json "RecoveryPoints" RecoveryPointByResourceList.of_json in
@@ -7052,6 +7126,7 @@ module ListRecoveryPointsByResourceInput =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7146,6 +7221,7 @@ module ListRecoveryPointsByBackupVaultOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?recoveryPoints ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recoveryPoints =
         field_map json "RecoveryPoints"
@@ -7237,6 +7313,7 @@ module ListRecoveryPointsByBackupVaultInput =
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ?byCreatedAfter ?byCreatedBefore ?byBackupPlanId ?byResourceType
         ?byResourceArn ?maxResults ?nextToken ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byCreatedAfter = field_map json "ByCreatedAfter" Timestamp.of_json in
       let byCreatedBefore =
@@ -7318,6 +7395,7 @@ module ListProtectedResourcesOutput =
         (Option.map ~f:ProtectedResourcesList.of_xml)
           (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let results = field_map json "Results" ProtectedResourcesList.of_json in
@@ -7347,6 +7425,7 @@ module ListProtectedResourcesInput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7418,6 +7497,7 @@ module ListFrameworksOutput =
         (Option.map ~f:FrameworkList.of_xml)
           (Xml.child xml_arg0 "Frameworks") in
       make ?nextToken ?frameworks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let frameworks = field_map json "Frameworks" FrameworkList.of_json in
@@ -7450,6 +7530,7 @@ module ListFrameworksInput =
         (Option.map ~f:MaxFrameworkInputs.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" MaxFrameworkInputs.of_json in
@@ -7519,6 +7600,7 @@ module ListCopyJobsOutput =
       let copyJobs =
         (Option.map ~f:CopyJobsList.of_xml) (Xml.child xml_arg0 "CopyJobs") in
       make ?nextToken ?copyJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let copyJobs = field_map json "CopyJobs" CopyJobsList.of_json in
@@ -7615,6 +7697,7 @@ module ListCopyJobsInput =
       make ?byAccountId ?byDestinationVaultArn ?byResourceType
         ?byCreatedAfter ?byCreatedBefore ?byState ?byResourceArn ?maxResults
         ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byAccountId = field_map json "ByAccountId" AccountId.of_json in
       let byDestinationVaultArn =
@@ -7718,6 +7801,7 @@ module ListBackupVaultsOutput =
         (Option.map ~f:BackupVaultList.of_xml)
           (Xml.child xml_arg0 "BackupVaultList") in
       make ?nextToken ?backupVaultList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let backupVaultList =
@@ -7748,6 +7832,7 @@ module ListBackupVaultsInput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7841,6 +7926,7 @@ module ListBackupSelectionsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?backupSelectionsList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupSelectionsList =
         field_map json "BackupSelectionsList" BackupSelectionsList.of_json in
@@ -7880,6 +7966,7 @@ module ListBackupSelectionsInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ?maxResults ?nextToken ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7973,6 +8060,7 @@ module ListBackupPlansOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?backupPlansList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlansList =
         field_map json "BackupPlansList" BackupPlansList.of_json in
@@ -8011,6 +8099,7 @@ module ListBackupPlansInput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?includeDeleted ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeDeleted = field_map json "IncludeDeleted" Boolean.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -8106,6 +8195,7 @@ module ListBackupPlanVersionsOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?backupPlanVersionsList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanVersionsList =
         field_map json "BackupPlanVersionsList"
@@ -8146,6 +8236,7 @@ module ListBackupPlanVersionsInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ?maxResults ?nextToken ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -8241,6 +8332,7 @@ module ListBackupPlanTemplatesOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?backupPlanTemplatesList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanTemplatesList =
         field_map json "BackupPlanTemplatesList"
@@ -8272,6 +8364,7 @@ module ListBackupPlanTemplatesInput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -8343,6 +8436,7 @@ module ListBackupJobsOutput =
         (Option.map ~f:BackupJobsList.of_xml)
           (Xml.child xml_arg0 "BackupJobs") in
       make ?nextToken ?backupJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let backupJobs = field_map json "BackupJobs" BackupJobsList.of_json in
@@ -8439,6 +8533,7 @@ module ListBackupJobsInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?byAccountId ?byResourceType ?byCreatedAfter ?byCreatedBefore
         ?byBackupVaultName ?byState ?byResourceArn ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let byAccountId = field_map json "ByAccountId" AccountId.of_json in
       let byResourceType =
@@ -8484,6 +8579,7 @@ module InvalidResourceStateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       make ?context ?type_ ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let context = field_map json "Context" String_.of_json in
       let type_ = field_map json "Type" String_.of_json in
@@ -8540,6 +8636,7 @@ module GetSupportedResourceTypesOutput =
         (Option.map ~f:ResourceTypes.of_xml)
           (Xml.child xml_arg0 "ResourceTypes") in
       make ?resourceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTypes =
         field_map json "ResourceTypes" ResourceTypes.of_json in
@@ -8640,6 +8737,7 @@ module GetRecoveryPointRestoreMetadataOutput =
       let backupVaultArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "BackupVaultArn") in
       make ?restoreMetadata ?recoveryPointArn ?backupVaultArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restoreMetadata = field_map json "RestoreMetadata" Metadata.of_json in
       let recoveryPointArn = field_map json "RecoveryPointArn" ARN.of_json in
@@ -8676,6 +8774,7 @@ module GetRecoveryPointRestoreMetadataInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~recoveryPointArn ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recoveryPointArn =
         field_map_exn json "RecoveryPointArn" ARN.of_json in
@@ -8794,6 +8893,7 @@ module GetBackupVaultNotificationsOutput =
           (Xml.child xml_arg0 "BackupVaultName") in
       make ?backupVaultEvents ?sNSTopicArn ?backupVaultArn ?backupVaultName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultEvents =
         field_map json "BackupVaultEvents" BackupVaultEvents.of_json in
@@ -8825,6 +8925,7 @@ module GetBackupVaultNotificationsInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map_exn json "BackupVaultName" BackupVaultName.of_json in
@@ -8924,6 +9025,7 @@ module GetBackupVaultAccessPolicyOutput =
         (Option.map ~f:BackupVaultName.of_xml)
           (Xml.child xml_arg0 "BackupVaultName") in
       make ?policy ?backupVaultArn ?backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policy = field_map json "Policy" IAMPolicy.of_json in
       let backupVaultArn = field_map json "BackupVaultArn" ARN.of_json in
@@ -8952,6 +9054,7 @@ module GetBackupVaultAccessPolicyInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map_exn json "BackupVaultName" BackupVaultName.of_json in
@@ -9075,6 +9178,7 @@ module GetBackupSelectionOutput =
           (Xml.child xml_arg0 "BackupSelection") in
       make ?creatorRequestId ?creationDate ?backupPlanId ?selectionId
         ?backupSelection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creatorRequestId =
         field_map json "CreatorRequestId" String_.of_json in
@@ -9113,6 +9217,7 @@ module GetBackupSelectionInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ~selectionId ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectionId = field_map_exn json "SelectionId" String_.of_json in
       let backupPlanId = field_map_exn json "BackupPlanId" String_.of_json in
@@ -9272,6 +9377,7 @@ module GetBackupPlanOutput =
       make ?advancedBackupSettings ?lastExecutionDate ?deletionDate
         ?creationDate ?creatorRequestId ?versionId ?backupPlanArn
         ?backupPlanId ?backupPlan ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedBackupSettings =
         field_map json "AdvancedBackupSettings"
@@ -9316,6 +9422,7 @@ module GetBackupPlanInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ?versionId ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" String_.of_json in
       let backupPlanId = field_map_exn json "BackupPlanId" String_.of_json in
@@ -9401,6 +9508,7 @@ module GetBackupPlanFromTemplateOutput =
         (Option.map ~f:BackupPlan.of_xml)
           (Xml.child xml_arg0 "BackupPlanDocument") in
       make ?backupPlanDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanDocument =
         field_map json "BackupPlanDocument" BackupPlan.of_json in
@@ -9425,6 +9533,7 @@ module GetBackupPlanFromTemplateInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "templateId") in
       make ~backupPlanTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanTemplateId =
         field_map_exn json "BackupPlanTemplateId" String_.of_json in
@@ -9517,6 +9626,7 @@ module GetBackupPlanFromJSONOutput =
       let backupPlan =
         (Option.map ~f:BackupPlan.of_xml) (Xml.child xml_arg0 "BackupPlan") in
       make ?backupPlan ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlan = field_map json "BackupPlan" BackupPlan.of_json in
       make ?backupPlan ()
@@ -9542,6 +9652,7 @@ module GetBackupPlanFromJSONInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BackupPlanTemplateJson") in
       make ~backupPlanTemplateJson ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanTemplateJson =
         field_map_exn json "BackupPlanTemplateJson" String_.of_json in
@@ -9627,6 +9738,7 @@ module ExportBackupPlanTemplateOutput =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "BackupPlanTemplateJson") in
       make ?backupPlanTemplateJson ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanTemplateJson =
         field_map json "BackupPlanTemplateJson" String_.of_json in
@@ -9651,6 +9763,7 @@ module ExportBackupPlanTemplateInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanId = field_map_exn json "BackupPlanId" String_.of_json in
       make ~backupPlanId ()
@@ -9684,6 +9797,7 @@ module DisassociateRecoveryPointInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~recoveryPointArn ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recoveryPointArn =
         field_map_exn json "RecoveryPointArn" ARN.of_json in
@@ -9888,6 +10002,7 @@ module DescribeRestoreJobOutput =
         ?iamRoleArn ?backupSizeInBytes ?percentDone ?statusMessage ?status
         ?completionDate ?creationDate ?recoveryPointArn ?restoreJobId
         ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let createdResourceArn =
@@ -9929,6 +10044,7 @@ module DescribeRestoreJobInput =
         RestoreJobId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "restoreJobId") in
       make ~restoreJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let restoreJobId =
         field_map_exn json "RestoreJobId" RestoreJobId.of_json in
@@ -10012,6 +10128,7 @@ module DescribeReportPlanOutput =
       let reportPlan =
         (Option.map ~f:ReportPlan.of_xml) (Xml.child xml_arg0 "ReportPlan") in
       make ?reportPlan ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportPlan = field_map json "ReportPlan" ReportPlan.of_json in
       make ?reportPlan ()
@@ -10036,6 +10153,7 @@ module DescribeReportPlanInput =
         ReportPlanName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportPlanName") in
       make ~reportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportPlanName =
         field_map_exn json "ReportPlanName" ReportPlanName.of_json in
@@ -10108,6 +10226,7 @@ module DescribeReportJobOutput =
       let reportJob =
         (Option.map ~f:ReportJob.of_xml) (Xml.child xml_arg0 "ReportJob") in
       make ?reportJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportJob = field_map json "ReportJob" ReportJob.of_json in
       make ?reportJob ()
@@ -10132,6 +10251,7 @@ module DescribeReportJobInput =
         ReportJobId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportJobId") in
       make ~reportJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportJobId = field_map_exn json "ReportJobId" ReportJobId.of_json in
       make ~reportJobId ()
@@ -10199,6 +10319,7 @@ module DescribeRegionSettingsOutput =
         (Option.map ~f:ResourceTypeOptInPreference.of_xml)
           (Xml.child xml_arg0 "ResourceTypeOptInPreference") in
       make ?resourceTypeManagementPreference ?resourceTypeOptInPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceTypeManagementPreference =
         field_map json "ResourceTypeManagementPreference"
@@ -10218,6 +10339,7 @@ module DescribeRegionSettingsInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10469,6 +10591,7 @@ module DescribeRecoveryPointOutput =
         ?creationDate ?statusMessage ?status ?iamRoleArn ?createdBy
         ?resourceType ?resourceArn ?sourceBackupVaultArn ?backupVaultArn
         ?backupVaultName ?recoveryPointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastRestoreTime =
         field_map json "LastRestoreTime" Timestamp.of_json in
@@ -10529,6 +10652,7 @@ module DescribeRecoveryPointInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~recoveryPointArn ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recoveryPointArn =
         field_map_exn json "RecoveryPointArn" ARN.of_json in
@@ -10633,6 +10757,7 @@ module DescribeProtectedResourceOutput =
       let resourceArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?lastBackupTime ?resourceType ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastBackupTime = field_map json "LastBackupTime" Timestamp.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -10658,6 +10783,7 @@ module DescribeProtectedResourceInput =
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" ARN.of_json in
       make ~resourceArn ()
@@ -10728,6 +10854,7 @@ module DescribeGlobalSettingsOutput =
         (Option.map ~f:GlobalSettings.of_xml)
           (Xml.child xml_arg0 "GlobalSettings") in
       make ?lastUpdateTime ?globalSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdateTime = field_map json "LastUpdateTime" Timestamp.of_json in
       let globalSettings =
@@ -10744,6 +10871,7 @@ module DescribeGlobalSettingsInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10895,6 +11023,7 @@ module DescribeFrameworkOutput =
       make ?idempotencyToken ?frameworkStatus ?deploymentStatus ?creationTime
         ?frameworkControls ?frameworkDescription ?frameworkArn ?frameworkName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" String_.of_json in
@@ -10932,6 +11061,7 @@ module DescribeFrameworkInput =
         FrameworkName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "frameworkName") in
       make ~frameworkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frameworkName =
         field_map_exn json "FrameworkName" FrameworkName.of_json in
@@ -11014,6 +11144,7 @@ module DescribeCopyJobOutput =
       let copyJob =
         (Option.map ~f:CopyJob.of_xml) (Xml.child xml_arg0 "CopyJob") in
       make ?copyJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyJob = field_map json "CopyJob" CopyJob.of_json in
       make ?copyJob ()
@@ -11035,6 +11166,7 @@ module DescribeCopyJobInput =
       let copyJobId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "copyJobId") in
       make ~copyJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let copyJobId = field_map_exn json "CopyJobId" String_.of_json in
       make ~copyJobId ()
@@ -11202,6 +11334,7 @@ module DescribeBackupVaultOutput =
       make ?lockDate ?maxRetentionDays ?minRetentionDays ?locked
         ?numberOfRecoveryPoints ?creatorRequestId ?creationDate
         ?encryptionKeyArn ?backupVaultArn ?backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lockDate = field_map json "LockDate" Timestamp.of_json in
       let maxRetentionDays = field_map json "MaxRetentionDays" Long.of_json in
@@ -11239,6 +11372,7 @@ module DescribeBackupVaultInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map_exn json "BackupVaultName" String_.of_json in
@@ -11503,6 +11637,7 @@ module DescribeBackupJobOutput =
         ?backupSizeInBytes ?percentDone ?statusMessage ?state ?completionDate
         ?creationDate ?resourceArn ?recoveryPointArn ?backupVaultArn
         ?backupVaultName ?backupJobId ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupType = field_map json "BackupType" String_.of_json in
       let backupOptions =
@@ -11553,6 +11688,7 @@ module DescribeBackupJobInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupJobId") in
       make ~backupJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupJobId = field_map_exn json "BackupJobId" String_.of_json in
       make ~backupJobId ()
@@ -11577,6 +11713,7 @@ module DeleteReportPlanInput =
         ReportPlanName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "reportPlanName") in
       make ~reportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportPlanName =
         field_map_exn json "ReportPlanName" ReportPlanName.of_json in
@@ -11611,6 +11748,7 @@ module DeleteRecoveryPointInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~recoveryPointArn ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recoveryPointArn =
         field_map_exn json "RecoveryPointArn" ARN.of_json in
@@ -11637,6 +11775,7 @@ module DeleteFrameworkInput =
         FrameworkName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "frameworkName") in
       make ~frameworkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frameworkName =
         field_map_exn json "FrameworkName" FrameworkName.of_json in
@@ -11662,6 +11801,7 @@ module DeleteBackupVaultNotificationsInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map_exn json "BackupVaultName" BackupVaultName.of_json in
@@ -11688,6 +11828,7 @@ module DeleteBackupVaultLockConfigurationInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map_exn json "BackupVaultName" BackupVaultName.of_json in
@@ -11713,6 +11854,7 @@ module DeleteBackupVaultInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map_exn json "BackupVaultName" String_.of_json in
@@ -11739,6 +11881,7 @@ module DeleteBackupVaultAccessPolicyInput =
         BackupVaultName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupVaultName =
         field_map_exn json "BackupVaultName" BackupVaultName.of_json in
@@ -11771,6 +11914,7 @@ module DeleteBackupSelectionInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ~selectionId ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let selectionId = field_map_exn json "SelectionId" String_.of_json in
       let backupPlanId = field_map_exn json "BackupPlanId" String_.of_json in
@@ -11885,6 +12029,7 @@ module DeleteBackupPlanOutput =
       let backupPlanId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BackupPlanId") in
       make ?versionId ?deletionDate ?backupPlanArn ?backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let versionId = field_map json "VersionId" String_.of_json in
       let deletionDate = field_map json "DeletionDate" Timestamp.of_json in
@@ -11911,6 +12056,7 @@ module DeleteBackupPlanInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let backupPlanId = field_map_exn json "BackupPlanId" String_.of_json in
       make ~backupPlanId ()
@@ -12018,6 +12164,7 @@ module CreateReportPlanOutput =
         (Option.map ~f:ReportPlanName.of_xml)
           (Xml.child xml_arg0 "ReportPlanName") in
       make ?creationTime ?reportPlanArn ?reportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
       let reportPlanArn = field_map json "ReportPlanArn" ARN.of_json in
@@ -12101,6 +12248,7 @@ module CreateReportPlanInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ReportPlanName") in
       make ?idempotencyToken ?reportPlanTags ~reportSetting
         ~reportDeliveryChannel ?reportPlanDescription ~reportPlanName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idempotencyToken =
         field_map json "IdempotencyToken" String_.of_json in
@@ -12213,6 +12361,7 @@ module CreateFrameworkOutput =
         (Option.map ~f:FrameworkName.of_xml)
           (Xml.child xml_arg0 "FrameworkName") in
       make ?frameworkArn ?frameworkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frameworkArn = field_map json "FrameworkArn" ARN.of_json in
       let frameworkName =
@@ -12282,6 +12431,7 @@ module CreateFrameworkInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FrameworkName") in
       make ?frameworkTags ?idempotencyToken ~frameworkControls
         ?frameworkDescription ~frameworkName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frameworkTags = field_map json "FrameworkTags" StringMap.of_json in
       let idempotencyToken =
@@ -12399,6 +12549,7 @@ module CreateBackupVaultOutput =
         (Option.map ~f:BackupVaultName.of_xml)
           (Xml.child xml_arg0 "BackupVaultName") in
       make ?creationDate ?backupVaultArn ?backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" Timestamp.of_json in
       let backupVaultArn = field_map json "BackupVaultArn" ARN.of_json in
@@ -12458,6 +12609,7 @@ module CreateBackupVaultInput =
           (Xml.child_exn ~context:context_ xml_arg0 "backupVaultName") in
       make ?creatorRequestId ?encryptionKeyArn ?backupVaultTags
         ~backupVaultName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creatorRequestId =
         field_map json "CreatorRequestId" String_.of_json in
@@ -12569,6 +12721,7 @@ module CreateBackupSelectionOutput =
       let selectionId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SelectionId") in
       make ?creationDate ?backupPlanId ?selectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationDate = field_map json "CreationDate" Timestamp.of_json in
       let backupPlanId = field_map json "BackupPlanId" String_.of_json in
@@ -12614,6 +12767,7 @@ module CreateBackupSelectionInput =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "backupPlanId") in
       make ?creatorRequestId ~backupSelection ~backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creatorRequestId =
         field_map json "CreatorRequestId" String_.of_json in
@@ -12748,6 +12902,7 @@ module CreateBackupPlanOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BackupPlanId") in
       make ?advancedBackupSettings ?versionId ?creationDate ?backupPlanArn
         ?backupPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let advancedBackupSettings =
         field_map json "AdvancedBackupSettings"
@@ -12796,6 +12951,7 @@ module CreateBackupPlanInput =
         BackupPlanInput.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BackupPlan") in
       make ?creatorRequestId ?backupPlanTags ~backupPlan ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creatorRequestId =
         field_map json "CreatorRequestId" String_.of_json in

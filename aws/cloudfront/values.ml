@@ -328,6 +328,7 @@ module CookieNames =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" CookieNameList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -436,6 +437,7 @@ module FunctionAssociation =
         FunctionARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FunctionARN") in
       make ~eventType ~functionARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventType = field_map_exn json "EventType" EventType.of_json in
       let functionARN = field_map_exn json "FunctionARN" FunctionARN.of_json in
@@ -478,6 +480,7 @@ module LambdaFunctionAssociation =
         LambdaFunctionARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LambdaFunctionARN") in
       make ?includeBody ~eventType ~lambdaFunctionARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let includeBody = field_map json "IncludeBody" Boolean.of_json in
       let eventType = field_map_exn json "EventType" EventType.of_json in
@@ -527,6 +530,7 @@ module OriginGroupMember =
       let originId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OriginId") in
       make ~originId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originId = field_map_exn json "OriginId" String_.of_json in
       make ~originId ()
@@ -558,6 +562,7 @@ module OriginCustomHeader =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HeaderName") in
       make ~headerValue ~headerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headerValue =
         field_map_exn json "HeaderValue" SensitiveStringType.of_json in
@@ -746,6 +751,7 @@ module ResponseHeadersPolicyCustomHeader =
       let header =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Header") in
       make ~override ~value ~header ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let override = field_map_exn json "Override" Boolean.of_json in
       let value = field_map_exn json "Value" String_.of_json in
@@ -888,6 +894,7 @@ module CachedMethods =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "Items" MethodsList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -922,6 +929,7 @@ module CookiePreference =
         ItemSelection.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Forward") in
       make ?whitelistedNames ~forward ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let whitelistedNames =
         field_map json "WhitelistedNames" CookieNames.of_json in
@@ -950,6 +958,7 @@ module Headers =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" HeaderList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -980,6 +989,7 @@ module QueryStringCacheKeys =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" QueryStringCacheKeysList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -1108,6 +1118,7 @@ module StatusCodes =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "Items" StatusCodeList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -1222,6 +1233,7 @@ module OriginSslProtocols =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "Items" SslProtocolsList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -1365,6 +1377,7 @@ module QueryStringNames =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" QueryStringNamesList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -1394,6 +1407,7 @@ module ResponseHeadersPolicyAccessControlAllowHeaders =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map_exn json "Items" AccessControlAllowHeadersList.of_json in
@@ -1425,6 +1439,7 @@ module ResponseHeadersPolicyAccessControlAllowMethods =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map_exn json "Items" AccessControlAllowMethodsList.of_json in
@@ -1455,6 +1470,7 @@ module ResponseHeadersPolicyAccessControlAllowOrigins =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map_exn json "Items" AccessControlAllowOriginsList.of_json in
@@ -1487,6 +1503,7 @@ module ResponseHeadersPolicyAccessControlExposeHeaders =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" AccessControlExposeHeadersList.of_json in
@@ -1549,6 +1566,7 @@ module ResponseHeadersPolicyContentSecurityPolicy =
       let override =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Override") in
       make ~contentSecurityPolicy ~override ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentSecurityPolicy =
         field_map_exn json "ContentSecurityPolicy" String_.of_json in
@@ -1573,6 +1591,7 @@ module ResponseHeadersPolicyContentTypeOptions =
       let override =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Override") in
       make ~override ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let override = field_map_exn json "Override" Boolean.of_json in
       make ~override ()
@@ -1604,6 +1623,7 @@ module ResponseHeadersPolicyFrameOptions =
       let override =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Override") in
       make ~frameOption ~override ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let frameOption =
         field_map_exn json "FrameOption" FrameOptionsList.of_json in
@@ -1638,6 +1658,7 @@ module ResponseHeadersPolicyReferrerPolicy =
       let override =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Override") in
       make ~referrerPolicy ~override ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let referrerPolicy =
         field_map_exn json "ReferrerPolicy" ReferrerPolicyList.of_json in
@@ -1691,6 +1712,7 @@ module ResponseHeadersPolicyStrictTransportSecurity =
       let override =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Override") in
       make ~accessControlMaxAgeSec ?preload ?includeSubdomains ~override ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessControlMaxAgeSec =
         field_map_exn json "AccessControlMaxAgeSec" Integer.of_json in
@@ -1742,6 +1764,7 @@ module ResponseHeadersPolicyXSSProtection =
       let override =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Override") in
       make ?reportUri ?modeBlock ~protection ~override ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportUri = field_map json "ReportUri" String_.of_json in
       let modeBlock = field_map json "ModeBlock" Boolean.of_json in
@@ -1870,6 +1893,7 @@ module FieldPatterns =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" FieldPatternList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -1909,6 +1933,7 @@ module ContentTypeProfile =
       let format =
         Format_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Format") in
       make ~contentType ?profileId ~format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map_exn json "ContentType" String_.of_json in
       let profileId = field_map json "ProfileId" String_.of_json in
@@ -1939,6 +1964,7 @@ module QueryArgProfile =
       let queryArg =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryArg") in
       make ~profileId ~queryArg ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let profileId = field_map_exn json "ProfileId" String_.of_json in
       let queryArg = field_map_exn json "QueryArg" String_.of_json in
@@ -1977,6 +2003,7 @@ module AllowedMethods =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?cachedMethods ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachedMethods =
         field_map json "CachedMethods" CachedMethods.of_json in
@@ -2029,6 +2056,7 @@ module ForwardedValues =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
       make ?queryStringCacheKeys ?headers ~cookies ~queryString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStringCacheKeys =
         field_map json "QueryStringCacheKeys" QueryStringCacheKeys.of_json in
@@ -2062,6 +2090,7 @@ module FunctionAssociations =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" FunctionAssociationList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -2094,6 +2123,7 @@ module LambdaFunctionAssociations =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" LambdaFunctionAssociationList.of_json in
@@ -2131,6 +2161,7 @@ module TrustedKeyGroups =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?items ~quantity ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" TrustedKeyGroupIdList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -2169,6 +2200,7 @@ module TrustedSigners =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?items ~quantity ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" AwsAccountNumberList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -2237,6 +2269,7 @@ module OriginGroupFailoverCriteria =
         StatusCodes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StatusCodes") in
       make ~statusCodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statusCodes = field_map_exn json "StatusCodes" StatusCodes.of_json in
       make ~statusCodes ()
@@ -2265,6 +2298,7 @@ module OriginGroupMembers =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "Items" OriginGroupMemberList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -2296,6 +2330,7 @@ module CustomHeaders =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" OriginCustomHeadersList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -2373,6 +2408,7 @@ module CustomOriginConfig =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HTTPPort") in
       make ?originKeepaliveTimeout ?originReadTimeout ?originSslProtocols
         ~originProtocolPolicy ~hTTPSPort ~hTTPPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originKeepaliveTimeout =
         field_map json "OriginKeepaliveTimeout" Integer.of_json in
@@ -2416,6 +2452,7 @@ module OriginShield =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?originShieldRegion ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originShieldRegion =
         field_map json "OriginShieldRegion" OriginShieldRegion.of_json in
@@ -2443,6 +2480,7 @@ module S3OriginConfig =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OriginAccessIdentity") in
       make ~originAccessIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originAccessIdentity =
         field_map_exn json "OriginAccessIdentity" String_.of_json in
@@ -2474,6 +2512,7 @@ module CachePolicyCookiesConfig =
         CachePolicyCookieBehavior.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CookieBehavior") in
       make ?cookies ~cookieBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cookies = field_map json "Cookies" CookieNames.of_json in
       let cookieBehavior =
@@ -2506,6 +2545,7 @@ module CachePolicyHeadersConfig =
         CachePolicyHeaderBehavior.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HeaderBehavior") in
       make ?headers ~headerBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headers = field_map json "Headers" Headers.of_json in
       let headerBehavior =
@@ -2544,6 +2584,7 @@ module CachePolicyQueryStringsConfig =
         CachePolicyQueryStringBehavior.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryStringBehavior") in
       make ?queryStrings ~queryStringBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStrings =
         field_map json "QueryStrings" QueryStringNames.of_json in
@@ -2678,6 +2719,7 @@ module ResponseHeadersPolicyCorsConfig =
         ?accessControlExposeHeaders ~accessControlAllowCredentials
         ~accessControlAllowMethods ~accessControlAllowHeaders
         ~accessControlAllowOrigins ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originOverride =
         field_map_exn json "OriginOverride" Boolean.of_json in
@@ -2728,6 +2770,7 @@ module ResponseHeadersPolicyCustomHeadersConfig =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" ResponseHeadersPolicyCustomHeaderList.of_json in
@@ -2818,6 +2861,7 @@ module ResponseHeadersPolicySecurityHeadersConfig =
       make ?strictTransportSecurity ?contentTypeOptions
         ?contentSecurityPolicy ?referrerPolicy ?frameOptions ?xSSProtection
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let strictTransportSecurity =
         field_map json "StrictTransportSecurity"
@@ -2866,6 +2910,7 @@ module KinesisStreamConfig =
       let roleARN =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
       make ~streamARN ~roleARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamARN = field_map_exn json "StreamARN" String_.of_json in
       let roleARN = field_map_exn json "RoleARN" String_.of_json in
@@ -2898,6 +2943,7 @@ module OriginRequestPolicyCookiesConfig =
         OriginRequestPolicyCookieBehavior.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CookieBehavior") in
       make ?cookies ~cookieBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cookies = field_map json "Cookies" CookieNames.of_json in
       let cookieBehavior =
@@ -2932,6 +2978,7 @@ module OriginRequestPolicyHeadersConfig =
         OriginRequestPolicyHeaderBehavior.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HeaderBehavior") in
       make ?headers ~headerBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let headers = field_map json "Headers" Headers.of_json in
       let headerBehavior =
@@ -2972,6 +3019,7 @@ module OriginRequestPolicyQueryStringsConfig =
         OriginRequestPolicyQueryStringBehavior.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryStringBehavior") in
       make ?queryStrings ~queryStringBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStrings =
         field_map json "QueryStrings" QueryStringNames.of_json in
@@ -3041,6 +3089,7 @@ module EncryptionEntity =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PublicKeyId") in
       make ~fieldPatterns ~providerId ~publicKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldPatterns =
         field_map_exn json "FieldPatterns" FieldPatterns.of_json in
@@ -3320,6 +3369,7 @@ module CacheBehavior =
         ?lambdaFunctionAssociations ?compress ?smoothStreaming
         ?allowedMethods ~viewerProtocolPolicy ?trustedKeyGroups
         ?trustedSigners ~targetOriginId ~pathPattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxTTL = field_map json "MaxTTL" Long.of_json in
       let defaultTTL = field_map json "DefaultTTL" Long.of_json in
@@ -3407,6 +3457,7 @@ module CustomErrorResponse =
       let errorCode =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
       make ?errorCachingMinTTL ?responseCode ?responsePagePath ~errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCachingMinTTL =
         field_map json "ErrorCachingMinTTL" Long.of_json in
@@ -3449,6 +3500,7 @@ module OriginGroup =
           (Xml.child_exn ~context:context_ xml_arg0 "FailoverCriteria") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~members ~failoverCriteria ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let members = field_map_exn json "Members" OriginGroupMembers.of_json in
       let failoverCriteria =
@@ -3558,6 +3610,7 @@ module Origin =
       make ?originShield ?connectionTimeout ?connectionAttempts
         ?customOriginConfig ?s3OriginConfig ?customHeaders ?originPath
         ~domainName ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originShield = field_map json "OriginShield" OriginShield.of_json in
       let connectionTimeout =
@@ -3697,6 +3750,7 @@ module ParametersInCacheKeyAndForwardedToOrigin =
              "EnableAcceptEncodingGzip") in
       make ~queryStringsConfig ~cookiesConfig ~headersConfig
         ?enableAcceptEncodingBrotli ~enableAcceptEncodingGzip ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStringsConfig =
         field_map_exn json "QueryStringsConfig"
@@ -3735,6 +3789,7 @@ module KeyPairIds =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" KeyPairIdList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -3828,6 +3883,7 @@ module ResponseHeadersPolicyConfig =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Comment") in
       make ?customHeadersConfig ?securityHeadersConfig ?corsConfig ~name
         ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let customHeadersConfig =
         field_map json "CustomHeadersConfig"
@@ -3883,6 +3939,7 @@ module EndPoint =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamType") in
       make ?kinesisStreamConfig ~streamType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let kinesisStreamConfig =
         field_map json "KinesisStreamConfig" KinesisStreamConfig.of_json in
@@ -3952,6 +4009,7 @@ module OriginRequestPolicyConfig =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Comment") in
       make ~queryStringsConfig ~cookiesConfig ~headersConfig ~name ?comment
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryStringsConfig =
         field_map_exn json "QueryStringsConfig"
@@ -3998,6 +4056,7 @@ module KeyGroupConfig =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?comment ~items ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" String_.of_json in
       let items = field_map_exn json "Items" PublicKeyIdList.of_json in
@@ -4102,6 +4161,7 @@ module ContentTypeProfiles =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" ContentTypeProfileList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -4132,6 +4192,7 @@ module QueryArgProfiles =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" QueryArgProfileList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -4162,6 +4223,7 @@ module AliasICPRecordal =
           (Xml.child xml_arg0 "ICPRecordalStatus") in
       let cNAME = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CNAME") in
       make ?iCPRecordalStatus ?cNAME ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iCPRecordalStatus =
         field_map json "ICPRecordalStatus" ICPRecordalStatus.of_json in
@@ -4301,6 +4363,7 @@ module GeoRestriction =
         GeoRestrictionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RestrictionType") in
       make ?items ~quantity ~restrictionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" LocationList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -4473,6 +4536,7 @@ module CachePolicyConfig =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Comment") in
       make ?parametersInCacheKeyAndForwardedToOrigin ~minTTL ?maxTTL
         ?defaultTTL ~name ?comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let parametersInCacheKeyAndForwardedToOrigin =
         field_map json "ParametersInCacheKeyAndForwardedToOrigin"
@@ -4557,6 +4621,7 @@ module Signer =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "AwsAccountNumber") in
       make ?keyPairIds ?awsAccountNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPairIds = field_map json "KeyPairIds" KeyPairIds.of_json in
       let awsAccountNumber =
@@ -4586,6 +4651,7 @@ module KGKeyPairIds =
       let keyGroupId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KeyGroupId") in
       make ?keyPairIds ?keyGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPairIds = field_map json "KeyPairIds" KeyPairIds.of_json in
       let keyGroupId = field_map json "KeyGroupId" String_.of_json in
@@ -4616,6 +4682,7 @@ module Aliases =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" AliasList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -4678,6 +4745,7 @@ module S3Origin =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~originAccessIdentity ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originAccessIdentity =
         field_map_exn json "OriginAccessIdentity" String_.of_json in
@@ -4722,6 +4790,7 @@ module ResponseHeadersPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~responseHeadersPolicyConfig ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseHeadersPolicyConfig =
         field_map_exn json "ResponseHeadersPolicyConfig"
@@ -4841,6 +4910,7 @@ module OriginRequestPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~originRequestPolicyConfig ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originRequestPolicyConfig =
         field_map_exn json "OriginRequestPolicyConfig"
@@ -4909,6 +4979,7 @@ module KeyGroup =
           (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~keyGroupConfig ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyGroupConfig =
         field_map_exn json "KeyGroupConfig" KeyGroupConfig.of_json in
@@ -4941,6 +5012,7 @@ module FunctionConfig =
       let comment =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Comment") in
       make ~runtime ~comment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runtime = field_map_exn json "Runtime" FunctionRuntime.of_json in
       let comment = field_map_exn json "Comment" String_.of_json in
@@ -4988,6 +5060,7 @@ module FunctionMetadata =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FunctionARN") in
       make ~lastModifiedTime ?createdTime ?stage ~functionARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastModifiedTime =
         field_map_exn json "LastModifiedTime" Timestamp.of_json in
@@ -5041,6 +5114,7 @@ module EncryptionEntities =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" EncryptionEntityList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -5078,6 +5152,7 @@ module ContentTypeProfileConfig =
           (Xml.child_exn ~context:context_ xml_arg0
              "ForwardWhenContentTypeIsUnknown") in
       make ?contentTypeProfiles ~forwardWhenContentTypeIsUnknown ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentTypeProfiles =
         field_map json "ContentTypeProfiles" ContentTypeProfiles.of_json in
@@ -5117,6 +5192,7 @@ module QueryArgProfileConfig =
           (Xml.child_exn ~context:context_ xml_arg0
              "ForwardWhenQueryArgProfileIsUnknown") in
       make ?queryArgProfiles ~forwardWhenQueryArgProfileIsUnknown ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryArgProfiles =
         field_map json "QueryArgProfiles" QueryArgProfiles.of_json in
@@ -5174,6 +5250,7 @@ module CacheBehaviors =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" CacheBehaviorList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -5205,6 +5282,7 @@ module CustomErrorResponses =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" CustomErrorResponseList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -5394,6 +5472,7 @@ module DefaultCacheBehavior =
         ?lambdaFunctionAssociations ?compress ?smoothStreaming
         ?allowedMethods ~viewerProtocolPolicy ?trustedKeyGroups
         ?trustedSigners ~targetOriginId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxTTL = field_map json "MaxTTL" Long.of_json in
       let defaultTTL = field_map json "DefaultTTL" Long.of_json in
@@ -5481,6 +5560,7 @@ module OriginGroups =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" OriginGroupList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -5508,6 +5588,7 @@ module Origins =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ~items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map_exn json "Items" OriginList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -5534,6 +5615,7 @@ module Restrictions =
         GeoRestriction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GeoRestriction") in
       make ~geoRestriction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let geoRestriction =
         field_map_exn json "GeoRestriction" GeoRestriction.of_json in
@@ -5624,6 +5706,7 @@ module ViewerCertificate =
       make ?certificateSource ?certificate ?minimumProtocolVersion
         ?sSLSupportMethod ?aCMCertificateArn ?iAMCertificateId
         ?cloudFrontDefaultCertificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateSource =
         field_map json "CertificateSource" CertificateSource.of_json in
@@ -5677,6 +5760,7 @@ module CachePolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~cachePolicyConfig ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachePolicyConfig =
         field_map_exn json "CachePolicyConfig" CachePolicyConfig.of_json in
@@ -5758,6 +5842,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -5817,6 +5902,7 @@ module StreamingLoggingConfig =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~prefix ~bucket ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map_exn json "Prefix" String_.of_json in
       let bucket = field_map_exn json "Bucket" String_.of_json in
@@ -5902,6 +5988,7 @@ module LoggingConfig =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~prefix ~bucket ~includeCookies ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix = field_map_exn json "Prefix" String_.of_json in
       let bucket = field_map_exn json "Bucket" String_.of_json in
@@ -6016,6 +6103,7 @@ module StreamingDistributionSummary =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~enabled ~priceClass ~comment ~trustedSigners ~aliases ~s3Origin
         ~domainName ~lastModifiedTime ~status ~aRN ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Boolean.of_json in
       let priceClass = field_map_exn json "PriceClass" PriceClass.of_json in
@@ -6062,6 +6150,7 @@ module ResponseHeadersPolicySummary =
         ResponseHeadersPolicyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~responseHeadersPolicy ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseHeadersPolicy =
         field_map_exn json "ResponseHeadersPolicy"
@@ -6116,6 +6205,7 @@ module RealtimeLogConfig =
       let aRN =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
       make ~fields ~endPoints ~samplingRate ~name ~aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fields = field_map_exn json "Fields" FieldList.of_json in
       let endPoints = field_map_exn json "EndPoints" EndPointList.of_json in
@@ -6165,6 +6255,7 @@ module PublicKeySummary =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~encodedKey ~createdTime ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" String_.of_json in
       let encodedKey = field_map_exn json "EncodedKey" String_.of_json in
@@ -6200,6 +6291,7 @@ module OriginRequestPolicySummary =
         OriginRequestPolicyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~originRequestPolicy ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originRequestPolicy =
         field_map_exn json "OriginRequestPolicy" OriginRequestPolicy.of_json in
@@ -6221,6 +6313,7 @@ module KeyGroupSummary =
       let keyGroup =
         KeyGroup.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyGroup") in
       make ~keyGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyGroup = field_map_exn json "KeyGroup" KeyGroup.of_json in
       make ~keyGroup ()
@@ -6251,6 +6344,7 @@ module InvalidationSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~status ~createTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" String_.of_json in
       let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
@@ -6297,6 +6391,7 @@ module FunctionSummary =
       let name =
         FunctionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~functionMetadata ~functionConfig ?status ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionMetadata =
         field_map_exn json "FunctionMetadata" FunctionMetadata.of_json in
@@ -6355,6 +6450,7 @@ module FieldLevelEncryptionProfileSummary =
           (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~encryptionEntities ~name ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" String_.of_json in
       let encryptionEntities =
@@ -6423,6 +6519,7 @@ module FieldLevelEncryptionSummary =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?contentTypeProfileConfig ?queryArgProfileConfig ?comment
         ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentTypeProfileConfig =
         field_map json "ContentTypeProfileConfig"
@@ -6629,6 +6726,7 @@ module DistributionSummary =
         ~customErrorResponses ~cacheBehaviors ~defaultCacheBehavior
         ?originGroups ~origins ~aliases ~domainName ~lastModifiedTime ~status
         ~aRN ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliasICPRecordals =
         field_map json "AliasICPRecordals" AliasICPRecordals.of_json in
@@ -6694,6 +6792,7 @@ module ConflictingAlias =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DistributionId") in
       let alias = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Alias") in
       make ?accountId ?distributionId ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "AccountId" String_.of_json in
       let distributionId = field_map json "DistributionId" String_.of_json in
@@ -6733,6 +6832,7 @@ module CloudFrontOriginAccessIdentitySummary =
           (Xml.child_exn ~context:context_ xml_arg0 "S3CanonicalUserId") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~comment ~s3CanonicalUserId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map_exn json "Comment" String_.of_json in
       let s3CanonicalUserId =
@@ -6765,6 +6865,7 @@ module CachePolicySummary =
         CachePolicyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~cachePolicy ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachePolicy = field_map_exn json "CachePolicy" CachePolicy.of_json in
       let type_ = field_map_exn json "Type" CachePolicyType.of_json in
@@ -6822,6 +6923,7 @@ module Paths =
       let quantity =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Quantity") in
       make ?items ~quantity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" PathList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -6882,6 +6984,7 @@ module ActiveTrustedSigners =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?items ~quantity ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" SignerList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -6972,6 +7075,7 @@ module StreamingDistributionConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ~enabled ?priceClass ~trustedSigners ?logging ~comment ?aliases
         ~s3Origin ~callerReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enabled = field_map_exn json "Enabled" Boolean.of_json in
       let priceClass = field_map json "PriceClass" PriceClass.of_json in
@@ -7026,6 +7130,7 @@ module PublicKeyConfig =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ?comment ~encodedKey ~name ~callerReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map json "Comment" String_.of_json in
       let encodedKey = field_map_exn json "EncodedKey" String_.of_json in
@@ -7077,6 +7182,7 @@ module FieldLevelEncryptionProfileConfig =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~encryptionEntities ?comment ~callerReference ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionEntities =
         field_map_exn json "EncryptionEntities" EncryptionEntities.of_json in
@@ -7141,6 +7247,7 @@ module FieldLevelEncryptionConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ?contentTypeProfileConfig ?queryArgProfileConfig ?comment
         ~callerReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentTypeProfileConfig =
         field_map json "ContentTypeProfileConfig"
@@ -7184,6 +7291,7 @@ module ActiveTrustedKeyGroups =
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?items ~quantity ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" KGKeyPairIdsList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -7361,6 +7469,7 @@ module DistributionConfig =
         ?customErrorResponses ?cacheBehaviors ~defaultCacheBehavior
         ?originGroups ~origins ?defaultRootObject ?aliases ~callerReference
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let isIPV6Enabled = field_map json "IsIPV6Enabled" Boolean.of_json in
       let httpVersion = field_map json "HttpVersion" HttpVersion.of_json in
@@ -7418,6 +7527,7 @@ module CloudFrontOriginAccessIdentityConfig =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ~comment ~callerReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let comment = field_map_exn json "Comment" String_.of_json in
       let callerReference =
@@ -7882,6 +7992,7 @@ module RealtimeMetricsSubscriptionConfig =
           (Xml.child_exn ~context:context_ xml_arg0
              "RealtimeMetricsSubscriptionStatus") in
       make ~realtimeMetricsSubscriptionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeMetricsSubscriptionStatus =
         field_map_exn json "RealtimeMetricsSubscriptionStatus"
@@ -7915,6 +8026,7 @@ module InvalidationBatch =
       let paths =
         Paths.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Paths") in
       make ~callerReference ~paths ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let callerReference =
         field_map_exn json "CallerReference" String_.of_json in
@@ -7936,6 +8048,7 @@ module Tags =
     let of_xml xml_arg0 =
       let items = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Items") in
       make ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" TagList.of_json in make ?items ()
     let to_json v = composed_to_json to_value v
@@ -7953,6 +8066,7 @@ module AccessDenied =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -7971,6 +8085,7 @@ module CNAMEAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -7989,6 +8104,7 @@ module IllegalUpdate =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8007,6 +8123,7 @@ module InconsistentQuantities =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8025,6 +8142,7 @@ module InvalidArgument =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8043,6 +8161,7 @@ module InvalidIfMatchVersion =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8061,6 +8180,7 @@ module InvalidOriginAccessIdentity =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8080,6 +8200,7 @@ module MissingBody =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8099,6 +8220,7 @@ module NoSuchStreamingDistribution =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8117,6 +8239,7 @@ module PreconditionFailed =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8202,6 +8325,7 @@ module StreamingDistribution =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~streamingDistributionConfig ~activeTrustedSigners ~domainName
         ?lastModifiedTime ~status ~aRN ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingDistributionConfig =
         field_map_exn json "StreamingDistributionConfig"
@@ -8233,6 +8357,7 @@ module TooManyStreamingDistributionCNAMEs =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8252,6 +8377,7 @@ module TooManyTrustedSigners =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8271,6 +8397,7 @@ module TrustedSignerDoesNotExist =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8289,6 +8416,7 @@ module NoSuchResponseHeadersPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8307,6 +8435,7 @@ module ResponseHeadersPolicyAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8326,6 +8455,7 @@ module TooManyCustomHeadersInResponseHeadersPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8345,6 +8475,7 @@ module NoSuchRealtimeLogConfig =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8363,6 +8494,7 @@ module CannotChangeImmutablePublicKeyFields =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8381,6 +8513,7 @@ module NoSuchPublicKey =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8417,6 +8550,7 @@ module PublicKey =
           (Xml.child_exn ~context:context_ xml_arg0 "CreatedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~publicKeyConfig ~createdTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicKeyConfig =
         field_map_exn json "PublicKeyConfig" PublicKeyConfig.of_json in
@@ -8439,6 +8573,7 @@ module NoSuchOriginRequestPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8457,6 +8592,7 @@ module OriginRequestPolicyAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8476,6 +8612,7 @@ module TooManyCookiesInOriginRequestPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8495,6 +8632,7 @@ module TooManyHeadersInOriginRequestPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8514,6 +8652,7 @@ module TooManyQueryStringsInOriginRequestPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8533,6 +8672,7 @@ module KeyGroupAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8552,6 +8692,7 @@ module NoSuchResource =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8570,6 +8711,7 @@ module TooManyPublicKeysInKeyGroup =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8589,6 +8731,7 @@ module FunctionSizeLimitExceeded =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8608,6 +8751,7 @@ module NoSuchFunctionExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8626,6 +8770,7 @@ module UnsupportedOperation =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8681,6 +8826,7 @@ module FieldLevelEncryptionProfile =
           (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~fieldLevelEncryptionProfileConfig ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldLevelEncryptionProfileConfig =
         field_map_exn json "FieldLevelEncryptionProfileConfig"
@@ -8704,6 +8850,7 @@ module FieldLevelEncryptionProfileAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8723,6 +8870,7 @@ module FieldLevelEncryptionProfileSizeExceeded =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8742,6 +8890,7 @@ module NoSuchFieldLevelEncryptionProfile =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8761,6 +8910,7 @@ module TooManyFieldLevelEncryptionEncryptionEntities =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8780,6 +8930,7 @@ module TooManyFieldLevelEncryptionFieldPatterns =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8823,6 +8974,7 @@ module FieldLevelEncryption =
           (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~fieldLevelEncryptionConfig ~lastModifiedTime ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldLevelEncryptionConfig =
         field_map_exn json "FieldLevelEncryptionConfig"
@@ -8847,6 +8999,7 @@ module NoSuchFieldLevelEncryptionConfig =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8866,6 +9019,7 @@ module QueryArgProfileEmpty =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8885,6 +9039,7 @@ module TooManyFieldLevelEncryptionContentTypeProfiles =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -8904,6 +9059,7 @@ module TooManyFieldLevelEncryptionQueryArgProfiles =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9017,6 +9173,7 @@ module Distribution =
       make ?aliasICPRecordals ~distributionConfig ?activeTrustedKeyGroups
         ?activeTrustedSigners ~domainName ~inProgressInvalidationBatches
         ~lastModifiedTime ~status ~aRN ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliasICPRecordals =
         field_map json "AliasICPRecordals" AliasICPRecordals.of_json in
@@ -9054,6 +9211,7 @@ module IllegalFieldLevelEncryptionConfigAssociationWithCacheBehavior =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9073,6 +9231,7 @@ module InvalidDefaultRootObject =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9092,6 +9251,7 @@ module InvalidErrorCode =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9110,6 +9270,7 @@ module InvalidForwardCookies =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9129,6 +9290,7 @@ module InvalidFunctionAssociation =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9147,6 +9309,7 @@ module InvalidGeoRestrictionParameter =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9165,6 +9328,7 @@ module InvalidHeadersForS3Origin =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9184,6 +9348,7 @@ module InvalidLambdaFunctionAssociation =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9203,6 +9368,7 @@ module InvalidLocationCode =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9221,6 +9387,7 @@ module InvalidMinimumProtocolVersion =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9239,6 +9406,7 @@ module InvalidOriginKeepaliveTimeout =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9258,6 +9426,7 @@ module InvalidOriginReadTimeout =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9276,6 +9445,7 @@ module InvalidQueryStringParameters =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9294,6 +9464,7 @@ module InvalidRelativePath =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9313,6 +9484,7 @@ module InvalidRequiredProtocol =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9332,6 +9504,7 @@ module InvalidResponseCode =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9350,6 +9523,7 @@ module InvalidTTLOrder =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9368,6 +9542,7 @@ module InvalidViewerCertificate =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9386,6 +9561,7 @@ module InvalidWebACLId =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9405,6 +9581,7 @@ module NoSuchCachePolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9423,6 +9600,7 @@ module NoSuchDistribution =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9441,6 +9619,7 @@ module NoSuchOrigin =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9459,6 +9638,7 @@ module RealtimeLogConfigOwnerMismatch =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9478,6 +9658,7 @@ module TooManyCacheBehaviors =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9497,6 +9678,7 @@ module TooManyCertificates =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9515,6 +9697,7 @@ module TooManyCookieNamesInWhiteList =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9534,6 +9717,7 @@ module TooManyDistributionCNAMEs =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9553,6 +9737,7 @@ module TooManyDistributionsAssociatedToCachePolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9572,6 +9757,7 @@ module TooManyDistributionsAssociatedToFieldLevelEncryptionConfig =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9591,6 +9777,7 @@ module TooManyDistributionsAssociatedToKeyGroup =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9610,6 +9797,7 @@ module TooManyDistributionsAssociatedToOriginRequestPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9629,6 +9817,7 @@ module TooManyDistributionsAssociatedToResponseHeadersPolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9648,6 +9837,7 @@ module TooManyDistributionsWithFunctionAssociations =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9667,6 +9857,7 @@ module TooManyDistributionsWithLambdaAssociations =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9686,6 +9877,7 @@ module TooManyDistributionsWithSingleFunctionARN =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9705,6 +9897,7 @@ module TooManyFunctionAssociations =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9724,6 +9917,7 @@ module TooManyHeadersInForwardedValues =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9743,6 +9937,7 @@ module TooManyKeyGroupsAssociatedToDistribution =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9762,6 +9957,7 @@ module TooManyLambdaFunctionAssociations =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9781,6 +9977,7 @@ module TooManyOriginCustomHeaders =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9799,6 +9996,7 @@ module TooManyOriginGroupsPerDistribution =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9818,6 +10016,7 @@ module TooManyOrigins =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9836,6 +10035,7 @@ module TooManyQueryStringParameters =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9854,6 +10054,7 @@ module TrustedKeyGroupDoesNotExist =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9896,6 +10097,7 @@ module CloudFrontOriginAccessIdentity =
           (Xml.child_exn ~context:context_ xml_arg0 "S3CanonicalUserId") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?cloudFrontOriginAccessIdentityConfig ~s3CanonicalUserId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudFrontOriginAccessIdentityConfig =
         field_map json "CloudFrontOriginAccessIdentityConfig"
@@ -9919,6 +10121,7 @@ module NoSuchCloudFrontOriginAccessIdentity =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9937,6 +10140,7 @@ module CachePolicyAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9956,6 +10160,7 @@ module TooManyCookiesInCachePolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9975,6 +10180,7 @@ module TooManyHeadersInCachePolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -9994,6 +10200,7 @@ module TooManyQueryStringsInCachePolicy =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -10032,6 +10239,7 @@ module TagKeys =
       let items =
         (Option.map ~f:TagKeyList.of_xml) (Xml.child xml_arg0 "Items") in
       make ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" TagKeyList.of_json in make ?items ()
     let to_json v = composed_to_json to_value v
@@ -10049,6 +10257,7 @@ module TestFunctionFailed =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -10118,6 +10327,7 @@ module TestResult =
           (Xml.child xml_arg0 "FunctionSummary") in
       make ?functionOutput ?functionErrorMessage ?functionExecutionLogs
         ?computeUtilization ?functionSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionOutput =
         field_map json "FunctionOutput" SensitiveStringType.of_json in
@@ -10160,6 +10370,7 @@ module InvalidTagging =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -10229,6 +10440,7 @@ module StreamingDistributionList =
       let marker =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Marker") in
       make ?items ~quantity ~isTruncated ~maxItems ?nextMarker ~marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" StreamingDistributionSummaryList.of_json in
@@ -10279,6 +10491,7 @@ module ResponseHeadersPolicyList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" ResponseHeadersPolicySummaryList.of_json in
@@ -10335,6 +10548,7 @@ module RealtimeLogConfigs =
       let maxItems =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
       make ?nextMarker ~marker ~isTruncated ?items ~maxItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextMarker = field_map json "NextMarker" String_.of_json in
       let marker = field_map_exn json "Marker" String_.of_json in
@@ -10382,6 +10596,7 @@ module PublicKeyList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" PublicKeySummaryList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -10431,6 +10646,7 @@ module OriginRequestPolicyList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" OriginRequestPolicySummaryList.of_json in
@@ -10477,6 +10693,7 @@ module KeyGroupList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" KeyGroupSummaryList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -10548,6 +10765,7 @@ module InvalidationList =
       let marker =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Marker") in
       make ?items ~quantity ~isTruncated ~maxItems ?nextMarker ~marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" InvalidationSummaryList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -10596,6 +10814,7 @@ module FunctionList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" FunctionSummaryList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -10644,6 +10863,7 @@ module FieldLevelEncryptionProfileList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" FieldLevelEncryptionProfileSummaryList.of_json in
@@ -10692,6 +10912,7 @@ module FieldLevelEncryptionList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items" FieldLevelEncryptionSummaryList.of_json in
@@ -10764,6 +10985,7 @@ module DistributionList =
       let marker =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Marker") in
       make ?items ~quantity ~isTruncated ~maxItems ?nextMarker ~marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" DistributionSummaryList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -10834,6 +11056,7 @@ module DistributionIdList =
       let marker =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Marker") in
       make ?items ~quantity ~isTruncated ~maxItems ?nextMarker ~marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" DistributionIdListSummary.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -10880,6 +11103,7 @@ module ConflictingAliasesList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ?quantity ?maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" ConflictingAliases.of_json in
       let quantity = field_map json "Quantity" Integer.of_json in
@@ -10999,6 +11223,7 @@ module CloudFrontOriginAccessIdentityList =
       let marker =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Marker") in
       make ?items ~quantity ~isTruncated ~maxItems ?nextMarker ~marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items =
         field_map json "Items"
@@ -11050,6 +11275,7 @@ module CachePolicyList =
       let nextMarker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?items ~quantity ~maxItems ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let items = field_map json "Items" CachePolicySummaryList.of_json in
       let quantity = field_map_exn json "Quantity" Integer.of_json in
@@ -11079,6 +11305,7 @@ module MonitoringSubscription =
         (Option.map ~f:RealtimeMetricsSubscriptionConfig.of_xml)
           (Xml.child xml_arg0 "RealtimeMetricsSubscriptionConfig") in
       make ?realtimeMetricsSubscriptionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeMetricsSubscriptionConfig =
         field_map json "RealtimeMetricsSubscriptionConfig"
@@ -11128,6 +11355,7 @@ module Invalidation =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~invalidationBatch ~createTime ~status ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidationBatch =
         field_map_exn json "InvalidationBatch" InvalidationBatch.of_json in
@@ -11150,6 +11378,7 @@ module NoSuchInvalidation =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11168,6 +11397,7 @@ module InvalidOrigin =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11187,6 +11417,7 @@ module StreamingDistributionAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11206,6 +11437,7 @@ module TooManyStreamingDistributions =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11240,6 +11472,7 @@ module StreamingDistributionConfigWithTags =
           (Xml.child_exn ~context:context_ xml_arg0
              "StreamingDistributionConfig") in
       make ~tags ~streamingDistributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let streamingDistributionConfig =
@@ -11262,6 +11495,7 @@ module TooManyResponseHeadersPolicies =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11281,6 +11515,7 @@ module RealtimeLogConfigAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11300,6 +11535,7 @@ module TooManyRealtimeLogConfigs =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11319,6 +11555,7 @@ module PublicKeyAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11337,6 +11574,7 @@ module TooManyPublicKeys =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11356,6 +11594,7 @@ module TooManyOriginRequestPolicies =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11375,6 +11614,7 @@ module TooManyKeyGroups =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11394,6 +11634,7 @@ module BatchTooLarge =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11412,6 +11653,7 @@ module TooManyInvalidationsInProgress =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11431,6 +11673,7 @@ module FunctionAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11450,6 +11693,7 @@ module TooManyFunctions =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11469,6 +11713,7 @@ module TooManyFieldLevelEncryptionProfiles =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11488,6 +11733,7 @@ module FieldLevelEncryptionConfigAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11507,6 +11753,7 @@ module TooManyFieldLevelEncryptionConfigs =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11526,6 +11773,7 @@ module DistributionAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11545,6 +11793,7 @@ module InvalidProtocolSettings =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11564,6 +11813,7 @@ module TooManyDistributions =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11595,6 +11845,7 @@ module DistributionConfigWithTags =
         DistributionConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionConfig") in
       make ~tags ~distributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let distributionConfig =
@@ -11616,6 +11867,7 @@ module CloudFrontOriginAccessIdentityAlreadyExists =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11635,6 +11887,7 @@ module TooManyCloudFrontOriginAccessIdentities =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11654,6 +11907,7 @@ module TooManyCachePolicies =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -11805,6 +12059,13 @@ module UpdateStreamingDistributionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?streamingDistribution:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistribution",
@@ -11818,6 +12079,7 @@ module UpdateStreamingDistributionResult =
         (Option.map ~f:StreamingDistribution.of_xml)
           (Xml.child xml_arg0 "StreamingDistribution") in
       make ?eTag ?streamingDistribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let streamingDistribution =
@@ -11840,6 +12102,16 @@ module UpdateStreamingDistributionRequest =
     let make ?ifMatch =
       fun ~streamingDistributionConfig ->
         fun ~id -> fun () -> { ifMatch; streamingDistributionConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~streamingDistributionConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistributionConfig",
@@ -11858,6 +12130,7 @@ module UpdateStreamingDistributionRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "StreamingDistributionConfig") in
       make ?ifMatch ~id ~streamingDistributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -11979,6 +12252,13 @@ module UpdateResponseHeadersPolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?responseHeadersPolicy:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ResponseHeadersPolicy",
@@ -11992,6 +12272,7 @@ module UpdateResponseHeadersPolicyResult =
         (Option.map ~f:ResponseHeadersPolicy.of_xml)
           (Xml.child xml_arg0 "ResponseHeadersPolicy") in
       make ?eTag ?responseHeadersPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let responseHeadersPolicy =
@@ -12016,6 +12297,16 @@ module UpdateResponseHeadersPolicyRequest =
     let make ?ifMatch =
       fun ~responseHeadersPolicyConfig ->
         fun ~id -> fun () -> { ifMatch; responseHeadersPolicyConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~responseHeadersPolicyConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ResponseHeadersPolicyConfig",
@@ -12034,6 +12325,7 @@ module UpdateResponseHeadersPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResponseHeadersPolicyConfig") in
       make ?ifMatch ~id ~responseHeadersPolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -12102,6 +12394,7 @@ module UpdateRealtimeLogConfigResult =
         (Option.map ~f:RealtimeLogConfig.of_xml)
           (Xml.child xml_arg0 "RealtimeLogConfig") in
       make ?realtimeLogConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeLogConfig =
         field_map json "RealtimeLogConfig" RealtimeLogConfig.of_json in
@@ -12151,6 +12444,7 @@ module UpdateRealtimeLogConfigRequest =
       let endPoints =
         (Option.map ~f:EndPointList.of_xml) (Xml.child xml_arg0 "EndPoints") in
       make ?samplingRate ?aRN ?name ?fields ?endPoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let samplingRate = field_map json "SamplingRate" Long.of_json in
       let aRN = field_map json "ARN" String_.of_json in
@@ -12246,6 +12540,13 @@ module UpdatePublicKeyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?publicKey:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicKey", (Option.map x.publicKey ~f:PublicKey.to_value));
@@ -12256,6 +12557,7 @@ module UpdatePublicKeyResult =
       let publicKey =
         (Option.map ~f:PublicKey.of_xml) (Xml.child xml_arg0 "PublicKey") in
       make ?eTag ?publicKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let publicKey = field_map json "PublicKey" PublicKey.of_json in
@@ -12279,6 +12581,16 @@ module UpdatePublicKeyRequest =
     let make ?ifMatch =
       fun ~publicKeyConfig ->
         fun ~id -> fun () -> { ifMatch; publicKeyConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~publicKeyConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicKeyConfig",
@@ -12294,6 +12606,7 @@ module UpdatePublicKeyRequest =
         PublicKeyConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PublicKeyConfig") in
       make ?ifMatch ~id ~publicKeyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -12435,6 +12748,13 @@ module UpdateOriginRequestPolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?originRequestPolicy:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OriginRequestPolicy",
@@ -12447,6 +12767,7 @@ module UpdateOriginRequestPolicyResult =
         (Option.map ~f:OriginRequestPolicy.of_xml)
           (Xml.child xml_arg0 "OriginRequestPolicy") in
       make ?eTag ?originRequestPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let originRequestPolicy =
@@ -12471,6 +12792,16 @@ module UpdateOriginRequestPolicyRequest =
     let make ?ifMatch =
       fun ~originRequestPolicyConfig ->
         fun ~id -> fun () -> { ifMatch; originRequestPolicyConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~originRequestPolicyConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OriginRequestPolicyConfig",
@@ -12488,6 +12819,7 @@ module UpdateOriginRequestPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OriginRequestPolicyConfig") in
       make ?ifMatch ~id ~originRequestPolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -12577,6 +12909,13 @@ module UpdateKeyGroupResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?keyGroup:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("KeyGroup", (Option.map x.keyGroup ~f:KeyGroup.to_value));
@@ -12587,6 +12926,7 @@ module UpdateKeyGroupResult =
       let keyGroup =
         (Option.map ~f:KeyGroup.of_xml) (Xml.child xml_arg0 "KeyGroup") in
       make ?eTag ?keyGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let keyGroup = field_map json "KeyGroup" KeyGroup.of_json in
@@ -12609,6 +12949,16 @@ module UpdateKeyGroupRequest =
     let make ?ifMatch =
       fun ~keyGroupConfig ->
         fun ~id -> fun () -> { ifMatch; keyGroupConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~keyGroupConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("KeyGroupConfig",
@@ -12624,6 +12974,7 @@ module UpdateKeyGroupRequest =
         KeyGroupConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "KeyGroupConfig") in
       make ?ifMatch ~id ~keyGroupConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -12715,6 +13066,13 @@ module UpdateFunctionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?functionSummary:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETtag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FunctionSummary",
@@ -12727,6 +13085,7 @@ module UpdateFunctionResult =
         (Option.map ~f:FunctionSummary.of_xml)
           (Xml.child xml_arg0 "FunctionSummary") in
       make ?eTag ?functionSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let functionSummary =
@@ -12774,6 +13133,7 @@ module UpdateFunctionRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~functionCode ~functionConfig ~ifMatch ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionCode =
         field_map_exn json "FunctionCode" FunctionBlob.of_json in
@@ -12931,6 +13291,13 @@ module UpdateFieldLevelEncryptionProfileResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryptionProfile:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionProfile",
@@ -12944,6 +13311,7 @@ module UpdateFieldLevelEncryptionProfileResult =
         (Option.map ~f:FieldLevelEncryptionProfile.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryptionProfile") in
       make ?eTag ?fieldLevelEncryptionProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let fieldLevelEncryptionProfile =
@@ -12968,6 +13336,16 @@ module UpdateFieldLevelEncryptionProfileRequest =
       fun ~fieldLevelEncryptionProfileConfig ->
         fun ~id ->
           fun () -> { ifMatch; fieldLevelEncryptionProfileConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~fieldLevelEncryptionProfileConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionProfileConfig",
@@ -12986,6 +13364,7 @@ module UpdateFieldLevelEncryptionProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "FieldLevelEncryptionProfileConfig") in
       make ?ifMatch ~id ~fieldLevelEncryptionProfileConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -13132,6 +13511,13 @@ module UpdateFieldLevelEncryptionConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryption:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryption",
@@ -13145,6 +13531,7 @@ module UpdateFieldLevelEncryptionConfigResult =
         (Option.map ~f:FieldLevelEncryption.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryption") in
       make ?eTag ?fieldLevelEncryption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let fieldLevelEncryption =
@@ -13168,6 +13555,16 @@ module UpdateFieldLevelEncryptionConfigRequest =
     let make ?ifMatch =
       fun ~fieldLevelEncryptionConfig ->
         fun ~id -> fun () -> { ifMatch; fieldLevelEncryptionConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~fieldLevelEncryptionConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionConfig",
@@ -13186,6 +13583,7 @@ module UpdateFieldLevelEncryptionConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "FieldLevelEncryptionConfig") in
       make ?ifMatch ~id ~fieldLevelEncryptionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -13831,6 +14229,13 @@ module UpdateDistributionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?distribution:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Distribution",
@@ -13843,6 +14248,7 @@ module UpdateDistributionResult =
         (Option.map ~f:Distribution.of_xml)
           (Xml.child xml_arg0 "Distribution") in
       make ?eTag ?distribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let distribution = field_map json "Distribution" Distribution.of_json in
@@ -13863,6 +14269,16 @@ module UpdateDistributionRequest =
     let make ?ifMatch =
       fun ~distributionConfig ->
         fun ~id -> fun () -> { ifMatch; distributionConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~distributionConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionConfig",
@@ -13878,6 +14294,7 @@ module UpdateDistributionRequest =
         DistributionConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionConfig") in
       make ?ifMatch ~id ~distributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -13981,6 +14398,13 @@ module UpdateCloudFrontOriginAccessIdentityResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cloudFrontOriginAccessIdentity:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CloudFrontOriginAccessIdentity",
@@ -13994,6 +14418,7 @@ module UpdateCloudFrontOriginAccessIdentityResult =
         (Option.map ~f:CloudFrontOriginAccessIdentity.of_xml)
           (Xml.child xml_arg0 "CloudFrontOriginAccessIdentity") in
       make ?eTag ?cloudFrontOriginAccessIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let cloudFrontOriginAccessIdentity =
@@ -14018,6 +14443,16 @@ module UpdateCloudFrontOriginAccessIdentityRequest =
       fun ~cloudFrontOriginAccessIdentityConfig ->
         fun ~id ->
           fun () -> { ifMatch; cloudFrontOriginAccessIdentityConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~cloudFrontOriginAccessIdentityConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CloudFrontOriginAccessIdentityConfig",
@@ -14036,6 +14471,7 @@ module UpdateCloudFrontOriginAccessIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "CloudFrontOriginAccessIdentityConfig") in
       make ?ifMatch ~id ~cloudFrontOriginAccessIdentityConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -14171,6 +14607,13 @@ module UpdateCachePolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cachePolicy:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CachePolicy", (Option.map x.cachePolicy ~f:CachePolicy.to_value));
@@ -14181,6 +14624,7 @@ module UpdateCachePolicyResult =
       let cachePolicy =
         (Option.map ~f:CachePolicy.of_xml) (Xml.child xml_arg0 "CachePolicy") in
       make ?eTag ?cachePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let cachePolicy = field_map json "CachePolicy" CachePolicy.of_json in
@@ -14204,6 +14648,16 @@ module UpdateCachePolicyRequest =
     let make ?ifMatch =
       fun ~cachePolicyConfig ->
         fun ~id -> fun () -> { ifMatch; cachePolicyConfig; id }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ~cachePolicyConfig:pipe
+            ~id:(String_.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "Id"))
+            ?ifMatch:(Option.map
+                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                           "If-Match") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CachePolicyConfig",
@@ -14219,6 +14673,7 @@ module UpdateCachePolicyRequest =
         CachePolicyConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CachePolicyConfig") in
       make ?ifMatch ~id ~cachePolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -14238,6 +14693,13 @@ module UntagResourceRequest =
           "A complex type that contains zero or more Tag key elements."]}
     let context_ = "UntagResourceRequest"
     let make ~resource = fun ~tagKeys -> fun () -> { resource; tagKeys }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~resource:(ResourceARN.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "Resource")) ~tagKeys:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Resource", (Some (ResourceARN.to_value x.resource)));
@@ -14250,6 +14712,7 @@ module UntagResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
       make ~tagKeys ~resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let resource = field_map_exn json "Resource" ResourceARN.of_json in
@@ -14325,6 +14788,8 @@ module TestFunctionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?testResult:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("TestResult", (Option.map x.testResult ~f:TestResult.to_value))]
@@ -14333,6 +14798,7 @@ module TestFunctionResult =
       let testResult =
         (Option.map ~f:TestResult.of_xml) (Xml.child xml_arg0 "TestResult") in
       make ?testResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let testResult = field_map json "TestResult" TestResult.of_json in
       make ?testResult ()
@@ -14377,6 +14843,7 @@ module TestFunctionRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~eventObject ?stage ~ifMatch ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventObject =
         field_map_exn json "EventObject" FunctionEventObject.of_json in
@@ -14397,6 +14864,13 @@ module TagResourceRequest =
           "A complex type that contains zero or more Tag elements."]}
     let context_ = "TagResourceRequest"
     let make ~resource = fun ~tags -> fun () -> { resource; tags }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~resource:(ResourceARN.of_string
+                         ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                            xs "Resource")) ~tags:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Resource", (Some (ResourceARN.to_value x.resource)));
@@ -14409,6 +14883,7 @@ module TagResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
       make ~tags ~resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let resource = field_map_exn json "Resource" ResourceARN.of_json in
@@ -14428,6 +14903,7 @@ module StreamingDistributionNotDisabled =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -14447,6 +14923,7 @@ module ResponseHeadersPolicyInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -14466,6 +14943,7 @@ module ResourceInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -14484,6 +14962,7 @@ module RealtimeLogConfigInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -14559,6 +15038,9 @@ module PublishFunctionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?functionSummary:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FunctionSummary",
@@ -14569,6 +15051,7 @@ module PublishFunctionResult =
         (Option.map ~f:FunctionSummary.of_xml)
           (Xml.child xml_arg0 "FunctionSummary") in
       make ?functionSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionSummary =
         field_map json "FunctionSummary" FunctionSummary.of_json in
@@ -14598,6 +15081,7 @@ module PublishFunctionRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~ifMatch ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map_exn json "IfMatch" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -14618,6 +15102,7 @@ module PublicKeyInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -14636,6 +15121,7 @@ module OriginRequestPolicyInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -14697,6 +15183,8 @@ module ListTagsForResourceResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~tags:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("Tags", (Some (Tags.to_value x.tags)))]
     let to_query v = to_query to_value v
@@ -14704,6 +15192,7 @@ module ListTagsForResourceResult =
       let tags =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
@@ -14724,6 +15213,7 @@ module ListTagsForResourceRequest =
         ResourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
       make ~resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resource = field_map_exn json "Resource" ResourceARN.of_json in
       make ~resource ()
@@ -14762,6 +15252,9 @@ module ListStreamingDistributionsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?streamingDistributionList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistributionList",
@@ -14773,6 +15266,7 @@ module ListStreamingDistributionsResult =
         (Option.map ~f:StreamingDistributionList.of_xml)
           (Xml.child xml_arg0 "StreamingDistributionList") in
       make ?streamingDistributionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingDistributionList =
         field_map json "StreamingDistributionList"
@@ -14802,6 +15296,7 @@ module ListStreamingDistributionsRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -14859,6 +15354,9 @@ module ListResponseHeadersPoliciesResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?responseHeadersPolicyList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ResponseHeadersPolicyList",
@@ -14870,6 +15368,7 @@ module ListResponseHeadersPoliciesResult =
         (Option.map ~f:ResponseHeadersPolicyList.of_xml)
           (Xml.child xml_arg0 "ResponseHeadersPolicyList") in
       make ?responseHeadersPolicyList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseHeadersPolicyList =
         field_map json "ResponseHeadersPolicyList"
@@ -14908,6 +15407,7 @@ module ListResponseHeadersPoliciesRequest =
         (Option.map ~f:ResponseHeadersPolicyType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?maxItems ?marker ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -14964,6 +15464,9 @@ module ListRealtimeLogConfigsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?realtimeLogConfigs:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("RealtimeLogConfigs",
@@ -14974,6 +15477,7 @@ module ListRealtimeLogConfigsResult =
         (Option.map ~f:RealtimeLogConfigs.of_xml)
           (Xml.child xml_arg0 "RealtimeLogConfigs") in
       make ?realtimeLogConfigs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeLogConfigs =
         field_map json "RealtimeLogConfigs" RealtimeLogConfigs.of_json in
@@ -15003,6 +15507,7 @@ module ListRealtimeLogConfigsRequest =
       let maxItems =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MaxItems") in
       make ?marker ?maxItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let marker = field_map json "Marker" String_.of_json in
       let maxItems = field_map json "MaxItems" String_.of_json in
@@ -15043,6 +15548,9 @@ module ListPublicKeysResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?publicKeyList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicKeyList",
@@ -15053,6 +15561,7 @@ module ListPublicKeysResult =
         (Option.map ~f:PublicKeyList.of_xml)
           (Xml.child xml_arg0 "PublicKeyList") in
       make ?publicKeyList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicKeyList =
         field_map json "PublicKeyList" PublicKeyList.of_json in
@@ -15082,6 +15591,7 @@ module ListPublicKeysRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -15137,6 +15647,9 @@ module ListOriginRequestPoliciesResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?originRequestPolicyList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OriginRequestPolicyList",
@@ -15148,6 +15661,7 @@ module ListOriginRequestPoliciesResult =
         (Option.map ~f:OriginRequestPolicyList.of_xml)
           (Xml.child xml_arg0 "OriginRequestPolicyList") in
       make ?originRequestPolicyList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originRequestPolicyList =
         field_map json "OriginRequestPolicyList"
@@ -15186,6 +15700,7 @@ module ListOriginRequestPoliciesRequest =
         (Option.map ~f:OriginRequestPolicyType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?maxItems ?marker ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -15226,6 +15741,8 @@ module ListKeyGroupsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?keyGroupList:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("KeyGroupList",
@@ -15236,6 +15753,7 @@ module ListKeyGroupsResult =
         (Option.map ~f:KeyGroupList.of_xml)
           (Xml.child xml_arg0 "KeyGroupList") in
       make ?keyGroupList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyGroupList = field_map json "KeyGroupList" KeyGroupList.of_json in
       make ?keyGroupList ()
@@ -15264,6 +15782,7 @@ module ListKeyGroupsRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -15319,6 +15838,9 @@ module ListInvalidationsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?invalidationList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("InvalidationList",
@@ -15329,6 +15851,7 @@ module ListInvalidationsResult =
         (Option.map ~f:InvalidationList.of_xml)
           (Xml.child xml_arg0 "InvalidationList") in
       make ?invalidationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidationList =
         field_map json "InvalidationList" InvalidationList.of_json in
@@ -15365,6 +15888,7 @@ module ListInvalidationsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionId") in
       make ?maxItems ?marker ~distributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -15414,6 +15938,8 @@ module ListFunctionsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?functionList:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("FunctionList",
@@ -15424,6 +15950,7 @@ module ListFunctionsResult =
         (Option.map ~f:FunctionList.of_xml)
           (Xml.child xml_arg0 "FunctionList") in
       make ?functionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionList = field_map json "FunctionList" FunctionList.of_json in
       make ?functionList ()
@@ -15459,6 +15986,7 @@ module ListFunctionsRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?stage ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stage = field_map json "Stage" FunctionStage.of_json in
       let maxItems = field_map json "MaxItems" String_.of_json in
@@ -15502,6 +16030,10 @@ module ListFieldLevelEncryptionProfilesResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryptionProfileList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionProfileList",
@@ -15513,6 +16045,7 @@ module ListFieldLevelEncryptionProfilesResult =
         (Option.map ~f:FieldLevelEncryptionProfileList.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryptionProfileList") in
       make ?fieldLevelEncryptionProfileList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldLevelEncryptionProfileList =
         field_map json "FieldLevelEncryptionProfileList"
@@ -15543,6 +16076,7 @@ module ListFieldLevelEncryptionProfilesRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -15584,6 +16118,9 @@ module ListFieldLevelEncryptionConfigsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?fieldLevelEncryptionList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionList",
@@ -15595,6 +16132,7 @@ module ListFieldLevelEncryptionConfigsResult =
         (Option.map ~f:FieldLevelEncryptionList.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryptionList") in
       make ?fieldLevelEncryptionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldLevelEncryptionList =
         field_map json "FieldLevelEncryptionList"
@@ -15625,6 +16163,7 @@ module ListFieldLevelEncryptionConfigsRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -15664,6 +16203,9 @@ module ListDistributionsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?distributionList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionList",
@@ -15674,6 +16216,7 @@ module ListDistributionsResult =
         (Option.map ~f:DistributionList.of_xml)
           (Xml.child xml_arg0 "DistributionList") in
       make ?distributionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionList =
         field_map json "DistributionList" DistributionList.of_json in
@@ -15702,6 +16245,7 @@ module ListDistributionsRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -15747,6 +16291,9 @@ module ListDistributionsByWebACLIdResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?distributionList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionList",
@@ -15757,6 +16304,7 @@ module ListDistributionsByWebACLIdResult =
         (Option.map ~f:DistributionList.of_xml)
           (Xml.child xml_arg0 "DistributionList") in
       make ?distributionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionList =
         field_map json "DistributionList" DistributionList.of_json in
@@ -15795,6 +16343,7 @@ module ListDistributionsByWebACLIdRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ~webACLId ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let webACLId = field_map_exn json "WebACLId" String_.of_json in
       let maxItems = field_map json "MaxItems" String_.of_json in
@@ -15851,6 +16400,9 @@ module ListDistributionsByResponseHeadersPolicyIdResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?distributionIdList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionIdList",
@@ -15861,6 +16413,7 @@ module ListDistributionsByResponseHeadersPolicyIdResult =
         (Option.map ~f:DistributionIdList.of_xml)
           (Xml.child xml_arg0 "DistributionIdList") in
       make ?distributionIdList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionIdList =
         field_map json "DistributionIdList" DistributionIdList.of_json in
@@ -15902,6 +16455,7 @@ module ListDistributionsByResponseHeadersPolicyIdRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ~responseHeadersPolicyId ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseHeadersPolicyId =
         field_map_exn json "ResponseHeadersPolicyId" String_.of_json in
@@ -15941,6 +16495,9 @@ module ListDistributionsByRealtimeLogConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?distributionList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionList",
@@ -15951,6 +16508,7 @@ module ListDistributionsByRealtimeLogConfigResult =
         (Option.map ~f:DistributionList.of_xml)
           (Xml.child xml_arg0 "DistributionList") in
       make ?distributionList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionList =
         field_map json "DistributionList" DistributionList.of_json in
@@ -16002,6 +16560,7 @@ module ListDistributionsByRealtimeLogConfigRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?realtimeLogConfigArn ?realtimeLogConfigName ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeLogConfigArn =
         field_map json "RealtimeLogConfigArn" String_.of_json in
@@ -16061,6 +16620,9 @@ module ListDistributionsByOriginRequestPolicyIdResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?distributionIdList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionIdList",
@@ -16071,6 +16633,7 @@ module ListDistributionsByOriginRequestPolicyIdResult =
         (Option.map ~f:DistributionIdList.of_xml)
           (Xml.child xml_arg0 "DistributionIdList") in
       make ?distributionIdList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionIdList =
         field_map json "DistributionIdList" DistributionIdList.of_json in
@@ -16112,6 +16675,7 @@ module ListDistributionsByOriginRequestPolicyIdRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ~originRequestPolicyId ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originRequestPolicyId =
         field_map_exn json "OriginRequestPolicyId" String_.of_json in
@@ -16158,6 +16722,9 @@ module ListDistributionsByKeyGroupResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?distributionIdList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionIdList",
@@ -16168,6 +16735,7 @@ module ListDistributionsByKeyGroupResult =
         (Option.map ~f:DistributionIdList.of_xml)
           (Xml.child xml_arg0 "DistributionIdList") in
       make ?distributionIdList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionIdList =
         field_map json "DistributionIdList" DistributionIdList.of_json in
@@ -16207,6 +16775,7 @@ module ListDistributionsByKeyGroupRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ~keyGroupId ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyGroupId = field_map_exn json "KeyGroupId" String_.of_json in
       let maxItems = field_map json "MaxItems" String_.of_json in
@@ -16263,6 +16832,9 @@ module ListDistributionsByCachePolicyIdResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?distributionIdList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionIdList",
@@ -16273,6 +16845,7 @@ module ListDistributionsByCachePolicyIdResult =
         (Option.map ~f:DistributionIdList.of_xml)
           (Xml.child xml_arg0 "DistributionIdList") in
       make ?distributionIdList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionIdList =
         field_map json "DistributionIdList" DistributionIdList.of_json in
@@ -16312,6 +16885,7 @@ module ListDistributionsByCachePolicyIdRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ~cachePolicyId ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachePolicyId = field_map_exn json "CachePolicyId" String_.of_json in
       let maxItems = field_map json "MaxItems" String_.of_json in
@@ -16361,6 +16935,9 @@ module ListConflictingAliasesResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?conflictingAliasesList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ConflictingAliasesList",
@@ -16372,6 +16949,7 @@ module ListConflictingAliasesResult =
         (Option.map ~f:ConflictingAliasesList.of_xml)
           (Xml.child xml_arg0 "ConflictingAliasesList") in
       make ?conflictingAliasesList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let conflictingAliasesList =
         field_map json "ConflictingAliasesList"
@@ -16423,6 +17001,7 @@ module ListConflictingAliasesRequest =
         DistributionIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionId") in
       make ?maxItems ?marker ~alias ~distributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems =
         field_map json "MaxItems"
@@ -16469,6 +17048,10 @@ module ListCloudFrontOriginAccessIdentitiesResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cloudFrontOriginAccessIdentityList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CloudFrontOriginAccessIdentityList",
@@ -16480,6 +17063,7 @@ module ListCloudFrontOriginAccessIdentitiesResult =
         (Option.map ~f:CloudFrontOriginAccessIdentityList.of_xml)
           (Xml.child xml_arg0 "CloudFrontOriginAccessIdentityList") in
       make ?cloudFrontOriginAccessIdentityList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudFrontOriginAccessIdentityList =
         field_map json "CloudFrontOriginAccessIdentityList"
@@ -16509,6 +17093,7 @@ module ListCloudFrontOriginAccessIdentitiesRequest =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -16563,6 +17148,9 @@ module ListCachePoliciesResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?cachePolicyList:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CachePolicyList",
@@ -16573,6 +17161,7 @@ module ListCachePoliciesResult =
         (Option.map ~f:CachePolicyList.of_xml)
           (Xml.child xml_arg0 "CachePolicyList") in
       make ?cachePolicyList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachePolicyList =
         field_map json "CachePolicyList" CachePolicyList.of_json in
@@ -16609,6 +17198,7 @@ module ListCachePoliciesRequest =
       let type_ =
         (Option.map ~f:CachePolicyType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?maxItems ?marker ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxItems = field_map json "MaxItems" String_.of_json in
       let marker = field_map json "Marker" String_.of_json in
@@ -16630,6 +17220,7 @@ module IllegalDelete =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -16682,6 +17273,13 @@ module GetStreamingDistributionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?streamingDistribution:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistribution",
@@ -16695,6 +17293,7 @@ module GetStreamingDistributionResult =
         (Option.map ~f:StreamingDistribution.of_xml)
           (Xml.child xml_arg0 "StreamingDistribution") in
       make ?eTag ?streamingDistribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let streamingDistribution =
@@ -16715,6 +17314,7 @@ module GetStreamingDistributionRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -16768,6 +17368,13 @@ module GetStreamingDistributionConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?streamingDistributionConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistributionConfig",
@@ -16781,6 +17388,7 @@ module GetStreamingDistributionConfigResult =
         (Option.map ~f:StreamingDistributionConfig.of_xml)
           (Xml.child xml_arg0 "StreamingDistributionConfig") in
       make ?eTag ?streamingDistributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let streamingDistributionConfig =
@@ -16802,6 +17410,7 @@ module GetStreamingDistributionConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -16854,6 +17463,13 @@ module GetResponseHeadersPolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?responseHeadersPolicy:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ResponseHeadersPolicy",
@@ -16867,6 +17483,7 @@ module GetResponseHeadersPolicyResult =
         (Option.map ~f:ResponseHeadersPolicy.of_xml)
           (Xml.child xml_arg0 "ResponseHeadersPolicy") in
       make ?eTag ?responseHeadersPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let responseHeadersPolicy =
@@ -16890,6 +17507,7 @@ module GetResponseHeadersPolicyRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -16942,6 +17560,13 @@ module GetResponseHeadersPolicyConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?responseHeadersPolicyConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ResponseHeadersPolicyConfig",
@@ -16955,6 +17580,7 @@ module GetResponseHeadersPolicyConfigResult =
         (Option.map ~f:ResponseHeadersPolicyConfig.of_xml)
           (Xml.child xml_arg0 "ResponseHeadersPolicyConfig") in
       make ?eTag ?responseHeadersPolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let responseHeadersPolicyConfig =
@@ -16979,6 +17605,7 @@ module GetResponseHeadersPolicyConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17042,6 +17669,7 @@ module GetRealtimeLogConfigResult =
         (Option.map ~f:RealtimeLogConfig.of_xml)
           (Xml.child xml_arg0 "RealtimeLogConfig") in
       make ?realtimeLogConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeLogConfig =
         field_map json "RealtimeLogConfig" RealtimeLogConfig.of_json in
@@ -17068,6 +17696,7 @@ module GetRealtimeLogConfigRequest =
       let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aRN = field_map json "ARN" String_.of_json in
       let name = field_map json "Name" String_.of_json in make ?aRN ?name ()
@@ -17114,6 +17743,13 @@ module GetPublicKeyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?publicKey:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicKey", (Option.map x.publicKey ~f:PublicKey.to_value));
@@ -17124,6 +17760,7 @@ module GetPublicKeyResult =
       let publicKey =
         (Option.map ~f:PublicKey.of_xml) (Xml.child xml_arg0 "PublicKey") in
       make ?eTag ?publicKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let publicKey = field_map json "PublicKey" PublicKey.of_json in
@@ -17144,6 +17781,7 @@ module GetPublicKeyRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17191,6 +17829,13 @@ module GetPublicKeyConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?publicKeyConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicKeyConfig",
@@ -17203,6 +17848,7 @@ module GetPublicKeyConfigResult =
         (Option.map ~f:PublicKeyConfig.of_xml)
           (Xml.child xml_arg0 "PublicKeyConfig") in
       make ?eTag ?publicKeyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let publicKeyConfig =
@@ -17225,6 +17871,7 @@ module GetPublicKeyConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17273,6 +17920,13 @@ module GetOriginRequestPolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?originRequestPolicy:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OriginRequestPolicy",
@@ -17285,6 +17939,7 @@ module GetOriginRequestPolicyResult =
         (Option.map ~f:OriginRequestPolicy.of_xml)
           (Xml.child xml_arg0 "OriginRequestPolicy") in
       make ?eTag ?originRequestPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let originRequestPolicy =
@@ -17308,6 +17963,7 @@ module GetOriginRequestPolicyRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17357,6 +18013,13 @@ module GetOriginRequestPolicyConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?originRequestPolicyConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OriginRequestPolicyConfig",
@@ -17370,6 +18033,7 @@ module GetOriginRequestPolicyConfigResult =
         (Option.map ~f:OriginRequestPolicyConfig.of_xml)
           (Xml.child xml_arg0 "OriginRequestPolicyConfig") in
       make ?eTag ?originRequestPolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let originRequestPolicyConfig =
@@ -17394,6 +18058,7 @@ module GetOriginRequestPolicyConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17450,6 +18115,9 @@ module GetMonitoringSubscriptionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?monitoringSubscription:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("MonitoringSubscription",
@@ -17461,6 +18129,7 @@ module GetMonitoringSubscriptionResult =
         (Option.map ~f:MonitoringSubscription.of_xml)
           (Xml.child xml_arg0 "MonitoringSubscription") in
       make ?monitoringSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitoringSubscription =
         field_map json "MonitoringSubscription"
@@ -17487,6 +18156,7 @@ module GetMonitoringSubscriptionRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionId") in
       make ~distributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionId =
         field_map_exn json "DistributionId" String_.of_json in
@@ -17527,6 +18197,13 @@ module GetKeyGroupResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?keyGroup:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("KeyGroup", (Option.map x.keyGroup ~f:KeyGroup.to_value));
@@ -17537,6 +18214,7 @@ module GetKeyGroupResult =
       let keyGroup =
         (Option.map ~f:KeyGroup.of_xml) (Xml.child xml_arg0 "KeyGroup") in
       make ?eTag ?keyGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let keyGroup = field_map json "KeyGroup" KeyGroup.of_json in
@@ -17559,6 +18237,7 @@ module GetKeyGroupRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17599,6 +18278,13 @@ module GetKeyGroupConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?keyGroupConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("KeyGroupConfig",
@@ -17611,6 +18297,7 @@ module GetKeyGroupConfigResult =
         (Option.map ~f:KeyGroupConfig.of_xml)
           (Xml.child xml_arg0 "KeyGroupConfig") in
       make ?eTag ?keyGroupConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let keyGroupConfig =
@@ -17634,6 +18321,7 @@ module GetKeyGroupConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17690,6 +18378,8 @@ module GetInvalidationResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?invalidation:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("Invalidation",
@@ -17700,6 +18390,7 @@ module GetInvalidationResult =
         (Option.map ~f:Invalidation.of_xml)
           (Xml.child xml_arg0 "Invalidation") in
       make ?invalidation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidation = field_map json "Invalidation" Invalidation.of_json in
       make ?invalidation ()
@@ -17726,6 +18417,7 @@ module GetInvalidationRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionId") in
       make ~id ~distributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in
       let distributionId =
@@ -17808,6 +18500,7 @@ module GetFunctionResult =
         (Option.map ~f:FunctionBlob.of_xml)
           (Xml.child xml_arg0 "FunctionCode") in
       make ?contentType ?eTag ?functionCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contentType = field_map json "ContentType" String_.of_json in
       let eTag = field_map json "ETag" String_.of_json in
@@ -17838,6 +18531,7 @@ module GetFunctionRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?stage ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stage = field_map json "Stage" FunctionStage.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -17894,6 +18588,13 @@ module GetFieldLevelEncryptionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryption:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryption",
@@ -17907,6 +18608,7 @@ module GetFieldLevelEncryptionResult =
         (Option.map ~f:FieldLevelEncryption.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryption") in
       make ?eTag ?fieldLevelEncryption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let fieldLevelEncryption =
@@ -17930,6 +18632,7 @@ module GetFieldLevelEncryptionRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -17983,6 +18686,13 @@ module GetFieldLevelEncryptionProfileResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryptionProfile:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionProfile",
@@ -17996,6 +18706,7 @@ module GetFieldLevelEncryptionProfileResult =
         (Option.map ~f:FieldLevelEncryptionProfile.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryptionProfile") in
       make ?eTag ?fieldLevelEncryptionProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let fieldLevelEncryptionProfile =
@@ -18019,6 +18730,7 @@ module GetFieldLevelEncryptionProfileRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18073,6 +18785,13 @@ module GetFieldLevelEncryptionProfileConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryptionProfileConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionProfileConfig",
@@ -18086,6 +18805,7 @@ module GetFieldLevelEncryptionProfileConfigResult =
         (Option.map ~f:FieldLevelEncryptionProfileConfig.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryptionProfileConfig") in
       make ?eTag ?fieldLevelEncryptionProfileConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let fieldLevelEncryptionProfileConfig =
@@ -18110,6 +18830,7 @@ module GetFieldLevelEncryptionProfileConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18164,6 +18885,13 @@ module GetFieldLevelEncryptionConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryptionConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionConfig",
@@ -18177,6 +18905,7 @@ module GetFieldLevelEncryptionConfigResult =
         (Option.map ~f:FieldLevelEncryptionConfig.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryptionConfig") in
       make ?eTag ?fieldLevelEncryptionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let fieldLevelEncryptionConfig =
@@ -18201,6 +18930,7 @@ module GetFieldLevelEncryptionConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18250,6 +18980,13 @@ module GetDistributionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?distribution:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Distribution",
@@ -18262,6 +18999,7 @@ module GetDistributionResult =
         (Option.map ~f:Distribution.of_xml)
           (Xml.child xml_arg0 "Distribution") in
       make ?eTag ?distribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let distribution = field_map json "Distribution" Distribution.of_json in
@@ -18283,6 +19021,7 @@ module GetDistributionRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18332,6 +19071,13 @@ module GetDistributionConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?distributionConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionConfig",
@@ -18344,6 +19090,7 @@ module GetDistributionConfigResult =
         (Option.map ~f:DistributionConfig.of_xml)
           (Xml.child xml_arg0 "DistributionConfig") in
       make ?eTag ?distributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let distributionConfig =
@@ -18366,6 +19113,7 @@ module GetDistributionConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18418,6 +19166,13 @@ module GetCloudFrontOriginAccessIdentityResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cloudFrontOriginAccessIdentity:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CloudFrontOriginAccessIdentity",
@@ -18431,6 +19186,7 @@ module GetCloudFrontOriginAccessIdentityResult =
         (Option.map ~f:CloudFrontOriginAccessIdentity.of_xml)
           (Xml.child xml_arg0 "CloudFrontOriginAccessIdentity") in
       make ?eTag ?cloudFrontOriginAccessIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let cloudFrontOriginAccessIdentity =
@@ -18451,6 +19207,7 @@ module GetCloudFrontOriginAccessIdentityRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18506,6 +19263,13 @@ module GetCloudFrontOriginAccessIdentityConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cloudFrontOriginAccessIdentityConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CloudFrontOriginAccessIdentityConfig",
@@ -18519,6 +19283,7 @@ module GetCloudFrontOriginAccessIdentityConfigResult =
         (Option.map ~f:CloudFrontOriginAccessIdentityConfig.of_xml)
           (Xml.child xml_arg0 "CloudFrontOriginAccessIdentityConfig") in
       make ?eTag ?cloudFrontOriginAccessIdentityConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let cloudFrontOriginAccessIdentityConfig =
@@ -18539,6 +19304,7 @@ module GetCloudFrontOriginAccessIdentityConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18586,6 +19352,13 @@ module GetCachePolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cachePolicy:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CachePolicy", (Option.map x.cachePolicy ~f:CachePolicy.to_value));
@@ -18596,6 +19369,7 @@ module GetCachePolicyResult =
       let cachePolicy =
         (Option.map ~f:CachePolicy.of_xml) (Xml.child xml_arg0 "CachePolicy") in
       make ?eTag ?cachePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let cachePolicy = field_map json "CachePolicy" CachePolicy.of_json in
@@ -18618,6 +19392,7 @@ module GetCachePolicyRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18667,6 +19442,13 @@ module GetCachePolicyConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cachePolicyConfig:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CachePolicyConfig",
@@ -18679,6 +19461,7 @@ module GetCachePolicyConfigResult =
         (Option.map ~f:CachePolicyConfig.of_xml)
           (Xml.child xml_arg0 "CachePolicyConfig") in
       make ?eTag ?cachePolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let cachePolicyConfig =
@@ -18702,6 +19485,7 @@ module GetCachePolicyConfigRequest =
     let of_xml xml_arg0 =
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" String_.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -18720,6 +19504,7 @@ module FunctionInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -18739,6 +19524,7 @@ module FieldLevelEncryptionProfileInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -18758,6 +19544,7 @@ module FieldLevelEncryptionConfigInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -18777,6 +19564,7 @@ module DistributionNotDisabled =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -18831,6 +19619,13 @@ module DescribeFunctionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?functionSummary:(Some pipe)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FunctionSummary",
@@ -18843,6 +19638,7 @@ module DescribeFunctionResult =
         (Option.map ~f:FunctionSummary.of_xml)
           (Xml.child xml_arg0 "FunctionSummary") in
       make ?eTag ?functionSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let functionSummary =
@@ -18874,6 +19670,7 @@ module DescribeFunctionRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?stage ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stage = field_map json "Stage" FunctionStage.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -18901,6 +19698,7 @@ module DeleteStreamingDistributionRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -18929,6 +19727,7 @@ module DeleteResponseHeadersPolicyRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -18955,6 +19754,7 @@ module DeleteRealtimeLogConfigRequest =
       let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aRN = field_map json "ARN" String_.of_json in
       let name = field_map json "Name" String_.of_json in make ?aRN ?name ()
@@ -18983,6 +19783,7 @@ module DeletePublicKeyRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19011,6 +19812,7 @@ module DeleteOriginRequestPolicyRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19069,6 +19871,7 @@ module DeleteMonitoringSubscriptionResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19091,6 +19894,7 @@ module DeleteMonitoringSubscriptionRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionId") in
       make ~distributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionId =
         field_map_exn json "DistributionId" String_.of_json in
@@ -19120,6 +19924,7 @@ module DeleteKeyGroupRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19149,6 +19954,7 @@ module DeleteFunctionRequest =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~ifMatch ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map_exn json "IfMatch" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -19178,6 +19984,7 @@ module DeleteFieldLevelEncryptionProfileRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19206,6 +20013,7 @@ module DeleteFieldLevelEncryptionConfigRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19232,6 +20040,7 @@ module DeleteDistributionRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19259,6 +20068,7 @@ module DeleteCloudFrontOriginAccessIdentityRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19287,6 +20097,7 @@ module DeleteCachePolicyRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "If-Match") in
       let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?ifMatch ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ifMatch = field_map json "IfMatch" String_.of_json in
       let id = field_map_exn json "Id" String_.of_json in
@@ -19442,6 +20253,16 @@ module CreateStreamingDistributionWithTagsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?streamingDistribution:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistribution",
@@ -19458,6 +20279,7 @@ module CreateStreamingDistributionWithTagsResult =
         (Option.map ~f:StreamingDistribution.of_xml)
           (Xml.child xml_arg0 "StreamingDistribution") in
       make ?eTag ?location ?streamingDistribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -19477,6 +20299,9 @@ module CreateStreamingDistributionWithTagsRequest =
     let context_ = "CreateStreamingDistributionWithTagsRequest"
     let make ~streamingDistributionConfigWithTags =
       fun () -> { streamingDistributionConfigWithTags }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~streamingDistributionConfigWithTags:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistributionConfigWithTags",
@@ -19490,6 +20315,7 @@ module CreateStreamingDistributionWithTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "StreamingDistributionConfigWithTags") in
       make ~streamingDistributionConfigWithTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingDistributionConfigWithTags =
         field_map_exn json "StreamingDistributionConfigWithTags"
@@ -19641,6 +20467,16 @@ module CreateStreamingDistributionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?streamingDistribution:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistribution",
@@ -19657,6 +20493,7 @@ module CreateStreamingDistributionResult =
         (Option.map ~f:StreamingDistribution.of_xml)
           (Xml.child xml_arg0 "StreamingDistribution") in
       make ?eTag ?location ?streamingDistribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -19675,6 +20512,9 @@ module CreateStreamingDistributionRequest =
     let context_ = "CreateStreamingDistributionRequest"
     let make ~streamingDistributionConfig =
       fun () -> { streamingDistributionConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~streamingDistributionConfig:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("StreamingDistributionConfig",
@@ -19688,6 +20528,7 @@ module CreateStreamingDistributionRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "StreamingDistributionConfig") in
       make ~streamingDistributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamingDistributionConfig =
         field_map_exn json "StreamingDistributionConfig"
@@ -19787,6 +20628,16 @@ module CreateResponseHeadersPolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?responseHeadersPolicy:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ResponseHeadersPolicy",
@@ -19803,6 +20654,7 @@ module CreateResponseHeadersPolicyResult =
         (Option.map ~f:ResponseHeadersPolicy.of_xml)
           (Xml.child xml_arg0 "ResponseHeadersPolicy") in
       make ?eTag ?location ?responseHeadersPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -19822,6 +20674,9 @@ module CreateResponseHeadersPolicyRequest =
     let context_ = "CreateResponseHeadersPolicyRequest"
     let make ~responseHeadersPolicyConfig =
       fun () -> { responseHeadersPolicyConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~responseHeadersPolicyConfig:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("ResponseHeadersPolicyConfig",
@@ -19835,6 +20690,7 @@ module CreateResponseHeadersPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "ResponseHeadersPolicyConfig") in
       make ~responseHeadersPolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseHeadersPolicyConfig =
         field_map_exn json "ResponseHeadersPolicyConfig"
@@ -19912,6 +20768,7 @@ module CreateRealtimeLogConfigResult =
         (Option.map ~f:RealtimeLogConfig.of_xml)
           (Xml.child xml_arg0 "RealtimeLogConfig") in
       make ?realtimeLogConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let realtimeLogConfig =
         field_map json "RealtimeLogConfig" RealtimeLogConfig.of_json in
@@ -19959,6 +20816,7 @@ module CreateRealtimeLogConfigRequest =
         EndPointList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndPoints") in
       make ~samplingRate ~name ~fields ~endPoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let samplingRate = field_map_exn json "SamplingRate" Long.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -20021,6 +20879,16 @@ module CreatePublicKeyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?publicKey:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicKey", (Option.map x.publicKey ~f:PublicKey.to_value));
@@ -20034,6 +20902,7 @@ module CreatePublicKeyResult =
       let publicKey =
         (Option.map ~f:PublicKey.of_xml) (Xml.child xml_arg0 "PublicKey") in
       make ?eTag ?location ?publicKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -20050,6 +20919,8 @@ module CreatePublicKeyRequest =
         [@ocaml.doc "A CloudFront public key configuration."]}
     let context_ = "CreatePublicKeyRequest"
     let make ~publicKeyConfig = fun () -> { publicKeyConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~publicKeyConfig:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("PublicKeyConfig",
@@ -20060,6 +20931,7 @@ module CreatePublicKeyRequest =
         PublicKeyConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PublicKeyConfig") in
       make ~publicKeyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let publicKeyConfig =
         field_map_exn json "PublicKeyConfig" PublicKeyConfig.of_json in
@@ -20181,6 +21053,16 @@ module CreateOriginRequestPolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?originRequestPolicy:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OriginRequestPolicy",
@@ -20196,6 +21078,7 @@ module CreateOriginRequestPolicyResult =
         (Option.map ~f:OriginRequestPolicy.of_xml)
           (Xml.child xml_arg0 "OriginRequestPolicy") in
       make ?eTag ?location ?originRequestPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -20214,6 +21097,9 @@ module CreateOriginRequestPolicyRequest =
     let context_ = "CreateOriginRequestPolicyRequest"
     let make ~originRequestPolicyConfig =
       fun () -> { originRequestPolicyConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~originRequestPolicyConfig:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("OriginRequestPolicyConfig",
@@ -20226,6 +21112,7 @@ module CreateOriginRequestPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "OriginRequestPolicyConfig") in
       make ~originRequestPolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originRequestPolicyConfig =
         field_map_exn json "OriginRequestPolicyConfig"
@@ -20285,6 +21172,9 @@ module CreateMonitoringSubscriptionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?monitoringSubscription:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("MonitoringSubscription",
@@ -20296,6 +21186,7 @@ module CreateMonitoringSubscriptionResult =
         (Option.map ~f:MonitoringSubscription.of_xml)
           (Xml.child xml_arg0 "MonitoringSubscription") in
       make ?monitoringSubscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitoringSubscription =
         field_map json "MonitoringSubscription"
@@ -20318,6 +21209,15 @@ module CreateMonitoringSubscriptionRequest =
     let make ~distributionId =
       fun ~monitoringSubscription ->
         fun () -> { distributionId; monitoringSubscription }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~distributionId:(String_.of_string
+                               ((List.Assoc.find_exn
+                                   ~equal:String.Caseless.equal) xs
+                                  "DistributionId"))
+            ~monitoringSubscription:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionId", (Some (String_.to_value x.distributionId)));
@@ -20332,6 +21232,7 @@ module CreateMonitoringSubscriptionRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionId") in
       make ~monitoringSubscription ~distributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let monitoringSubscription =
         field_map_exn json "MonitoringSubscription"
@@ -20406,6 +21307,16 @@ module CreateKeyGroupResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?keyGroup:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("KeyGroup", (Option.map x.keyGroup ~f:KeyGroup.to_value));
@@ -20419,6 +21330,7 @@ module CreateKeyGroupResult =
       let keyGroup =
         (Option.map ~f:KeyGroup.of_xml) (Xml.child xml_arg0 "KeyGroup") in
       make ?eTag ?location ?keyGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -20435,6 +21347,8 @@ module CreateKeyGroupRequest =
         [@ocaml.doc "A key group configuration."]}
     let context_ = "CreateKeyGroupRequest"
     let make ~keyGroupConfig = fun () -> { keyGroupConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~keyGroupConfig:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("KeyGroupConfig",
@@ -20445,6 +21359,7 @@ module CreateKeyGroupRequest =
         KeyGroupConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "KeyGroupConfig") in
       make ~keyGroupConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyGroupConfig =
         field_map_exn json "KeyGroupConfig" KeyGroupConfig.of_json in
@@ -20537,6 +21452,14 @@ module CreateInvalidationResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?invalidation:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Location", (Option.map x.location ~f:String_.to_value));
@@ -20550,6 +21473,7 @@ module CreateInvalidationResult =
       let location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?invalidation ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidation = field_map json "Invalidation" Invalidation.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -20567,6 +21491,15 @@ module CreateInvalidationRequest =
     let make ~distributionId =
       fun ~invalidationBatch ->
         fun () -> { distributionId; invalidationBatch }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~distributionId:(String_.of_string
+                               ((List.Assoc.find_exn
+                                   ~equal:String.Caseless.equal) xs
+                                  "DistributionId")) ~invalidationBatch:pipe
+            ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionId", (Some (String_.to_value x.distributionId)));
@@ -20581,6 +21514,7 @@ module CreateInvalidationRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionId") in
       make ~invalidationBatch ~distributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let invalidationBatch =
         field_map_exn json "InvalidationBatch" InvalidationBatch.of_json in
@@ -20665,6 +21599,16 @@ module CreateFunctionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?functionSummary:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FunctionSummary",
@@ -20680,6 +21624,7 @@ module CreateFunctionResult =
         (Option.map ~f:FunctionSummary.of_xml)
           (Xml.child xml_arg0 "FunctionSummary") in
       make ?eTag ?location ?functionSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -20720,6 +21665,7 @@ module CreateFunctionRequest =
       let name =
         FunctionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~functionCode ~functionConfig ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let functionCode =
         field_map_exn json "FunctionCode" FunctionBlob.of_json in
@@ -20851,6 +21797,16 @@ module CreateFieldLevelEncryptionProfileResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryptionProfile:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionProfile",
@@ -20867,6 +21823,7 @@ module CreateFieldLevelEncryptionProfileResult =
         (Option.map ~f:FieldLevelEncryptionProfile.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryptionProfile") in
       make ?eTag ?location ?fieldLevelEncryptionProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -20886,6 +21843,9 @@ module CreateFieldLevelEncryptionProfileRequest =
     let context_ = "CreateFieldLevelEncryptionProfileRequest"
     let make ~fieldLevelEncryptionProfileConfig =
       fun () -> { fieldLevelEncryptionProfileConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~fieldLevelEncryptionProfileConfig:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionProfileConfig",
@@ -20899,6 +21859,7 @@ module CreateFieldLevelEncryptionProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "FieldLevelEncryptionProfileConfig") in
       make ~fieldLevelEncryptionProfileConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldLevelEncryptionProfileConfig =
         field_map_exn json "FieldLevelEncryptionProfileConfig"
@@ -21030,6 +21991,16 @@ module CreateFieldLevelEncryptionConfigResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?fieldLevelEncryption:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryption",
@@ -21046,6 +22017,7 @@ module CreateFieldLevelEncryptionConfigResult =
         (Option.map ~f:FieldLevelEncryption.of_xml)
           (Xml.child xml_arg0 "FieldLevelEncryption") in
       make ?eTag ?location ?fieldLevelEncryption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -21064,6 +22036,9 @@ module CreateFieldLevelEncryptionConfigRequest =
     let context_ = "CreateFieldLevelEncryptionConfigRequest"
     let make ~fieldLevelEncryptionConfig =
       fun () -> { fieldLevelEncryptionConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~fieldLevelEncryptionConfig:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("FieldLevelEncryptionConfig",
@@ -21077,6 +22052,7 @@ module CreateFieldLevelEncryptionConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "FieldLevelEncryptionConfig") in
       make ~fieldLevelEncryptionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldLevelEncryptionConfig =
         field_map_exn json "FieldLevelEncryptionConfig"
@@ -21731,6 +22707,16 @@ module CreateDistributionWithTagsResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?distribution:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Distribution",
@@ -21746,6 +22732,7 @@ module CreateDistributionWithTagsResult =
         (Option.map ~f:Distribution.of_xml)
           (Xml.child xml_arg0 "Distribution") in
       make ?eTag ?location ?distribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -21762,6 +22749,9 @@ module CreateDistributionWithTagsRequest =
     let context_ = "CreateDistributionWithTagsRequest"
     let make ~distributionConfigWithTags =
       fun () -> { distributionConfigWithTags }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~distributionConfigWithTags:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionConfigWithTags",
@@ -21775,6 +22765,7 @@ module CreateDistributionWithTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "DistributionConfigWithTags") in
       make ~distributionConfigWithTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfigWithTags =
         field_map_exn json "DistributionConfigWithTags"
@@ -22422,6 +23413,16 @@ module CreateDistributionResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?distribution:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Distribution",
@@ -22437,6 +23438,7 @@ module CreateDistributionResult =
         (Option.map ~f:Distribution.of_xml)
           (Xml.child xml_arg0 "Distribution") in
       make ?eTag ?location ?distribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -22452,6 +23454,8 @@ module CreateDistributionRequest =
         [@ocaml.doc "The distribution's configuration information."]}
     let context_ = "CreateDistributionRequest"
     let make ~distributionConfig = fun () -> { distributionConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~distributionConfig:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("DistributionConfig",
@@ -22462,6 +23466,7 @@ module CreateDistributionRequest =
         DistributionConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DistributionConfig") in
       make ~distributionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let distributionConfig =
         field_map_exn json "DistributionConfig" DistributionConfig.of_json in
@@ -22552,6 +23557,16 @@ module CreateCloudFrontOriginAccessIdentityResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cloudFrontOriginAccessIdentity:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CloudFrontOriginAccessIdentity",
@@ -22568,6 +23583,7 @@ module CreateCloudFrontOriginAccessIdentityResult =
         (Option.map ~f:CloudFrontOriginAccessIdentity.of_xml)
           (Xml.child xml_arg0 "CloudFrontOriginAccessIdentity") in
       make ?eTag ?location ?cloudFrontOriginAccessIdentity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -22588,6 +23604,9 @@ module CreateCloudFrontOriginAccessIdentityRequest =
     let context_ = "CreateCloudFrontOriginAccessIdentityRequest"
     let make ~cloudFrontOriginAccessIdentityConfig =
       fun () -> { cloudFrontOriginAccessIdentityConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~cloudFrontOriginAccessIdentityConfig:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CloudFrontOriginAccessIdentityConfig",
@@ -22601,6 +23620,7 @@ module CreateCloudFrontOriginAccessIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "CloudFrontOriginAccessIdentityConfig") in
       make ~cloudFrontOriginAccessIdentityConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cloudFrontOriginAccessIdentityConfig =
         field_map_exn json "CloudFrontOriginAccessIdentityConfig"
@@ -22714,6 +23734,16 @@ module CreateCachePolicyResult =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make ?cachePolicy:(Some pipe)
+            ?location:(Option.map
+                         ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                            "Location") ~f:String_.of_string)
+            ?eTag:(Option.map
+                     ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                        "ETag") ~f:String_.of_string) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("CachePolicy", (Option.map x.cachePolicy ~f:CachePolicy.to_value));
@@ -22727,6 +23757,7 @@ module CreateCachePolicyResult =
       let cachePolicy =
         (Option.map ~f:CachePolicy.of_xml) (Xml.child xml_arg0 "CachePolicy") in
       make ?eTag ?location ?cachePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eTag = field_map json "ETag" String_.of_json in
       let location = field_map json "Location" String_.of_json in
@@ -22743,6 +23774,8 @@ module CreateCachePolicyRequest =
         [@ocaml.doc "A cache policy configuration."]}
     let context_ = "CreateCachePolicyRequest"
     let make ~cachePolicyConfig = fun () -> { cachePolicyConfig }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~cachePolicyConfig:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("CachePolicyConfig",
@@ -22753,6 +23786,7 @@ module CreateCachePolicyRequest =
         CachePolicyConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CachePolicyConfig") in
       make ~cachePolicyConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cachePolicyConfig =
         field_map_exn json "CachePolicyConfig" CachePolicyConfig.of_json in
@@ -22773,6 +23807,7 @@ module CloudFrontOriginAccessIdentityInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -22791,6 +23826,7 @@ module CachePolicyInUse =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -22823,6 +23859,7 @@ module AssociateAliasRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetDistributionId") in
       make ~alias ~targetDistributionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map_exn json "Alias" String_.of_json in
       let targetDistributionId =

@@ -126,6 +126,7 @@ module CloudWatchLogsDestination =
       let iamRoleArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
       make ?logGroupArn ?iamRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupArn = field_map json "LogGroupArn" String_.of_json in
       let iamRoleArn = field_map json "IamRoleArn" String_.of_json in
@@ -182,6 +183,7 @@ module KinesisFirehoseDestination =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DeliveryStreamArn") in
       make ?iamRoleArn ?deliveryStreamArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iamRoleArn = field_map json "IamRoleArn" String_.of_json in
       let deliveryStreamArn =
@@ -206,6 +208,7 @@ module SnsDestination =
       let topicArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TopicArn") in
       make ?topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let topicArn = field_map json "TopicArn" String_.of_json in
       make ?topicArn ()
@@ -228,6 +231,7 @@ module CallInstructionsMessageType =
       let text =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Text") in
       make ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let text = field_map json "Text" NonEmptyString.of_json in
       make ?text ()
@@ -263,6 +267,7 @@ module PlainTextMessageType =
       let languageCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LanguageCode") in
       make ?voiceId ?text ?languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let voiceId = field_map json "VoiceId" String_.of_json in
       let text = field_map json "Text" NonEmptyString.of_json in
@@ -299,6 +304,7 @@ module SSMLMessageType =
       let languageCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LanguageCode") in
       make ?voiceId ?text ?languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let voiceId = field_map json "VoiceId" String_.of_json in
       let text = field_map json "Text" NonEmptyString.of_json in
@@ -369,6 +375,7 @@ module EventDestination =
           (Xml.child xml_arg0 "CloudWatchLogsDestination") in
       make ?snsDestination ?name ?matchingEventTypes
         ?kinesisFirehoseDestination ?enabled ?cloudWatchLogsDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsDestination =
         field_map json "SnsDestination" SnsDestination.of_json in
@@ -399,6 +406,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -417,6 +425,7 @@ module InternalServiceErrorException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -436,6 +445,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -454,6 +464,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -515,6 +526,7 @@ module EventDestinationDefinition =
           (Xml.child xml_arg0 "CloudWatchLogsDestination") in
       make ?snsDestination ?matchingEventTypes ?kinesisFirehoseDestination
         ?enabled ?cloudWatchLogsDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let snsDestination =
         field_map json "SnsDestination" SnsDestination.of_json in
@@ -577,6 +589,7 @@ module VoiceMessageContent =
         (Option.map ~f:CallInstructionsMessageType.of_xml)
           (Xml.child xml_arg0 "CallInstructionsMessage") in
       make ?sSMLMessage ?plainTextMessage ?callInstructionsMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sSMLMessage = field_map json "SSMLMessage" SSMLMessageType.of_json in
       let plainTextMessage =
@@ -639,6 +652,7 @@ module AlreadyExistsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -657,6 +671,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" String_.of_json in
       make ?message ()
@@ -803,6 +818,7 @@ module UpdateConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -841,6 +857,7 @@ module UpdateConfigurationSetEventDestinationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestinationName ?eventDestination ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map_exn json "EventDestinationName" Zz__string.of_json in
@@ -913,6 +930,7 @@ module SendVoiceMessageResponse =
       let messageId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" String_.of_json in
       make ?messageId ()
@@ -978,6 +996,7 @@ module SendVoiceMessageRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CallerId") in
       make ?originationPhoneNumber ?destinationPhoneNumber ?content
         ?configurationSetName ?callerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let originationPhoneNumber =
         field_map json "OriginationPhoneNumber" NonEmptyString.of_json in
@@ -1063,6 +1082,7 @@ module GetConfigurationSetEventDestinationsResponse =
         (Option.map ~f:EventDestinations.of_xml)
           (Xml.child xml_arg0 "EventDestinations") in
       make ?eventDestinations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinations =
         field_map json "EventDestinations" EventDestinations.of_json in
@@ -1087,6 +1107,7 @@ module GetConfigurationSetEventDestinationsRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map_exn json "ConfigurationSetName" Zz__string.of_json in
@@ -1158,6 +1179,7 @@ module DeleteConfigurationSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1179,6 +1201,7 @@ module DeleteConfigurationSetRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map_exn json "ConfigurationSetName" Zz__string.of_json in
@@ -1249,6 +1272,7 @@ module DeleteConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1278,6 +1302,7 @@ module DeleteConfigurationSetEventDestinationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestinationName ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map_exn json "EventDestinationName" Zz__string.of_json in
@@ -1359,6 +1384,7 @@ module CreateConfigurationSetResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1381,6 +1407,7 @@ module CreateConfigurationSetRequest =
         (Option.map ~f:WordCharactersWithDelimiters.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationSetName =
         field_map json "ConfigurationSetName"
@@ -1470,6 +1497,7 @@ module CreateConfigurationSetEventDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1509,6 +1537,7 @@ module CreateConfigurationSetEventDestinationRequest =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?eventDestination ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventDestinationName =
         field_map json "EventDestinationName" NonEmptyString.of_json in

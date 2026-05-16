@@ -84,6 +84,7 @@ module HashKeyRange =
         HashKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartingHashKey") in
       make ~endingHashKey ~startingHashKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endingHashKey = field_map_exn json "EndingHashKey" HashKey.of_json in
       let startingHashKey =
@@ -271,6 +272,7 @@ module ChildShard =
       let shardId =
         ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
       make ~hashKeyRange ~parentShards ~shardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hashKeyRange =
         field_map_exn json "HashKeyRange" HashKeyRange.of_json in
@@ -341,6 +343,7 @@ module Record =
           (Xml.child_exn ~context:context_ xml_arg0 "SequenceNumber") in
       make ?encryptionType ~partitionKey ~data ?approximateArrivalTimestamp
         ~sequenceNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionType =
         field_map json "EncryptionType" EncryptionType.of_json in
@@ -412,6 +415,7 @@ module SequenceNumberRange =
         SequenceNumber.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartingSequenceNumber") in
       make ?endingSequenceNumber ~startingSequenceNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endingSequenceNumber =
         field_map json "EndingSequenceNumber" SequenceNumber.of_json in
@@ -631,6 +635,7 @@ module EnhancedMetrics =
         (Option.map ~f:MetricsNameList.of_xml)
           (Xml.child xml_arg0 "ShardLevelMetrics") in
       make ?shardLevelMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shardLevelMetrics =
         field_map json "ShardLevelMetrics" MetricsNameList.of_json in
@@ -718,6 +723,7 @@ module Shard =
         ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
       make ~sequenceNumberRange ~hashKeyRange ?adjacentParentShardId
         ?parentShardId ~shardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sequenceNumberRange =
         field_map_exn json "SequenceNumberRange" SequenceNumberRange.of_json in
@@ -745,6 +751,7 @@ module InternalFailureException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -766,6 +773,7 @@ module KMSAccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -787,6 +795,7 @@ module KMSDisabledException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -808,6 +817,7 @@ module KMSInvalidStateException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -829,6 +839,7 @@ module KMSNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -850,6 +861,7 @@ module KMSOptInRequired =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -871,6 +883,7 @@ module KMSThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -892,6 +905,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -913,6 +927,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -971,6 +986,7 @@ module SubscribeToShardEvent =
           (Xml.child_exn ~context:context_ xml_arg0 "Records") in
       make ?childShards ~millisBehindLatest ~continuationSequenceNumber
         ~records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let childShards = field_map json "ChildShards" ChildShardList.of_json in
       let millisBehindLatest =
@@ -1059,6 +1075,7 @@ module PutRecordsResultEntry =
         (Option.map ~f:SequenceNumber.of_xml)
           (Xml.child xml_arg0 "SequenceNumber") in
       make ?errorMessage ?errorCode ?shardId ?sequenceNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
       let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
@@ -1103,6 +1120,7 @@ module PutRecordsRequestEntry =
       let data =
         Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~partitionKey ?explicitHashKey ~data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partitionKey =
         field_map_exn json "PartitionKey" PartitionKey.of_json in
@@ -1134,6 +1152,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1211,6 +1230,7 @@ module Consumer =
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerName") in
       make ~consumerCreationTimestamp ~consumerStatus ~consumerARN
         ~consumerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumerCreationTimestamp =
         field_map_exn json "ConsumerCreationTimestamp" Timestamp.of_json in
@@ -1396,6 +1416,7 @@ module StreamModeDetails =
         StreamMode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamMode") in
       make ~streamMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamMode = field_map_exn json "StreamMode" StreamMode.of_json in
       make ~streamMode ()
@@ -1484,6 +1505,7 @@ module InvalidArgumentException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1505,6 +1527,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1539,6 +1562,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1669,6 +1693,7 @@ module SubscribeToShardEventStream =
         ?kMSInvalidStateException ?kMSDisabledException
         ?resourceInUseException ?resourceNotFoundException
         ~subscribeToShardEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let internalFailureException =
         field_map json "InternalFailureException"
@@ -1739,6 +1764,7 @@ module StartingPosition =
         ShardIteratorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?timestamp ?sequenceNumber ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
       let sequenceNumber =
@@ -1790,6 +1816,7 @@ module ProvisionedThroughputExceededException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1985,6 +2012,7 @@ module ExpiredNextTokenException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2078,6 +2106,7 @@ module ShardFilter =
         ShardFilterType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?timestamp ?shardId ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
       let shardId = field_map json "ShardId" ShardId.of_json in
@@ -2119,6 +2148,7 @@ module ExpiredIteratorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2258,6 +2288,7 @@ module StreamDescriptionSummary =
       make ?consumerCount ~openShardCount ?keyId ?encryptionType
         ~enhancedMonitoring ~streamCreationTimestamp ~retentionPeriodHours
         ?streamModeDetails ~streamStatus ~streamARN ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumerCount =
         field_map json "ConsumerCount" ConsumerCountObject.of_json in
@@ -2397,6 +2428,7 @@ module StreamDescription =
       make ?keyId ?encryptionType ~enhancedMonitoring
         ~streamCreationTimestamp ~retentionPeriodHours ~hasMoreShards ~shards
         ?streamModeDetails ~streamStatus ~streamARN ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map json "KeyId" KeyId.of_json in
       let encryptionType =
@@ -2502,6 +2534,7 @@ module ConsumerDescription =
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerName") in
       make ~streamARN ~consumerCreationTimestamp ~consumerStatus ~consumerARN
         ~consumerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamARN = field_map_exn json "StreamARN" StreamARN.of_json in
       let consumerCreationTimestamp =
@@ -2616,6 +2649,7 @@ module UpdateStreamModeInput =
         StreamARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
       make ~streamModeDetails ~streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamModeDetails =
         field_map_exn json "StreamModeDetails" StreamModeDetails.of_json in
@@ -2718,6 +2752,7 @@ module UpdateShardCountOutput =
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?targetShardCount ?currentShardCount ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetShardCount =
         field_map json "TargetShardCount" PositiveIntegerObject.of_json in
@@ -2762,6 +2797,7 @@ module UpdateShardCountInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~scalingType ~targetShardCount ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingType = field_map_exn json "ScalingType" ScalingType.of_json in
       let targetShardCount =
@@ -2844,6 +2880,7 @@ module SubscribeToShardOutput =
         SubscribeToShardEventStream.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventStream") in
       make ~eventStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventStream =
         field_map_exn json "EventStream" SubscribeToShardEventStream.of_json in
@@ -2886,6 +2923,7 @@ module SubscribeToShardInput =
         ConsumerARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerARN") in
       make ~startingPosition ~shardId ~consumerARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startingPosition =
         field_map_exn json "StartingPosition" StartingPosition.of_json in
@@ -2927,6 +2965,7 @@ module StopStreamEncryptionInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~keyId ~encryptionType ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyId.of_json in
       let encryptionType =
@@ -2969,6 +3008,7 @@ module StartStreamEncryptionInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~keyId ~encryptionType ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyId = field_map_exn json "KeyId" KeyId.of_json in
       let encryptionType =
@@ -3012,6 +3052,7 @@ module SplitShardInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~newStartingHashKey ~shardToSplit ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let newStartingHashKey =
         field_map_exn json "NewStartingHashKey" HashKey.of_json in
@@ -3043,6 +3084,7 @@ module RemoveTagsFromStreamInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~tagKeys ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let streamName = field_map_exn json "StreamName" StreamName.of_json in
@@ -3120,6 +3162,7 @@ module RegisterStreamConsumerOutput =
       let consumer =
         Consumer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Consumer") in
       make ~consumer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumer = field_map_exn json "Consumer" Consumer.of_json in
       make ~consumer ()
@@ -3152,6 +3195,7 @@ module RegisterStreamConsumerInput =
         StreamARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
       make ~consumerName ~streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumerName =
         field_map_exn json "ConsumerName" ConsumerName.of_json in
@@ -3298,6 +3342,7 @@ module PutRecordsOutput =
         (Option.map ~f:PositiveIntegerObject.of_xml)
           (Xml.child xml_arg0 "FailedRecordCount") in
       make ?encryptionType ~records ?failedRecordCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionType =
         field_map json "EncryptionType" EncryptionType.of_json in
@@ -3331,6 +3376,7 @@ module PutRecordsInput =
         PutRecordsRequestEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Records") in
       make ~streamName ~records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamName = field_map_exn json "StreamName" StreamName.of_json in
       let records =
@@ -3474,6 +3520,7 @@ module PutRecordOutput =
       let shardId =
         ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
       make ?encryptionType ~sequenceNumber ~shardId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let encryptionType =
         field_map json "EncryptionType" EncryptionType.of_json in
@@ -3541,6 +3588,7 @@ module PutRecordInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ?sequenceNumberForOrdering ?explicitHashKey ~partitionKey ~data
         ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sequenceNumberForOrdering =
         field_map json "SequenceNumberForOrdering" SequenceNumber.of_json in
@@ -3587,6 +3635,7 @@ module MergeShardsInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~adjacentShardToMerge ~shardToMerge ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let adjacentShardToMerge =
         field_map_exn json "AdjacentShardToMerge" ShardId.of_json in
@@ -3664,6 +3713,7 @@ module ListTagsForStreamOutput =
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~hasMoreTags ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hasMoreTags =
         field_map_exn json "HasMoreTags" BooleanObject.of_json in
@@ -3706,6 +3756,7 @@ module ListTagsForStreamInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ?limit ?exclusiveStartTagKey ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" ListTagsForStreamInputLimit.of_json in
       let exclusiveStartTagKey =
@@ -3767,6 +3818,7 @@ module ListStreamsOutput =
         StreamNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamNames") in
       make ~hasMoreStreams ~streamNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hasMoreStreams =
         field_map_exn json "HasMoreStreams" BooleanObject.of_json in
@@ -3801,6 +3853,7 @@ module ListStreamsInput =
         (Option.map ~f:ListStreamsInputLimit.of_xml)
           (Xml.child xml_arg0 "Limit") in
       make ?exclusiveStartStreamName ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exclusiveStartStreamName =
         field_map json "ExclusiveStartStreamName" StreamName.of_json in
@@ -3894,6 +3947,7 @@ module ListStreamConsumersOutput =
       let consumers =
         (Option.map ~f:ConsumerList.of_xml) (Xml.child xml_arg0 "Consumers") in
       make ?nextToken ?consumers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let consumers = field_map json "Consumers" ConsumerList.of_json in
@@ -3946,6 +4000,7 @@ module ListStreamConsumersInput =
         StreamARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
       make ?streamCreationTimestamp ?maxResults ?nextToken ~streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamCreationTimestamp =
         field_map json "StreamCreationTimestamp" Timestamp.of_json in
@@ -4042,6 +4097,7 @@ module ListShardsOutput =
       let shards =
         (Option.map ~f:ShardList.of_xml) (Xml.child xml_arg0 "Shards") in
       make ?nextToken ?shards ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let shards = field_map json "Shards" ShardList.of_json in
@@ -4116,6 +4172,7 @@ module ListShardsInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?shardFilter ?streamCreationTimestamp ?maxResults
         ?exclusiveStartShardId ?nextToken ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shardFilter = field_map json "ShardFilter" ShardFilter.of_json in
       let streamCreationTimestamp =
@@ -4158,6 +4215,7 @@ module IncreaseStreamRetentionPeriodInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~retentionPeriodHours ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retentionPeriodHours =
         field_map_exn json "RetentionPeriodHours"
@@ -4232,6 +4290,7 @@ module GetShardIteratorOutput =
         (Option.map ~f:ShardIterator.of_xml)
           (Xml.child xml_arg0 "ShardIterator") in
       make ?shardIterator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shardIterator =
         field_map json "ShardIterator" ShardIterator.of_json in
@@ -4296,6 +4355,7 @@ module GetShardIteratorInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ?timestamp ?startingSequenceNumber ~shardIteratorType ~shardId
         ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timestamp = field_map json "Timestamp" Timestamp.of_json in
       let startingSequenceNumber =
@@ -4464,6 +4524,7 @@ module GetRecordsOutput =
         RecordList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Records") in
       make ?childShards ?millisBehindLatest ?nextShardIterator ~records ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let childShards = field_map json "ChildShards" ChildShardList.of_json in
       let millisBehindLatest =
@@ -4500,6 +4561,7 @@ module GetRecordsInput =
         ShardIterator.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ShardIterator") in
       make ?limit ~shardIterator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limit = field_map json "Limit" GetRecordsInputLimit.of_json in
       let shardIterator =
@@ -4597,6 +4659,7 @@ module EnhancedMonitoringOutput =
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?desiredShardLevelMetrics ?currentShardLevelMetrics ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredShardLevelMetrics =
         field_map json "DesiredShardLevelMetrics" MetricsNameList.of_json in
@@ -4634,6 +4697,7 @@ module EnableEnhancedMonitoringInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~shardLevelMetrics ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shardLevelMetrics =
         field_map_exn json "ShardLevelMetrics" MetricsNameList.of_json in
@@ -4668,6 +4732,7 @@ module DisableEnhancedMonitoringInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~shardLevelMetrics ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let shardLevelMetrics =
         field_map_exn json "ShardLevelMetrics" MetricsNameList.of_json in
@@ -4733,6 +4798,7 @@ module DescribeStreamSummaryOutput =
           (Xml.child_exn ~context:context_ xml_arg0
              "StreamDescriptionSummary") in
       make ~streamDescriptionSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamDescriptionSummary =
         field_map_exn json "StreamDescriptionSummary"
@@ -4758,6 +4824,7 @@ module DescribeStreamSummaryInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamName = field_map_exn json "StreamName" StreamName.of_json in
       make ~streamName ()
@@ -4819,6 +4886,7 @@ module DescribeStreamOutput =
         StreamDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamDescription") in
       make ~streamDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamDescription =
         field_map_exn json "StreamDescription" StreamDescription.of_json in
@@ -4860,6 +4928,7 @@ module DescribeStreamInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ?exclusiveStartShardId ?limit ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exclusiveStartShardId =
         field_map json "ExclusiveStartShardId" ShardId.of_json in
@@ -4931,6 +5000,7 @@ module DescribeStreamConsumerOutput =
         ConsumerDescription.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerDescription") in
       make ~consumerDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumerDescription =
         field_map_exn json "ConsumerDescription" ConsumerDescription.of_json in
@@ -4970,6 +5040,7 @@ module DescribeStreamConsumerInput =
       let streamARN =
         (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       make ?consumerARN ?consumerName ?streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumerARN = field_map json "ConsumerARN" ConsumerARN.of_json in
       let consumerName = field_map json "ConsumerName" ConsumerName.of_json in
@@ -5059,6 +5130,7 @@ module DescribeLimitsOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "ShardLimit") in
       make ~onDemandStreamCountLimit ~onDemandStreamCount ~openShardCount
         ~shardLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onDemandStreamCountLimit =
         field_map_exn json "OnDemandStreamCountLimit"
@@ -5083,6 +5155,7 @@ module DescribeLimitsInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5119,6 +5192,7 @@ module DeregisterStreamConsumerInput =
       let streamARN =
         (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       make ?consumerARN ?consumerName ?streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumerARN = field_map json "ConsumerARN" ConsumerARN.of_json in
       let consumerName = field_map json "ConsumerName" ConsumerName.of_json in
@@ -5153,6 +5227,7 @@ module DeleteStreamInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ?enforceConsumerDeletion ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enforceConsumerDeletion =
         field_map json "EnforceConsumerDeletion" BooleanObject.of_json in
@@ -5187,6 +5262,7 @@ module DecreaseStreamRetentionPeriodInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~retentionPeriodHours ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retentionPeriodHours =
         field_map_exn json "RetentionPeriodHours"
@@ -5232,6 +5308,7 @@ module CreateStreamInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ?streamModeDetails ?shardCount ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let streamModeDetails =
         field_map json "StreamModeDetails" StreamModeDetails.of_json in
@@ -5263,6 +5340,7 @@ module AddTagsToStreamInput =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
       make ~tags ~streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagMap.of_json in
       let streamName = field_map_exn json "StreamName" StreamName.of_json in

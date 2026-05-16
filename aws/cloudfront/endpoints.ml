@@ -1157,28 +1157,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | CreateCachePolicy ->
       if is_success
-      then Ok (CreateCachePolicyResult.of_xml (response_to_xml resp))
+      then
+        let body = CachePolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateCachePolicyResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateCachePolicyResult.error_of_xml))
   | CreateCloudFrontOriginAccessIdentity ->
       if is_success
       then
+        let body =
+          CloudFrontOriginAccessIdentity.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (CreateCloudFrontOriginAccessIdentityResult.of_xml
-             (response_to_xml resp))
+          (CreateCloudFrontOriginAccessIdentityResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some CreateCloudFrontOriginAccessIdentityResult.error_of_xml))
   | CreateDistribution ->
       if is_success
-      then Ok (CreateDistributionResult.of_xml (response_to_xml resp))
+      then
+        let body = Distribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateDistributionResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateDistributionResult.error_of_xml))
   | CreateDistributionWithTags ->
       if is_success
       then
-        Ok (CreateDistributionWithTagsResult.of_xml (response_to_xml resp))
+        let body = Distribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateDistributionWithTagsResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1186,9 +1204,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CreateFieldLevelEncryptionConfig ->
       if is_success
       then
+        let body =
+          FieldLevelEncryption.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (CreateFieldLevelEncryptionConfigResult.of_xml
-             (response_to_xml resp))
+          (CreateFieldLevelEncryptionConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1196,44 +1218,77 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CreateFieldLevelEncryptionProfile ->
       if is_success
       then
+        let body =
+          FieldLevelEncryptionProfile.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (CreateFieldLevelEncryptionProfileResult.of_xml
-             (response_to_xml resp))
+          (CreateFieldLevelEncryptionProfileResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some CreateFieldLevelEncryptionProfileResult.error_of_xml))
   | CreateFunction ->
       if is_success
-      then Ok (CreateFunctionResult.of_xml (response_to_xml resp))
+      then
+        let body = FunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CreateFunctionResult.error_of_xml))
   | CreateInvalidation ->
       if is_success
-      then Ok (CreateInvalidationResult.of_xml (response_to_xml resp))
+      then
+        let body = Invalidation.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateInvalidationResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateInvalidationResult.error_of_xml))
   | CreateKeyGroup ->
       if is_success
-      then Ok (CreateKeyGroupResult.of_xml (response_to_xml resp))
+      then
+        let body = KeyGroup.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateKeyGroupResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CreateKeyGroupResult.error_of_xml))
   | CreateMonitoringSubscription ->
       if is_success
       then
-        Ok (CreateMonitoringSubscriptionResult.of_xml (response_to_xml resp))
+        let body =
+          MonitoringSubscription.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateMonitoringSubscriptionResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some CreateMonitoringSubscriptionResult.error_of_xml))
   | CreateOriginRequestPolicy ->
       if is_success
-      then Ok (CreateOriginRequestPolicyResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          OriginRequestPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateOriginRequestPolicyResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error
              (Some CreateOriginRequestPolicyResult.error_of_xml))
   | CreatePublicKey ->
       if is_success
-      then Ok (CreatePublicKeyResult.of_xml (response_to_xml resp))
+      then
+        let body = PublicKey.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreatePublicKeyResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CreatePublicKeyResult.error_of_xml))
   | CreateRealtimeLogConfig ->
       if is_success
@@ -1244,7 +1299,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CreateResponseHeadersPolicy ->
       if is_success
       then
-        Ok (CreateResponseHeadersPolicyResult.of_xml (response_to_xml resp))
+        let body =
+          ResponseHeadersPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateResponseHeadersPolicyResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1252,7 +1313,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CreateStreamingDistribution ->
       if is_success
       then
-        Ok (CreateStreamingDistributionResult.of_xml (response_to_xml resp))
+        let body =
+          StreamingDistribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateStreamingDistributionResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1260,9 +1327,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CreateStreamingDistributionWithTags ->
       if is_success
       then
+        let body =
+          StreamingDistribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (CreateStreamingDistributionWithTagsResult.of_xml
-             (response_to_xml resp))
+          (CreateStreamingDistributionWithTagsResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1305,24 +1376,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DescribeFunction ->
       if is_success
-      then Ok (DescribeFunctionResult.of_xml (response_to_xml resp))
+      then
+        let body = FunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some DescribeFunctionResult.error_of_xml))
   | GetCachePolicy ->
       if is_success
-      then Ok (GetCachePolicyResult.of_xml (response_to_xml resp))
+      then
+        let body = CachePolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetCachePolicyResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetCachePolicyResult.error_of_xml))
   | GetCachePolicyConfig ->
       if is_success
-      then Ok (GetCachePolicyConfigResult.of_xml (response_to_xml resp))
+      then
+        let body = CachePolicyConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetCachePolicyConfigResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetCachePolicyConfigResult.error_of_xml))
   | GetCloudFrontOriginAccessIdentity ->
       if is_success
       then
+        let body =
+          CloudFrontOriginAccessIdentity.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetCloudFrontOriginAccessIdentityResult.of_xml
-             (response_to_xml resp))
+          (GetCloudFrontOriginAccessIdentityResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1330,34 +1418,58 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetCloudFrontOriginAccessIdentityConfig ->
       if is_success
       then
+        let body =
+          CloudFrontOriginAccessIdentityConfig.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetCloudFrontOriginAccessIdentityConfigResult.of_xml
-             (response_to_xml resp))
+          (GetCloudFrontOriginAccessIdentityConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some GetCloudFrontOriginAccessIdentityConfigResult.error_of_xml))
   | GetDistribution ->
       if is_success
-      then Ok (GetDistributionResult.of_xml (response_to_xml resp))
+      then
+        let body = Distribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetDistributionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetDistributionResult.error_of_xml))
   | GetDistributionConfig ->
       if is_success
-      then Ok (GetDistributionConfigResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          DistributionConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetDistributionConfigResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetDistributionConfigResult.error_of_xml))
   | GetFieldLevelEncryption ->
       if is_success
-      then Ok (GetFieldLevelEncryptionResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          FieldLevelEncryption.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetFieldLevelEncryptionResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetFieldLevelEncryptionResult.error_of_xml))
   | GetFieldLevelEncryptionConfig ->
       if is_success
       then
+        let body =
+          FieldLevelEncryptionConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetFieldLevelEncryptionConfigResult.of_xml (response_to_xml resp))
+          (GetFieldLevelEncryptionConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1365,8 +1477,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetFieldLevelEncryptionProfile ->
       if is_success
       then
+        let body =
+          FieldLevelEncryptionProfile.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetFieldLevelEncryptionProfileResult.of_xml (response_to_xml resp))
+          (GetFieldLevelEncryptionProfileResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1374,9 +1492,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetFieldLevelEncryptionProfileConfig ->
       if is_success
       then
+        let body =
+          FieldLevelEncryptionProfileConfig.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetFieldLevelEncryptionProfileConfigResult.of_xml
-             (response_to_xml resp))
+          (GetFieldLevelEncryptionProfileConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1391,45 +1514,82 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some GetFunctionResult.error_of_xml))
   | GetInvalidation ->
       if is_success
-      then Ok (GetInvalidationResult.of_xml (response_to_xml resp))
+      then
+        let body = Invalidation.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetInvalidationResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetInvalidationResult.error_of_xml))
   | GetKeyGroup ->
       if is_success
-      then Ok (GetKeyGroupResult.of_xml (response_to_xml resp))
+      then
+        let body = KeyGroup.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetKeyGroupResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetKeyGroupResult.error_of_xml))
   | GetKeyGroupConfig ->
       if is_success
-      then Ok (GetKeyGroupConfigResult.of_xml (response_to_xml resp))
+      then
+        let body = KeyGroupConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetKeyGroupConfigResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some GetKeyGroupConfigResult.error_of_xml))
   | GetMonitoringSubscription ->
       if is_success
-      then Ok (GetMonitoringSubscriptionResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          MonitoringSubscription.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetMonitoringSubscriptionResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error
              (Some GetMonitoringSubscriptionResult.error_of_xml))
   | GetOriginRequestPolicy ->
       if is_success
-      then Ok (GetOriginRequestPolicyResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          OriginRequestPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetOriginRequestPolicyResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetOriginRequestPolicyResult.error_of_xml))
   | GetOriginRequestPolicyConfig ->
       if is_success
       then
-        Ok (GetOriginRequestPolicyConfigResult.of_xml (response_to_xml resp))
+        let body =
+          OriginRequestPolicyConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetOriginRequestPolicyConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some GetOriginRequestPolicyConfigResult.error_of_xml))
   | GetPublicKey ->
       if is_success
-      then Ok (GetPublicKeyResult.of_xml (response_to_xml resp))
+      then
+        let body = PublicKey.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetPublicKeyResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetPublicKeyResult.error_of_xml))
   | GetPublicKeyConfig ->
       if is_success
-      then Ok (GetPublicKeyConfigResult.of_xml (response_to_xml resp))
+      then
+        let body = PublicKeyConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetPublicKeyConfigResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some GetPublicKeyConfigResult.error_of_xml))
   | GetRealtimeLogConfig ->
@@ -1440,66 +1600,112 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some GetRealtimeLogConfigResult.error_of_xml))
   | GetResponseHeadersPolicy ->
       if is_success
-      then Ok (GetResponseHeadersPolicyResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          ResponseHeadersPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetResponseHeadersPolicyResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetResponseHeadersPolicyResult.error_of_xml))
   | GetResponseHeadersPolicyConfig ->
       if is_success
       then
+        let body =
+          ResponseHeadersPolicyConfig.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetResponseHeadersPolicyConfigResult.of_xml (response_to_xml resp))
+          (GetResponseHeadersPolicyConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some GetResponseHeadersPolicyConfigResult.error_of_xml))
   | GetStreamingDistribution ->
       if is_success
-      then Ok (GetStreamingDistributionResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          StreamingDistribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetStreamingDistributionResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some GetStreamingDistributionResult.error_of_xml))
   | GetStreamingDistributionConfig ->
       if is_success
       then
+        let body =
+          StreamingDistributionConfig.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (GetStreamingDistributionConfigResult.of_xml (response_to_xml resp))
+          (GetStreamingDistributionConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some GetStreamingDistributionConfigResult.error_of_xml))
   | ListCachePolicies ->
       if is_success
-      then Ok (ListCachePoliciesResult.of_xml (response_to_xml resp))
+      then
+        let body = CachePolicyList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListCachePoliciesResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some ListCachePoliciesResult.error_of_xml))
   | ListCloudFrontOriginAccessIdentities ->
       if is_success
       then
+        let body =
+          CloudFrontOriginAccessIdentityList.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (ListCloudFrontOriginAccessIdentitiesResult.of_xml
-             (response_to_xml resp))
+          (ListCloudFrontOriginAccessIdentitiesResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some ListCloudFrontOriginAccessIdentitiesResult.error_of_xml))
   | ListConflictingAliases ->
       if is_success
-      then Ok (ListConflictingAliasesResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          ConflictingAliasesList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListConflictingAliasesResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some ListConflictingAliasesResult.error_of_xml))
   | ListDistributions ->
       if is_success
-      then Ok (ListDistributionsResult.of_xml (response_to_xml resp))
+      then
+        let body = DistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListDistributionsResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some ListDistributionsResult.error_of_xml))
   | ListDistributionsByCachePolicyId ->
       if is_success
       then
+        let body =
+          DistributionIdList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (ListDistributionsByCachePolicyIdResult.of_xml
-             (response_to_xml resp))
+          (ListDistributionsByCachePolicyIdResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1507,7 +1713,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListDistributionsByKeyGroup ->
       if is_success
       then
-        Ok (ListDistributionsByKeyGroupResult.of_xml (response_to_xml resp))
+        let body =
+          DistributionIdList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByKeyGroupResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1515,9 +1727,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListDistributionsByOriginRequestPolicyId ->
       if is_success
       then
+        let body =
+          DistributionIdList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (ListDistributionsByOriginRequestPolicyIdResult.of_xml
-             (response_to_xml resp))
+          (ListDistributionsByOriginRequestPolicyIdResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1526,9 +1742,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListDistributionsByRealtimeLogConfig ->
       if is_success
       then
+        let body = DistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (ListDistributionsByRealtimeLogConfigResult.of_xml
-             (response_to_xml resp))
+          (ListDistributionsByRealtimeLogConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1536,9 +1755,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListDistributionsByResponseHeadersPolicyId ->
       if is_success
       then
+        let body =
+          DistributionIdList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (ListDistributionsByResponseHeadersPolicyIdResult.of_xml
-             (response_to_xml resp))
+          (ListDistributionsByResponseHeadersPolicyIdResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1547,7 +1770,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListDistributionsByWebACLId ->
       if is_success
       then
-        Ok (ListDistributionsByWebACLIdResult.of_xml (response_to_xml resp))
+        let body = DistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByWebACLIdResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1555,9 +1783,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListFieldLevelEncryptionConfigs ->
       if is_success
       then
+        let body =
+          FieldLevelEncryptionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (ListFieldLevelEncryptionConfigsResult.of_xml
-             (response_to_xml resp))
+          (ListFieldLevelEncryptionConfigsResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1565,47 +1797,85 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListFieldLevelEncryptionProfiles ->
       if is_success
       then
+        let body =
+          FieldLevelEncryptionProfileList.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (ListFieldLevelEncryptionProfilesResult.of_xml
-             (response_to_xml resp))
+          (ListFieldLevelEncryptionProfilesResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some ListFieldLevelEncryptionProfilesResult.error_of_xml))
   | ListFunctions ->
       if is_success
-      then Ok (ListFunctionsResult.of_xml (response_to_xml resp))
+      then
+        let body = FunctionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListFunctionsResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some ListFunctionsResult.error_of_xml))
   | ListInvalidations ->
       if is_success
-      then Ok (ListInvalidationsResult.of_xml (response_to_xml resp))
+      then
+        let body = InvalidationList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListInvalidationsResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some ListInvalidationsResult.error_of_xml))
   | ListKeyGroups ->
       if is_success
-      then Ok (ListKeyGroupsResult.of_xml (response_to_xml resp))
+      then
+        let body = KeyGroupList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListKeyGroupsResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some ListKeyGroupsResult.error_of_xml))
   | ListOriginRequestPolicies ->
       if is_success
-      then Ok (ListOriginRequestPoliciesResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          OriginRequestPolicyList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListOriginRequestPoliciesResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error
              (Some ListOriginRequestPoliciesResult.error_of_xml))
   | ListPublicKeys ->
       if is_success
-      then Ok (ListPublicKeysResult.of_xml (response_to_xml resp))
+      then
+        let body = PublicKeyList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListPublicKeysResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some ListPublicKeysResult.error_of_xml))
   | ListRealtimeLogConfigs ->
       if is_success
-      then Ok (ListRealtimeLogConfigsResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          RealtimeLogConfigs.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListRealtimeLogConfigsResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error (Some ListRealtimeLogConfigsResult.error_of_xml))
   | ListResponseHeadersPolicies ->
       if is_success
       then
-        Ok (ListResponseHeadersPoliciesResult.of_xml (response_to_xml resp))
+        let body =
+          ResponseHeadersPolicyList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListResponseHeadersPoliciesResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1613,53 +1883,88 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListStreamingDistributions ->
       if is_success
       then
-        Ok (ListStreamingDistributionsResult.of_xml (response_to_xml resp))
+        let body =
+          StreamingDistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListStreamingDistributionsResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some ListStreamingDistributionsResult.error_of_xml))
   | ListTagsForResource ->
       if is_success
-      then Ok (ListTagsForResourceResult.of_xml (response_to_xml resp))
+      then
+        let body = Tags.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListTagsForResourceResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some ListTagsForResourceResult.error_of_xml))
   | PublishFunction ->
       if is_success
-      then Ok (PublishFunctionResult.of_xml (response_to_xml resp))
+      then
+        let body = FunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PublishFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some PublishFunctionResult.error_of_xml))
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
   | TestFunction ->
       if is_success
-      then Ok (TestFunctionResult.of_xml (response_to_xml resp))
+      then
+        let body = TestResult.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TestFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some TestFunctionResult.error_of_xml))
   | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateCachePolicy ->
       if is_success
-      then Ok (UpdateCachePolicyResult.of_xml (response_to_xml resp))
+      then
+        let body = CachePolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateCachePolicyResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some UpdateCachePolicyResult.error_of_xml))
   | UpdateCloudFrontOriginAccessIdentity ->
       if is_success
       then
+        let body =
+          CloudFrontOriginAccessIdentity.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (UpdateCloudFrontOriginAccessIdentityResult.of_xml
-             (response_to_xml resp))
+          (UpdateCloudFrontOriginAccessIdentityResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some UpdateCloudFrontOriginAccessIdentityResult.error_of_xml))
   | UpdateDistribution ->
       if is_success
-      then Ok (UpdateDistributionResult.of_xml (response_to_xml resp))
+      then
+        let body = Distribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateDistributionResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some UpdateDistributionResult.error_of_xml))
   | UpdateFieldLevelEncryptionConfig ->
       if is_success
       then
+        let body =
+          FieldLevelEncryption.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (UpdateFieldLevelEncryptionConfigResult.of_xml
-             (response_to_xml resp))
+          (UpdateFieldLevelEncryptionConfigResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1667,31 +1972,54 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | UpdateFieldLevelEncryptionProfile ->
       if is_success
       then
+        let body =
+          FieldLevelEncryptionProfile.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (UpdateFieldLevelEncryptionProfileResult.of_xml
-             (response_to_xml resp))
+          (UpdateFieldLevelEncryptionProfileResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
              (Some UpdateFieldLevelEncryptionProfileResult.error_of_xml))
   | UpdateFunction ->
       if is_success
-      then Ok (UpdateFunctionResult.of_xml (response_to_xml resp))
+      then
+        let body = FunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some UpdateFunctionResult.error_of_xml))
   | UpdateKeyGroup ->
       if is_success
-      then Ok (UpdateKeyGroupResult.of_xml (response_to_xml resp))
+      then
+        let body = KeyGroup.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateKeyGroupResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some UpdateKeyGroupResult.error_of_xml))
   | UpdateOriginRequestPolicy ->
       if is_success
-      then Ok (UpdateOriginRequestPolicyResult.of_xml (response_to_xml resp))
+      then
+        let body =
+          OriginRequestPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateOriginRequestPolicyResult.of_header_and_body (headers, body))
       else
         Error
           (parse_aws_error
              (Some UpdateOriginRequestPolicyResult.error_of_xml))
   | UpdatePublicKey ->
       if is_success
-      then Ok (UpdatePublicKeyResult.of_xml (response_to_xml resp))
+      then
+        let body = PublicKey.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdatePublicKeyResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some UpdatePublicKeyResult.error_of_xml))
   | UpdateRealtimeLogConfig ->
       if is_success
@@ -1702,7 +2030,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | UpdateResponseHeadersPolicy ->
       if is_success
       then
-        Ok (UpdateResponseHeadersPolicyResult.of_xml (response_to_xml resp))
+        let body =
+          ResponseHeadersPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateResponseHeadersPolicyResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error
@@ -1710,7 +2044,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | UpdateStreamingDistribution ->
       if is_success
       then
-        Ok (UpdateStreamingDistributionResult.of_xml (response_to_xml resp))
+        let body =
+          StreamingDistribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateStreamingDistributionResult.of_header_and_body
+             (headers, body))
       else
         Error
           (parse_aws_error

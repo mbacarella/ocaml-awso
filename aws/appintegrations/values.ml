@@ -175,6 +175,7 @@ module EventFilter =
       let source =
         Source.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Source") in
       make ~source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let source = field_map_exn json "Source" Source.of_json in
       make ~source ()
@@ -390,6 +391,7 @@ module EventIntegration =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventIntegrationArn") in
       make ?tags ?eventBridgeBus ?eventFilter ?description ?name
         ?eventIntegrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let eventBridgeBus =
@@ -472,6 +474,7 @@ module EventIntegrationAssociation =
       make ?clientAssociationMetadata ?eventBridgeRuleName ?clientId
         ?eventIntegrationName ?eventIntegrationAssociationId
         ?eventIntegrationAssociationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientAssociationMetadata =
         field_map json "ClientAssociationMetadata"
@@ -514,6 +517,7 @@ module DataIntegrationSummary =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?sourceURI ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceURI = field_map json "SourceURI" NonBlankString.of_json in
       let name = field_map json "Name" Name.of_json in
@@ -555,6 +559,7 @@ module DataIntegrationAssociationSummary =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "DataIntegrationAssociationArn") in
       make ?clientId ?dataIntegrationArn ?dataIntegrationAssociationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientId = field_map json "ClientId" ClientId.of_json in
       let dataIntegrationArn =
@@ -620,6 +625,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -639,6 +645,7 @@ module InternalServiceError =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -658,6 +665,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -676,6 +684,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -694,6 +703,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -938,6 +948,7 @@ module ScheduleConfiguration =
         (Option.map ~f:NonBlankString.of_xml)
           (Xml.child xml_arg0 "FirstExecutionFrom") in
       make ?scheduleExpression ?object_ ?firstExecutionFrom ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheduleExpression =
         field_map json "ScheduleExpression" Schedule.of_json in
@@ -961,6 +972,7 @@ module DuplicateResourceException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -979,6 +991,7 @@ module ResourceQuotaExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -1075,6 +1088,7 @@ module UpdateEventIntegrationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the description of an event integration."]
@@ -1098,6 +1112,7 @@ module UpdateEventIntegrationRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let name = field_map_exn json "Name" Name.of_json in
@@ -1175,6 +1190,7 @@ module UpdateDataIntegrationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1206,6 +1222,7 @@ module UpdateDataIntegrationRequest =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ?description ?name ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" Description.of_json in
       let name = field_map json "Name" Name.of_json in
@@ -1276,6 +1293,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -1301,6 +1319,7 @@ module UntagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -1369,6 +1388,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
@@ -1392,6 +1412,7 @@ module TagResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -1464,6 +1485,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1484,6 +1506,7 @@ module ListTagsForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       make ~resourceArn ()
@@ -1567,6 +1590,7 @@ module ListEventIntegrationsResponse =
         (Option.map ~f:EventIntegrationsList.of_xml)
           (Xml.child xml_arg0 "EventIntegrations") in
       make ?nextToken ?eventIntegrations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let eventIntegrations =
@@ -1597,6 +1621,7 @@ module ListEventIntegrationsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -1692,6 +1717,7 @@ module ListEventIntegrationAssociationsResponse =
         (Option.map ~f:EventIntegrationAssociationsList.of_xml)
           (Xml.child xml_arg0 "EventIntegrationAssociations") in
       make ?nextToken ?eventIntegrationAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let eventIntegrationAssociations =
@@ -1731,6 +1757,7 @@ module ListEventIntegrationAssociationsRequest =
       let eventIntegrationName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?maxResults ?nextToken ~eventIntegrationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -1818,6 +1845,7 @@ module ListDataIntegrationsResponse =
         (Option.map ~f:DataIntegrationsList.of_xml)
           (Xml.child xml_arg0 "DataIntegrations") in
       make ?nextToken ?dataIntegrations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dataIntegrations =
@@ -1848,6 +1876,7 @@ module ListDataIntegrationsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -1944,6 +1973,7 @@ module ListDataIntegrationAssociationsResponse =
         (Option.map ~f:DataIntegrationAssociationsList.of_xml)
           (Xml.child xml_arg0 "DataIntegrationAssociations") in
       make ?nextToken ?dataIntegrationAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dataIntegrationAssociations =
@@ -1985,6 +2015,7 @@ module ListDataIntegrationAssociationsRequest =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ?maxResults ?nextToken ~dataIntegrationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2111,6 +2142,7 @@ module GetEventIntegrationResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?tags ?eventFilter ?eventBridgeBus ?eventIntegrationArn
         ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let eventFilter = field_map json "EventFilter" EventFilter.of_json in
@@ -2138,6 +2170,7 @@ module GetEventIntegrationRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -2273,6 +2306,7 @@ module GetDataIntegrationResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?scheduleConfiguration ?sourceURI ?kmsKey ?description ?name
         ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let scheduleConfiguration =
@@ -2304,6 +2338,7 @@ module GetDataIntegrationRequest =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifier = field_map_exn json "Identifier" Identifier.of_json in
       make ~identifier ()
@@ -2381,6 +2416,7 @@ module DeleteEventIntegrationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2399,6 +2435,7 @@ module DeleteEventIntegrationRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
@@ -2475,6 +2512,7 @@ module DeleteDataIntegrationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2498,6 +2536,7 @@ module DeleteDataIntegrationRequest =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~dataIntegrationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataIntegrationIdentifier =
         field_map_exn json "DataIntegrationIdentifier" Identifier.of_json in
@@ -2597,6 +2636,7 @@ module CreateEventIntegrationResponse =
       let eventIntegrationArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventIntegrationArn") in
       make ?eventIntegrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eventIntegrationArn =
         field_map json "EventIntegrationArn" Arn.of_json in
@@ -2660,6 +2700,7 @@ module CreateEventIntegrationRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?clientToken ~eventBridgeBus ~eventFilter ?description ~name
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagMap.of_json in
       let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
@@ -2824,6 +2865,7 @@ module CreateDataIntegrationResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?clientToken ?tags ?scheduleConfiguration ?sourceURI ?kmsKey
         ?description ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
       let tags = field_map json "Tags" TagMap.of_json in
@@ -2907,6 +2949,7 @@ module CreateDataIntegrationRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?clientToken ?tags ?scheduleConfig ?sourceURI ?kmsKey ?description
         ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
       let tags = field_map json "Tags" TagMap.of_json in

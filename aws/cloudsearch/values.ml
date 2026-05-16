@@ -303,6 +303,7 @@ module DocumentSuggesterOptions =
         FieldName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceField") in
       make ?sortExpression ?fuzzyMatching ~sourceField ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortExpression = field_map json "SortExpression" String_.of_json in
       let fuzzyMatching =
@@ -386,6 +387,7 @@ module DateArrayOptions =
         (Option.map ~f:FieldValue.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?returnEnabled ?searchEnabled ?facetEnabled ?sourceFields
         ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
       let searchEnabled = field_map json "SearchEnabled" Boolean.of_json in
@@ -456,6 +458,7 @@ module DateOptions =
         (Option.map ~f:FieldValue.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?sortEnabled ?returnEnabled ?searchEnabled ?facetEnabled
         ?sourceField ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortEnabled = field_map json "SortEnabled" Boolean.of_json in
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
@@ -521,6 +524,7 @@ module DoubleArrayOptions =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?returnEnabled ?searchEnabled ?facetEnabled ?sourceFields
         ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
       let searchEnabled = field_map json "SearchEnabled" Boolean.of_json in
@@ -592,6 +596,7 @@ module DoubleOptions =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?sortEnabled ?returnEnabled ?searchEnabled ?facetEnabled
         ?sourceField ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortEnabled = field_map json "SortEnabled" Boolean.of_json in
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
@@ -731,6 +736,7 @@ module IntArrayOptions =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?returnEnabled ?searchEnabled ?facetEnabled ?sourceFields
         ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
       let searchEnabled = field_map json "SearchEnabled" Boolean.of_json in
@@ -802,6 +808,7 @@ module IntOptions =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?sortEnabled ?returnEnabled ?searchEnabled ?facetEnabled
         ?sourceField ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortEnabled = field_map json "SortEnabled" Boolean.of_json in
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
@@ -872,6 +879,7 @@ module LatLonOptions =
         (Option.map ~f:FieldValue.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?sortEnabled ?returnEnabled ?searchEnabled ?facetEnabled
         ?sourceField ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortEnabled = field_map json "SortEnabled" Boolean.of_json in
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
@@ -937,6 +945,7 @@ module LiteralArrayOptions =
         (Option.map ~f:FieldValue.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?returnEnabled ?searchEnabled ?facetEnabled ?sourceFields
         ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
       let searchEnabled = field_map json "SearchEnabled" Boolean.of_json in
@@ -1007,6 +1016,7 @@ module LiteralOptions =
         (Option.map ~f:FieldValue.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?sortEnabled ?returnEnabled ?searchEnabled ?facetEnabled
         ?sourceField ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sortEnabled = field_map json "SortEnabled" Boolean.of_json in
       let returnEnabled = field_map json "ReturnEnabled" Boolean.of_json in
@@ -1073,6 +1083,7 @@ module TextArrayOptions =
         (Option.map ~f:FieldValue.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?analysisScheme ?highlightEnabled ?returnEnabled ?sourceFields
         ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisScheme = field_map json "AnalysisScheme" Word.of_json in
       let highlightEnabled =
@@ -1145,6 +1156,7 @@ module TextOptions =
         (Option.map ~f:FieldValue.of_xml) (Xml.child xml_arg0 "DefaultValue") in
       make ?analysisScheme ?highlightEnabled ?sortEnabled ?returnEnabled
         ?sourceField ?defaultValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisScheme = field_map json "AnalysisScheme" Word.of_json in
       let highlightEnabled =
@@ -1283,6 +1295,7 @@ module AnalysisOptions =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Synonyms") in
       make ?algorithmicStemming ?japaneseTokenizationDictionary
         ?stemmingDictionary ?stopwords ?synonyms ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let algorithmicStemming =
         field_map json "AlgorithmicStemming" AlgorithmicStemming.of_json in
@@ -1580,6 +1593,7 @@ module OptionStatus =
           (Xml.child_exn ~context:context_ xml_arg0 "CreationDate") in
       make ?pendingDeletion ~state ?updateVersion ~updateDate ~creationDate
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let pendingDeletion = field_map json "PendingDeletion" Boolean.of_json in
       let state = field_map_exn json "State" OptionState.of_json in
@@ -1618,6 +1632,7 @@ module Suggester =
         StandardName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SuggesterName") in
       make ~documentSuggesterOptions ~suggesterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let documentSuggesterOptions =
         field_map_exn json "DocumentSuggesterOptions"
@@ -1743,6 +1758,7 @@ module IndexField =
         ?doubleArrayOptions ?intArrayOptions ?latLonOptions ?dateOptions
         ?textOptions ?literalOptions ?doubleOptions ?intOptions
         ~indexFieldType ~indexFieldName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dateArrayOptions =
         field_map json "DateArrayOptions" DateArrayOptions.of_json in
@@ -1797,6 +1813,7 @@ module Expression =
         StandardName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExpressionName") in
       make ~expressionValue ~expressionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expressionValue =
         field_map_exn json "ExpressionValue" ExpressionValue.of_json in
@@ -1902,6 +1919,7 @@ module Limits =
         MaximumReplicationCount.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MaximumReplicationCount") in
       make ~maximumPartitionCount ~maximumReplicationCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maximumPartitionCount =
         field_map_exn json "MaximumPartitionCount"
@@ -1957,6 +1975,7 @@ module ServiceEndpoint =
       let endpoint =
         (Option.map ~f:ServiceUrl.of_xml) (Xml.child xml_arg0 "Endpoint") in
       make ?endpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endpoint = field_map json "Endpoint" ServiceUrl.of_json in
       make ?endpoint ()
@@ -1995,6 +2014,7 @@ module AnalysisScheme =
         StandardName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnalysisSchemeName") in
       make ?analysisOptions ~analysisSchemeLanguage ~analysisSchemeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisOptions =
         field_map json "AnalysisOptions" AnalysisOptions.of_json in
@@ -2094,6 +2114,7 @@ module ScalingParameters =
           (Xml.child xml_arg0 "DesiredInstanceType") in
       make ?desiredPartitionCount ?desiredReplicationCount
         ?desiredInstanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let desiredPartitionCount =
         field_map json "DesiredPartitionCount" UIntValue.of_json in
@@ -2129,6 +2150,7 @@ module DomainEndpointOptions =
       let enforceHTTPS =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "EnforceHTTPS") in
       make ?tLSSecurityPolicy ?enforceHTTPS ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tLSSecurityPolicy =
         field_map json "TLSSecurityPolicy" TLSSecurityPolicy.of_json in
@@ -2183,6 +2205,7 @@ module SuggesterStatus =
       let options =
         Suggester.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options = field_map_exn json "Options" Suggester.of_json in
@@ -2209,6 +2232,7 @@ module IndexFieldStatus =
         IndexField.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options = field_map_exn json "Options" IndexField.of_json in
@@ -2238,6 +2262,7 @@ module ExpressionStatus =
         Expression.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options = field_map_exn json "Options" Expression.of_json in
@@ -2367,6 +2392,7 @@ module DomainStatus =
         ?searchInstanceType ?processing ~requiresIndexDocuments
         ?searchService ?docService ?deleted ?created ?aRN ~domainName
         ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let limits = field_map json "Limits" Limits.of_json in
       let searchInstanceCount =
@@ -2412,6 +2438,7 @@ module AnalysisSchemeStatus =
         AnalysisScheme.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options = field_map_exn json "Options" AnalysisScheme.of_json in
@@ -2438,6 +2465,7 @@ module AccessPoliciesStatus =
         PolicyDocument.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options = field_map_exn json "Options" PolicyDocument.of_json in
@@ -2462,6 +2490,7 @@ module BaseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       let code = field_map json "Code" ErrorCode.of_json in
@@ -2476,6 +2505,7 @@ module InternalException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2488,6 +2518,7 @@ module InvalidTypeException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2500,6 +2531,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2512,6 +2544,7 @@ module ResourceNotFoundException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2524,6 +2557,7 @@ module ValidationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2548,6 +2582,7 @@ module ScalingParametersStatus =
         ScalingParameters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options = field_map_exn json "Options" ScalingParameters.of_json in
@@ -2563,6 +2598,7 @@ module DisabledOperationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2590,6 +2626,7 @@ module DomainEndpointOptionsStatus =
         DomainEndpointOptions.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options =
@@ -2619,6 +2656,7 @@ module AvailabilityOptionsStatus =
       let options =
         MultiAZ.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       make ~status ~options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" OptionStatus.of_json in
       let options = field_map_exn json "Options" MultiAZ.of_json in
@@ -2884,6 +2922,7 @@ module ResourceAlreadyExistsException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2991,6 +3030,7 @@ module UpdateServiceAccessPoliciesResponse =
         AccessPoliciesStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessPolicies") in
       make ~accessPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPolicies =
         field_map_exn json "AccessPolicies" AccessPoliciesStatus.of_json in
@@ -3022,6 +3062,7 @@ module UpdateServiceAccessPoliciesRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~accessPolicies ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPolicies =
         field_map_exn json "AccessPolicies" PolicyDocument.of_json in
@@ -3131,6 +3172,7 @@ module UpdateScalingParametersResponse =
         ScalingParametersStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScalingParameters") in
       make ~scalingParameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingParameters =
         field_map_exn json "ScalingParameters"
@@ -3162,6 +3204,7 @@ module UpdateScalingParametersRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~scalingParameters ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingParameters =
         field_map_exn json "ScalingParameters" ScalingParameters.of_json in
@@ -3284,6 +3327,7 @@ module UpdateDomainEndpointOptionsResponse =
         (Option.map ~f:DomainEndpointOptionsStatus.of_xml)
           (Xml.child xml_arg0 "DomainEndpointOptions") in
       make ?domainEndpointOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainEndpointOptions =
         field_map json "DomainEndpointOptions"
@@ -3319,6 +3363,7 @@ module UpdateDomainEndpointOptionsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainEndpointOptions ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainEndpointOptions =
         field_map_exn json "DomainEndpointOptions"
@@ -3443,6 +3488,7 @@ module UpdateAvailabilityOptionsResponse =
         (Option.map ~f:AvailabilityOptionsStatus.of_xml)
           (Xml.child xml_arg0 "AvailabilityOptions") in
       make ?availabilityOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availabilityOptions =
         field_map json "AvailabilityOptions"
@@ -3473,6 +3519,7 @@ module UpdateAvailabilityOptionsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~multiAZ ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multiAZ = field_map_exn json "MultiAZ" Boolean.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -3534,6 +3581,7 @@ module ListDomainNamesResponse =
         (Option.map ~f:DomainNameMap.of_xml)
           (Xml.child xml_arg0 "DomainNames") in
       make ?domainNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainNames = field_map json "DomainNames" DomainNameMap.of_json in
       make ?domainNames ()
@@ -3620,6 +3668,7 @@ module IndexDocumentsResponse =
         (Option.map ~f:FieldNameList.of_xml)
           (Xml.child xml_arg0 "FieldNames") in
       make ?fieldNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldNames = field_map json "FieldNames" FieldNameList.of_json in
       make ?fieldNames ()
@@ -3641,6 +3690,7 @@ module IndexDocumentsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -3719,6 +3769,7 @@ module DescribeSuggestersResponse =
         SuggesterStatusList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Suggesters") in
       make ~suggesters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggesters =
         field_map_exn json "Suggesters" SuggesterStatusList.of_json in
@@ -3757,6 +3808,7 @@ module DescribeSuggestersRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?deployed ?suggesterNames ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deployed = field_map json "Deployed" Boolean.of_json in
       let suggesterNames =
@@ -3845,6 +3897,7 @@ module DescribeServiceAccessPoliciesResponse =
         AccessPoliciesStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccessPolicies") in
       make ~accessPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessPolicies =
         field_map_exn json "AccessPolicies" AccessPoliciesStatus.of_json in
@@ -3875,6 +3928,7 @@ module DescribeServiceAccessPoliciesRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?deployed ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deployed = field_map json "Deployed" Boolean.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -3957,6 +4011,7 @@ module DescribeScalingParametersResponse =
         ScalingParametersStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScalingParameters") in
       make ~scalingParameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scalingParameters =
         field_map_exn json "ScalingParameters"
@@ -3980,6 +4035,7 @@ module DescribeScalingParametersRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -4059,6 +4115,7 @@ module DescribeIndexFieldsResponse =
         IndexFieldStatusList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexFields") in
       make ~indexFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexFields =
         field_map_exn json "IndexFields" IndexFieldStatusList.of_json in
@@ -4099,6 +4156,7 @@ module DescribeIndexFieldsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?deployed ?fieldNames ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deployed = field_map json "Deployed" Boolean.of_json in
       let fieldNames =
@@ -4181,6 +4239,7 @@ module DescribeExpressionsResponse =
         ExpressionStatusList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Expressions") in
       make ~expressions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expressions =
         field_map_exn json "Expressions" ExpressionStatusList.of_json in
@@ -4222,6 +4281,7 @@ module DescribeExpressionsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?deployed ?expressionNames ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deployed = field_map json "Deployed" Boolean.of_json in
       let expressionNames =
@@ -4293,6 +4353,7 @@ module DescribeDomainsResponse =
         DomainStatusList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainStatusList") in
       make ~domainStatusList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainStatusList =
         field_map_exn json "DomainStatusList" DomainStatusList.of_json in
@@ -4318,6 +4379,7 @@ module DescribeDomainsRequest =
         (Option.map ~f:DomainNameList.of_xml)
           (Xml.child xml_arg0 "DomainNames") in
       make ?domainNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainNames = field_map json "DomainNames" DomainNameList.of_json in
       make ?domainNames ()
@@ -4423,6 +4485,7 @@ module DescribeDomainEndpointOptionsResponse =
         (Option.map ~f:DomainEndpointOptionsStatus.of_xml)
           (Xml.child xml_arg0 "DomainEndpointOptions") in
       make ?domainEndpointOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainEndpointOptions =
         field_map json "DomainEndpointOptions"
@@ -4455,6 +4518,7 @@ module DescribeDomainEndpointOptionsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?deployed ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deployed = field_map json "Deployed" Boolean.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -4568,6 +4632,7 @@ module DescribeAvailabilityOptionsResponse =
         (Option.map ~f:AvailabilityOptionsStatus.of_xml)
           (Xml.child xml_arg0 "AvailabilityOptions") in
       make ?availabilityOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let availabilityOptions =
         field_map json "AvailabilityOptions"
@@ -4600,6 +4665,7 @@ module DescribeAvailabilityOptionsRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?deployed ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deployed = field_map json "Deployed" Boolean.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -4682,6 +4748,7 @@ module DescribeAnalysisSchemesResponse =
         AnalysisSchemeStatusList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnalysisSchemes") in
       make ~analysisSchemes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisSchemes =
         field_map_exn json "AnalysisSchemes" AnalysisSchemeStatusList.of_json in
@@ -4722,6 +4789,7 @@ module DescribeAnalysisSchemesRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?deployed ?analysisSchemeNames ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deployed = field_map json "Deployed" Boolean.of_json in
       let analysisSchemeNames =
@@ -4820,6 +4888,7 @@ module DeleteSuggesterResponse =
         SuggesterStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Suggester") in
       make ~suggester ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggester = field_map_exn json "Suggester" SuggesterStatus.of_json in
       make ~suggester ()
@@ -4850,6 +4919,7 @@ module DeleteSuggesterRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~suggesterName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggesterName =
         field_map_exn json "SuggesterName" StandardName.of_json in
@@ -4947,6 +5017,7 @@ module DeleteIndexFieldResponse =
         IndexFieldStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexField") in
       make ~indexField ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexField =
         field_map_exn json "IndexField" IndexFieldStatus.of_json in
@@ -4978,6 +5049,7 @@ module DeleteIndexFieldRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~indexFieldName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexFieldName =
         field_map_exn json "IndexFieldName" DynamicFieldName.of_json in
@@ -5075,6 +5147,7 @@ module DeleteExpressionResponse =
         ExpressionStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
       make ~expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expression =
         field_map_exn json "Expression" ExpressionStatus.of_json in
@@ -5105,6 +5178,7 @@ module DeleteExpressionRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~expressionName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expressionName =
         field_map_exn json "ExpressionName" StandardName.of_json in
@@ -5173,6 +5247,7 @@ module DeleteDomainResponse =
         (Option.map ~f:DomainStatus.of_xml)
           (Xml.child xml_arg0 "DomainStatus") in
       make ?domainStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainStatus = field_map json "DomainStatus" DomainStatus.of_json in
       make ?domainStatus ()
@@ -5196,6 +5271,7 @@ module DeleteDomainRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -5295,6 +5371,7 @@ module DeleteAnalysisSchemeResponse =
         AnalysisSchemeStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnalysisScheme") in
       make ~analysisScheme ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisScheme =
         field_map_exn json "AnalysisScheme" AnalysisSchemeStatus.of_json in
@@ -5326,6 +5403,7 @@ module DeleteAnalysisSchemeRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~analysisSchemeName ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisSchemeName =
         field_map_exn json "AnalysisSchemeName" StandardName.of_json in
@@ -5430,6 +5508,7 @@ module DefineSuggesterResponse =
         SuggesterStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Suggester") in
       make ~suggester ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggester = field_map_exn json "Suggester" SuggesterStatus.of_json in
       make ~suggester ()
@@ -5457,6 +5536,7 @@ module DefineSuggesterRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~suggester ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suggester = field_map_exn json "Suggester" Suggester.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -5560,6 +5640,7 @@ module DefineIndexFieldResponse =
         IndexFieldStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexField") in
       make ~indexField ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexField =
         field_map_exn json "IndexField" IndexFieldStatus.of_json in
@@ -5591,6 +5672,7 @@ module DefineIndexFieldRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~indexField ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let indexField = field_map_exn json "IndexField" IndexField.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -5694,6 +5776,7 @@ module DefineExpressionResponse =
         ExpressionStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
       make ~expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expression =
         field_map_exn json "Expression" ExpressionStatus.of_json in
@@ -5722,6 +5805,7 @@ module DefineExpressionRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~expression ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expression = field_map_exn json "Expression" Expression.of_json in
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
@@ -5830,6 +5914,7 @@ module DefineAnalysisSchemeResponse =
         AnalysisSchemeStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AnalysisScheme") in
       make ~analysisScheme ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisScheme =
         field_map_exn json "AnalysisScheme" AnalysisSchemeStatus.of_json in
@@ -5859,6 +5944,7 @@ module DefineAnalysisSchemeRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~analysisScheme ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let analysisScheme =
         field_map_exn json "AnalysisScheme" AnalysisScheme.of_json in
@@ -5956,6 +6042,7 @@ module CreateDomainResponse =
         (Option.map ~f:DomainStatus.of_xml)
           (Xml.child xml_arg0 "DomainStatus") in
       make ?domainStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainStatus = field_map json "DomainStatus" DomainStatus.of_json in
       make ?domainStatus ()
@@ -5980,6 +6067,7 @@ module CreateDomainRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()
@@ -6064,6 +6152,7 @@ module BuildSuggestersResponse =
         (Option.map ~f:FieldNameList.of_xml)
           (Xml.child xml_arg0 "FieldNames") in
       make ?fieldNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fieldNames = field_map json "FieldNames" FieldNameList.of_json in
       make ?fieldNames ()
@@ -6085,6 +6174,7 @@ module BuildSuggestersRequest =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let domainName = field_map_exn json "DomainName" DomainName.of_json in
       make ~domainName ()

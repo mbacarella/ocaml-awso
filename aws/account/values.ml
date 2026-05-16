@@ -170,6 +170,7 @@ module AccessDeniedException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -228,6 +229,7 @@ module AlternateContact =
         (Option.map ~f:AlternateContactType.of_xml)
           (Xml.child xml_arg0 "AlternateContactType") in
       make ?title ?phoneNumber ?name ?emailAddress ?alternateContactType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map json "Title" Title.of_json in
       let phoneNumber = field_map json "PhoneNumber" PhoneNumber.of_json in
@@ -252,6 +254,7 @@ module InternalServerException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -271,6 +274,7 @@ module ResourceNotFoundException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -290,6 +294,7 @@ module TooManyRequestsException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -309,6 +314,7 @@ module ValidationException =
       let message =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" String_.of_json in
       make ~message ()
@@ -376,6 +382,7 @@ module PutAlternateContactRequest =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ~title ~phoneNumber ~name ~emailAddress ~alternateContactType
         ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let title = field_map_exn json "Title" Title.of_json in
       let phoneNumber = field_map_exn json "PhoneNumber" PhoneNumber.of_json in
@@ -472,6 +479,7 @@ module GetAlternateContactResponse =
         (Option.map ~f:AlternateContact.of_xml)
           (Xml.child xml_arg0 "AlternateContact") in
       make ?alternateContact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alternateContact =
         field_map json "AlternateContact" AlternateContact.of_json in
@@ -506,6 +514,7 @@ module GetAlternateContactRequest =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ~alternateContactType ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alternateContactType =
         field_map_exn json "AlternateContactType"
@@ -541,6 +550,7 @@ module DeleteAlternateContactRequest =
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ~alternateContactType ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alternateContactType =
         field_map_exn json "AlternateContactType"

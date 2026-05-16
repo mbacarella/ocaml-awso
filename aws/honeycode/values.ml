@@ -151,6 +151,7 @@ module DataItem =
       let overrideFormat =
         (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "overrideFormat") in
       make ?formattedValue ?rawValue ?overrideFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let formattedValue =
         field_map json "formattedValue" FormattedValue.of_json in
@@ -343,6 +344,7 @@ module SourceDataColumnProperties =
         (Option.map ~f:SourceDataColumnIndex.of_xml)
           (Xml.child xml_arg0 "columnIndex") in
       make ?columnIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let columnIndex =
         field_map json "columnIndex" SourceDataColumnIndex.of_json in
@@ -429,6 +431,7 @@ module Cell =
       let formula =
         (Option.map ~f:Formula.of_xml) (Xml.child xml_arg0 "formula") in
       make ?formattedValues ?formattedValue ?rawValue ?format ?formula ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let formattedValues =
         field_map json "formattedValues" FormattedValuesList.of_json in
@@ -459,6 +462,7 @@ module ColumnMetadata =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~format ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let format = field_map_exn json "format" Format_.of_json in
       let name = field_map_exn json "name" Name.of_json in
@@ -485,6 +489,7 @@ module ResultRow =
           (Xml.child_exn ~context:context_ xml_arg0 "dataItems") in
       let rowId = (Option.map ~f:RowId.of_xml) (Xml.child xml_arg0 "rowId") in
       make ~dataItems ?rowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataItems = field_map_exn json "dataItems" DataItems.of_json in
       let rowId = field_map json "rowId" RowId.of_json in
@@ -655,6 +660,7 @@ module CellInput =
         (Option.map ~f:FactList.of_xml) (Xml.child xml_arg0 "facts") in
       let fact = (Option.map ~f:Fact.of_xml) (Xml.child xml_arg0 "fact") in
       make ?facts ?fact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let facts = field_map json "facts" FactList.of_json in
       let fact = field_map json "fact" Fact.of_json in make ?facts ?fact ()
@@ -775,6 +781,7 @@ module ImportDataSourceConfig =
       let dataSourceUrl =
         (Option.map ~f:SecureURL.of_xml) (Xml.child xml_arg0 "dataSourceUrl") in
       make ?dataSourceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceUrl = field_map json "dataSourceUrl" SecureURL.of_json in
       make ?dataSourceUrl ()
@@ -874,6 +881,7 @@ module DelimitedTextImportOptions =
           (Xml.child_exn ~context:context_ xml_arg0 "delimiter") in
       make ?dataCharacterEncoding ?ignoreEmptyRows ?hasHeaderRow ~delimiter
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataCharacterEncoding =
         field_map json "dataCharacterEncoding"
@@ -905,6 +913,7 @@ module DestinationOptions =
         (Option.map ~f:ImportColumnMap.of_xml)
           (Xml.child xml_arg0 "columnMap") in
       make ?columnMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let columnMap = field_map json "columnMap" ImportColumnMap.of_json in
       make ?columnMap ()
@@ -1023,6 +1032,7 @@ module Filter =
       let formula =
         Formula.of_xml (Xml.child_exn ~context:context_ xml_arg0 "formula") in
       make ?contextRowId ~formula ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let contextRowId = field_map json "contextRowId" RowId.of_json in
       let formula = field_map_exn json "formula" Formula.of_json in
@@ -1143,6 +1153,7 @@ module TableRow =
       let rowId =
         RowId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "rowId") in
       make ~cells ~rowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cells = field_map_exn json "cells" Cells.of_json in
       let rowId = field_map_exn json "rowId" RowId.of_json in
@@ -1168,6 +1179,7 @@ module Table =
       let tableId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "tableId") in
       make ?tableName ?tableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tableName = field_map json "tableName" TableName.of_json in
       let tableId = field_map json "tableId" ResourceId.of_json in
@@ -1207,6 +1219,7 @@ module TableColumn =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "tableColumnId") in
       make ?format ?tableColumnName ?tableColumnId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let format = field_map json "format" Format_.of_json in
       let tableColumnName =
@@ -1251,6 +1264,7 @@ module VariableValue =
       let rawValue =
         RawValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "rawValue") in
       make ~rawValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rawValue = field_map_exn json "rawValue" RawValue.of_json in
       make ~rawValue ()
@@ -1281,6 +1295,7 @@ module ResultSet =
         ResultHeader.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "headers") in
       make ~rows ~headers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rows = field_map_exn json "rows" ResultRows.of_json in
       let headers = field_map_exn json "headers" ResultHeader.of_json in
@@ -1307,6 +1322,7 @@ module ImportDataSource =
         ImportDataSourceConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataSourceConfig") in
       make ~dataSourceConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSourceConfig =
         field_map_exn json "dataSourceConfig" ImportDataSourceConfig.of_json in
@@ -1335,6 +1351,7 @@ module ImportJobSubmitter =
         (Option.map ~f:AwsUserArn.of_xml) (Xml.child xml_arg0 "userArn") in
       let email = (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "email") in
       make ?userArn ?email ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userArn = field_map json "userArn" AwsUserArn.of_json in
       let email = field_map json "email" Email.of_json in
@@ -1371,6 +1388,7 @@ module ImportOptions =
         (Option.map ~f:DestinationOptions.of_xml)
           (Xml.child xml_arg0 "destinationOptions") in
       make ?delimitedTextOptions ?destinationOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let delimitedTextOptions =
         field_map json "delimitedTextOptions"
@@ -1417,6 +1435,7 @@ module FailedBatchItem =
       let id =
         BatchItemId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~errorMessage ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorMessage =
         field_map_exn json "errorMessage" BatchErrorMessage.of_json in
@@ -1449,6 +1468,7 @@ module UpsertRowsResult =
       let rowIds =
         RowIdList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "rowIds") in
       make ~upsertAction ~rowIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let upsertAction =
         field_map_exn json "upsertAction" UpsertAction.of_json in
@@ -1491,6 +1511,7 @@ module UpsertRowData =
         BatchItemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "batchItemId") in
       make ~cellsToUpdate ~filter ~batchItemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cellsToUpdate =
         field_map_exn json "cellsToUpdate" RowDataInput.of_json in
@@ -1524,6 +1545,7 @@ module UpdateRowData =
       let rowId =
         RowId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "rowId") in
       make ~cellsToUpdate ~rowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cellsToUpdate =
         field_map_exn json "cellsToUpdate" RowDataInput.of_json in
@@ -1558,6 +1580,7 @@ module CreateRowData =
         BatchItemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "batchItemId") in
       make ~cellsToCreate ~batchItemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let cellsToCreate =
         field_map_exn json "cellsToCreate" RowDataInput.of_json in
@@ -1579,6 +1602,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1598,6 +1622,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1616,6 +1641,7 @@ module RequestTimeoutException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1634,6 +1660,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1653,6 +1680,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1671,6 +1699,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -1691,6 +1720,7 @@ module ValidationException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -1810,6 +1840,7 @@ module ServiceQuotaExceededException =
         ErrorMessage.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "message" ErrorMessage.of_json in
       make ~message ()
@@ -2052,6 +2083,7 @@ module AutomationExecutionException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2070,6 +2102,7 @@ module AutomationExecutionTimeoutException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -2249,6 +2282,7 @@ module TableDataImportJobMetadata =
         ImportJobSubmitter.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "submitter") in
       make ~dataSource ~importOptions ~submitTime ~submitter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dataSource =
         field_map_exn json "dataSource" ImportDataSource.of_json in
@@ -2524,6 +2558,7 @@ module UntagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2552,6 +2587,7 @@ module UntagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeysList.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -2650,6 +2686,7 @@ module TagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2675,6 +2712,7 @@ module TagResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagsMap.of_json in
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
@@ -2800,6 +2838,7 @@ module StartTableDataImportJobResult =
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobStatus ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobStatus =
         field_map_exn json "jobStatus" TableDataImportJobStatus.of_json in
@@ -2876,6 +2915,7 @@ module StartTableDataImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ~clientRequestToken ~importOptions ~destinationTableId ~dataFormat
         ~dataSource ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map_exn json "clientRequestToken" ClientRequestToken.of_json in
@@ -3018,6 +3058,7 @@ module QueryTableRowsResult =
         ResourceIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "columnIds") in
       make ~workbookCursor ?nextToken ~rows ~columnIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workbookCursor =
         field_map_exn json "workbookCursor" WorkbookCursor.of_json in
@@ -3079,6 +3120,7 @@ module QueryTableRowsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?nextToken ?maxResults ~filterFormula ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3184,6 +3226,7 @@ module ListTagsForResourceResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -3206,6 +3249,7 @@ module ListTagsForResourceRequest =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
@@ -3327,6 +3371,7 @@ module ListTablesResult =
       let tables =
         Tables.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tables") in
       make ?workbookCursor ?nextToken ~tables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workbookCursor =
         field_map json "workbookCursor" WorkbookCursor.of_json in
@@ -3369,6 +3414,7 @@ module ListTablesRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?nextToken ?maxResults ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3513,6 +3559,7 @@ module ListTableRowsResult =
         ResourceIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "columnIds") in
       make ~workbookCursor ?nextToken ?rowIdsNotFound ~rows ~columnIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workbookCursor =
         field_map_exn json "workbookCursor" WorkbookCursor.of_json in
@@ -3574,6 +3621,7 @@ module ListTableRowsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?nextToken ?maxResults ?rowIds ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -3702,6 +3750,7 @@ module ListTableColumnsResult =
         TableColumns.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "tableColumns") in
       make ?workbookCursor ?nextToken ~tableColumns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workbookCursor =
         field_map json "workbookCursor" WorkbookCursor.of_json in
@@ -3746,6 +3795,7 @@ module ListTableColumnsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?nextToken ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let tableId = field_map_exn json "tableId" ResourceId.of_json in
@@ -3890,6 +3940,7 @@ module InvokeScreenAutomationResult =
         WorkbookCursor.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookCursor") in
       make ~workbookCursor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workbookCursor =
         field_map_exn json "workbookCursor" WorkbookCursor.of_json in
@@ -3970,6 +4021,7 @@ module InvokeScreenAutomationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?clientRequestToken ?rowId ?variables ~screenAutomationId
         ~screenId ~appId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -4103,6 +4155,7 @@ module GetScreenDataResult =
         ResultSetMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "results") in
       make ?nextToken ~workbookCursor ~results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let workbookCursor =
@@ -4173,6 +4226,7 @@ module GetScreenDataRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?nextToken ?maxResults ?variables ~screenId ~appId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" PaginationToken.of_json in
       let maxResults = field_map json "maxResults" MaxResults.of_json in
@@ -4310,6 +4364,7 @@ module DescribeTableDataImportJobResult =
         TableDataImportJobStatus.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobStatus") in
       make ?errorCode ~jobMetadata ~message ~jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode = field_map json "errorCode" ErrorCode.of_json in
       let jobMetadata =
@@ -4354,6 +4409,7 @@ module DescribeTableDataImportJobRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ~jobId ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let jobId = field_map_exn json "jobId" JobId.of_json in
       let tableId = field_map_exn json "tableId" ResourceId.of_json in
@@ -4492,6 +4548,7 @@ module BatchUpsertTableRowsResult =
         UpsertRowsResultMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "rows") in
       make ?failedBatchItems ~workbookCursor ~rows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedBatchItems =
         field_map json "failedBatchItems" FailedBatchItems.of_json in
@@ -4547,6 +4604,7 @@ module BatchUpsertTableRowsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?clientRequestToken ~rowsToUpsert ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -4669,6 +4727,7 @@ module BatchUpdateTableRowsResult =
         WorkbookCursor.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookCursor") in
       make ?failedBatchItems ~workbookCursor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedBatchItems =
         field_map json "failedBatchItems" FailedBatchItems.of_json in
@@ -4723,6 +4782,7 @@ module BatchUpdateTableRowsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?clientRequestToken ~rowsToUpdate ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -4845,6 +4905,7 @@ module BatchDeleteTableRowsResult =
         WorkbookCursor.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookCursor") in
       make ?failedBatchItems ~workbookCursor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedBatchItems =
         field_map json "failedBatchItems" FailedBatchItems.of_json in
@@ -4897,6 +4958,7 @@ module BatchDeleteTableRowsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?clientRequestToken ~rowIds ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in
@@ -5038,6 +5100,7 @@ module BatchCreateTableRowsResult =
         WorkbookCursor.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookCursor") in
       make ?failedBatchItems ~createdRows ~workbookCursor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failedBatchItems =
         field_map json "failedBatchItems" FailedBatchItems.of_json in
@@ -5094,6 +5157,7 @@ module BatchCreateTableRowsRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workbookId") in
       make ?clientRequestToken ~rowsToCreate ~tableId ~workbookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "clientRequestToken" ClientRequestToken.of_json in

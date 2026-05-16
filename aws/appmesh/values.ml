@@ -157,6 +157,7 @@ module SubjectAlternativeNameMatchers =
         SubjectAlternativeNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "exact") in
       make ~exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exact =
         field_map_exn json "exact" SubjectAlternativeNameList.of_json in
@@ -185,6 +186,7 @@ module TlsValidationContextAcmTrust =
           (Xml.child_exn ~context:context_ xml_arg0
              "certificateAuthorityArns") in
       make ~certificateAuthorityArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArns =
         field_map_exn json "certificateAuthorityArns"
@@ -211,6 +213,7 @@ module TlsValidationContextFileTrust =
         FilePath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~certificateChain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateChain =
         field_map_exn json "certificateChain" FilePath.of_json in
@@ -236,6 +239,7 @@ module TlsValidationContextSdsTrust =
         SdsSecretName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretName = field_map_exn json "secretName" SdsSecretName.of_json in
       make ~secretName ()
@@ -267,6 +271,7 @@ module ListenerTlsFileCertificate =
         FilePath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~privateKey ~certificateChain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateKey = field_map_exn json "privateKey" FilePath.of_json in
       let certificateChain =
@@ -293,6 +298,7 @@ module ListenerTlsSdsCertificate =
         SdsSecretName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretName = field_map_exn json "secretName" SdsSecretName.of_json in
       make ~secretName ()
@@ -336,6 +342,7 @@ module SubjectAlternativeNames =
         SubjectAlternativeNameMatchers.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "match") in
       make ~match_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let match_ =
         field_map_exn json "match" SubjectAlternativeNameMatchers.of_json in
@@ -375,6 +382,7 @@ module TlsValidationContextTrust =
         (Option.map ~f:TlsValidationContextAcmTrust.of_xml)
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds = field_map json "sds" TlsValidationContextSdsTrust.of_json in
       let file = field_map json "file" TlsValidationContextFileTrust.of_json in
@@ -475,6 +483,7 @@ module ClientTlsCertificate =
         (Option.map ~f:ListenerTlsFileCertificate.of_xml)
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds = field_map json "sds" ListenerTlsSdsCertificate.of_json in
       let file = field_map json "file" ListenerTlsFileCertificate.of_json in
@@ -533,6 +542,7 @@ module TlsValidationContext =
         (Option.map ~f:SubjectAlternativeNames.of_xml)
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trust =
         field_map_exn json "trust" TlsValidationContextTrust.of_json in
@@ -596,6 +606,7 @@ module VirtualGatewayTlsValidationContextAcmTrust =
           (Xml.child_exn ~context:context_ xml_arg0
              "certificateAuthorityArns") in
       make ~certificateAuthorityArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateAuthorityArns =
         field_map_exn json "certificateAuthorityArns"
@@ -622,6 +633,7 @@ module VirtualGatewayTlsValidationContextFileTrust =
         FilePath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~certificateChain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateChain =
         field_map_exn json "certificateChain" FilePath.of_json in
@@ -648,6 +660,7 @@ module VirtualGatewayTlsValidationContextSdsTrust =
         VirtualGatewaySdsSecretName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretName =
         field_map_exn json "secretName" VirtualGatewaySdsSecretName.of_json in
@@ -691,6 +704,7 @@ module MatchRange =
         Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "start") in
       let end_ = Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "end") in
       make ~start ~end_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let start = field_map_exn json "start" Long.of_json in
       let end_ = field_map_exn json "end" Long.of_json in
@@ -751,6 +765,7 @@ module ClientPolicyTls =
         (Option.map ~f:ClientTlsCertificate.of_xml)
           (Xml.child xml_arg0 "certificate") in
       make ~validation ?ports ?enforce ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validation =
         field_map_exn json "validation" TlsValidationContext.of_json in
@@ -780,6 +795,7 @@ module Duration =
       let unit =
         (Option.map ~f:DurationUnit.of_xml) (Xml.child xml_arg0 "unit") in
       make ?value ?unit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" DurationValue.of_json in
       let unit = field_map json "unit" DurationUnit.of_json in
@@ -804,6 +820,7 @@ module ListenerTlsAcmCertificate =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateArn") in
       make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn = field_map_exn json "certificateArn" Arn.of_json in
       make ~certificateArn ()
@@ -835,6 +852,7 @@ module ListenerTlsValidationContextTrust =
         (Option.map ~f:TlsValidationContextFileTrust.of_xml)
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds = field_map json "sds" TlsValidationContextSdsTrust.of_json in
       let file = field_map json "file" TlsValidationContextFileTrust.of_json in
@@ -955,6 +973,7 @@ module VirtualGatewayListenerTlsFileCertificate =
         FilePath.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~privateKey ~certificateChain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let privateKey = field_map_exn json "privateKey" FilePath.of_json in
       let certificateChain =
@@ -982,6 +1001,7 @@ module VirtualGatewayListenerTlsSdsCertificate =
         VirtualGatewaySdsSecretName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secretName =
         field_map_exn json "secretName" VirtualGatewaySdsSecretName.of_json in
@@ -1026,6 +1046,7 @@ module VirtualGatewayTlsValidationContextTrust =
         (Option.map ~f:VirtualGatewayTlsValidationContextAcmTrust.of_xml)
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds =
         field_map json "sds"
@@ -1058,6 +1079,7 @@ module VirtualGatewayListenerTlsAcmCertificate =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateArn") in
       make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateArn = field_map_exn json "certificateArn" Arn.of_json in
       make ~certificateArn ()
@@ -1092,6 +1114,7 @@ module VirtualGatewayListenerTlsValidationContextTrust =
         (Option.map ~f:VirtualGatewayTlsValidationContextFileTrust.of_xml)
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds =
         field_map json "sds"
@@ -1183,6 +1206,7 @@ module GrpcRouteMetadataMatchMethod =
       let exact =
         (Option.map ~f:HeaderMatch.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?regex ?range ?prefix ?exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suffix = field_map json "suffix" HeaderMatch.of_json in
       let regex = field_map json "regex" HeaderMatch.of_json in
@@ -1225,6 +1249,7 @@ module QueryParameterMatch =
     let of_xml xml_arg0 =
       let exact = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "exact") in
       make ?exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exact = field_map json "exact" String_.of_json in make ?exact ()
     let to_json v = composed_to_json to_value v
@@ -1286,6 +1311,7 @@ module HeaderMatchMethod =
       let exact =
         (Option.map ~f:HeaderMatch.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?regex ?range ?prefix ?exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suffix = field_map json "suffix" HeaderMatch.of_json in
       let regex = field_map json "regex" HeaderMatch.of_json in
@@ -1364,6 +1390,7 @@ module GrpcMetadataMatchMethod =
       let exact =
         (Option.map ~f:HeaderMatch.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?regex ?range ?prefix ?exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suffix = field_map json "suffix" HeaderMatch.of_json in
       let regex = field_map json "regex" HeaderMatch.of_json in
@@ -1456,6 +1483,7 @@ module ClientPolicy =
       let tls =
         (Option.map ~f:ClientPolicyTls.of_xml) (Xml.child xml_arg0 "tls") in
       make ?tls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tls = field_map json "tls" ClientPolicyTls.of_json in make ?tls ()
     let to_json v = composed_to_json to_value v
@@ -1548,6 +1576,7 @@ module GrpcTimeout =
         (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "perRequest") in
       let idle = (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "idle") in
       make ?perRequest ?idle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let perRequest = field_map json "perRequest" Duration.of_json in
       let idle = field_map json "idle" Duration.of_json in
@@ -1575,6 +1604,7 @@ module HttpTimeout =
         (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "perRequest") in
       let idle = (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "idle") in
       make ?perRequest ?idle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let perRequest = field_map json "perRequest" Duration.of_json in
       let idle = field_map json "idle" Duration.of_json in
@@ -1595,6 +1625,7 @@ module TcpTimeout =
     let of_xml xml_arg0 =
       let idle = (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "idle") in
       make ?idle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let idle = field_map json "idle" Duration.of_json in make ?idle ()
     let to_json v = composed_to_json to_value v
@@ -1630,6 +1661,7 @@ module ListenerTlsCertificate =
         (Option.map ~f:ListenerTlsAcmCertificate.of_xml)
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds = field_map json "sds" ListenerTlsSdsCertificate.of_json in
       let file = field_map json "file" ListenerTlsFileCertificate.of_json in
@@ -1695,6 +1727,7 @@ module ListenerTlsValidationContext =
         (Option.map ~f:SubjectAlternativeNames.of_xml)
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trust =
         field_map_exn json "trust" ListenerTlsValidationContextTrust.of_json in
@@ -1756,6 +1789,7 @@ module VirtualNodeGrpcConnectionPool =
         MaxRequests.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
@@ -1779,6 +1813,7 @@ module VirtualNodeHttp2ConnectionPool =
         MaxRequests.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
@@ -1812,6 +1847,7 @@ module VirtualNodeHttpConnectionPool =
         MaxConnections.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxConnections") in
       make ?maxPendingRequests ~maxConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxPendingRequests =
         field_map json "maxPendingRequests" MaxPendingRequests.of_json in
@@ -1839,6 +1875,7 @@ module VirtualNodeTcpConnectionPool =
         MaxConnections.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxConnections") in
       make ~maxConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxConnections =
         field_map_exn json "maxConnections" MaxConnections.of_json in
@@ -1871,6 +1908,7 @@ module AwsCloudMapInstanceAttribute =
         AwsCloudMapInstanceAttributeKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value =
         field_map_exn json "value" AwsCloudMapInstanceAttributeValue.of_json in
@@ -1908,6 +1946,7 @@ module VirtualGatewayClientTlsCertificate =
         (Option.map ~f:VirtualGatewayListenerTlsFileCertificate.of_xml)
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds =
         field_map json "sds" VirtualGatewayListenerTlsSdsCertificate.of_json in
@@ -1947,6 +1986,7 @@ module VirtualGatewayTlsValidationContext =
         (Option.map ~f:SubjectAlternativeNames.of_xml)
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trust =
         field_map_exn json "trust"
@@ -1976,6 +2016,7 @@ module VirtualGatewayGrpcConnectionPool =
         MaxRequests.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
@@ -1999,6 +2040,7 @@ module VirtualGatewayHttp2ConnectionPool =
         MaxRequests.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
@@ -2032,6 +2074,7 @@ module VirtualGatewayHttpConnectionPool =
         MaxConnections.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "maxConnections") in
       make ?maxPendingRequests ~maxConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxPendingRequests =
         field_map json "maxPendingRequests" MaxPendingRequests.of_json in
@@ -2163,6 +2206,7 @@ module VirtualGatewayListenerTlsCertificate =
         (Option.map ~f:VirtualGatewayListenerTlsAcmCertificate.of_xml)
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sds =
         field_map json "sds" VirtualGatewayListenerTlsSdsCertificate.of_json in
@@ -2237,6 +2281,7 @@ module VirtualGatewayListenerTlsValidationContext =
         (Option.map ~f:SubjectAlternativeNames.of_xml)
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let trust =
         field_map_exn json "trust"
@@ -2347,6 +2392,7 @@ module WeightedTarget =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
       make ~weight ~virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weight = field_map_exn json "weight" PercentInt.of_json in
       let virtualNode = field_map_exn json "virtualNode" ResourceName.of_json in
@@ -2384,6 +2430,7 @@ module GrpcRouteMetadata =
       let invert =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" HeaderName.of_json in
       let match_ =
@@ -2435,6 +2482,7 @@ module HttpQueryParameter =
         (Option.map ~f:QueryParameterMatch.of_xml)
           (Xml.child xml_arg0 "match") in
       make ~name ?match_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" QueryParameterName.of_json in
       let match_ = field_map json "match" QueryParameterMatch.of_json in
@@ -2471,6 +2519,7 @@ module HttpRouteHeader =
       let invert =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" HeaderName.of_json in
       let match_ = field_map json "match" HeaderMatchMethod.of_json in
@@ -2498,6 +2547,7 @@ module GatewayRouteVirtualService =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualServiceName") in
       make ~virtualServiceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ResourceName.of_json in
@@ -2523,6 +2573,7 @@ module GatewayRouteHostnameRewrite =
         (Option.map ~f:DefaultGatewayRouteRewrite.of_xml)
           (Xml.child xml_arg0 "defaultTargetHostname") in
       make ?defaultTargetHostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let defaultTargetHostname =
         field_map json "defaultTargetHostname"
@@ -2596,6 +2647,7 @@ module GrpcGatewayRouteMetadata =
       let invert =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" HeaderName.of_json in
       let match_ = field_map json "match" GrpcMetadataMatchMethod.of_json in
@@ -2618,6 +2670,7 @@ module HttpGatewayRoutePathRewrite =
       let exact =
         (Option.map ~f:HttpPathExact.of_xml) (Xml.child xml_arg0 "exact") in
       make ?exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let exact = field_map json "exact" HttpPathExact.of_json in
       make ?exact ()
@@ -2649,6 +2702,7 @@ module HttpGatewayRoutePrefixRewrite =
         (Option.map ~f:DefaultGatewayRouteRewrite.of_xml)
           (Xml.child xml_arg0 "defaultPrefix") in
       make ?value ?defaultPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "value" HttpGatewayRoutePrefix.of_json in
       let defaultPrefix =
@@ -2685,6 +2739,7 @@ module HttpGatewayRouteHeader =
       let invert =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "name" HeaderName.of_json in
       let match_ = field_map json "match" HeaderMatchMethod.of_json in
@@ -2715,6 +2770,7 @@ module PortMapping =
       let port =
         PortNumber.of_xml (Xml.child_exn ~context:context_ xml_arg0 "port") in
       make ~protocol ~port ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol = field_map_exn json "protocol" PortProtocol.of_json in
       let port = field_map_exn json "port" PortNumber.of_json in
@@ -2750,6 +2806,7 @@ module VirtualServiceBackend =
         (Option.map ~f:ClientPolicy.of_xml)
           (Xml.child xml_arg0 "clientPolicy") in
       make ~virtualServiceName ?clientPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ServiceName.of_json in
@@ -2836,6 +2893,7 @@ module HealthCheckPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "healthyThreshold") in
       make ~unhealthyThreshold ~timeoutMillis ~protocol ?port ?path
         ~intervalMillis ~healthyThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unhealthyThreshold =
         field_map_exn json "unhealthyThreshold" HealthCheckThreshold.of_json in
@@ -2884,6 +2942,7 @@ module ListenerTimeout =
       let grpc =
         (Option.map ~f:GrpcTimeout.of_xml) (Xml.child xml_arg0 "grpc") in
       make ?tcp ?http2 ?http ?grpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tcp = field_map json "tcp" TcpTimeout.of_json in
       let http2 = field_map json "http2" HttpTimeout.of_json in
@@ -2929,6 +2988,7 @@ module ListenerTls =
         ListenerTlsCertificate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificate") in
       make ?validation ~mode ~certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validation =
         field_map json "validation" ListenerTlsValidationContext.of_json in
@@ -2991,6 +3051,7 @@ module OutlierDetection =
           (Xml.child_exn ~context:context_ xml_arg0 "baseEjectionDuration") in
       make ~maxServerErrors ~maxEjectionPercent ~interval
         ~baseEjectionDuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxServerErrors =
         field_map_exn json "maxServerErrors"
@@ -3045,6 +3106,7 @@ module VirtualNodeConnectionPool =
         (Option.map ~f:VirtualNodeGrpcConnectionPool.of_xml)
           (Xml.child xml_arg0 "grpc") in
       make ?tcp ?http2 ?http ?grpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tcp = field_map json "tcp" VirtualNodeTcpConnectionPool.of_json in
       let http2 =
@@ -3071,6 +3133,7 @@ module FileAccessLog =
       let path =
         FilePath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "path") in
       make ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map_exn json "path" FilePath.of_json in make ~path ()
     let to_json v = composed_to_json to_value v
@@ -3199,6 +3262,7 @@ module VirtualGatewayClientPolicyTls =
         (Option.map ~f:VirtualGatewayClientTlsCertificate.of_xml)
           (Xml.child xml_arg0 "certificate") in
       make ~validation ?ports ?enforce ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validation =
         field_map_exn json "validation"
@@ -3244,6 +3308,7 @@ module VirtualGatewayConnectionPool =
         (Option.map ~f:VirtualGatewayGrpcConnectionPool.of_xml)
           (Xml.child xml_arg0 "grpc") in
       make ?http2 ?http ?grpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let http2 =
         field_map json "http2" VirtualGatewayHttp2ConnectionPool.of_json in
@@ -3339,6 +3404,7 @@ module VirtualGatewayHealthCheckPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "healthyThreshold") in
       make ~unhealthyThreshold ~timeoutMillis ~protocol ?port ?path
         ~intervalMillis ~healthyThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unhealthyThreshold =
         field_map_exn json "unhealthyThreshold"
@@ -3399,6 +3465,7 @@ module VirtualGatewayListenerTls =
         VirtualGatewayListenerTlsCertificate.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificate") in
       make ?validation ~mode ~certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let validation =
         field_map json "validation"
@@ -3435,6 +3502,7 @@ module VirtualGatewayPortMapping =
       let port =
         PortNumber.of_xml (Xml.child_exn ~context:context_ xml_arg0 "port") in
       make ~protocol ~port ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol =
         field_map_exn json "protocol" VirtualGatewayPortProtocol.of_json in
@@ -3458,6 +3526,7 @@ module VirtualGatewayFileAccessLog =
       let path =
         FilePath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "path") in
       make ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map_exn json "path" FilePath.of_json in make ~path ()
     let to_json v = composed_to_json to_value v
@@ -3707,6 +3776,7 @@ module HttpPathMatch =
       let exact =
         (Option.map ~f:HttpPathExact.of_xml) (Xml.child xml_arg0 "exact") in
       make ?regex ?exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let regex = field_map json "regex" HttpPathRegex.of_json in
       let exact = field_map json "exact" HttpPathExact.of_json in
@@ -3809,6 +3879,7 @@ module GatewayRouteTarget =
         GatewayRouteVirtualService.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
       make ~virtualService ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualService =
         field_map_exn json "virtualService"
@@ -3833,6 +3904,7 @@ module GrpcGatewayRouteRewrite =
         (Option.map ~f:GatewayRouteHostnameRewrite.of_xml)
           (Xml.child xml_arg0 "hostname") in
       make ?hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let hostname =
         field_map json "hostname" GatewayRouteHostnameRewrite.of_json in
@@ -3860,6 +3932,7 @@ module GatewayRouteHostnameMatch =
       let exact =
         (Option.map ~f:ExactHostName.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?exact ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suffix = field_map json "suffix" SuffixHostname.of_json in
       let exact = field_map json "exact" ExactHostName.of_json in
@@ -3928,6 +4001,7 @@ module HttpGatewayRouteRewrite =
         (Option.map ~f:GatewayRouteHostnameRewrite.of_xml)
           (Xml.child xml_arg0 "hostname") in
       make ?prefix ?path ?hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let prefix =
         field_map json "prefix" HttpGatewayRoutePrefixRewrite.of_json in
@@ -3986,6 +4060,7 @@ module VirtualNodeServiceProvider =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
       make ~virtualNodeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodeName =
         field_map_exn json "virtualNodeName" ResourceName.of_json in
@@ -4012,6 +4087,7 @@ module VirtualRouterServiceProvider =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
       make ~virtualRouterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -4034,6 +4110,7 @@ module VirtualRouterListener =
         PortMapping.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "portMapping") in
       make ~portMapping ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let portMapping = field_map_exn json "portMapping" PortMapping.of_json in
       make ~portMapping ()
@@ -4056,6 +4133,7 @@ module Backend =
         (Option.map ~f:VirtualServiceBackend.of_xml)
           (Xml.child xml_arg0 "virtualService") in
       make ?virtualService ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualService =
         field_map json "virtualService" VirtualServiceBackend.of_json in
@@ -4127,6 +4205,7 @@ module Listener =
           (Xml.child xml_arg0 "connectionPool") in
       make ?tls ?timeout ~portMapping ?outlierDetection ?healthCheck
         ?connectionPool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tls = field_map json "tls" ListenerTls.of_json in
       let timeout = field_map json "timeout" ListenerTimeout.of_json in
@@ -4156,6 +4235,7 @@ module AccessLog =
       let file =
         (Option.map ~f:FileAccessLog.of_xml) (Xml.child xml_arg0 "file") in
       make ?file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let file = field_map json "file" FileAccessLog.of_json in make ?file ()
     let to_json v = composed_to_json to_value v
@@ -4195,6 +4275,7 @@ module AwsCloudMapServiceDiscovery =
         (Option.map ~f:AwsCloudMapInstanceAttributes.of_xml)
           (Xml.child xml_arg0 "attributes") in
       make ~serviceName ~namespaceName ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceName =
         field_map_exn json "serviceName" AwsCloudMapName.of_json in
@@ -4231,6 +4312,7 @@ module DnsServiceDiscovery =
       let hostname =
         Hostname.of_xml (Xml.child_exn ~context:context_ xml_arg0 "hostname") in
       make ?responseType ~hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseType =
         field_map json "responseType" DnsResponseType.of_json in
@@ -4257,6 +4339,7 @@ module VirtualGatewayClientPolicy =
         (Option.map ~f:VirtualGatewayClientPolicyTls.of_xml)
           (Xml.child xml_arg0 "tls") in
       make ?tls ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tls = field_map json "tls" VirtualGatewayClientPolicyTls.of_json in
       make ?tls ()
@@ -4308,6 +4391,7 @@ module VirtualGatewayListener =
         (Option.map ~f:VirtualGatewayConnectionPool.of_xml)
           (Xml.child xml_arg0 "connectionPool") in
       make ?tls ~portMapping ?healthCheck ?connectionPool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tls = field_map json "tls" VirtualGatewayListenerTls.of_json in
       let portMapping =
@@ -4338,6 +4422,7 @@ module VirtualGatewayAccessLog =
         (Option.map ~f:VirtualGatewayFileAccessLog.of_xml)
           (Xml.child xml_arg0 "file") in
       make ?file ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let file = field_map json "file" VirtualGatewayFileAccessLog.of_json in
       make ?file ()
@@ -4402,6 +4487,7 @@ module GrpcRetryPolicy =
           (Xml.child xml_arg0 "grpcRetryEvents") in
       make ?tcpRetryEvents ~perRetryTimeout ~maxRetries ?httpRetryEvents
         ?grpcRetryEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tcpRetryEvents =
         field_map json "tcpRetryEvents" TcpRetryPolicyEvents.of_json in
@@ -4436,6 +4522,7 @@ module GrpcRouteAction =
         WeightedTargets.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "weightedTargets") in
       make ~weightedTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weightedTargets =
         field_map_exn json "weightedTargets" WeightedTargets.of_json in
@@ -4475,6 +4562,7 @@ module GrpcRouteMatch =
         (Option.map ~f:GrpcRouteMetadataList.of_xml)
           (Xml.child xml_arg0 "metadata") in
       make ?serviceName ?methodName ?metadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceName = field_map json "serviceName" ServiceName.of_json in
       let methodName = field_map json "methodName" MethodName.of_json in
@@ -4528,6 +4616,7 @@ module HttpRetryPolicy =
         (Option.map ~f:HttpRetryPolicyEvents.of_xml)
           (Xml.child xml_arg0 "httpRetryEvents") in
       make ?tcpRetryEvents ~perRetryTimeout ~maxRetries ?httpRetryEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tcpRetryEvents =
         field_map json "tcpRetryEvents" TcpRetryPolicyEvents.of_json in
@@ -4559,6 +4648,7 @@ module HttpRouteAction =
         WeightedTargets.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "weightedTargets") in
       make ~weightedTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weightedTargets =
         field_map_exn json "weightedTargets" WeightedTargets.of_json in
@@ -4619,6 +4709,7 @@ module HttpRouteMatch =
         (Option.map ~f:HttpRouteHeaders.of_xml)
           (Xml.child xml_arg0 "headers") in
       make ?scheme ?queryParameters ?prefix ?path ?method_ ?headers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scheme = field_map json "scheme" HttpScheme.of_json in
       let queryParameters =
@@ -4650,6 +4741,7 @@ module TcpRouteAction =
         WeightedTargets.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "weightedTargets") in
       make ~weightedTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weightedTargets =
         field_map_exn json "weightedTargets" WeightedTargets.of_json in
@@ -4707,6 +4799,7 @@ module GrpcGatewayRouteAction =
         (Option.map ~f:GrpcGatewayRouteRewrite.of_xml)
           (Xml.child xml_arg0 "rewrite") in
       make ~target ?rewrite ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let target = field_map_exn json "target" GatewayRouteTarget.of_json in
       let rewrite = field_map json "rewrite" GrpcGatewayRouteRewrite.of_json in
@@ -4746,6 +4839,7 @@ module GrpcGatewayRouteMatch =
         (Option.map ~f:GatewayRouteHostnameMatch.of_xml)
           (Xml.child xml_arg0 "hostname") in
       make ?serviceName ?metadata ?hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceName = field_map json "serviceName" ServiceName.of_json in
       let metadata =
@@ -4781,6 +4875,7 @@ module HttpGatewayRouteAction =
         (Option.map ~f:HttpGatewayRouteRewrite.of_xml)
           (Xml.child xml_arg0 "rewrite") in
       make ~target ?rewrite ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let target = field_map_exn json "target" GatewayRouteTarget.of_json in
       let rewrite = field_map json "rewrite" HttpGatewayRouteRewrite.of_json in
@@ -4841,6 +4936,7 @@ module HttpGatewayRouteMatch =
         (Option.map ~f:HttpGatewayRouteHeaders.of_xml)
           (Xml.child xml_arg0 "headers") in
       make ?queryParameters ?prefix ?path ?method_ ?hostname ?headers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let queryParameters =
         field_map json "queryParameters" HttpQueryParameters.of_json in
@@ -4910,6 +5006,7 @@ module VirtualServiceProvider =
         (Option.map ~f:VirtualNodeServiceProvider.of_xml)
           (Xml.child xml_arg0 "virtualNode") in
       make ?virtualRouter ?virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouter =
         field_map json "virtualRouter" VirtualRouterServiceProvider.of_json in
@@ -5027,6 +5124,7 @@ module BackendDefaults =
         (Option.map ~f:ClientPolicy.of_xml)
           (Xml.child xml_arg0 "clientPolicy") in
       make ?clientPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientPolicy = field_map json "clientPolicy" ClientPolicy.of_json in
       make ?clientPolicy ()
@@ -5099,6 +5197,7 @@ module Logging =
       let accessLog =
         (Option.map ~f:AccessLog.of_xml) (Xml.child xml_arg0 "accessLog") in
       make ?accessLog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessLog = field_map json "accessLog" AccessLog.of_json in
       make ?accessLog ()
@@ -5128,6 +5227,7 @@ module ServiceDiscovery =
         (Option.map ~f:AwsCloudMapServiceDiscovery.of_xml)
           (Xml.child xml_arg0 "awsCloudMap") in
       make ?dns ?awsCloudMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dns = field_map json "dns" DnsServiceDiscovery.of_json in
       let awsCloudMap =
@@ -5184,6 +5284,7 @@ module VirtualGatewayBackendDefaults =
         (Option.map ~f:VirtualGatewayClientPolicy.of_xml)
           (Xml.child xml_arg0 "clientPolicy") in
       make ?clientPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientPolicy =
         field_map json "clientPolicy" VirtualGatewayClientPolicy.of_json in
@@ -5238,6 +5339,7 @@ module VirtualGatewayLogging =
         (Option.map ~f:VirtualGatewayAccessLog.of_xml)
           (Xml.child xml_arg0 "accessLog") in
       make ?accessLog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessLog =
         field_map json "accessLog" VirtualGatewayAccessLog.of_json in
@@ -5314,6 +5416,7 @@ module GrpcRoute =
         GrpcRouteAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ?timeout ?retryPolicy ~match_ ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeout = field_map json "timeout" GrpcTimeout.of_json in
       let retryPolicy = field_map json "retryPolicy" GrpcRetryPolicy.of_json in
@@ -5362,6 +5465,7 @@ module HttpRoute =
         HttpRouteAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ?timeout ?retryPolicy ~match_ ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeout = field_map json "timeout" HttpTimeout.of_json in
       let retryPolicy = field_map json "retryPolicy" HttpRetryPolicy.of_json in
@@ -5410,6 +5514,7 @@ module TcpRoute =
         TcpRouteAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ?timeout ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timeout = field_map json "timeout" TcpTimeout.of_json in
       let action = field_map_exn json "action" TcpRouteAction.of_json in
@@ -5462,6 +5567,7 @@ module EgressFilter =
         EgressFilterType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let type_ = field_map_exn json "type" EgressFilterType.of_json in
       make ~type_ ()
@@ -5539,6 +5645,7 @@ module GrpcGatewayRoute =
         GrpcGatewayRouteAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~match_ ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let match_ = field_map_exn json "match" GrpcGatewayRouteMatch.of_json in
       let action = field_map_exn json "action" GrpcGatewayRouteAction.of_json in
@@ -5570,6 +5677,7 @@ module HttpGatewayRoute =
         HttpGatewayRouteAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~match_ ~action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let match_ = field_map_exn json "match" HttpGatewayRouteMatch.of_json in
       let action = field_map_exn json "action" HttpGatewayRouteAction.of_json in
@@ -5712,6 +5820,7 @@ module ResourceMetadata =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~version ~uid ~resourceOwner ~meshOwner ~lastUpdatedAt ~createdAt
         ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Long.of_json in
       let uid = field_map_exn json "uid" String_.of_json in
@@ -5744,6 +5853,7 @@ module VirtualServiceSpec =
         (Option.map ~f:VirtualServiceProvider.of_xml)
           (Xml.child xml_arg0 "provider") in
       make ?provider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let provider = field_map json "provider" VirtualServiceProvider.of_json in
       make ?provider ()
@@ -5767,6 +5877,7 @@ module VirtualServiceStatus =
         VirtualServiceStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" VirtualServiceStatusCode.of_json in
@@ -5792,6 +5903,7 @@ module VirtualRouterSpec =
         (Option.map ~f:VirtualRouterListeners.of_xml)
           (Xml.child xml_arg0 "listeners") in
       make ?listeners ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let listeners =
         field_map json "listeners" VirtualRouterListeners.of_json in
@@ -5816,6 +5928,7 @@ module VirtualRouterStatus =
         VirtualRouterStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" VirtualRouterStatusCode.of_json in
@@ -5880,6 +5993,7 @@ module VirtualNodeSpec =
           (Xml.child xml_arg0 "backendDefaults") in
       make ?serviceDiscovery ?logging ?listeners ?backends ?backendDefaults
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceDiscovery =
         field_map json "serviceDiscovery" ServiceDiscovery.of_json in
@@ -5910,6 +6024,7 @@ module VirtualNodeStatus =
         VirtualNodeStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" VirtualNodeStatusCode.of_json in
       make ~status ()
@@ -5950,6 +6065,7 @@ module VirtualGatewaySpec =
         (Option.map ~f:VirtualGatewayBackendDefaults.of_xml)
           (Xml.child xml_arg0 "backendDefaults") in
       make ?logging ~listeners ?backendDefaults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logging = field_map json "logging" VirtualGatewayLogging.of_json in
       let listeners =
@@ -5977,6 +6093,7 @@ module VirtualGatewayStatus =
         VirtualGatewayStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status =
         field_map_exn json "status" VirtualGatewayStatusCode.of_json in
@@ -6030,6 +6147,7 @@ module RouteSpec =
       let grpcRoute =
         (Option.map ~f:GrpcRoute.of_xml) (Xml.child xml_arg0 "grpcRoute") in
       make ?tcpRoute ?priority ?httpRoute ?http2Route ?grpcRoute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tcpRoute = field_map json "tcpRoute" TcpRoute.of_json in
       let priority = field_map json "priority" RoutePriority.of_json in
@@ -6057,6 +6175,7 @@ module RouteStatus =
         RouteStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" RouteStatusCode.of_json in
       make ~status ()
@@ -6079,6 +6198,7 @@ module MeshSpec =
         (Option.map ~f:EgressFilter.of_xml)
           (Xml.child xml_arg0 "egressFilter") in
       make ?egressFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let egressFilter = field_map json "egressFilter" EgressFilter.of_json in
       make ?egressFilter ()
@@ -6099,6 +6219,7 @@ module MeshStatus =
       let status =
         (Option.map ~f:MeshStatusCode.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "status" MeshStatusCode.of_json in
       make ?status ()
@@ -6147,6 +6268,7 @@ module GatewayRouteSpec =
         (Option.map ~f:GrpcGatewayRoute.of_xml)
           (Xml.child xml_arg0 "grpcRoute") in
       make ?priority ?httpRoute ?http2Route ?grpcRoute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let priority = field_map json "priority" GatewayRoutePriority.of_json in
       let httpRoute = field_map json "httpRoute" HttpGatewayRoute.of_json in
@@ -6173,6 +6295,7 @@ module GatewayRouteStatus =
         GatewayRouteStatusCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" GatewayRouteStatusCode.of_json in
       make ~status ()
@@ -6202,6 +6325,7 @@ module TagRef =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "value" TagValue.of_json in
       let key = field_map_exn json "key" TagKey.of_json in
@@ -6292,6 +6416,7 @@ module VirtualServiceRef =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~virtualServiceName ~version ~resourceOwner ~meshOwner ~meshName
         ~lastUpdatedAt ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ServiceName.of_json in
@@ -6392,6 +6517,7 @@ module VirtualRouterRef =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~virtualRouterName ~version ~resourceOwner ~meshOwner ~meshName
         ~lastUpdatedAt ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -6491,6 +6617,7 @@ module VirtualNodeRef =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~virtualNodeName ~version ~resourceOwner ~meshOwner ~meshName
         ~lastUpdatedAt ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodeName =
         field_map_exn json "virtualNodeName" ResourceName.of_json in
@@ -6590,6 +6717,7 @@ module VirtualGatewayRef =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~virtualGatewayName ~version ~resourceOwner ~meshOwner ~meshName
         ~lastUpdatedAt ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -6696,6 +6824,7 @@ module RouteRef =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~virtualRouterName ~version ~routeName ~resourceOwner ~meshOwner
         ~meshName ~lastUpdatedAt ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -6786,6 +6915,7 @@ module MeshRef =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~version ~resourceOwner ~meshOwner ~meshName ~lastUpdatedAt
         ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "version" Long.of_json in
       let resourceOwner =
@@ -6894,6 +7024,7 @@ module GatewayRouteRef =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~virtualGatewayName ~version ~resourceOwner ~meshOwner ~meshName
         ~lastUpdatedAt ~gatewayRouteName ~createdAt ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -6926,6 +7057,7 @@ module BadRequestException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -6945,6 +7077,7 @@ module ConflictException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -6964,6 +7097,7 @@ module ForbiddenException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -6982,6 +7116,7 @@ module InternalServerErrorException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -7001,6 +7136,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -7020,6 +7156,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -7039,6 +7176,7 @@ module ServiceUnavailableException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -7058,6 +7196,7 @@ module TooManyRequestsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -7112,6 +7251,7 @@ module VirtualServiceData =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualServiceName ~status ~spec ~metadata ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ServiceName.of_json in
@@ -7172,6 +7312,7 @@ module VirtualRouterData =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ~status ~spec ~metadata ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -7230,6 +7371,7 @@ module VirtualNodeData =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualNodeName ~status ~spec ~metadata ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodeName =
         field_map_exn json "virtualNodeName" ResourceName.of_json in
@@ -7289,6 +7431,7 @@ module VirtualGatewayData =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualGatewayName ~status ~spec ~metadata ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -7359,6 +7502,7 @@ module RouteData =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ~status ~spec ~routeName ~metadata ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -7405,6 +7549,7 @@ module MeshData =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~status ~spec ~metadata ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "status" MeshStatus.of_json in
       let spec = field_map_exn json "spec" MeshSpec.of_json in
@@ -7479,6 +7624,7 @@ module GatewayRouteData =
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRouteName") in
       make ~virtualGatewayName ~status ~spec ~metadata ~meshName
         ~gatewayRouteName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -7533,6 +7679,7 @@ module TooManyTagsException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -7896,6 +8043,7 @@ module ResourceInUseException =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" String_.of_json in
       make ?message ()
@@ -8005,6 +8153,8 @@ module UpdateVirtualServiceOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
@@ -8015,6 +8165,7 @@ module UpdateVirtualServiceOutput =
         VirtualServiceData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
       make ~virtualService ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualService =
         field_map_exn json "virtualService" VirtualServiceData.of_json in
@@ -8072,6 +8223,7 @@ module UpdateVirtualServiceInput =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualServiceName ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ServiceName.of_json in
@@ -8185,6 +8337,8 @@ module UpdateVirtualRouterOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualRouter",
@@ -8195,6 +8349,7 @@ module UpdateVirtualRouterOutput =
         VirtualRouterData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
       make ~virtualRouter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouter =
         field_map_exn json "virtualRouter" VirtualRouterData.of_json in
@@ -8251,6 +8406,7 @@ module UpdateVirtualRouterInput =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualRouterName ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -8364,6 +8520,8 @@ module UpdateVirtualNodeOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
@@ -8373,6 +8531,7 @@ module UpdateVirtualNodeOutput =
         VirtualNodeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
       make ~virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNode =
         field_map_exn json "virtualNode" VirtualNodeData.of_json in
@@ -8428,6 +8587,7 @@ module UpdateVirtualNodeInput =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualNodeName ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodeName =
         field_map_exn json "virtualNodeName" ResourceName.of_json in
@@ -8541,6 +8701,8 @@ module UpdateVirtualGatewayOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualGateway",
@@ -8551,6 +8713,7 @@ module UpdateVirtualGatewayOutput =
         VirtualGatewayData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
       make ~virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGateway =
         field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
@@ -8609,6 +8772,7 @@ module UpdateVirtualGatewayInput =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualGatewayName ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -8722,6 +8886,8 @@ module UpdateRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("route", (Some (RouteData.to_value x.route)))]
     let to_query v = to_query to_value v
@@ -8729,6 +8895,7 @@ module UpdateRouteOutput =
       let route =
         RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
       make ~route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map_exn json "route" RouteData.of_json in
       make ~route ()
@@ -8799,6 +8966,7 @@ module UpdateRouteInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualRouterName ~spec ~routeName ?meshOwner ~meshName
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -8902,6 +9070,8 @@ module UpdateMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
     let to_query v = to_query to_value v
@@ -8909,6 +9079,7 @@ module UpdateMeshOutput =
       let mesh =
         MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
       make ~mesh ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
     let to_json v = composed_to_json to_value v
@@ -8941,6 +9112,7 @@ module UpdateMeshInput =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?spec ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let spec = field_map json "spec" MeshSpec.of_json in
       let meshName = field_map_exn json "meshName" ResourceName.of_json in
@@ -9051,6 +9223,8 @@ module UpdateGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
@@ -9060,6 +9234,7 @@ module UpdateGatewayRouteOutput =
         GatewayRouteData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
       make ~gatewayRoute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayRoute =
         field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
@@ -9134,6 +9309,7 @@ module UpdateGatewayRouteInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualGatewayName ~spec ?meshOwner ~meshName ~gatewayRouteName
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -9232,6 +9408,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -9259,6 +9436,7 @@ module UntagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -9358,6 +9536,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end
@@ -9384,6 +9563,7 @@ module TagResourceInput =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
@@ -9492,6 +9672,7 @@ module ListVirtualServicesOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~virtualServices ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServices =
         field_map_exn json "virtualServices" VirtualServiceList.of_json in
@@ -9540,6 +9721,7 @@ module ListVirtualServicesInput =
         (Option.map ~f:ListVirtualServicesLimit.of_xml)
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let meshOwner = field_map json "meshOwner" AccountId.of_json in
@@ -9650,6 +9832,7 @@ module ListVirtualRoutersOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~virtualRouters ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouters =
         field_map_exn json "virtualRouters" VirtualRouterList.of_json in
@@ -9698,6 +9881,7 @@ module ListVirtualRoutersInput =
         (Option.map ~f:ListVirtualRoutersLimit.of_xml)
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let meshOwner = field_map json "meshOwner" AccountId.of_json in
@@ -9807,6 +9991,7 @@ module ListVirtualNodesOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~virtualNodes ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodes =
         field_map_exn json "virtualNodes" VirtualNodeList.of_json in
@@ -9854,6 +10039,7 @@ module ListVirtualNodesInput =
         (Option.map ~f:ListVirtualNodesLimit.of_xml)
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let meshOwner = field_map json "meshOwner" AccountId.of_json in
@@ -9964,6 +10150,7 @@ module ListVirtualGatewaysOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~virtualGateways ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGateways =
         field_map_exn json "virtualGateways" VirtualGatewayList.of_json in
@@ -10013,6 +10200,7 @@ module ListVirtualGatewaysInput =
         (Option.map ~f:ListVirtualGatewaysLimit.of_xml)
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let meshOwner = field_map json "meshOwner" AccountId.of_json in
@@ -10119,6 +10307,7 @@ module ListTagsForResourceOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~tags ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "tags" TagList.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -10156,6 +10345,7 @@ module ListTagsForResourceInput =
       let limit =
         (Option.map ~f:TagsLimit.of_xml) (Xml.child xml_arg0 "limit") in
       make ~resourceArn ?nextToken ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -10262,6 +10452,7 @@ module ListRoutesOutput =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~routes ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routes = field_map_exn json "routes" RouteList.of_json in
       let nextToken = field_map json "nextToken" String_.of_json in
@@ -10316,6 +10507,7 @@ module ListRoutesInput =
       let limit =
         (Option.map ~f:ListRoutesLimit.of_xml) (Xml.child xml_arg0 "limit") in
       make ~virtualRouterName ?nextToken ?meshOwner ~meshName ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -10423,6 +10615,7 @@ module ListMeshesOutput =
       let meshes =
         MeshList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "meshes") in
       make ?nextToken ~meshes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let meshes = field_map_exn json "meshes" MeshList.of_json in
@@ -10451,6 +10644,7 @@ module ListMeshesInput =
       let limit =
         (Option.map ~f:ListMeshesLimit.of_xml) (Xml.child xml_arg0 "limit") in
       make ?nextToken ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let limit = field_map json "limit" ListMeshesLimit.of_json in
@@ -10559,6 +10753,7 @@ module ListGatewayRoutesOutput =
         GatewayRouteList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoutes") in
       make ?nextToken ~gatewayRoutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "nextToken" String_.of_json in
       let gatewayRoutes =
@@ -10618,6 +10813,7 @@ module ListGatewayRoutesInput =
         (Option.map ~f:ListGatewayRoutesLimit.of_xml)
           (Xml.child xml_arg0 "limit") in
       make ~virtualGatewayName ?nextToken ?meshOwner ~meshName ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -10713,6 +10909,8 @@ module DescribeVirtualServiceOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
@@ -10723,6 +10921,7 @@ module DescribeVirtualServiceOutput =
         VirtualServiceData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
       make ~virtualService ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualService =
         field_map_exn json "virtualService" VirtualServiceData.of_json in
@@ -10763,6 +10962,7 @@ module DescribeVirtualServiceInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualServiceName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ServiceName.of_json in
@@ -10855,6 +11055,8 @@ module DescribeVirtualRouterOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualRouter",
@@ -10865,6 +11067,7 @@ module DescribeVirtualRouterOutput =
         VirtualRouterData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
       make ~virtualRouter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouter =
         field_map_exn json "virtualRouter" VirtualRouterData.of_json in
@@ -10905,6 +11108,7 @@ module DescribeVirtualRouterInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -10997,6 +11201,8 @@ module DescribeVirtualNodeOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
@@ -11006,6 +11212,7 @@ module DescribeVirtualNodeOutput =
         VirtualNodeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
       make ~virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNode =
         field_map_exn json "virtualNode" VirtualNodeData.of_json in
@@ -11045,6 +11252,7 @@ module DescribeVirtualNodeInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualNodeName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodeName =
         field_map_exn json "virtualNodeName" ResourceName.of_json in
@@ -11137,6 +11345,8 @@ module DescribeVirtualGatewayOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualGateway",
@@ -11147,6 +11357,7 @@ module DescribeVirtualGatewayOutput =
         VirtualGatewayData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
       make ~virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGateway =
         field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
@@ -11187,6 +11398,7 @@ module DescribeVirtualGatewayInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualGatewayName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -11278,6 +11490,8 @@ module DescribeRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("route", (Some (RouteData.to_value x.route)))]
     let to_query v = to_query to_value v
@@ -11285,6 +11499,7 @@ module DescribeRouteOutput =
       let route =
         RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
       make ~route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map_exn json "route" RouteData.of_json in
       make ~route ()
@@ -11332,6 +11547,7 @@ module DescribeRouteInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ~routeName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -11425,6 +11641,8 @@ module DescribeMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
     let to_query v = to_query to_value v
@@ -11432,6 +11650,7 @@ module DescribeMeshOutput =
       let mesh =
         MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
       make ~mesh ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
     let to_json v = composed_to_json to_value v
@@ -11459,6 +11678,7 @@ module DescribeMeshInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meshOwner = field_map json "meshOwner" AccountId.of_json in
       let meshName = field_map_exn json "meshName" ResourceName.of_json in
@@ -11549,6 +11769,8 @@ module DescribeGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
@@ -11558,6 +11780,7 @@ module DescribeGatewayRouteOutput =
         GatewayRouteData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
       make ~gatewayRoute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayRoute =
         field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
@@ -11608,6 +11831,7 @@ module DescribeGatewayRouteInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRouteName") in
       make ~virtualGatewayName ?meshOwner ~meshName ~gatewayRouteName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -11711,6 +11935,8 @@ module DeleteVirtualServiceOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
@@ -11721,6 +11947,7 @@ module DeleteVirtualServiceOutput =
         VirtualServiceData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
       make ~virtualService ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualService =
         field_map_exn json "virtualService" VirtualServiceData.of_json in
@@ -11761,6 +11988,7 @@ module DeleteVirtualServiceInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualServiceName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ServiceName.of_json in
@@ -11862,6 +12090,8 @@ module DeleteVirtualRouterOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualRouter",
@@ -11872,6 +12102,7 @@ module DeleteVirtualRouterOutput =
         VirtualRouterData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
       make ~virtualRouter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouter =
         field_map_exn json "virtualRouter" VirtualRouterData.of_json in
@@ -11912,6 +12143,7 @@ module DeleteVirtualRouterInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -12013,6 +12245,8 @@ module DeleteVirtualNodeOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
@@ -12022,6 +12256,7 @@ module DeleteVirtualNodeOutput =
         VirtualNodeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
       make ~virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNode =
         field_map_exn json "virtualNode" VirtualNodeData.of_json in
@@ -12061,6 +12296,7 @@ module DeleteVirtualNodeInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualNodeName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodeName =
         field_map_exn json "virtualNodeName" ResourceName.of_json in
@@ -12162,6 +12398,8 @@ module DeleteVirtualGatewayOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualGateway",
@@ -12172,6 +12410,7 @@ module DeleteVirtualGatewayOutput =
         VirtualGatewayData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
       make ~virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGateway =
         field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
@@ -12213,6 +12452,7 @@ module DeleteVirtualGatewayInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualGatewayName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -12314,6 +12554,8 @@ module DeleteRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("route", (Some (RouteData.to_value x.route)))]
     let to_query v = to_query to_value v
@@ -12321,6 +12563,7 @@ module DeleteRouteOutput =
       let route =
         RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
       make ~route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map_exn json "route" RouteData.of_json in
       make ~route ()
@@ -12366,6 +12609,7 @@ module DeleteRouteInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ~routeName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -12467,6 +12711,8 @@ module DeleteMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
     let to_query v = to_query to_value v
@@ -12474,6 +12720,7 @@ module DeleteMeshOutput =
       let mesh =
         MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
       make ~mesh ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
     let to_json v = composed_to_json to_value v
@@ -12495,6 +12742,7 @@ module DeleteMeshInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let meshName = field_map_exn json "meshName" ResourceName.of_json in
       make ~meshName ()
@@ -12593,6 +12841,8 @@ module DeleteGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
@@ -12602,6 +12852,7 @@ module DeleteGatewayRouteOutput =
         GatewayRouteData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
       make ~gatewayRoute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayRoute =
         field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
@@ -12652,6 +12903,7 @@ module DeleteGatewayRouteInput =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRouteName") in
       make ~virtualGatewayName ?meshOwner ~meshName ~gatewayRouteName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -12765,6 +13017,8 @@ module CreateVirtualServiceOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
@@ -12775,6 +13029,7 @@ module CreateVirtualServiceOutput =
         VirtualServiceData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
       make ~virtualService ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualService =
         field_map_exn json "virtualService" VirtualServiceData.of_json in
@@ -12844,6 +13099,7 @@ module CreateVirtualServiceInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualServiceName ?tags ~spec ?meshOwner ~meshName ?clientToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualServiceName =
         field_map_exn json "virtualServiceName" ServiceName.of_json in
@@ -12959,6 +13215,8 @@ module CreateVirtualRouterOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualRouter",
@@ -12969,6 +13227,7 @@ module CreateVirtualRouterOutput =
         VirtualRouterData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
       make ~virtualRouter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouter =
         field_map_exn json "virtualRouter" VirtualRouterData.of_json in
@@ -13038,6 +13297,7 @@ module CreateVirtualRouterInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualRouterName ?tags ~spec ?meshOwner ~meshName ?clientToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -13153,6 +13413,8 @@ module CreateVirtualNodeOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
@@ -13162,6 +13424,7 @@ module CreateVirtualNodeOutput =
         VirtualNodeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
       make ~virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNode =
         field_map_exn json "virtualNode" VirtualNodeData.of_json in
@@ -13229,6 +13492,7 @@ module CreateVirtualNodeInput =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualNodeName ?tags ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualNodeName =
         field_map_exn json "virtualNodeName" ResourceName.of_json in
@@ -13343,6 +13607,8 @@ module CreateVirtualGatewayOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualGateway",
@@ -13353,6 +13619,7 @@ module CreateVirtualGatewayOutput =
         VirtualGatewayData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
       make ~virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGateway =
         field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
@@ -13423,6 +13690,7 @@ module CreateVirtualGatewayInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName ?clientToken
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in
@@ -13539,6 +13807,8 @@ module CreateRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("route", (Some (RouteData.to_value x.route)))]
     let to_query v = to_query to_value v
@@ -13546,6 +13816,7 @@ module CreateRouteOutput =
       let route =
         RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
       make ~route ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let route = field_map_exn json "route" RouteData.of_json in
       make ~route ()
@@ -13619,6 +13890,7 @@ module CreateRouteInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualRouterName ?tags ~spec ~routeName ?meshOwner ~meshName
         ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualRouterName =
         field_map_exn json "virtualRouterName" ResourceName.of_json in
@@ -13735,6 +14007,8 @@ module CreateMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
     let to_query v = to_query to_value v
@@ -13742,6 +14016,7 @@ module CreateMeshOutput =
       let mesh =
         MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
       make ~mesh ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
     let to_json v = composed_to_json to_value v
@@ -13781,6 +14056,7 @@ module CreateMeshInput =
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?tags ?spec ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "tags" TagList.of_json in
       let spec = field_map json "spec" MeshSpec.of_json in
@@ -13892,6 +14168,8 @@ module CreateGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
@@ -13901,6 +14179,7 @@ module CreateGatewayRouteOutput =
         GatewayRouteData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
       make ~gatewayRoute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gatewayRoute =
         field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
@@ -13981,6 +14260,7 @@ module CreateGatewayRouteInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName
         ~gatewayRouteName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let virtualGatewayName =
         field_map_exn json "virtualGatewayName" ResourceName.of_json in

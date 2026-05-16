@@ -355,6 +355,7 @@ module Target =
       let targetType =
         (Option.map ~f:TargetType.of_xml) (Xml.child xml_arg0 "TargetType") in
       make ?targetAddress ?targetType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetAddress =
         field_map json "TargetAddress" TargetAddress.of_json in
@@ -437,6 +438,7 @@ module TargetSummary =
         (Option.map ~f:TargetAddress.of_xml)
           (Xml.child xml_arg0 "TargetAddress") in
       make ?targetStatus ?targetType ?targetAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetStatus = field_map json "TargetStatus" TargetStatus.of_json in
       let targetType = field_map json "TargetType" TargetType.of_json in
@@ -471,6 +473,7 @@ module ListTargetsFilter =
         ListTargetsFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" ListTargetsFilterValue.of_json in
       let name = field_map_exn json "Name" ListTargetsFilterName.of_json in
@@ -499,6 +502,7 @@ module NotificationRuleSummary =
       let id =
         (Option.map ~f:NotificationRuleId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" NotificationRuleArn.of_json in
       let id = field_map json "Id" NotificationRuleId.of_json in
@@ -530,6 +534,7 @@ module ListNotificationRulesFilter =
         ListNotificationRulesFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value =
         field_map_exn json "Value" ListNotificationRulesFilterValue.of_json in
@@ -578,6 +583,7 @@ module EventTypeSummary =
       let eventTypeId =
         (Option.map ~f:EventTypeId.of_xml) (Xml.child xml_arg0 "EventTypeId") in
       make ?resourceType ?eventTypeName ?serviceName ?eventTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let eventTypeName =
@@ -613,6 +619,7 @@ module ListEventTypesFilter =
         ListEventTypesFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value =
         field_map_exn json "Value" ListEventTypesFilterValue.of_json in
@@ -634,6 +641,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -653,6 +661,7 @@ module ValidationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -785,6 +794,7 @@ module ConcurrentModificationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -875,6 +885,7 @@ module InvalidNextTokenException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -1147,6 +1158,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -1166,6 +1178,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -1185,6 +1198,7 @@ module ConfigurationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -1204,6 +1218,7 @@ module ResourceAlreadyExistsException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -1254,6 +1269,7 @@ module UpdateNotificationRuleResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1316,6 +1332,7 @@ module UpdateNotificationRuleRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?detailType ?targets ?eventTypeIds ?status ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let detailType = field_map json "DetailType" DetailType.of_json in
       let targets = field_map json "Targets" Targets.of_json in
@@ -1383,6 +1400,7 @@ module UntagResourceResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1409,6 +1427,7 @@ module UntagResourceRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tagKeys ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
@@ -1461,6 +1480,7 @@ module UnsubscribeResult =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
       make ~arn ()
@@ -1492,6 +1512,7 @@ module UnsubscribeRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~targetAddress ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetAddress =
         field_map_exn json "TargetAddress" TargetAddress.of_json in
@@ -1561,6 +1582,7 @@ module TagResourceResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1590,6 +1612,7 @@ module TagResourceRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tags ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
@@ -1649,6 +1672,7 @@ module SubscribeResult =
       let arn =
         (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" NotificationRuleArn.of_json in
       make ?arn ()
@@ -1687,6 +1711,7 @@ module SubscribeRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?clientRequestToken ~target ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -1753,6 +1778,7 @@ module ListTargetsResult =
       let targets =
         (Option.map ~f:TargetsBatch.of_xml) (Xml.child xml_arg0 "Targets") in
       make ?nextToken ?targets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let targets = field_map json "Targets" TargetsBatch.of_json in
@@ -1791,6 +1817,7 @@ module ListTargetsRequest =
         (Option.map ~f:ListTargetsFilters.of_xml)
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -1848,6 +1875,7 @@ module ListTagsForResourceResult =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -1871,6 +1899,7 @@ module ListTagsForResourceRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
       make ~arn ()
@@ -1938,6 +1967,7 @@ module ListNotificationRulesResult =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?notificationRules ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationRules =
         field_map json "NotificationRules" NotificationRuleBatch.of_json in
@@ -1978,6 +2008,7 @@ module ListNotificationRulesRequest =
         (Option.map ~f:ListNotificationRulesFilters.of_xml)
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2047,6 +2078,7 @@ module ListEventTypesResult =
         (Option.map ~f:EventTypeBatch.of_xml)
           (Xml.child xml_arg0 "EventTypes") in
       make ?nextToken ?eventTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let eventTypes = field_map json "EventTypes" EventTypeBatch.of_json in
@@ -2086,6 +2118,7 @@ module ListEventTypesRequest =
         (Option.map ~f:ListEventTypesFilters.of_xml)
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -2242,6 +2275,7 @@ module DescribeNotificationRuleResult =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?tags ?lastModifiedTimestamp ?createdTimestamp ?status ?createdBy
         ?detailType ?targets ?resource ?eventTypes ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let lastModifiedTimestamp =
@@ -2280,6 +2314,7 @@ module DescribeNotificationRuleRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
       make ~arn ()
@@ -2320,6 +2355,7 @@ module DeleteTargetResult =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a specified target for notifications."]
@@ -2350,6 +2386,7 @@ module DeleteTargetRequest =
         TargetAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetAddress") in
       make ?forceUnsubscribeAll ~targetAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let forceUnsubscribeAll =
         field_map json "ForceUnsubscribeAll" ForceUnsubscribeAll.of_json in
@@ -2422,6 +2459,7 @@ module DeleteNotificationRuleResult =
       let arn =
         (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" NotificationRuleArn.of_json in
       make ?arn ()
@@ -2445,6 +2483,7 @@ module DeleteNotificationRuleRequest =
         NotificationRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
       make ~arn ()
@@ -2542,6 +2581,7 @@ module CreateNotificationRuleResult =
       let arn =
         (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" NotificationRuleArn.of_json in
       make ?arn ()
@@ -2632,6 +2672,7 @@ module CreateNotificationRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?status ?tags ?clientRequestToken ~detailType ~targets ~resource
         ~eventTypeIds ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" NotificationRuleStatus.of_json in
       let tags = field_map json "Tags" Tags.of_json in

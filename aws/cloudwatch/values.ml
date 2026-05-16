@@ -86,6 +86,7 @@ module Dimension =
         DimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" DimensionValue.of_json in
       let name = field_map_exn json "Name" DimensionName.of_json in
@@ -183,6 +184,7 @@ module Metric =
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?dimensions ?metricName ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dimensions = field_map json "Dimensions" Dimensions.of_json in
       let metricName = field_map json "MetricName" MetricName.of_json in
@@ -433,6 +435,7 @@ module MetricStat =
       let metric =
         Metric.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
       make ?unit ~stat ~period ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" StandardUnit.of_json in
       let stat = field_map_exn json "Stat" Stat.of_json in
@@ -518,6 +521,7 @@ module Range =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
       make ~endTime ~startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map_exn json "EndTime" Timestamp.of_json in
       let startTime = field_map_exn json "StartTime" Timestamp.of_json in
@@ -597,6 +601,7 @@ module MetricDataQuery =
         MetricId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?accountId ?period ?returnData ?label ?expression ?metricStat ~id
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountId = field_map json "AccountId" AccountId.of_json in
       let period = field_map json "Period" Period.of_json in
@@ -646,6 +651,7 @@ module MetricStreamStatisticsMetric =
         Namespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
       make ~metricName ~namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricName = field_map_exn json "MetricName" MetricName.of_json in
       let namespace = field_map_exn json "Namespace" Namespace.of_json in
@@ -729,6 +735,7 @@ module MessageData =
       let code =
         (Option.map ~f:MessageDataCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?value ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" MessageDataValue.of_json in
       let code = field_map json "Code" MessageDataCode.of_json in
@@ -761,6 +768,7 @@ module InsightRuleContributorDatapoint =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
       make ~approximateValue ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let approximateValue =
         field_map_exn json "ApproximateValue"
@@ -1039,6 +1047,7 @@ module StatisticSet =
         DatapointValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SampleCount") in
       make ~maximum ~minimum ~sum ~sampleCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maximum = field_map_exn json "Maximum" DatapointValue.of_json in
       let minimum = field_map_exn json "Minimum" DatapointValue.of_json in
@@ -1108,6 +1117,7 @@ module DashboardValidationMessage =
       let dataPath =
         (Option.map ~f:DataPath.of_xml) (Xml.child xml_arg0 "DataPath") in
       make ?message ?dataPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       let dataPath = field_map json "DataPath" DataPath.of_json in
@@ -1577,6 +1587,7 @@ module AnomalyDetectorConfiguration =
         (Option.map ~f:AnomalyDetectorExcludedTimeRanges.of_xml)
           (Xml.child xml_arg0 "ExcludedTimeRanges") in
       make ?metricTimezone ?excludedTimeRanges ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricTimezone =
         field_map json "MetricTimezone" AnomalyDetectorMetricTimezone.of_json in
@@ -1635,6 +1646,7 @@ module MetricMathAnomalyDetector =
         (Option.map ~f:MetricDataQueries.of_xml)
           (Xml.child xml_arg0 "MetricDataQueries") in
       make ?metricDataQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricDataQueries =
         field_map json "MetricDataQueries" MetricDataQueries.of_json in
@@ -1680,6 +1692,7 @@ module SingleMetricAnomalyDetector =
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?stat ?dimensions ?metricName ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stat = field_map json "Stat" AnomalyDetectorMetricStat.of_json in
       let dimensions = field_map json "Dimensions" Dimensions.of_json in
@@ -2181,6 +2194,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -2202,6 +2216,7 @@ module MetricStreamFilter =
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let namespace = field_map json "Namespace" Namespace.of_json in
       make ?namespace ()
@@ -2240,6 +2255,7 @@ module MetricStreamStatisticsConfiguration =
         MetricStreamStatisticsIncludeMetrics.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IncludeMetrics") in
       make ~additionalStatistics ~includeMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let additionalStatistics =
         field_map_exn json "AdditionalStatistics"
@@ -2338,6 +2354,7 @@ module MetricDatum =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
       make ?storageResolution ?unit ?counts ?values ?statisticValues ?value
         ?timestamp ?dimensions ~metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageResolution =
         field_map json "StorageResolution" StorageResolution.of_json in
@@ -2415,6 +2432,7 @@ module DimensionFilter =
         DimensionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" DimensionValue.of_json in
       let name = field_map_exn json "Name" DimensionName.of_json in
@@ -2512,6 +2530,7 @@ module MetricStreamEntry =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?outputFormat ?state ?firehoseArn ?name ?lastUpdateDate
         ?creationDate ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputFormat =
         field_map json "OutputFormat" MetricStreamOutputFormat.of_json in
@@ -2566,6 +2585,7 @@ module DashboardEntry =
         (Option.map ~f:DashboardName.of_xml)
           (Xml.child xml_arg0 "DashboardName") in
       make ?size ?lastModified ?dashboardArn ?dashboardName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let size = field_map json "Size" Size.of_json in
       let lastModified = field_map json "LastModified" LastModified.of_json in
@@ -2650,6 +2670,7 @@ module Datapoint =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?extendedStatistics ?unit ?maximum ?minimum ?sum ?average
         ?sampleCount ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let extendedStatistics =
         field_map json "ExtendedStatistics" DatapointValueMap.of_json in
@@ -2717,6 +2738,7 @@ module MetricDataResult =
         (Option.map ~f:MetricLabel.of_xml) (Xml.child xml_arg0 "Label") in
       let id = (Option.map ~f:MetricId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?messages ?statusCode ?values ?timestamps ?label ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messages =
         field_map json "Messages" MetricDataResultMessages.of_json in
@@ -2794,6 +2816,7 @@ module InsightRuleContributor =
         InsightRuleContributorKeys.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Keys") in
       make ~datapoints ~approximateAggregateValue ~keys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datapoints =
         field_map_exn json "Datapoints"
@@ -2898,6 +2921,7 @@ module InsightRuleMetricDatapoint =
           (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
       make ?maximum ?minimum ?sum ?average ?sampleCount ?maxContributorValue
         ?uniqueContributors ~timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maximum = field_map json "Maximum" InsightRuleUnboundDouble.of_json in
       let minimum = field_map json "Minimum" InsightRuleUnboundDouble.of_json in
@@ -2980,6 +3004,7 @@ module PartialFailure =
           (Xml.child xml_arg0 "FailureResource") in
       make ?failureDescription ?failureCode ?exceptionType ?failureResource
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failureDescription =
         field_map json "FailureDescription" FailureDescription.of_json in
@@ -3032,6 +3057,7 @@ module InsightRule =
         InsightRuleName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~definition ~schema ~state ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let definition =
         field_map_exn json "Definition" InsightRuleDefinition.of_json in
@@ -3132,6 +3158,7 @@ module AnomalyDetector =
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector
         ?stateValue ?configuration ?stat ?dimensions ?metricName ?namespace
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricMathAnomalyDetector =
         field_map json "MetricMathAnomalyDetector"
@@ -3305,6 +3332,7 @@ module CompositeAlarm =
         ?oKActions ?insufficientDataActions ?alarmRule ?alarmName
         ?alarmDescription ?alarmConfigurationUpdatedTimestamp ?alarmArn
         ?alarmActions ?actionsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateValue = field_map json "StateValue" StateValue.of_json in
       let stateUpdatedTimestamp =
@@ -3591,6 +3619,7 @@ module MetricAlarm =
         ?alarmActions ?oKActions ?actionsEnabled
         ?alarmConfigurationUpdatedTimestamp ?alarmDescription ?alarmArn
         ?alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thresholdMetricId =
         field_map json "ThresholdMetricId" MetricId.of_json in
@@ -3703,6 +3732,7 @@ module AlarmHistoryItem =
         (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "AlarmName") in
       make ?historyData ?historySummary ?historyItemType ?timestamp
         ?alarmType ?alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let historyData = field_map json "HistoryData" HistoryData.of_json in
       let historySummary =
@@ -3724,6 +3754,7 @@ module ConcurrentModificationException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3742,6 +3773,7 @@ module InternalServiceFault =
         (Option.map ~f:FaultDescription.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" FaultDescription.of_json in
       make ?message ()
@@ -3762,6 +3794,7 @@ module InvalidParameterValueException =
         (Option.map ~f:AwsQueryErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" AwsQueryErrorMessage.of_json in
       make ?message ()
@@ -3788,6 +3821,7 @@ module ResourceNotFoundException =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?resourceId ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceId = field_map json "ResourceId" ResourceId.of_json in
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
@@ -3854,6 +3888,7 @@ module MissingRequiredParameterException =
         (Option.map ~f:AwsQueryErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" AwsQueryErrorMessage.of_json in
       make ?message ()
@@ -3898,6 +3933,7 @@ module InvalidParameterCombinationException =
         (Option.map ~f:AwsQueryErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" AwsQueryErrorMessage.of_json in
       make ?message ()
@@ -3988,6 +4024,7 @@ module LimitExceededException =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation exceeded one or more limits."]
@@ -4016,6 +4053,7 @@ module DashboardInvalidInputError =
         (Option.map ~f:DashboardErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?dashboardValidationMessages ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardValidationMessages =
         field_map json "dashboardValidationMessages"
@@ -4128,6 +4166,7 @@ module InvalidNextToken =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -4391,6 +4430,7 @@ module LabelOptions =
         (Option.map ~f:GetMetricDataLabelTimezone.of_xml)
           (Xml.child xml_arg0 "Timezone") in
       make ?timezone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let timezone =
         field_map json "Timezone" GetMetricDataLabelTimezone.of_json in
@@ -4603,6 +4643,7 @@ module DashboardNotFoundError =
         (Option.map ~f:DashboardErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" DashboardErrorMessage.of_json in
       make ?message ()
@@ -5039,6 +5080,7 @@ module UntagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified resource."]
@@ -5067,6 +5109,7 @@ module UntagResourceInput =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -5146,6 +5189,7 @@ module TagResourceOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5174,6 +5218,7 @@ module TagResourceInput =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN =
@@ -5245,6 +5290,7 @@ module StopMetricStreamsOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5267,6 +5313,7 @@ module StopMetricStreamsInput =
         MetricStreamNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Names") in
       make ~names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let names = field_map_exn json "Names" MetricStreamNames.of_json in
       make ~names ()
@@ -5336,6 +5383,7 @@ module StartMetricStreamsOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5358,6 +5406,7 @@ module StartMetricStreamsInput =
         MetricStreamNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Names") in
       make ~names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let names = field_map_exn json "Names" MetricStreamNames.of_json in
       make ~names ()
@@ -5404,6 +5453,7 @@ module SetAlarmStateInput =
         AlarmName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmName") in
       make ?stateReasonData ~stateReason ~stateValue ~alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let stateReasonData =
         field_map json "StateReasonData" StateReasonData.of_json in
@@ -5427,6 +5477,7 @@ module ResourceNotFound =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -5532,6 +5583,7 @@ module PutMetricStreamOutput =
       let arn =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" AmazonResourceName.of_json in
       make ?arn ()
@@ -5627,6 +5679,7 @@ module PutMetricStreamInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?statisticsConfigurations ?tags ~outputFormat ~roleArn
         ~firehoseArn ?excludeFilters ?includeFilters ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statisticsConfigurations =
         field_map json "StatisticsConfigurations"
@@ -5673,6 +5726,7 @@ module PutMetricDataInput =
         Namespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
       make ~metricData ~namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricData = field_map_exn json "MetricData" MetricData.of_json in
       let namespace = field_map_exn json "Namespace" Namespace.of_json in
@@ -5897,6 +5951,7 @@ module PutMetricAlarmInput =
         ?unit ?period ?dimensions ?extendedStatistic ?statistic ?namespace
         ?metricName ?insufficientDataActions ?alarmActions ?oKActions
         ?actionsEnabled ?alarmDescription ~alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thresholdMetricId =
         field_map json "ThresholdMetricId" MetricId.of_json in
@@ -6003,6 +6058,7 @@ module PutInsightRuleOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6047,6 +6103,7 @@ module PutInsightRuleInput =
         InsightRuleName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleName") in
       make ?tags ~ruleDefinition ?ruleState ~ruleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let ruleDefinition =
@@ -6127,6 +6184,7 @@ module PutDashboardOutput =
         (Option.map ~f:DashboardValidationMessages.of_xml)
           (Xml.child xml_arg0 "DashboardValidationMessages") in
       make ?dashboardValidationMessages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardValidationMessages =
         field_map json "DashboardValidationMessages"
@@ -6161,6 +6219,7 @@ module PutDashboardInput =
         DashboardName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardName") in
       make ~dashboardBody ~dashboardName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardBody =
         field_map_exn json "DashboardBody" DashboardBody.of_json in
@@ -6256,6 +6315,7 @@ module PutCompositeAlarmInput =
           (Xml.child xml_arg0 "ActionsEnabled") in
       make ?tags ?oKActions ?insufficientDataActions ~alarmRule ~alarmName
         ?alarmDescription ?alarmActions ?actionsEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let oKActions = field_map json "OKActions" ResourceList.of_json in
@@ -6357,6 +6417,7 @@ module PutAnomalyDetectorOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6440,6 +6501,7 @@ module PutAnomalyDetectorInput =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector
         ?configuration ?stat ?dimensions ?metricName ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricMathAnomalyDetector =
         field_map json "MetricMathAnomalyDetector"
@@ -6532,6 +6594,7 @@ module ListTagsForResourceOutput =
         Xml.child_exn ~context:context_ t "ListTagsForResourceResult" in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -6555,6 +6618,7 @@ module ListTagsForResourceInput =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" AmazonResourceName.of_json in
@@ -6634,6 +6698,7 @@ module ListMetricsOutput =
       let metrics =
         (Option.map ~f:Metrics.of_xml) (Xml.child xml_arg0 "Metrics") in
       make ?nextToken ?metrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let metrics = field_map json "Metrics" Metrics.of_json in
@@ -6697,6 +6762,7 @@ module ListMetricsInput =
       let namespace =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?recentlyActive ?nextToken ?dimensions ?metricName ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let recentlyActive =
         field_map json "RecentlyActive" RecentlyActive.of_json in
@@ -6804,6 +6870,7 @@ module ListMetricStreamsOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?entries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entries = field_map json "Entries" MetricStreamEntries.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6835,6 +6902,7 @@ module ListMetricStreamsInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" ListMetricStreamsMaxResults.of_json in
@@ -6918,6 +6986,7 @@ module ListDashboardsOutput =
         (Option.map ~f:DashboardEntries.of_xml)
           (Xml.child xml_arg0 "DashboardEntries") in
       make ?nextToken ?dashboardEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dashboardEntries =
@@ -6951,6 +7020,7 @@ module ListDashboardsInput =
         (Option.map ~f:DashboardNamePrefix.of_xml)
           (Xml.child xml_arg0 "DashboardNamePrefix") in
       make ?nextToken ?dashboardNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let dashboardNamePrefix =
@@ -6972,6 +7042,7 @@ module LimitExceededFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -6991,6 +7062,7 @@ module InvalidFormatFault =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "message" ErrorMessage.of_json in
       make ?message ()
@@ -7049,6 +7121,7 @@ module GetMetricWidgetImageOutput =
         (Option.map ~f:MetricWidgetImage.of_xml)
           (Xml.child xml_arg0 "MetricWidgetImage") in
       make ?metricWidgetImage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricWidgetImage =
         field_map json "MetricWidgetImage" MetricWidgetImage.of_json in
@@ -7083,6 +7156,7 @@ module GetMetricWidgetImageInput =
         MetricWidget.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricWidget") in
       make ?outputFormat ~metricWidget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let outputFormat = field_map json "OutputFormat" OutputFormat.of_json in
       let metricWidget =
@@ -7289,6 +7363,7 @@ module GetMetricStreamOutput =
       make ?statisticsConfigurations ?outputFormat ?lastUpdateDate
         ?creationDate ?state ?roleArn ?firehoseArn ?excludeFilters
         ?includeFilters ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let statisticsConfigurations =
         field_map json "StatisticsConfigurations"
@@ -7331,6 +7406,7 @@ module GetMetricStreamInput =
         MetricStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" MetricStreamName.of_json in
       make ~name ()
@@ -7435,6 +7511,7 @@ module GetMetricStatisticsOutput =
       let label =
         (Option.map ~f:MetricLabel.of_xml) (Xml.child xml_arg0 "Label") in
       make ?datapoints ?label ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let datapoints = field_map json "Datapoints" Datapoints.of_json in
       let label = field_map json "Label" MetricLabel.of_json in
@@ -7531,6 +7608,7 @@ module GetMetricStatisticsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
       make ?unit ?extendedStatistics ?statistics ~period ~endTime ~startTime
         ?dimensions ~metricName ~namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" StandardUnit.of_json in
       let extendedStatistics =
@@ -7621,6 +7699,7 @@ module GetMetricDataOutput =
         (Option.map ~f:MetricDataResults.of_xml)
           (Xml.child xml_arg0 "MetricDataResults") in
       make ?messages ?nextToken ?metricDataResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messages =
         field_map json "Messages" MetricDataResultMessages.of_json in
@@ -7708,6 +7787,7 @@ module GetMetricDataInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
       make ?labelOptions ?maxDatapoints ?scanBy ?nextToken ~endTime
         ~startTime ~metricDataQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let labelOptions = field_map json "LabelOptions" LabelOptions.of_json in
       let maxDatapoints =
@@ -7864,6 +7944,7 @@ module GetInsightRuleReportOutput =
           (Xml.child xml_arg0 "KeyLabels") in
       make ?metricDatapoints ?contributors ?approximateUniqueCount
         ?aggregateValue ?aggregationStatistic ?keyLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricDatapoints =
         field_map json "MetricDatapoints" InsightRuleMetricDatapoints.of_json in
@@ -7960,6 +8041,7 @@ module GetInsightRuleReportInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleName") in
       make ?orderBy ?metrics ?maxContributorCount ~period ~endTime ~startTime
         ~ruleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let orderBy = field_map json "OrderBy" InsightRuleOrderBy.of_json in
       let metrics = field_map json "Metrics" InsightRuleMetricList.of_json in
@@ -8071,6 +8153,7 @@ module GetDashboardOutput =
         (Option.map ~f:DashboardArn.of_xml)
           (Xml.child xml_arg0 "DashboardArn") in
       make ?dashboardName ?dashboardBody ?dashboardArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardName =
         field_map json "DashboardName" DashboardName.of_json in
@@ -8098,6 +8181,7 @@ module GetDashboardInput =
         DashboardName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardName") in
       make ~dashboardName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardName =
         field_map_exn json "DashboardName" DashboardName.of_json in
@@ -8183,6 +8267,7 @@ module EnableInsightRulesOutput =
       let failures =
         (Option.map ~f:BatchFailures.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failures = field_map json "Failures" BatchFailures.of_json in
       make ?failures ()
@@ -8207,6 +8292,7 @@ module EnableInsightRulesInput =
         InsightRuleNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleNames") in
       make ~ruleNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleNames = field_map_exn json "RuleNames" InsightRuleNames.of_json in
       make ~ruleNames ()
@@ -8229,6 +8315,7 @@ module EnableAlarmActionsInput =
         AlarmNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmNames") in
       make ~alarmNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmNames = field_map_exn json "AlarmNames" AlarmNames.of_json in
       make ~alarmNames ()
@@ -8303,6 +8390,7 @@ module DisableInsightRulesOutput =
       let failures =
         (Option.map ~f:BatchFailures.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failures = field_map json "Failures" BatchFailures.of_json in
       make ?failures ()
@@ -8327,6 +8415,7 @@ module DisableInsightRulesInput =
         InsightRuleNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleNames") in
       make ~ruleNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleNames = field_map_exn json "RuleNames" InsightRuleNames.of_json in
       make ~ruleNames ()
@@ -8349,6 +8438,7 @@ module DisableAlarmActionsInput =
         AlarmNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmNames") in
       make ~alarmNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmNames = field_map_exn json "AlarmNames" AlarmNames.of_json in
       make ~alarmNames ()
@@ -8420,6 +8510,7 @@ module DescribeInsightRulesOutput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?insightRules ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let insightRules = field_map json "InsightRules" InsightRules.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8452,6 +8543,7 @@ module DescribeInsightRulesInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults =
         field_map json "MaxResults" InsightRuleMaxResults.of_json in
@@ -8559,6 +8651,7 @@ module DescribeAnomalyDetectorsOutput =
         (Option.map ~f:AnomalyDetectors.of_xml)
           (Xml.child xml_arg0 "AnomalyDetectors") in
       make ?nextToken ?anomalyDetectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let anomalyDetectors =
@@ -8632,6 +8725,7 @@ module DescribeAnomalyDetectorsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?anomalyDetectorTypes ?dimensions ?metricName ?namespace
         ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let anomalyDetectorTypes =
         field_map json "AnomalyDetectorTypes" AnomalyDetectorTypes.of_json in
@@ -8721,6 +8815,7 @@ module DescribeAlarmsOutput =
         (Option.map ~f:CompositeAlarms.of_xml)
           (Xml.child xml_arg0 "CompositeAlarms") in
       make ?nextToken ?metricAlarms ?compositeAlarms ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let metricAlarms = field_map json "MetricAlarms" MetricAlarms.of_json in
@@ -8822,6 +8917,7 @@ module DescribeAlarmsInput =
       make ?nextToken ?maxRecords ?actionPrefix ?stateValue
         ?parentsOfAlarmName ?childrenOfAlarmName ?alarmTypes ?alarmNamePrefix
         ?alarmNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
@@ -8891,6 +8987,7 @@ module DescribeAlarmsForMetricOutput =
         (Option.map ~f:MetricAlarms.of_xml)
           (Xml.child xml_arg0 "MetricAlarms") in
       make ?metricAlarms ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricAlarms = field_map json "MetricAlarms" MetricAlarms.of_json in
       make ?metricAlarms ()
@@ -8965,6 +9062,7 @@ module DescribeAlarmsForMetricInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
       make ?unit ?period ?dimensions ?extendedStatistic ?statistic ~namespace
         ~metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map json "Unit" StandardUnit.of_json in
       let period = field_map json "Period" Period.of_json in
@@ -9044,6 +9142,7 @@ module DescribeAlarmHistoryOutput =
         (Option.map ~f:AlarmHistoryItems.of_xml)
           (Xml.child xml_arg0 "AlarmHistoryItems") in
       make ?nextToken ?alarmHistoryItems ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let alarmHistoryItems =
@@ -9126,6 +9225,7 @@ module DescribeAlarmHistoryInput =
         (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "AlarmName") in
       make ?scanBy ?nextToken ?maxRecords ?endDate ?startDate
         ?historyItemType ?alarmTypes ?alarmName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scanBy = field_map json "ScanBy" ScanBy.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9204,6 +9304,7 @@ module DeleteMetricStreamOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently deletes the metric stream that you specify."]
@@ -9224,6 +9325,7 @@ module DeleteMetricStreamInput =
         MetricStreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" MetricStreamName.of_json in
       make ~name ()
@@ -9298,6 +9400,7 @@ module DeleteInsightRulesOutput =
       let failures =
         (Option.map ~f:BatchFailures.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let failures = field_map json "Failures" BatchFailures.of_json in
       make ?failures ()
@@ -9322,6 +9425,7 @@ module DeleteInsightRulesInput =
         InsightRuleNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleNames") in
       make ~ruleNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleNames = field_map_exn json "RuleNames" InsightRuleNames.of_json in
       make ~ruleNames ()
@@ -9388,6 +9492,7 @@ module DeleteDashboardsOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9411,6 +9516,7 @@ module DeleteDashboardsInput =
         DashboardNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardNames") in
       make ~dashboardNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dashboardNames =
         field_map_exn json "DashboardNames" DashboardNames.of_json in
@@ -9502,6 +9608,7 @@ module DeleteAnomalyDetectorOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9574,6 +9681,7 @@ module DeleteAnomalyDetectorInput =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?metricMathAnomalyDetector ?singleMetricAnomalyDetector ?stat
         ?dimensions ?metricName ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricMathAnomalyDetector =
         field_map json "MetricMathAnomalyDetector"
@@ -9606,6 +9714,7 @@ module DeleteAlarmsInput =
         AlarmNames.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlarmNames") in
       make ~alarmNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alarmNames = field_map_exn json "AlarmNames" AlarmNames.of_json in
       make ~alarmNames ()

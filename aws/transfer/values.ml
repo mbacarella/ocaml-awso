@@ -168,6 +168,7 @@ module EfsFileLocation =
         (Option.map ~f:EfsFileSystemId.of_xml)
           (Xml.child xml_arg0 "FileSystemId") in
       make ?path ?fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let path = field_map json "Path" EfsPath.of_json in
       let fileSystemId =
@@ -195,6 +196,7 @@ module S3InputFileLocation =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let key = field_map json "Key" S3Key.of_json in
       let bucket = field_map json "Bucket" S3Bucket.of_json in
@@ -223,6 +225,7 @@ module S3Tag =
       let key =
         S3TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" S3TagValue.of_json in
       let key = field_map_exn json "Key" S3TagKey.of_json in
@@ -412,6 +415,7 @@ module InputFileLocation =
         (Option.map ~f:S3InputFileLocation.of_xml)
           (Xml.child xml_arg0 "S3FileLocation") in
       make ?efsFileLocation ?s3FileLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let efsFileLocation =
         field_map json "EfsFileLocation" EfsFileLocation.of_json in
@@ -606,6 +610,7 @@ module ExecutionError =
         ExecutionErrorType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~message ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message =
         field_map_exn json "Message" ExecutionErrorMessage.of_json in
@@ -693,6 +698,7 @@ module S3FileLocation =
       let bucket =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?etag ?versionId ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let etag = field_map json "Etag" S3Etag.of_json in
       let versionId = field_map json "VersionId" S3VersionId.of_json in
@@ -733,6 +739,7 @@ module UserDetails =
       let userName =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?sessionId ~serverId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionId = field_map json "SessionId" SessionId.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -819,6 +826,7 @@ module CopyStepDetails =
         (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sourceFileLocation ?overwriteExisting ?destinationFileLocation
         ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceFileLocation =
         field_map json "SourceFileLocation" SourceFileLocation.of_json in
@@ -870,6 +878,7 @@ module CustomStepDetails =
       let name =
         (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sourceFileLocation ?timeoutSeconds ?target ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceFileLocation =
         field_map json "SourceFileLocation" SourceFileLocation.of_json in
@@ -904,6 +913,7 @@ module DeleteStepDetails =
       let name =
         (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sourceFileLocation ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceFileLocation =
         field_map json "SourceFileLocation" SourceFileLocation.of_json in
@@ -941,6 +951,7 @@ module TagStepDetails =
       let name =
         (Option.map ~f:WorkflowStepName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?sourceFileLocation ?tags ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceFileLocation =
         field_map json "SourceFileLocation" SourceFileLocation.of_json in
@@ -1127,6 +1138,7 @@ module WorkflowDetail =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~executionRole ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executionRole = field_map_exn json "ExecutionRole" Role.of_json in
       let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
@@ -1165,6 +1177,7 @@ module ExecutionStepResult =
         (Option.map ~f:WorkflowStepType.of_xml)
           (Xml.child xml_arg0 "StepType") in
       make ?error ?outputs ?stepType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let error = field_map json "Error" ExecutionError.of_json in
       let outputs = field_map json "Outputs" StepResultOutputsJson.of_json in
@@ -1472,6 +1485,7 @@ module FileLocation =
         (Option.map ~f:S3FileLocation.of_xml)
           (Xml.child xml_arg0 "S3FileLocation") in
       make ?efsFileLocation ?s3FileLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let efsFileLocation =
         field_map json "EfsFileLocation" EfsFileLocation.of_json in
@@ -1499,6 +1513,7 @@ module ServiceMetadata =
         UserDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserDetails") in
       make ~userDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userDetails = field_map_exn json "UserDetails" UserDetails.of_json in
       make ~userDetails ()
@@ -1547,6 +1562,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -1614,6 +1630,7 @@ module WorkflowStep =
         (Option.map ~f:WorkflowStepType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?tagStepDetails ?deleteStepDetails ?customStepDetails
         ?copyStepDetails ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagStepDetails =
         field_map json "TagStepDetails" TagStepDetails.of_json in
@@ -1650,6 +1667,7 @@ module HomeDirectoryMapEntry =
       let entry =
         MapEntry.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Entry") in
       make ~target ~entry ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let target = field_map_exn json "Target" MapTarget.of_json in
       let entry = field_map_exn json "Entry" MapEntry.of_json in
@@ -1721,6 +1739,7 @@ module SshPublicKey =
         DateImported.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DateImported") in
       make ~sshPublicKeyId ~sshPublicKeyBody ~dateImported ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sshPublicKeyId =
         field_map_exn json "SshPublicKeyId" SshPublicKeyId.of_json in
@@ -2151,6 +2170,7 @@ module ListedWorkflow =
       let workflowId =
         (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "WorkflowId") in
       make ?arn ?description ?workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" Arn.of_json in
       let description =
@@ -2226,6 +2246,7 @@ module ListedUser =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?userName ?sshPublicKeyCount ?role ?homeDirectoryType
         ?homeDirectory ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map json "UserName" UserName.of_json in
       let sshPublicKeyCount =
@@ -2320,6 +2341,7 @@ module ListedServer =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?userCount ?state ?serverId ?loggingRole ?endpointType
         ?identityProviderType ?domain ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userCount = field_map json "UserCount" UserCount.of_json in
       let state = field_map json "State" State.of_json in
@@ -2395,6 +2417,7 @@ module ListedExecution =
       let executionId =
         (Option.map ~f:ExecutionId.of_xml) (Xml.child xml_arg0 "ExecutionId") in
       make ?status ?serviceMetadata ?initialFileLocation ?executionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" ExecutionStatus.of_json in
       let serviceMetadata =
@@ -2446,6 +2469,7 @@ module ListedAccess =
         (Option.map ~f:HomeDirectory.of_xml)
           (Xml.child xml_arg0 "HomeDirectory") in
       make ?externalId ?role ?homeDirectoryType ?homeDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map json "ExternalId" ExternalId.of_json in
       let role = field_map json "Role" Role.of_json in
@@ -2585,6 +2609,7 @@ module PosixProfile =
       let uid =
         PosixId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uid") in
       make ?secondaryGids ~gid ~uid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secondaryGids =
         field_map json "SecondaryGids" SecondaryGids.of_json in
@@ -2692,6 +2717,7 @@ module EndpointDetails =
           (Xml.child xml_arg0 "AddressAllocationIds") in
       make ?securityGroupIds ?vpcId ?vpcEndpointId ?subnetIds
         ?addressAllocationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityGroupIds =
         field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
@@ -2756,6 +2782,7 @@ module IdentityProviderDetails =
         (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "InvocationRole") in
       let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "Url") in
       make ?function_ ?directoryId ?invocationRole ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let function_ = field_map json "Function" Function.of_json in
       let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
@@ -2828,6 +2855,7 @@ module ProtocolDetails =
       let passiveIp =
         (Option.map ~f:PassiveIp.of_xml) (Xml.child xml_arg0 "PassiveIp") in
       make ?tlsSessionResumptionMode ?passiveIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tlsSessionResumptionMode =
         field_map json "TlsSessionResumptionMode"
@@ -2883,6 +2911,7 @@ module WorkflowDetails =
         OnUploadWorkflowDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OnUpload") in
       make ~onUpload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onUpload =
         field_map_exn json "OnUpload" OnUploadWorkflowDetails.of_json in
@@ -2955,6 +2984,7 @@ module ExecutionResults =
         (Option.map ~f:ExecutionStepResults.of_xml)
           (Xml.child xml_arg0 "Steps") in
       make ?onExceptionSteps ?steps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let onExceptionSteps =
         field_map json "OnExceptionSteps" ExecutionStepResults.of_json in
@@ -2988,6 +3018,7 @@ module LoggingConfiguration =
       let loggingRole =
         (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "LoggingRole") in
       make ?logGroupName ?loggingRole ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logGroupName = field_map json "LogGroupName" LogGroupName.of_json in
       let loggingRole = field_map json "LoggingRole" Role.of_json in
@@ -3007,6 +3038,7 @@ module InternalServiceError =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -3026,6 +3058,7 @@ module InvalidRequestException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -3058,6 +3091,7 @@ module ResourceNotFoundException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resource ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" ResourceType.of_json in
@@ -3081,6 +3115,7 @@ module ServiceUnavailableException =
         (Option.map ~f:ServiceErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ServiceErrorMessage.of_json in
       make ?message ()
@@ -3102,6 +3137,7 @@ module ThrottlingException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "RetryAfterSeconds") in
       make ?retryAfterSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let retryAfterSeconds =
         field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
@@ -3123,6 +3159,7 @@ module AccessDeniedException =
         (Option.map ~f:ServiceErrorMessage.of_xml)
           (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ServiceErrorMessage.of_json in
       make ?message ()
@@ -3142,6 +3179,7 @@ module ConflictException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -3174,6 +3212,7 @@ module ResourceExistsException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~resourceType ~resource ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" ResourceType.of_json in
@@ -3360,6 +3399,7 @@ module InvalidNextTokenException =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       make ~message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map_exn json "Message" Message.of_json in
       make ~message ()
@@ -3608,6 +3648,7 @@ module DescribedWorkflow =
           (Xml.child xml_arg0 "Description") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?tags ?workflowId ?onExceptionSteps ?steps ?description ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let workflowId = field_map json "WorkflowId" WorkflowId.of_json in
@@ -3722,6 +3763,7 @@ module DescribedUser =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?userName ?tags ?sshPublicKeys ?role ?posixProfile ?policy
         ?homeDirectoryType ?homeDirectoryMappings ?homeDirectory ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map json "UserName" UserName.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -3930,6 +3972,7 @@ module DescribedServer =
         ?postAuthenticationLoginBanner ?loggingRole ?identityProviderType
         ?identityProviderDetails ?hostKeyFingerprint ?endpointType
         ?endpointDetails ?domain ?protocolDetails ?certificate ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowDetails =
         field_map json "WorkflowDetails" WorkflowDetails.of_json in
@@ -4039,6 +4082,7 @@ module DescribedSecurityPolicy =
       let fips = (Option.map ~f:Fips.of_xml) (Xml.child xml_arg0 "Fips") in
       make ?tlsCiphers ?sshMacs ?sshKexs ?sshCiphers ~securityPolicyName
         ?fips ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tlsCiphers =
         field_map json "TlsCiphers" SecurityPolicyOptions.of_json in
@@ -4135,6 +4179,7 @@ module DescribedExecution =
         (Option.map ~f:ExecutionId.of_xml) (Xml.child xml_arg0 "ExecutionId") in
       make ?results ?status ?posixProfile ?loggingConfiguration
         ?executionRole ?serviceMetadata ?initialFileLocation ?executionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let results = field_map json "Results" ExecutionResults.of_json in
       let status = field_map json "Status" ExecutionStatus.of_json in
@@ -4226,6 +4271,7 @@ module DescribedAccess =
           (Xml.child xml_arg0 "HomeDirectory") in
       make ?externalId ?role ?posixProfile ?policy ?homeDirectoryType
         ?homeDirectoryMappings ?homeDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map json "ExternalId" ExternalId.of_json in
       let role = field_map json "Role" Role.of_json in
@@ -4330,6 +4376,7 @@ module UpdateUserResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -4423,6 +4470,7 @@ module UpdateUserRequest =
           (Xml.child xml_arg0 "HomeDirectory") in
       make ~userName ~serverId ?role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -4549,6 +4597,7 @@ module UpdateServerResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       make ~serverId ()
@@ -4695,6 +4744,7 @@ module UpdateServerRequest =
         ?preAuthenticationLoginBanner ?postAuthenticationLoginBanner
         ?loggingRole ?identityProviderDetails ?hostKey ?endpointType
         ?endpointDetails ?protocolDetails ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowDetails =
         field_map json "WorkflowDetails" WorkflowDetails.of_json in
@@ -4815,6 +4865,7 @@ module UpdateAccessResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~externalId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -4907,6 +4958,7 @@ module UpdateAccessRequest =
           (Xml.child xml_arg0 "HomeDirectory") in
       make ~externalId ~serverId ?role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -4946,6 +4998,7 @@ module UntagResourceRequest =
         TagKeys.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tagKeys ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
       let arn = field_map_exn json "Arn" Arn.of_json in make ~tagKeys ~arn ()
@@ -5045,6 +5098,7 @@ module TestIdentityProviderResponse =
       let response =
         (Option.map ~f:Response.of_xml) (Xml.child xml_arg0 "Response") in
       make ~url ?message ~statusCode ?response ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let url = field_map_exn json "Url" Url.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -5103,6 +5157,7 @@ module TestIdentityProviderRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ?userPassword ~userName ?sourceIp ?serverProtocol ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userPassword = field_map json "UserPassword" UserPassword.of_json in
       let userName = field_map_exn json "UserName" UserName.of_json in
@@ -5135,6 +5190,7 @@ module TagResourceRequest =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tags ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" Tags.of_json in
       let arn = field_map_exn json "Arn" Arn.of_json in make ~tags ~arn ()
@@ -5158,6 +5214,7 @@ module StopServerRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       make ~serverId ()
@@ -5181,6 +5238,7 @@ module StartServerRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       make ~serverId ()
@@ -5269,6 +5327,7 @@ module SendWorkflowStepStateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5313,6 +5372,7 @@ module SendWorkflowStepStateRequest =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~status ~token ~executionId ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map_exn json "Status" CustomStepStatus.of_json in
       let token = field_map_exn json "Token" CallbackToken.of_json in
@@ -5403,6 +5463,7 @@ module ListWorkflowsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~workflows ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflows = field_map_exn json "Workflows" ListedWorkflows.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5431,6 +5492,7 @@ module ListWorkflowsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5532,6 +5594,7 @@ module ListUsersResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~users ~serverId ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let users = field_map_exn json "Users" ListedUsers.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -5571,6 +5634,7 @@ module ListUsersRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~serverId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5661,6 +5725,7 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?nextToken ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5698,6 +5763,7 @@ module ListTagsForResourceRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?nextToken ?maxResults ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5785,6 +5851,7 @@ module ListServersResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~servers ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let servers = field_map_exn json "Servers" ListedServers.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -5815,6 +5882,7 @@ module ListServersRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -5904,6 +5972,7 @@ module ListSecurityPoliciesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~securityPolicyNames ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityPolicyNames =
         field_map_exn json "SecurityPolicyNames" SecurityPolicyNames.of_json in
@@ -5935,6 +6004,7 @@ module ListSecurityPoliciesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -6039,6 +6109,7 @@ module ListExecutionsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~executions ~workflowId ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let executions =
         field_map_exn json "Executions" ListedExecutions.of_json in
@@ -6077,6 +6148,7 @@ module ListExecutionsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~workflowId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6181,6 +6253,7 @@ module ListAccessesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~accesses ~serverId ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accesses = field_map_exn json "Accesses" ListedAccesses.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -6219,6 +6292,7 @@ module ListAccessesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~serverId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -6332,6 +6406,7 @@ module ImportSshPublicKeyResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~sshPublicKeyId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let sshPublicKeyId =
@@ -6372,6 +6447,7 @@ module ImportSshPublicKeyRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~sshPublicKeyBody ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let sshPublicKeyBody =
@@ -6455,6 +6531,7 @@ module DescribeWorkflowResponse =
         DescribedWorkflow.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Workflow") in
       make ~workflow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflow = field_map_exn json "Workflow" DescribedWorkflow.of_json in
       make ~workflow ()
@@ -6477,6 +6554,7 @@ module DescribeWorkflowRequest =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
       make ~workflowId ()
@@ -6562,6 +6640,7 @@ module DescribeUserResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~user ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let user = field_map_exn json "User" DescribedUser.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -6592,6 +6671,7 @@ module DescribeUserRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -6673,6 +6753,7 @@ module DescribeServerResponse =
         DescribedServer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Server") in
       make ~server ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let server = field_map_exn json "Server" DescribedServer.of_json in
       make ~server ()
@@ -6695,6 +6776,7 @@ module DescribeServerRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       make ~serverId ()
@@ -6776,6 +6858,7 @@ module DescribeSecurityPolicyResponse =
         DescribedSecurityPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityPolicy") in
       make ~securityPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityPolicy =
         field_map_exn json "SecurityPolicy" DescribedSecurityPolicy.of_json in
@@ -6802,6 +6885,7 @@ module DescribeSecurityPolicyRequest =
         SecurityPolicyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityPolicyName") in
       make ~securityPolicyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let securityPolicyName =
         field_map_exn json "SecurityPolicyName" SecurityPolicyName.of_json in
@@ -6890,6 +6974,7 @@ module DescribeExecutionResponse =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~execution ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let execution =
         field_map_exn json "Execution" DescribedExecution.of_json in
@@ -6922,6 +7007,7 @@ module DescribeExecutionRequest =
         ExecutionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExecutionId") in
       make ~workflowId ~executionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
       let executionId = field_map_exn json "ExecutionId" ExecutionId.of_json in
@@ -7009,6 +7095,7 @@ module DescribeAccessResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~access ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let access = field_map_exn json "Access" DescribedAccess.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -7041,6 +7128,7 @@ module DescribeAccessRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~externalId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -7065,6 +7153,7 @@ module DeleteWorkflowRequest =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
       make ~workflowId ()
@@ -7093,6 +7182,7 @@ module DeleteUserRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -7132,6 +7222,7 @@ module DeleteSshPublicKeyRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~sshPublicKeyId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let sshPublicKeyId =
@@ -7157,6 +7248,7 @@ module DeleteServerRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       make ~serverId ()
@@ -7188,6 +7280,7 @@ module DeleteAccessRequest =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~externalId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -7286,6 +7379,7 @@ module CreateWorkflowResponse =
         WorkflowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkflowId") in
       make ~workflowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowId = field_map_exn json "WorkflowId" WorkflowId.of_json in
       make ~workflowId ()
@@ -7334,6 +7428,7 @@ module CreateWorkflowRequest =
         (Option.map ~f:WorkflowDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       make ?tags ?onExceptionSteps ~steps ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" Tags.of_json in
       let onExceptionSteps =
@@ -7432,6 +7527,7 @@ module CreateUserResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~userName ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -7543,6 +7639,7 @@ module CreateUserRequest =
           (Xml.child xml_arg0 "HomeDirectory") in
       make ~userName ?tags ?sshPublicKeyBody ~serverId ~role ?posixProfile
         ?policy ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let userName = field_map_exn json "UserName" UserName.of_json in
       let tags = field_map json "Tags" Tags.of_json in
@@ -7662,6 +7759,7 @@ module CreateServerResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
       make ~serverId ()
@@ -7824,6 +7922,7 @@ module CreateServerRequest =
         ?postAuthenticationLoginBanner ?loggingRole ?identityProviderType
         ?identityProviderDetails ?hostKey ?endpointType ?endpointDetails
         ?domain ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let workflowDetails =
         field_map json "WorkflowDetails" WorkflowDetails.of_json in
@@ -7948,6 +8047,7 @@ module CreateAccessResponse =
       let serverId =
         ServerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServerId") in
       make ~externalId ~serverId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in
@@ -8041,6 +8141,7 @@ module CreateAccessRequest =
           (Xml.child xml_arg0 "HomeDirectory") in
       make ~externalId ~serverId ~role ?posixProfile ?policy
         ?homeDirectoryMappings ?homeDirectoryType ?homeDirectory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let externalId = field_map_exn json "ExternalId" ExternalId.of_json in
       let serverId = field_map_exn json "ServerId" ServerId.of_json in

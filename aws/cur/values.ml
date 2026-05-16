@@ -535,6 +535,7 @@ module ReportDefinition =
         ?additionalArtifacts ~s3Region ~s3Prefix ~s3Bucket
         ~additionalSchemaElements ~compression ~format ~timeUnit ~reportName
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let billingViewArn =
         field_map json "BillingViewArn" BillingViewArn.of_json in
@@ -575,6 +576,7 @@ module DuplicateReportNameException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -594,6 +596,7 @@ module InternalErrorException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -613,6 +616,7 @@ module ReportLimitReachedException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -632,6 +636,7 @@ module ValidationException =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" ErrorMessage.of_json in
       make ?message ()
@@ -781,6 +786,7 @@ module PutReportDefinitionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -804,6 +810,7 @@ module PutReportDefinitionRequest =
         ReportDefinition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReportDefinition") in
       make ~reportDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportDefinition =
         field_map_exn json "ReportDefinition" ReportDefinition.of_json in
@@ -854,6 +861,7 @@ module ModifyReportDefinitionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -881,6 +889,7 @@ module ModifyReportDefinitionRequest =
         ReportName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReportName") in
       make ~reportDefinition ~reportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportDefinition =
         field_map_exn json "ReportDefinition" ReportDefinition.of_json in
@@ -939,6 +948,7 @@ module DescribeReportDefinitionsResponse =
         (Option.map ~f:ReportDefinitionList.of_xml)
           (Xml.child xml_arg0 "ReportDefinitions") in
       make ?nextToken ?reportDefinitions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let reportDefinitions =
@@ -966,6 +976,7 @@ module DescribeReportDefinitionsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" GenericString.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -1024,6 +1035,7 @@ module DeleteReportDefinitionResponse =
         (Option.map ~f:DeleteResponseMessage.of_xml)
           (Xml.child xml_arg0 "ResponseMessage") in
       make ?responseMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let responseMessage =
         field_map json "ResponseMessage" DeleteResponseMessage.of_json in
@@ -1047,6 +1059,7 @@ module DeleteReportDefinitionRequest =
       let reportName =
         (Option.map ~f:ReportName.of_xml) (Xml.child xml_arg0 "ReportName") in
       make ?reportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportName = field_map json "ReportName" ReportName.of_json in
       make ?reportName ()

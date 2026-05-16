@@ -309,6 +309,7 @@ module CertificateList =
         SigningAlg.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SigningAlg") in
       make ~value ~signingAlg ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" CertificateValue.of_json in
       let signingAlg = field_map_exn json "SigningAlg" SigningAlg.of_json in
@@ -334,6 +335,7 @@ module WirelessDeviceEventLogOption =
         WirelessDeviceEvent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Event") in
       make ~logLevel ~event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
       let event = field_map_exn json "Event" WirelessDeviceEvent.of_json in
@@ -360,6 +362,7 @@ module WirelessGatewayEventLogOption =
         WirelessGatewayEvent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Event") in
       make ~logLevel ~event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
       let event = field_map_exn json "Event" WirelessGatewayEvent.of_json in
@@ -511,6 +514,7 @@ module LoRaWANGatewayVersion =
         (Option.map ~f:PackageVersion.of_xml)
           (Xml.child xml_arg0 "PackageVersion") in
       make ?station ?model ?packageVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let station = field_map json "Station" Station.of_json in
       let model = field_map json "Model" Model.of_json in
@@ -994,6 +998,7 @@ module LoRaWANGateway =
       let gatewayEui =
         (Option.map ~f:GatewayEui.of_xml) (Xml.child xml_arg0 "GatewayEui") in
       make ?subBands ?netIdFilters ?joinEuiFilters ?rfRegion ?gatewayEui ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let subBands = field_map json "SubBands" SubBands.of_json in
       let netIdFilters = field_map json "NetIdFilters" NetIdFilters.of_json in
@@ -1071,6 +1076,7 @@ module LoRaWANUpdateGatewayTaskEntry =
         (Option.map ~f:LoRaWANGatewayVersion.of_xml)
           (Xml.child xml_arg0 "CurrentVersion") in
       make ?updateVersion ?currentVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateVersion =
         field_map json "UpdateVersion" LoRaWANGatewayVersion.of_json in
@@ -1197,6 +1203,7 @@ module LoRaWANListDevice =
       let devEui =
         (Option.map ~f:DevEui.of_xml) (Xml.child xml_arg0 "DevEui") in
       make ?devEui ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let devEui = field_map json "DevEui" DevEui.of_json in make ?devEui ()
     let to_json v = composed_to_json to_value v
@@ -1278,6 +1285,7 @@ module SidewalkListDevice =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
       make ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceCertificates =
         field_map json "DeviceCertificates" DeviceCertificateList.of_json in
@@ -1383,6 +1391,7 @@ module LoRaWANSendDataToDevice =
     let of_xml xml_arg0 =
       let fPort = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "FPort") in
       make ?fPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fPort = field_map json "FPort" FPort.of_json in make ?fPort ()
     let to_json v = composed_to_json to_value v
@@ -1703,6 +1712,7 @@ module LoRaWANGatewayMetadata =
       let gatewayEui =
         (Option.map ~f:GatewayEui.of_xml) (Xml.child xml_arg0 "GatewayEui") in
       make ?rssi ?snr ?gatewayEui ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rssi = field_map json "Rssi" Double.of_json in
       let snr = field_map json "Snr" Double.of_json in
@@ -1743,6 +1753,7 @@ module SessionKeysAbpV1_0_x =
       let nwkSKey =
         (Option.map ~f:NwkSKey.of_xml) (Xml.child xml_arg0 "NwkSKey") in
       make ?appSKey ?nwkSKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appSKey = field_map json "AppSKey" AppSKey.of_json in
       let nwkSKey = field_map json "NwkSKey" NwkSKey.of_json in
@@ -1779,6 +1790,7 @@ module SessionKeysAbpV1_1 =
       let fNwkSIntKey =
         (Option.map ~f:FNwkSIntKey.of_xml) (Xml.child xml_arg0 "FNwkSIntKey") in
       make ?appSKey ?nwkSEncKey ?sNwkSIntKey ?fNwkSIntKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appSKey = field_map json "AppSKey" AppSKey.of_json in
       let nwkSEncKey = field_map json "NwkSEncKey" NwkSEncKey.of_json in
@@ -1925,6 +1937,7 @@ module SidewalkEventNotificationConfigurations =
         (Option.map ~f:EventNotificationTopicStatus.of_xml)
           (Xml.child xml_arg0 "AmazonIdEventTopic") in
       make ?amazonIdEventTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let amazonIdEventTopic =
         field_map json "AmazonIdEventTopic"
@@ -2064,6 +2077,7 @@ module WirelessDeviceLogOption =
         WirelessDeviceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?events ~logLevel ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events =
         field_map json "Events" WirelessDeviceEventLogOptionList.of_json in
@@ -2100,6 +2114,7 @@ module WirelessGatewayLogOption =
         WirelessGatewayType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?events ~logLevel ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let events =
         field_map json "Events" WirelessGatewayEventLogOptionList.of_json in
@@ -2146,6 +2161,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -2251,6 +2267,7 @@ module SidewalkSendDataToDevice =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "MessageType") in
       let seq = (Option.map ~f:Seq.of_xml) (Xml.child xml_arg0 "Seq") in
       make ?messageType ?seq ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageType = field_map json "MessageType" MessageType.of_json in
       let seq = field_map json "Seq" Seq.of_json in make ?messageType ?seq ()
@@ -2267,6 +2284,7 @@ module LoRaWANMulticastMetadata =
     let of_xml xml_arg0 =
       let fPort = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "FPort") in
       make ?fPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fPort = field_map json "FPort" FPort.of_json in make ?fPort ()
     let to_json v = composed_to_json to_value v
@@ -2322,6 +2340,7 @@ module WirelessGatewayStatistics =
       let arn =
         (Option.map ~f:WirelessGatewayArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?lastUplinkReceivedAt ?loRaWAN ?description ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUplinkReceivedAt =
         field_map json "LastUplinkReceivedAt" ISODateTimeString.of_json in
@@ -2365,6 +2384,7 @@ module UpdateWirelessGatewayTaskEntry =
         (Option.map ~f:WirelessGatewayTaskDefinitionId.of_xml)
           (Xml.child xml_arg0 "Id") in
       make ?arn ?loRaWAN ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" WirelessGatewayTaskDefinitionArn.of_json in
       let loRaWAN =
@@ -2475,6 +2495,7 @@ module WirelessDeviceStatistics =
       make ?mcGroupId ?multicastDeviceStatus ?fuotaDeviceStatus ?sidewalk
         ?loRaWAN ?lastUplinkReceivedAt ?destinationName ?name ?type_ ?id ?arn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let mcGroupId = field_map json "McGroupId" McGroupId.of_json in
       let multicastDeviceStatus =
@@ -2521,6 +2542,7 @@ module ServiceProfile =
       let arn =
         (Option.map ~f:ServiceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" ServiceProfileId.of_json in
       let name = field_map json "Name" ServiceProfileName.of_json in
@@ -2569,6 +2591,7 @@ module DownlinkQueueMessage =
       let messageId =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?loRaWAN ?receivedAt ?transmitMode ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN = field_map json "LoRaWAN" LoRaWANSendDataToDevice.of_json in
       let receivedAt = field_map json "ReceivedAt" ISODateTimeString.of_json in
@@ -2604,6 +2627,7 @@ module SidewalkAccountInfoWithFingerprint =
       let amazonId =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
       make ?arn ?fingerprint ?amazonId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PartnerAccountArn.of_json in
       let fingerprint = field_map json "Fingerprint" Fingerprint.of_json in
@@ -2633,6 +2657,7 @@ module MulticastGroup =
       let id =
         (Option.map ~f:MulticastGroupId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" MulticastGroupName.of_json in
       let arn = field_map json "Arn" MulticastGroupArn.of_json in
@@ -2653,6 +2678,7 @@ module MulticastGroupByFuotaTask =
       let id =
         (Option.map ~f:MulticastGroupId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" MulticastGroupId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
@@ -2678,6 +2704,7 @@ module FuotaTask =
         (Option.map ~f:FuotaTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:FuotaTaskId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" FuotaTaskName.of_json in
       let arn = field_map json "Arn" FuotaTaskArn.of_json in
@@ -2710,6 +2737,7 @@ module DeviceProfile =
       let arn =
         (Option.map ~f:DeviceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" DeviceProfileId.of_json in
       let name = field_map json "Name" DeviceProfileName.of_json in
@@ -2773,6 +2801,7 @@ module Destinations =
       let arn =
         (Option.map ~f:DestinationArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?roleArn ?description ?expression ?expressionType ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "RoleArn" RoleArn.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -2826,6 +2855,7 @@ module LoRaWANUpdateGatewayTaskCreate =
         (Option.map ~f:UpdateSignature.of_xml)
           (Xml.child xml_arg0 "UpdateSignature") in
       make ?updateVersion ?currentVersion ?sigKeyCrc ?updateSignature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateVersion =
         field_map json "UpdateVersion" LoRaWANGatewayVersion.of_json in
@@ -3009,6 +3039,7 @@ module AbpV1_0_x =
       let devAddr =
         (Option.map ~f:DevAddr.of_xml) (Xml.child xml_arg0 "DevAddr") in
       make ?sessionKeys ?devAddr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionKeys =
         field_map json "SessionKeys" SessionKeysAbpV1_0_x.of_json in
@@ -3038,6 +3069,7 @@ module AbpV1_1 =
       let devAddr =
         (Option.map ~f:DevAddr.of_xml) (Xml.child xml_arg0 "DevAddr") in
       make ?sessionKeys ?devAddr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionKeys =
         field_map json "SessionKeys" SessionKeysAbpV1_1.of_json in
@@ -3068,6 +3100,7 @@ module FPorts =
         (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "Multicast") in
       let fuota = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "Fuota") in
       make ?clockSync ?multicast ?fuota ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clockSync = field_map json "ClockSync" FPort.of_json in
       let multicast = field_map json "Multicast" FPort.of_json in
@@ -3100,6 +3133,7 @@ module OtaaV1_0_x =
       let appKey =
         (Option.map ~f:AppKey.of_xml) (Xml.child xml_arg0 "AppKey") in
       make ?genAppKey ?appEui ?appKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let genAppKey = field_map json "GenAppKey" GenAppKey.of_json in
       let appEui = field_map json "AppEui" AppEui.of_json in
@@ -3130,6 +3164,7 @@ module OtaaV1_1 =
       let appKey =
         (Option.map ~f:AppKey.of_xml) (Xml.child xml_arg0 "AppKey") in
       make ?joinEui ?nwkKey ?appKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let joinEui = field_map json "JoinEui" JoinEui.of_json in
       let nwkKey = field_map json "NwkKey" NwkKey.of_json in
@@ -3785,6 +3820,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3803,6 +3839,7 @@ module InternalServerException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3836,6 +3873,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let resourceId = field_map json "ResourceId" ResourceId.of_json in
@@ -3856,6 +3894,7 @@ module ThrottlingException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3875,6 +3914,7 @@ module ValidationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3906,6 +3946,7 @@ module LoRaWANUpdateDevice =
         (Option.map ~f:DeviceProfileId.of_xml)
           (Xml.child xml_arg0 "DeviceProfileId") in
       make ?serviceProfileId ?deviceProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceProfileId =
         field_map json "ServiceProfileId" ServiceProfileId.of_json in
@@ -3942,6 +3983,7 @@ module ConflictException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType = field_map json "ResourceType" ResourceType.of_json in
       let resourceId = field_map json "ResourceId" ResourceId.of_json in
@@ -3969,6 +4011,7 @@ module DeviceRegistrationStateEventConfiguration =
         (Option.map ~f:SidewalkEventNotificationConfigurations.of_xml)
           (Xml.child xml_arg0 "Sidewalk") in
       make ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sidewalk =
         field_map json "Sidewalk"
@@ -4051,6 +4094,7 @@ module ProximityEventConfiguration =
         (Option.map ~f:SidewalkEventNotificationConfigurations.of_xml)
           (Xml.child xml_arg0 "Sidewalk") in
       make ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sidewalk =
         field_map json "Sidewalk"
@@ -4106,6 +4150,7 @@ module SidewalkUpdateAccount =
         (Option.map ~f:AppServerPrivateKey.of_xml)
           (Xml.child xml_arg0 "AppServerPrivateKey") in
       make ?appServerPrivateKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appServerPrivateKey =
         field_map json "AppServerPrivateKey" AppServerPrivateKey.of_json in
@@ -4155,6 +4200,7 @@ module TraceContent =
         (Option.map ~f:WirelessDeviceFrameInfo.of_xml)
           (Xml.child xml_arg0 "WirelessDeviceFrameInfo") in
       make ?logLevel ?wirelessDeviceFrameInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map json "LogLevel" LogLevel.of_json in
       let wirelessDeviceFrameInfo =
@@ -4237,6 +4283,7 @@ module LoRaWANMulticast =
         (Option.map ~f:SupportedRfRegion.of_xml)
           (Xml.child xml_arg0 "RfRegion") in
       make ?dlClass ?rfRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dlClass = field_map json "DlClass" DlClass.of_json in
       let rfRegion = field_map json "RfRegion" SupportedRfRegion.of_json in
@@ -4350,6 +4397,7 @@ module LoRaWANFuotaTask =
         (Option.map ~f:SupportedRfRegion.of_xml)
           (Xml.child xml_arg0 "RfRegion") in
       make ?rfRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let rfRegion = field_map json "RfRegion" SupportedRfRegion.of_json in
       make ?rfRegion ()
@@ -4420,6 +4468,7 @@ module TooManyTagsException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceName =
         field_map json "ResourceName" AmazonResourceName.of_json in
@@ -4490,6 +4539,7 @@ module LoRaWANMulticastSession =
         (Option.map ~f:DlFreq.of_xml) (Xml.child xml_arg0 "DlFreq") in
       let dlDr = (Option.map ~f:DlDr.of_xml) (Xml.child xml_arg0 "DlDr") in
       make ?sessionTimeout ?sessionStartTime ?dlFreq ?dlDr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionTimeout =
         field_map json "SessionTimeout" SessionTimeout.of_json in
@@ -4513,6 +4563,7 @@ module LoRaWANStartFuotaTask =
       let startTime =
         (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" StartTime.of_json in
       make ?startTime ()
@@ -4580,6 +4631,7 @@ module WirelessMetadata =
         (Option.map ~f:LoRaWANSendDataToDevice.of_xml)
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?sidewalk ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sidewalk =
         field_map json "Sidewalk" SidewalkSendDataToDevice.of_json in
@@ -4616,6 +4668,7 @@ module MulticastWirelessMetadata =
         (Option.map ~f:LoRaWANMulticastMetadata.of_xml)
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticastMetadata.of_json in
       make ?loRaWAN ()
@@ -5056,6 +5109,7 @@ module UpdateWirelessGatewayTaskCreate =
         (Option.map ~f:UpdateDataSource.of_xml)
           (Xml.child xml_arg0 "UpdateDataSource") in
       make ?loRaWAN ?updateDataRole ?updateDataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN =
         field_map json "LoRaWAN" LoRaWANUpdateGatewayTaskCreate.of_json in
@@ -5183,6 +5237,7 @@ module LoRaWANGatewayCurrentVersion =
         (Option.map ~f:LoRaWANGatewayVersion.of_xml)
           (Xml.child xml_arg0 "CurrentVersion") in
       make ?currentVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let currentVersion =
         field_map json "CurrentVersion" LoRaWANGatewayVersion.of_json in
@@ -5253,6 +5308,7 @@ module LoRaWANDeviceMetadata =
       let devEui =
         (Option.map ~f:DevEui.of_xml) (Xml.child xml_arg0 "DevEui") in
       make ?gateways ?timestamp ?frequency ?dataRate ?fPort ?devEui ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gateways =
         field_map json "Gateways" LoRaWANGatewayMetadataList.of_json in
@@ -5298,6 +5354,7 @@ module SidewalkDeviceMetadata =
           (Xml.child xml_arg0 "BatteryLevel") in
       let rssi = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Rssi") in
       make ?deviceState ?event ?batteryLevel ?rssi ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceState = field_map json "DeviceState" DeviceState.of_json in
       let event = field_map json "Event" Event.of_json in
@@ -5378,6 +5435,7 @@ module LoRaWANDevice =
         (Option.map ~f:DevEui.of_xml) (Xml.child xml_arg0 "DevEui") in
       make ?fPorts ?abpV1_0_x ?abpV1_1 ?otaaV1_0_x ?otaaV1_1
         ?serviceProfileId ?deviceProfileId ?devEui ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fPorts = field_map json "FPorts" FPorts.of_json in
       let abpV1_0_x = field_map json "AbpV1_0_x" AbpV1_0_x.of_json in
@@ -5439,6 +5497,7 @@ module SidewalkDevice =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
       make ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceCertificates =
         field_map json "DeviceCertificates" DeviceCertificateList.of_json in
@@ -5646,6 +5705,7 @@ module LoRaWANGetServiceProfileInfo =
         ?reportDevStatusBattery ?devStatusReqFreq ?addGwMetadata
         ?dlRatePolicy ?dlBucketSize ?dlRate ?ulRatePolicy ?ulBucketSize
         ?ulRate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let minGwDiversity =
         field_map json "MinGwDiversity" MinGwDiversity.of_json in
@@ -5811,6 +5871,7 @@ module LoRaWANMulticastGet =
           (Xml.child xml_arg0 "RfRegion") in
       make ?numberOfDevicesInGroup ?numberOfDevicesRequested ?dlClass
         ?rfRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let numberOfDevicesInGroup =
         field_map json "NumberOfDevicesInGroup"
@@ -5891,6 +5952,7 @@ module LoRaWANFuotaTaskGetInfo =
       let rfRegion =
         (Option.map ~f:RfRegion.of_xml) (Xml.child xml_arg0 "RfRegion") in
       make ?startTime ?rfRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let startTime = field_map json "StartTime" StartTime.of_json in
       let rfRegion = field_map json "RfRegion" RfRegion.of_json in
@@ -6066,6 +6128,7 @@ module LoRaWANDeviceProfile =
         ?regParamsRevision ?macVersion ?classCTimeout ?supportsClassC
         ?pingSlotFreq ?pingSlotDr ?pingSlotPeriod ?classBTimeout
         ?supportsClassB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let supports32BitFCnt =
         field_map json "Supports32BitFCnt" Supports32BitFCnt.of_json in
@@ -6141,6 +6204,7 @@ module LoRaWANServiceProfile =
         (Option.map ~f:AddGwMetadata.of_xml)
           (Xml.child xml_arg0 "AddGwMetadata") in
       make ?addGwMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let addGwMetadata =
         field_map json "AddGwMetadata" AddGwMetadata.of_json in
@@ -6169,6 +6233,7 @@ module SidewalkAccountInfo =
       let amazonId =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
       make ?appServerPrivateKey ?amazonId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let appServerPrivateKey =
         field_map json "AppServerPrivateKey" AppServerPrivateKey.of_json in
@@ -6247,6 +6312,7 @@ module UpdateWirelessGatewayResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a wireless gateway."]
@@ -6296,6 +6362,7 @@ module UpdateWirelessGatewayRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?netIdFilters ?joinEuiFilters ?description ?name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let netIdFilters = field_map json "NetIdFilters" NetIdFilters.of_json in
       let joinEuiFilters =
@@ -6377,6 +6444,7 @@ module UpdateWirelessDeviceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a wireless device."]
@@ -6424,6 +6492,7 @@ module UpdateWirelessDeviceRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?loRaWAN ?description ?name ?destinationName ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN = field_map json "LoRaWAN" LoRaWANUpdateDevice.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -6514,6 +6583,7 @@ module UpdateResourceEventConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6580,6 +6650,7 @@ module UpdateResourceEventConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ?proximity ?deviceRegistrationState ?partnerType ~identifierType
         ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let proximity =
         field_map json "Proximity" ProximityEventConfiguration.of_json in
@@ -6658,6 +6729,7 @@ module UpdatePartnerAccountResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a partner account."]
@@ -6693,6 +6765,7 @@ module UpdatePartnerAccountRequest =
         SidewalkUpdateAccount.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Sidewalk") in
       make ~partnerType ~partnerAccountId ~sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partnerType = field_map_exn json "PartnerType" PartnerType.of_json in
       let partnerAccountId =
@@ -6773,6 +6846,7 @@ module UpdateNetworkAnalyzerConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update NetworkAnalyzer configuration."]
@@ -6850,6 +6924,7 @@ module UpdateNetworkAnalyzerConfigurationRequest =
       make ?wirelessGatewaysToRemove ?wirelessGatewaysToAdd
         ?wirelessDevicesToRemove ?wirelessDevicesToAdd ?traceContent
         ~configurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessGatewaysToRemove =
         field_map json "WirelessGatewaysToRemove" WirelessGatewayList.of_json in
@@ -6948,6 +7023,7 @@ module UpdateMulticastGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a multicast group session."]
@@ -6983,6 +7059,7 @@ module UpdateMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?loRaWAN ?description ?name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticast.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -7071,6 +7148,7 @@ module UpdateLogLevelsByResourceTypesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7114,6 +7192,7 @@ module UpdateLogLevelsByResourceTypesRequest =
           (Xml.child xml_arg0 "DefaultLogLevel") in
       make ?wirelessGatewayLogOptions ?wirelessDeviceLogOptions
         ?defaultLogLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessGatewayLogOptions =
         field_map json "WirelessGatewayLogOptions"
@@ -7207,6 +7286,7 @@ module UpdateFuotaTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a FUOTA task."]
@@ -7265,6 +7345,7 @@ module UpdateFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN ?description
         ?name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let firmwareUpdateRole =
         field_map json "FirmwareUpdateRole" FirmwareUpdateRole.of_json in
@@ -7349,6 +7430,7 @@ module UpdateDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a destination."]
@@ -7397,6 +7479,7 @@ module UpdateDestinationRequest =
         DestinationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?roleArn ?description ?expression ?expressionType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "RoleArn" RoleArn.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -7478,6 +7561,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from a resource."]
@@ -7506,6 +7590,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn =
@@ -7582,6 +7667,7 @@ module TestWirelessDeviceResponse =
       let result =
         (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "Result") in
       make ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let result = field_map json "Result" Result_.of_json in make ?result ()
     let to_json v = composed_to_json to_value v
@@ -7603,6 +7689,7 @@ module TestWirelessDeviceRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessDeviceId.of_json in
       make ~id ()
@@ -7689,6 +7776,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to a resource."]
@@ -7715,6 +7803,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn =
@@ -7802,6 +7891,7 @@ module StartMulticastGroupSessionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a multicast group session."]
@@ -7826,6 +7916,7 @@ module StartMulticastGroupSessionRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~loRaWAN ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN =
         field_map_exn json "LoRaWAN" LoRaWANMulticastSession.of_json in
@@ -7913,6 +8004,7 @@ module StartFuotaTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a FUOTA task."]
@@ -7936,6 +8028,7 @@ module StartFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?loRaWAN ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN = field_map json "LoRaWAN" LoRaWANStartFuotaTask.of_json in
       let id = field_map_exn json "Id" FuotaTaskId.of_json in
@@ -8013,6 +8106,7 @@ module StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8042,6 +8136,7 @@ module StartBulkDisassociateWirelessDeviceFromMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?tags ?queryString ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let queryString = field_map json "QueryString" QueryString.of_json in
@@ -8121,6 +8216,7 @@ module StartBulkAssociateWirelessDeviceWithMulticastGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8150,6 +8246,7 @@ module StartBulkAssociateWirelessDeviceWithMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?tags ?queryString ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let queryString = field_map json "QueryString" QueryString.of_json in
@@ -8227,6 +8324,7 @@ module SendDataToWirelessDeviceResponse =
       let messageId =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId = field_map json "MessageId" MessageId.of_json in
       make ?messageId ()
@@ -8272,6 +8370,7 @@ module SendDataToWirelessDeviceRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?wirelessMetadata ~payloadData ~transmitMode ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessMetadata =
         field_map json "WirelessMetadata" WirelessMetadata.of_json in
@@ -8369,6 +8468,7 @@ module SendDataToMulticastGroupResponse =
         (Option.map ~f:MulticastGroupMessageId.of_xml)
           (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let messageId =
         field_map json "MessageId" MulticastGroupMessageId.of_json in
@@ -8405,6 +8505,7 @@ module SendDataToMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessMetadata ~payloadData ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessMetadata =
         field_map_exn json "WirelessMetadata"
@@ -8485,6 +8586,7 @@ module ResetResourceLogLevelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8514,6 +8616,7 @@ module ResetResourceLogLevelRequest =
         ResourceIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" ResourceType.of_json in
@@ -8594,6 +8697,7 @@ module ResetAllResourceLogLevelsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8606,6 +8710,7 @@ module ResetAllResourceLogLevelsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8681,6 +8786,7 @@ module PutResourceLogLevelResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8716,6 +8822,7 @@ module PutResourceLogLevelRequest =
         ResourceIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~logLevel ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
       let resourceType =
@@ -8806,6 +8913,7 @@ module ListWirelessGatewaysResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?wirelessGatewayList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessGatewayList =
         field_map json "WirelessGatewayList"
@@ -8838,6 +8946,7 @@ module ListWirelessGatewaysRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -8924,6 +9033,7 @@ module ListWirelessGatewayTaskDefinitionsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?taskDefinitions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskDefinitions =
         field_map json "TaskDefinitions"
@@ -8967,6 +9077,7 @@ module ListWirelessGatewayTaskDefinitionsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?taskDefinitionType ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let taskDefinitionType =
         field_map json "TaskDefinitionType"
@@ -9056,6 +9167,7 @@ module ListWirelessDevicesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?wirelessDeviceList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceList =
         field_map json "WirelessDeviceList"
@@ -9149,6 +9261,7 @@ module ListWirelessDevicesRequest =
       make ?multicastGroupId ?fuotaTaskId ?wirelessDeviceType
         ?serviceProfileId ?deviceProfileId ?destinationName ?nextToken
         ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multicastGroupId =
         field_map json "MulticastGroupId" MulticastGroupId.of_json in
@@ -9246,6 +9359,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -9269,6 +9383,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn =
         field_map_exn json "ResourceArn" AmazonResourceName.of_json in
@@ -9354,6 +9469,7 @@ module ListServiceProfilesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?serviceProfileList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceProfileList =
         field_map json "ServiceProfileList" ServiceProfileList.of_json in
@@ -9385,6 +9501,7 @@ module ListServiceProfilesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9481,6 +9598,7 @@ module ListQueuedMessagesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?downlinkQueueMessagesList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let downlinkQueueMessagesList =
         field_map json "DownlinkQueueMessagesList"
@@ -9531,6 +9649,7 @@ module ListQueuedMessagesRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?wirelessDeviceType ?maxResults ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceType =
         field_map json "WirelessDeviceType" WirelessDeviceType.of_json in
@@ -9616,6 +9735,7 @@ module ListPartnerAccountsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sidewalk ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sidewalk = field_map json "Sidewalk" SidewalkAccountList.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9646,6 +9766,7 @@ module ListPartnerAccountsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9730,6 +9851,7 @@ module ListMulticastGroupsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?multicastGroupList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multicastGroupList =
         field_map json "MulticastGroupList" MulticastGroupList.of_json in
@@ -9759,6 +9881,7 @@ module ListMulticastGroupsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9853,6 +9976,7 @@ module ListMulticastGroupsByFuotaTaskResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?multicastGroupList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multicastGroupList =
         field_map json "MulticastGroupList"
@@ -9887,6 +10011,7 @@ module ListMulticastGroupsByFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxResults ?nextToken ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -9971,6 +10096,7 @@ module ListFuotaTasksResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?fuotaTaskList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fuotaTaskList =
         field_map json "FuotaTaskList" FuotaTaskList.of_json in
@@ -9999,6 +10125,7 @@ module ListFuotaTasksRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10083,6 +10210,7 @@ module ListDeviceProfilesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?deviceProfileList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deviceProfileList =
         field_map json "DeviceProfileList" DeviceProfileList.of_json in
@@ -10114,6 +10242,7 @@ module ListDeviceProfilesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
       let nextToken = field_map json "NextToken" NextToken.of_json in
@@ -10199,6 +10328,7 @@ module ListDestinationsResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?destinationList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationList =
         field_map json "DestinationList" DestinationList.of_json in
@@ -10229,6 +10359,7 @@ module ListDestinationsRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NextToken.of_json in
       let maxResults = field_map json "MaxResults" MaxResults.of_json in
@@ -10359,6 +10490,7 @@ module GetWirelessGatewayTaskResponse =
           (Xml.child xml_arg0 "WirelessGatewayId") in
       make ?status ?taskCreatedAt ?lastUplinkReceivedAt
         ?wirelessGatewayTaskDefinitionId ?wirelessGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" WirelessGatewayTaskStatus.of_json in
       let taskCreatedAt =
@@ -10389,6 +10521,7 @@ module GetWirelessGatewayTaskRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
       make ~id ()
@@ -10498,6 +10631,7 @@ module GetWirelessGatewayTaskDefinitionResponse =
         (Option.map ~f:AutoCreateTasks.of_xml)
           (Xml.child xml_arg0 "AutoCreateTasks") in
       make ?arn ?update ?name ?autoCreateTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" WirelessGatewayTaskDefinitionArn.of_json in
       let update =
@@ -10526,6 +10660,7 @@ module GetWirelessGatewayTaskDefinitionRequest =
         WirelessGatewayTaskDefinitionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id =
         field_map_exn json "Id" WirelessGatewayTaskDefinitionId.of_json in
@@ -10632,6 +10767,7 @@ module GetWirelessGatewayStatisticsResponse =
         (Option.map ~f:WirelessGatewayId.of_xml)
           (Xml.child xml_arg0 "WirelessGatewayId") in
       make ?connectionStatus ?lastUplinkReceivedAt ?wirelessGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let connectionStatus =
         field_map json "ConnectionStatus" ConnectionStatus.of_json in
@@ -10660,6 +10796,7 @@ module GetWirelessGatewayStatisticsRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessGatewayId =
         field_map_exn json "WirelessGatewayId" WirelessGatewayId.of_json in
@@ -10793,6 +10930,7 @@ module GetWirelessGatewayResponse =
         (Option.map ~f:WirelessGatewayName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?thingArn ?thingName ?arn ?loRaWAN ?description ?id ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thingArn = field_map json "ThingArn" ThingArn.of_json in
       let thingName = field_map json "ThingName" ThingName.of_json in
@@ -10829,6 +10967,7 @@ module GetWirelessGatewayRequest =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifierType ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifierType =
         field_map_exn json "IdentifierType" WirelessGatewayIdType.of_json in
@@ -10916,6 +11055,7 @@ module GetWirelessGatewayFirmwareInformationResponse =
         (Option.map ~f:LoRaWANGatewayCurrentVersion.of_xml)
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN =
         field_map json "LoRaWAN" LoRaWANGatewayCurrentVersion.of_json in
@@ -10938,6 +11078,7 @@ module GetWirelessGatewayFirmwareInformationRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
       make ~id ()
@@ -11036,6 +11177,7 @@ module GetWirelessGatewayCertificateResponse =
         (Option.map ~f:IotCertificateId.of_xml)
           (Xml.child xml_arg0 "IotCertificateId") in
       make ?loRaWANNetworkServerCertificateId ?iotCertificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWANNetworkServerCertificateId =
         field_map json "LoRaWANNetworkServerCertificateId"
@@ -11061,6 +11203,7 @@ module GetWirelessGatewayCertificateRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
       make ~id ()
@@ -11173,6 +11316,7 @@ module GetWirelessDeviceStatisticsResponse =
         (Option.map ~f:WirelessDeviceId.of_xml)
           (Xml.child xml_arg0 "WirelessDeviceId") in
       make ?sidewalk ?loRaWAN ?lastUplinkReceivedAt ?wirelessDeviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sidewalk = field_map json "Sidewalk" SidewalkDeviceMetadata.of_json in
       let loRaWAN = field_map json "LoRaWAN" LoRaWANDeviceMetadata.of_json in
@@ -11201,6 +11345,7 @@ module GetWirelessDeviceStatisticsRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceId =
         field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
@@ -11358,6 +11503,7 @@ module GetWirelessDeviceResponse =
         (Option.map ~f:WirelessDeviceType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?sidewalk ?loRaWAN ?thingArn ?thingName ?arn ?id ?destinationName
         ?description ?name ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sidewalk = field_map json "Sidewalk" SidewalkDevice.of_json in
       let loRaWAN = field_map json "LoRaWAN" LoRaWANDevice.of_json in
@@ -11399,6 +11545,7 @@ module GetWirelessDeviceRequest =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifierType ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let identifierType =
         field_map_exn json "IdentifierType" WirelessDeviceIdType.of_json in
@@ -11503,6 +11650,7 @@ module GetServiceProfileResponse =
       let arn =
         (Option.map ~f:ServiceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?loRaWAN ?id ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN =
         field_map json "LoRaWAN" LoRaWANGetServiceProfileInfo.of_json in
@@ -11527,6 +11675,7 @@ module GetServiceProfileRequest =
         ServiceProfileId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" ServiceProfileId.of_json in
       make ~id ()
@@ -11620,6 +11769,7 @@ module GetServiceEndpointResponse =
         (Option.map ~f:WirelessGatewayServiceType.of_xml)
           (Xml.child xml_arg0 "ServiceType") in
       make ?serverTrust ?serviceEndpoint ?serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serverTrust = field_map json "ServerTrust" CertificatePEM.of_json in
       let serviceEndpoint = field_map json "ServiceEndpoint" EndPoint.of_json in
@@ -11647,6 +11797,7 @@ module GetServiceEndpointRequest =
         (Option.map ~f:WirelessGatewayServiceType.of_xml)
           (Xml.child xml_arg0 "serviceType") in
       make ?serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let serviceType =
         field_map json "ServiceType" WirelessGatewayServiceType.of_json in
@@ -11730,6 +11881,7 @@ module GetResourceLogLevelResponse =
       let logLevel =
         (Option.map ~f:LogLevel.of_xml) (Xml.child xml_arg0 "LogLevel") in
       make ?logLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let logLevel = field_map json "LogLevel" LogLevel.of_json in
       make ?logLevel ()
@@ -11761,6 +11913,7 @@ module GetResourceLogLevelRequest =
         ResourceIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceType =
         field_map_exn json "ResourceType" ResourceType.of_json in
@@ -11861,6 +12014,7 @@ module GetResourceEventConfigurationResponse =
         (Option.map ~f:DeviceRegistrationStateEventConfiguration.of_xml)
           (Xml.child xml_arg0 "DeviceRegistrationState") in
       make ?proximity ?deviceRegistrationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let proximity =
         field_map json "Proximity" ProximityEventConfiguration.of_json in
@@ -11906,6 +12060,7 @@ module GetResourceEventConfigurationRequest =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ?partnerType ~identifierType ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partnerType =
         field_map json "PartnerType" EventNotificationPartnerType.of_json in
@@ -11997,6 +12152,7 @@ module GetPartnerAccountResponse =
         (Option.map ~f:SidewalkAccountInfoWithFingerprint.of_xml)
           (Xml.child xml_arg0 "Sidewalk") in
       make ?accountLinked ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accountLinked =
         field_map json "AccountLinked" AccountLinked.of_json in
@@ -12031,6 +12187,7 @@ module GetPartnerAccountRequest =
         PartnerAccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PartnerAccountId") in
       make ~partnerType ~partnerAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partnerType = field_map_exn json "PartnerType" PartnerType.of_json in
       let partnerAccountId =
@@ -12137,6 +12294,7 @@ module GetNetworkAnalyzerConfigurationResponse =
         (Option.map ~f:TraceContent.of_xml)
           (Xml.child xml_arg0 "TraceContent") in
       make ?wirelessGateways ?wirelessDevices ?traceContent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessGateways =
         field_map json "WirelessGateways" WirelessGatewayList.of_json in
@@ -12163,6 +12321,7 @@ module GetNetworkAnalyzerConfigurationRequest =
         NetworkAnalyzerConfigurationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationName") in
       make ~configurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configurationName =
         field_map_exn json "ConfigurationName"
@@ -12248,6 +12407,7 @@ module GetMulticastGroupSessionResponse =
         (Option.map ~f:LoRaWANMulticastSession.of_xml)
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticastSession.of_json in
       make ?loRaWAN ()
@@ -12267,6 +12427,7 @@ module GetMulticastGroupSessionRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" MulticastGroupId.of_json in
       make ~id ()
@@ -12384,6 +12545,7 @@ module GetMulticastGroupResponse =
       let arn =
         (Option.map ~f:MulticastGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?createdAt ?loRaWAN ?status ?description ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" CreatedAt.of_json in
       let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticastGet.of_json in
@@ -12409,6 +12571,7 @@ module GetMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" MulticastGroupId.of_json in
       make ~id ()
@@ -12516,6 +12679,7 @@ module GetLogLevelsByResourceTypesResponse =
           (Xml.child xml_arg0 "DefaultLogLevel") in
       make ?wirelessDeviceLogOptions ?wirelessGatewayLogOptions
         ?defaultLogLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceLogOptions =
         field_map json "WirelessDeviceLogOptions"
@@ -12537,6 +12701,7 @@ module GetLogLevelsByResourceTypesRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12676,6 +12841,7 @@ module GetFuotaTaskResponse =
         (Option.map ~f:FuotaTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?createdAt ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN
         ?description ?name ?status ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let createdAt = field_map json "CreatedAt" CreatedAt.of_json in
       let firmwareUpdateRole =
@@ -12705,6 +12871,7 @@ module GetFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" FuotaTaskId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -12805,6 +12972,7 @@ module GetDeviceProfileResponse =
       let arn =
         (Option.map ~f:DeviceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?loRaWAN ?id ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let loRaWAN = field_map json "LoRaWAN" LoRaWANDeviceProfile.of_json in
       let id = field_map json "Id" DeviceProfileId.of_json in
@@ -12828,6 +12996,7 @@ module GetDeviceProfileRequest =
         DeviceProfileId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" DeviceProfileId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -12951,6 +13120,7 @@ module GetDestinationResponse =
       let arn =
         (Option.map ~f:DestinationArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?roleArn ?description ?expressionType ?expression ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let roleArn = field_map json "RoleArn" RoleArn.of_json in
       let description = field_map json "Description" Description.of_json in
@@ -12977,6 +13147,7 @@ module GetDestinationRequest =
         DestinationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" DestinationName.of_json in
       make ~name ()
@@ -13062,6 +13233,7 @@ module DisassociateWirelessGatewayFromThingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13082,6 +13254,7 @@ module DisassociateWirelessGatewayFromThingRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
       make ~id ()
@@ -13159,6 +13332,7 @@ module DisassociateWirelessGatewayFromCertificateResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13179,6 +13353,7 @@ module DisassociateWirelessGatewayFromCertificateRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
       make ~id ()
@@ -13265,6 +13440,7 @@ module DisassociateWirelessDeviceFromThingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13284,6 +13460,7 @@ module DisassociateWirelessDeviceFromThingRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessDeviceId.of_json in
       make ~id ()
@@ -13361,6 +13538,7 @@ module DisassociateWirelessDeviceFromMulticastGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a wireless device from a multicast group."]
@@ -13387,6 +13565,7 @@ module DisassociateWirelessDeviceFromMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceId =
         field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
@@ -13474,6 +13653,7 @@ module DisassociateWirelessDeviceFromFuotaTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a wireless device from a FUOTA task."]
@@ -13499,6 +13679,7 @@ module DisassociateWirelessDeviceFromFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceId =
         field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
@@ -13577,6 +13758,7 @@ module DisassociateMulticastGroupFromFuotaTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a multicast group from a fuota task."]
@@ -13602,6 +13784,7 @@ module DisassociateMulticastGroupFromFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~multicastGroupId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multicastGroupId =
         field_map_exn json "MulticastGroupId" MulticastGroupId.of_json in
@@ -13671,6 +13854,7 @@ module DisassociateAwsAccountFromPartnerAccountResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13700,6 +13884,7 @@ module DisassociateAwsAccountFromPartnerAccountRequest =
         PartnerAccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PartnerAccountId") in
       make ~partnerType ~partnerAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let partnerType = field_map_exn json "PartnerType" PartnerType.of_json in
       let partnerAccountId =
@@ -13779,6 +13964,7 @@ module DeleteWirelessGatewayTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a wireless gateway task."]
@@ -13798,6 +13984,7 @@ module DeleteWirelessGatewayTaskRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
       make ~id ()
@@ -13874,6 +14061,7 @@ module DeleteWirelessGatewayTaskDefinitionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13895,6 +14083,7 @@ module DeleteWirelessGatewayTaskDefinitionRequest =
         WirelessGatewayTaskDefinitionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id =
         field_map_exn json "Id" WirelessGatewayTaskDefinitionId.of_json in
@@ -13973,6 +14162,7 @@ module DeleteWirelessGatewayResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a wireless gateway."]
@@ -13992,6 +14182,7 @@ module DeleteWirelessGatewayRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
       make ~id ()
@@ -14068,6 +14259,7 @@ module DeleteWirelessDeviceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a wireless device."]
@@ -14086,6 +14278,7 @@ module DeleteWirelessDeviceRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" WirelessDeviceId.of_json in
       make ~id ()
@@ -14171,6 +14364,7 @@ module DeleteServiceProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a service profile."]
@@ -14189,6 +14383,7 @@ module DeleteServiceProfileRequest =
         ServiceProfileId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" ServiceProfileId.of_json in
       make ~id ()
@@ -14265,6 +14460,7 @@ module DeleteQueuedMessagesResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation to delete queued messages."]
@@ -14303,6 +14499,7 @@ module DeleteQueuedMessagesRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?wirelessDeviceType ~messageId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceType =
         field_map json "WirelessDeviceType" WirelessDeviceType.of_json in
@@ -14391,6 +14588,7 @@ module DeleteMulticastGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14409,6 +14607,7 @@ module DeleteMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" MulticastGroupId.of_json in
       make ~id ()
@@ -14486,6 +14685,7 @@ module DeleteFuotaTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a FUOTA task."]
@@ -14502,6 +14702,7 @@ module DeleteFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" FuotaTaskId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -14586,6 +14787,7 @@ module DeleteDeviceProfileResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a device profile."]
@@ -14604,6 +14806,7 @@ module DeleteDeviceProfileRequest =
         DeviceProfileId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" DeviceProfileId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
@@ -14688,6 +14891,7 @@ module DeleteDestinationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a destination."]
@@ -14707,6 +14911,7 @@ module DeleteDestinationRequest =
         DestinationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" DestinationName.of_json in
       make ~name ()
@@ -14811,6 +15016,7 @@ module CreateWirelessGatewayTaskResponse =
         (Option.map ~f:WirelessGatewayTaskDefinitionId.of_xml)
           (Xml.child xml_arg0 "WirelessGatewayTaskDefinitionId") in
       make ?status ?wirelessGatewayTaskDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" WirelessGatewayTaskStatus.of_json in
       let wirelessGatewayTaskDefinitionId =
@@ -14848,6 +15054,7 @@ module CreateWirelessGatewayTaskRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessGatewayTaskDefinitionId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessGatewayTaskDefinitionId =
         field_map_exn json "WirelessGatewayTaskDefinitionId"
@@ -14952,6 +15159,7 @@ module CreateWirelessGatewayTaskDefinitionResponse =
         (Option.map ~f:WirelessGatewayTaskDefinitionId.of_xml)
           (Xml.child xml_arg0 "Id") in
       make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" WirelessGatewayTaskDefinitionArn.of_json in
       let id = field_map json "Id" WirelessGatewayTaskDefinitionId.of_json in
@@ -15009,6 +15217,7 @@ module CreateWirelessGatewayTaskDefinitionRequest =
         AutoCreateTasks.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoCreateTasks") in
       make ?tags ?clientRequestToken ?update ?name ~autoCreateTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =
@@ -15104,6 +15313,7 @@ module CreateWirelessGatewayResponse =
       let arn =
         (Option.map ~f:WirelessGatewayArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" WirelessDeviceId.of_json in
       let arn = field_map json "Arn" WirelessGatewayArn.of_json in
@@ -15158,6 +15368,7 @@ module CreateWirelessGatewayRequest =
         (Option.map ~f:WirelessGatewayName.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?clientRequestToken ?tags ~loRaWAN ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -15260,6 +15471,7 @@ module CreateWirelessDeviceResponse =
       let arn =
         (Option.map ~f:WirelessDeviceArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" WirelessDeviceId.of_json in
       let arn = field_map json "Arn" WirelessDeviceArn.of_json in
@@ -15336,6 +15548,7 @@ module CreateWirelessDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?tags ?loRaWAN ?clientRequestToken ~destinationName ?description
         ?name ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let loRaWAN = field_map json "LoRaWAN" LoRaWANDevice.of_json in
@@ -15433,6 +15646,7 @@ module CreateServiceProfileResponse =
       let arn =
         (Option.map ~f:ServiceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" ServiceProfileId.of_json in
       let arn = field_map json "Arn" ServiceProfileArn.of_json in
@@ -15478,6 +15692,7 @@ module CreateServiceProfileRequest =
       let name =
         (Option.map ~f:ServiceProfileName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?clientRequestToken ?tags ?loRaWAN ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -15577,6 +15792,7 @@ module CreateMulticastGroupResponse =
       let arn =
         (Option.map ~f:MulticastGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" MulticastGroupId.of_json in
       let arn = field_map json "Arn" MulticastGroupArn.of_json in
@@ -15625,6 +15841,7 @@ module CreateMulticastGroupRequest =
       let name =
         (Option.map ~f:MulticastGroupName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?tags ~loRaWAN ?clientRequestToken ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let loRaWAN = field_map_exn json "LoRaWAN" LoRaWANMulticast.of_json in
@@ -15723,6 +15940,7 @@ module CreateFuotaTaskResponse =
       let arn =
         (Option.map ~f:FuotaTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" FuotaTaskId.of_json in
       let arn = field_map json "Arn" FuotaTaskArn.of_json in make ?id ?arn ()
@@ -15790,6 +16008,7 @@ module CreateFuotaTaskRequest =
         (Option.map ~f:FuotaTaskName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?tags ~firmwareUpdateRole ~firmwareUpdateImage ?loRaWAN
         ?clientRequestToken ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let firmwareUpdateRole =
@@ -15888,6 +16107,7 @@ module CreateDeviceProfileResponse =
       let arn =
         (Option.map ~f:DeviceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map json "Id" DeviceProfileId.of_json in
       let arn = field_map json "Arn" DeviceProfileArn.of_json in
@@ -15933,6 +16153,7 @@ module CreateDeviceProfileRequest =
       let name =
         (Option.map ~f:DeviceProfileName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?clientRequestToken ?tags ?loRaWAN ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -16034,6 +16255,7 @@ module CreateDestinationResponse =
       let arn =
         (Option.map ~f:DestinationArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" DestinationName.of_json in
       let arn = field_map json "Arn" DestinationArn.of_json in
@@ -16110,6 +16332,7 @@ module CreateDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?clientRequestToken ?tags ~roleArn ?description ~expression
         ~expressionType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientRequestToken =
         field_map json "ClientRequestToken" ClientRequestToken.of_json in
@@ -16205,6 +16428,7 @@ module CancelMulticastGroupSessionResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels an existing multicast group session."]
@@ -16222,6 +16446,7 @@ module CancelMulticastGroupSessionRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let id = field_map_exn json "Id" MulticastGroupId.of_json in
       make ~id ()
@@ -16307,6 +16532,7 @@ module AssociateWirelessGatewayWithThingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless gateway with a thing."]
@@ -16333,6 +16559,7 @@ module AssociateWirelessGatewayWithThingRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~thingArn ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thingArn = field_map_exn json "ThingArn" ThingArn.of_json in
       let id = field_map_exn json "Id" WirelessGatewayId.of_json in
@@ -16429,6 +16656,7 @@ module AssociateWirelessGatewayWithCertificateResponse =
         (Option.map ~f:IotCertificateId.of_xml)
           (Xml.child xml_arg0 "IotCertificateId") in
       make ?iotCertificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iotCertificateId =
         field_map json "IotCertificateId" IotCertificateId.of_json in
@@ -16461,6 +16689,7 @@ module AssociateWirelessGatewayWithCertificateRequest =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~iotCertificateId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let iotCertificateId =
         field_map_exn json "IotCertificateId" IotCertificateId.of_json in
@@ -16548,6 +16777,7 @@ module AssociateWirelessDeviceWithThingResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless device with a thing."]
@@ -16573,6 +16803,7 @@ module AssociateWirelessDeviceWithThingRequest =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~thingArn ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let thingArn = field_map_exn json "ThingArn" ThingArn.of_json in
       let id = field_map_exn json "Id" WirelessDeviceId.of_json in
@@ -16659,6 +16890,7 @@ module AssociateWirelessDeviceWithMulticastGroupResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless device with a multicast group."]
@@ -16685,6 +16917,7 @@ module AssociateWirelessDeviceWithMulticastGroupRequest =
         MulticastGroupId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceId =
         field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
@@ -16772,6 +17005,7 @@ module AssociateWirelessDeviceWithFuotaTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associate a wireless device with a FUOTA task."]
@@ -16797,6 +17031,7 @@ module AssociateWirelessDeviceWithFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let wirelessDeviceId =
         field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
@@ -16884,6 +17119,7 @@ module AssociateMulticastGroupWithFuotaTaskResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associate a multicast group with a FUOTA task."]
@@ -16909,6 +17145,7 @@ module AssociateMulticastGroupWithFuotaTaskRequest =
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~multicastGroupId ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let multicastGroupId =
         field_map_exn json "MulticastGroupId" MulticastGroupId.of_json in
@@ -17010,6 +17247,7 @@ module AssociateAwsAccountWithPartnerAccountResponse =
         (Option.map ~f:SidewalkAccountInfo.of_xml)
           (Xml.child xml_arg0 "Sidewalk") in
       make ?arn ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let arn = field_map json "Arn" PartnerAccountArn.of_json in
       let sidewalk = field_map json "Sidewalk" SidewalkAccountInfo.of_json in
@@ -17048,6 +17286,7 @@ module AssociateAwsAccountWithPartnerAccountRequest =
         SidewalkAccountInfo.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Sidewalk") in
       make ?tags ?clientRequestToken ~sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let clientRequestToken =

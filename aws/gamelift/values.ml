@@ -184,6 +184,7 @@ module AttributeValue =
       let s =
         (Option.map ~f:NonZeroAndMaxString.of_xml) (Xml.child xml_arg0 "S") in
       make ?sDM ?sL ?n ?s ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sDM = field_map json "SDM" StringDoubleMap.of_json in
       let sL = field_map json "SL" StringList.of_json in
@@ -554,6 +555,7 @@ module MatchedPlayerSession =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "PlayerId") in
       make ?playerSessionId ?playerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerSessionId =
         field_map json "PlayerSessionId" PlayerSessionId.of_json in
@@ -730,6 +732,7 @@ module GameProperty =
         GamePropertyKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" GamePropertyValue.of_json in
       let key = field_map_exn json "Key" GamePropertyKey.of_json in
@@ -844,6 +847,7 @@ module InstanceDefinition =
         GameServerGroupInstanceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceType") in
       make ?weightedCapacity ~instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let weightedCapacity =
         field_map json "WeightedCapacity" WeightedCapacity.of_json in
@@ -1014,6 +1018,7 @@ module Player =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "PlayerId") in
       make ?latencyInMs ?team ?playerAttributes ?playerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latencyInMs = field_map json "LatencyInMs" LatencyMap.of_json in
       let team = field_map json "Team" NonZeroAndMaxString.of_json in
@@ -1073,6 +1078,7 @@ module GameSessionQueueDestination =
         (Option.map ~f:ArnStringModel.of_xml)
           (Xml.child xml_arg0 "DestinationArn") in
       make ?destinationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationArn =
         field_map json "DestinationArn" ArnStringModel.of_json in
@@ -1112,6 +1118,7 @@ module PlayerLatencyPolicy =
           (Xml.child xml_arg0 "MaximumIndividualPlayerLatencyMilliseconds") in
       make ?policyDurationSeconds ?maximumIndividualPlayerLatencyMilliseconds
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyDurationSeconds =
         field_map json "PolicyDurationSeconds" WholeNumber.of_json in
@@ -1509,6 +1516,7 @@ module ServerProcess =
         LaunchPathStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LaunchPath") in
       make ~concurrentExecutions ?parameters ~launchPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let concurrentExecutions =
         field_map_exn json "ConcurrentExecutions" PositiveInteger.of_json in
@@ -1616,6 +1624,7 @@ module PlacedPlayerSession =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "PlayerId") in
       make ?playerSessionId ?playerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerSessionId =
         field_map json "PlayerSessionId" PlayerSessionId.of_json in
@@ -1661,6 +1670,7 @@ module PlayerLatency =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "PlayerId") in
       make ?latencyInMilliseconds ?regionIdentifier ?playerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let latencyInMilliseconds =
         field_map json "LatencyInMilliseconds" Float.of_json in
@@ -1743,6 +1753,7 @@ module S3Location =
       let bucket =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?objectVersion ?roleArn ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let objectVersion =
         field_map json "ObjectVersion" NonEmptyString.of_json in
@@ -2325,6 +2336,7 @@ module RoutingStrategy =
         (Option.map ~f:RoutingStrategyType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?message ?fleetId ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" FreeText.of_json in
       let fleetId = field_map json "FleetId" FleetId.of_json in
@@ -2357,6 +2369,7 @@ module VpcPeeringConnectionStatus =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonZeroAndMaxString.of_json in
       let code = field_map json "Code" NonZeroAndMaxString.of_json in
@@ -2595,6 +2608,7 @@ module TargetConfiguration =
         Double.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetValue") in
       make ~targetValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetValue = field_map_exn json "TargetValue" Double.of_json in
       make ~targetValue ()
@@ -2746,6 +2760,7 @@ module GameSessionConnectionInfo =
           (Xml.child xml_arg0 "GameSessionArn") in
       make ?matchedPlayerSessions ?port ?dnsName ?ipAddress ?gameSessionArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchedPlayerSessions =
         field_map json "MatchedPlayerSessions"
@@ -3358,6 +3373,7 @@ module FilterConfiguration =
         (Option.map ~f:LocationList.of_xml)
           (Xml.child xml_arg0 "AllowedLocations") in
       make ?allowedLocations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowedLocations =
         field_map json "AllowedLocations" LocationList.of_json in
@@ -3486,6 +3502,7 @@ module PriorityConfiguration =
         (Option.map ~f:PriorityTypeList.of_xml)
           (Xml.child xml_arg0 "PriorityOrder") in
       make ?locationOrder ?priorityOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationOrder = field_map json "LocationOrder" LocationList.of_json in
       let priorityOrder =
@@ -3726,6 +3743,7 @@ module GameSession =
         ?gameProperties ?statusReason ?status ?maximumPlayerSessionCount
         ?currentPlayerSessionCount ?terminationTime ?creationTime ?fleetArn
         ?fleetId ?name ?gameSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let matchmakerData =
@@ -3870,6 +3888,7 @@ module LocationState =
         (Option.map ~f:LocationStringModel.of_xml)
           (Xml.child xml_arg0 "Location") in
       make ?status ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" FleetStatus.of_json in
       let location = field_map json "Location" LocationStringModel.of_json in
@@ -4081,6 +4100,7 @@ module EC2InstanceCounts =
       let dESIRED =
         (Option.map ~f:WholeNumber.of_xml) (Xml.child xml_arg0 "DESIRED") in
       make ?tERMINATING ?iDLE ?aCTIVE ?pENDING ?mAXIMUM ?mINIMUM ?dESIRED ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tERMINATING = field_map json "TERMINATING" WholeNumber.of_json in
       let iDLE = field_map json "IDLE" WholeNumber.of_json in
@@ -4112,6 +4132,7 @@ module CertificateConfiguration =
         CertificateType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateType") in
       make ~certificateType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateType =
         field_map_exn json "CertificateType" CertificateType.of_json in
@@ -4197,6 +4218,7 @@ module ResourceCreationLimitPolicy =
         (Option.map ~f:WholeNumber.of_xml)
           (Xml.child xml_arg0 "NewGameSessionsPerCreator") in
       make ?policyPeriodInMinutes ?newGameSessionsPerCreator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let policyPeriodInMinutes =
         field_map json "PolicyPeriodInMinutes" WholeNumber.of_json in
@@ -4329,6 +4351,7 @@ module IpPermission =
         PortNumber.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FromPort") in
       make ~protocol ~ipRange ~toPort ~fromPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protocol = field_map_exn json "Protocol" IpProtocol.of_json in
       let ipRange = field_map_exn json "IpRange" NonBlankString.of_json in
@@ -4361,6 +4384,7 @@ module Tag =
       let key =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map_exn json "Value" TagValue.of_json in
       let key = field_map_exn json "Key" TagKey.of_json in
@@ -4499,6 +4523,7 @@ module DesiredPlayerSession =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "PlayerId") in
       make ?playerData ?playerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerData = field_map json "PlayerData" PlayerData.of_json in
       let playerId = field_map json "PlayerId" NonZeroAndMaxString.of_json in
@@ -4576,6 +4601,7 @@ module Script =
         (Option.map ~f:ScriptId.of_xml) (Xml.child xml_arg0 "ScriptId") in
       make ?storageLocation ?creationTime ?sizeOnDisk ?version ?name
         ?scriptArn ?scriptId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageLocation =
         field_map json "StorageLocation" S3Location.of_json in
@@ -4713,6 +4739,7 @@ module GameServer =
       make ?lastHealthCheckTime ?lastClaimTime ?registrationTime
         ?utilizationStatus ?claimStatus ?gameServerData ?connectionInfo
         ?instanceId ?gameServerId ?gameServerGroupArn ?gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastHealthCheckTime =
         field_map json "LastHealthCheckTime" Timestamp.of_json in
@@ -4871,6 +4898,7 @@ module GameServerGroup =
         ?status ?autoScalingGroupArn ?gameServerProtectionPolicy
         ?balancingStrategy ?instanceDefinitions ?roleArn ?gameServerGroupArn
         ?gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTime =
         field_map json "LastUpdatedTime" Timestamp.of_json in
@@ -4978,6 +5006,7 @@ module Build =
         (Option.map ~f:BuildId.of_xml) (Xml.child xml_arg0 "BuildId") in
       make ?creationTime ?operatingSystem ?sizeOnDisk ?status ?version ?name
         ?buildArn ?buildId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
       let operatingSystem =
@@ -5067,6 +5096,7 @@ module Alias =
         (Option.map ~f:AliasId.of_xml) (Xml.child xml_arg0 "AliasId") in
       make ?lastUpdatedTime ?creationTime ?routingStrategy ?description
         ?aliasArn ?name ?aliasId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastUpdatedTime =
         field_map json "LastUpdatedTime" Timestamp.of_json in
@@ -5103,6 +5133,7 @@ module InstanceCredentials =
       let userName =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?secret ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let secret = field_map json "Secret" NonEmptyString.of_json in
       let userName = field_map json "UserName" NonEmptyString.of_json in
@@ -5190,6 +5221,7 @@ module VpcPeeringConnection =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?gameLiftVpcId ?peerVpcId ?status ?vpcPeeringConnectionId
         ?ipV4CidrBlock ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameLiftVpcId =
         field_map json "GameLiftVpcId" NonZeroAndMaxString.of_json in
@@ -5265,6 +5297,7 @@ module VpcPeeringAuthorization =
           (Xml.child xml_arg0 "GameLiftAwsAccountId") in
       make ?expirationTime ?creationTime ?peerVpcId ?peerVpcAwsAccountId
         ?gameLiftAwsAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expirationTime = field_map json "ExpirationTime" Timestamp.of_json in
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
@@ -5419,6 +5452,7 @@ module ScalingPolicy =
         ?metricName ?evaluationPeriods ?threshold ?comparisonOperator
         ?scalingAdjustmentType ?scalingAdjustment ?status ?name ?fleetArn
         ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let updateStatus =
@@ -5564,6 +5598,7 @@ module PlayerSession =
       make ?playerData ?port ?dnsName ?ipAddress ?status ?terminationTime
         ?creationTime ?fleetArn ?fleetId ?gameSessionId ?playerId
         ?playerSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerData = field_map json "PlayerData" PlayerData.of_json in
       let port = field_map json "Port" PortNumber.of_json in
@@ -5629,6 +5664,7 @@ module MatchmakingRuleSet =
         (Option.map ~f:MatchmakingIdStringModel.of_xml)
           (Xml.child xml_arg0 "RuleSetName") in
       make ?creationTime ~ruleSetBody ?ruleSetArn ?ruleSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
       let ruleSetBody = field_map_exn json "RuleSetBody" RuleSetBody.of_json in
@@ -5780,6 +5816,7 @@ module MatchmakingTicket =
       make ?estimatedWaitTime ?gameSessionConnectionInfo ?players ?endTime
         ?startTime ?statusMessage ?statusReason ?status ?configurationArn
         ?configurationName ?ticketId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let estimatedWaitTime =
         field_map json "EstimatedWaitTime" WholeNumber.of_json in
@@ -5991,6 +6028,7 @@ module MatchmakingConfiguration =
         ?notificationTarget ?ruleSetArn ?ruleSetName ?acceptanceRequired
         ?acceptanceTimeoutSeconds ?requestTimeoutSeconds
         ?gameSessionQueueArns ?description ?configurationArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flexMatchMode =
         field_map json "FlexMatchMode" FlexMatchMode.of_json in
@@ -6148,6 +6186,7 @@ module Instance =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?location ?creationTime ?status ?type_ ?operatingSystem ?dnsName
         ?ipAddress ?instanceId ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let creationTime = field_map json "CreationTime" Timestamp.of_json in
@@ -6271,6 +6310,7 @@ module GameSessionQueue =
       make ?notificationTarget ?customEventData ?priorityConfiguration
         ?filterConfiguration ?destinations ?playerLatencyPolicies
         ?timeoutInSeconds ?gameSessionQueueArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationTarget =
         field_map json "NotificationTarget" QueueSnsArnStringModel.of_json in
@@ -6342,6 +6382,7 @@ module GameSessionDetail =
       let gameSession =
         (Option.map ~f:GameSession.of_xml) (Xml.child xml_arg0 "GameSession") in
       make ?protectionPolicy ?gameSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionPolicy =
         field_map json "ProtectionPolicy" ProtectionPolicy.of_json in
@@ -6403,6 +6444,7 @@ module GameServerInstance =
           (Xml.child xml_arg0 "GameServerGroupName") in
       make ?instanceStatus ?instanceId ?gameServerGroupArn
         ?gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceStatus =
         field_map json "InstanceStatus" GameServerInstanceStatus.of_json in
@@ -6496,6 +6538,7 @@ module FleetUtilization =
       make ?location ?maximumPlayerSessionCount ?currentPlayerSessionCount
         ?activeGameSessionCount ?activeServerProcessCount ?fleetArn ?fleetId
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let maximumPlayerSessionCount =
@@ -6567,6 +6610,7 @@ module LocationAttributes =
         (Option.map ~f:LocationState.of_xml)
           (Xml.child xml_arg0 "LocationState") in
       make ?updateStatus ?stoppedActions ?locationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let updateStatus =
         field_map json "UpdateStatus" LocationUpdateStatus.of_json in
@@ -6642,6 +6686,7 @@ module Event =
           (Xml.child xml_arg0 "EventId") in
       make ?preSignedLogUrl ?eventTime ?message ?eventCode ?resourceId
         ?eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preSignedLogUrl =
         field_map json "PreSignedLogUrl" NonZeroAndMaxString.of_json in
@@ -6707,6 +6752,7 @@ module FleetCapacity =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?location ?instanceCounts ?instanceType ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let instanceCounts =
@@ -6948,6 +6994,7 @@ module FleetAttributes =
         ?serverLaunchPath ?scriptArn ?scriptId ?buildArn ?buildId ?status
         ?terminationTime ?creationTime ?name ?description ?instanceType
         ?fleetType ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let certificateConfiguration =
         field_map json "CertificateConfiguration"
@@ -7042,6 +7089,7 @@ module EC2InstanceLimit =
         (Option.map ~f:EC2InstanceType.of_xml)
           (Xml.child xml_arg0 "EC2InstanceType") in
       make ?location ?instanceLimit ?currentInstances ?eC2InstanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let instanceLimit = field_map json "InstanceLimit" WholeNumber.of_json in
@@ -7071,6 +7119,7 @@ module TargetTrackingConfiguration =
         NonNegativeDouble.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetValue") in
       make ~targetValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetValue =
         field_map_exn json "TargetValue" NonNegativeDouble.of_json in
@@ -7180,6 +7229,7 @@ module LocationConfiguration =
         (Option.map ~f:LocationStringModel.of_xml)
           (Xml.child xml_arg0 "Location") in
       make ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       make ?location ()
@@ -7199,6 +7249,7 @@ module InternalServiceException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7218,6 +7269,7 @@ module InvalidRequestException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7237,6 +7289,7 @@ module UnsupportedRegionException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7256,6 +7309,7 @@ module NotFoundException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7275,6 +7329,7 @@ module UnauthorizedException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7324,6 +7379,7 @@ module InvalidFleetStatusException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7377,6 +7433,7 @@ module RuntimeConfiguration =
           (Xml.child xml_arg0 "ServerProcesses") in
       make ?gameSessionActivationTimeoutSeconds
         ?maxConcurrentGameSessionActivations ?serverProcesses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionActivationTimeoutSeconds =
         field_map json "GameSessionActivationTimeoutSeconds"
@@ -7404,6 +7461,7 @@ module ConflictException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7423,6 +7481,7 @@ module InvalidGameSessionStatusException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7482,6 +7541,7 @@ module LimitExceededException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7560,6 +7620,7 @@ module TaggingFailedException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7826,6 +7887,7 @@ module GameSessionPlacement =
         ?gameSessionRegion ?gameSessionArn ?gameSessionId ?gameSessionName
         ?maximumPlayerSessionCount ?gameProperties ?status
         ?gameSessionQueueName ?placementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchmakerData =
         field_map json "MatchmakerData" MatchmakerData.of_json in
@@ -7927,6 +7989,7 @@ module TerminalRoutingStrategyException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -7970,6 +8033,7 @@ module AwsCredentials =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "AccessKeyId") in
       make ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sessionToken = field_map json "SessionToken" NonEmptyString.of_json in
       let secretAccessKey =
@@ -8199,6 +8263,7 @@ module InstanceAccess =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?credentials ?operatingSystem ?ipAddress ?instanceId ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let credentials =
         field_map json "Credentials" InstanceCredentials.of_json in
@@ -8882,6 +8947,7 @@ module GameSessionFullException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -8959,6 +9025,7 @@ module FleetCapacityExceededException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -8978,6 +9045,7 @@ module IdempotentParameterMismatchException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -9016,6 +9084,7 @@ module GameServerGroupAutoScalingPolicy =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "EstimatedInstanceWarmup") in
       make ~targetTrackingConfiguration ?estimatedInstanceWarmup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetTrackingConfiguration =
         field_map_exn json "TargetTrackingConfiguration"
@@ -9062,6 +9131,7 @@ module LaunchTemplateSpecification =
         (Option.map ~f:LaunchTemplateId.of_xml)
           (Xml.child xml_arg0 "LaunchTemplateId") in
       make ?version ?launchTemplateName ?launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" LaunchTemplateVersion.of_json in
       let launchTemplateName =
@@ -9144,6 +9214,7 @@ module OutOfCapacityException =
       let message =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" NonEmptyString.of_json in
       make ?message ()
@@ -9236,6 +9307,7 @@ module ValidateMatchmakingRuleSetOutput =
       let valid =
         (Option.map ~f:BooleanModel.of_xml) (Xml.child xml_arg0 "Valid") in
       make ?valid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let valid = field_map json "Valid" BooleanModel.of_json in
       make ?valid ()
@@ -9260,6 +9332,7 @@ module ValidateMatchmakingRuleSetInput =
         RuleSetBody.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetBody") in
       make ~ruleSetBody ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleSetBody = field_map_exn json "RuleSetBody" RuleSetBody.of_json in
       make ~ruleSetBody ()
@@ -9335,6 +9408,7 @@ module UpdateScriptOutput =
       let script =
         (Option.map ~f:Script.of_xml) (Xml.child xml_arg0 "Script") in
       make ?script ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let script = field_map json "Script" Script.of_json in make ?script ()
     let to_json v = composed_to_json to_value v
@@ -9391,6 +9465,7 @@ module UpdateScriptInput =
         ScriptIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScriptId") in
       make ?zipFile ?storageLocation ?version ?name ~scriptId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let zipFile = field_map json "ZipFile" ZipBlob.of_json in
       let storageLocation =
@@ -9486,6 +9561,7 @@ module UpdateRuntimeConfigurationOutput =
         (Option.map ~f:RuntimeConfiguration.of_xml)
           (Xml.child xml_arg0 "RuntimeConfiguration") in
       make ?runtimeConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runtimeConfiguration =
         field_map json "RuntimeConfiguration" RuntimeConfiguration.of_json in
@@ -9521,6 +9597,7 @@ module UpdateRuntimeConfigurationInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~runtimeConfiguration ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runtimeConfiguration =
         field_map_exn json "RuntimeConfiguration"
@@ -9601,6 +9678,7 @@ module UpdateMatchmakingConfigurationOutput =
         (Option.map ~f:MatchmakingConfiguration.of_xml)
           (Xml.child xml_arg0 "Configuration") in
       make ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "Configuration" MatchmakingConfiguration.of_json in
@@ -9765,6 +9843,7 @@ module UpdateMatchmakingConfigurationInput =
         ?customEventData ?additionalPlayerCount ?notificationTarget
         ?ruleSetName ?acceptanceRequired ?acceptanceTimeoutSeconds
         ?requestTimeoutSeconds ?gameSessionQueueArns ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let flexMatchMode =
         field_map json "FlexMatchMode" FlexMatchMode.of_json in
@@ -9873,6 +9952,7 @@ module UpdateGameSessionQueueOutput =
         (Option.map ~f:GameSessionQueue.of_xml)
           (Xml.child xml_arg0 "GameSessionQueue") in
       make ?gameSessionQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionQueue =
         field_map json "GameSessionQueue" GameSessionQueue.of_json in
@@ -9977,6 +10057,7 @@ module UpdateGameSessionQueueInput =
       make ?notificationTarget ?customEventData ?priorityConfiguration
         ?filterConfiguration ?destinations ?playerLatencyPolicies
         ?timeoutInSeconds ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let notificationTarget =
         field_map json "NotificationTarget" QueueSnsArnStringModel.of_json in
@@ -10089,6 +10170,7 @@ module UpdateGameSessionOutput =
       let gameSession =
         (Option.map ~f:GameSession.of_xml) (Xml.child xml_arg0 "GameSession") in
       make ?gameSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSession = field_map json "GameSession" GameSession.of_json in
       make ?gameSession ()
@@ -10157,6 +10239,7 @@ module UpdateGameSessionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GameSessionId") in
       make ?protectionPolicy ?playerSessionCreationPolicy ?name
         ?maximumPlayerSessionCount ~gameSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let protectionPolicy =
         field_map json "ProtectionPolicy" ProtectionPolicy.of_json in
@@ -10241,6 +10324,7 @@ module UpdateGameServerOutput =
       let gameServer =
         (Option.map ~f:GameServer.of_xml) (Xml.child xml_arg0 "GameServer") in
       make ?gameServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServer = field_map json "GameServer" GameServer.of_json in
       make ?gameServer ()
@@ -10311,6 +10395,7 @@ module UpdateGameServerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ?healthCheck ?utilizationStatus ?gameServerData ~gameServerId
         ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let healthCheck =
         field_map json "HealthCheck" GameServerHealthCheck.of_json in
@@ -10401,6 +10486,7 @@ module UpdateGameServerGroupOutput =
         (Option.map ~f:GameServerGroup.of_xml)
           (Xml.child xml_arg0 "GameServerGroup") in
       make ?gameServerGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerGroup =
         field_map json "GameServerGroup" GameServerGroup.of_json in
@@ -10471,6 +10557,7 @@ module UpdateGameServerGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ?balancingStrategy ?gameServerProtectionPolicy
         ?instanceDefinitions ?roleArn ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let balancingStrategy =
         field_map json "BalancingStrategy" BalancingStrategy.of_json in
@@ -10586,6 +10673,7 @@ module UpdateFleetPortSettingsOutput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetId = field_map json "FleetId" FleetId.of_json in
       make ?fleetId ()
@@ -10637,6 +10725,7 @@ module UpdateFleetPortSettingsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?inboundPermissionRevocations ?inboundPermissionAuthorizations
         ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let inboundPermissionRevocations =
         field_map json "InboundPermissionRevocations"
@@ -10772,6 +10861,7 @@ module UpdateFleetCapacityOutput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?location ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let fleetArn = field_map json "FleetArn" FleetArn.of_json in
@@ -10831,6 +10921,7 @@ module UpdateFleetCapacityInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?location ?maxSize ?minSize ?desiredInstances ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let maxSize = field_map json "MaxSize" WholeNumber.of_json in
@@ -10939,6 +11030,7 @@ module UpdateFleetAttributesOutput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetId = field_map json "FleetId" FleetId.of_json in
       make ?fleetId ()
@@ -11018,6 +11110,7 @@ module UpdateFleetAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?metricGroups ?resourceCreationLimitPolicy
         ?newGameSessionProtectionPolicy ?description ?name ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metricGroups =
         field_map json "MetricGroups" MetricGroupList.of_json in
@@ -11101,6 +11194,7 @@ module UpdateBuildOutput =
     let of_xml xml_arg0 =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "Build") in
       make ?build ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let build = field_map json "Build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
@@ -11139,6 +11233,7 @@ module UpdateBuildInput =
         BuildIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BuildId") in
       make ?version ?name ~buildId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" NonZeroAndMaxString.of_json in
       let name = field_map json "Name" NonZeroAndMaxString.of_json in
@@ -11212,6 +11307,7 @@ module UpdateAliasOutput =
     let of_xml xml_arg0 =
       let alias = (Option.map ~f:Alias.of_xml) (Xml.child xml_arg0 "Alias") in
       make ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map json "Alias" Alias.of_json in make ?alias ()
     let to_json v = composed_to_json to_value v
@@ -11262,6 +11358,7 @@ module UpdateAliasInput =
         AliasIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AliasId") in
       make ?routingStrategy ?description ?name ~aliasId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let routingStrategy =
         field_map json "RoutingStrategy" RoutingStrategy.of_json in
@@ -11335,6 +11432,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11365,6 +11463,7 @@ module UntagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceARN =
@@ -11435,6 +11534,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11463,6 +11563,7 @@ module TagResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceARN =
@@ -11543,6 +11644,7 @@ module SuspendGameServerGroupOutput =
         (Option.map ~f:GameServerGroup.of_xml)
           (Xml.child xml_arg0 "GameServerGroup") in
       make ?gameServerGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerGroup =
         field_map json "GameServerGroup" GameServerGroup.of_json in
@@ -11578,6 +11680,7 @@ module SuspendGameServerGroupInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ~suspendActions ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let suspendActions =
         field_map_exn json "SuspendActions" GameServerGroupActions.of_json in
@@ -11651,6 +11754,7 @@ module StopMatchmakingOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11672,6 +11776,7 @@ module StopMatchmakingInput =
         MatchmakingIdStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TicketId") in
       make ~ticketId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ticketId =
         field_map_exn json "TicketId" MatchmakingIdStringModel.of_json in
@@ -11751,6 +11856,7 @@ module StopGameSessionPlacementOutput =
         (Option.map ~f:GameSessionPlacement.of_xml)
           (Xml.child xml_arg0 "GameSessionPlacement") in
       make ?gameSessionPlacement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionPlacement =
         field_map json "GameSessionPlacement" GameSessionPlacement.of_json in
@@ -11776,6 +11882,7 @@ module StopGameSessionPlacementInput =
         IdStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PlacementId") in
       make ~placementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementId =
         field_map_exn json "PlacementId" IdStringModel.of_json in
@@ -11867,6 +11974,7 @@ module StopFleetActionsOutput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map json "FleetArn" FleetArn.of_json in
       let fleetId = field_map json "FleetId" FleetId.of_json in
@@ -11906,6 +12014,7 @@ module StopFleetActionsInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?location ~actions ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let actions = field_map_exn json "Actions" FleetActionList.of_json in
@@ -11986,6 +12095,7 @@ module StartMatchmakingOutput =
         (Option.map ~f:MatchmakingTicket.of_xml)
           (Xml.child xml_arg0 "MatchmakingTicket") in
       make ?matchmakingTicket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchmakingTicket =
         field_map json "MatchmakingTicket" MatchmakingTicket.of_json in
@@ -12029,6 +12139,7 @@ module StartMatchmakingInput =
         (Option.map ~f:MatchmakingIdStringModel.of_xml)
           (Xml.child xml_arg0 "TicketId") in
       make ~players ~configurationName ?ticketId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let players = field_map_exn json "Players" PlayerList.of_json in
       let configurationName =
@@ -12112,6 +12223,7 @@ module StartMatchBackfillOutput =
         (Option.map ~f:MatchmakingTicket.of_xml)
           (Xml.child xml_arg0 "MatchmakingTicket") in
       make ?matchmakingTicket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let matchmakingTicket =
         field_map json "MatchmakingTicket" MatchmakingTicket.of_json in
@@ -12166,6 +12278,7 @@ module StartMatchBackfillInput =
         (Option.map ~f:MatchmakingIdStringModel.of_xml)
           (Xml.child xml_arg0 "TicketId") in
       make ~players ?gameSessionArn ~configurationName ?ticketId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let players = field_map_exn json "Players" PlayerList.of_json in
       let gameSessionArn =
@@ -12251,6 +12364,7 @@ module StartGameSessionPlacementOutput =
         (Option.map ~f:GameSessionPlacement.of_xml)
           (Xml.child xml_arg0 "GameSessionPlacement") in
       make ?gameSessionPlacement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionPlacement =
         field_map json "GameSessionPlacement" GameSessionPlacement.of_json in
@@ -12354,6 +12468,7 @@ module StartGameSessionPlacementInput =
       make ?gameSessionData ?desiredPlayerSessions ?playerLatencies
         ?gameSessionName ~maximumPlayerSessionCount ?gameProperties
         ~gameSessionQueueName ~placementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionData =
         field_map json "GameSessionData" LargeGameSessionData.of_json in
@@ -12464,6 +12579,7 @@ module StartFleetActionsOutput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map json "FleetArn" FleetArn.of_json in
       let fleetId = field_map json "FleetId" FleetId.of_json in
@@ -12504,6 +12620,7 @@ module StartFleetActionsInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?location ~actions ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let actions = field_map_exn json "Actions" FleetActionList.of_json in
@@ -12614,6 +12731,7 @@ module SearchGameSessionsOutput =
         (Option.map ~f:GameSessionList.of_xml)
           (Xml.child xml_arg0 "GameSessions") in
       make ?nextToken ?gameSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let gameSessions =
@@ -12698,6 +12816,7 @@ module SearchGameSessionsInput =
         (Option.map ~f:FleetIdOrArn.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?nextToken ?limit ?sortExpression ?filterExpression ?location
         ?aliasId ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -12784,6 +12903,7 @@ module ResumeGameServerGroupOutput =
         (Option.map ~f:GameServerGroup.of_xml)
           (Xml.child xml_arg0 "GameServerGroup") in
       make ?gameServerGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerGroup =
         field_map json "GameServerGroup" GameServerGroup.of_json in
@@ -12818,6 +12938,7 @@ module ResumeGameServerGroupInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ~resumeActions ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resumeActions =
         field_map_exn json "ResumeActions" GameServerGroupActions.of_json in
@@ -12915,6 +13036,7 @@ module ResolveAliasOutput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetArn = field_map json "FleetArn" FleetArn.of_json in
       let fleetId = field_map json "FleetId" FleetId.of_json in
@@ -12940,6 +13062,7 @@ module ResolveAliasInput =
         AliasIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AliasId") in
       make ~aliasId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliasId = field_map_exn json "AliasId" AliasIdOrArn.of_json in
       make ~aliasId ()
@@ -13027,6 +13150,7 @@ module RequestUploadCredentialsOutput =
         (Option.map ~f:AwsCredentials.of_xml)
           (Xml.child xml_arg0 "UploadCredentials") in
       make ?storageLocation ?uploadCredentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageLocation =
         field_map json "StorageLocation" S3Location.of_json in
@@ -13054,6 +13178,7 @@ module RequestUploadCredentialsInput =
         BuildIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BuildId") in
       make ~buildId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildId = field_map_exn json "BuildId" BuildIdOrArn.of_json in
       make ~buildId ()
@@ -13138,6 +13263,7 @@ module RegisterGameServerOutput =
       let gameServer =
         (Option.map ~f:GameServer.of_xml) (Xml.child xml_arg0 "GameServer") in
       make ?gameServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServer = field_map json "GameServer" GameServer.of_json in
       make ?gameServer ()
@@ -13206,6 +13332,7 @@ module RegisterGameServerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ?gameServerData ?connectionInfo ~instanceId ~gameServerId
         ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerData =
         field_map json "GameServerData" GameServerData.of_json in
@@ -13294,6 +13421,7 @@ module PutScalingPolicyOutput =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map json "Name" NonZeroAndMaxString.of_json in
       make ?name ()
@@ -13408,6 +13536,7 @@ module PutScalingPolicyInput =
       make ?targetConfiguration ?policyType ~metricName ?evaluationPeriods
         ?comparisonOperator ?threshold ?scalingAdjustmentType
         ?scalingAdjustment ~fleetId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let targetConfiguration =
         field_map json "TargetConfiguration" TargetConfiguration.of_json in
@@ -13497,6 +13626,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -13520,6 +13650,7 @@ module ListTagsForResourceRequest =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceARN =
         field_map_exn json "ResourceARN" AmazonResourceName.of_json in
@@ -13594,6 +13725,7 @@ module ListScriptsOutput =
       let scripts =
         (Option.map ~f:ScriptList.of_xml) (Xml.child xml_arg0 "Scripts") in
       make ?nextToken ?scripts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in
       let scripts = field_map json "Scripts" ScriptList.of_json in
@@ -13624,6 +13756,7 @@ module ListScriptsInput =
       let limit =
         (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "Limit") in
       make ?nextToken ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -13701,6 +13834,7 @@ module ListGameServersOutput =
       let gameServers =
         (Option.map ~f:GameServers.of_xml) (Xml.child xml_arg0 "GameServers") in
       make ?nextToken ?gameServers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let gameServers = field_map json "GameServers" GameServers.of_json in
@@ -13751,6 +13885,7 @@ module ListGameServersInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ?nextToken ?limit ?sortOrder ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -13834,6 +13969,7 @@ module ListGameServerGroupsOutput =
         (Option.map ~f:GameServerGroups.of_xml)
           (Xml.child xml_arg0 "GameServerGroups") in
       make ?nextToken ?gameServerGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let gameServerGroups =
@@ -13866,6 +14002,7 @@ module ListGameServerGroupsInput =
       let limit =
         (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "Limit") in
       make ?nextToken ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -13951,6 +14088,7 @@ module ListFleetsOutput =
       let fleetIds =
         (Option.map ~f:FleetIdList.of_xml) (Xml.child xml_arg0 "FleetIds") in
       make ?nextToken ?fleetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let fleetIds = field_map json "FleetIds" FleetIdList.of_json in
@@ -13997,6 +14135,7 @@ module ListFleetsInput =
       let buildId =
         (Option.map ~f:BuildIdOrArn.of_xml) (Xml.child xml_arg0 "BuildId") in
       make ?nextToken ?limit ?scriptId ?buildId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -14073,6 +14212,7 @@ module ListBuildsOutput =
       let builds =
         (Option.map ~f:BuildList.of_xml) (Xml.child xml_arg0 "Builds") in
       make ?nextToken ?builds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in
       let builds = field_map json "Builds" BuildList.of_json in
@@ -14110,6 +14250,7 @@ module ListBuildsInput =
       let status =
         (Option.map ~f:BuildStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?nextToken ?limit ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -14185,6 +14326,7 @@ module ListAliasesOutput =
       let aliases =
         (Option.map ~f:AliasList.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?nextToken ?aliases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in
       let aliases = field_map json "Aliases" AliasList.of_json in
@@ -14233,6 +14375,7 @@ module ListAliasesInput =
         (Option.map ~f:RoutingStrategyType.of_xml)
           (Xml.child xml_arg0 "RoutingStrategyType") in
       make ?nextToken ?limit ?name ?routingStrategyType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonEmptyString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -14314,6 +14457,7 @@ module GetInstanceAccessOutput =
         (Option.map ~f:InstanceAccess.of_xml)
           (Xml.child xml_arg0 "InstanceAccess") in
       make ?instanceAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceAccess =
         field_map json "InstanceAccess" InstanceAccess.of_json in
@@ -14346,6 +14490,7 @@ module GetInstanceAccessInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~instanceId ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
       let fleetId = field_map_exn json "FleetId" FleetIdOrArn.of_json in
@@ -14424,6 +14569,7 @@ module GetGameSessionLogUrlOutput =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "PreSignedUrl") in
       make ?preSignedUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let preSignedUrl =
         field_map json "PreSignedUrl" NonZeroAndMaxString.of_json in
@@ -14449,6 +14595,7 @@ module GetGameSessionLogUrlInput =
         ArnStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameSessionId") in
       make ~gameSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionId =
         field_map_exn json "GameSessionId" ArnStringModel.of_json in
@@ -14528,6 +14675,7 @@ module DescribeVpcPeeringConnectionsOutput =
         (Option.map ~f:VpcPeeringConnectionList.of_xml)
           (Xml.child xml_arg0 "VpcPeeringConnections") in
       make ?vpcPeeringConnections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnections =
         field_map json "VpcPeeringConnections"
@@ -14552,6 +14700,7 @@ module DescribeVpcPeeringConnectionsInput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetId = field_map json "FleetId" FleetId.of_json in
       make ?fleetId ()
@@ -14622,6 +14771,7 @@ module DescribeVpcPeeringAuthorizationsOutput =
         (Option.map ~f:VpcPeeringAuthorizationList.of_xml)
           (Xml.child xml_arg0 "VpcPeeringAuthorizations") in
       make ?vpcPeeringAuthorizations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringAuthorizations =
         field_map json "VpcPeeringAuthorizations"
@@ -14638,6 +14788,7 @@ module DescribeVpcPeeringAuthorizationsInput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14711,6 +14862,7 @@ module DescribeScriptOutput =
       let script =
         (Option.map ~f:Script.of_xml) (Xml.child xml_arg0 "Script") in
       make ?script ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let script = field_map json "Script" Script.of_json in make ?script ()
     let to_json v = composed_to_json to_value v
@@ -14734,6 +14886,7 @@ module DescribeScriptInput =
         ScriptIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScriptId") in
       make ~scriptId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scriptId = field_map_exn json "ScriptId" ScriptIdOrArn.of_json in
       make ~scriptId ()
@@ -14831,6 +14984,7 @@ module DescribeScalingPoliciesOutput =
         (Option.map ~f:ScalingPolicyList.of_xml)
           (Xml.child xml_arg0 "ScalingPolicies") in
       make ?nextToken ?scalingPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let scalingPolicies =
@@ -14891,6 +15045,7 @@ module DescribeScalingPoliciesInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?location ?nextToken ?limit ?statusFilter ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
@@ -14974,6 +15129,7 @@ module DescribeRuntimeConfigurationOutput =
         (Option.map ~f:RuntimeConfiguration.of_xml)
           (Xml.child xml_arg0 "RuntimeConfiguration") in
       make ?runtimeConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let runtimeConfiguration =
         field_map json "RuntimeConfiguration" RuntimeConfiguration.of_json in
@@ -14999,6 +15155,7 @@ module DescribeRuntimeConfigurationInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetId = field_map_exn json "FleetId" FleetIdOrArn.of_json in
       make ~fleetId ()
@@ -15085,6 +15242,7 @@ module DescribePlayerSessionsOutput =
         (Option.map ~f:PlayerSessionList.of_xml)
           (Xml.child xml_arg0 "PlayerSessions") in
       make ?nextToken ?playerSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let playerSessions =
@@ -15163,6 +15321,7 @@ module DescribePlayerSessionsInput =
           (Xml.child xml_arg0 "GameSessionId") in
       make ?nextToken ?limit ?playerSessionStatusFilter ?playerSessionId
         ?playerId ?gameSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -15259,6 +15418,7 @@ module DescribeMatchmakingRuleSetsOutput =
         MatchmakingRuleSetList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSets") in
       make ?nextToken ~ruleSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let ruleSets =
@@ -15300,6 +15460,7 @@ module DescribeMatchmakingRuleSetsInput =
         (Option.map ~f:MatchmakingRuleSetNameList.of_xml)
           (Xml.child xml_arg0 "Names") in
       make ?nextToken ?limit ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" RuleSetLimit.of_json in
@@ -15371,6 +15532,7 @@ module DescribeMatchmakingOutput =
         (Option.map ~f:MatchmakingTicketList.of_xml)
           (Xml.child xml_arg0 "TicketList") in
       make ?ticketList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ticketList =
         field_map json "TicketList" MatchmakingTicketList.of_json in
@@ -15396,6 +15558,7 @@ module DescribeMatchmakingInput =
         MatchmakingIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TicketIds") in
       make ~ticketIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ticketIds =
         field_map_exn json "TicketIds" MatchmakingIdList.of_json in
@@ -15475,6 +15638,7 @@ module DescribeMatchmakingConfigurationsOutput =
         (Option.map ~f:MatchmakingConfigurationList.of_xml)
           (Xml.child xml_arg0 "Configurations") in
       make ?nextToken ?configurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let configurations =
@@ -15527,6 +15691,7 @@ module DescribeMatchmakingConfigurationsInput =
         (Option.map ~f:MatchmakingConfigurationNameList.of_xml)
           (Xml.child xml_arg0 "Names") in
       make ?nextToken ?limit ?ruleSetName ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -15626,6 +15791,7 @@ module DescribeInstancesOutput =
       let instances =
         (Option.map ~f:InstanceList.of_xml) (Xml.child xml_arg0 "Instances") in
       make ?nextToken ?instances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let instances = field_map json "Instances" InstanceList.of_json in
@@ -15683,6 +15849,7 @@ module DescribeInstancesInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?location ?nextToken ?limit ?instanceId ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
@@ -15795,6 +15962,7 @@ module DescribeGameSessionsOutput =
         (Option.map ~f:GameSessionList.of_xml)
           (Xml.child xml_arg0 "GameSessions") in
       make ?nextToken ?gameSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let gameSessions =
@@ -15878,6 +16046,7 @@ module DescribeGameSessionsInput =
         (Option.map ~f:FleetIdOrArn.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?nextToken ?limit ?statusFilter ?location ?aliasId ?gameSessionId
         ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -15973,6 +16142,7 @@ module DescribeGameSessionQueuesOutput =
         (Option.map ~f:GameSessionQueueList.of_xml)
           (Xml.child xml_arg0 "GameSessionQueues") in
       make ?nextToken ?gameSessionQueues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let gameSessionQueues =
@@ -16014,6 +16184,7 @@ module DescribeGameSessionQueuesInput =
         (Option.map ~f:GameSessionQueueNameOrArnList.of_xml)
           (Xml.child xml_arg0 "Names") in
       make ?nextToken ?limit ?names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -16095,6 +16266,7 @@ module DescribeGameSessionPlacementOutput =
         (Option.map ~f:GameSessionPlacement.of_xml)
           (Xml.child xml_arg0 "GameSessionPlacement") in
       make ?gameSessionPlacement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionPlacement =
         field_map json "GameSessionPlacement" GameSessionPlacement.of_json in
@@ -16120,6 +16292,7 @@ module DescribeGameSessionPlacementInput =
         IdStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PlacementId") in
       make ~placementId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let placementId =
         field_map_exn json "PlacementId" IdStringModel.of_json in
@@ -16229,6 +16402,7 @@ module DescribeGameSessionDetailsOutput =
         (Option.map ~f:GameSessionDetailList.of_xml)
           (Xml.child xml_arg0 "GameSessionDetails") in
       make ?nextToken ?gameSessionDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let gameSessionDetails =
@@ -16312,6 +16486,7 @@ module DescribeGameSessionDetailsInput =
         (Option.map ~f:FleetIdOrArn.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?nextToken ?limit ?statusFilter ?location ?aliasId ?gameSessionId
         ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -16395,6 +16570,7 @@ module DescribeGameServerOutput =
       let gameServer =
         (Option.map ~f:GameServer.of_xml) (Xml.child xml_arg0 "GameServer") in
       make ?gameServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServer = field_map json "GameServer" GameServer.of_json in
       make ?gameServer ()
@@ -16481,6 +16657,7 @@ module DescribeGameServerInstancesOutput =
         (Option.map ~f:GameServerInstances.of_xml)
           (Xml.child xml_arg0 "GameServerInstances") in
       make ?nextToken ?gameServerInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let gameServerInstances =
@@ -16534,6 +16711,7 @@ module DescribeGameServerInstancesInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ?nextToken ?limit ?instanceIds ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -16573,6 +16751,7 @@ module DescribeGameServerInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ~gameServerId ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerId =
         field_map_exn json "GameServerId" GameServerId.of_json in
@@ -16655,6 +16834,7 @@ module DescribeGameServerGroupOutput =
         (Option.map ~f:GameServerGroup.of_xml)
           (Xml.child xml_arg0 "GameServerGroup") in
       make ?gameServerGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerGroup =
         field_map json "GameServerGroup" GameServerGroup.of_json in
@@ -16681,6 +16861,7 @@ module DescribeGameServerGroupInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerGroupName =
         field_map_exn json "GameServerGroupName"
@@ -16770,6 +16951,7 @@ module DescribeFleetUtilizationOutput =
         (Option.map ~f:FleetUtilizationList.of_xml)
           (Xml.child xml_arg0 "FleetUtilization") in
       make ?nextToken ?fleetUtilization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let fleetUtilization =
@@ -16811,6 +16993,7 @@ module DescribeFleetUtilizationInput =
         (Option.map ~f:FleetIdOrArnList.of_xml)
           (Xml.child xml_arg0 "FleetIds") in
       make ?nextToken ?limit ?fleetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -16927,6 +17110,7 @@ module DescribeFleetPortSettingsOutput =
       let fleetId =
         (Option.map ~f:FleetId.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?location ?updateStatus ?inboundPermissions ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let updateStatus =
@@ -16964,6 +17148,7 @@ module DescribeFleetPortSettingsInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?location ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let fleetId = field_map_exn json "FleetId" FleetIdOrArn.of_json in
@@ -17052,6 +17237,7 @@ module DescribeFleetLocationUtilizationOutput =
         (Option.map ~f:FleetUtilization.of_xml)
           (Xml.child xml_arg0 "FleetUtilization") in
       make ?fleetUtilization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetUtilization =
         field_map json "FleetUtilization" FleetUtilization.of_json in
@@ -17084,6 +17270,7 @@ module DescribeFleetLocationUtilizationInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~location ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location =
         field_map_exn json "Location" LocationStringModel.of_json in
@@ -17173,6 +17360,7 @@ module DescribeFleetLocationCapacityOutput =
         (Option.map ~f:FleetCapacity.of_xml)
           (Xml.child xml_arg0 "FleetCapacity") in
       make ?fleetCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetCapacity =
         field_map json "FleetCapacity" FleetCapacity.of_json in
@@ -17205,6 +17393,7 @@ module DescribeFleetLocationCapacityInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~location ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location =
         field_map_exn json "Location" LocationStringModel.of_json in
@@ -17318,6 +17507,7 @@ module DescribeFleetLocationAttributesOutput =
       let fleetId =
         (Option.map ~f:FleetIdOrArn.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?nextToken ?locationAttributes ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let locationAttributes =
@@ -17369,6 +17559,7 @@ module DescribeFleetLocationAttributesInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?nextToken ?limit ?locations ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -17455,6 +17646,7 @@ module DescribeFleetEventsOutput =
       let events =
         (Option.map ~f:EventList.of_xml) (Xml.child xml_arg0 "Events") in
       make ?nextToken ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let events = field_map json "Events" EventList.of_json in
@@ -17511,6 +17703,7 @@ module DescribeFleetEventsInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ?nextToken ?limit ?endTime ?startTime ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -17601,6 +17794,7 @@ module DescribeFleetCapacityOutput =
         (Option.map ~f:FleetCapacityList.of_xml)
           (Xml.child xml_arg0 "FleetCapacity") in
       make ?nextToken ?fleetCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let fleetCapacity =
@@ -17642,6 +17836,7 @@ module DescribeFleetCapacityInput =
         (Option.map ~f:FleetIdOrArnList.of_xml)
           (Xml.child xml_arg0 "FleetIds") in
       make ?nextToken ?limit ?fleetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -17730,6 +17925,7 @@ module DescribeFleetAttributesOutput =
         (Option.map ~f:FleetAttributesList.of_xml)
           (Xml.child xml_arg0 "FleetAttributes") in
       make ?nextToken ?fleetAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let fleetAttributes =
@@ -17771,6 +17967,7 @@ module DescribeFleetAttributesInput =
         (Option.map ~f:FleetIdOrArnList.of_xml)
           (Xml.child xml_arg0 "FleetIds") in
       make ?nextToken ?limit ?fleetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" NonZeroAndMaxString.of_json in
       let limit = field_map json "Limit" PositiveInteger.of_json in
@@ -17851,6 +18048,7 @@ module DescribeEC2InstanceLimitsOutput =
         (Option.map ~f:EC2InstanceLimitList.of_xml)
           (Xml.child xml_arg0 "EC2InstanceLimits") in
       make ?eC2InstanceLimits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let eC2InstanceLimits =
         field_map json "EC2InstanceLimits" EC2InstanceLimitList.of_json in
@@ -17884,6 +18082,7 @@ module DescribeEC2InstanceLimitsInput =
         (Option.map ~f:EC2InstanceType.of_xml)
           (Xml.child xml_arg0 "EC2InstanceType") in
       make ?location ?eC2InstanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let eC2InstanceType =
@@ -17958,6 +18157,7 @@ module DescribeBuildOutput =
     let of_xml xml_arg0 =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "Build") in
       make ?build ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let build = field_map json "Build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
@@ -17981,6 +18181,7 @@ module DescribeBuildInput =
         BuildIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BuildId") in
       make ~buildId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildId = field_map_exn json "BuildId" BuildIdOrArn.of_json in
       make ~buildId ()
@@ -18052,6 +18253,7 @@ module DescribeAliasOutput =
     let of_xml xml_arg0 =
       let alias = (Option.map ~f:Alias.of_xml) (Xml.child xml_arg0 "Alias") in
       make ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map json "Alias" Alias.of_json in make ?alias ()
     let to_json v = composed_to_json to_value v
@@ -18075,6 +18277,7 @@ module DescribeAliasInput =
         AliasIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AliasId") in
       make ~aliasId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliasId = field_map_exn json "AliasId" AliasIdOrArn.of_json in
       make ~aliasId ()
@@ -18107,6 +18310,7 @@ module DeregisterGameServerInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ~gameServerId ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerId =
         field_map_exn json "GameServerId" GameServerId.of_json in
@@ -18179,6 +18383,7 @@ module DeleteVpcPeeringConnectionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18210,6 +18415,7 @@ module DeleteVpcPeeringConnectionInput =
       let fleetId =
         FleetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~vpcPeeringConnectionId ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringConnectionId =
         field_map_exn json "VpcPeeringConnectionId"
@@ -18280,6 +18486,7 @@ module DeleteVpcPeeringAuthorizationOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18311,6 +18518,7 @@ module DeleteVpcPeeringAuthorizationInput =
         NonZeroAndMaxString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameLiftAwsAccountId") in
       make ~peerVpcId ~gameLiftAwsAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerVpcId =
         field_map_exn json "PeerVpcId" NonZeroAndMaxString.of_json in
@@ -18337,6 +18545,7 @@ module DeleteScriptInput =
         ScriptIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScriptId") in
       make ~scriptId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let scriptId = field_map_exn json "ScriptId" ScriptIdOrArn.of_json in
       make ~scriptId ()
@@ -18368,6 +18577,7 @@ module DeleteScalingPolicyInput =
         NonZeroAndMaxString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~fleetId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetId = field_map_exn json "FleetId" FleetIdOrArn.of_json in
       let name = field_map_exn json "Name" NonZeroAndMaxString.of_json in
@@ -18446,6 +18656,7 @@ module DeleteMatchmakingRuleSetOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18468,6 +18679,7 @@ module DeleteMatchmakingRuleSetInput =
         MatchmakingRuleSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" MatchmakingRuleSetName.of_json in
       make ~name ()
@@ -18545,6 +18757,7 @@ module DeleteMatchmakingConfigurationOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18567,6 +18780,7 @@ module DeleteMatchmakingConfigurationInput =
         MatchmakingConfigurationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name =
         field_map_exn json "Name" MatchmakingConfigurationName.of_json in
@@ -18644,6 +18858,7 @@ module DeleteGameSessionQueueOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18666,6 +18881,7 @@ module DeleteGameSessionQueueInput =
         GameSessionQueueNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let name = field_map_exn json "Name" GameSessionQueueNameOrArn.of_json in
       make ~name ()
@@ -18743,6 +18959,7 @@ module DeleteGameServerGroupOutput =
         (Option.map ~f:GameServerGroup.of_xml)
           (Xml.child xml_arg0 "GameServerGroup") in
       make ?gameServerGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerGroup =
         field_map json "GameServerGroup" GameServerGroup.of_json in
@@ -18779,6 +18996,7 @@ module DeleteGameServerGroupInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ?deleteOption ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deleteOption =
         field_map json "DeleteOption" GameServerGroupDeleteOption.of_json in
@@ -18886,6 +19104,7 @@ module DeleteFleetLocationsOutput =
       let fleetId =
         (Option.map ~f:FleetIdOrArn.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?locationStates ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationStates =
         field_map json "LocationStates" LocationStateList.of_json in
@@ -18920,6 +19139,7 @@ module DeleteFleetLocationsInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~locations ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locations = field_map_exn json "Locations" LocationList.of_json in
       let fleetId = field_map_exn json "FleetId" FleetIdOrArn.of_json in
@@ -18944,6 +19164,7 @@ module DeleteFleetInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let fleetId = field_map_exn json "FleetId" FleetIdOrArn.of_json in
       make ~fleetId ()
@@ -18967,6 +19188,7 @@ module DeleteBuildInput =
         BuildIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BuildId") in
       make ~buildId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let buildId = field_map_exn json "BuildId" BuildIdOrArn.of_json in
       make ~buildId ()
@@ -18990,6 +19212,7 @@ module DeleteAliasInput =
         AliasIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AliasId") in
       make ~aliasId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let aliasId = field_map_exn json "AliasId" AliasIdOrArn.of_json in
       make ~aliasId ()
@@ -19057,6 +19280,7 @@ module CreateVpcPeeringConnectionOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19096,6 +19320,7 @@ module CreateVpcPeeringConnectionInput =
       let fleetId =
         FleetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~peerVpcId ~peerVpcAwsAccountId ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerVpcId =
         field_map_exn json "PeerVpcId" NonZeroAndMaxString.of_json in
@@ -19178,6 +19403,7 @@ module CreateVpcPeeringAuthorizationOutput =
         (Option.map ~f:VpcPeeringAuthorization.of_xml)
           (Xml.child xml_arg0 "VpcPeeringAuthorization") in
       make ?vpcPeeringAuthorization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let vpcPeeringAuthorization =
         field_map json "VpcPeeringAuthorization"
@@ -19213,6 +19439,7 @@ module CreateVpcPeeringAuthorizationInput =
         NonZeroAndMaxString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameLiftAwsAccountId") in
       make ~peerVpcId ~gameLiftAwsAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let peerVpcId =
         field_map_exn json "PeerVpcId" NonZeroAndMaxString.of_json in
@@ -19300,6 +19527,7 @@ module CreateScriptOutput =
       let script =
         (Option.map ~f:Script.of_xml) (Xml.child xml_arg0 "Script") in
       make ?script ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let script = field_map json "Script" Script.of_json in make ?script ()
     let to_json v = composed_to_json to_value v
@@ -19353,6 +19581,7 @@ module CreateScriptInput =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?tags ?zipFile ?storageLocation ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let zipFile = field_map json "ZipFile" ZipBlob.of_json in
@@ -19469,6 +19698,7 @@ module CreatePlayerSessionsOutput =
         (Option.map ~f:PlayerSessionList.of_xml)
           (Xml.child xml_arg0 "PlayerSessions") in
       make ?playerSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerSessions =
         field_map json "PlayerSessions" PlayerSessionList.of_json in
@@ -19512,6 +19742,7 @@ module CreatePlayerSessionsInput =
         ArnStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameSessionId") in
       make ?playerDataMap ~playerIds ~gameSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerDataMap =
         field_map json "PlayerDataMap" PlayerDataMap.of_json in
@@ -19626,6 +19857,7 @@ module CreatePlayerSessionOutput =
         (Option.map ~f:PlayerSession.of_xml)
           (Xml.child xml_arg0 "PlayerSession") in
       make ?playerSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerSession =
         field_map json "PlayerSession" PlayerSession.of_json in
@@ -19666,6 +19898,7 @@ module CreatePlayerSessionInput =
         ArnStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameSessionId") in
       make ?playerData ~playerId ~gameSessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let playerData = field_map json "PlayerData" PlayerData.of_json in
       let playerId =
@@ -19747,6 +19980,7 @@ module CreateMatchmakingRuleSetOutput =
         MatchmakingRuleSet.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSet") in
       make ~ruleSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let ruleSet = field_map_exn json "RuleSet" MatchmakingRuleSet.of_json in
       make ~ruleSet ()
@@ -19784,6 +20018,7 @@ module CreateMatchmakingRuleSetInput =
         MatchmakingIdStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~ruleSetBody ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let ruleSetBody = field_map_exn json "RuleSetBody" RuleSetBody.of_json in
@@ -19882,6 +20117,7 @@ module CreateMatchmakingConfigurationOutput =
         (Option.map ~f:MatchmakingConfiguration.of_xml)
           (Xml.child xml_arg0 "Configuration") in
       make ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let configuration =
         field_map json "Configuration" MatchmakingConfiguration.of_json in
@@ -20055,6 +20291,7 @@ module CreateMatchmakingConfigurationInput =
         ?notificationTarget ~ruleSetName ~acceptanceRequired
         ?acceptanceTimeoutSeconds ~requestTimeoutSeconds
         ?gameSessionQueueArns ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let flexMatchMode =
@@ -20182,6 +20419,7 @@ module CreateGameSessionQueueOutput =
         (Option.map ~f:GameSessionQueue.of_xml)
           (Xml.child xml_arg0 "GameSessionQueue") in
       make ?gameSessionQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSessionQueue =
         field_map json "GameSessionQueue" GameSessionQueue.of_json in
@@ -20293,6 +20531,7 @@ module CreateGameSessionQueueInput =
       make ?tags ?notificationTarget ?customEventData ?priorityConfiguration
         ?filterConfiguration ?destinations ?playerLatencyPolicies
         ?timeoutInSeconds ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let notificationTarget =
@@ -20460,6 +20699,7 @@ module CreateGameSessionOutput =
       let gameSession =
         (Option.map ~f:GameSession.of_xml) (Xml.child xml_arg0 "GameSession") in
       make ?gameSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameSession = field_map json "GameSession" GameSession.of_json in
       make ?gameSession ()
@@ -20576,6 +20816,7 @@ module CreateGameSessionInput =
       make ?location ?gameSessionData ?idempotencyToken ?gameSessionId
         ?creatorId ?gameProperties ?name ~maximumPlayerSessionCount ?aliasId
         ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let location = field_map json "Location" LocationStringModel.of_json in
       let gameSessionData =
@@ -20678,6 +20919,7 @@ module CreateGameServerGroupOutput =
         (Option.map ~f:GameServerGroup.of_xml)
           (Xml.child xml_arg0 "GameServerGroup") in
       make ?gameServerGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerGroup =
         field_map json "GameServerGroup" GameServerGroup.of_json in
@@ -20804,6 +21046,7 @@ module CreateGameServerGroupInput =
       make ?tags ?vpcSubnets ?gameServerProtectionPolicy ?balancingStrategy
         ?autoScalingPolicy ~instanceDefinitions ~launchTemplate ~maxSize
         ~minSize ~roleArn ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let vpcSubnets = field_map json "VpcSubnets" VpcSubnets.of_json in
@@ -20949,6 +21192,7 @@ module CreateFleetOutput =
         (Option.map ~f:FleetAttributes.of_xml)
           (Xml.child xml_arg0 "FleetAttributes") in
       make ?locationStates ?fleetAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationStates =
         field_map json "LocationStates" LocationStateList.of_json in
@@ -21066,6 +21310,7 @@ module CreateFleetLocationsOutput =
       let fleetId =
         (Option.map ~f:FleetIdOrArn.of_xml) (Xml.child xml_arg0 "FleetId") in
       make ?locationStates ?fleetArn ?fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locationStates =
         field_map json "LocationStates" LocationStateList.of_json in
@@ -21101,6 +21346,7 @@ module CreateFleetLocationsInput =
         FleetIdOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FleetId") in
       make ~locations ~fleetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let locations =
         field_map_exn json "Locations" LocationConfigurationList.of_json in
@@ -21317,6 +21563,7 @@ module CreateFleetInput =
         ?newGameSessionProtectionPolicy ?eC2InboundPermissions
         ~eC2InstanceType ?logPaths ?serverLaunchParameters ?serverLaunchPath
         ?scriptId ?buildId ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let locations =
@@ -21460,6 +21707,7 @@ module CreateBuildOutput =
           (Xml.child xml_arg0 "UploadCredentials") in
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "Build") in
       make ?storageLocation ?uploadCredentials ?build ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let storageLocation =
         field_map json "StorageLocation" S3Location.of_json in
@@ -21521,6 +21769,7 @@ module CreateBuildInput =
         (Option.map ~f:NonZeroAndMaxString.of_xml)
           (Xml.child xml_arg0 "Name") in
       make ?tags ?operatingSystem ?storageLocation ?version ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let operatingSystem =
@@ -21616,6 +21865,7 @@ module CreateAliasOutput =
     let of_xml xml_arg0 =
       let alias = (Option.map ~f:Alias.of_xml) (Xml.child xml_arg0 "Alias") in
       make ?alias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let alias = field_map json "Alias" Alias.of_json in make ?alias ()
     let to_json v = composed_to_json to_value v
@@ -21663,6 +21913,7 @@ module CreateAliasInput =
         NonBlankAndLengthConstraintString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~routingStrategy ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let routingStrategy =
@@ -21761,6 +22012,7 @@ module ClaimGameServerOutput =
       let gameServer =
         (Option.map ~f:GameServer.of_xml) (Xml.child xml_arg0 "GameServer") in
       make ?gameServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServer = field_map json "GameServer" GameServer.of_json in
       make ?gameServer ()
@@ -21805,6 +22057,7 @@ module ClaimGameServerInput =
         GameServerGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GameServerGroupName") in
       make ?gameServerData ?gameServerId ~gameServerGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let gameServerData =
         field_map json "GameServerData" GameServerData.of_json in
@@ -21879,6 +22132,7 @@ module AcceptMatchOutput =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21917,6 +22171,7 @@ module AcceptMatchInput =
         MatchmakingIdStringModel.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TicketId") in
       make ~acceptanceType ~playerIds ~ticketId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let acceptanceType =
         field_map_exn json "AcceptanceType" AcceptanceType.of_json in

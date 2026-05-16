@@ -103,6 +103,7 @@ module ProductInformationFilter =
              "ProductInformationFilterName") in
       make ~productInformationFilterComparator ?productInformationFilterValue
         ~productInformationFilterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productInformationFilterComparator =
         field_map_exn json "ProductInformationFilterComparator"
@@ -430,6 +431,7 @@ module BorrowConfiguration =
         BoxBoolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AllowEarlyCheckIn") in
       make ~maxTimeToLiveInMinutes ~allowEarlyCheckIn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxTimeToLiveInMinutes =
         field_map_exn json "MaxTimeToLiveInMinutes" BoxInteger.of_json in
@@ -457,6 +459,7 @@ module ProvisionalConfiguration =
         BoxInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MaxTimeToLiveInMinutes") in
       make ~maxTimeToLiveInMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxTimeToLiveInMinutes =
         field_map_exn json "MaxTimeToLiveInMinutes" BoxInteger.of_json in
@@ -558,6 +561,7 @@ module Entitlement =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?allowCheckIn ~unit ?overage ?maxCount ?value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowCheckIn = field_map json "AllowCheckIn" BoxBoolean.of_json in
       let unit = field_map_exn json "Unit" EntitlementUnit.of_json in
@@ -584,6 +588,7 @@ module Metadata =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let name = field_map json "Name" String_.of_json in
@@ -788,6 +793,7 @@ module Tag =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let key = field_map json "Key" String_.of_json in make ?value ?key ()
@@ -844,6 +850,7 @@ module ConsumedLicenseSummary =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?consumedLicenses ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumedLicenses =
         field_map json "ConsumedLicenses" BoxLong.of_json in
@@ -876,6 +883,7 @@ module ManagedResourceSummary =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       make ?associationCount ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let associationCount =
         field_map json "AssociationCount" BoxLong.of_json in
@@ -914,6 +922,7 @@ module ProductInformation =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~productInformationFilterList ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productInformationFilterList =
         field_map_exn json "ProductInformationFilterList"
@@ -1152,6 +1161,7 @@ module ConsumptionConfiguration =
       let renewType =
         (Option.map ~f:RenewType.of_xml) (Xml.child xml_arg0 "RenewType") in
       make ?borrowConfiguration ?provisionalConfiguration ?renewType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let borrowConfiguration =
         field_map json "BorrowConfiguration" BorrowConfiguration.of_json in
@@ -1182,6 +1192,7 @@ module DatetimeRange =
         ISO8601DateTime.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Begin") in
       make ?end_ ~begin_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let end_ = field_map json "End" ISO8601DateTime.of_json in
       let begin_ = field_map_exn json "Begin" ISO8601DateTime.of_json in
@@ -1237,6 +1248,7 @@ module IssuerDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SignKey") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?keyFingerprint ?signKey ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyFingerprint = field_map json "KeyFingerprint" String_.of_json in
       let signKey = field_map json "SignKey" String_.of_json in
@@ -1342,6 +1354,7 @@ module ReceivedMetadata =
         (Option.map ~f:ReceivedStatus.of_xml)
           (Xml.child xml_arg0 "ReceivedStatus") in
       make ?allowedOperations ?receivedStatusReason ?receivedStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowedOperations =
         field_map json "AllowedOperations" AllowedOperationList.of_json in
@@ -1419,6 +1432,7 @@ module ReportContext =
           (Xml.child_exn ~context:context_ xml_arg0
              "licenseConfigurationArns") in
       make ~licenseConfigurationArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConfigurationArns =
         field_map_exn json "licenseConfigurationArns" ArnList.of_json in
@@ -1448,6 +1462,7 @@ module ReportFrequency =
           (Xml.child xml_arg0 "period") in
       let value = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "value") in
       make ?period ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let period = field_map json "period" ReportFrequencyType.of_json in
       let value = field_map json "value" Integer.of_json in
@@ -1498,6 +1513,7 @@ module S3Location =
       let bucket =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?keyPrefix ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let keyPrefix = field_map json "keyPrefix" String_.of_json in
       let bucket = field_map json "bucket" String_.of_json in
@@ -1546,6 +1562,7 @@ module LicenseConversionContext =
         (Option.map ~f:UsageOperation.of_xml)
           (Xml.child xml_arg0 "UsageOperation") in
       make ?usageOperation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let usageOperation =
         field_map json "UsageOperation" UsageOperation.of_json in
@@ -1616,6 +1633,7 @@ module AutomatedDiscoveryInformation =
       let lastRunTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "LastRunTime") in
       make ?lastRunTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let lastRunTime = field_map json "LastRunTime" DateTime.of_json in
       make ?lastRunTime ()
@@ -1763,6 +1781,7 @@ module EntitlementUsage =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~unit ?maxCount ~consumedValue ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map_exn json "Unit" EntitlementDataUnit.of_json in
       let maxCount = field_map json "MaxCount" String_.of_json in
@@ -1826,6 +1845,7 @@ module LicenseSpecification =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?amiAssociationScope ~licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let amiAssociationScope =
         field_map json "AmiAssociationScope" String_.of_json in
@@ -1896,6 +1916,7 @@ module LicenseConfigurationUsage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?consumedLicenses ?associationTime ?resourceOwnerId
         ?resourceStatus ?resourceType ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let consumedLicenses =
         field_map json "ConsumedLicenses" BoxLong.of_json in
@@ -1929,6 +1950,7 @@ module Filter =
       let name =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let values = field_map json "Values" FilterValues.of_json in
       let name = field_map json "Name" FilterName.of_json in
@@ -2004,6 +2026,7 @@ module TokenData =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TokenId") in
       make ?status ?roleArns ?tokenProperties ?expirationTime ?licenseArn
         ?tokenType ?tokenId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" String_.of_json in
       let roleArns = field_map json "RoleArns" ArnList.of_json in
@@ -2075,6 +2098,7 @@ module ResourceInventory =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?resourceOwningAccountId ?platformVersion ?platform ?resourceArn
         ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceOwningAccountId =
         field_map json "ResourceOwningAccountId" String_.of_json in
@@ -2112,6 +2136,7 @@ module InventoryFilter =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?value ~condition ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let value = field_map json "Value" String_.of_json in
       let condition =
@@ -2246,6 +2271,7 @@ module GrantedLicense =
         ?consumptionConfiguration ?entitlements ?beneficiary ?validity
         ?status ?homeRegion ?issuer ?productSKU ?productName ?licenseName
         ?licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let receivedMetadata =
         field_map json "ReceivedMetadata" ReceivedMetadata.of_json in
@@ -2356,6 +2382,7 @@ module Grant =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ~grantedOperations ~version ?statusReason ~grantStatus ~homeRegion
         ~granteePrincipalArn ~licenseArn ~parentArn ~grantName ~grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantedOperations =
         field_map_exn json "GrantedOperations" AllowedOperationList.of_json in
@@ -2486,6 +2513,7 @@ module License =
       make ?version ?createTime ?licenseMetadata ?consumptionConfiguration
         ?entitlements ?beneficiary ?validity ?status ?homeRegion ?issuer
         ?productSKU ?productName ?licenseName ?licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let createTime = field_map json "CreateTime" ISO8601DateTime.of_json in
@@ -2633,6 +2661,7 @@ module ReportGenerator =
         ?lastReportGenerationTime ?lastRunFailureReason ?lastRunStatus
         ?licenseManagerReportGeneratorArn ?reportFrequency ?reportContext
         ?reportType ?reportGeneratorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let createTime = field_map json "CreateTime" String_.of_json in
@@ -2754,6 +2783,7 @@ module LicenseConversionTask =
       make ?endTime ?licenseConversionTime ?startTime ?statusMessage ?status
         ?destinationLicenseContext ?sourceLicenseContext ?resourceArn
         ?licenseConversionTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map json "EndTime" DateTime.of_json in
       let licenseConversionTime =
@@ -2931,6 +2961,7 @@ module LicenseConfiguration =
         ?licenseCountHardLimit ?licenseCount ?licenseRules
         ?licenseCountingType ?description ?name ?licenseConfigurationArn
         ?licenseConfigurationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let automatedDiscoveryInformation =
         field_map json "AutomatedDiscoveryInformation"
@@ -3045,6 +3076,7 @@ module LicenseOperationFailure =
       make ?metadataList ?operationRequestedBy ?resourceOwnerId
         ?operationName ?failureTime ?errorMessage ?resourceType ?resourceArn
         ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let metadataList = field_map json "MetadataList" MetadataList.of_json in
       let operationRequestedBy =
@@ -3118,6 +3150,7 @@ module LicenseConfigurationAssociation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?amiAssociationScope ?associationTime ?resourceOwnerId
         ?resourceType ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let amiAssociationScope =
         field_map json "AmiAssociationScope" String_.of_json in
@@ -3191,6 +3224,7 @@ module EntitlementData =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~unit ?value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let unit = field_map_exn json "Unit" EntitlementDataUnit.of_json in
       let value = field_map json "Value" String_.of_json in
@@ -3211,6 +3245,7 @@ module AccessDeniedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3229,6 +3264,7 @@ module AuthorizationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3248,6 +3284,7 @@ module InvalidParameterValueException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3266,6 +3303,7 @@ module RateLimitExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3285,6 +3323,7 @@ module ServerInternalException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3307,6 +3346,7 @@ module OrganizationConfiguration =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EnableIntegration") in
       make ~enableIntegration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableIntegration =
         field_map_exn json "EnableIntegration" Boolean.of_json in
@@ -3326,6 +3366,7 @@ module InvalidResourceStateException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3345,6 +3386,7 @@ module LicenseUsageException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3390,6 +3432,7 @@ module ResourceLimitExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3408,6 +3451,7 @@ module ResourceNotFoundException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3426,6 +3470,7 @@ module ValidationException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3532,6 +3577,7 @@ module FilterLimitExceededException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -3669,6 +3715,7 @@ module FailedDependencyException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?errorCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let errorCode = field_map json "ErrorCode" String_.of_json in
       let message = field_map json "Message" Message.of_json in
@@ -3943,6 +3990,7 @@ module LicenseUsage =
         (Option.map ~f:EntitlementUsageList.of_xml)
           (Xml.child xml_arg0 "EntitlementUsages") in
       make ?entitlementUsages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let entitlementUsages =
         field_map json "EntitlementUsages" EntitlementUsageList.of_json in
@@ -3985,6 +4033,7 @@ module RedirectException =
       let location =
         (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "Location") in
       make ?message ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       let location = field_map json "Location" Location.of_json in
@@ -4005,6 +4054,7 @@ module ConflictException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -4095,6 +4145,7 @@ module Issuer =
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?signKey ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let signKey = field_map json "SignKey" String_.of_json in
       let name = field_map_exn json "Name" String_.of_json in
@@ -4192,6 +4243,7 @@ module NoEntitlementsAllowedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -4225,6 +4277,7 @@ module UnsupportedDigitalSignatureMethodException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -4244,6 +4297,7 @@ module EntitlementNotAllowedException =
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let message = field_map json "Message" Message.of_json in
       make ?message ()
@@ -4343,6 +4397,7 @@ module UpdateServiceSettingsResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates License Manager settings for the current Region."]
@@ -4395,6 +4450,7 @@ module UpdateServiceSettingsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3BucketArn") in
       make ?enableCrossAccountsDiscovery ?organizationConfiguration
         ?snsTopicArn ?s3BucketArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let enableCrossAccountsDiscovery =
         field_map json "EnableCrossAccountsDiscovery" BoxBoolean.of_json in
@@ -4501,6 +4557,7 @@ module UpdateLicenseSpecificationsForResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4548,6 +4605,7 @@ module UpdateLicenseSpecificationsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?removeLicenseSpecifications ?addLicenseSpecifications
         ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let removeLicenseSpecifications =
         field_map json "RemoveLicenseSpecifications"
@@ -4664,6 +4722,7 @@ module UpdateLicenseManagerReportGeneratorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4743,6 +4802,7 @@ module UpdateLicenseManagerReportGeneratorRequest =
              "LicenseManagerReportGeneratorArn") in
       make ?description ~clientToken ~reportFrequency ~reportContext ~type_
         ~reportGeneratorName ~licenseManagerReportGeneratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let description = field_map json "Description" String_.of_json in
       let clientToken =
@@ -4846,6 +4906,7 @@ module UpdateLicenseConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4943,6 +5004,7 @@ module UpdateLicenseConfigurationRequest =
       make ?disassociateWhenNotFound ?productInformationList ?description
         ?name ?licenseCountHardLimit ?licenseCount ?licenseRules
         ?licenseConfigurationStatus ~licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disassociateWhenNotFound =
         field_map json "DisassociateWhenNotFound" BoxBoolean.of_json in
@@ -5040,6 +5102,7 @@ module UntagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5069,6 +5132,7 @@ module UntagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
@@ -5150,6 +5214,7 @@ module TagResourceResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5176,6 +5241,7 @@ module TagResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map_exn json "Tags" TagList.of_json in
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
@@ -5292,6 +5358,7 @@ module RejectGrantResponse =
       let grantArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let status = field_map json "Status" GrantStatus.of_json in
@@ -5313,6 +5380,7 @@ module RejectGrantRequest =
       let grantArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ~grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantArn = field_map_exn json "GrantArn" Arn.of_json in
       make ~grantArn ()
@@ -5420,6 +5488,7 @@ module ListUsageForLicenseConfigurationResponse =
         (Option.map ~f:LicenseConfigurationUsageList.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationUsageList") in
       make ?nextToken ?licenseConfigurationUsageList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenseConfigurationUsageList =
@@ -5469,6 +5538,7 @@ module ListUsageForLicenseConfigurationRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?filters ?nextToken ?maxResults ~licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5562,6 +5632,7 @@ module ListTokensResponse =
       let tokens =
         (Option.map ~f:TokenList.of_xml) (Xml.child xml_arg0 "Tokens") in
       make ?nextToken ?tokens ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let tokens = field_map json "Tokens" TokenList.of_json in
@@ -5602,6 +5673,7 @@ module ListTokensRequest =
       let tokenIds =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "TokenIds") in
       make ?maxResults ?nextToken ?filters ?tokenIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5688,6 +5760,7 @@ module ListTagsForResourceResponse =
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
@@ -5710,6 +5783,7 @@ module ListTagsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
       make ~resourceArn ()
@@ -5825,6 +5899,7 @@ module ListResourceInventoryResponse =
         (Option.map ~f:ResourceInventoryList.of_xml)
           (Xml.child xml_arg0 "ResourceInventoryList") in
       make ?nextToken ?resourceInventoryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let resourceInventoryList =
@@ -5861,6 +5936,7 @@ module ListResourceInventoryRequest =
       let maxResults =
         (Option.map ~f:BoxInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" InventoryFilterList.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -5975,6 +6051,7 @@ module ListReceivedLicensesResponse =
         (Option.map ~f:GrantedLicenseList.of_xml)
           (Xml.child xml_arg0 "Licenses") in
       make ?nextToken ?licenses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenses = field_map json "Licenses" GrantedLicenseList.of_json in
@@ -6016,6 +6093,7 @@ module ListReceivedLicensesRequest =
       let licenseArns =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "LicenseArns") in
       make ?maxResults ?nextToken ?filters ?licenseArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6129,6 +6207,7 @@ module ListReceivedGrantsResponse =
       let grants =
         (Option.map ~f:GrantList.of_xml) (Xml.child xml_arg0 "Grants") in
       make ?nextToken ?grants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let grants = field_map json "Grants" GrantList.of_json in
@@ -6170,6 +6249,7 @@ module ListReceivedGrantsRequest =
       let grantArns =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "GrantArns") in
       make ?maxResults ?nextToken ?filters ?grantArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6272,6 +6352,7 @@ module ListLicensesResponse =
       let licenses =
         (Option.map ~f:LicenseList.of_xml) (Xml.child xml_arg0 "Licenses") in
       make ?nextToken ?licenses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenses = field_map json "Licenses" LicenseList.of_json in
@@ -6313,6 +6394,7 @@ module ListLicensesRequest =
       let licenseArns =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "LicenseArns") in
       make ?maxResults ?nextToken ?filters ?licenseArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6406,6 +6488,7 @@ module ListLicenseVersionsResponse =
       let licenses =
         (Option.map ~f:LicenseList.of_xml) (Xml.child xml_arg0 "Licenses") in
       make ?nextToken ?licenses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenses = field_map json "Licenses" LicenseList.of_json in
@@ -6440,6 +6523,7 @@ module ListLicenseVersionsRequest =
       let licenseArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ?maxResults ?nextToken ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6537,6 +6621,7 @@ module ListLicenseSpecificationsForResourceResponse =
         (Option.map ~f:LicenseSpecifications.of_xml)
           (Xml.child xml_arg0 "LicenseSpecifications") in
       make ?nextToken ?licenseSpecifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenseSpecifications =
@@ -6575,6 +6660,7 @@ module ListLicenseSpecificationsForResourceRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ?maxResults ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" BoxInteger.of_json in
@@ -6702,6 +6788,7 @@ module ListLicenseManagerReportGeneratorsResponse =
         (Option.map ~f:ReportGeneratorList.of_xml)
           (Xml.child xml_arg0 "ReportGenerators") in
       make ?nextToken ?reportGenerators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let reportGenerators =
@@ -6737,6 +6824,7 @@ module ListLicenseManagerReportGeneratorsRequest =
       let filters =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -6835,6 +6923,7 @@ module ListLicenseConversionTasksResponse =
         (Option.map ~f:LicenseConversionTasks.of_xml)
           (Xml.child xml_arg0 "LicenseConversionTasks") in
       make ?nextToken ?licenseConversionTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenseConversionTasks =
@@ -6872,6 +6961,7 @@ module ListLicenseConversionTasksRequest =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let maxResults = field_map json "MaxResults" BoxInteger.of_json in
@@ -6981,6 +7071,7 @@ module ListLicenseConfigurationsResponse =
         (Option.map ~f:LicenseConfigurations.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurations") in
       make ?nextToken ?licenseConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenseConfigurations =
@@ -7027,6 +7118,7 @@ module ListLicenseConfigurationsRequest =
         (Option.map ~f:StringList.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationArns") in
       make ?filters ?nextToken ?maxResults ?licenseConfigurationArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let filters = field_map json "Filters" Filters.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7126,6 +7218,7 @@ module ListFailuresForLicenseConfigurationOperationsResponse =
         (Option.map ~f:LicenseOperationFailureList.of_xml)
           (Xml.child xml_arg0 "LicenseOperationFailureList") in
       make ?nextToken ?licenseOperationFailureList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenseOperationFailureList =
@@ -7165,6 +7258,7 @@ module ListFailuresForLicenseConfigurationOperationsRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?nextToken ?maxResults ~licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" BoxInteger.of_json in
@@ -7278,6 +7372,7 @@ module ListDistributedGrantsResponse =
       let grants =
         (Option.map ~f:GrantList.of_xml) (Xml.child xml_arg0 "Grants") in
       make ?nextToken ?grants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let grants = field_map json "Grants" GrantList.of_json in
@@ -7319,6 +7414,7 @@ module ListDistributedGrantsRequest =
       let grantArns =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "GrantArns") in
       make ?maxResults ?nextToken ?filters ?grantArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let maxResults = field_map json "MaxResults" MaxSize100.of_json in
       let nextToken = field_map json "NextToken" String_.of_json in
@@ -7431,6 +7527,7 @@ module ListAssociationsForLicenseConfigurationResponse =
         (Option.map ~f:LicenseConfigurationAssociations.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationAssociations") in
       make ?nextToken ?licenseConfigurationAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let licenseConfigurationAssociations =
@@ -7471,6 +7568,7 @@ module ListAssociationsForLicenseConfigurationRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?nextToken ?maxResults ~licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nextToken = field_map json "NextToken" String_.of_json in
       let maxResults = field_map json "MaxResults" BoxInteger.of_json in
@@ -7594,6 +7692,7 @@ module GetServiceSettingsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3BucketArn") in
       make ?licenseManagerResourceShareArn ?enableCrossAccountsDiscovery
         ?organizationConfiguration ?snsTopicArn ?s3BucketArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseManagerResourceShareArn =
         field_map json "LicenseManagerResourceShareArn" String_.of_json in
@@ -7617,6 +7716,7 @@ module GetServiceSettingsRequest =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7713,6 +7813,7 @@ module GetLicenseUsageResponse =
         (Option.map ~f:LicenseUsage.of_xml)
           (Xml.child xml_arg0 "LicenseUsage") in
       make ?licenseUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseUsage = field_map json "LicenseUsage" LicenseUsage.of_json in
       make ?licenseUsage ()
@@ -7734,6 +7835,7 @@ module GetLicenseUsageRequest =
       let licenseArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
       make ~licenseArn ()
@@ -7829,6 +7931,7 @@ module GetLicenseResponse =
       let license =
         (Option.map ~f:License.of_xml) (Xml.child xml_arg0 "License") in
       make ?license ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let license = field_map json "License" License.of_json in
       make ?license ()
@@ -7854,6 +7957,7 @@ module GetLicenseRequest =
       let licenseArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ?version ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
@@ -7973,6 +8077,7 @@ module GetLicenseManagerReportGeneratorResponse =
         (Option.map ~f:ReportGenerator.of_xml)
           (Xml.child xml_arg0 "ReportGenerator") in
       make ?reportGenerator ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let reportGenerator =
         field_map json "ReportGenerator" ReportGenerator.of_json in
@@ -7999,6 +8104,7 @@ module GetLicenseManagerReportGeneratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "LicenseManagerReportGeneratorArn") in
       make ~licenseManagerReportGeneratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseManagerReportGeneratorArn =
         field_map_exn json "LicenseManagerReportGeneratorArn" String_.of_json in
@@ -8165,6 +8271,7 @@ module GetLicenseConversionTaskResponse =
       make ?endTime ?licenseConversionTime ?startTime ?status ?statusMessage
         ?destinationLicenseContext ?sourceLicenseContext ?resourceArn
         ?licenseConversionTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let endTime = field_map json "EndTime" DateTime.of_json in
       let licenseConversionTime =
@@ -8208,6 +8315,7 @@ module GetLicenseConversionTaskRequest =
         LicenseConversionTaskId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConversionTaskId") in
       make ~licenseConversionTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConversionTaskId =
         field_map_exn json "LicenseConversionTaskId"
@@ -8440,6 +8548,7 @@ module GetLicenseConfigurationResponse =
         ?licenseCountHardLimit ?licenseCount ?licenseRules
         ?licenseCountingType ?description ?name ?licenseConfigurationArn
         ?licenseConfigurationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let disassociateWhenNotFound =
         field_map json "DisassociateWhenNotFound" BoxBoolean.of_json in
@@ -8500,6 +8609,7 @@ module GetLicenseConfigurationRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ~licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConfigurationArn =
         field_map_exn json "LicenseConfigurationArn" String_.of_json in
@@ -8604,6 +8714,7 @@ module GetGrantResponse =
     let of_xml xml_arg0 =
       let grant = (Option.map ~f:Grant.of_xml) (Xml.child xml_arg0 "Grant") in
       make ?grant ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grant = field_map json "Grant" Grant.of_json in make ?grant ()
     let to_json v = composed_to_json to_value v
@@ -8627,6 +8738,7 @@ module GetGrantRequest =
       let grantArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ?version ~grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let grantArn = field_map_exn json "GrantArn" Arn.of_json in
@@ -8712,6 +8824,7 @@ module GetAccessTokenResponse =
       let accessToken =
         (Option.map ~f:TokenString.of_xml) (Xml.child xml_arg0 "AccessToken") in
       make ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let accessToken = field_map json "AccessToken" TokenString.of_json in
       make ?accessToken ()
@@ -8743,6 +8856,7 @@ module GetAccessTokenRequest =
       let token =
         TokenString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Token") in
       make ?tokenProperties ~token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tokenProperties =
         field_map json "TokenProperties" MaxSize3StringList.of_json in
@@ -8860,6 +8974,7 @@ module ExtendLicenseConsumptionResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseConsumptionToken") in
       make ?expiration ?licenseConsumptionToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let expiration = field_map json "Expiration" ISO8601DateTime.of_json in
       let licenseConsumptionToken =
@@ -8893,6 +9008,7 @@ module ExtendLicenseConsumptionRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConsumptionToken") in
       make ?dryRun ~licenseConsumptionToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let dryRun = field_map json "DryRun" Boolean.of_json in
       let licenseConsumptionToken =
@@ -8990,6 +9106,7 @@ module DeleteTokenResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9007,6 +9124,7 @@ module DeleteTokenRequest =
       let tokenId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TokenId") in
       make ~tokenId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tokenId = field_map_exn json "TokenId" String_.of_json in
       make ~tokenId ()
@@ -9129,6 +9247,7 @@ module DeleteLicenseResponse =
         (Option.map ~f:LicenseDeletionStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
       make ?deletionDate ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let deletionDate =
         field_map json "DeletionDate" ISO8601DateTime.of_json in
@@ -9158,6 +9277,7 @@ module DeleteLicenseRequest =
       let licenseArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ~sourceVersion ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceVersion = field_map_exn json "SourceVersion" String_.of_json in
       let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
@@ -9267,6 +9387,7 @@ module DeleteLicenseManagerReportGeneratorResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9292,6 +9413,7 @@ module DeleteLicenseManagerReportGeneratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "LicenseManagerReportGeneratorArn") in
       make ~licenseManagerReportGeneratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseManagerReportGeneratorArn =
         field_map_exn json "LicenseManagerReportGeneratorArn" String_.of_json in
@@ -9373,6 +9495,7 @@ module DeleteLicenseConfigurationResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9395,6 +9518,7 @@ module DeleteLicenseConfigurationRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ~licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConfigurationArn =
         field_map_exn json "LicenseConfigurationArn" String_.of_json in
@@ -9511,6 +9635,7 @@ module DeleteGrantResponse =
       let grantArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let status = field_map json "Status" GrantStatus.of_json in
@@ -9546,6 +9671,7 @@ module DeleteGrantRequest =
       let grantArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ~version ?statusReason ~grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map_exn json "Version" String_.of_json in
       let statusReason =
@@ -9671,6 +9797,7 @@ module CreateTokenResponse =
       let tokenId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TokenId") in
       make ?token ?tokenType ?tokenId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let token = field_map json "Token" TokenString.of_json in
       let tokenType = field_map json "TokenType" TokenType.of_json in
@@ -9737,6 +9864,7 @@ module CreateTokenRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ~clientToken ?tokenProperties ?expirationInDays ?roleArns
         ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
       let tokenProperties =
@@ -9865,6 +9993,7 @@ module CreateLicenseVersionResponse =
       let licenseArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       make ?status ?version ?licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let status = field_map json "Status" LicenseStatus.of_json in
       let version = field_map json "Version" String_.of_json in
@@ -9981,6 +10110,7 @@ module CreateLicenseVersionRequest =
       make ?sourceVersion ~clientToken ~status ~consumptionConfiguration
         ~entitlements ?licenseMetadata ~validity ~homeRegion ~issuer
         ~productName ~licenseName ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceVersion = field_map json "SourceVersion" String_.of_json in
       let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
@@ -10112,6 +10242,7 @@ module CreateLicenseResponse =
       let licenseArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       make ?version ?status ?licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let status = field_map json "Status" LicenseStatus.of_json in
@@ -10221,6 +10352,7 @@ module CreateLicenseRequest =
       make ~clientToken ?licenseMetadata ~consumptionConfiguration
         ~beneficiary ~entitlements ~validity ~homeRegion ~issuer ~productSKU
         ~productName ~licenseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
       let licenseMetadata =
@@ -10356,6 +10488,7 @@ module CreateLicenseManagerReportGeneratorResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseManagerReportGeneratorArn") in
       make ?licenseManagerReportGeneratorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseManagerReportGeneratorArn =
         field_map json "LicenseManagerReportGeneratorArn" String_.of_json in
@@ -10435,6 +10568,7 @@ module CreateLicenseManagerReportGeneratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ReportGeneratorName") in
       make ?tags ?description ~clientToken ~reportFrequency ~reportContext
         ~type_ ~reportGeneratorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let tags = field_map json "Tags" TagList.of_json in
       let description = field_map json "Description" String_.of_json in
@@ -10544,6 +10678,7 @@ module CreateLicenseConversionTaskForResourceResponse =
         (Option.map ~f:LicenseConversionTaskId.of_xml)
           (Xml.child xml_arg0 "LicenseConversionTaskId") in
       make ?licenseConversionTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConversionTaskId =
         field_map json "LicenseConversionTaskId"
@@ -10590,6 +10725,7 @@ module CreateLicenseConversionTaskForResourceRequest =
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~destinationLicenseContext ~sourceLicenseContext ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let destinationLicenseContext =
         field_map_exn json "DestinationLicenseContext"
@@ -10696,6 +10832,7 @@ module CreateLicenseConfigurationResponse =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseConfigurationArn =
         field_map json "LicenseConfigurationArn" String_.of_json in
@@ -10792,6 +10929,7 @@ module CreateLicenseConfigurationRequest =
       make ?productInformationList ?disassociateWhenNotFound ?tags
         ?licenseRules ?licenseCountHardLimit ?licenseCount
         ~licenseCountingType ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let productInformationList =
         field_map json "ProductInformationList"
@@ -10922,6 +11060,7 @@ module CreateGrantVersionResponse =
       let grantArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let status = field_map json "Status" GrantStatus.of_json in
@@ -10995,6 +11134,7 @@ module CreateGrantVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
       make ?sourceVersion ?statusReason ?status ?allowedOperations ?grantName
         ~grantArn ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let sourceVersion = field_map json "SourceVersion" String_.of_json in
       let statusReason =
@@ -11118,6 +11258,7 @@ module CreateGrantResponse =
       let grantArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let status = field_map json "Status" GrantStatus.of_json in
@@ -11185,6 +11326,7 @@ module CreateGrantRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
       make ~allowedOperations ~homeRegion ~principals ~licenseArn ~grantName
         ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let allowedOperations =
         field_map_exn json "AllowedOperations" AllowedOperationList.of_json in
@@ -11391,6 +11533,7 @@ module CheckoutLicenseResponse =
           (Xml.child xml_arg0 "CheckoutType") in
       make ?licenseArn ?expiration ?issuedAt ?nodeId ?signedToken
         ?entitlementsAllowed ?licenseConsumptionToken ?checkoutType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let licenseArn = field_map json "LicenseArn" String_.of_json in
       let expiration = field_map json "Expiration" ISO8601DateTime.of_json in
@@ -11472,6 +11615,7 @@ module CheckoutLicenseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProductSKU") in
       make ?nodeId ?beneficiary ~clientToken ~entitlements ~keyFingerprint
         ~checkoutType ~productSKU ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let nodeId = field_map json "NodeId" String_.of_json in
       let beneficiary = field_map json "Beneficiary" String_.of_json in
@@ -11691,6 +11835,7 @@ module CheckoutBorrowLicenseResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       make ?checkoutMetadata ?expiration ?issuedAt ?signedToken ?nodeId
         ?entitlementsAllowed ?licenseConsumptionToken ?licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let checkoutMetadata =
         field_map json "CheckoutMetadata" MetadataList.of_json in
@@ -11773,6 +11918,7 @@ module CheckoutBorrowLicenseRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ~clientToken ?checkoutMetadata ?nodeId ~digitalSignatureMethod
         ~entitlements ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
       let checkoutMetadata =
@@ -11889,6 +12035,7 @@ module CheckInLicenseResponse =
     let to_value _ = `Structure []
     let to_query v = to_query to_value v
     let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11917,6 +12064,7 @@ module CheckInLicenseRequest =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConsumptionToken") in
       make ?beneficiary ~licenseConsumptionToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let beneficiary = field_map json "Beneficiary" String_.of_json in
       let licenseConsumptionToken =
@@ -12034,6 +12182,7 @@ module AcceptGrantResponse =
       let grantArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let version = field_map json "Version" String_.of_json in
       let status = field_map json "Status" GrantStatus.of_json in
@@ -12055,6 +12204,7 @@ module AcceptGrantRequest =
       let grantArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ~grantArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json =
       let grantArn = field_map_exn json "GrantArn" Arn.of_json in
       make ~grantArn ()
