@@ -299,7 +299,7 @@ let stop_meeting_transcription =
            None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-create-attendee", batch_create_attendee);
     ("create-attendee", create_attendee);
     ("create-meeting", create_meeting);

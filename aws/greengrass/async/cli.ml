@@ -2047,7 +2047,7 @@ let update_thing_runtime_configuration =
            (Some Values.UpdateThingRuntimeConfigurationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-role-to-group", associate_role_to_group);
     ("associate-service-role-to-account", associate_service_role_to_account);
     ("create-connector-definition", create_connector_definition);

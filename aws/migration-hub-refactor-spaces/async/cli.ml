@@ -598,7 +598,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-application", create_application);
     ("create-environment", create_environment);
     ("create-route", create_route);

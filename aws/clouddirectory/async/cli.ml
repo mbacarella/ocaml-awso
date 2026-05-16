@@ -1717,7 +1717,7 @@ let upgrade_published_schema =
            (Some Values.UpgradePublishedSchemaResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-facet-to-object", add_facet_to_object);
     ("apply-schema", apply_schema);
     ("attach-object", attach_object);

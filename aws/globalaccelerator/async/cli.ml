@@ -1159,7 +1159,7 @@ let withdraw_byoip_cidr =
            (Some Values.WithdrawByoipCidrResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-custom-routing-endpoints", add_custom_routing_endpoints);
     ("advertise-byoip-cidr", advertise_byoip_cidr);
     ("allow-custom-routing-traffic", allow_custom_routing_traffic);

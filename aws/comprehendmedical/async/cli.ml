@@ -627,7 +627,7 @@ let stop_s_n_o_m_e_d_c_t_inference_job =
            (Some Values.StopSNOMEDCTInferenceJobResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-entities-detection-v2-job",
        describe_entities_detection_v2_job);
     ("describe-i-c-d10-c-m-inference-job",

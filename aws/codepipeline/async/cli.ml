@@ -909,7 +909,7 @@ let update_pipeline =
            (Some Values.UpdatePipelineOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("acknowledge-job", acknowledge_job);
     ("acknowledge-third-party-job", acknowledge_third_party_job);
     ("create-custom-action-type", create_custom_action_type);

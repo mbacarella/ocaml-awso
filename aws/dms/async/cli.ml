@@ -1713,7 +1713,7 @@ let test_connection =
            (Some Values.TestConnectionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-resource", add_tags_to_resource);
     ("apply-pending-maintenance-action", apply_pending_maintenance_action);
     ("cancel-replication-task-assessment-run",

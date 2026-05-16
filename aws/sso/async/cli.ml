@@ -115,7 +115,7 @@ let logout =
            (Values.LogoutRequest.make ~accessToken ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-role-credentials", get_role_credentials);
     ("list-account-roles", list_account_roles);
     ("list-accounts", list_accounts);

@@ -261,7 +261,7 @@ let get_session_token =
            (Some Values.GetSessionTokenResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("assume-role", assume_role);
     ("assume-role-with-s-a-m-l", assume_role_with_s_a_m_l);
     ("assume-role-with-web-identity", assume_role_with_web_identity);

@@ -1420,7 +1420,7 @@ let update_infrastructure_configuration =
               Values.UpdateInfrastructureConfigurationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-image-creation", cancel_image_creation);
     ("create-component", create_component);
     ("create-container-recipe", create_container_recipe);

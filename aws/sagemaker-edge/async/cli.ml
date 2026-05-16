@@ -80,6 +80,6 @@ let send_heartbeat =
               ~agentVersion ~deviceName ~deviceFleetName ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-device-registration", get_device_registration);
     ("send-heartbeat", send_heartbeat)]

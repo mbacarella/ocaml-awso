@@ -228,7 +228,7 @@ let update_lifecycle_policy =
            (Some Values.UpdateLifecyclePolicyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-lifecycle-policy", create_lifecycle_policy);
     ("delete-lifecycle-policy", delete_lifecycle_policy);
     ("get-lifecycle-policies", get_lifecycle_policies);

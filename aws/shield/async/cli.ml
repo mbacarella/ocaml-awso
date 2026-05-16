@@ -777,7 +777,7 @@ let update_subscription =
            (Some Values.UpdateSubscriptionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-d-r-t-log-bucket", associate_d_r_t_log_bucket);
     ("associate-d-r-t-role", associate_d_r_t_role);
     ("associate-health-check", associate_health_check);

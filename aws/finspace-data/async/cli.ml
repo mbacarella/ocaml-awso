@@ -652,7 +652,7 @@ let update_user =
            (Some Values.UpdateUserResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-changeset", create_changeset);
     ("create-data-view", create_data_view);
     ("create-dataset", create_dataset);

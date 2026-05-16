@@ -764,7 +764,7 @@ let update_knowledge_base_template_uri =
            (Some Values.UpdateKnowledgeBaseTemplateUriResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-assistant", create_assistant);
     ("create-assistant-association", create_assistant_association);
     ("create-content", create_content);

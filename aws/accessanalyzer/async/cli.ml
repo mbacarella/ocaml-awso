@@ -663,7 +663,7 @@ let validate_policy =
            (Some Values.ValidatePolicyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("apply-archive-rule", apply_archive_rule);
     ("cancel-policy-generation", cancel_policy_generation);
     ("create-access-preview", create_access_preview);

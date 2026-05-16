@@ -451,7 +451,7 @@ let validate_pipeline_definition =
            (Some Values.ValidatePipelineDefinitionOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("activate-pipeline", activate_pipeline);
     ("add-tags", add_tags);
     ("create-pipeline", create_pipeline);

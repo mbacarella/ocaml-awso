@@ -107,7 +107,7 @@ let start_device_authorization =
            (Some Values.StartDeviceAuthorizationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-token", create_token);
     ("register-client", register_client);
     ("start-device-authorization", start_device_authorization)]

@@ -3,7 +3,7 @@ include Cli_0
 include Cli_1
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-certificate-transfer", accept_certificate_transfer);
     ("add-thing-to-billing-group", add_thing_to_billing_group);
     ("add-thing-to-thing-group", add_thing_to_thing_group);

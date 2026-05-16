@@ -333,7 +333,7 @@ let update_environment_membership =
            (Some Values.UpdateEnvironmentMembershipResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-environment-e-c2", create_environment_e_c2);
     ("create-environment-membership", create_environment_membership);
     ("delete-environment", delete_environment);

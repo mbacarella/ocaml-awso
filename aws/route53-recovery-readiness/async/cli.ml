@@ -693,7 +693,7 @@ let update_resource_set =
            (Some Values.UpdateResourceSetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-cell", create_cell);
     ("create-cross-account-authorization",
       create_cross_account_authorization);

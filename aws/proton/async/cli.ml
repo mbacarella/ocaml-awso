@@ -1672,7 +1672,7 @@ let update_template_sync_config =
            (Some Values.UpdateTemplateSyncConfigOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-environment-account-connection",
        accept_environment_account_connection);
     ("cancel-environment-deployment", cancel_environment_deployment);

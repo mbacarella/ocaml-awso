@@ -1057,7 +1057,7 @@ let upgrade_lens_review =
               ~workloadId ~lensAlias ~milestoneName ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-lenses", associate_lenses);
     ("create-lens-share", create_lens_share);
     ("create-lens-version", create_lens_version);

@@ -810,7 +810,7 @@ let update_source_server_replication_type =
            (Some Values.SourceServer.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("change-server-life-cycle-state", change_server_life_cycle_state);
     ("create-replication-configuration-template",
       create_replication_configuration_template);

@@ -479,7 +479,7 @@ let update_ledger_permissions_mode =
            (Some Values.UpdateLedgerPermissionsModeResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-journal-kinesis-stream", cancel_journal_kinesis_stream);
     ("create-ledger", create_ledger);
     ("delete-ledger", delete_ledger);

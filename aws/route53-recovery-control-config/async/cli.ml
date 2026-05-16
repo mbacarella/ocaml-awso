@@ -543,7 +543,7 @@ let update_safety_rule =
            (Some Values.UpdateSafetyRuleResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-cluster", create_cluster);
     ("create-control-panel", create_control_panel);
     ("create-routing-control", create_routing_control);

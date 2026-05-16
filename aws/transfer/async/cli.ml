@@ -850,7 +850,7 @@ let update_user =
            (Some Values.UpdateUserResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-access", create_access);
     ("create-server", create_server);
     ("create-user", create_user);

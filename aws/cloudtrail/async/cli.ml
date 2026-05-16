@@ -718,7 +718,7 @@ let update_trail =
            (Some Values.UpdateTrailResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags", add_tags);
     ("cancel-query", cancel_query);
     ("create-event-data-store", create_event_data_store);

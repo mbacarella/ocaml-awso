@@ -354,7 +354,7 @@ let update_event_integration =
            (Some Values.UpdateEventIntegrationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-data-integration", create_data_integration);
     ("create-event-integration", create_event_integration);
     ("delete-data-integration", delete_data_integration);

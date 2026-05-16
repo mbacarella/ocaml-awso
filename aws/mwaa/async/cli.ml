@@ -357,7 +357,7 @@ let update_environment =
            (Some Values.UpdateEnvironmentOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-cli-token", create_cli_token);
     ("create-environment", create_environment);
     ("create-web-login-token", create_web_login_token);

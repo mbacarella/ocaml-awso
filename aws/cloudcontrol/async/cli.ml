@@ -223,7 +223,7 @@ let update_resource =
            (Some Values.UpdateResourceOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-resource-request", cancel_resource_request);
     ("create-resource", create_resource);
     ("delete-resource", delete_resource);

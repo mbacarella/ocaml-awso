@@ -210,7 +210,7 @@ let update_project =
            (Some Values.UpdateProjectResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-project", create_project);
     ("delete-project", delete_project);
     ("describe-bundle", describe_bundle);

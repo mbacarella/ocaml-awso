@@ -1169,7 +1169,7 @@ let verify =
            (Some Values.VerifyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-key-deletion", cancel_key_deletion);
     ("connect-custom-key-store", connect_custom_key_store);
     ("create-alias", create_alias);

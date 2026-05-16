@@ -1619,7 +1619,7 @@ let update_time_to_live =
            (Some Values.UpdateTimeToLiveOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-execute-statement", batch_execute_statement);
     ("batch-get-item", batch_get_item);
     ("batch-write-item", batch_write_item);

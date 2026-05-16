@@ -2217,7 +2217,7 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-aggregate-resource-config",
        batch_get_aggregate_resource_config);
     ("batch-get-resource-config", batch_get_resource_config);

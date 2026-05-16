@@ -246,7 +246,7 @@ let start_attachment_upload =
            (Some Values.StartAttachmentUploadResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("complete-attachment-upload", complete_attachment_upload);
     ("create-participant-connection", create_participant_connection);
     ("disconnect-participant", disconnect_participant);

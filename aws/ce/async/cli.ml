@@ -1011,7 +1011,7 @@ let update_cost_category_definition =
            (Some Values.UpdateCostCategoryDefinitionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-anomaly-monitor", create_anomaly_monitor);
     ("create-anomaly-subscription", create_anomaly_subscription);
     ("create-cost-category-definition", create_cost_category_definition);

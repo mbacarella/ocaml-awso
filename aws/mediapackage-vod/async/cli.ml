@@ -388,7 +388,7 @@ let update_packaging_group =
            (Some Values.UpdatePackagingGroupResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("configure-logs", configure_logs);
     ("create-asset", create_asset);
     ("create-packaging-configuration", create_packaging_configuration);

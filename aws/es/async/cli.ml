@@ -1069,7 +1069,7 @@ let upgrade_elasticsearch_domain =
            (Some Values.UpgradeElasticsearchDomainResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-inbound-cross-cluster-search-connection",
        accept_inbound_cross_cluster_search_connection);
     ("add-tags", add_tags);

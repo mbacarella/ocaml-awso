@@ -352,7 +352,7 @@ let update_theme =
            (Some Values.UpdateThemeResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-component", create_component);
     ("create-theme", create_theme);
     ("delete-component", delete_component);

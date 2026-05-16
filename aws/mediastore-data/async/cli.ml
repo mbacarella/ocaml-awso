@@ -133,7 +133,7 @@ let put_object =
            (Some Values.PutObjectResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-object", delete_object);
     ("describe-object", describe_object);
     ("get-object", get_object);

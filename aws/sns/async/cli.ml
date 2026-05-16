@@ -861,7 +861,7 @@ let verify_s_m_s_sandbox_phone_number =
            (Some Values.VerifySMSSandboxPhoneNumberResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-permission", add_permission);
     ("check-if-phone-number-is-opted-out",
       check_if_phone_number_is_opted_out);

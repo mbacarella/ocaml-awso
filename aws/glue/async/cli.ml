@@ -4522,7 +4522,7 @@ let update_workflow =
            (Some Values.UpdateWorkflowResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-create-partition", batch_create_partition);
     ("batch-delete-connection", batch_delete_connection);
     ("batch-delete-partition", batch_delete_partition);

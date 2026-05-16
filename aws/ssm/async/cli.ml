@@ -4010,7 +4010,7 @@ let update_service_setting =
            (Some Values.UpdateServiceSettingResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-resource", add_tags_to_resource);
     ("associate-ops-item-related-item", associate_ops_item_related_item);
     ("cancel-command", cancel_command);

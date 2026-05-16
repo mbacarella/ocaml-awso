@@ -2430,7 +2430,7 @@ let update_tag_option =
            (Some Values.UpdateTagOptionOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-portfolio-share", accept_portfolio_share);
     ("associate-budget-with-resource", associate_budget_with_resource);
     ("associate-principal-with-portfolio",

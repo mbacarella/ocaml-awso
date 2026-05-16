@@ -429,7 +429,7 @@ let untag_resource =
            (Some Values.UntagResourceOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-container", create_container);
     ("delete-container", delete_container);
     ("delete-container-policy", delete_container_policy);

@@ -812,7 +812,7 @@ let update_device_metadata =
            (Some Values.UpdateDeviceMetadataResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-application-instance", create_application_instance);
     ("create-job-for-devices", create_job_for_devices);
     ("create-node-from-template-job", create_node_from_template_job);

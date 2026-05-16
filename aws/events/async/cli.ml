@@ -1284,7 +1284,7 @@ let update_endpoint =
            (Some Values.UpdateEndpointResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("activate-event-source", activate_event_source);
     ("cancel-replay", cancel_replay);
     ("create-api-destination", create_api_destination);

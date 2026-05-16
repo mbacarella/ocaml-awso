@@ -837,7 +837,7 @@ let update_permission_set =
            (Some Values.UpdatePermissionSetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("attach-managed-policy-to-permission-set",
        attach_managed_policy_to_permission_set);
     ("create-account-assignment", create_account_assignment);

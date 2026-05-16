@@ -1225,7 +1225,7 @@ let update_studio_component =
            (Some Values.UpdateStudioComponentResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-eulas", accept_eulas);
     ("create-launch-profile", create_launch_profile);
     ("create-streaming-image", create_streaming_image);

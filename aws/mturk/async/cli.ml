@@ -1030,7 +1030,7 @@ let update_qualification_type =
            (Some Values.UpdateQualificationTypeResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-qualification-request", accept_qualification_request);
     ("approve-assignment", approve_assignment);
     ("associate-qualification-with-worker",

@@ -1362,7 +1362,7 @@ let update_threat_intel_set =
            (Some Values.UpdateThreatIntelSetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-invitation", accept_invitation);
     ("archive-findings", archive_findings);
     ("create-detector", create_detector);

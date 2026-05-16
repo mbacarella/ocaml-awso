@@ -433,7 +433,7 @@ let update_records =
            (Some Values.UpdateRecordsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("bulk-publish", bulk_publish);
     ("delete-dataset", delete_dataset);
     ("describe-dataset", describe_dataset);

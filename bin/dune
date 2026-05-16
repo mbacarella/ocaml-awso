@@ -1,7 +1,5 @@
 (executable
  (name awso_codegen_main)
- (public_name awso-codegen)
- (package awso-codegen)
  (libraries awso_codegen))
 
 (executable

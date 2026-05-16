@@ -1454,7 +1454,7 @@ let verify_trust =
            (Some Values.VerifyTrustResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-shared-directory", accept_shared_directory);
     ("add-ip-routes", add_ip_routes);
     ("add-region", add_region);

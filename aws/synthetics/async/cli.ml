@@ -356,7 +356,7 @@ let update_canary =
            (Some Values.UpdateCanaryResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-canary", create_canary);
     ("delete-canary", delete_canary);
     ("describe-canaries", describe_canaries);

@@ -646,7 +646,7 @@ let update_scheduling_policy =
            (Some Values.UpdateSchedulingPolicyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-job", cancel_job);
     ("create-compute-environment", create_compute_environment);
     ("create-job-queue", create_job_queue);

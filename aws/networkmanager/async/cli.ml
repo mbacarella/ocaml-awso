@@ -1993,7 +1993,7 @@ let update_vpc_attachment =
            (Some Values.UpdateVpcAttachmentResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-attachment", accept_attachment);
     ("associate-connect-peer", associate_connect_peer);
     ("associate-customer-gateway", associate_customer_gateway);

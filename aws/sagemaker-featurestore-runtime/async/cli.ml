@@ -120,7 +120,7 @@ let put_record =
               ~record:(Values.Record.of_json record) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-record", batch_get_record);
     ("delete-record", delete_record);
     ("get-record", get_record);

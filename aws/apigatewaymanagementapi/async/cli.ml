@@ -82,7 +82,7 @@ let post_to_connection =
               ~data:(Values.Data.of_json data) ~connectionId ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-connection", delete_connection);
     ("get-connection", get_connection);
     ("post-to-connection", post_to_connection)]

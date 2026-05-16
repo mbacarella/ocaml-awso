@@ -703,7 +703,7 @@ let update_log_pattern =
            (Some Values.UpdateLogPatternResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-application", create_application);
     ("create-component", create_component);
     ("create-log-pattern", create_log_pattern);

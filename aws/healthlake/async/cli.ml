@@ -367,7 +367,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-f-h-i-r-datastore", create_f_h_i_r_datastore);
     ("delete-f-h-i-r-datastore", delete_f_h_i_r_datastore);
     ("describe-f-h-i-r-datastore", describe_f_h_i_r_datastore);

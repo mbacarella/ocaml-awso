@@ -411,7 +411,7 @@ let update_organization_configuration =
               ~graphArn ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-invitation", accept_invitation);
     ("create-graph", create_graph);
     ("create-members", create_members);

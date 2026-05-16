@@ -463,7 +463,7 @@ let put_resource_attributes =
            (Some Values.PutResourceAttributesResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-created-artifact", associate_created_artifact);
     ("associate-discovered-resource", associate_discovered_resource);
     ("create-progress-update-stream", create_progress_update_stream);

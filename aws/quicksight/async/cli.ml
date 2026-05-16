@@ -3294,7 +3294,7 @@ let update_user =
            (Some Values.UpdateUserResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-ingestion", cancel_ingestion);
     ("create-account-customization", create_account_customization);
     ("create-analysis", create_analysis);

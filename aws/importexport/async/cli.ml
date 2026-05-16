@@ -173,7 +173,7 @@ let update_job =
            (Some Values.UpdateJobOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-job", cancel_job);
     ("create-job", create_job);
     ("get-shipping-label", get_shipping_label);

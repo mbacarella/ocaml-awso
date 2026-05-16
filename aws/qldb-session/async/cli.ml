@@ -85,5 +85,5 @@ let send_command =
            (Some Values.SendCommandResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("send-command", send_command)]

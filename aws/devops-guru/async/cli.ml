@@ -715,7 +715,7 @@ let update_service_integration =
            (Some Values.UpdateServiceIntegrationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-notification-channel", add_notification_channel);
     ("delete-insight", delete_insight);
     ("describe-account-health", describe_account_health);

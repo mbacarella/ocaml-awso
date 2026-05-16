@@ -1120,7 +1120,7 @@ let update_table_storage_optimizer =
            (Some Values.UpdateTableStorageOptimizerResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-l-f-tags-to-resource", add_l_f_tags_to_resource);
     ("batch-grant-permissions", batch_grant_permissions);
     ("batch-revoke-permissions", batch_revoke_permissions);

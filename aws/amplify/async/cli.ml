@@ -1029,7 +1029,7 @@ let update_webhook =
            (Some Values.UpdateWebhookResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-app", create_app);
     ("create-backend-environment", create_backend_environment);
     ("create-branch", create_branch);

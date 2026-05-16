@@ -53,5 +53,5 @@ let get_media =
            (Some Values.GetMediaOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-media", get_media)]

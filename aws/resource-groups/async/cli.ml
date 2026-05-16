@@ -365,7 +365,7 @@ let update_group_query =
            (Some Values.UpdateGroupQueryOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-group", create_group);
     ("delete-group", delete_group);
     ("get-group", get_group);

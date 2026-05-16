@@ -3554,7 +3554,7 @@ let update_relational_database_parameters =
               Values.UpdateRelationalDatabaseParametersResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("allocate-static-ip", allocate_static_ip);
     ("attach-certificate-to-distribution",
       attach_certificate_to_distribution);

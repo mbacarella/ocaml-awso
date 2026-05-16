@@ -407,7 +407,7 @@ let update_application =
            (Some Values.UpdateApplicationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-application", create_application);
     ("create-application-version", create_application_version);
     ("create-cloud-formation-change-set", create_cloud_formation_change_set);

@@ -634,7 +634,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-admin-account", associate_admin_account);
     ("associate-third-party-firewall", associate_third_party_firewall);
     ("delete-apps-list", delete_apps_list);

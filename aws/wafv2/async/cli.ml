@@ -1173,7 +1173,7 @@ let update_web_a_c_l =
            (Some Values.UpdateWebACLResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-web-a-c-l", associate_web_a_c_l);
     ("check-capacity", check_capacity);
     ("create-i-p-set", create_i_p_set);

@@ -124,7 +124,7 @@ let update_routing_control_states =
            (Some Values.UpdateRoutingControlStatesResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-routing-control-state", get_routing_control_state);
     ("list-routing-controls", list_routing_controls);
     ("update-routing-control-state", update_routing_control_state);

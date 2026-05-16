@@ -588,7 +588,7 @@ let update_mission_profile =
            (Some Values.MissionProfileIdResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-contact", cancel_contact);
     ("create-config", create_config);
     ("create-dataflow-endpoint-group", create_dataflow_endpoint_group);

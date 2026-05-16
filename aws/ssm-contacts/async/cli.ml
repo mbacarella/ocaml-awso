@@ -630,7 +630,7 @@ let update_contact_channel =
            (Some Values.UpdateContactChannelResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-page", accept_page);
     ("activate-contact-channel", activate_contact_channel);
     ("create-contact", create_contact);

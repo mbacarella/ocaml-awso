@@ -715,7 +715,7 @@ let update_m_l_model =
            (Some Values.UpdateMLModelOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags", add_tags);
     ("create-batch-prediction", create_batch_prediction);
     ("create-data-source-from-r-d-s", create_data_source_from_r_d_s);

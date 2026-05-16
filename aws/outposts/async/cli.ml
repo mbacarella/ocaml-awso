@@ -616,7 +616,7 @@ let update_site_rack_physical_properties =
            (Some Values.UpdateSiteRackPhysicalPropertiesOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-order", cancel_order);
     ("create-order", create_order);
     ("create-outpost", create_outpost);

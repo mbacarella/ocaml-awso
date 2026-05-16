@@ -685,7 +685,7 @@ let update_metric_set =
            (Some Values.UpdateMetricSetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("activate-anomaly-detector", activate_anomaly_detector);
     ("back-test-anomaly-detector", back_test_anomaly_detector);
     ("create-alert", create_alert);

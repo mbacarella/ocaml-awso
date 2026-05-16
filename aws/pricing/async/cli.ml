@@ -107,7 +107,7 @@ let get_products =
            (Some Values.GetProductsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-services", describe_services);
     ("get-attribute-values", get_attribute_values);
     ("get-products", get_products)]

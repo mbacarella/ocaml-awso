@@ -2234,7 +2234,7 @@ let update_v_t_l_device_type =
            (Some Values.UpdateVTLDeviceTypeOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("activate-gateway", activate_gateway);
     ("add-cache", add_cache);
     ("add-tags-to-resource", add_tags_to_resource);

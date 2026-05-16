@@ -795,7 +795,7 @@ let update_replication_job =
            (Some Values.UpdateReplicationJobResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-app", create_app);
     ("create-replication-job", create_replication_job);
     ("delete-app", delete_app);

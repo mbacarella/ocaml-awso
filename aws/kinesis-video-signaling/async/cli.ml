@@ -79,6 +79,6 @@ let send_alexa_offer_to_master =
            (Some Values.SendAlexaOfferToMasterResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-ice-server-config", get_ice_server_config);
     ("send-alexa-offer-to-master", send_alexa_offer_to_master)]

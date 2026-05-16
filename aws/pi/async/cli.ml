@@ -235,7 +235,7 @@ let list_available_resource_metrics =
            (Some Values.ListAvailableResourceMetricsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-dimension-keys", describe_dimension_keys);
     ("get-dimension-key-details", get_dimension_key_details);
     ("get-resource-metadata", get_resource_metadata);

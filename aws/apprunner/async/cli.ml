@@ -764,7 +764,7 @@ let update_service =
            (Some Values.UpdateServiceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-custom-domain", associate_custom_domain);
     ("create-auto-scaling-configuration", create_auto_scaling_configuration);
     ("create-connection", create_connection);

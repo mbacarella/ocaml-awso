@@ -635,7 +635,7 @@ let update_service =
            (Some Values.UpdateServiceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-http-namespace", create_http_namespace);
     ("create-private-dns-namespace", create_private_dns_namespace);
     ("create-public-dns-namespace", create_public_dns_namespace);

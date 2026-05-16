@@ -415,7 +415,7 @@ let register_scalable_target =
            (Some Values.RegisterScalableTargetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-scaling-policy", delete_scaling_policy);
     ("delete-scheduled-action", delete_scheduled_action);
     ("deregister-scalable-target", deregister_scalable_target);

@@ -172,7 +172,7 @@ let update_thing_shadow =
            (Some Values.UpdateThingShadowResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-thing-shadow", delete_thing_shadow);
     ("get-retained-message", get_retained_message);
     ("get-thing-shadow", get_thing_shadow);

@@ -265,7 +265,7 @@ let list_detectors =
            (Some Values.ListDetectorsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-acknowledge-alarm", batch_acknowledge_alarm);
     ("batch-disable-alarm", batch_disable_alarm);
     ("batch-enable-alarm", batch_enable_alarm);

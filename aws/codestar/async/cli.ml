@@ -420,7 +420,7 @@ let update_user_profile =
            (Some Values.UpdateUserProfileResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-team-member", associate_team_member);
     ("create-project", create_project);
     ("create-user-profile", create_user_profile);

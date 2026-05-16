@@ -606,7 +606,7 @@ let update_application =
            (Some Values.UpdateApplicationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-configuration-items-to-application",
        associate_configuration_items_to_application);
     ("batch-delete-import-data", batch_delete_import_data);

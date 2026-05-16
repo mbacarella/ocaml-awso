@@ -2032,7 +2032,7 @@ let update_wireless_gateway =
            (Some Values.UpdateWirelessGatewayResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-aws-account-with-partner-account",
        associate_aws_account_with_partner_account);
     ("associate-multicast-group-with-fuota-task",

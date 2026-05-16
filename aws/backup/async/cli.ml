@@ -1546,7 +1546,7 @@ let update_report_plan =
            (Some Values.UpdateReportPlanOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-backup-plan", create_backup_plan);
     ("create-backup-selection", create_backup_selection);
     ("create-backup-vault", create_backup_vault);

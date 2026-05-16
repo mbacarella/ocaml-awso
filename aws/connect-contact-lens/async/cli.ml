@@ -56,6 +56,6 @@ let list_realtime_contact_analysis_segments =
               Values.ListRealtimeContactAnalysisSegmentsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("list-realtime-contact-analysis-segments",
        list_realtime_contact_analysis_segments)]

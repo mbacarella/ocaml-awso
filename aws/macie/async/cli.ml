@@ -181,7 +181,7 @@ let update_s3_resources =
            (Some Values.UpdateS3ResourcesResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-member-account", associate_member_account);
     ("associate-s3-resources", associate_s3_resources);
     ("disassociate-member-account", disassociate_member_account);

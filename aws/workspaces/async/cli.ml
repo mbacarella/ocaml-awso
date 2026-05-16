@@ -1416,7 +1416,7 @@ let update_workspace_image_permission =
            (Some Values.UpdateWorkspaceImagePermissionResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-connection-alias", associate_connection_alias);
     ("associate-ip-groups", associate_ip_groups);
     ("authorize-ip-rules", authorize_ip_rules);

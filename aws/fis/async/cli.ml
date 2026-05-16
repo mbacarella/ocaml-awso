@@ -392,7 +392,7 @@ let update_experiment_template =
            (Some Values.UpdateExperimentTemplateResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-experiment-template", create_experiment_template);
     ("delete-experiment-template", delete_experiment_template);
     ("get-action", get_action);

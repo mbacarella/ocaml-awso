@@ -1590,7 +1590,7 @@ let update_task_set =
            (Some Values.UpdateTaskSetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-capacity-provider", create_capacity_provider);
     ("create-cluster", create_cluster);
     ("create-service", create_service);

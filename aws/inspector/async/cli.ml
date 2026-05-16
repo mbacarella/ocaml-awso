@@ -856,7 +856,7 @@ let update_assessment_target =
               ~assessmentTargetArn ~assessmentTargetName ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-attributes-to-findings", add_attributes_to_findings);
     ("create-assessment-target", create_assessment_target);
     ("create-assessment-template", create_assessment_template);

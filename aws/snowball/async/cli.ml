@@ -672,7 +672,7 @@ let update_long_term_pricing =
            (Some Values.UpdateLongTermPricingResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-cluster", cancel_cluster);
     ("cancel-job", cancel_job);
     ("create-address", create_address);

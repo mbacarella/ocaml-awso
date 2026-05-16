@@ -526,7 +526,7 @@ let update_state_machine =
            (Some Values.UpdateStateMachineOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-activity", create_activity);
     ("create-state-machine", create_state_machine);
     ("delete-activity", delete_activity);

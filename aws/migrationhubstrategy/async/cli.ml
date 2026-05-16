@@ -498,7 +498,7 @@ let update_server_config =
            (Some Values.UpdateServerConfigResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-application-component-details", get_application_component_details);
     ("get-application-component-strategies",
       get_application_component_strategies);

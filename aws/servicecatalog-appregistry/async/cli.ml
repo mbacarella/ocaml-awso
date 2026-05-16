@@ -491,7 +491,7 @@ let update_attribute_group =
            (Some Values.UpdateAttributeGroupResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-attribute-group", associate_attribute_group);
     ("associate-resource", associate_resource);
     ("create-application", create_application);

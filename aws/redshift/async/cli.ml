@@ -3259,7 +3259,7 @@ let update_partner_status =
            (Some Values.PartnerIntegrationOutputMessage.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-reserved-node-exchange", accept_reserved_node_exchange);
     ("add-partner", add_partner);
     ("associate-data-share-consumer", associate_data_share_consumer);

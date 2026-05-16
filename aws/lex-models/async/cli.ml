@@ -1022,7 +1022,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-bot-version", create_bot_version);
     ("create-intent-version", create_intent_version);
     ("create-slot-type-version", create_slot_type_version);

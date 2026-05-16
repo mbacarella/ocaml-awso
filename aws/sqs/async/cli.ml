@@ -463,7 +463,7 @@ let untag_queue =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-permission", add_permission);
     ("change-message-visibility", change_message_visibility);
     ("change-message-visibility-batch", change_message_visibility_batch);

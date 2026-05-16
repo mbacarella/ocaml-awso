@@ -333,7 +333,7 @@ let update_notification_rule =
            (Some Values.UpdateNotificationRuleResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-notification-rule", create_notification_rule);
     ("delete-notification-rule", delete_notification_rule);
     ("delete-target", delete_target);

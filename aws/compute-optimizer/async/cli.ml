@@ -598,7 +598,7 @@ let update_enrollment_status =
            (Some Values.UpdateEnrollmentStatusResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-recommendation-preferences", delete_recommendation_preferences);
     ("describe-recommendation-export-jobs",
       describe_recommendation_export_jobs);

@@ -644,7 +644,7 @@ let update_subscriber =
            (Some Values.UpdateSubscriberResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-budget", create_budget);
     ("create-budget-action", create_budget_action);
     ("create-notification", create_notification);

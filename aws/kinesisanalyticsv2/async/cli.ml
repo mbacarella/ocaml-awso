@@ -903,7 +903,7 @@ let update_application_maintenance_configuration =
               Values.UpdateApplicationMaintenanceConfigurationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-application-cloud-watch-logging-option",
        add_application_cloud_watch_logging_option);
     ("add-application-input", add_application_input);

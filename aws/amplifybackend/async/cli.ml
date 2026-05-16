@@ -771,7 +771,7 @@ let update_backend_storage =
            (Some Values.UpdateBackendStorageResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("clone-backend", clone_backend);
     ("create-backend", create_backend);
     ("create-backend-a-p-i", create_backend_a_p_i);

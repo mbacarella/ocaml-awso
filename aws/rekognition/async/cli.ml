@@ -1403,7 +1403,7 @@ let update_dataset_entries =
            (Some Values.UpdateDatasetEntriesResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("compare-faces", compare_faces);
     ("create-collection", create_collection);
     ("create-dataset", create_dataset);

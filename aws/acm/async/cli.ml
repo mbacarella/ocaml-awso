@@ -364,7 +364,7 @@ let update_certificate_options =
            None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-certificate", add_tags_to_certificate);
     ("delete-certificate", delete_certificate);
     ("describe-certificate", describe_certificate);

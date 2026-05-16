@@ -833,7 +833,7 @@ let update_pipeline =
                                      pipelineActivities) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-put-message", batch_put_message);
     ("cancel-pipeline-reprocessing", cancel_pipeline_reprocessing);
     ("create-channel", create_channel);

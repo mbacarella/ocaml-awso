@@ -1,7 +1,7 @@
 (library
  (name awso_codegen)
- (public_name awso-codegen)
  (libraries
+  awso
   awso_common
   unix
   yojson

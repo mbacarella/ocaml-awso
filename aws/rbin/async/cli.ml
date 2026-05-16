@@ -215,7 +215,7 @@ let update_rule =
            (Some Values.UpdateRuleResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-rule", create_rule);
     ("delete-rule", delete_rule);
     ("get-rule", get_rule);

@@ -711,7 +711,7 @@ let view_billing =
            (Some Values.ViewBillingResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-domain-transfer-from-another-aws-account",
        accept_domain_transfer_from_another_aws_account);
     ("cancel-domain-transfer-to-another-aws-account",

@@ -1007,7 +1007,7 @@ let update_virtual_service =
            (Some Values.UpdateVirtualServiceOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-gateway-route", create_gateway_route);
     ("create-mesh", create_mesh);
     ("create-route", create_route);

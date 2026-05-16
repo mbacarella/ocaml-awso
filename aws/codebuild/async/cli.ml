@@ -1420,7 +1420,7 @@ let update_webhook =
            (Some Values.UpdateWebhookOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-delete-builds", batch_delete_builds);
     ("batch-get-build-batches", batch_get_build_batches);
     ("batch-get-builds", batch_get_builds);

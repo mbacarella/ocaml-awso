@@ -1435,7 +1435,7 @@ let validate_assessment_report_integrity =
               Values.ValidateAssessmentReportIntegrityResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-assessment-report-evidence-folder",
        associate_assessment_report_evidence_folder);
     ("batch-associate-assessment-report-evidence",

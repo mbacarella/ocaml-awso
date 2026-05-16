@@ -1331,7 +1331,7 @@ let update_tracker =
            (Some Values.UpdateTrackerResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-tracker-consumer", associate_tracker_consumer);
     ("batch-delete-device-position-history",
       batch_delete_device_position_history);

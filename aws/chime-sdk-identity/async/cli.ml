@@ -567,7 +567,7 @@ let update_app_instance_user_endpoint =
            (Some Values.UpdateAppInstanceUserEndpointResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-app-instance", create_app_instance);
     ("create-app-instance-admin", create_app_instance_admin);
     ("create-app-instance-user", create_app_instance_user);

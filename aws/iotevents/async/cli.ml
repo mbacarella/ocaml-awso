@@ -663,7 +663,7 @@ let update_input =
            (Some Values.UpdateInputResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-alarm-model", create_alarm_model);
     ("create-detector-model", create_detector_model);
     ("create-input", create_input);

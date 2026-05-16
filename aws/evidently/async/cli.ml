@@ -889,7 +889,7 @@ let update_project_data_delivery =
            (Some Values.UpdateProjectDataDeliveryResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-evaluate-feature", batch_evaluate_feature);
     ("create-experiment", create_experiment);
     ("create-feature", create_feature);

@@ -1850,7 +1850,7 @@ let update_streaming_distribution2020_05_31 =
            (Some Values.UpdateStreamingDistributionResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-alias2020_05_31", associate_alias2020_05_31);
     ("create-cache-policy2020_05_31", create_cache_policy2020_05_31);
     ("create-cloud-front-origin-access-identity2020_05_31",

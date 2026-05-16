@@ -111,6 +111,6 @@ let start_support_data_export =
            (Some Values.StartSupportDataExportResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("generate-data-set", generate_data_set);
     ("start-support-data-export", start_support_data_export)]

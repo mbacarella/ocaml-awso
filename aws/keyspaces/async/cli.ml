@@ -386,7 +386,7 @@ let update_table =
            (Some Values.UpdateTableResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-keyspace", create_keyspace);
     ("create-table", create_table);
     ("delete-keyspace", delete_keyspace);

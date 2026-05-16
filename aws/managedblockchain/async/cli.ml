@@ -596,7 +596,7 @@ let vote_on_proposal =
            (Some Values.VoteOnProposalOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-member", create_member);
     ("create-network", create_network);
     ("create-node", create_node);

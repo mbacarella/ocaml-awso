@@ -4362,7 +4362,7 @@ let update_voice_connector_group =
            (Some Values.UpdateVoiceConnectorGroupResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-phone-number-with-user", associate_phone_number_with_user);
     ("associate-phone-numbers-with-voice-connector",
       associate_phone_numbers_with_voice_connector);

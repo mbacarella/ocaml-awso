@@ -702,7 +702,7 @@ let update_queue =
            (Some Values.UpdateQueueResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-certificate", associate_certificate);
     ("cancel-job", cancel_job);
     ("create-job", create_job);

@@ -354,7 +354,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("copy-backup-to-region", copy_backup_to_region);
     ("create-cluster", create_cluster);
     ("create-hsm", create_hsm);

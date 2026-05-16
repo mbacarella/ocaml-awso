@@ -121,7 +121,7 @@ let list_users =
            (Some Values.ListUsersResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-group", describe_group);
     ("describe-user", describe_user);
     ("list-groups", list_groups);

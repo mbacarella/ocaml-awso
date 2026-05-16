@@ -154,7 +154,7 @@ let update_job_execution =
            (Some Values.UpdateJobExecutionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-job-execution", describe_job_execution);
     ("get-pending-job-executions", get_pending_job_executions);
     ("start-next-pending-job-execution", start_next_pending_job_execution);

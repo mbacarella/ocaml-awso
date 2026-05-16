@@ -1719,7 +1719,7 @@ let update_stack =
            (Some Values.UpdateStackResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-application-fleet", associate_application_fleet);
     ("associate-application-to-entitlement",
       associate_application_to_entitlement);

@@ -701,7 +701,7 @@ let update_schema =
            (Some Values.UpdateSchemaResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-discoverer", create_discoverer);
     ("create-registry", create_registry);
     ("create-schema", create_schema);

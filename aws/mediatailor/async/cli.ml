@@ -915,7 +915,7 @@ let update_vod_source =
            (Some Values.UpdateVodSourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("configure-logs-for-playback-configuration",
        configure_logs_for_playback_configuration);
     ("create-channel", create_channel);

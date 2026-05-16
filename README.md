@@ -14,7 +14,7 @@ Sub-libraries are provided for Async and Lwt versions of all code.
 ## Features
 
 Nearly all of AWS's 300+ APIs are supported. Async and Lwt concurrency
-interfaces are provided. There is additionally a command-line tool for
+interfaces are provided. There is additionally a command-line tool `awso-cli` for
 all APIs composed using Core.Command.
 
 ## Getting started

@@ -93,6 +93,6 @@ let get_recommendations =
            (Some Values.GetRecommendationsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-personalized-ranking", get_personalized_ranking);
     ("get-recommendations", get_recommendations)]

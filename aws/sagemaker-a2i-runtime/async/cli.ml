@@ -152,7 +152,7 @@ let stop_human_loop =
            (Some Values.StopHumanLoopResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-human-loop", delete_human_loop);
     ("describe-human-loop", describe_human_loop);
     ("list-human-loops", list_human_loops);

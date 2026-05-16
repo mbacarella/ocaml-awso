@@ -1019,7 +1019,7 @@ let update_vocabulary_filter =
            (Some Values.UpdateVocabularyFilterResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-call-analytics-category", create_call_analytics_category);
     ("create-language-model", create_language_model);
     ("create-medical-vocabulary", create_medical_vocabulary);

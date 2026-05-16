@@ -1754,7 +1754,7 @@ let update_resource =
            (Some Values.UpdateResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-delegate-to-resource", associate_delegate_to_resource);
     ("associate-member-to-group", associate_member_to_group);
     ("cancel-mailbox-export-job", cancel_mailbox_export_job);

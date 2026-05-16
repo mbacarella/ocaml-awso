@@ -625,7 +625,7 @@ let update_inference_scheduler =
               ~inferenceSchedulerName ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-dataset", create_dataset);
     ("create-inference-scheduler", create_inference_scheduler);
     ("create-model", create_model);

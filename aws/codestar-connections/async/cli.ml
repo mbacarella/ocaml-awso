@@ -290,7 +290,7 @@ let update_host =
            (Some Values.UpdateHostOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-connection", create_connection);
     ("create-host", create_host);
     ("delete-connection", delete_connection);

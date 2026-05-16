@@ -350,7 +350,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-savings-plan", create_savings_plan);
     ("delete-queued-savings-plan", delete_queued_savings_plan);
     ("describe-savings-plan-rates", describe_savings_plan_rates);

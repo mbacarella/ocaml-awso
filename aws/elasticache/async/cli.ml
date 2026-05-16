@@ -2074,7 +2074,7 @@ let test_failover =
            (Some Values.TestFailoverResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-resource", add_tags_to_resource);
     ("authorize-cache-security-group-ingress",
       authorize_cache_security_group_ingress);

@@ -330,7 +330,7 @@ let update_connector =
            (Some Values.UpdateConnectorResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-connector", create_connector);
     ("create-custom-plugin", create_custom_plugin);
     ("create-worker-configuration", create_worker_configuration);

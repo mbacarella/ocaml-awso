@@ -662,7 +662,7 @@ let update_connectivity_info =
            (Some Values.UpdateConnectivityInfoResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-service-role-to-account", associate_service_role_to_account);
     ("batch-associate-client-device-with-core-device",
       batch_associate_client_device_with_core_device);

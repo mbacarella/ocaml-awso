@@ -632,7 +632,7 @@ let update_identity_pool =
            (Some Values.IdentityPool.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-identity-pool", create_identity_pool);
     ("delete-identities", delete_identities);
     ("delete-identity-pool", delete_identity_pool);

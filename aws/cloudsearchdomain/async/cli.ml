@@ -110,7 +110,7 @@ let upload_documents =
            (Some Values.UploadDocumentsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("search", search);
     ("suggest", suggest);
     ("upload-documents", upload_documents)]

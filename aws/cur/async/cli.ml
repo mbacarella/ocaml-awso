@@ -113,7 +113,7 @@ let put_report_definition =
            (Some Values.PutReportDefinitionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-report-definition", delete_report_definition);
     ("describe-report-definitions", describe_report_definitions);
     ("modify-report-definition", modify_report_definition);

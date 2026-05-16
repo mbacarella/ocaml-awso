@@ -201,7 +201,7 @@ let update_application =
            (Some Values.UpdateApplicationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-application", create_application);
     ("delete-application", delete_application);
     ("describe-application", describe_application);

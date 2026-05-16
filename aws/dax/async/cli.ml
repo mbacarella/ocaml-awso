@@ -573,7 +573,7 @@ let update_subnet_group =
            (Some Values.UpdateSubnetGroupResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-cluster", create_cluster);
     ("create-parameter-group", create_parameter_group);
     ("create-subnet-group", create_subnet_group);

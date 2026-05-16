@@ -751,7 +751,7 @@ let update_identity_provider_configuration =
               Values.UpdateIdentityProviderConfigurationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-domain", associate_domain);
     ("associate-website-authorization-provider",
       associate_website_authorization_provider);

@@ -1865,7 +1865,7 @@ let update_volume =
            None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("assign-instance", assign_instance);
     ("assign-volume", assign_volume);
     ("associate-elastic-ip", associate_elastic_ip);

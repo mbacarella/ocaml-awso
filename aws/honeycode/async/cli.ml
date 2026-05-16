@@ -417,7 +417,7 @@ let untag_resource =
            (Some Values.UntagResourceResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-create-table-rows", batch_create_table_rows);
     ("batch-delete-table-rows", batch_delete_table_rows);
     ("batch-update-table-rows", batch_update_table_rows);

@@ -803,7 +803,7 @@ let upload_entity_definitions =
            (Some Values.UploadEntityDefinitionsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-entity-to-thing", associate_entity_to_thing);
     ("create-flow-template", create_flow_template);
     ("create-system-instance", create_system_instance);

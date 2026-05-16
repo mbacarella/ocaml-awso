@@ -721,7 +721,7 @@ let update_timeline_event =
            (Some Values.UpdateTimelineEventOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-replication-set", create_replication_set);
     ("create-response-plan", create_response_plan);
     ("create-timeline-event", create_timeline_event);

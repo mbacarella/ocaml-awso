@@ -13,7 +13,7 @@ bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
   "dune" {>= "3.0"}
   "ocaml" {>= "4.14"}
-  "awso-codegen"
+  "awso-common"
   "cohttp" {>= "0.21.0"}
   "cryptokit"
   "ppx_expect"

@@ -1140,7 +1140,7 @@ let update_task_execution =
            (Some Values.UpdateTaskExecutionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-task-execution", cancel_task_execution);
     ("create-agent", create_agent);
     ("create-location-efs", create_location_efs);

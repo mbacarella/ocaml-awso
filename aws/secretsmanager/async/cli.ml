@@ -592,7 +592,7 @@ let validate_resource_policy =
            (Some Values.ValidateResourcePolicyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-rotate-secret", cancel_rotate_secret);
     ("create-secret", create_secret);
     ("delete-resource-policy", delete_resource_policy);

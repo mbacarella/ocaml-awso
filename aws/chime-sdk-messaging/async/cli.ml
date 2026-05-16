@@ -1125,7 +1125,7 @@ let update_channel_read_marker =
            (Some Values.UpdateChannelReadMarkerResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-channel-flow", associate_channel_flow);
     ("batch-create-channel-membership", batch_create_channel_membership);
     ("channel-flow-callback", channel_flow_callback);

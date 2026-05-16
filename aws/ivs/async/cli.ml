@@ -605,7 +605,7 @@ let update_channel =
            (Some Values.UpdateChannelResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-channel", batch_get_channel);
     ("batch-get-stream-key", batch_get_stream_key);
     ("create-channel", create_channel);

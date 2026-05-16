@@ -2598,7 +2598,7 @@ let validate_matchmaking_rule_set =
            (Some Values.ValidateMatchmakingRuleSetOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-match", accept_match);
     ("claim-game-server", claim_game_server);
     ("create-alias", create_alias);

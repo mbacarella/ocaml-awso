@@ -524,7 +524,7 @@ let update_domain =
            (Some Values.UpdateDomainResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-domain", create_domain);
     ("delete-domain", delete_domain);
     ("delete-fraudster", delete_fraudster);

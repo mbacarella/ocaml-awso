@@ -685,7 +685,7 @@ let update_stream_mode =
                                     streamModeDetails) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-stream", add_tags_to_stream);
     ("create-stream", create_stream);
     ("decrease-stream-retention-period", decrease_stream_retention_period);

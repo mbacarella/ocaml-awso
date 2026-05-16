@@ -1076,7 +1076,7 @@ let update_schedule =
            (Some Values.UpdateScheduleResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-delete-recipe-version", batch_delete_recipe_version);
     ("create-dataset", create_dataset);
     ("create-profile-job", create_profile_job);

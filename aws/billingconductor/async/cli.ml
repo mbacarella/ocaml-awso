@@ -817,7 +817,7 @@ let update_pricing_rule =
            (Some Values.UpdatePricingRuleOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-accounts", associate_accounts);
     ("associate-pricing-rules", associate_pricing_rules);
     ("batch-associate-resources-to-custom-line-item",

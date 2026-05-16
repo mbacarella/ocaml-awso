@@ -372,7 +372,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-repository", associate_repository);
     ("create-code-review", create_code_review);
     ("describe-code-review", describe_code_review);

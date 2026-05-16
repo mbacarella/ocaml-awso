@@ -362,7 +362,7 @@ let write_records =
            (Some Values.WriteRecordsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-database", create_database);
     ("create-table", create_table);
     ("delete-database", delete_database);

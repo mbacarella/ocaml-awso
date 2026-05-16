@@ -3391,7 +3391,7 @@ let upload_signing_certificate =
            (Some Values.UploadSigningCertificateResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-client-i-d-to-open-i-d-connect-provider",
        add_client_i_d_to_open_i_d_connect_provider);
     ("add-role-to-instance-profile", add_role_to_instance_profile);

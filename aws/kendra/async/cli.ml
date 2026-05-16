@@ -1409,7 +1409,7 @@ let update_thesaurus =
               ~id ~indexId ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-entities-to-experience", associate_entities_to_experience);
     ("associate-personas-to-entities", associate_personas_to_entities);
     ("batch-delete-document", batch_delete_document);

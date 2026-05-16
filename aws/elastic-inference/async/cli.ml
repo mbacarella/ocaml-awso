@@ -160,7 +160,7 @@ let untag_resource =
            (Some Values.UntagResourceResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-accelerator-offerings", describe_accelerator_offerings);
     ("describe-accelerator-types", describe_accelerator_types);
     ("describe-accelerators", describe_accelerators);

@@ -178,7 +178,7 @@ let command_main ~loc data =
   [%str
     let main =
       Command.group
-        ~summary:(Awso_codegen.Service.to_string Values.service ^ " commands")
+        ~summary:(Awso.Service.to_string Values.service ^ " commands")
         [%e command_list]
     ;;]
 ;;

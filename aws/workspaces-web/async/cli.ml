@@ -1003,7 +1003,7 @@ let update_user_settings =
            (Some Values.UpdateUserSettingsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-browser-settings", associate_browser_settings);
     ("associate-network-settings", associate_network_settings);
     ("associate-trust-store", associate_trust_store);

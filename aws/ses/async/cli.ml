@@ -1609,7 +1609,7 @@ let verify_email_identity =
            (Some Values.VerifyEmailIdentityResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("clone-receipt-rule-set", clone_receipt_rule_set);
     ("create-configuration-set", create_configuration_set);
     ("create-configuration-set-event-destination",

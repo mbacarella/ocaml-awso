@@ -76,6 +76,14 @@ module Param = struct
         (required string)
         ~doc:"PATH Path to the botocore/data directory.")
   ;;
+
+  let runtime_dir =
+    Command.Param.(
+      flag
+        "--runtime-dir"
+        (required string)
+        ~doc:"DIR Directory in which to write service.ml and service.mli.")
+  ;;
 end
 
 module Build_service_module : sig
@@ -141,17 +149,22 @@ end = struct
     Command.basic
       ~summary:"generate the Service module"
       ~readme:(fun () ->
-        "Print a service.ml and service.mli file to the current working directory.\n\
-         Existing files of this name will be overwritten.\n\n\
+        "Writes service.ml and service.mli into the directory given by --runtime-dir.\n\
+         Existing files of these names will be overwritten.\n\n\
          Note this generator is not provided in the main awso-codegen CLI because the\n\
          Service module is needed in the awso-codegen library. Thus, that would lead to\n\
          a circular dependency.")
       [%map_open
-        let botocore_data = Param.botocore_data in
+        let botocore_data = Param.botocore_data
+        and runtime_dir = Param.runtime_dir in
         fun () ->
           let all_services = get_all_services ~botocore_data in
-          save_file_and_format ~path:"service.ml" ~contents:(make_ml all_services);
-          save_file_and_format ~path:"service.mli" ~contents:(make_mli all_services)]
+          save_file_and_format
+            ~path:(Filename.concat runtime_dir "service.ml")
+            ~contents:(make_ml all_services);
+          save_file_and_format
+            ~path:(Filename.concat runtime_dir "service.mli")
+            ~contents:(make_mli all_services)]
   ;;
 end
 

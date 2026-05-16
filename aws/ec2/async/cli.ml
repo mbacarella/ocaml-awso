@@ -4,7 +4,7 @@ include Cli_1
 include Cli_2
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-reserved-instances-exchange-quote",
        accept_reserved_instances_exchange_quote);
     ("accept-transit-gateway-multicast-domain-associations",

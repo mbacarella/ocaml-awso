@@ -715,7 +715,7 @@ let set_load_balancer_policies_of_listener =
            (Some Values.SetLoadBalancerPoliciesOfListenerOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags", add_tags);
     ("apply-security-groups-to-load-balancer",
       apply_security_groups_to_load_balancer);

@@ -102,7 +102,7 @@ let put_alternate_contact =
               ~name ~phoneNumber ~title ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-alternate-contact", delete_alternate_contact);
     ("get-alternate-contact", get_alternate_contact);
     ("put-alternate-contact", put_alternate_contact)]

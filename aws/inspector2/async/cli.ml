@@ -707,7 +707,7 @@ let update_organization_configuration =
            (Some Values.UpdateOrganizationConfigurationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-member", associate_member);
     ("batch-get-account-status", batch_get_account_status);
     ("batch-get-free-trial-info", batch_get_free_trial_info);

@@ -1713,7 +1713,7 @@ let update_variable =
            (Some Values.UpdateVariableResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-create-variable", batch_create_variable);
     ("batch-get-variable", batch_get_variable);
     ("cancel-batch-import-job", cancel_batch_import_job);

@@ -1472,7 +1472,7 @@ let update_traffic_policy_instance =
            (Some Values.UpdateTrafficPolicyInstanceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("activate-key-signing-key", activate_key_signing_key);
     ("associate-v-p-c-with-hosted-zone", associate_v_p_c_with_hosted_zone);
     ("change-resource-record-sets", change_resource_record_sets);

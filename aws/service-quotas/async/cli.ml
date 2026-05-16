@@ -456,7 +456,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-service-quota-template", associate_service_quota_template);
     ("delete-service-quota-increase-request-from-template",
       delete_service_quota_increase_request_from_template);

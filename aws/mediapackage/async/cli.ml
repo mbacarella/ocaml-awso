@@ -483,7 +483,7 @@ let update_origin_endpoint =
            (Some Values.UpdateOriginEndpointResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("configure-logs", configure_logs);
     ("create-channel", create_channel);
     ("create-harvest-job", create_harvest_job);

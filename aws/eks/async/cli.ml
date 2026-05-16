@@ -931,7 +931,7 @@ let update_nodegroup_version =
            (Some Values.UpdateNodegroupVersionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-encryption-config", associate_encryption_config);
     ("associate-identity-provider-config",
       associate_identity_provider_config);

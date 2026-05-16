@@ -676,7 +676,7 @@ let update_file_system =
            (Some Values.FileSystemDescription.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-access-point", create_access_point);
     ("create-file-system", create_file_system);
     ("create-mount-target", create_mount_target);

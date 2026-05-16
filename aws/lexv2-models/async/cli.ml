@@ -1905,7 +1905,7 @@ let update_slot_type =
            (Some Values.UpdateSlotTypeResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("build-bot-locale", build_bot_locale);
     ("create-bot", create_bot);
     ("create-bot-alias", create_bot_alias);

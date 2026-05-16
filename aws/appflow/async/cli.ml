@@ -574,7 +574,7 @@ let update_flow =
            (Some Values.UpdateFlowResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-connector-profile", create_connector_profile);
     ("create-flow", create_flow);
     ("delete-connector-profile", delete_connector_profile);

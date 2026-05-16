@@ -567,7 +567,7 @@ let update_service_access_policies =
            (Some Values.UpdateServiceAccessPoliciesResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("build-suggesters", build_suggesters);
     ("create-domain", create_domain);
     ("define-analysis-scheme", define_analysis_scheme);

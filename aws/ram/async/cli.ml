@@ -714,7 +714,7 @@ let update_resource_share =
            (Some Values.UpdateResourceShareResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-resource-share-invitation", accept_resource_share_invitation);
     ("associate-resource-share", associate_resource_share);
     ("associate-resource-share-permission",

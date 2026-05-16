@@ -1320,7 +1320,7 @@ let validate_configuration_settings =
            (Some Values.ConfigurationSettingsValidationMessages.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("abort-environment-update", abort_environment_update);
     ("apply-environment-managed-action", apply_environment_managed_action);
     ("associate-environment-operations-role",

@@ -1683,7 +1683,7 @@ let update_xss_match_set =
            (Some Values.UpdateXssMatchSetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-web-a-c-l", associate_web_a_c_l);
     ("create-byte-match-set", create_byte_match_set);
     ("create-geo-match-set", create_geo_match_set);

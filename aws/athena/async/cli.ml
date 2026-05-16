@@ -827,7 +827,7 @@ let update_work_group =
            (Some Values.UpdateWorkGroupOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-named-query", batch_get_named_query);
     ("batch-get-query-execution", batch_get_query_execution);
     ("create-data-catalog", create_data_catalog);

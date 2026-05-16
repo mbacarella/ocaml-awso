@@ -192,7 +192,7 @@ let rollback_transaction =
            (Some Values.RollbackTransactionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-execute-statement", batch_execute_statement);
     ("begin-transaction", begin_transaction);
     ("commit-transaction", commit_transaction);

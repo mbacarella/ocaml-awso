@@ -88,7 +88,7 @@ let put_users =
               ~users:(Values.UserList.of_json users) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("put-events", put_events);
     ("put-items", put_items);
     ("put-users", put_users)]

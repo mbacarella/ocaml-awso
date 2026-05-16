@@ -80,7 +80,7 @@ let send_serial_console_s_s_h_public_key =
            (Some Values.SendSerialConsoleSSHPublicKeyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("send-s-s-h-public-key", send_s_s_h_public_key);
     ("send-serial-console-s-s-h-public-key",
       send_serial_console_s_s_h_public_key)]

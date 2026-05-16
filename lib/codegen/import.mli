@@ -1,5 +1,10 @@
 include module type of Awso_common.Jane_compat
 
+module Service = Awso.Service
+module Region = Awso.Region
+module Botodata = Awso.Botodata
+module Uri_json = Awso.Uri_json
+
 val failwithj : here:'c -> string -> 'd -> ('d -> Yojson.Safe.t) -> 'e
 
 module Sexp : sig
@@ -8,17 +13,6 @@ module Sexp : sig
     | List of t list
 
   val to_string : t -> string
-end
-
-module Uri_json : sig
-  type t = Uri.t
-
-  val to_string : t -> string
-  val of_string : string -> t
-  val compare : t -> t -> int
-  val equal : t -> t -> bool
-  val yojson_of_t : t -> Yojson.Safe.t
-  val t_of_yojson : Yojson.Safe.t -> t
 end
 
 module Process : sig

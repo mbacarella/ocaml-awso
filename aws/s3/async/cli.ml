@@ -3310,7 +3310,7 @@ let write_get_object_response =
               ?bucketKeyEnabled ~requestRoute ~requestToken ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("abort-multipart-upload", abort_multipart_upload);
     ("complete-multipart-upload", complete_multipart_upload);
     ("copy-object", copy_object);

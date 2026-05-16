@@ -1153,7 +1153,7 @@ let update_volume =
            (Some Values.UpdateVolumeResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-file-system-aliases", associate_file_system_aliases);
     ("cancel-data-repository-task", cancel_data_repository_task);
     ("copy-backup", copy_backup);

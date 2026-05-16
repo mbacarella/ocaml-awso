@@ -55,5 +55,5 @@ let query_forecast =
            (Some Values.QueryForecastResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("query-forecast", query_forecast)]

@@ -2220,7 +2220,7 @@ let update_skill_group =
            (Some Values.UpdateSkillGroupResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("approve-skill", approve_skill);
     ("associate-contact-with-address-book",
       associate_contact_with_address_book);

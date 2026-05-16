@@ -1316,7 +1316,7 @@ let update_service_settings =
            (Some Values.UpdateServiceSettingsResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-grant", accept_grant);
     ("check-in-license", check_in_license);
     ("checkout-borrow-license", checkout_borrow_license);

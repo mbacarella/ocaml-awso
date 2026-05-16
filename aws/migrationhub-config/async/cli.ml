@@ -96,7 +96,7 @@ let get_home_region =
            (Some Values.GetHomeRegionResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-home-region-control", create_home_region_control);
     ("describe-home-region-controls", describe_home_region_controls);
     ("get-home-region", get_home_region)]

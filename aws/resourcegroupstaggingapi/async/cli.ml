@@ -243,7 +243,7 @@ let untag_resources =
            (Some Values.UntagResourcesOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-report-creation", describe_report_creation);
     ("get-compliance-summary", get_compliance_summary);
     ("get-resources", get_resources);

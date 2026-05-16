@@ -2,7 +2,6 @@
  (name awso)
  (public_name awso)
  (libraries
-  awso-codegen
   awso_common
   cohttp
   unix

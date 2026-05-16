@@ -125,7 +125,7 @@ let list_streams =
            (Some Values.ListStreamsOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("describe-stream", describe_stream);
     ("get-records", get_records);
     ("get-shard-iterator", get_shard_iterator);

@@ -1218,7 +1218,7 @@ let update_standards_control =
            (Some Values.UpdateStandardsControlResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-administrator-invitation", accept_administrator_invitation);
     ("accept-invitation", accept_invitation);
     ("batch-disable-standards", batch_disable_standards);

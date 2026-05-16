@@ -1823,7 +1823,7 @@ let update_endpoint =
            (Some Values.UpdateEndpointResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-detect-dominant-language", batch_detect_dominant_language);
     ("batch-detect-entities", batch_detect_entities);
     ("batch-detect-key-phrases", batch_detect_key_phrases);

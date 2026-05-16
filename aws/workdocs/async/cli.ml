@@ -1167,7 +1167,7 @@ let update_user =
            (Some Values.UpdateUserResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("abort-document-version-upload", abort_document_version_upload);
     ("activate-user", activate_user);
     ("add-resource-permissions", add_resource_permissions);

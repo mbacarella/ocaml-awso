@@ -256,7 +256,7 @@ let update_app_monitor =
            (Some Values.UpdateAppMonitorResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-app-monitor", create_app_monitor);
     ("delete-app-monitor", delete_app_monitor);
     ("get-app-monitor", get_app_monitor);

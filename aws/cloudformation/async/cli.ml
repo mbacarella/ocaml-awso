@@ -2008,7 +2008,7 @@ let validate_template =
            (Some Values.ValidateTemplateOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("activate-type", activate_type);
     ("batch-describe-type-configurations",
       batch_describe_type_configurations);

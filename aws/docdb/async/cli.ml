@@ -1555,7 +1555,7 @@ let stop_d_b_cluster =
            (Some Values.StopDBClusterResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-source-identifier-to-subscription",
        add_source_identifier_to_subscription);
     ("add-tags-to-resource", add_tags_to_resource);

@@ -487,7 +487,7 @@ let update_stream =
            (Some Values.UpdateStreamOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-signaling-channel", create_signaling_channel);
     ("create-stream", create_stream);
     ("delete-signaling-channel", delete_signaling_channel);

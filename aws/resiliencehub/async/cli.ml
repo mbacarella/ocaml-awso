@@ -971,7 +971,7 @@ let update_resiliency_policy =
            (Some Values.UpdateResiliencyPolicyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-draft-app-version-resource-mappings",
        add_draft_app_version_resource_mappings);
     ("create-app", create_app);

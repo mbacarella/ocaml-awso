@@ -1526,7 +1526,7 @@ let update_virtual_interface_attributes =
            (Some Values.VirtualInterface.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-direct-connect-gateway-association-proposal",
        accept_direct_connect_gateway_association_proposal);
     ("allocate-connection-on-interconnect",

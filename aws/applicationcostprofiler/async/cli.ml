@@ -174,7 +174,7 @@ let update_report_definition =
            (Some Values.UpdateReportDefinitionResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-report-definition", delete_report_definition);
     ("get-report-definition", get_report_definition);
     ("import-application-usage", import_application_usage);

@@ -415,7 +415,7 @@ let update_pipeline_status =
            (Some Values.UpdatePipelineStatusResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-job", cancel_job);
     ("create-job", create_job);
     ("create-pipeline", create_pipeline);

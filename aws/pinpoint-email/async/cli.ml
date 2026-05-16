@@ -974,7 +974,7 @@ let update_configuration_set_event_destination =
               Values.UpdateConfigurationSetEventDestinationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-configuration-set", create_configuration_set);
     ("create-configuration-set-event-destination",
       create_configuration_set_event_destination);

@@ -660,7 +660,7 @@ let update_sampling_rule =
            (Some Values.UpdateSamplingRuleResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-traces", batch_get_traces);
     ("create-group", create_group);
     ("create-sampling-rule", create_sampling_rule);

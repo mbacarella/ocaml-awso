@@ -21,7 +21,7 @@
  (depends
   (ocaml
    (>= 4.14))
-  awso-codegen
+  awso-common
   (cohttp
    (>= 0.21.0))
   cryptokit
@@ -67,24 +67,6 @@
   ppx_expect))
 
 (package
- (name awso-codegen)
- (synopsis "AWS botocore code generator")
- (depends
-  (ocaml
-   (>= 4.14))
-  awso-common
-  ocamlgraph
-  ppxlib
-  ppx_expect
-  (re
-   (>= 1.7.2))
-  (sedlex
-   (>= 2.3))
-  uri
-  xmlm
-  yojson))
-
-(package
  (name awso-unix)
  (synopsis "AWS API base library Unix")
  (depends
@@ -95,7 +77,7 @@
 
 (package
  (name awso-cli)
- (synopsis "A pure OCaml replacement for Python aws-cli")
+ (synopsis "A pure OCaml aws-cli")
  (depends
   (ocaml
    (>= 4.14))

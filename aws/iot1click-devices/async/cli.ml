@@ -293,7 +293,7 @@ let update_device_state =
            (Some Values.UpdateDeviceStateResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("claim-devices-by-claim-code", claim_devices_by_claim_code);
     ("describe-device", describe_device);
     ("finalize-device-claim", finalize_device_claim);

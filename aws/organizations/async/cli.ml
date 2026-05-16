@@ -1101,7 +1101,7 @@ let update_policy =
            (Some Values.UpdatePolicyResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-handshake", accept_handshake);
     ("attach-policy", attach_policy);
     ("cancel-handshake", cancel_handshake);

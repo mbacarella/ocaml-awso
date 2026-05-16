@@ -967,7 +967,7 @@ let untag_log_group =
               ~tags:(Values.TagList.of_json tags) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-kms-key", associate_kms_key);
     ("cancel-export-task", cancel_export_task);
     ("create-export-task", create_export_task);

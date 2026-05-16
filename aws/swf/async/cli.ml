@@ -975,7 +975,7 @@ let untag_resource =
            None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("count-closed-workflow-executions", count_closed_workflow_executions);
     ("count-open-workflow-executions", count_open_workflow_executions);
     ("count-pending-activity-tasks", count_pending_activity_tasks);

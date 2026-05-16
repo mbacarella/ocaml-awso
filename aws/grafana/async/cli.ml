@@ -417,7 +417,7 @@ let update_workspace_authentication =
            (Some Values.UpdateWorkspaceAuthenticationResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-license", associate_license);
     ("create-workspace", create_workspace);
     ("delete-workspace", delete_workspace);

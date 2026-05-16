@@ -1323,7 +1323,7 @@ let update_world_template =
            (Some Values.UpdateWorldTemplateResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-delete-worlds", batch_delete_worlds);
     ("batch-describe-simulation-job", batch_describe_simulation_job);
     ("cancel-deployment-job", cancel_deployment_job);

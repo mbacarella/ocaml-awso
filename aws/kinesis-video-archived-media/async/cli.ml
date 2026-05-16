@@ -217,7 +217,7 @@ let list_fragments =
            (Some Values.ListFragmentsOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("get-clip", get_clip);
     ("get-d-a-s-h-streaming-session-u-r-l",
       get_d_a_s_h_streaming_session_u_r_l);

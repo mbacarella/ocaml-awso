@@ -514,7 +514,7 @@ let update_server_engine_attributes =
            (Some Values.UpdateServerEngineAttributesResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-node", associate_node);
     ("create-backup", create_backup);
     ("create-server", create_server);

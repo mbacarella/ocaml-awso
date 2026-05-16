@@ -1068,7 +1068,7 @@ let update_dataset_group =
            (Some Values.UpdateDatasetGroupResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-auto-predictor", create_auto_predictor);
     ("create-dataset", create_dataset);
     ("create-dataset-group", create_dataset_group);

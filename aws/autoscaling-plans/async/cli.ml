@@ -236,7 +236,7 @@ let update_scaling_plan =
            (Some Values.UpdateScalingPlanResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-scaling-plan", create_scaling_plan);
     ("delete-scaling-plan", delete_scaling_plan);
     ("describe-scaling-plan-resources", describe_scaling_plan_resources);

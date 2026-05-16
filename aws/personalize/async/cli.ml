@@ -1273,7 +1273,7 @@ let update_recommender =
            (Some Values.UpdateRecommenderResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-batch-inference-job", create_batch_inference_job);
     ("create-batch-segment-job", create_batch_segment_job);
     ("create-campaign", create_campaign);

@@ -1035,7 +1035,7 @@ let untag_resource =
            (Some Values.UntagResourceOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-alarms", delete_alarms);
     ("delete-anomaly-detector", delete_anomaly_detector);
     ("delete-dashboards", delete_dashboards);

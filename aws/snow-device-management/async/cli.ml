@@ -300,7 +300,7 @@ let untag_resource =
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-task", cancel_task);
     ("create-task", create_task);
     ("describe-device", describe_device);

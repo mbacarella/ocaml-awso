@@ -2113,7 +2113,7 @@ let update_repository_name =
            None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-approval-rule-template-with-repository",
        associate_approval_rule_template_with_repository);
     ("batch-associate-approval-rule-template-with-repositories",

@@ -446,7 +446,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-profile-permission", add_profile_permission);
     ("cancel-signing-profile", cancel_signing_profile);
     ("describe-signing-job", describe_signing_job);

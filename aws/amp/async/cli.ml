@@ -399,7 +399,7 @@ let update_workspace_alias =
               ~workspaceId ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-alert-manager-definition", create_alert_manager_definition);
     ("create-rule-groups-namespace", create_rule_groups_namespace);
     ("create-workspace", create_workspace);

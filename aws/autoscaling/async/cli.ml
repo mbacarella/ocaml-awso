@@ -1762,7 +1762,7 @@ let update_auto_scaling_group =
               ?desiredCapacityType ~autoScalingGroupName ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("attach-instances", attach_instances);
     ("attach-load-balancer-target-groups",
       attach_load_balancer_target_groups);

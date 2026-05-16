@@ -1760,7 +1760,7 @@ let update_v_p_c_e_configuration =
            (Some Values.UpdateVPCEConfigurationResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-device-pool", create_device_pool);
     ("create-instance-profile", create_instance_profile);
     ("create-network-profile", create_network_profile);

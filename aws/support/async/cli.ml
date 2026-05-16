@@ -358,7 +358,7 @@ let resolve_case =
            (Some Values.ResolveCaseResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-attachments-to-set", add_attachments_to_set);
     ("add-communication-to-case", add_communication_to_case);
     ("create-case", create_case);

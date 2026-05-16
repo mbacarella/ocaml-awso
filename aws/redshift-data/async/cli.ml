@@ -291,7 +291,7 @@ let list_tables =
            (Some Values.ListTablesResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-execute-statement", batch_execute_statement);
     ("cancel-statement", cancel_statement);
     ("describe-statement", describe_statement);

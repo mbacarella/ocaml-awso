@@ -1043,7 +1043,7 @@ let upload_layer_part =
            (Some Values.UploadLayerPartResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-check-layer-availability", batch_check_layer_availability);
     ("batch-delete-image", batch_delete_image);
     ("batch-get-image", batch_get_image);

@@ -382,7 +382,7 @@ let update_parallel_data =
            (Some Values.UpdateParallelDataResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-parallel-data", create_parallel_data);
     ("delete-parallel-data", delete_parallel_data);
     ("delete-terminology", delete_terminology);

@@ -1265,7 +1265,7 @@ let update_deployment_group =
            (Some Values.UpdateDeploymentGroupOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-on-premises-instances", add_tags_to_on_premises_instances);
     ("batch-get-application-revisions", batch_get_application_revisions);
     ("batch-get-applications", batch_get_applications);

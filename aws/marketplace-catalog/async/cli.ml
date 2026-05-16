@@ -170,7 +170,7 @@ let start_change_set =
            (Some Values.StartChangeSetResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-change-set", cancel_change_set);
     ("describe-change-set", describe_change_set);
     ("describe-entity", describe_entity);

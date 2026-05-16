@@ -295,7 +295,7 @@ let start_expense_analysis =
            (Some Values.StartExpenseAnalysisResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("analyze-document", analyze_document);
     ("analyze-expense", analyze_expense);
     ("analyze-i-d", analyze_i_d);

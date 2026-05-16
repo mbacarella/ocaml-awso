@@ -747,7 +747,7 @@ let update_stage =
            (Some Values.UpdateStageResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-game", create_game);
     ("create-snapshot", create_snapshot);
     ("create-stage", create_stage);

@@ -181,7 +181,7 @@ let untag_resource =
            (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("close-tunnel", close_tunnel);
     ("describe-tunnel", describe_tunnel);
     ("list-tags-for-resource", list_tags_for_resource);

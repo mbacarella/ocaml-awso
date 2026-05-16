@@ -206,7 +206,7 @@ let start_snapshot =
            (Some Values.StartSnapshotResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("complete-snapshot", complete_snapshot);
     ("get-snapshot-block", get_snapshot_block);
     ("list-changed-blocks", list_changed_blocks);

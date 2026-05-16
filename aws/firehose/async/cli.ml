@@ -423,7 +423,7 @@ let update_destination =
            (Some Values.UpdateDestinationOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-delivery-stream", create_delivery_stream);
     ("delete-delivery-stream", delete_delivery_stream);
     ("describe-delivery-stream", describe_delivery_stream);

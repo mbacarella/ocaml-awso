@@ -2979,7 +2979,7 @@ let verify_user_attribute =
            (Some Values.VerifyUserAttributeResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-custom-attributes", add_custom_attributes);
     ("admin-add-user-to-group", admin_add_user_to_group);
     ("admin-confirm-sign-up", admin_confirm_sign_up);

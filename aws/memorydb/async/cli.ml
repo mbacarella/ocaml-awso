@@ -927,7 +927,7 @@ let update_user =
            (Some Values.UpdateUserResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-update-cluster", batch_update_cluster);
     ("copy-snapshot", copy_snapshot);
     ("create-a-c-l", create_a_c_l);

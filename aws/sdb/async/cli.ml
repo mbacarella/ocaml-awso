@@ -236,7 +236,7 @@ let select =
            (Some Values.SelectResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-delete-attributes", batch_delete_attributes);
     ("batch-put-attributes", batch_put_attributes);
     ("create-domain", create_domain);

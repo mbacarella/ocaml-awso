@@ -330,7 +330,7 @@ let update_scheduled_query =
               ~state:(Values.ScheduledQueryState.of_json state) ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-query", cancel_query);
     ("create-scheduled-query", create_scheduled_query);
     ("delete-scheduled-query", delete_scheduled_query);

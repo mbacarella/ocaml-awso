@@ -1722,7 +1722,7 @@ let update_function_url_config =
            (Some Values.UpdateFunctionUrlConfigResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-layer-version-permission", add_layer_version_permission);
     ("add-permission", add_permission);
     ("create-alias", create_alias);

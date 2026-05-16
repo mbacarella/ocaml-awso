@@ -3,7 +3,7 @@ include Cli_0
 include Cli_1
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-role-to-d-b-cluster", add_role_to_d_b_cluster);
     ("add-role-to-d-b-instance", add_role_to_d_b_instance);
     ("add-source-identifier-to-subscription",

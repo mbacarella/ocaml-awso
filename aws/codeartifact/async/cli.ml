@@ -995,7 +995,7 @@ let update_repository =
            (Some Values.UpdateRepositoryResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-external-connection", associate_external_connection);
     ("copy-package-versions", copy_package_versions);
     ("create-domain", create_domain);

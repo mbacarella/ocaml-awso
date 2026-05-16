@@ -855,7 +855,7 @@ let update_security =
            (Some Values.UpdateSecurityResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-associate-scram-secret", batch_associate_scram_secret);
     ("create-cluster", create_cluster);
     ("create-cluster-v2", create_cluster_v2);

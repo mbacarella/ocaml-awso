@@ -1327,7 +1327,7 @@ let update_studio_session_mapping =
               ~sessionPolicyArn ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-instance-fleet", add_instance_fleet);
     ("add-instance-groups", add_instance_groups);
     ("add-job-flow-steps", add_job_flow_steps);

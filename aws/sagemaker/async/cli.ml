@@ -3,7 +3,7 @@ include Cli_0
 include Cli_1
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-association", add_association);
     ("add-tags", add_tags);
     ("associate-trial-component", associate_trial_component);

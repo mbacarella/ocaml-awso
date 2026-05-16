@@ -123,7 +123,7 @@ let list_shared_endpoints =
            (Some Values.ListSharedEndpointsResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-endpoint", create_endpoint);
     ("delete-endpoint", delete_endpoint);
     ("list-endpoints", list_endpoints);

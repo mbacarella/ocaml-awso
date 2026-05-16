@@ -259,7 +259,7 @@ let synthesize_speech =
            (Some Values.SynthesizeSpeechOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("delete-lexicon", delete_lexicon);
     ("describe-voices", describe_voices);
     ("get-lexicon", get_lexicon);

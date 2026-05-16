@@ -763,7 +763,7 @@ let update_subnet_change_protection =
            (Some Values.UpdateSubnetChangeProtectionResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-firewall-policy", associate_firewall_policy);
     ("associate-subnets", associate_subnets);
     ("create-firewall", create_firewall);

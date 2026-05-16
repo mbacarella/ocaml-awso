@@ -566,7 +566,7 @@ let update_certificate_authority =
               ~certificateAuthorityArn ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-certificate-authority", create_certificate_authority);
     ("create-certificate-authority-audit-report",
       create_certificate_authority_audit_report);

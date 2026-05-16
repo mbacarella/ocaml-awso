@@ -3352,7 +3352,7 @@ let update_user_security_profiles =
               ()) None None])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-approved-origin", associate_approved_origin);
     ("associate-bot", associate_bot);
     ("associate-default-vocabulary", associate_default_vocabulary);

@@ -1485,7 +1485,7 @@ let update_resolver_rule =
            (Some Values.UpdateResolverRuleResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-firewall-rule-group", associate_firewall_rule_group);
     ("associate-resolver-endpoint-ip-address",
       associate_resolver_endpoint_ip_address);

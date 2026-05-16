@@ -732,7 +732,7 @@ let upload_multipart_part =
            (Some Values.UploadMultipartPartOutput.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("abort-multipart-upload", abort_multipart_upload);
     ("abort-vault-lock", abort_vault_lock);
     ("add-tags-to-vault", add_tags_to_vault);

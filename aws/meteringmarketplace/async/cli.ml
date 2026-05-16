@@ -124,7 +124,7 @@ let resolve_customer =
            (Some Values.ResolveCustomerResult.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-meter-usage", batch_meter_usage);
     ("meter-usage", meter_usage);
     ("register-usage", register_usage);

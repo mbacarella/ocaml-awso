@@ -1004,7 +1004,7 @@ let upgrade_domain =
            (Some Values.UpgradeDomainResponse.error_to_json)])
 let main =
   Command.group
-    ~summary:((Awso_codegen.Service.to_string Values.service) ^ " commands")
+    ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-inbound-connection", accept_inbound_connection);
     ("add-tags", add_tags);
     ("associate-package", associate_package);
