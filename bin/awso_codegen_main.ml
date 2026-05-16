@@ -4,6 +4,6 @@ let () =
     Awso_codegen.Cmd.main argv
   with
   | e ->
-    Printf.eprintf "%s\n" (Printexc.to_string e);
+    Printf.eprintf "%s\n%s" (Printexc.to_string e) (Printexc.get_backtrace ());
     exit 1
 ;;

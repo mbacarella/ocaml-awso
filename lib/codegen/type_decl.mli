@@ -1,5 +1,9 @@
 open! Import
 
+val strip_html : string -> string
+val doc_attribute : string option -> Parsetree.attribute list
+val documentation_of_shape : Botodata.shape -> string option
+
 (* Make a type declaration corresponding to the name and type returned by
     [error_cases]. *)
 val type_declaration_of_errors : Botodata.operation -> Parsetree.type_declaration

@@ -193,18 +193,15 @@ end
 
 module Util = struct
   let mkdir_exn (dir : string) : unit =
-    match Sys_unix.is_directory dir with
-    | `Yes -> ()
-    | `Unknown -> failwithf "unable to determine if %s is a directory" dir ()
-    | `No -> (
-      match Sys_unix.is_file dir with
-      | `No -> Unix.mkdir dir 0o755
-      | `Unknown -> failwithf "unable to determine if %s is a file" dir ()
-      | `Yes ->
-        failwithf
-          "cannot make directory %s because it already exists as a regular file"
-          dir
-          ())
+    if Stdlib.Sys.file_exists dir
+    then (
+      match Sys_unix.is_directory dir with
+      | `Yes -> ()
+      | `No | `Unknown ->
+        failwithf "cannot make directory %s: path exists but is not a directory" dir ())
+    else (
+      try Unix.mkdir dir 0o755 with
+      | Unix.Unix_error (Unix.EEXIST, _, _) -> ())
 
   let camel_to_snake_case ?(sep = '_') (s : string) : string =
     String.uncapitalize s

@@ -1,7 +1,44 @@
 open! Import
 
-let type_declaration ?kind ?manifest ?priv n =
+let strip_html s =
+  let s = Re.replace_string (Re.Perl.compile_pat "<[^>]*>") ~by:"" s in
+  let s = String.substr_replace_all s ~pattern:"&amp;" ~with_:"&" in
+  let s = String.substr_replace_all s ~pattern:"&lt;" ~with_:"<" in
+  let s = String.substr_replace_all s ~pattern:"&gt;" ~with_:">" in
+  let s = String.substr_replace_all s ~pattern:"&quot;" ~with_:"\"" in
+  let s = String.substr_replace_all s ~pattern:"&#39;" ~with_:"'" in
+  let s = Re.replace_string (Re.Perl.compile_pat "\\s+") ~by:" " s in
+  String.strip s
+
+let doc_attribute = function
+  | None | Some "" -> []
+  | Some html ->
+    let text = strip_html html in
+    if String.is_empty text then []
+    else
+      let loc = !Ast_helper.default_loc in
+      [{ attr_name = { txt = "ocaml.doc"; loc }
+       ; attr_payload = PStr [%str [%e Ast_convenience.str text]]
+       ; attr_loc = loc
+       }]
+
+let documentation_of_shape = function
+  | Botodata.Boolean_shape s -> s.documentation
+  | Long_shape s -> s.documentation
+  | Double_shape s -> s.documentation
+  | Float_shape s -> s.documentation
+  | Blob_shape s -> s.documentation
+  | Integer_shape s -> s.documentation
+  | String_shape s -> s.documentation
+  | List_shape _ -> None
+  | Enum_shape _ -> None
+  | Structure_shape s -> s.documentation
+  | Timestamp_shape s -> s.documentation
+  | Map_shape _ -> None
+
+let type_declaration ?kind ?manifest ?priv ?(attrs=[]) n =
   Ast_helper.Type.mk
+    ~attrs
     (Ast_convenience.mknoloc (Shape.uncapitalized_id n))
     ?manifest
     ?kind
@@ -127,7 +164,7 @@ let%expect_test "type_declaration_of_errors" =
     |}]
 ;;
 
-let type_alias ?priv manifest = type_declaration ?priv "t" ~manifest
+let type_alias ?priv ?(attrs=[]) manifest = type_declaration ?priv ~attrs "t" ~manifest
 
 (** A field typed like its name, such as [t : t]. *)
 let self_typed_field raw_name =
@@ -139,29 +176,30 @@ let self_typed_field raw_name =
 
 let type_declarations_of_shape ?result_wrapper ?priv shape =
   let loc = !Ast_helper.default_loc in
+  let doc_attrs = doc_attribute (documentation_of_shape shape) in
   match shape with
-  | Botodata.Boolean_shape _ -> [ type_alias ?priv [%type: bool] ]
-  | Float_shape _ -> [ type_alias ?priv [%type: float] ]
-  | Integer_shape _ -> [ type_alias ?priv [%type: int] ]
-  | String_shape _ -> [ type_alias ?priv [%type: string] ]
-  | Long_shape _ -> [ type_alias ?priv [%type: Int64.t] ]
-  | Double_shape _ -> [ type_alias ?priv [%type: float] ]
-  | Timestamp_shape _ -> [ type_alias ?priv [%type: string] ]
-  | Blob_shape _ -> [ type_alias ?priv [%type: string] ]
+  | Botodata.Boolean_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: bool] ]
+  | Float_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: float] ]
+  | Integer_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: int] ]
+  | String_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: string] ]
+  | Long_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: Int64.t] ]
+  | Double_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: float] ]
+  | Timestamp_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: string] ]
+  | Blob_shape _ -> [ type_alias ?priv ~attrs:doc_attrs [%type: string] ]
   | Enum_shape es ->
     let cases =
       List.map es.cases ~f:(fun case ->
         Ast_helper.Type.constructor (Ast_convenience.mknoloc (Shape.capitalized_id case)))
     in
     let other_case = Enum_other.type_decl ~loc in
-    [ type_declaration ?priv "t" ~kind:(Ptype_variant (cases @ [ other_case ])) ]
+    [ type_declaration ?priv ~attrs:doc_attrs "t" ~kind:(Ptype_variant (cases @ [ other_case ])) ]
   | List_shape ls ->
     let elem = Shape.core_type_of_shape ls.member.shape in
-    [ type_alias ?priv [%type: [%t elem] list] ]
+    [ type_alias ?priv ~attrs:doc_attrs [%type: [%t elem] list] ]
   | Map_shape ms ->
     let key = Shape.core_type_of_shape ms.key in
     let value = Shape.core_type_of_shape ms.value in
-    [ type_alias ?priv [%type: ([%t key] * [%t value]) list] ]
+    [ type_alias ?priv ~attrs:doc_attrs [%type: ([%t key] * [%t value]) list] ]
   | Structure_shape ss -> (
     let unwrapped_shape_declaration type_name =
       match ss.members with
@@ -182,7 +220,9 @@ let type_declarations_of_shape ?result_wrapper ?priv shape =
               then ty
               else [%type: [%t ty] option]
             in
-            Ast_helper.Type.field (Ast_convenience.mknoloc (Shape.uncapitalized_id fn)) ty)
+            Ast_helper.Type.field
+              ~attrs:(doc_attribute sm.documentation)
+              (Ast_convenience.mknoloc (Shape.uncapitalized_id fn)) ty)
         in
         type_declaration ?priv type_name ~kind:(Ptype_record fields)
     in

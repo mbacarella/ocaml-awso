@@ -765,9 +765,27 @@ let module_type service sn shape =
     composed_module_type service sn shape
 ;;
 
+let doc_for_shape (service : Botodata.service) sn shape =
+  match Type_decl.documentation_of_shape shape with
+  | Some _ as doc -> doc
+  | None ->
+    List.find_map service.operations ~f:(fun (op : Botodata.operation) ->
+      let input_match =
+        Option.bind op.input ~f:(fun (i : Botodata.operation_input) ->
+          if String.equal i.shape sn then Some () else None)
+      in
+      let output_match =
+        Option.bind op.output ~f:(fun (o : Botodata.operation_output) ->
+          if String.equal o.shape sn then Some () else None)
+      in
+      match input_match, output_match with
+      | Some (), _ | _, Some () -> op.documentation
+      | _ -> None)
+
 let module_binding service sn shape =
   Ast_helper.Str.module_
     (Ast_helper.Mb.mk
+       ~attrs:(Type_decl.doc_attribute (doc_for_shape service sn shape))
        (Ast_convenience.mknoloc (Some (Shape.capitalized_id sn)))
        (structure_of_shape service sn shape))
 ;;
@@ -814,6 +832,7 @@ let module_declarations (service : Botodata.service) sg =
       let shape = List.Assoc.find_exn service.shapes sn ~equal:String.equal in
       let module_ =
         Ast_helper.Mb.mk
+          ~attrs:(Type_decl.doc_attribute (doc_for_shape service sn shape))
           (Ast_convenience.mknoloc (Some (Shape.capitalized_id sn)))
           (if with_sig
           then

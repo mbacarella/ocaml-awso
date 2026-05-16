@@ -14,10 +14,7 @@ let or_die = function
 
 let fetch_instance_types ~min_vcpus =
   let filter =
-    Ec2.Filter.make
-      ~name:"processor-info.supported-architecture"
-      ~values:[ "x86_64" ]
-      ()
+    Ec2.Filter.make ~name:"processor-info.supported-architecture" ~values:[ "x86_64" ] ()
   in
   let rec fetch_all ?next_token acc =
     let req =
@@ -73,12 +70,12 @@ let fetch_spot_prices ~instance_types =
   let best_per_type =
     List.fold prices ~init:String.Map.empty ~f:(fun acc sp ->
       match sp.SpotPrice.instanceType, sp.SpotPrice.spotPrice with
-      | Some it, Some price ->
+      | Some it, Some price -> (
         let key = InstanceType.to_string it in
         let az = Option.value ~default:"?" sp.SpotPrice.availabilityZone in
-        (match Map.find acc key with
-         | Some (existing_price, _) when String.( <= ) existing_price price -> acc
-         | _ -> Map.set acc ~key ~data:(price, az))
+        match Map.find acc key with
+        | Some (existing_price, _) when String.( <= ) existing_price price -> acc
+        | _ -> Map.set acc ~key ~data:(price, az))
       | _ -> acc)
   in
   return best_per_type
@@ -120,9 +117,7 @@ let () =
            "--min-vcpus"
            (optional_with_default 64 int)
            ~doc:"N minimum vCPUs (default: 64)"
-       and show_spot =
-         flag "--spot" no_arg ~doc:" show current spot prices"
-       in
+       and show_spot = flag "--spot" no_arg ~doc:" show current spot prices" in
        fun () -> find_box_with_most_cores ~min_vcpus ~show_spot)
   in
   Command_unix.run cmd

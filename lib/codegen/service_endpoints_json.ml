@@ -127,41 +127,40 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
-      (let handle_error err error_of_json =
-         let generic_error () = Error (`Transport err) in
-         match err with
-         | `Too_many_redirects -> generic_error ()
-         | `Bad_response
-             { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-             (match (error_of_json, ((code >= 400) && (code <= 599))) with
-              | (Some error_of_json, true) ->
-                  let json = Yojson.Safe.from_string body in
-                  (match json |> (Yojson.Safe.Util.member "__type") with
-                   | `String error_type ->
-                       Error (`AWS (error_of_json error_type json))
-                   | `Null -> generic_error ()
-                   | _ ->
-                       failwith
-                         (sprintf "Error '__type' did not have string type: %s"
-                            body))
-              | (None, _) | (_, false) -> generic_error ()) in
-       match endpoint with
-       | Name1 ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp ->
-                let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-                Ok (ResultModule1.of_json json))
-       | Name2 ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp ->
-                let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-                Ok (ResultModule2.of_json json))
-       | Name3 -> Ok () : (o,
-                            [ `AWS of e
-                            | `Transport of Awso.Http.Io.Error.call ]) result)
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
+      (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
+      let handle_error err error_of_json =
+        let generic_error () = Error (`Transport err) in
+        match err with
+        | `Too_many_redirects -> generic_error ()
+        | `Bad_response
+            { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
+            (match (error_of_json, ((code >= 400) && (code <= 599))) with
+             | (Some error_of_json, true) ->
+                 let json = Yojson.Safe.from_string body in
+                 (match json |> (Yojson.Safe.Util.member "__type") with
+                  | `String error_type ->
+                      Error (`AWS (error_of_json error_type json))
+                  | `Null -> generic_error ()
+                  | _ ->
+                      failwith
+                        (sprintf "Error '__type' did not have string type: %s"
+                           body))
+             | (None, _) | (_, false) -> generic_error ()) in
+      match endpoint with
+      | Name1 ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp ->
+               let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+               Ok (ResultModule1.of_json json))
+      | Name2 ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp ->
+               let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+               Ok (ResultModule2.of_json json))
+      | Name3 -> Ok ()
     |}]
 ;;
 

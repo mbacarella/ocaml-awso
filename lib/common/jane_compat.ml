@@ -9,6 +9,10 @@
    You should not be calling these functions from the Jane/Async runtime or
    utilities as the real Jane versions are better optimized. *)
 
+(* Mirror Core/Base: enable exception backtraces at module load time so users
+   of Jane_compat get tracebacks without needing OCAMLRUNPARAM=b. *)
+let () = Printexc.record_backtrace true
+
 let sprintf = Printf.sprintf
 let printf = Printf.printf
 let eprintf = Printf.eprintf
