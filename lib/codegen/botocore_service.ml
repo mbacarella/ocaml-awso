@@ -327,9 +327,15 @@ end
 module Operations = struct
   type t = Operation.t list
 
+  (* The dict key is the canonical operation identifier ("AssociateAlias").
+     The value's [name] field is the wire-level name, which for some services
+     (e.g. CloudFront 2020-05-31) carries an API-version suffix
+     ("AssociateAlias2020_05_31"). For code identifiers we want the canonical
+     key, so override [name] with it. *)
   let parser =
     let open Json_parser in
-    dict Operation.parser >>| List.map ~f:snd
+    dict Operation.parser
+    >>| List.map ~f:(fun (key, op) -> { op with Botodata.name = key })
   ;;
 end
 

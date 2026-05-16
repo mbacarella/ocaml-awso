@@ -2,442 +2,434 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
-  | AssociateAlias2020_05_31: (AssociateAliasRequest.t, unit, unit) t 
-  | CreateCachePolicy2020_05_31: (CreateCachePolicyRequest.t,
+  | AssociateAlias: (AssociateAliasRequest.t, unit, unit) t 
+  | CreateCachePolicy: (CreateCachePolicyRequest.t,
   CreateCachePolicyResult.t, CreateCachePolicyResult.error) t 
-  | CreateCloudFrontOriginAccessIdentity2020_05_31:
+  | CreateCloudFrontOriginAccessIdentity:
   (CreateCloudFrontOriginAccessIdentityRequest.t,
   CreateCloudFrontOriginAccessIdentityResult.t,
   CreateCloudFrontOriginAccessIdentityResult.error) t 
-  | CreateDistribution2020_05_31: (CreateDistributionRequest.t,
+  | CreateDistribution: (CreateDistributionRequest.t,
   CreateDistributionResult.t, CreateDistributionResult.error) t 
-  | CreateDistributionWithTags2020_05_31:
-  (CreateDistributionWithTagsRequest.t, CreateDistributionWithTagsResult.t,
-  CreateDistributionWithTagsResult.error) t 
-  | CreateFieldLevelEncryptionConfig2020_05_31:
+  | CreateDistributionWithTags: (CreateDistributionWithTagsRequest.t,
+  CreateDistributionWithTagsResult.t, CreateDistributionWithTagsResult.error)
+  t 
+  | CreateFieldLevelEncryptionConfig:
   (CreateFieldLevelEncryptionConfigRequest.t,
   CreateFieldLevelEncryptionConfigResult.t,
   CreateFieldLevelEncryptionConfigResult.error) t 
-  | CreateFieldLevelEncryptionProfile2020_05_31:
+  | CreateFieldLevelEncryptionProfile:
   (CreateFieldLevelEncryptionProfileRequest.t,
   CreateFieldLevelEncryptionProfileResult.t,
   CreateFieldLevelEncryptionProfileResult.error) t 
-  | CreateFunction2020_05_31: (CreateFunctionRequest.t,
-  CreateFunctionResult.t, CreateFunctionResult.error) t 
-  | CreateInvalidation2020_05_31: (CreateInvalidationRequest.t,
+  | CreateFunction: (CreateFunctionRequest.t, CreateFunctionResult.t,
+  CreateFunctionResult.error) t 
+  | CreateInvalidation: (CreateInvalidationRequest.t,
   CreateInvalidationResult.t, CreateInvalidationResult.error) t 
-  | CreateKeyGroup2020_05_31: (CreateKeyGroupRequest.t,
-  CreateKeyGroupResult.t, CreateKeyGroupResult.error) t 
-  | CreateMonitoringSubscription2020_05_31:
-  (CreateMonitoringSubscriptionRequest.t,
+  | CreateKeyGroup: (CreateKeyGroupRequest.t, CreateKeyGroupResult.t,
+  CreateKeyGroupResult.error) t 
+  | CreateMonitoringSubscription: (CreateMonitoringSubscriptionRequest.t,
   CreateMonitoringSubscriptionResult.t,
   CreateMonitoringSubscriptionResult.error) t 
-  | CreateOriginRequestPolicy2020_05_31: (CreateOriginRequestPolicyRequest.t,
+  | CreateOriginRequestPolicy: (CreateOriginRequestPolicyRequest.t,
   CreateOriginRequestPolicyResult.t, CreateOriginRequestPolicyResult.error) t
   
-  | CreatePublicKey2020_05_31: (CreatePublicKeyRequest.t,
-  CreatePublicKeyResult.t, CreatePublicKeyResult.error) t 
-  | CreateRealtimeLogConfig2020_05_31: (CreateRealtimeLogConfigRequest.t,
+  | CreatePublicKey: (CreatePublicKeyRequest.t, CreatePublicKeyResult.t,
+  CreatePublicKeyResult.error) t 
+  | CreateRealtimeLogConfig: (CreateRealtimeLogConfigRequest.t,
   CreateRealtimeLogConfigResult.t, CreateRealtimeLogConfigResult.error) t 
-  | CreateResponseHeadersPolicy2020_05_31:
-  (CreateResponseHeadersPolicyRequest.t, CreateResponseHeadersPolicyResult.t,
+  | CreateResponseHeadersPolicy: (CreateResponseHeadersPolicyRequest.t,
+  CreateResponseHeadersPolicyResult.t,
   CreateResponseHeadersPolicyResult.error) t 
-  | CreateStreamingDistribution2020_05_31:
-  (CreateStreamingDistributionRequest.t, CreateStreamingDistributionResult.t,
+  | CreateStreamingDistribution: (CreateStreamingDistributionRequest.t,
+  CreateStreamingDistributionResult.t,
   CreateStreamingDistributionResult.error) t 
-  | CreateStreamingDistributionWithTags2020_05_31:
+  | CreateStreamingDistributionWithTags:
   (CreateStreamingDistributionWithTagsRequest.t,
   CreateStreamingDistributionWithTagsResult.t,
   CreateStreamingDistributionWithTagsResult.error) t 
-  | DeleteCachePolicy2020_05_31: (DeleteCachePolicyRequest.t, unit, unit) t 
-  | DeleteCloudFrontOriginAccessIdentity2020_05_31:
+  | DeleteCachePolicy: (DeleteCachePolicyRequest.t, unit, unit) t 
+  | DeleteCloudFrontOriginAccessIdentity:
   (DeleteCloudFrontOriginAccessIdentityRequest.t, unit, unit) t 
-  | DeleteDistribution2020_05_31: (DeleteDistributionRequest.t, unit, 
-  unit) t 
-  | DeleteFieldLevelEncryptionConfig2020_05_31:
+  | DeleteDistribution: (DeleteDistributionRequest.t, unit, unit) t 
+  | DeleteFieldLevelEncryptionConfig:
   (DeleteFieldLevelEncryptionConfigRequest.t, unit, unit) t 
-  | DeleteFieldLevelEncryptionProfile2020_05_31:
+  | DeleteFieldLevelEncryptionProfile:
   (DeleteFieldLevelEncryptionProfileRequest.t, unit, unit) t 
-  | DeleteFunction2020_05_31: (DeleteFunctionRequest.t, unit, unit) t 
-  | DeleteKeyGroup2020_05_31: (DeleteKeyGroupRequest.t, unit, unit) t 
-  | DeleteMonitoringSubscription2020_05_31:
-  (DeleteMonitoringSubscriptionRequest.t,
+  | DeleteFunction: (DeleteFunctionRequest.t, unit, unit) t 
+  | DeleteKeyGroup: (DeleteKeyGroupRequest.t, unit, unit) t 
+  | DeleteMonitoringSubscription: (DeleteMonitoringSubscriptionRequest.t,
   DeleteMonitoringSubscriptionResult.t,
   DeleteMonitoringSubscriptionResult.error) t 
-  | DeleteOriginRequestPolicy2020_05_31: (DeleteOriginRequestPolicyRequest.t,
+  | DeleteOriginRequestPolicy: (DeleteOriginRequestPolicyRequest.t, unit,
+  unit) t 
+  | DeletePublicKey: (DeletePublicKeyRequest.t, unit, unit) t 
+  | DeleteRealtimeLogConfig: (DeleteRealtimeLogConfigRequest.t, unit, 
+  unit) t 
+  | DeleteResponseHeadersPolicy: (DeleteResponseHeadersPolicyRequest.t, 
   unit, unit) t 
-  | DeletePublicKey2020_05_31: (DeletePublicKeyRequest.t, unit, unit) t 
-  | DeleteRealtimeLogConfig2020_05_31: (DeleteRealtimeLogConfigRequest.t,
+  | DeleteStreamingDistribution: (DeleteStreamingDistributionRequest.t, 
   unit, unit) t 
-  | DeleteResponseHeadersPolicy2020_05_31:
-  (DeleteResponseHeadersPolicyRequest.t, unit, unit) t 
-  | DeleteStreamingDistribution2020_05_31:
-  (DeleteStreamingDistributionRequest.t, unit, unit) t 
-  | DescribeFunction2020_05_31: (DescribeFunctionRequest.t,
-  DescribeFunctionResult.t, DescribeFunctionResult.error) t 
-  | GetCachePolicy2020_05_31: (GetCachePolicyRequest.t,
-  GetCachePolicyResult.t, GetCachePolicyResult.error) t 
-  | GetCachePolicyConfig2020_05_31: (GetCachePolicyConfigRequest.t,
+  | DescribeFunction: (DescribeFunctionRequest.t, DescribeFunctionResult.t,
+  DescribeFunctionResult.error) t 
+  | GetCachePolicy: (GetCachePolicyRequest.t, GetCachePolicyResult.t,
+  GetCachePolicyResult.error) t 
+  | GetCachePolicyConfig: (GetCachePolicyConfigRequest.t,
   GetCachePolicyConfigResult.t, GetCachePolicyConfigResult.error) t 
-  | GetCloudFrontOriginAccessIdentity2020_05_31:
+  | GetCloudFrontOriginAccessIdentity:
   (GetCloudFrontOriginAccessIdentityRequest.t,
   GetCloudFrontOriginAccessIdentityResult.t,
   GetCloudFrontOriginAccessIdentityResult.error) t 
-  | GetCloudFrontOriginAccessIdentityConfig2020_05_31:
+  | GetCloudFrontOriginAccessIdentityConfig:
   (GetCloudFrontOriginAccessIdentityConfigRequest.t,
   GetCloudFrontOriginAccessIdentityConfigResult.t,
   GetCloudFrontOriginAccessIdentityConfigResult.error) t 
-  | GetDistribution2020_05_31: (GetDistributionRequest.t,
-  GetDistributionResult.t, GetDistributionResult.error) t 
-  | GetDistributionConfig2020_05_31: (GetDistributionConfigRequest.t,
+  | GetDistribution: (GetDistributionRequest.t, GetDistributionResult.t,
+  GetDistributionResult.error) t 
+  | GetDistributionConfig: (GetDistributionConfigRequest.t,
   GetDistributionConfigResult.t, GetDistributionConfigResult.error) t 
-  | GetFieldLevelEncryption2020_05_31: (GetFieldLevelEncryptionRequest.t,
+  | GetFieldLevelEncryption: (GetFieldLevelEncryptionRequest.t,
   GetFieldLevelEncryptionResult.t, GetFieldLevelEncryptionResult.error) t 
-  | GetFieldLevelEncryptionConfig2020_05_31:
-  (GetFieldLevelEncryptionConfigRequest.t,
+  | GetFieldLevelEncryptionConfig: (GetFieldLevelEncryptionConfigRequest.t,
   GetFieldLevelEncryptionConfigResult.t,
   GetFieldLevelEncryptionConfigResult.error) t 
-  | GetFieldLevelEncryptionProfile2020_05_31:
-  (GetFieldLevelEncryptionProfileRequest.t,
+  | GetFieldLevelEncryptionProfile: (GetFieldLevelEncryptionProfileRequest.t,
   GetFieldLevelEncryptionProfileResult.t,
   GetFieldLevelEncryptionProfileResult.error) t 
-  | GetFieldLevelEncryptionProfileConfig2020_05_31:
+  | GetFieldLevelEncryptionProfileConfig:
   (GetFieldLevelEncryptionProfileConfigRequest.t,
   GetFieldLevelEncryptionProfileConfigResult.t,
   GetFieldLevelEncryptionProfileConfigResult.error) t 
-  | GetFunction2020_05_31: (GetFunctionRequest.t, GetFunctionResult.t,
+  | GetFunction: (GetFunctionRequest.t, GetFunctionResult.t,
   GetFunctionResult.error) t 
-  | GetInvalidation2020_05_31: (GetInvalidationRequest.t,
-  GetInvalidationResult.t, GetInvalidationResult.error) t 
-  | GetKeyGroup2020_05_31: (GetKeyGroupRequest.t, GetKeyGroupResult.t,
+  | GetInvalidation: (GetInvalidationRequest.t, GetInvalidationResult.t,
+  GetInvalidationResult.error) t 
+  | GetKeyGroup: (GetKeyGroupRequest.t, GetKeyGroupResult.t,
   GetKeyGroupResult.error) t 
-  | GetKeyGroupConfig2020_05_31: (GetKeyGroupConfigRequest.t,
+  | GetKeyGroupConfig: (GetKeyGroupConfigRequest.t,
   GetKeyGroupConfigResult.t, GetKeyGroupConfigResult.error) t 
-  | GetMonitoringSubscription2020_05_31: (GetMonitoringSubscriptionRequest.t,
+  | GetMonitoringSubscription: (GetMonitoringSubscriptionRequest.t,
   GetMonitoringSubscriptionResult.t, GetMonitoringSubscriptionResult.error) t
   
-  | GetOriginRequestPolicy2020_05_31: (GetOriginRequestPolicyRequest.t,
+  | GetOriginRequestPolicy: (GetOriginRequestPolicyRequest.t,
   GetOriginRequestPolicyResult.t, GetOriginRequestPolicyResult.error) t 
-  | GetOriginRequestPolicyConfig2020_05_31:
-  (GetOriginRequestPolicyConfigRequest.t,
+  | GetOriginRequestPolicyConfig: (GetOriginRequestPolicyConfigRequest.t,
   GetOriginRequestPolicyConfigResult.t,
   GetOriginRequestPolicyConfigResult.error) t 
-  | GetPublicKey2020_05_31: (GetPublicKeyRequest.t, GetPublicKeyResult.t,
+  | GetPublicKey: (GetPublicKeyRequest.t, GetPublicKeyResult.t,
   GetPublicKeyResult.error) t 
-  | GetPublicKeyConfig2020_05_31: (GetPublicKeyConfigRequest.t,
+  | GetPublicKeyConfig: (GetPublicKeyConfigRequest.t,
   GetPublicKeyConfigResult.t, GetPublicKeyConfigResult.error) t 
-  | GetRealtimeLogConfig2020_05_31: (GetRealtimeLogConfigRequest.t,
+  | GetRealtimeLogConfig: (GetRealtimeLogConfigRequest.t,
   GetRealtimeLogConfigResult.t, GetRealtimeLogConfigResult.error) t 
-  | GetResponseHeadersPolicy2020_05_31: (GetResponseHeadersPolicyRequest.t,
+  | GetResponseHeadersPolicy: (GetResponseHeadersPolicyRequest.t,
   GetResponseHeadersPolicyResult.t, GetResponseHeadersPolicyResult.error) t 
-  | GetResponseHeadersPolicyConfig2020_05_31:
-  (GetResponseHeadersPolicyConfigRequest.t,
+  | GetResponseHeadersPolicyConfig: (GetResponseHeadersPolicyConfigRequest.t,
   GetResponseHeadersPolicyConfigResult.t,
   GetResponseHeadersPolicyConfigResult.error) t 
-  | GetStreamingDistribution2020_05_31: (GetStreamingDistributionRequest.t,
+  | GetStreamingDistribution: (GetStreamingDistributionRequest.t,
   GetStreamingDistributionResult.t, GetStreamingDistributionResult.error) t 
-  | GetStreamingDistributionConfig2020_05_31:
-  (GetStreamingDistributionConfigRequest.t,
+  | GetStreamingDistributionConfig: (GetStreamingDistributionConfigRequest.t,
   GetStreamingDistributionConfigResult.t,
   GetStreamingDistributionConfigResult.error) t 
-  | ListCachePolicies2020_05_31: (ListCachePoliciesRequest.t,
+  | ListCachePolicies: (ListCachePoliciesRequest.t,
   ListCachePoliciesResult.t, ListCachePoliciesResult.error) t 
-  | ListCloudFrontOriginAccessIdentities2020_05_31:
+  | ListCloudFrontOriginAccessIdentities:
   (ListCloudFrontOriginAccessIdentitiesRequest.t,
   ListCloudFrontOriginAccessIdentitiesResult.t,
   ListCloudFrontOriginAccessIdentitiesResult.error) t 
-  | ListConflictingAliases2020_05_31: (ListConflictingAliasesRequest.t,
+  | ListConflictingAliases: (ListConflictingAliasesRequest.t,
   ListConflictingAliasesResult.t, ListConflictingAliasesResult.error) t 
-  | ListDistributions2020_05_31: (ListDistributionsRequest.t,
+  | ListDistributions: (ListDistributionsRequest.t,
   ListDistributionsResult.t, ListDistributionsResult.error) t 
-  | ListDistributionsByCachePolicyId2020_05_31:
+  | ListDistributionsByCachePolicyId:
   (ListDistributionsByCachePolicyIdRequest.t,
   ListDistributionsByCachePolicyIdResult.t,
   ListDistributionsByCachePolicyIdResult.error) t 
-  | ListDistributionsByKeyGroup2020_05_31:
-  (ListDistributionsByKeyGroupRequest.t, ListDistributionsByKeyGroupResult.t,
+  | ListDistributionsByKeyGroup: (ListDistributionsByKeyGroupRequest.t,
+  ListDistributionsByKeyGroupResult.t,
   ListDistributionsByKeyGroupResult.error) t 
-  | ListDistributionsByOriginRequestPolicyId2020_05_31:
+  | ListDistributionsByOriginRequestPolicyId:
   (ListDistributionsByOriginRequestPolicyIdRequest.t,
   ListDistributionsByOriginRequestPolicyIdResult.t,
   ListDistributionsByOriginRequestPolicyIdResult.error) t 
-  | ListDistributionsByRealtimeLogConfig2020_05_31:
+  | ListDistributionsByRealtimeLogConfig:
   (ListDistributionsByRealtimeLogConfigRequest.t,
   ListDistributionsByRealtimeLogConfigResult.t,
   ListDistributionsByRealtimeLogConfigResult.error) t 
-  | ListDistributionsByResponseHeadersPolicyId2020_05_31:
+  | ListDistributionsByResponseHeadersPolicyId:
   (ListDistributionsByResponseHeadersPolicyIdRequest.t,
   ListDistributionsByResponseHeadersPolicyIdResult.t,
   ListDistributionsByResponseHeadersPolicyIdResult.error) t 
-  | ListDistributionsByWebACLId2020_05_31:
-  (ListDistributionsByWebACLIdRequest.t, ListDistributionsByWebACLIdResult.t,
+  | ListDistributionsByWebACLId: (ListDistributionsByWebACLIdRequest.t,
+  ListDistributionsByWebACLIdResult.t,
   ListDistributionsByWebACLIdResult.error) t 
-  | ListFieldLevelEncryptionConfigs2020_05_31:
+  | ListFieldLevelEncryptionConfigs:
   (ListFieldLevelEncryptionConfigsRequest.t,
   ListFieldLevelEncryptionConfigsResult.t,
   ListFieldLevelEncryptionConfigsResult.error) t 
-  | ListFieldLevelEncryptionProfiles2020_05_31:
+  | ListFieldLevelEncryptionProfiles:
   (ListFieldLevelEncryptionProfilesRequest.t,
   ListFieldLevelEncryptionProfilesResult.t,
   ListFieldLevelEncryptionProfilesResult.error) t 
-  | ListFunctions2020_05_31: (ListFunctionsRequest.t, ListFunctionsResult.t,
+  | ListFunctions: (ListFunctionsRequest.t, ListFunctionsResult.t,
   ListFunctionsResult.error) t 
-  | ListInvalidations2020_05_31: (ListInvalidationsRequest.t,
+  | ListInvalidations: (ListInvalidationsRequest.t,
   ListInvalidationsResult.t, ListInvalidationsResult.error) t 
-  | ListKeyGroups2020_05_31: (ListKeyGroupsRequest.t, ListKeyGroupsResult.t,
+  | ListKeyGroups: (ListKeyGroupsRequest.t, ListKeyGroupsResult.t,
   ListKeyGroupsResult.error) t 
-  | ListOriginRequestPolicies2020_05_31: (ListOriginRequestPoliciesRequest.t,
+  | ListOriginRequestPolicies: (ListOriginRequestPoliciesRequest.t,
   ListOriginRequestPoliciesResult.t, ListOriginRequestPoliciesResult.error) t
   
-  | ListPublicKeys2020_05_31: (ListPublicKeysRequest.t,
-  ListPublicKeysResult.t, ListPublicKeysResult.error) t 
-  | ListRealtimeLogConfigs2020_05_31: (ListRealtimeLogConfigsRequest.t,
+  | ListPublicKeys: (ListPublicKeysRequest.t, ListPublicKeysResult.t,
+  ListPublicKeysResult.error) t 
+  | ListRealtimeLogConfigs: (ListRealtimeLogConfigsRequest.t,
   ListRealtimeLogConfigsResult.t, ListRealtimeLogConfigsResult.error) t 
-  | ListResponseHeadersPolicies2020_05_31:
-  (ListResponseHeadersPoliciesRequest.t, ListResponseHeadersPoliciesResult.t,
+  | ListResponseHeadersPolicies: (ListResponseHeadersPoliciesRequest.t,
+  ListResponseHeadersPoliciesResult.t,
   ListResponseHeadersPoliciesResult.error) t 
-  | ListStreamingDistributions2020_05_31:
-  (ListStreamingDistributionsRequest.t, ListStreamingDistributionsResult.t,
-  ListStreamingDistributionsResult.error) t 
-  | ListTagsForResource2020_05_31: (ListTagsForResourceRequest.t,
+  | ListStreamingDistributions: (ListStreamingDistributionsRequest.t,
+  ListStreamingDistributionsResult.t, ListStreamingDistributionsResult.error)
+  t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResult.t, ListTagsForResourceResult.error) t 
-  | PublishFunction2020_05_31: (PublishFunctionRequest.t,
-  PublishFunctionResult.t, PublishFunctionResult.error) t 
-  | TagResource2020_05_31: (TagResourceRequest.t, unit, unit) t 
-  | TestFunction2020_05_31: (TestFunctionRequest.t, TestFunctionResult.t,
+  | PublishFunction: (PublishFunctionRequest.t, PublishFunctionResult.t,
+  PublishFunctionResult.error) t 
+  | TagResource: (TagResourceRequest.t, unit, unit) t 
+  | TestFunction: (TestFunctionRequest.t, TestFunctionResult.t,
   TestFunctionResult.error) t 
-  | UntagResource2020_05_31: (UntagResourceRequest.t, unit, unit) t 
-  | UpdateCachePolicy2020_05_31: (UpdateCachePolicyRequest.t,
+  | UntagResource: (UntagResourceRequest.t, unit, unit) t 
+  | UpdateCachePolicy: (UpdateCachePolicyRequest.t,
   UpdateCachePolicyResult.t, UpdateCachePolicyResult.error) t 
-  | UpdateCloudFrontOriginAccessIdentity2020_05_31:
+  | UpdateCloudFrontOriginAccessIdentity:
   (UpdateCloudFrontOriginAccessIdentityRequest.t,
   UpdateCloudFrontOriginAccessIdentityResult.t,
   UpdateCloudFrontOriginAccessIdentityResult.error) t 
-  | UpdateDistribution2020_05_31: (UpdateDistributionRequest.t,
+  | UpdateDistribution: (UpdateDistributionRequest.t,
   UpdateDistributionResult.t, UpdateDistributionResult.error) t 
-  | UpdateFieldLevelEncryptionConfig2020_05_31:
+  | UpdateFieldLevelEncryptionConfig:
   (UpdateFieldLevelEncryptionConfigRequest.t,
   UpdateFieldLevelEncryptionConfigResult.t,
   UpdateFieldLevelEncryptionConfigResult.error) t 
-  | UpdateFieldLevelEncryptionProfile2020_05_31:
+  | UpdateFieldLevelEncryptionProfile:
   (UpdateFieldLevelEncryptionProfileRequest.t,
   UpdateFieldLevelEncryptionProfileResult.t,
   UpdateFieldLevelEncryptionProfileResult.error) t 
-  | UpdateFunction2020_05_31: (UpdateFunctionRequest.t,
-  UpdateFunctionResult.t, UpdateFunctionResult.error) t 
-  | UpdateKeyGroup2020_05_31: (UpdateKeyGroupRequest.t,
-  UpdateKeyGroupResult.t, UpdateKeyGroupResult.error) t 
-  | UpdateOriginRequestPolicy2020_05_31: (UpdateOriginRequestPolicyRequest.t,
+  | UpdateFunction: (UpdateFunctionRequest.t, UpdateFunctionResult.t,
+  UpdateFunctionResult.error) t 
+  | UpdateKeyGroup: (UpdateKeyGroupRequest.t, UpdateKeyGroupResult.t,
+  UpdateKeyGroupResult.error) t 
+  | UpdateOriginRequestPolicy: (UpdateOriginRequestPolicyRequest.t,
   UpdateOriginRequestPolicyResult.t, UpdateOriginRequestPolicyResult.error) t
   
-  | UpdatePublicKey2020_05_31: (UpdatePublicKeyRequest.t,
-  UpdatePublicKeyResult.t, UpdatePublicKeyResult.error) t 
-  | UpdateRealtimeLogConfig2020_05_31: (UpdateRealtimeLogConfigRequest.t,
+  | UpdatePublicKey: (UpdatePublicKeyRequest.t, UpdatePublicKeyResult.t,
+  UpdatePublicKeyResult.error) t 
+  | UpdateRealtimeLogConfig: (UpdateRealtimeLogConfigRequest.t,
   UpdateRealtimeLogConfigResult.t, UpdateRealtimeLogConfigResult.error) t 
-  | UpdateResponseHeadersPolicy2020_05_31:
-  (UpdateResponseHeadersPolicyRequest.t, UpdateResponseHeadersPolicyResult.t,
+  | UpdateResponseHeadersPolicy: (UpdateResponseHeadersPolicyRequest.t,
+  UpdateResponseHeadersPolicyResult.t,
   UpdateResponseHeadersPolicyResult.error) t 
-  | UpdateStreamingDistribution2020_05_31:
-  (UpdateStreamingDistributionRequest.t, UpdateStreamingDistributionResult.t,
+  | UpdateStreamingDistribution: (UpdateStreamingDistributionRequest.t,
+  UpdateStreamingDistributionResult.t,
   UpdateStreamingDistributionResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
-  | AssociateAlias2020_05_31 -> `PUT
-  | CreateCachePolicy2020_05_31 -> `POST
-  | CreateCloudFrontOriginAccessIdentity2020_05_31 -> `POST
-  | CreateDistribution2020_05_31 -> `POST
-  | CreateDistributionWithTags2020_05_31 -> `POST
-  | CreateFieldLevelEncryptionConfig2020_05_31 -> `POST
-  | CreateFieldLevelEncryptionProfile2020_05_31 -> `POST
-  | CreateFunction2020_05_31 -> `POST
-  | CreateInvalidation2020_05_31 -> `POST
-  | CreateKeyGroup2020_05_31 -> `POST
-  | CreateMonitoringSubscription2020_05_31 -> `POST
-  | CreateOriginRequestPolicy2020_05_31 -> `POST
-  | CreatePublicKey2020_05_31 -> `POST
-  | CreateRealtimeLogConfig2020_05_31 -> `POST
-  | CreateResponseHeadersPolicy2020_05_31 -> `POST
-  | CreateStreamingDistribution2020_05_31 -> `POST
-  | CreateStreamingDistributionWithTags2020_05_31 -> `POST
-  | DeleteCachePolicy2020_05_31 -> `DELETE
-  | DeleteCloudFrontOriginAccessIdentity2020_05_31 -> `DELETE
-  | DeleteDistribution2020_05_31 -> `DELETE
-  | DeleteFieldLevelEncryptionConfig2020_05_31 -> `DELETE
-  | DeleteFieldLevelEncryptionProfile2020_05_31 -> `DELETE
-  | DeleteFunction2020_05_31 -> `DELETE
-  | DeleteKeyGroup2020_05_31 -> `DELETE
-  | DeleteMonitoringSubscription2020_05_31 -> `DELETE
-  | DeleteOriginRequestPolicy2020_05_31 -> `DELETE
-  | DeletePublicKey2020_05_31 -> `DELETE
-  | DeleteRealtimeLogConfig2020_05_31 -> `POST
-  | DeleteResponseHeadersPolicy2020_05_31 -> `DELETE
-  | DeleteStreamingDistribution2020_05_31 -> `DELETE
-  | DescribeFunction2020_05_31 -> `GET
-  | GetCachePolicy2020_05_31 -> `GET
-  | GetCachePolicyConfig2020_05_31 -> `GET
-  | GetCloudFrontOriginAccessIdentity2020_05_31 -> `GET
-  | GetCloudFrontOriginAccessIdentityConfig2020_05_31 -> `GET
-  | GetDistribution2020_05_31 -> `GET
-  | GetDistributionConfig2020_05_31 -> `GET
-  | GetFieldLevelEncryption2020_05_31 -> `GET
-  | GetFieldLevelEncryptionConfig2020_05_31 -> `GET
-  | GetFieldLevelEncryptionProfile2020_05_31 -> `GET
-  | GetFieldLevelEncryptionProfileConfig2020_05_31 -> `GET
-  | GetFunction2020_05_31 -> `GET
-  | GetInvalidation2020_05_31 -> `GET
-  | GetKeyGroup2020_05_31 -> `GET
-  | GetKeyGroupConfig2020_05_31 -> `GET
-  | GetMonitoringSubscription2020_05_31 -> `GET
-  | GetOriginRequestPolicy2020_05_31 -> `GET
-  | GetOriginRequestPolicyConfig2020_05_31 -> `GET
-  | GetPublicKey2020_05_31 -> `GET
-  | GetPublicKeyConfig2020_05_31 -> `GET
-  | GetRealtimeLogConfig2020_05_31 -> `POST
-  | GetResponseHeadersPolicy2020_05_31 -> `GET
-  | GetResponseHeadersPolicyConfig2020_05_31 -> `GET
-  | GetStreamingDistribution2020_05_31 -> `GET
-  | GetStreamingDistributionConfig2020_05_31 -> `GET
-  | ListCachePolicies2020_05_31 -> `GET
-  | ListCloudFrontOriginAccessIdentities2020_05_31 -> `GET
-  | ListConflictingAliases2020_05_31 -> `GET
-  | ListDistributions2020_05_31 -> `GET
-  | ListDistributionsByCachePolicyId2020_05_31 -> `GET
-  | ListDistributionsByKeyGroup2020_05_31 -> `GET
-  | ListDistributionsByOriginRequestPolicyId2020_05_31 -> `GET
-  | ListDistributionsByRealtimeLogConfig2020_05_31 -> `POST
-  | ListDistributionsByResponseHeadersPolicyId2020_05_31 -> `GET
-  | ListDistributionsByWebACLId2020_05_31 -> `GET
-  | ListFieldLevelEncryptionConfigs2020_05_31 -> `GET
-  | ListFieldLevelEncryptionProfiles2020_05_31 -> `GET
-  | ListFunctions2020_05_31 -> `GET
-  | ListInvalidations2020_05_31 -> `GET
-  | ListKeyGroups2020_05_31 -> `GET
-  | ListOriginRequestPolicies2020_05_31 -> `GET
-  | ListPublicKeys2020_05_31 -> `GET
-  | ListRealtimeLogConfigs2020_05_31 -> `GET
-  | ListResponseHeadersPolicies2020_05_31 -> `GET
-  | ListStreamingDistributions2020_05_31 -> `GET
-  | ListTagsForResource2020_05_31 -> `GET
-  | PublishFunction2020_05_31 -> `POST
-  | TagResource2020_05_31 -> `POST
-  | TestFunction2020_05_31 -> `POST
-  | UntagResource2020_05_31 -> `POST
-  | UpdateCachePolicy2020_05_31 -> `PUT
-  | UpdateCloudFrontOriginAccessIdentity2020_05_31 -> `PUT
-  | UpdateDistribution2020_05_31 -> `PUT
-  | UpdateFieldLevelEncryptionConfig2020_05_31 -> `PUT
-  | UpdateFieldLevelEncryptionProfile2020_05_31 -> `PUT
-  | UpdateFunction2020_05_31 -> `PUT
-  | UpdateKeyGroup2020_05_31 -> `PUT
-  | UpdateOriginRequestPolicy2020_05_31 -> `PUT
-  | UpdatePublicKey2020_05_31 -> `PUT
-  | UpdateRealtimeLogConfig2020_05_31 -> `PUT
-  | UpdateResponseHeadersPolicy2020_05_31 -> `PUT
-  | UpdateStreamingDistribution2020_05_31 -> `PUT
+  | AssociateAlias -> `PUT
+  | CreateCachePolicy -> `POST
+  | CreateCloudFrontOriginAccessIdentity -> `POST
+  | CreateDistribution -> `POST
+  | CreateDistributionWithTags -> `POST
+  | CreateFieldLevelEncryptionConfig -> `POST
+  | CreateFieldLevelEncryptionProfile -> `POST
+  | CreateFunction -> `POST
+  | CreateInvalidation -> `POST
+  | CreateKeyGroup -> `POST
+  | CreateMonitoringSubscription -> `POST
+  | CreateOriginRequestPolicy -> `POST
+  | CreatePublicKey -> `POST
+  | CreateRealtimeLogConfig -> `POST
+  | CreateResponseHeadersPolicy -> `POST
+  | CreateStreamingDistribution -> `POST
+  | CreateStreamingDistributionWithTags -> `POST
+  | DeleteCachePolicy -> `DELETE
+  | DeleteCloudFrontOriginAccessIdentity -> `DELETE
+  | DeleteDistribution -> `DELETE
+  | DeleteFieldLevelEncryptionConfig -> `DELETE
+  | DeleteFieldLevelEncryptionProfile -> `DELETE
+  | DeleteFunction -> `DELETE
+  | DeleteKeyGroup -> `DELETE
+  | DeleteMonitoringSubscription -> `DELETE
+  | DeleteOriginRequestPolicy -> `DELETE
+  | DeletePublicKey -> `DELETE
+  | DeleteRealtimeLogConfig -> `POST
+  | DeleteResponseHeadersPolicy -> `DELETE
+  | DeleteStreamingDistribution -> `DELETE
+  | DescribeFunction -> `GET
+  | GetCachePolicy -> `GET
+  | GetCachePolicyConfig -> `GET
+  | GetCloudFrontOriginAccessIdentity -> `GET
+  | GetCloudFrontOriginAccessIdentityConfig -> `GET
+  | GetDistribution -> `GET
+  | GetDistributionConfig -> `GET
+  | GetFieldLevelEncryption -> `GET
+  | GetFieldLevelEncryptionConfig -> `GET
+  | GetFieldLevelEncryptionProfile -> `GET
+  | GetFieldLevelEncryptionProfileConfig -> `GET
+  | GetFunction -> `GET
+  | GetInvalidation -> `GET
+  | GetKeyGroup -> `GET
+  | GetKeyGroupConfig -> `GET
+  | GetMonitoringSubscription -> `GET
+  | GetOriginRequestPolicy -> `GET
+  | GetOriginRequestPolicyConfig -> `GET
+  | GetPublicKey -> `GET
+  | GetPublicKeyConfig -> `GET
+  | GetRealtimeLogConfig -> `POST
+  | GetResponseHeadersPolicy -> `GET
+  | GetResponseHeadersPolicyConfig -> `GET
+  | GetStreamingDistribution -> `GET
+  | GetStreamingDistributionConfig -> `GET
+  | ListCachePolicies -> `GET
+  | ListCloudFrontOriginAccessIdentities -> `GET
+  | ListConflictingAliases -> `GET
+  | ListDistributions -> `GET
+  | ListDistributionsByCachePolicyId -> `GET
+  | ListDistributionsByKeyGroup -> `GET
+  | ListDistributionsByOriginRequestPolicyId -> `GET
+  | ListDistributionsByRealtimeLogConfig -> `POST
+  | ListDistributionsByResponseHeadersPolicyId -> `GET
+  | ListDistributionsByWebACLId -> `GET
+  | ListFieldLevelEncryptionConfigs -> `GET
+  | ListFieldLevelEncryptionProfiles -> `GET
+  | ListFunctions -> `GET
+  | ListInvalidations -> `GET
+  | ListKeyGroups -> `GET
+  | ListOriginRequestPolicies -> `GET
+  | ListPublicKeys -> `GET
+  | ListRealtimeLogConfigs -> `GET
+  | ListResponseHeadersPolicies -> `GET
+  | ListStreamingDistributions -> `GET
+  | ListTagsForResource -> `GET
+  | PublishFunction -> `POST
+  | TagResource -> `POST
+  | TestFunction -> `POST
+  | UntagResource -> `POST
+  | UpdateCachePolicy -> `PUT
+  | UpdateCloudFrontOriginAccessIdentity -> `PUT
+  | UpdateDistribution -> `PUT
+  | UpdateFieldLevelEncryptionConfig -> `PUT
+  | UpdateFieldLevelEncryptionProfile -> `PUT
+  | UpdateFunction -> `PUT
+  | UpdateKeyGroup -> `PUT
+  | UpdateOriginRequestPolicy -> `PUT
+  | UpdatePublicKey -> `PUT
+  | UpdateRealtimeLogConfig -> `PUT
+  | UpdateResponseHeadersPolicy -> `PUT
+  | UpdateStreamingDistribution -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
-      | AssociateAlias2020_05_31 ->
+      | AssociateAlias ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distribution/%s/associate-alias"
                (String_.to_header
                   x.AssociateAliasRequest.targetDistributionId))
             (List.filter_opt [Some ("Alias", (String_.to_header x.alias))])
-      | CreateCachePolicy2020_05_31 ->
+      | CreateCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy"
-      | CreateCloudFrontOriginAccessIdentity2020_05_31 ->
+      | CreateCloudFrontOriginAccessIdentity ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-access-identity/cloudfront"
-      | CreateDistribution2020_05_31 ->
+      | CreateDistribution ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/distribution"
-      | CreateDistributionWithTags2020_05_31 ->
+      | CreateDistributionWithTags ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution?WithTags"
-      | CreateFieldLevelEncryptionConfig2020_05_31 ->
+      | CreateFieldLevelEncryptionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption"
-      | CreateFieldLevelEncryptionProfile2020_05_31 ->
+      | CreateFieldLevelEncryptionProfile ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption-profile"
-      | CreateFunction2020_05_31 ->
+      | CreateFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function"
-      | CreateInvalidation2020_05_31 ->
+      | CreateInvalidation ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution/%s/invalidation"
             (String_.to_header x.CreateInvalidationRequest.distributionId)
-      | CreateKeyGroup2020_05_31 ->
+      | CreateKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group"
-      | CreateMonitoringSubscription2020_05_31 ->
+      | CreateMonitoringSubscription ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distributions/%s/monitoring-subscription"
             (String_.to_header
                x.CreateMonitoringSubscriptionRequest.distributionId)
-      | CreateOriginRequestPolicy2020_05_31 ->
+      | CreateOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy"
-      | CreatePublicKey2020_05_31 ->
+      | CreatePublicKey ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/public-key"
-      | CreateRealtimeLogConfig2020_05_31 ->
+      | CreateRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/realtime-log-config"
-      | CreateResponseHeadersPolicy2020_05_31 ->
+      | CreateResponseHeadersPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy"
-      | CreateStreamingDistribution2020_05_31 ->
+      | CreateStreamingDistribution ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution"
-      | CreateStreamingDistributionWithTags2020_05_31 ->
+      | CreateStreamingDistributionWithTags ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution?WithTags"
-      | DeleteCachePolicy2020_05_31 ->
+      | DeleteCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy/%s"
             (String_.to_header x.DeleteCachePolicyRequest.id)
-      | DeleteCloudFrontOriginAccessIdentity2020_05_31 ->
+      | DeleteCloudFrontOriginAccessIdentity ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-access-identity/cloudfront/%s"
             (String_.to_header
                x.DeleteCloudFrontOriginAccessIdentityRequest.id)
-      | DeleteDistribution2020_05_31 ->
+      | DeleteDistribution ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/distribution/%s"
             (String_.to_header x.DeleteDistributionRequest.id)
-      | DeleteFieldLevelEncryptionConfig2020_05_31 ->
+      | DeleteFieldLevelEncryptionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption/%s"
             (String_.to_header x.DeleteFieldLevelEncryptionConfigRequest.id)
-      | DeleteFieldLevelEncryptionProfile2020_05_31 ->
+      | DeleteFieldLevelEncryptionProfile ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption-profile/%s"
             (String_.to_header x.DeleteFieldLevelEncryptionProfileRequest.id)
-      | DeleteFunction2020_05_31 ->
+      | DeleteFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s"
             (String_.to_header x.DeleteFunctionRequest.name)
-      | DeleteKeyGroup2020_05_31 ->
+      | DeleteKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s"
             (String_.to_header x.DeleteKeyGroupRequest.id)
-      | DeleteMonitoringSubscription2020_05_31 ->
+      | DeleteMonitoringSubscription ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distributions/%s/monitoring-subscription"
             (String_.to_header
                x.DeleteMonitoringSubscriptionRequest.distributionId)
-      | DeleteOriginRequestPolicy2020_05_31 ->
+      | DeleteOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy/%s"
             (String_.to_header x.DeleteOriginRequestPolicyRequest.id)
-      | DeletePublicKey2020_05_31 ->
+      | DeletePublicKey ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/public-key/%s"
             (String_.to_header x.DeletePublicKeyRequest.id)
-      | DeleteRealtimeLogConfig2020_05_31 ->
+      | DeleteRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/delete-realtime-log-config/"
-      | DeleteResponseHeadersPolicy2020_05_31 ->
+      | DeleteResponseHeadersPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy/%s"
             (String_.to_header x.DeleteResponseHeadersPolicyRequest.id)
-      | DeleteStreamingDistribution2020_05_31 ->
+      | DeleteStreamingDistribution ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution/%s"
             (String_.to_header x.DeleteStreamingDistributionRequest.id)
-      | DescribeFunction2020_05_31 ->
+      | DescribeFunction ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/function/%s/describe"
@@ -446,47 +438,47 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("Stage", (FunctionStage.to_header v)))
                   x.stage])
-      | GetCachePolicy2020_05_31 ->
+      | GetCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy/%s"
             (String_.to_header x.GetCachePolicyRequest.id)
-      | GetCachePolicyConfig2020_05_31 ->
+      | GetCachePolicyConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/cache-policy/%s/config"
             (String_.to_header x.GetCachePolicyConfigRequest.id)
-      | GetCloudFrontOriginAccessIdentity2020_05_31 ->
+      | GetCloudFrontOriginAccessIdentity ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-access-identity/cloudfront/%s"
             (String_.to_header x.GetCloudFrontOriginAccessIdentityRequest.id)
-      | GetCloudFrontOriginAccessIdentityConfig2020_05_31 ->
+      | GetCloudFrontOriginAccessIdentityConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-access-identity/cloudfront/%s/config"
             (String_.to_header
                x.GetCloudFrontOriginAccessIdentityConfigRequest.id)
-      | GetDistribution2020_05_31 ->
+      | GetDistribution ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/distribution/%s"
             (String_.to_header x.GetDistributionRequest.id)
-      | GetDistributionConfig2020_05_31 ->
+      | GetDistributionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution/%s/config"
             (String_.to_header x.GetDistributionConfigRequest.id)
-      | GetFieldLevelEncryption2020_05_31 ->
+      | GetFieldLevelEncryption ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption/%s"
             (String_.to_header x.GetFieldLevelEncryptionRequest.id)
-      | GetFieldLevelEncryptionConfig2020_05_31 ->
+      | GetFieldLevelEncryptionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption/%s/config"
             (String_.to_header x.GetFieldLevelEncryptionConfigRequest.id)
-      | GetFieldLevelEncryptionProfile2020_05_31 ->
+      | GetFieldLevelEncryptionProfile ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption-profile/%s"
             (String_.to_header x.GetFieldLevelEncryptionProfileRequest.id)
-      | GetFieldLevelEncryptionProfileConfig2020_05_31 ->
+      | GetFieldLevelEncryptionProfileConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption-profile/%s/config"
             (String_.to_header
                x.GetFieldLevelEncryptionProfileConfigRequest.id)
-      | GetFunction2020_05_31 ->
+      | GetFunction ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/function/%s"
                (String_.to_header x.GetFunctionRequest.name))
@@ -494,56 +486,56 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("Stage", (FunctionStage.to_header v)))
                   x.stage])
-      | GetInvalidation2020_05_31 ->
+      | GetInvalidation ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution/%s/invalidation/%s"
             (String_.to_header x.GetInvalidationRequest.distributionId)
             (String_.to_header x.GetInvalidationRequest.id)
-      | GetKeyGroup2020_05_31 ->
+      | GetKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s"
             (String_.to_header x.GetKeyGroupRequest.id)
-      | GetKeyGroupConfig2020_05_31 ->
+      | GetKeyGroupConfig ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s/config"
             (String_.to_header x.GetKeyGroupConfigRequest.id)
-      | GetMonitoringSubscription2020_05_31 ->
+      | GetMonitoringSubscription ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distributions/%s/monitoring-subscription"
             (String_.to_header
                x.GetMonitoringSubscriptionRequest.distributionId)
-      | GetOriginRequestPolicy2020_05_31 ->
+      | GetOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy/%s"
             (String_.to_header x.GetOriginRequestPolicyRequest.id)
-      | GetOriginRequestPolicyConfig2020_05_31 ->
+      | GetOriginRequestPolicyConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy/%s/config"
             (String_.to_header x.GetOriginRequestPolicyConfigRequest.id)
-      | GetPublicKey2020_05_31 ->
+      | GetPublicKey ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/public-key/%s"
             (String_.to_header x.GetPublicKeyRequest.id)
-      | GetPublicKeyConfig2020_05_31 ->
+      | GetPublicKeyConfig ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/public-key/%s/config"
             (String_.to_header x.GetPublicKeyConfigRequest.id)
-      | GetRealtimeLogConfig2020_05_31 ->
+      | GetRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/get-realtime-log-config/"
-      | GetResponseHeadersPolicy2020_05_31 ->
+      | GetResponseHeadersPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy/%s"
             (String_.to_header x.GetResponseHeadersPolicyRequest.id)
-      | GetResponseHeadersPolicyConfig2020_05_31 ->
+      | GetResponseHeadersPolicyConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy/%s/config"
             (String_.to_header x.GetResponseHeadersPolicyConfigRequest.id)
-      | GetStreamingDistribution2020_05_31 ->
+      | GetStreamingDistribution ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution/%s"
             (String_.to_header x.GetStreamingDistributionRequest.id)
-      | GetStreamingDistributionConfig2020_05_31 ->
+      | GetStreamingDistributionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution/%s/config"
             (String_.to_header x.GetStreamingDistributionConfigRequest.id)
-      | ListCachePolicies2020_05_31 ->
+      | ListCachePolicies ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy")
             (List.filter_opt
@@ -554,7 +546,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListCloudFrontOriginAccessIdentities2020_05_31 ->
+      | ListCloudFrontOriginAccessIdentities ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/origin-access-identity/cloudfront")
@@ -563,7 +555,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListConflictingAliases2020_05_31 ->
+      | ListConflictingAliases ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/conflicting-alias")
             (List.filter_opt
@@ -578,7 +570,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("MaxItems",
                          (ListConflictingAliasesMaxItemsInteger.to_header v)))
                  x.maxItems])
-      | ListDistributions2020_05_31 ->
+      | ListDistributions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/distribution")
             (List.filter_opt
@@ -586,7 +578,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListDistributionsByCachePolicyId2020_05_31 ->
+      | ListDistributionsByCachePolicyId ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distributionsByCachePolicyId/%s"
@@ -597,7 +589,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListDistributionsByKeyGroup2020_05_31 ->
+      | ListDistributionsByKeyGroup ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distributionsByKeyGroupId/%s"
@@ -608,7 +600,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListDistributionsByOriginRequestPolicyId2020_05_31 ->
+      | ListDistributionsByOriginRequestPolicyId ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distributionsByOriginRequestPolicyId/%s"
@@ -619,10 +611,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListDistributionsByRealtimeLogConfig2020_05_31 ->
+      | ListDistributionsByRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distributionsByRealtimeLogConfig/"
-      | ListDistributionsByResponseHeadersPolicyId2020_05_31 ->
+      | ListDistributionsByResponseHeadersPolicyId ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distributionsByResponseHeadersPolicyId/%s"
@@ -633,7 +625,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListDistributionsByWebACLId2020_05_31 ->
+      | ListDistributionsByWebACLId ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distributionsByWebACLId/%s"
@@ -644,7 +636,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListFieldLevelEncryptionConfigs2020_05_31 ->
+      | ListFieldLevelEncryptionConfigs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/field-level-encryption")
@@ -653,7 +645,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListFieldLevelEncryptionProfiles2020_05_31 ->
+      | ListFieldLevelEncryptionProfiles ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/field-level-encryption-profile")
@@ -662,7 +654,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListFunctions2020_05_31 ->
+      | ListFunctions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/function")
             (List.filter_opt
@@ -673,7 +665,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("Stage", (FunctionStage.to_header v))) 
                  x.stage])
-      | ListInvalidations2020_05_31 ->
+      | ListInvalidations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distribution/%s/invalidation"
@@ -683,7 +675,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListKeyGroups2020_05_31 ->
+      | ListKeyGroups ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/key-group")
             (List.filter_opt
@@ -691,7 +683,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListOriginRequestPolicies2020_05_31 ->
+      | ListOriginRequestPolicies ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/origin-request-policy")
@@ -704,7 +696,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListPublicKeys2020_05_31 ->
+      | ListPublicKeys ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/public-key")
             (List.filter_opt
@@ -712,7 +704,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListRealtimeLogConfigs2020_05_31 ->
+      | ListRealtimeLogConfigs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/realtime-log-config")
@@ -721,7 +713,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxItems;
                Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                  x.marker])
-      | ListResponseHeadersPolicies2020_05_31 ->
+      | ListResponseHeadersPolicies ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/response-headers-policy")
@@ -734,7 +726,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListStreamingDistributions2020_05_31 ->
+      | ListStreamingDistributions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/streaming-distribution")
@@ -743,69 +735,69 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
-      | ListTagsForResource2020_05_31 ->
+      | ListTagsForResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/tagging")
             (List.filter_opt
                [Some ("Resource", (ResourceARN.to_header x.resource))])
-      | PublishFunction2020_05_31 ->
+      | PublishFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s/publish"
             (String_.to_header x.PublishFunctionRequest.name)
-      | TagResource2020_05_31 ->
+      | TagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/tagging?Operation=Tag")
             (List.filter_opt
                [Some ("Resource", (ResourceARN.to_header x.resource))])
-      | TestFunction2020_05_31 ->
+      | TestFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s/test"
             (String_.to_header x.TestFunctionRequest.name)
-      | UntagResource2020_05_31 ->
+      | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/tagging?Operation=Untag")
             (List.filter_opt
                [Some ("Resource", (ResourceARN.to_header x.resource))])
-      | UpdateCachePolicy2020_05_31 ->
+      | UpdateCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy/%s"
             (String_.to_header x.UpdateCachePolicyRequest.id)
-      | UpdateCloudFrontOriginAccessIdentity2020_05_31 ->
+      | UpdateCloudFrontOriginAccessIdentity ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-access-identity/cloudfront/%s/config"
             (String_.to_header
                x.UpdateCloudFrontOriginAccessIdentityRequest.id)
-      | UpdateDistribution2020_05_31 ->
+      | UpdateDistribution ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution/%s/config"
             (String_.to_header x.UpdateDistributionRequest.id)
-      | UpdateFieldLevelEncryptionConfig2020_05_31 ->
+      | UpdateFieldLevelEncryptionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption/%s/config"
             (String_.to_header x.UpdateFieldLevelEncryptionConfigRequest.id)
-      | UpdateFieldLevelEncryptionProfile2020_05_31 ->
+      | UpdateFieldLevelEncryptionProfile ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption-profile/%s/config"
             (String_.to_header x.UpdateFieldLevelEncryptionProfileRequest.id)
-      | UpdateFunction2020_05_31 ->
+      | UpdateFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s"
             (String_.to_header x.UpdateFunctionRequest.name)
-      | UpdateKeyGroup2020_05_31 ->
+      | UpdateKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s"
             (String_.to_header x.UpdateKeyGroupRequest.id)
-      | UpdateOriginRequestPolicy2020_05_31 ->
+      | UpdateOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy/%s"
             (String_.to_header x.UpdateOriginRequestPolicyRequest.id)
-      | UpdatePublicKey2020_05_31 ->
+      | UpdatePublicKey ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/public-key/%s/config"
             (String_.to_header x.UpdatePublicKeyRequest.id)
-      | UpdateRealtimeLogConfig2020_05_31 ->
+      | UpdateRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/realtime-log-config/"
-      | UpdateResponseHeadersPolicy2020_05_31 ->
+      | UpdateResponseHeadersPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy/%s"
             (String_.to_header x.UpdateResponseHeadersPolicyRequest.id)
-      | UpdateStreamingDistribution2020_05_31 ->
+      | UpdateStreamingDistribution ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution/%s/config"
             (String_.to_header x.UpdateStreamingDistributionRequest.id))
@@ -813,353 +805,318 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
-  | AssociateAlias2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | CreateCachePolicy2020_05_31 ->
+  | AssociateAlias -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateCachePolicy ->
       let body =
         (fun param ->
            (((param |> CachePolicyConfig.to_value) |>
-               (Awso.Xml.of_value "CreateCachePolicy2020_05_31"))
+               (Awso.Xml.of_value "CreateCachePolicy"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.cachePolicyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateCloudFrontOriginAccessIdentity2020_05_31 ->
+  | CreateCloudFrontOriginAccessIdentity ->
       let body =
         (fun param ->
            (((param |> CloudFrontOriginAccessIdentityConfig.to_value) |>
-               (Awso.Xml.of_value
-                  "CreateCloudFrontOriginAccessIdentity2020_05_31"))
+               (Awso.Xml.of_value "CreateCloudFrontOriginAccessIdentity"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:""))
           req.cloudFrontOriginAccessIdentityConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateDistribution2020_05_31 ->
+  | CreateDistribution ->
       let body =
         (fun param ->
            (((param |> DistributionConfig.to_value) |>
-               (Awso.Xml.of_value "CreateDistribution2020_05_31"))
+               (Awso.Xml.of_value "CreateDistribution"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.distributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateDistributionWithTags2020_05_31 ->
+  | CreateDistributionWithTags ->
       let body =
         (fun param ->
            (((param |> DistributionConfigWithTags.to_value) |>
-               (Awso.Xml.of_value "CreateDistributionWithTags2020_05_31"))
+               (Awso.Xml.of_value "CreateDistributionWithTags"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.distributionConfigWithTags in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateFieldLevelEncryptionConfig2020_05_31 ->
+  | CreateFieldLevelEncryptionConfig ->
       let body =
         (fun param ->
            (((param |> FieldLevelEncryptionConfig.to_value) |>
-               (Awso.Xml.of_value
-                  "CreateFieldLevelEncryptionConfig2020_05_31"))
+               (Awso.Xml.of_value "CreateFieldLevelEncryptionConfig"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.fieldLevelEncryptionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateFieldLevelEncryptionProfile2020_05_31 ->
+  | CreateFieldLevelEncryptionProfile ->
       let body =
         (fun param ->
            (((param |> FieldLevelEncryptionProfileConfig.to_value) |>
-               (Awso.Xml.of_value
-                  "CreateFieldLevelEncryptionProfile2020_05_31"))
+               (Awso.Xml.of_value "CreateFieldLevelEncryptionProfile"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:""))
           req.fieldLevelEncryptionProfileConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateFunction2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | CreateInvalidation2020_05_31 ->
+  | CreateFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateInvalidation ->
       let body =
         (fun param ->
            (((param |> InvalidationBatch.to_value) |>
-               (Awso.Xml.of_value "CreateInvalidation2020_05_31"))
+               (Awso.Xml.of_value "CreateInvalidation"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.invalidationBatch in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateKeyGroup2020_05_31 ->
+  | CreateKeyGroup ->
       let body =
         (fun param ->
            (((param |> KeyGroupConfig.to_value) |>
-               (Awso.Xml.of_value "CreateKeyGroup2020_05_31"))
+               (Awso.Xml.of_value "CreateKeyGroup"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.keyGroupConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateMonitoringSubscription2020_05_31 ->
+  | CreateMonitoringSubscription ->
       let body =
         (fun param ->
            (((param |> MonitoringSubscription.to_value) |>
-               (Awso.Xml.of_value "CreateMonitoringSubscription2020_05_31"))
+               (Awso.Xml.of_value "CreateMonitoringSubscription"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.monitoringSubscription in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateOriginRequestPolicy2020_05_31 ->
+  | CreateOriginRequestPolicy ->
       let body =
         (fun param ->
            (((param |> OriginRequestPolicyConfig.to_value) |>
-               (Awso.Xml.of_value "CreateOriginRequestPolicy2020_05_31"))
+               (Awso.Xml.of_value "CreateOriginRequestPolicy"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.originRequestPolicyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreatePublicKey2020_05_31 ->
+  | CreatePublicKey ->
       let body =
         (fun param ->
            (((param |> PublicKeyConfig.to_value) |>
-               (Awso.Xml.of_value "CreatePublicKey2020_05_31"))
+               (Awso.Xml.of_value "CreatePublicKey"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.publicKeyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateRealtimeLogConfig2020_05_31 ->
+  | CreateRealtimeLogConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | CreateResponseHeadersPolicy2020_05_31 ->
+  | CreateResponseHeadersPolicy ->
       let body =
         (fun param ->
            (((param |> ResponseHeadersPolicyConfig.to_value) |>
-               (Awso.Xml.of_value "CreateResponseHeadersPolicy2020_05_31"))
+               (Awso.Xml.of_value "CreateResponseHeadersPolicy"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.responseHeadersPolicyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateStreamingDistribution2020_05_31 ->
+  | CreateStreamingDistribution ->
       let body =
         (fun param ->
            (((param |> StreamingDistributionConfig.to_value) |>
-               (Awso.Xml.of_value "CreateStreamingDistribution2020_05_31"))
+               (Awso.Xml.of_value "CreateStreamingDistribution"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.streamingDistributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | CreateStreamingDistributionWithTags2020_05_31 ->
+  | CreateStreamingDistributionWithTags ->
       let body =
         (fun param ->
            (((param |> StreamingDistributionConfigWithTags.to_value) |>
-               (Awso.Xml.of_value
-                  "CreateStreamingDistributionWithTags2020_05_31"))
+               (Awso.Xml.of_value "CreateStreamingDistributionWithTags"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:""))
           req.streamingDistributionConfigWithTags in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | DeleteCachePolicy2020_05_31 ->
+  | DeleteCachePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCloudFrontOriginAccessIdentity ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteCloudFrontOriginAccessIdentity2020_05_31 ->
+  | DeleteDistribution -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteFieldLevelEncryptionConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteDistribution2020_05_31 ->
+  | DeleteFieldLevelEncryptionProfile ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteFieldLevelEncryptionConfig2020_05_31 ->
+  | DeleteFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKeyGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteMonitoringSubscription ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteFieldLevelEncryptionProfile2020_05_31 ->
+  | DeleteOriginRequestPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteFunction2020_05_31 ->
+  | DeletePublicKey -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRealtimeLogConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteKeyGroup2020_05_31 ->
+  | DeleteResponseHeadersPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteMonitoringSubscription2020_05_31 ->
+  | DeleteStreamingDistribution ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteOriginRequestPolicy2020_05_31 ->
+  | DescribeFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetCachePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetCachePolicyConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetCloudFrontOriginAccessIdentity ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeletePublicKey2020_05_31 ->
+  | GetCloudFrontOriginAccessIdentityConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteRealtimeLogConfig2020_05_31 ->
+  | GetDistribution -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetDistributionConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetFieldLevelEncryption ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteResponseHeadersPolicy2020_05_31 ->
+  | GetFieldLevelEncryptionConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteStreamingDistribution2020_05_31 ->
+  | GetFieldLevelEncryptionProfile ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DescribeFunction2020_05_31 ->
+  | GetFieldLevelEncryptionProfileConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetCachePolicy2020_05_31 ->
+  | GetFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetInvalidation -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetKeyGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetKeyGroupConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetMonitoringSubscription ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetCachePolicyConfig2020_05_31 ->
+  | GetOriginRequestPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetCloudFrontOriginAccessIdentity2020_05_31 ->
+  | GetOriginRequestPolicyConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetCloudFrontOriginAccessIdentityConfig2020_05_31 ->
+  | GetPublicKey -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetPublicKeyConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetRealtimeLogConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetResponseHeadersPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetDistribution2020_05_31 ->
+  | GetResponseHeadersPolicyConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetDistributionConfig2020_05_31 ->
+  | GetStreamingDistribution ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetFieldLevelEncryption2020_05_31 ->
+  | GetStreamingDistributionConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetFieldLevelEncryptionConfig2020_05_31 ->
+  | ListCachePolicies -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListCloudFrontOriginAccessIdentities ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetFieldLevelEncryptionProfile2020_05_31 ->
+  | ListConflictingAliases ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetFieldLevelEncryptionProfileConfig2020_05_31 ->
+  | ListDistributions -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionsByCachePolicyId ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetFunction2020_05_31 -> Awso.Http.Request.make (method_of_endpoint endp)
-  | GetInvalidation2020_05_31 ->
+  | ListDistributionsByKeyGroup ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetKeyGroup2020_05_31 -> Awso.Http.Request.make (method_of_endpoint endp)
-  | GetKeyGroupConfig2020_05_31 ->
+  | ListDistributionsByOriginRequestPolicyId ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetMonitoringSubscription2020_05_31 ->
+  | ListDistributionsByRealtimeLogConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetOriginRequestPolicy2020_05_31 ->
+  | ListDistributionsByResponseHeadersPolicyId ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetOriginRequestPolicyConfig2020_05_31 ->
+  | ListDistributionsByWebACLId ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetPublicKey2020_05_31 ->
+  | ListFieldLevelEncryptionConfigs ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetPublicKeyConfig2020_05_31 ->
+  | ListFieldLevelEncryptionProfiles ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetRealtimeLogConfig2020_05_31 ->
+  | ListFunctions -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListInvalidations -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListKeyGroups -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListOriginRequestPolicies ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetResponseHeadersPolicy2020_05_31 ->
+  | ListPublicKeys -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListRealtimeLogConfigs ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetResponseHeadersPolicyConfig2020_05_31 ->
+  | ListResponseHeadersPolicies ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetStreamingDistribution2020_05_31 ->
+  | ListStreamingDistributions ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | GetStreamingDistributionConfig2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListCachePolicies2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListCloudFrontOriginAccessIdentities2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListConflictingAliases2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListDistributions2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListDistributionsByCachePolicyId2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListDistributionsByKeyGroup2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListDistributionsByOriginRequestPolicyId2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListDistributionsByRealtimeLogConfig2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListDistributionsByResponseHeadersPolicyId2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListDistributionsByWebACLId2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListFieldLevelEncryptionConfigs2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListFieldLevelEncryptionProfiles2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListFunctions2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListInvalidations2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListKeyGroups2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListOriginRequestPolicies2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListPublicKeys2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListRealtimeLogConfigs2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListResponseHeadersPolicies2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListStreamingDistributions2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | ListTagsForResource2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PublishFunction2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | TagResource2020_05_31 ->
+  | ListTagsForResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | PublishFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | TagResource ->
       let body =
         (fun param ->
-           (((param |> Tags.to_value) |>
-               (Awso.Xml.of_value "TagResource2020_05_31"))
+           (((param |> Tags.to_value) |> (Awso.Xml.of_value "TagResource"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.tags in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | TestFunction2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | UntagResource2020_05_31 ->
+  | TestFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UntagResource ->
       let body =
         (fun param ->
            (((param |> TagKeys.to_value) |>
-               (Awso.Xml.of_value "UntagResource2020_05_31"))
+               (Awso.Xml.of_value "UntagResource"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.tagKeys in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateCachePolicy2020_05_31 ->
+  | UpdateCachePolicy ->
       let body =
         (fun param ->
            (((param |> CachePolicyConfig.to_value) |>
-               (Awso.Xml.of_value "UpdateCachePolicy2020_05_31"))
+               (Awso.Xml.of_value "UpdateCachePolicy"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.cachePolicyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateCloudFrontOriginAccessIdentity2020_05_31 ->
+  | UpdateCloudFrontOriginAccessIdentity ->
       let body =
         (fun param ->
            (((param |> CloudFrontOriginAccessIdentityConfig.to_value) |>
-               (Awso.Xml.of_value
-                  "UpdateCloudFrontOriginAccessIdentity2020_05_31"))
+               (Awso.Xml.of_value "UpdateCloudFrontOriginAccessIdentity"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:""))
           req.cloudFrontOriginAccessIdentityConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateDistribution2020_05_31 ->
+  | UpdateDistribution ->
       let body =
         (fun param ->
            (((param |> DistributionConfig.to_value) |>
-               (Awso.Xml.of_value "UpdateDistribution2020_05_31"))
+               (Awso.Xml.of_value "UpdateDistribution"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.distributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateFieldLevelEncryptionConfig2020_05_31 ->
+  | UpdateFieldLevelEncryptionConfig ->
       let body =
         (fun param ->
            (((param |> FieldLevelEncryptionConfig.to_value) |>
-               (Awso.Xml.of_value
-                  "UpdateFieldLevelEncryptionConfig2020_05_31"))
+               (Awso.Xml.of_value "UpdateFieldLevelEncryptionConfig"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.fieldLevelEncryptionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateFieldLevelEncryptionProfile2020_05_31 ->
+  | UpdateFieldLevelEncryptionProfile ->
       let body =
         (fun param ->
            (((param |> FieldLevelEncryptionProfileConfig.to_value) |>
-               (Awso.Xml.of_value
-                  "UpdateFieldLevelEncryptionProfile2020_05_31"))
+               (Awso.Xml.of_value "UpdateFieldLevelEncryptionProfile"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:""))
           req.fieldLevelEncryptionProfileConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateFunction2020_05_31 ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateKeyGroup2020_05_31 ->
+  | UpdateFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKeyGroup ->
       let body =
         (fun param ->
            (((param |> KeyGroupConfig.to_value) |>
-               (Awso.Xml.of_value "UpdateKeyGroup2020_05_31"))
+               (Awso.Xml.of_value "UpdateKeyGroup"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.keyGroupConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateOriginRequestPolicy2020_05_31 ->
+  | UpdateOriginRequestPolicy ->
       let body =
         (fun param ->
            (((param |> OriginRequestPolicyConfig.to_value) |>
-               (Awso.Xml.of_value "UpdateOriginRequestPolicy2020_05_31"))
+               (Awso.Xml.of_value "UpdateOriginRequestPolicy"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.originRequestPolicyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdatePublicKey2020_05_31 ->
+  | UpdatePublicKey ->
       let body =
         (fun param ->
            (((param |> PublicKeyConfig.to_value) |>
-               (Awso.Xml.of_value "UpdatePublicKey2020_05_31"))
+               (Awso.Xml.of_value "UpdatePublicKey"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.publicKeyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateRealtimeLogConfig2020_05_31 ->
+  | UpdateRealtimeLogConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateResponseHeadersPolicy2020_05_31 ->
+  | UpdateResponseHeadersPolicy ->
       let body =
         (fun param ->
            (((param |> ResponseHeadersPolicyConfig.to_value) |>
-               (Awso.Xml.of_value "UpdateResponseHeadersPolicy2020_05_31"))
+               (Awso.Xml.of_value "UpdateResponseHeadersPolicy"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.responseHeadersPolicyConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
-  | UpdateStreamingDistribution2020_05_31 ->
+  | UpdateStreamingDistribution ->
       let body =
         (fun param ->
            (((param |> StreamingDistributionConfig.to_value) |>
-               (Awso.Xml.of_value "UpdateStreamingDistribution2020_05_31"))
+               (Awso.Xml.of_value "UpdateStreamingDistribution"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.streamingDistributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
@@ -1196,14 +1153,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_xml in
   let _ = resp in
   match endpoint with
-  | AssociateAlias2020_05_31 ->
+  | AssociateAlias ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | CreateCachePolicy2020_05_31 ->
+  | CreateCachePolicy ->
       if is_success
       then Ok (CreateCachePolicyResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some CreateCachePolicyResult.error_of_xml))
-  | CreateCloudFrontOriginAccessIdentity2020_05_31 ->
+  | CreateCloudFrontOriginAccessIdentity ->
       if is_success
       then
         Ok
@@ -1213,12 +1170,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateCloudFrontOriginAccessIdentityResult.error_of_xml))
-  | CreateDistribution2020_05_31 ->
+  | CreateDistribution ->
       if is_success
       then Ok (CreateDistributionResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some CreateDistributionResult.error_of_xml))
-  | CreateDistributionWithTags2020_05_31 ->
+  | CreateDistributionWithTags ->
       if is_success
       then
         Ok (CreateDistributionWithTagsResult.of_xml (response_to_xml resp))
@@ -1226,7 +1183,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateDistributionWithTagsResult.error_of_xml))
-  | CreateFieldLevelEncryptionConfig2020_05_31 ->
+  | CreateFieldLevelEncryptionConfig ->
       if is_success
       then
         Ok
@@ -1236,7 +1193,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateFieldLevelEncryptionConfigResult.error_of_xml))
-  | CreateFieldLevelEncryptionProfile2020_05_31 ->
+  | CreateFieldLevelEncryptionProfile ->
       if is_success
       then
         Ok
@@ -1246,20 +1203,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateFieldLevelEncryptionProfileResult.error_of_xml))
-  | CreateFunction2020_05_31 ->
+  | CreateFunction ->
       if is_success
       then Ok (CreateFunctionResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some CreateFunctionResult.error_of_xml))
-  | CreateInvalidation2020_05_31 ->
+  | CreateInvalidation ->
       if is_success
       then Ok (CreateInvalidationResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some CreateInvalidationResult.error_of_xml))
-  | CreateKeyGroup2020_05_31 ->
+  | CreateKeyGroup ->
       if is_success
       then Ok (CreateKeyGroupResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some CreateKeyGroupResult.error_of_xml))
-  | CreateMonitoringSubscription2020_05_31 ->
+  | CreateMonitoringSubscription ->
       if is_success
       then
         Ok (CreateMonitoringSubscriptionResult.of_xml (response_to_xml resp))
@@ -1267,24 +1224,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateMonitoringSubscriptionResult.error_of_xml))
-  | CreateOriginRequestPolicy2020_05_31 ->
+  | CreateOriginRequestPolicy ->
       if is_success
       then Ok (CreateOriginRequestPolicyResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error
              (Some CreateOriginRequestPolicyResult.error_of_xml))
-  | CreatePublicKey2020_05_31 ->
+  | CreatePublicKey ->
       if is_success
       then Ok (CreatePublicKeyResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some CreatePublicKeyResult.error_of_xml))
-  | CreateRealtimeLogConfig2020_05_31 ->
+  | CreateRealtimeLogConfig ->
       if is_success
       then Ok (CreateRealtimeLogConfigResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some CreateRealtimeLogConfigResult.error_of_xml))
-  | CreateResponseHeadersPolicy2020_05_31 ->
+  | CreateResponseHeadersPolicy ->
       if is_success
       then
         Ok (CreateResponseHeadersPolicyResult.of_xml (response_to_xml resp))
@@ -1292,7 +1249,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateResponseHeadersPolicyResult.error_of_xml))
-  | CreateStreamingDistribution2020_05_31 ->
+  | CreateStreamingDistribution ->
       if is_success
       then
         Ok (CreateStreamingDistributionResult.of_xml (response_to_xml resp))
@@ -1300,7 +1257,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateStreamingDistributionResult.error_of_xml))
-  | CreateStreamingDistributionWithTags2020_05_31 ->
+  | CreateStreamingDistributionWithTags ->
       if is_success
       then
         Ok
@@ -1310,21 +1267,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateStreamingDistributionWithTagsResult.error_of_xml))
-  | DeleteCachePolicy2020_05_31 ->
+  | DeleteCachePolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteCloudFrontOriginAccessIdentity2020_05_31 ->
+  | DeleteCloudFrontOriginAccessIdentity ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteDistribution2020_05_31 ->
+  | DeleteDistribution ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteFieldLevelEncryptionConfig2020_05_31 ->
+  | DeleteFieldLevelEncryptionConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteFieldLevelEncryptionProfile2020_05_31 ->
+  | DeleteFieldLevelEncryptionProfile ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteFunction2020_05_31 ->
+  | DeleteFunction ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteKeyGroup2020_05_31 ->
+  | DeleteKeyGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteMonitoringSubscription2020_05_31 ->
+  | DeleteMonitoringSubscription ->
       if is_success
       then
         let headers =
@@ -1336,31 +1293,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteMonitoringSubscriptionResult.error_of_xml))
-  | DeleteOriginRequestPolicy2020_05_31 ->
+  | DeleteOriginRequestPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeletePublicKey2020_05_31 ->
+  | DeletePublicKey ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteRealtimeLogConfig2020_05_31 ->
+  | DeleteRealtimeLogConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteResponseHeadersPolicy2020_05_31 ->
+  | DeleteResponseHeadersPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteStreamingDistribution2020_05_31 ->
+  | DeleteStreamingDistribution ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DescribeFunction2020_05_31 ->
+  | DescribeFunction ->
       if is_success
       then Ok (DescribeFunctionResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some DescribeFunctionResult.error_of_xml))
-  | GetCachePolicy2020_05_31 ->
+  | GetCachePolicy ->
       if is_success
       then Ok (GetCachePolicyResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some GetCachePolicyResult.error_of_xml))
-  | GetCachePolicyConfig2020_05_31 ->
+  | GetCachePolicyConfig ->
       if is_success
       then Ok (GetCachePolicyConfigResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some GetCachePolicyConfigResult.error_of_xml))
-  | GetCloudFrontOriginAccessIdentity2020_05_31 ->
+  | GetCloudFrontOriginAccessIdentity ->
       if is_success
       then
         Ok
@@ -1370,7 +1327,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetCloudFrontOriginAccessIdentityResult.error_of_xml))
-  | GetCloudFrontOriginAccessIdentityConfig2020_05_31 ->
+  | GetCloudFrontOriginAccessIdentityConfig ->
       if is_success
       then
         Ok
@@ -1380,23 +1337,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetCloudFrontOriginAccessIdentityConfigResult.error_of_xml))
-  | GetDistribution2020_05_31 ->
+  | GetDistribution ->
       if is_success
       then Ok (GetDistributionResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some GetDistributionResult.error_of_xml))
-  | GetDistributionConfig2020_05_31 ->
+  | GetDistributionConfig ->
       if is_success
       then Ok (GetDistributionConfigResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some GetDistributionConfigResult.error_of_xml))
-  | GetFieldLevelEncryption2020_05_31 ->
+  | GetFieldLevelEncryption ->
       if is_success
       then Ok (GetFieldLevelEncryptionResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some GetFieldLevelEncryptionResult.error_of_xml))
-  | GetFieldLevelEncryptionConfig2020_05_31 ->
+  | GetFieldLevelEncryptionConfig ->
       if is_success
       then
         Ok
@@ -1405,7 +1362,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetFieldLevelEncryptionConfigResult.error_of_xml))
-  | GetFieldLevelEncryptionProfile2020_05_31 ->
+  | GetFieldLevelEncryptionProfile ->
       if is_success
       then
         Ok
@@ -1414,7 +1371,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetFieldLevelEncryptionProfileResult.error_of_xml))
-  | GetFieldLevelEncryptionProfileConfig2020_05_31 ->
+  | GetFieldLevelEncryptionProfileConfig ->
       if is_success
       then
         Ok
@@ -1424,7 +1381,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetFieldLevelEncryptionProfileConfigResult.error_of_xml))
-  | GetFunction2020_05_31 ->
+  | GetFunction ->
       if is_success
       then
         let body = FunctionBlob.of_string (Awso.Http.Response.body resp) in
@@ -1432,33 +1389,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (GetFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetFunctionResult.error_of_xml))
-  | GetInvalidation2020_05_31 ->
+  | GetInvalidation ->
       if is_success
       then Ok (GetInvalidationResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some GetInvalidationResult.error_of_xml))
-  | GetKeyGroup2020_05_31 ->
+  | GetKeyGroup ->
       if is_success
       then Ok (GetKeyGroupResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some GetKeyGroupResult.error_of_xml))
-  | GetKeyGroupConfig2020_05_31 ->
+  | GetKeyGroupConfig ->
       if is_success
       then Ok (GetKeyGroupConfigResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some GetKeyGroupConfigResult.error_of_xml))
-  | GetMonitoringSubscription2020_05_31 ->
+  | GetMonitoringSubscription ->
       if is_success
       then Ok (GetMonitoringSubscriptionResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error
              (Some GetMonitoringSubscriptionResult.error_of_xml))
-  | GetOriginRequestPolicy2020_05_31 ->
+  | GetOriginRequestPolicy ->
       if is_success
       then Ok (GetOriginRequestPolicyResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some GetOriginRequestPolicyResult.error_of_xml))
-  | GetOriginRequestPolicyConfig2020_05_31 ->
+  | GetOriginRequestPolicyConfig ->
       if is_success
       then
         Ok (GetOriginRequestPolicyConfigResult.of_xml (response_to_xml resp))
@@ -1466,28 +1423,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetOriginRequestPolicyConfigResult.error_of_xml))
-  | GetPublicKey2020_05_31 ->
+  | GetPublicKey ->
       if is_success
       then Ok (GetPublicKeyResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some GetPublicKeyResult.error_of_xml))
-  | GetPublicKeyConfig2020_05_31 ->
+  | GetPublicKeyConfig ->
       if is_success
       then Ok (GetPublicKeyConfigResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some GetPublicKeyConfigResult.error_of_xml))
-  | GetRealtimeLogConfig2020_05_31 ->
+  | GetRealtimeLogConfig ->
       if is_success
       then Ok (GetRealtimeLogConfigResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some GetRealtimeLogConfigResult.error_of_xml))
-  | GetResponseHeadersPolicy2020_05_31 ->
+  | GetResponseHeadersPolicy ->
       if is_success
       then Ok (GetResponseHeadersPolicyResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some GetResponseHeadersPolicyResult.error_of_xml))
-  | GetResponseHeadersPolicyConfig2020_05_31 ->
+  | GetResponseHeadersPolicyConfig ->
       if is_success
       then
         Ok
@@ -1496,13 +1453,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetResponseHeadersPolicyConfigResult.error_of_xml))
-  | GetStreamingDistribution2020_05_31 ->
+  | GetStreamingDistribution ->
       if is_success
       then Ok (GetStreamingDistributionResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some GetStreamingDistributionResult.error_of_xml))
-  | GetStreamingDistributionConfig2020_05_31 ->
+  | GetStreamingDistributionConfig ->
       if is_success
       then
         Ok
@@ -1511,12 +1468,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetStreamingDistributionConfigResult.error_of_xml))
-  | ListCachePolicies2020_05_31 ->
+  | ListCachePolicies ->
       if is_success
       then Ok (ListCachePoliciesResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some ListCachePoliciesResult.error_of_xml))
-  | ListCloudFrontOriginAccessIdentities2020_05_31 ->
+  | ListCloudFrontOriginAccessIdentities ->
       if is_success
       then
         Ok
@@ -1526,18 +1483,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListCloudFrontOriginAccessIdentitiesResult.error_of_xml))
-  | ListConflictingAliases2020_05_31 ->
+  | ListConflictingAliases ->
       if is_success
       then Ok (ListConflictingAliasesResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some ListConflictingAliasesResult.error_of_xml))
-  | ListDistributions2020_05_31 ->
+  | ListDistributions ->
       if is_success
       then Ok (ListDistributionsResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some ListDistributionsResult.error_of_xml))
-  | ListDistributionsByCachePolicyId2020_05_31 ->
+  | ListDistributionsByCachePolicyId ->
       if is_success
       then
         Ok
@@ -1547,7 +1504,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDistributionsByCachePolicyIdResult.error_of_xml))
-  | ListDistributionsByKeyGroup2020_05_31 ->
+  | ListDistributionsByKeyGroup ->
       if is_success
       then
         Ok (ListDistributionsByKeyGroupResult.of_xml (response_to_xml resp))
@@ -1555,7 +1512,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDistributionsByKeyGroupResult.error_of_xml))
-  | ListDistributionsByOriginRequestPolicyId2020_05_31 ->
+  | ListDistributionsByOriginRequestPolicyId ->
       if is_success
       then
         Ok
@@ -1566,7 +1523,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListDistributionsByOriginRequestPolicyIdResult.error_of_xml))
-  | ListDistributionsByRealtimeLogConfig2020_05_31 ->
+  | ListDistributionsByRealtimeLogConfig ->
       if is_success
       then
         Ok
@@ -1576,7 +1533,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDistributionsByRealtimeLogConfigResult.error_of_xml))
-  | ListDistributionsByResponseHeadersPolicyId2020_05_31 ->
+  | ListDistributionsByResponseHeadersPolicyId ->
       if is_success
       then
         Ok
@@ -1587,7 +1544,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListDistributionsByResponseHeadersPolicyIdResult.error_of_xml))
-  | ListDistributionsByWebACLId2020_05_31 ->
+  | ListDistributionsByWebACLId ->
       if is_success
       then
         Ok (ListDistributionsByWebACLIdResult.of_xml (response_to_xml resp))
@@ -1595,7 +1552,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDistributionsByWebACLIdResult.error_of_xml))
-  | ListFieldLevelEncryptionConfigs2020_05_31 ->
+  | ListFieldLevelEncryptionConfigs ->
       if is_success
       then
         Ok
@@ -1605,7 +1562,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListFieldLevelEncryptionConfigsResult.error_of_xml))
-  | ListFieldLevelEncryptionProfiles2020_05_31 ->
+  | ListFieldLevelEncryptionProfiles ->
       if is_success
       then
         Ok
@@ -1615,37 +1572,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListFieldLevelEncryptionProfilesResult.error_of_xml))
-  | ListFunctions2020_05_31 ->
+  | ListFunctions ->
       if is_success
       then Ok (ListFunctionsResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some ListFunctionsResult.error_of_xml))
-  | ListInvalidations2020_05_31 ->
+  | ListInvalidations ->
       if is_success
       then Ok (ListInvalidationsResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some ListInvalidationsResult.error_of_xml))
-  | ListKeyGroups2020_05_31 ->
+  | ListKeyGroups ->
       if is_success
       then Ok (ListKeyGroupsResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some ListKeyGroupsResult.error_of_xml))
-  | ListOriginRequestPolicies2020_05_31 ->
+  | ListOriginRequestPolicies ->
       if is_success
       then Ok (ListOriginRequestPoliciesResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error
              (Some ListOriginRequestPoliciesResult.error_of_xml))
-  | ListPublicKeys2020_05_31 ->
+  | ListPublicKeys ->
       if is_success
       then Ok (ListPublicKeysResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some ListPublicKeysResult.error_of_xml))
-  | ListRealtimeLogConfigs2020_05_31 ->
+  | ListRealtimeLogConfigs ->
       if is_success
       then Ok (ListRealtimeLogConfigsResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some ListRealtimeLogConfigsResult.error_of_xml))
-  | ListResponseHeadersPolicies2020_05_31 ->
+  | ListResponseHeadersPolicies ->
       if is_success
       then
         Ok (ListResponseHeadersPoliciesResult.of_xml (response_to_xml resp))
@@ -1653,7 +1610,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListResponseHeadersPoliciesResult.error_of_xml))
-  | ListStreamingDistributions2020_05_31 ->
+  | ListStreamingDistributions ->
       if is_success
       then
         Ok (ListStreamingDistributionsResult.of_xml (response_to_xml resp))
@@ -1661,29 +1618,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListStreamingDistributionsResult.error_of_xml))
-  | ListTagsForResource2020_05_31 ->
+  | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some ListTagsForResourceResult.error_of_xml))
-  | PublishFunction2020_05_31 ->
+  | PublishFunction ->
       if is_success
       then Ok (PublishFunctionResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some PublishFunctionResult.error_of_xml))
-  | TagResource2020_05_31 ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | TestFunction2020_05_31 ->
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | TestFunction ->
       if is_success
       then Ok (TestFunctionResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some TestFunctionResult.error_of_xml))
-  | UntagResource2020_05_31 ->
+  | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | UpdateCachePolicy2020_05_31 ->
+  | UpdateCachePolicy ->
       if is_success
       then Ok (UpdateCachePolicyResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some UpdateCachePolicyResult.error_of_xml))
-  | UpdateCloudFrontOriginAccessIdentity2020_05_31 ->
+  | UpdateCloudFrontOriginAccessIdentity ->
       if is_success
       then
         Ok
@@ -1693,12 +1649,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateCloudFrontOriginAccessIdentityResult.error_of_xml))
-  | UpdateDistribution2020_05_31 ->
+  | UpdateDistribution ->
       if is_success
       then Ok (UpdateDistributionResult.of_xml (response_to_xml resp))
       else
         Error (parse_aws_error (Some UpdateDistributionResult.error_of_xml))
-  | UpdateFieldLevelEncryptionConfig2020_05_31 ->
+  | UpdateFieldLevelEncryptionConfig ->
       if is_success
       then
         Ok
@@ -1708,7 +1664,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateFieldLevelEncryptionConfigResult.error_of_xml))
-  | UpdateFieldLevelEncryptionProfile2020_05_31 ->
+  | UpdateFieldLevelEncryptionProfile ->
       if is_success
       then
         Ok
@@ -1718,32 +1674,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateFieldLevelEncryptionProfileResult.error_of_xml))
-  | UpdateFunction2020_05_31 ->
+  | UpdateFunction ->
       if is_success
       then Ok (UpdateFunctionResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some UpdateFunctionResult.error_of_xml))
-  | UpdateKeyGroup2020_05_31 ->
+  | UpdateKeyGroup ->
       if is_success
       then Ok (UpdateKeyGroupResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some UpdateKeyGroupResult.error_of_xml))
-  | UpdateOriginRequestPolicy2020_05_31 ->
+  | UpdateOriginRequestPolicy ->
       if is_success
       then Ok (UpdateOriginRequestPolicyResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error
              (Some UpdateOriginRequestPolicyResult.error_of_xml))
-  | UpdatePublicKey2020_05_31 ->
+  | UpdatePublicKey ->
       if is_success
       then Ok (UpdatePublicKeyResult.of_xml (response_to_xml resp))
       else Error (parse_aws_error (Some UpdatePublicKeyResult.error_of_xml))
-  | UpdateRealtimeLogConfig2020_05_31 ->
+  | UpdateRealtimeLogConfig ->
       if is_success
       then Ok (UpdateRealtimeLogConfigResult.of_xml (response_to_xml resp))
       else
         Error
           (parse_aws_error (Some UpdateRealtimeLogConfigResult.error_of_xml))
-  | UpdateResponseHeadersPolicy2020_05_31 ->
+  | UpdateResponseHeadersPolicy ->
       if is_success
       then
         Ok (UpdateResponseHeadersPolicyResult.of_xml (response_to_xml resp))
@@ -1751,7 +1707,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateResponseHeadersPolicyResult.error_of_xml))
-  | UpdateStreamingDistribution2020_05_31 ->
+  | UpdateStreamingDistribution ->
       if is_success
       then
         Ok (UpdateStreamingDistributionResult.of_xml (response_to_xml resp))

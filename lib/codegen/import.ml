@@ -145,6 +145,8 @@ module Util = struct
     |> String.concat_map ~f:(fun c ->
       if Char.is_uppercase c
       then Printf.sprintf "%c%c" sep (Char.lowercase_ascii c)
+      else if Stdlib.( = ) c '_' || Stdlib.( = ) c '-'
+      then String.of_char sep
       else String.of_char c)
   ;;
 
@@ -153,7 +155,12 @@ module Util = struct
     test "AbortMultipartUpload";
     [%expect "abort_multipart_upload"];
     test "CompleteMultipartUpload";
-    [%expect "complete_multipart_upload"]
+    [%expect "complete_multipart_upload"];
+    test "AssociateAlias2020_05_31";
+    [%expect "associate_alias2020_05_31"];
+    let test_dash s = print_endline (camel_to_snake_case ~sep:'-' s) in
+    test_dash "AssociateAlias2020_05_31";
+    [%expect "associate-alias2020-05-31"]
   ;;
 
   let tokenize (read_token : Sedlexing.lexbuf -> ('a option, 'err) result) (s : string)

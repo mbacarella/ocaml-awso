@@ -28,7 +28,7 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
-let associate_alias2020_05_31 =
+let associate_alias =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -43,10 +43,10 @@ let associate_alias2020_05_31 =
        and alias = flag "alias" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.associate_alias2020_05_31
+           Io.associate_alias
            (Values.AssociateAliasRequest.make ~targetDistributionId ~alias ())
            None None])
-let create_cache_policy2020_05_31 =
+let create_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -61,13 +61,13 @@ let create_cache_policy2020_05_31 =
            ~doc:"JSON CachePolicyConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_cache_policy2020_05_31
+           Io.create_cache_policy
            (Values.CreateCachePolicyRequest.make
               ~cachePolicyConfig:(Values.CachePolicyConfig.of_json
                                     cachePolicyConfig) ())
            (Some Values.CreateCachePolicyResult.to_json)
            (Some Values.CreateCachePolicyResult.error_to_json)])
-let create_cloud_front_origin_access_identity2020_05_31 =
+let create_cloud_front_origin_access_identity =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -82,7 +82,7 @@ let create_cloud_front_origin_access_identity2020_05_31 =
            ~doc:"JSON CloudFrontOriginAccessIdentityConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_cloud_front_origin_access_identity2020_05_31
+           Io.create_cloud_front_origin_access_identity
            (Values.CreateCloudFrontOriginAccessIdentityRequest.make
               ~cloudFrontOriginAccessIdentityConfig:(Values.CloudFrontOriginAccessIdentityConfig.of_json
                                                        cloudFrontOriginAccessIdentityConfig)
@@ -90,7 +90,7 @@ let create_cloud_front_origin_access_identity2020_05_31 =
            (Some Values.CreateCloudFrontOriginAccessIdentityResult.to_json)
            (Some
               Values.CreateCloudFrontOriginAccessIdentityResult.error_to_json)])
-let create_distribution2020_05_31 =
+let create_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -105,13 +105,13 @@ let create_distribution2020_05_31 =
            ~doc:"JSON DistributionConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_distribution2020_05_31
+           Io.create_distribution
            (Values.CreateDistributionRequest.make
               ~distributionConfig:(Values.DistributionConfig.of_json
                                      distributionConfig) ())
            (Some Values.CreateDistributionResult.to_json)
            (Some Values.CreateDistributionResult.error_to_json)])
-let create_distribution_with_tags2020_05_31 =
+let create_distribution_with_tags =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -126,13 +126,13 @@ let create_distribution_with_tags2020_05_31 =
            ~doc:"JSON DistributionConfigWithTags" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_distribution_with_tags2020_05_31
+           Io.create_distribution_with_tags
            (Values.CreateDistributionWithTagsRequest.make
               ~distributionConfigWithTags:(Values.DistributionConfigWithTags.of_json
                                              distributionConfigWithTags) ())
            (Some Values.CreateDistributionWithTagsResult.to_json)
            (Some Values.CreateDistributionWithTagsResult.error_to_json)])
-let create_field_level_encryption_config2020_05_31 =
+let create_field_level_encryption_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -147,13 +147,13 @@ let create_field_level_encryption_config2020_05_31 =
            ~doc:"JSON FieldLevelEncryptionConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_field_level_encryption_config2020_05_31
+           Io.create_field_level_encryption_config
            (Values.CreateFieldLevelEncryptionConfigRequest.make
               ~fieldLevelEncryptionConfig:(Values.FieldLevelEncryptionConfig.of_json
                                              fieldLevelEncryptionConfig) ())
            (Some Values.CreateFieldLevelEncryptionConfigResult.to_json)
            (Some Values.CreateFieldLevelEncryptionConfigResult.error_to_json)])
-let create_field_level_encryption_profile2020_05_31 =
+let create_field_level_encryption_profile =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -168,14 +168,14 @@ let create_field_level_encryption_profile2020_05_31 =
            ~doc:"JSON FieldLevelEncryptionProfileConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_field_level_encryption_profile2020_05_31
+           Io.create_field_level_encryption_profile
            (Values.CreateFieldLevelEncryptionProfileRequest.make
               ~fieldLevelEncryptionProfileConfig:(Values.FieldLevelEncryptionProfileConfig.of_json
                                                     fieldLevelEncryptionProfileConfig)
               ())
            (Some Values.CreateFieldLevelEncryptionProfileResult.to_json)
            (Some Values.CreateFieldLevelEncryptionProfileResult.error_to_json)])
-let create_function2020_05_31 =
+let create_function =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -193,13 +193,13 @@ let create_function2020_05_31 =
          flag "function-code" (required json_arg) ~doc:"JSON FunctionBlob" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_function2020_05_31
+           Io.create_function
            (Values.CreateFunctionRequest.make ~name
               ~functionConfig:(Values.FunctionConfig.of_json functionConfig)
               ~functionCode:(Values.FunctionBlob.of_json functionCode) ())
            (Some Values.CreateFunctionResult.to_json)
            (Some Values.CreateFunctionResult.error_to_json)])
-let create_invalidation2020_05_31 =
+let create_invalidation =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -216,13 +216,13 @@ let create_invalidation2020_05_31 =
            ~doc:"JSON InvalidationBatch" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_invalidation2020_05_31
+           Io.create_invalidation
            (Values.CreateInvalidationRequest.make ~distributionId
               ~invalidationBatch:(Values.InvalidationBatch.of_json
                                     invalidationBatch) ())
            (Some Values.CreateInvalidationResult.to_json)
            (Some Values.CreateInvalidationResult.error_to_json)])
-let create_key_group2020_05_31 =
+let create_key_group =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -237,12 +237,12 @@ let create_key_group2020_05_31 =
            ~doc:"JSON KeyGroupConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_key_group2020_05_31
+           Io.create_key_group
            (Values.CreateKeyGroupRequest.make
               ~keyGroupConfig:(Values.KeyGroupConfig.of_json keyGroupConfig)
               ()) (Some Values.CreateKeyGroupResult.to_json)
            (Some Values.CreateKeyGroupResult.error_to_json)])
-let create_monitoring_subscription2020_05_31 =
+let create_monitoring_subscription =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -259,13 +259,13 @@ let create_monitoring_subscription2020_05_31 =
            ~doc:"JSON MonitoringSubscription" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_monitoring_subscription2020_05_31
+           Io.create_monitoring_subscription
            (Values.CreateMonitoringSubscriptionRequest.make ~distributionId
               ~monitoringSubscription:(Values.MonitoringSubscription.of_json
                                          monitoringSubscription) ())
            (Some Values.CreateMonitoringSubscriptionResult.to_json)
            (Some Values.CreateMonitoringSubscriptionResult.error_to_json)])
-let create_origin_request_policy2020_05_31 =
+let create_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -280,13 +280,13 @@ let create_origin_request_policy2020_05_31 =
            ~doc:"JSON OriginRequestPolicyConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_origin_request_policy2020_05_31
+           Io.create_origin_request_policy
            (Values.CreateOriginRequestPolicyRequest.make
               ~originRequestPolicyConfig:(Values.OriginRequestPolicyConfig.of_json
                                             originRequestPolicyConfig) ())
            (Some Values.CreateOriginRequestPolicyResult.to_json)
            (Some Values.CreateOriginRequestPolicyResult.error_to_json)])
-let create_public_key2020_05_31 =
+let create_public_key =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -301,13 +301,13 @@ let create_public_key2020_05_31 =
            ~doc:"JSON PublicKeyConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_public_key2020_05_31
+           Io.create_public_key
            (Values.CreatePublicKeyRequest.make
               ~publicKeyConfig:(Values.PublicKeyConfig.of_json
                                   publicKeyConfig) ())
            (Some Values.CreatePublicKeyResult.to_json)
            (Some Values.CreatePublicKeyResult.error_to_json)])
-let create_realtime_log_config2020_05_31 =
+let create_realtime_log_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -325,14 +325,14 @@ let create_realtime_log_config2020_05_31 =
          flag "sampling-rate" (required json_arg) ~doc:"JSON long" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_realtime_log_config2020_05_31
+           Io.create_realtime_log_config
            (Values.CreateRealtimeLogConfigRequest.make
               ~endPoints:(Values.EndPointList.of_json endPoints)
               ~fields:(Values.FieldList.of_json fields) ~name
               ~samplingRate:(Values.Long.of_json samplingRate) ())
            (Some Values.CreateRealtimeLogConfigResult.to_json)
            (Some Values.CreateRealtimeLogConfigResult.error_to_json)])
-let create_response_headers_policy2020_05_31 =
+let create_response_headers_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -347,13 +347,13 @@ let create_response_headers_policy2020_05_31 =
            ~doc:"JSON ResponseHeadersPolicyConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_response_headers_policy2020_05_31
+           Io.create_response_headers_policy
            (Values.CreateResponseHeadersPolicyRequest.make
               ~responseHeadersPolicyConfig:(Values.ResponseHeadersPolicyConfig.of_json
                                               responseHeadersPolicyConfig) ())
            (Some Values.CreateResponseHeadersPolicyResult.to_json)
            (Some Values.CreateResponseHeadersPolicyResult.error_to_json)])
-let create_streaming_distribution2020_05_31 =
+let create_streaming_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -368,13 +368,13 @@ let create_streaming_distribution2020_05_31 =
            ~doc:"JSON StreamingDistributionConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_streaming_distribution2020_05_31
+           Io.create_streaming_distribution
            (Values.CreateStreamingDistributionRequest.make
               ~streamingDistributionConfig:(Values.StreamingDistributionConfig.of_json
                                               streamingDistributionConfig) ())
            (Some Values.CreateStreamingDistributionResult.to_json)
            (Some Values.CreateStreamingDistributionResult.error_to_json)])
-let create_streaming_distribution_with_tags2020_05_31 =
+let create_streaming_distribution_with_tags =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -389,7 +389,7 @@ let create_streaming_distribution_with_tags2020_05_31 =
            ~doc:"JSON StreamingDistributionConfigWithTags" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.create_streaming_distribution_with_tags2020_05_31
+           Io.create_streaming_distribution_with_tags
            (Values.CreateStreamingDistributionWithTagsRequest.make
               ~streamingDistributionConfigWithTags:(Values.StreamingDistributionConfigWithTags.of_json
                                                       streamingDistributionConfigWithTags)
@@ -397,7 +397,7 @@ let create_streaming_distribution_with_tags2020_05_31 =
            (Some Values.CreateStreamingDistributionWithTagsResult.to_json)
            (Some
               Values.CreateStreamingDistributionWithTagsResult.error_to_json)])
-let delete_cache_policy2020_05_31 =
+let delete_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -411,9 +411,9 @@ let delete_cache_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_cache_policy2020_05_31
+           Io.delete_cache_policy
            (Values.DeleteCachePolicyRequest.make ?ifMatch ~id ()) None None])
-let delete_cloud_front_origin_access_identity2020_05_31 =
+let delete_cloud_front_origin_access_identity =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -427,10 +427,10 @@ let delete_cloud_front_origin_access_identity2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_cloud_front_origin_access_identity2020_05_31
+           Io.delete_cloud_front_origin_access_identity
            (Values.DeleteCloudFrontOriginAccessIdentityRequest.make ?ifMatch
               ~id ()) None None])
-let delete_distribution2020_05_31 =
+let delete_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -444,9 +444,9 @@ let delete_distribution2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_distribution2020_05_31
+           Io.delete_distribution
            (Values.DeleteDistributionRequest.make ?ifMatch ~id ()) None None])
-let delete_field_level_encryption_config2020_05_31 =
+let delete_field_level_encryption_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -460,10 +460,10 @@ let delete_field_level_encryption_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_field_level_encryption_config2020_05_31
+           Io.delete_field_level_encryption_config
            (Values.DeleteFieldLevelEncryptionConfigRequest.make ?ifMatch ~id
               ()) None None])
-let delete_field_level_encryption_profile2020_05_31 =
+let delete_field_level_encryption_profile =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -477,10 +477,10 @@ let delete_field_level_encryption_profile2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_field_level_encryption_profile2020_05_31
+           Io.delete_field_level_encryption_profile
            (Values.DeleteFieldLevelEncryptionProfileRequest.make ?ifMatch ~id
               ()) None None])
-let delete_function2020_05_31 =
+let delete_function =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -494,9 +494,9 @@ let delete_function2020_05_31 =
        and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_function2020_05_31
+           Io.delete_function
            (Values.DeleteFunctionRequest.make ~name ~ifMatch ()) None None])
-let delete_key_group2020_05_31 =
+let delete_key_group =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -510,9 +510,9 @@ let delete_key_group2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_key_group2020_05_31
+           Io.delete_key_group
            (Values.DeleteKeyGroupRequest.make ?ifMatch ~id ()) None None])
-let delete_monitoring_subscription2020_05_31 =
+let delete_monitoring_subscription =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -526,11 +526,11 @@ let delete_monitoring_subscription2020_05_31 =
          flag "distribution-id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_monitoring_subscription2020_05_31
+           Io.delete_monitoring_subscription
            (Values.DeleteMonitoringSubscriptionRequest.make ~distributionId
               ()) (Some Values.DeleteMonitoringSubscriptionResult.to_json)
            (Some Values.DeleteMonitoringSubscriptionResult.error_to_json)])
-let delete_origin_request_policy2020_05_31 =
+let delete_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -544,10 +544,10 @@ let delete_origin_request_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_origin_request_policy2020_05_31
+           Io.delete_origin_request_policy
            (Values.DeleteOriginRequestPolicyRequest.make ?ifMatch ~id ())
            None None])
-let delete_public_key2020_05_31 =
+let delete_public_key =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -561,9 +561,9 @@ let delete_public_key2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_public_key2020_05_31
+           Io.delete_public_key
            (Values.DeletePublicKeyRequest.make ?ifMatch ~id ()) None None])
-let delete_realtime_log_config2020_05_31 =
+let delete_realtime_log_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -577,10 +577,10 @@ let delete_realtime_log_config2020_05_31 =
        and aRN = flag "a-r-n" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_realtime_log_config2020_05_31
+           Io.delete_realtime_log_config
            (Values.DeleteRealtimeLogConfigRequest.make ?name ?aRN ()) None
            None])
-let delete_response_headers_policy2020_05_31 =
+let delete_response_headers_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -594,10 +594,10 @@ let delete_response_headers_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_response_headers_policy2020_05_31
+           Io.delete_response_headers_policy
            (Values.DeleteResponseHeadersPolicyRequest.make ?ifMatch ~id ())
            None None])
-let delete_streaming_distribution2020_05_31 =
+let delete_streaming_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -611,10 +611,10 @@ let delete_streaming_distribution2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_streaming_distribution2020_05_31
+           Io.delete_streaming_distribution
            (Values.DeleteStreamingDistributionRequest.make ?ifMatch ~id ())
            None None])
-let describe_function2020_05_31 =
+let describe_function =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -628,12 +628,12 @@ let describe_function2020_05_31 =
        and name = flag "name" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_function2020_05_31
+           Io.describe_function
            (Values.DescribeFunctionRequest.make
               ?stage:(Option.map ~f:Values.FunctionStage.of_json stage) ~name
               ()) (Some Values.DescribeFunctionResult.to_json)
            (Some Values.DescribeFunctionResult.error_to_json)])
-let get_cache_policy2020_05_31 =
+let get_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -646,11 +646,10 @@ let get_cache_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_cache_policy2020_05_31
-           (Values.GetCachePolicyRequest.make ~id ())
+           Io.get_cache_policy (Values.GetCachePolicyRequest.make ~id ())
            (Some Values.GetCachePolicyResult.to_json)
            (Some Values.GetCachePolicyResult.error_to_json)])
-let get_cache_policy_config2020_05_31 =
+let get_cache_policy_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -663,11 +662,11 @@ let get_cache_policy_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_cache_policy_config2020_05_31
+           Io.get_cache_policy_config
            (Values.GetCachePolicyConfigRequest.make ~id ())
            (Some Values.GetCachePolicyConfigResult.to_json)
            (Some Values.GetCachePolicyConfigResult.error_to_json)])
-let get_cloud_front_origin_access_identity2020_05_31 =
+let get_cloud_front_origin_access_identity =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -680,11 +679,11 @@ let get_cloud_front_origin_access_identity2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_cloud_front_origin_access_identity2020_05_31
+           Io.get_cloud_front_origin_access_identity
            (Values.GetCloudFrontOriginAccessIdentityRequest.make ~id ())
            (Some Values.GetCloudFrontOriginAccessIdentityResult.to_json)
            (Some Values.GetCloudFrontOriginAccessIdentityResult.error_to_json)])
-let get_cloud_front_origin_access_identity_config2020_05_31 =
+let get_cloud_front_origin_access_identity_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -697,12 +696,12 @@ let get_cloud_front_origin_access_identity_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_cloud_front_origin_access_identity_config2020_05_31
+           Io.get_cloud_front_origin_access_identity_config
            (Values.GetCloudFrontOriginAccessIdentityConfigRequest.make ~id ())
            (Some Values.GetCloudFrontOriginAccessIdentityConfigResult.to_json)
            (Some
               Values.GetCloudFrontOriginAccessIdentityConfigResult.error_to_json)])
-let get_distribution2020_05_31 =
+let get_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -715,11 +714,10 @@ let get_distribution2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_distribution2020_05_31
-           (Values.GetDistributionRequest.make ~id ())
+           Io.get_distribution (Values.GetDistributionRequest.make ~id ())
            (Some Values.GetDistributionResult.to_json)
            (Some Values.GetDistributionResult.error_to_json)])
-let get_distribution_config2020_05_31 =
+let get_distribution_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -732,11 +730,11 @@ let get_distribution_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_distribution_config2020_05_31
+           Io.get_distribution_config
            (Values.GetDistributionConfigRequest.make ~id ())
            (Some Values.GetDistributionConfigResult.to_json)
            (Some Values.GetDistributionConfigResult.error_to_json)])
-let get_field_level_encryption2020_05_31 =
+let get_field_level_encryption =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -749,11 +747,11 @@ let get_field_level_encryption2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_field_level_encryption2020_05_31
+           Io.get_field_level_encryption
            (Values.GetFieldLevelEncryptionRequest.make ~id ())
            (Some Values.GetFieldLevelEncryptionResult.to_json)
            (Some Values.GetFieldLevelEncryptionResult.error_to_json)])
-let get_field_level_encryption_config2020_05_31 =
+let get_field_level_encryption_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -766,11 +764,11 @@ let get_field_level_encryption_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_field_level_encryption_config2020_05_31
+           Io.get_field_level_encryption_config
            (Values.GetFieldLevelEncryptionConfigRequest.make ~id ())
            (Some Values.GetFieldLevelEncryptionConfigResult.to_json)
            (Some Values.GetFieldLevelEncryptionConfigResult.error_to_json)])
-let get_field_level_encryption_profile2020_05_31 =
+let get_field_level_encryption_profile =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -783,11 +781,11 @@ let get_field_level_encryption_profile2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_field_level_encryption_profile2020_05_31
+           Io.get_field_level_encryption_profile
            (Values.GetFieldLevelEncryptionProfileRequest.make ~id ())
            (Some Values.GetFieldLevelEncryptionProfileResult.to_json)
            (Some Values.GetFieldLevelEncryptionProfileResult.error_to_json)])
-let get_field_level_encryption_profile_config2020_05_31 =
+let get_field_level_encryption_profile_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -800,12 +798,12 @@ let get_field_level_encryption_profile_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_field_level_encryption_profile_config2020_05_31
+           Io.get_field_level_encryption_profile_config
            (Values.GetFieldLevelEncryptionProfileConfigRequest.make ~id ())
            (Some Values.GetFieldLevelEncryptionProfileConfigResult.to_json)
            (Some
               Values.GetFieldLevelEncryptionProfileConfigResult.error_to_json)])
-let get_function2020_05_31 =
+let get_function =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -819,12 +817,12 @@ let get_function2020_05_31 =
        and name = flag "name" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_function2020_05_31
+           Io.get_function
            (Values.GetFunctionRequest.make
               ?stage:(Option.map ~f:Values.FunctionStage.of_json stage) ~name
               ()) (Some Values.GetFunctionResult.to_json)
            (Some Values.GetFunctionResult.error_to_json)])
-let get_invalidation2020_05_31 =
+let get_invalidation =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -839,11 +837,11 @@ let get_invalidation2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_invalidation2020_05_31
+           Io.get_invalidation
            (Values.GetInvalidationRequest.make ~distributionId ~id ())
            (Some Values.GetInvalidationResult.to_json)
            (Some Values.GetInvalidationResult.error_to_json)])
-let get_key_group2020_05_31 =
+let get_key_group =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -856,10 +854,10 @@ let get_key_group2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_key_group2020_05_31 (Values.GetKeyGroupRequest.make ~id ())
+           Io.get_key_group (Values.GetKeyGroupRequest.make ~id ())
            (Some Values.GetKeyGroupResult.to_json)
            (Some Values.GetKeyGroupResult.error_to_json)])
-let get_key_group_config2020_05_31 =
+let get_key_group_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -872,11 +870,11 @@ let get_key_group_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_key_group_config2020_05_31
+           Io.get_key_group_config
            (Values.GetKeyGroupConfigRequest.make ~id ())
            (Some Values.GetKeyGroupConfigResult.to_json)
            (Some Values.GetKeyGroupConfigResult.error_to_json)])
-let get_monitoring_subscription2020_05_31 =
+let get_monitoring_subscription =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -890,11 +888,11 @@ let get_monitoring_subscription2020_05_31 =
          flag "distribution-id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_monitoring_subscription2020_05_31
+           Io.get_monitoring_subscription
            (Values.GetMonitoringSubscriptionRequest.make ~distributionId ())
            (Some Values.GetMonitoringSubscriptionResult.to_json)
            (Some Values.GetMonitoringSubscriptionResult.error_to_json)])
-let get_origin_request_policy2020_05_31 =
+let get_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -907,11 +905,11 @@ let get_origin_request_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_origin_request_policy2020_05_31
+           Io.get_origin_request_policy
            (Values.GetOriginRequestPolicyRequest.make ~id ())
            (Some Values.GetOriginRequestPolicyResult.to_json)
            (Some Values.GetOriginRequestPolicyResult.error_to_json)])
-let get_origin_request_policy_config2020_05_31 =
+let get_origin_request_policy_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -924,11 +922,11 @@ let get_origin_request_policy_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_origin_request_policy_config2020_05_31
+           Io.get_origin_request_policy_config
            (Values.GetOriginRequestPolicyConfigRequest.make ~id ())
            (Some Values.GetOriginRequestPolicyConfigResult.to_json)
            (Some Values.GetOriginRequestPolicyConfigResult.error_to_json)])
-let get_public_key2020_05_31 =
+let get_public_key =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -941,11 +939,10 @@ let get_public_key2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_public_key2020_05_31
-           (Values.GetPublicKeyRequest.make ~id ())
+           Io.get_public_key (Values.GetPublicKeyRequest.make ~id ())
            (Some Values.GetPublicKeyResult.to_json)
            (Some Values.GetPublicKeyResult.error_to_json)])
-let get_public_key_config2020_05_31 =
+let get_public_key_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -958,11 +955,11 @@ let get_public_key_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_public_key_config2020_05_31
+           Io.get_public_key_config
            (Values.GetPublicKeyConfigRequest.make ~id ())
            (Some Values.GetPublicKeyConfigResult.to_json)
            (Some Values.GetPublicKeyConfigResult.error_to_json)])
-let get_realtime_log_config2020_05_31 =
+let get_realtime_log_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -976,11 +973,11 @@ let get_realtime_log_config2020_05_31 =
        and aRN = flag "a-r-n" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_realtime_log_config2020_05_31
+           Io.get_realtime_log_config
            (Values.GetRealtimeLogConfigRequest.make ?name ?aRN ())
            (Some Values.GetRealtimeLogConfigResult.to_json)
            (Some Values.GetRealtimeLogConfigResult.error_to_json)])
-let get_response_headers_policy2020_05_31 =
+let get_response_headers_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -993,11 +990,11 @@ let get_response_headers_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_response_headers_policy2020_05_31
+           Io.get_response_headers_policy
            (Values.GetResponseHeadersPolicyRequest.make ~id ())
            (Some Values.GetResponseHeadersPolicyResult.to_json)
            (Some Values.GetResponseHeadersPolicyResult.error_to_json)])
-let get_response_headers_policy_config2020_05_31 =
+let get_response_headers_policy_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1010,11 +1007,11 @@ let get_response_headers_policy_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_response_headers_policy_config2020_05_31
+           Io.get_response_headers_policy_config
            (Values.GetResponseHeadersPolicyConfigRequest.make ~id ())
            (Some Values.GetResponseHeadersPolicyConfigResult.to_json)
            (Some Values.GetResponseHeadersPolicyConfigResult.error_to_json)])
-let get_streaming_distribution2020_05_31 =
+let get_streaming_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1027,11 +1024,11 @@ let get_streaming_distribution2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_streaming_distribution2020_05_31
+           Io.get_streaming_distribution
            (Values.GetStreamingDistributionRequest.make ~id ())
            (Some Values.GetStreamingDistributionResult.to_json)
            (Some Values.GetStreamingDistributionResult.error_to_json)])
-let get_streaming_distribution_config2020_05_31 =
+let get_streaming_distribution_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1044,11 +1041,11 @@ let get_streaming_distribution_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_streaming_distribution_config2020_05_31
+           Io.get_streaming_distribution_config
            (Values.GetStreamingDistributionConfigRequest.make ~id ())
            (Some Values.GetStreamingDistributionConfigResult.to_json)
            (Some Values.GetStreamingDistributionConfigResult.error_to_json)])
-let list_cache_policies2020_05_31 =
+let list_cache_policies =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1064,13 +1061,13 @@ let list_cache_policies2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_cache_policies2020_05_31
+           Io.list_cache_policies
            (Values.ListCachePoliciesRequest.make
               ?type_:(Option.map ~f:Values.CachePolicyType.of_json type_)
               ?marker ?maxItems ())
            (Some Values.ListCachePoliciesResult.to_json)
            (Some Values.ListCachePoliciesResult.error_to_json)])
-let list_cloud_front_origin_access_identities2020_05_31 =
+let list_cloud_front_origin_access_identities =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1084,13 +1081,13 @@ let list_cloud_front_origin_access_identities2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_cloud_front_origin_access_identities2020_05_31
+           Io.list_cloud_front_origin_access_identities
            (Values.ListCloudFrontOriginAccessIdentitiesRequest.make ?marker
               ?maxItems ())
            (Some Values.ListCloudFrontOriginAccessIdentitiesResult.to_json)
            (Some
               Values.ListCloudFrontOriginAccessIdentitiesResult.error_to_json)])
-let list_conflicting_aliases2020_05_31 =
+let list_conflicting_aliases =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1110,12 +1107,12 @@ let list_conflicting_aliases2020_05_31 =
        and alias = flag "alias" (required string) ~doc:"STRING aliasString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_conflicting_aliases2020_05_31
+           Io.list_conflicting_aliases
            (Values.ListConflictingAliasesRequest.make ?marker ?maxItems
               ~distributionId ~alias ())
            (Some Values.ListConflictingAliasesResult.to_json)
            (Some Values.ListConflictingAliasesResult.error_to_json)])
-let list_distributions2020_05_31 =
+let list_distributions =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1129,11 +1126,11 @@ let list_distributions2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_distributions2020_05_31
+           Io.list_distributions
            (Values.ListDistributionsRequest.make ?marker ?maxItems ())
            (Some Values.ListDistributionsResult.to_json)
            (Some Values.ListDistributionsResult.error_to_json)])
-let list_distributions_by_cache_policy_id2020_05_31 =
+let list_distributions_by_cache_policy_id =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1149,12 +1146,12 @@ let list_distributions_by_cache_policy_id2020_05_31 =
          flag "cache-policy-id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_distributions_by_cache_policy_id2020_05_31
+           Io.list_distributions_by_cache_policy_id
            (Values.ListDistributionsByCachePolicyIdRequest.make ?marker
               ?maxItems ~cachePolicyId ())
            (Some Values.ListDistributionsByCachePolicyIdResult.to_json)
            (Some Values.ListDistributionsByCachePolicyIdResult.error_to_json)])
-let list_distributions_by_key_group2020_05_31 =
+let list_distributions_by_key_group =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1170,12 +1167,12 @@ let list_distributions_by_key_group2020_05_31 =
          flag "key-group-id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_distributions_by_key_group2020_05_31
+           Io.list_distributions_by_key_group
            (Values.ListDistributionsByKeyGroupRequest.make ?marker ?maxItems
               ~keyGroupId ())
            (Some Values.ListDistributionsByKeyGroupResult.to_json)
            (Some Values.ListDistributionsByKeyGroupResult.error_to_json)])
-let list_distributions_by_origin_request_policy_id2020_05_31 =
+let list_distributions_by_origin_request_policy_id =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1192,14 +1189,14 @@ let list_distributions_by_origin_request_policy_id2020_05_31 =
            ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_distributions_by_origin_request_policy_id2020_05_31
+           Io.list_distributions_by_origin_request_policy_id
            (Values.ListDistributionsByOriginRequestPolicyIdRequest.make
               ?marker ?maxItems ~originRequestPolicyId ())
            (Some
               Values.ListDistributionsByOriginRequestPolicyIdResult.to_json)
            (Some
               Values.ListDistributionsByOriginRequestPolicyIdResult.error_to_json)])
-let list_distributions_by_realtime_log_config2020_05_31 =
+let list_distributions_by_realtime_log_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1219,13 +1216,13 @@ let list_distributions_by_realtime_log_config2020_05_31 =
            ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_distributions_by_realtime_log_config2020_05_31
+           Io.list_distributions_by_realtime_log_config
            (Values.ListDistributionsByRealtimeLogConfigRequest.make ?marker
               ?maxItems ?realtimeLogConfigName ?realtimeLogConfigArn ())
            (Some Values.ListDistributionsByRealtimeLogConfigResult.to_json)
            (Some
               Values.ListDistributionsByRealtimeLogConfigResult.error_to_json)])
-let list_distributions_by_response_headers_policy_id2020_05_31 =
+let list_distributions_by_response_headers_policy_id =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1242,14 +1239,14 @@ let list_distributions_by_response_headers_policy_id2020_05_31 =
            ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_distributions_by_response_headers_policy_id2020_05_31
+           Io.list_distributions_by_response_headers_policy_id
            (Values.ListDistributionsByResponseHeadersPolicyIdRequest.make
               ?marker ?maxItems ~responseHeadersPolicyId ())
            (Some
               Values.ListDistributionsByResponseHeadersPolicyIdResult.to_json)
            (Some
               Values.ListDistributionsByResponseHeadersPolicyIdResult.error_to_json)])
-let list_distributions_by_web_a_c_l_id2020_05_31 =
+let list_distributions_by_web_a_c_l_id =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1265,12 +1262,12 @@ let list_distributions_by_web_a_c_l_id2020_05_31 =
          flag "web-a-c-l-id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_distributions_by_web_a_c_l_id2020_05_31
+           Io.list_distributions_by_web_a_c_l_id
            (Values.ListDistributionsByWebACLIdRequest.make ?marker ?maxItems
               ~webACLId ())
            (Some Values.ListDistributionsByWebACLIdResult.to_json)
            (Some Values.ListDistributionsByWebACLIdResult.error_to_json)])
-let list_field_level_encryption_configs2020_05_31 =
+let list_field_level_encryption_configs =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1284,12 +1281,12 @@ let list_field_level_encryption_configs2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_field_level_encryption_configs2020_05_31
+           Io.list_field_level_encryption_configs
            (Values.ListFieldLevelEncryptionConfigsRequest.make ?marker
               ?maxItems ())
            (Some Values.ListFieldLevelEncryptionConfigsResult.to_json)
            (Some Values.ListFieldLevelEncryptionConfigsResult.error_to_json)])
-let list_field_level_encryption_profiles2020_05_31 =
+let list_field_level_encryption_profiles =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1303,12 +1300,12 @@ let list_field_level_encryption_profiles2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_field_level_encryption_profiles2020_05_31
+           Io.list_field_level_encryption_profiles
            (Values.ListFieldLevelEncryptionProfilesRequest.make ?marker
               ?maxItems ())
            (Some Values.ListFieldLevelEncryptionProfilesResult.to_json)
            (Some Values.ListFieldLevelEncryptionProfilesResult.error_to_json)])
-let list_functions2020_05_31 =
+let list_functions =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1323,12 +1320,12 @@ let list_functions2020_05_31 =
        and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_functions2020_05_31
+           Io.list_functions
            (Values.ListFunctionsRequest.make ?marker ?maxItems
               ?stage:(Option.map ~f:Values.FunctionStage.of_json stage) ())
            (Some Values.ListFunctionsResult.to_json)
            (Some Values.ListFunctionsResult.error_to_json)])
-let list_invalidations2020_05_31 =
+let list_invalidations =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1344,12 +1341,12 @@ let list_invalidations2020_05_31 =
          flag "distribution-id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_invalidations2020_05_31
+           Io.list_invalidations
            (Values.ListInvalidationsRequest.make ?marker ?maxItems
               ~distributionId ())
            (Some Values.ListInvalidationsResult.to_json)
            (Some Values.ListInvalidationsResult.error_to_json)])
-let list_key_groups2020_05_31 =
+let list_key_groups =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1363,11 +1360,11 @@ let list_key_groups2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_key_groups2020_05_31
+           Io.list_key_groups
            (Values.ListKeyGroupsRequest.make ?marker ?maxItems ())
            (Some Values.ListKeyGroupsResult.to_json)
            (Some Values.ListKeyGroupsResult.error_to_json)])
-let list_origin_request_policies2020_05_31 =
+let list_origin_request_policies =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1383,13 +1380,13 @@ let list_origin_request_policies2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_origin_request_policies2020_05_31
+           Io.list_origin_request_policies
            (Values.ListOriginRequestPoliciesRequest.make
               ?type_:(Option.map ~f:Values.OriginRequestPolicyType.of_json
                         type_) ?marker ?maxItems ())
            (Some Values.ListOriginRequestPoliciesResult.to_json)
            (Some Values.ListOriginRequestPoliciesResult.error_to_json)])
-let list_public_keys2020_05_31 =
+let list_public_keys =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1403,11 +1400,11 @@ let list_public_keys2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_public_keys2020_05_31
+           Io.list_public_keys
            (Values.ListPublicKeysRequest.make ?marker ?maxItems ())
            (Some Values.ListPublicKeysResult.to_json)
            (Some Values.ListPublicKeysResult.error_to_json)])
-let list_realtime_log_configs2020_05_31 =
+let list_realtime_log_configs =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1421,11 +1418,11 @@ let list_realtime_log_configs2020_05_31 =
        and marker = flag "marker" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_realtime_log_configs2020_05_31
+           Io.list_realtime_log_configs
            (Values.ListRealtimeLogConfigsRequest.make ?maxItems ?marker ())
            (Some Values.ListRealtimeLogConfigsResult.to_json)
            (Some Values.ListRealtimeLogConfigsResult.error_to_json)])
-let list_response_headers_policies2020_05_31 =
+let list_response_headers_policies =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1442,13 +1439,13 @@ let list_response_headers_policies2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_response_headers_policies2020_05_31
+           Io.list_response_headers_policies
            (Values.ListResponseHeadersPoliciesRequest.make
               ?type_:(Option.map ~f:Values.ResponseHeadersPolicyType.of_json
                         type_) ?marker ?maxItems ())
            (Some Values.ListResponseHeadersPoliciesResult.to_json)
            (Some Values.ListResponseHeadersPoliciesResult.error_to_json)])
-let list_streaming_distributions2020_05_31 =
+let list_streaming_distributions =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1462,11 +1459,11 @@ let list_streaming_distributions2020_05_31 =
        and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_streaming_distributions2020_05_31
+           Io.list_streaming_distributions
            (Values.ListStreamingDistributionsRequest.make ?marker ?maxItems
               ()) (Some Values.ListStreamingDistributionsResult.to_json)
            (Some Values.ListStreamingDistributionsResult.error_to_json)])
-let list_tags_for_resource2020_05_31 =
+let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1480,11 +1477,11 @@ let list_tags_for_resource2020_05_31 =
          flag "resource" (required string) ~doc:"STRING ResourceARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_tags_for_resource2020_05_31
+           Io.list_tags_for_resource
            (Values.ListTagsForResourceRequest.make ~resource ())
            (Some Values.ListTagsForResourceResult.to_json)
            (Some Values.ListTagsForResourceResult.error_to_json)])
-let publish_function2020_05_31 =
+let publish_function =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1498,11 +1495,11 @@ let publish_function2020_05_31 =
        and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.publish_function2020_05_31
+           Io.publish_function
            (Values.PublishFunctionRequest.make ~name ~ifMatch ())
            (Some Values.PublishFunctionResult.to_json)
            (Some Values.PublishFunctionResult.error_to_json)])
-let tag_resource2020_05_31 =
+let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1517,10 +1514,10 @@ let tag_resource2020_05_31 =
        and tags = flag "tags" (required json_arg) ~doc:"JSON Tags" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.tag_resource2020_05_31
+           Io.tag_resource
            (Values.TagResourceRequest.make ~resource
               ~tags:(Values.Tags.of_json tags) ()) None None])
-let test_function2020_05_31 =
+let test_function =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1538,14 +1535,14 @@ let test_function2020_05_31 =
            ~doc:"JSON FunctionEventObject" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.test_function2020_05_31
+           Io.test_function
            (Values.TestFunctionRequest.make
               ?stage:(Option.map ~f:Values.FunctionStage.of_json stage) ~name
               ~ifMatch
               ~eventObject:(Values.FunctionEventObject.of_json eventObject)
               ()) (Some Values.TestFunctionResult.to_json)
            (Some Values.TestFunctionResult.error_to_json)])
-let untag_resource2020_05_31 =
+let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1560,10 +1557,10 @@ let untag_resource2020_05_31 =
        and tagKeys = flag "tag-keys" (required json_arg) ~doc:"JSON TagKeys" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.untag_resource2020_05_31
+           Io.untag_resource
            (Values.UntagResourceRequest.make ~resource
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ()) None None])
-let update_cache_policy2020_05_31 =
+let update_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1580,13 +1577,13 @@ let update_cache_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_cache_policy2020_05_31
+           Io.update_cache_policy
            (Values.UpdateCachePolicyRequest.make ?ifMatch
               ~cachePolicyConfig:(Values.CachePolicyConfig.of_json
                                     cachePolicyConfig) ~id ())
            (Some Values.UpdateCachePolicyResult.to_json)
            (Some Values.UpdateCachePolicyResult.error_to_json)])
-let update_cloud_front_origin_access_identity2020_05_31 =
+let update_cloud_front_origin_access_identity =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1603,7 +1600,7 @@ let update_cloud_front_origin_access_identity2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_cloud_front_origin_access_identity2020_05_31
+           Io.update_cloud_front_origin_access_identity
            (Values.UpdateCloudFrontOriginAccessIdentityRequest.make ?ifMatch
               ~cloudFrontOriginAccessIdentityConfig:(Values.CloudFrontOriginAccessIdentityConfig.of_json
                                                        cloudFrontOriginAccessIdentityConfig)
@@ -1611,7 +1608,7 @@ let update_cloud_front_origin_access_identity2020_05_31 =
            (Some Values.UpdateCloudFrontOriginAccessIdentityResult.to_json)
            (Some
               Values.UpdateCloudFrontOriginAccessIdentityResult.error_to_json)])
-let update_distribution2020_05_31 =
+let update_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1628,13 +1625,13 @@ let update_distribution2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_distribution2020_05_31
+           Io.update_distribution
            (Values.UpdateDistributionRequest.make ?ifMatch
               ~distributionConfig:(Values.DistributionConfig.of_json
                                      distributionConfig) ~id ())
            (Some Values.UpdateDistributionResult.to_json)
            (Some Values.UpdateDistributionResult.error_to_json)])
-let update_field_level_encryption_config2020_05_31 =
+let update_field_level_encryption_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1651,14 +1648,14 @@ let update_field_level_encryption_config2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_field_level_encryption_config2020_05_31
+           Io.update_field_level_encryption_config
            (Values.UpdateFieldLevelEncryptionConfigRequest.make ?ifMatch
               ~fieldLevelEncryptionConfig:(Values.FieldLevelEncryptionConfig.of_json
                                              fieldLevelEncryptionConfig) ~id
               ())
            (Some Values.UpdateFieldLevelEncryptionConfigResult.to_json)
            (Some Values.UpdateFieldLevelEncryptionConfigResult.error_to_json)])
-let update_field_level_encryption_profile2020_05_31 =
+let update_field_level_encryption_profile =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1675,14 +1672,14 @@ let update_field_level_encryption_profile2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_field_level_encryption_profile2020_05_31
+           Io.update_field_level_encryption_profile
            (Values.UpdateFieldLevelEncryptionProfileRequest.make ?ifMatch
               ~fieldLevelEncryptionProfileConfig:(Values.FieldLevelEncryptionProfileConfig.of_json
                                                     fieldLevelEncryptionProfileConfig)
               ~id ())
            (Some Values.UpdateFieldLevelEncryptionProfileResult.to_json)
            (Some Values.UpdateFieldLevelEncryptionProfileResult.error_to_json)])
-let update_function2020_05_31 =
+let update_function =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1701,13 +1698,13 @@ let update_function2020_05_31 =
          flag "function-code" (required json_arg) ~doc:"JSON FunctionBlob" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_function2020_05_31
+           Io.update_function
            (Values.UpdateFunctionRequest.make ~name ~ifMatch
               ~functionConfig:(Values.FunctionConfig.of_json functionConfig)
               ~functionCode:(Values.FunctionBlob.of_json functionCode) ())
            (Some Values.UpdateFunctionResult.to_json)
            (Some Values.UpdateFunctionResult.error_to_json)])
-let update_key_group2020_05_31 =
+let update_key_group =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1724,12 +1721,12 @@ let update_key_group2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_key_group2020_05_31
+           Io.update_key_group
            (Values.UpdateKeyGroupRequest.make ?ifMatch
               ~keyGroupConfig:(Values.KeyGroupConfig.of_json keyGroupConfig)
               ~id ()) (Some Values.UpdateKeyGroupResult.to_json)
            (Some Values.UpdateKeyGroupResult.error_to_json)])
-let update_origin_request_policy2020_05_31 =
+let update_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1746,13 +1743,13 @@ let update_origin_request_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_origin_request_policy2020_05_31
+           Io.update_origin_request_policy
            (Values.UpdateOriginRequestPolicyRequest.make ?ifMatch
               ~originRequestPolicyConfig:(Values.OriginRequestPolicyConfig.of_json
                                             originRequestPolicyConfig) ~id ())
            (Some Values.UpdateOriginRequestPolicyResult.to_json)
            (Some Values.UpdateOriginRequestPolicyResult.error_to_json)])
-let update_public_key2020_05_31 =
+let update_public_key =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1769,13 +1766,13 @@ let update_public_key2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_public_key2020_05_31
+           Io.update_public_key
            (Values.UpdatePublicKeyRequest.make ?ifMatch
               ~publicKeyConfig:(Values.PublicKeyConfig.of_json
                                   publicKeyConfig) ~id ())
            (Some Values.UpdatePublicKeyResult.to_json)
            (Some Values.UpdatePublicKeyResult.error_to_json)])
-let update_realtime_log_config2020_05_31 =
+let update_realtime_log_config =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1794,7 +1791,7 @@ let update_realtime_log_config2020_05_31 =
          flag "sampling-rate" (optional json_arg) ~doc:"JSON long" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_realtime_log_config2020_05_31
+           Io.update_realtime_log_config
            (Values.UpdateRealtimeLogConfigRequest.make
               ?endPoints:(Option.map ~f:Values.EndPointList.of_json endPoints)
               ?fields:(Option.map ~f:Values.FieldList.of_json fields) ?name
@@ -1802,7 +1799,7 @@ let update_realtime_log_config2020_05_31 =
               ?samplingRate:(Option.map ~f:Values.Long.of_json samplingRate)
               ()) (Some Values.UpdateRealtimeLogConfigResult.to_json)
            (Some Values.UpdateRealtimeLogConfigResult.error_to_json)])
-let update_response_headers_policy2020_05_31 =
+let update_response_headers_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1819,13 +1816,13 @@ let update_response_headers_policy2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_response_headers_policy2020_05_31
+           Io.update_response_headers_policy
            (Values.UpdateResponseHeadersPolicyRequest.make ?ifMatch
               ~responseHeadersPolicyConfig:(Values.ResponseHeadersPolicyConfig.of_json
                                               responseHeadersPolicyConfig)
               ~id ()) (Some Values.UpdateResponseHeadersPolicyResult.to_json)
            (Some Values.UpdateResponseHeadersPolicyResult.error_to_json)])
-let update_streaming_distribution2020_05_31 =
+let update_streaming_distribution =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1842,7 +1839,7 @@ let update_streaming_distribution2020_05_31 =
        and id = flag "id" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.update_streaming_distribution2020_05_31
+           Io.update_streaming_distribution
            (Values.UpdateStreamingDistributionRequest.make ?ifMatch
               ~streamingDistributionConfig:(Values.StreamingDistributionConfig.of_json
                                               streamingDistributionConfig)
@@ -1851,147 +1848,118 @@ let update_streaming_distribution2020_05_31 =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("associate-alias2020_05_31", associate_alias2020_05_31);
-    ("create-cache-policy2020_05_31", create_cache_policy2020_05_31);
-    ("create-cloud-front-origin-access-identity2020_05_31",
-      create_cloud_front_origin_access_identity2020_05_31);
-    ("create-distribution2020_05_31", create_distribution2020_05_31);
-    ("create-distribution-with-tags2020_05_31",
-      create_distribution_with_tags2020_05_31);
-    ("create-field-level-encryption-config2020_05_31",
-      create_field_level_encryption_config2020_05_31);
-    ("create-field-level-encryption-profile2020_05_31",
-      create_field_level_encryption_profile2020_05_31);
-    ("create-function2020_05_31", create_function2020_05_31);
-    ("create-invalidation2020_05_31", create_invalidation2020_05_31);
-    ("create-key-group2020_05_31", create_key_group2020_05_31);
-    ("create-monitoring-subscription2020_05_31",
-      create_monitoring_subscription2020_05_31);
-    ("create-origin-request-policy2020_05_31",
-      create_origin_request_policy2020_05_31);
-    ("create-public-key2020_05_31", create_public_key2020_05_31);
-    ("create-realtime-log-config2020_05_31",
-      create_realtime_log_config2020_05_31);
-    ("create-response-headers-policy2020_05_31",
-      create_response_headers_policy2020_05_31);
-    ("create-streaming-distribution2020_05_31",
-      create_streaming_distribution2020_05_31);
-    ("create-streaming-distribution-with-tags2020_05_31",
-      create_streaming_distribution_with_tags2020_05_31);
-    ("delete-cache-policy2020_05_31", delete_cache_policy2020_05_31);
-    ("delete-cloud-front-origin-access-identity2020_05_31",
-      delete_cloud_front_origin_access_identity2020_05_31);
-    ("delete-distribution2020_05_31", delete_distribution2020_05_31);
-    ("delete-field-level-encryption-config2020_05_31",
-      delete_field_level_encryption_config2020_05_31);
-    ("delete-field-level-encryption-profile2020_05_31",
-      delete_field_level_encryption_profile2020_05_31);
-    ("delete-function2020_05_31", delete_function2020_05_31);
-    ("delete-key-group2020_05_31", delete_key_group2020_05_31);
-    ("delete-monitoring-subscription2020_05_31",
-      delete_monitoring_subscription2020_05_31);
-    ("delete-origin-request-policy2020_05_31",
-      delete_origin_request_policy2020_05_31);
-    ("delete-public-key2020_05_31", delete_public_key2020_05_31);
-    ("delete-realtime-log-config2020_05_31",
-      delete_realtime_log_config2020_05_31);
-    ("delete-response-headers-policy2020_05_31",
-      delete_response_headers_policy2020_05_31);
-    ("delete-streaming-distribution2020_05_31",
-      delete_streaming_distribution2020_05_31);
-    ("describe-function2020_05_31", describe_function2020_05_31);
-    ("get-cache-policy2020_05_31", get_cache_policy2020_05_31);
-    ("get-cache-policy-config2020_05_31", get_cache_policy_config2020_05_31);
-    ("get-cloud-front-origin-access-identity2020_05_31",
-      get_cloud_front_origin_access_identity2020_05_31);
-    ("get-cloud-front-origin-access-identity-config2020_05_31",
-      get_cloud_front_origin_access_identity_config2020_05_31);
-    ("get-distribution2020_05_31", get_distribution2020_05_31);
-    ("get-distribution-config2020_05_31", get_distribution_config2020_05_31);
-    ("get-field-level-encryption2020_05_31",
-      get_field_level_encryption2020_05_31);
-    ("get-field-level-encryption-config2020_05_31",
-      get_field_level_encryption_config2020_05_31);
-    ("get-field-level-encryption-profile2020_05_31",
-      get_field_level_encryption_profile2020_05_31);
-    ("get-field-level-encryption-profile-config2020_05_31",
-      get_field_level_encryption_profile_config2020_05_31);
-    ("get-function2020_05_31", get_function2020_05_31);
-    ("get-invalidation2020_05_31", get_invalidation2020_05_31);
-    ("get-key-group2020_05_31", get_key_group2020_05_31);
-    ("get-key-group-config2020_05_31", get_key_group_config2020_05_31);
-    ("get-monitoring-subscription2020_05_31",
-      get_monitoring_subscription2020_05_31);
-    ("get-origin-request-policy2020_05_31",
-      get_origin_request_policy2020_05_31);
-    ("get-origin-request-policy-config2020_05_31",
-      get_origin_request_policy_config2020_05_31);
-    ("get-public-key2020_05_31", get_public_key2020_05_31);
-    ("get-public-key-config2020_05_31", get_public_key_config2020_05_31);
-    ("get-realtime-log-config2020_05_31", get_realtime_log_config2020_05_31);
-    ("get-response-headers-policy2020_05_31",
-      get_response_headers_policy2020_05_31);
-    ("get-response-headers-policy-config2020_05_31",
-      get_response_headers_policy_config2020_05_31);
-    ("get-streaming-distribution2020_05_31",
-      get_streaming_distribution2020_05_31);
-    ("get-streaming-distribution-config2020_05_31",
-      get_streaming_distribution_config2020_05_31);
-    ("list-cache-policies2020_05_31", list_cache_policies2020_05_31);
-    ("list-cloud-front-origin-access-identities2020_05_31",
-      list_cloud_front_origin_access_identities2020_05_31);
-    ("list-conflicting-aliases2020_05_31",
-      list_conflicting_aliases2020_05_31);
-    ("list-distributions2020_05_31", list_distributions2020_05_31);
-    ("list-distributions-by-cache-policy-id2020_05_31",
-      list_distributions_by_cache_policy_id2020_05_31);
-    ("list-distributions-by-key-group2020_05_31",
-      list_distributions_by_key_group2020_05_31);
-    ("list-distributions-by-origin-request-policy-id2020_05_31",
-      list_distributions_by_origin_request_policy_id2020_05_31);
-    ("list-distributions-by-realtime-log-config2020_05_31",
-      list_distributions_by_realtime_log_config2020_05_31);
-    ("list-distributions-by-response-headers-policy-id2020_05_31",
-      list_distributions_by_response_headers_policy_id2020_05_31);
-    ("list-distributions-by-web-a-c-l-id2020_05_31",
-      list_distributions_by_web_a_c_l_id2020_05_31);
-    ("list-field-level-encryption-configs2020_05_31",
-      list_field_level_encryption_configs2020_05_31);
-    ("list-field-level-encryption-profiles2020_05_31",
-      list_field_level_encryption_profiles2020_05_31);
-    ("list-functions2020_05_31", list_functions2020_05_31);
-    ("list-invalidations2020_05_31", list_invalidations2020_05_31);
-    ("list-key-groups2020_05_31", list_key_groups2020_05_31);
-    ("list-origin-request-policies2020_05_31",
-      list_origin_request_policies2020_05_31);
-    ("list-public-keys2020_05_31", list_public_keys2020_05_31);
-    ("list-realtime-log-configs2020_05_31",
-      list_realtime_log_configs2020_05_31);
-    ("list-response-headers-policies2020_05_31",
-      list_response_headers_policies2020_05_31);
-    ("list-streaming-distributions2020_05_31",
-      list_streaming_distributions2020_05_31);
-    ("list-tags-for-resource2020_05_31", list_tags_for_resource2020_05_31);
-    ("publish-function2020_05_31", publish_function2020_05_31);
-    ("tag-resource2020_05_31", tag_resource2020_05_31);
-    ("test-function2020_05_31", test_function2020_05_31);
-    ("untag-resource2020_05_31", untag_resource2020_05_31);
-    ("update-cache-policy2020_05_31", update_cache_policy2020_05_31);
-    ("update-cloud-front-origin-access-identity2020_05_31",
-      update_cloud_front_origin_access_identity2020_05_31);
-    ("update-distribution2020_05_31", update_distribution2020_05_31);
-    ("update-field-level-encryption-config2020_05_31",
-      update_field_level_encryption_config2020_05_31);
-    ("update-field-level-encryption-profile2020_05_31",
-      update_field_level_encryption_profile2020_05_31);
-    ("update-function2020_05_31", update_function2020_05_31);
-    ("update-key-group2020_05_31", update_key_group2020_05_31);
-    ("update-origin-request-policy2020_05_31",
-      update_origin_request_policy2020_05_31);
-    ("update-public-key2020_05_31", update_public_key2020_05_31);
-    ("update-realtime-log-config2020_05_31",
-      update_realtime_log_config2020_05_31);
-    ("update-response-headers-policy2020_05_31",
-      update_response_headers_policy2020_05_31);
-    ("update-streaming-distribution2020_05_31",
-      update_streaming_distribution2020_05_31)]
+    [("associate-alias", associate_alias);
+    ("create-cache-policy", create_cache_policy);
+    ("create-cloud-front-origin-access-identity",
+      create_cloud_front_origin_access_identity);
+    ("create-distribution", create_distribution);
+    ("create-distribution-with-tags", create_distribution_with_tags);
+    ("create-field-level-encryption-config",
+      create_field_level_encryption_config);
+    ("create-field-level-encryption-profile",
+      create_field_level_encryption_profile);
+    ("create-function", create_function);
+    ("create-invalidation", create_invalidation);
+    ("create-key-group", create_key_group);
+    ("create-monitoring-subscription", create_monitoring_subscription);
+    ("create-origin-request-policy", create_origin_request_policy);
+    ("create-public-key", create_public_key);
+    ("create-realtime-log-config", create_realtime_log_config);
+    ("create-response-headers-policy", create_response_headers_policy);
+    ("create-streaming-distribution", create_streaming_distribution);
+    ("create-streaming-distribution-with-tags",
+      create_streaming_distribution_with_tags);
+    ("delete-cache-policy", delete_cache_policy);
+    ("delete-cloud-front-origin-access-identity",
+      delete_cloud_front_origin_access_identity);
+    ("delete-distribution", delete_distribution);
+    ("delete-field-level-encryption-config",
+      delete_field_level_encryption_config);
+    ("delete-field-level-encryption-profile",
+      delete_field_level_encryption_profile);
+    ("delete-function", delete_function);
+    ("delete-key-group", delete_key_group);
+    ("delete-monitoring-subscription", delete_monitoring_subscription);
+    ("delete-origin-request-policy", delete_origin_request_policy);
+    ("delete-public-key", delete_public_key);
+    ("delete-realtime-log-config", delete_realtime_log_config);
+    ("delete-response-headers-policy", delete_response_headers_policy);
+    ("delete-streaming-distribution", delete_streaming_distribution);
+    ("describe-function", describe_function);
+    ("get-cache-policy", get_cache_policy);
+    ("get-cache-policy-config", get_cache_policy_config);
+    ("get-cloud-front-origin-access-identity",
+      get_cloud_front_origin_access_identity);
+    ("get-cloud-front-origin-access-identity-config",
+      get_cloud_front_origin_access_identity_config);
+    ("get-distribution", get_distribution);
+    ("get-distribution-config", get_distribution_config);
+    ("get-field-level-encryption", get_field_level_encryption);
+    ("get-field-level-encryption-config", get_field_level_encryption_config);
+    ("get-field-level-encryption-profile",
+      get_field_level_encryption_profile);
+    ("get-field-level-encryption-profile-config",
+      get_field_level_encryption_profile_config);
+    ("get-function", get_function);
+    ("get-invalidation", get_invalidation);
+    ("get-key-group", get_key_group);
+    ("get-key-group-config", get_key_group_config);
+    ("get-monitoring-subscription", get_monitoring_subscription);
+    ("get-origin-request-policy", get_origin_request_policy);
+    ("get-origin-request-policy-config", get_origin_request_policy_config);
+    ("get-public-key", get_public_key);
+    ("get-public-key-config", get_public_key_config);
+    ("get-realtime-log-config", get_realtime_log_config);
+    ("get-response-headers-policy", get_response_headers_policy);
+    ("get-response-headers-policy-config",
+      get_response_headers_policy_config);
+    ("get-streaming-distribution", get_streaming_distribution);
+    ("get-streaming-distribution-config", get_streaming_distribution_config);
+    ("list-cache-policies", list_cache_policies);
+    ("list-cloud-front-origin-access-identities",
+      list_cloud_front_origin_access_identities);
+    ("list-conflicting-aliases", list_conflicting_aliases);
+    ("list-distributions", list_distributions);
+    ("list-distributions-by-cache-policy-id",
+      list_distributions_by_cache_policy_id);
+    ("list-distributions-by-key-group", list_distributions_by_key_group);
+    ("list-distributions-by-origin-request-policy-id",
+      list_distributions_by_origin_request_policy_id);
+    ("list-distributions-by-realtime-log-config",
+      list_distributions_by_realtime_log_config);
+    ("list-distributions-by-response-headers-policy-id",
+      list_distributions_by_response_headers_policy_id);
+    ("list-distributions-by-web-a-c-l-id",
+      list_distributions_by_web_a_c_l_id);
+    ("list-field-level-encryption-configs",
+      list_field_level_encryption_configs);
+    ("list-field-level-encryption-profiles",
+      list_field_level_encryption_profiles);
+    ("list-functions", list_functions);
+    ("list-invalidations", list_invalidations);
+    ("list-key-groups", list_key_groups);
+    ("list-origin-request-policies", list_origin_request_policies);
+    ("list-public-keys", list_public_keys);
+    ("list-realtime-log-configs", list_realtime_log_configs);
+    ("list-response-headers-policies", list_response_headers_policies);
+    ("list-streaming-distributions", list_streaming_distributions);
+    ("list-tags-for-resource", list_tags_for_resource);
+    ("publish-function", publish_function);
+    ("tag-resource", tag_resource);
+    ("test-function", test_function);
+    ("untag-resource", untag_resource);
+    ("update-cache-policy", update_cache_policy);
+    ("update-cloud-front-origin-access-identity",
+      update_cloud_front_origin_access_identity);
+    ("update-distribution", update_distribution);
+    ("update-field-level-encryption-config",
+      update_field_level_encryption_config);
+    ("update-field-level-encryption-profile",
+      update_field_level_encryption_profile);
+    ("update-function", update_function);
+    ("update-key-group", update_key_group);
+    ("update-origin-request-policy", update_origin_request_policy);
+    ("update-public-key", update_public_key);
+    ("update-realtime-log-config", update_realtime_log_config);
+    ("update-response-headers-policy", update_response_headers_policy);
+    ("update-streaming-distribution", update_streaming_distribution)]
