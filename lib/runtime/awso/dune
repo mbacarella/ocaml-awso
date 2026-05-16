@@ -4,7 +4,6 @@
  (libraries
   awso-codegen
   awso_common
-  base64
   cohttp
   unix
   cryptokit

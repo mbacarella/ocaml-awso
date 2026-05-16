@@ -22,8 +22,6 @@
   (ocaml
    (>= 4.14))
   awso-codegen
-  (base64
-   (>= 3.1.0))
   (cohttp
    (>= 0.21.0))
   cryptokit

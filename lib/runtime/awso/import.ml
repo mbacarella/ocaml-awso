@@ -112,6 +112,56 @@ let%expect_test "check_pattern" =
   [%expect {| (Ok ()) |}]
 ;;
 
+let%expect_test "String.matches" =
+  let test pat s = printf "%s ~ %s = %b\n" s pat (String.matches s ~pat) in
+  test {|\d+|} "abc";
+  [%expect {| abc ~ \d+ = false |}];
+  test {|\d+|} "123";
+  [%expect {| 123 ~ \d+ = true |}];
+  test {|^[a-z]+$|} "hello";
+  [%expect {| hello ~ ^[a-z]+$ = true |}];
+  test {|^[a-z]+$|} "Hello";
+  [%expect {| Hello ~ ^[a-z]+$ = false |}];
+  test {|foo|bar|} "bar";
+  [%expect {| bar ~ foo|bar = true |}];
+  test {|foo|bar|} "baz";
+  [%expect {| baz ~ foo|bar = false |}]
+;;
+
+let%expect_test "map_unicode_pattern_to_ascii_pattern" =
+  let test pat = printf "%s -> %s\n" pat (map_unicode_pattern_to_ascii_pattern pat) in
+  test {|\d+|};
+  [%expect {| \d+ -> \d+ |}];
+  test {|[\p{L}\p{N}]+|};
+  [%expect {| [\p{L}\p{N}]+ -> [a-zA-Z0-9]+ |}];
+  test {|[\p{L}\p{P}\p{Z}]|};
+  [%expect {xxx| [\p{L}\p{P}\p{Z}] -> [a-zA-Z!"\#$%&'()*+,\-./:;<=>?@\[\\\]^_`{|}~\p{Z}] |xxx}];
+  test {|[\p{S}\p{M}]|};
+  [%expect {| [\p{S}\p{M}] -> [] |}];
+  test {|[a-z\p{L}]|};
+  [%expect {| [a-z\p{L}] -> [a-za-zA-Z] |}];
+  test {|AZ|};
+  [%expect {| AZ -> AZ |}];
+  test {|plain|};
+  [%expect {| plain -> plain |}]
+;;
+
+let%expect_test "check_pattern with unicode classes" =
+  let test pat s = check_pattern s ~pattern:pat |> print_unit_or_error in
+  test {|^[\p{L}]+$|} "hello";
+  [%expect {| (Ok ()) |}];
+  test {|^[\p{L}]+$|} "123";
+  [%expect {| (Error "String 123 doesn't match expected regex ^[a-zA-Z]+$") |}];
+  test {|^[\p{N}]+$|} "456";
+  [%expect {| (Ok ()) |}];
+  test {|^[\p{N}]+$|} "abc";
+  [%expect {| (Error "String abc doesn't match expected regex ^[0-9]+$") |}];
+  test {|^[\p{L}\p{N}_-]+$|} "hello-world_123";
+  [%expect {| (Ok ()) |}];
+  test {|^[\p{L}\p{N}_-]+$|} "hello world";
+  [%expect {| (Error "String hello world doesn't match expected regex ^[a-zA-Z0-9_-]+$") |}]
+;;
+
 let check_list_min l ~min =
   ensure (List.length l >= min) "Expected list of length greater than %d" min
 ;;

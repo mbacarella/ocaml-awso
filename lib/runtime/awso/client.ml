@@ -72,4 +72,5 @@ module Query = struct
 end
 
 let content_md5 body =
-  Cryptokit.hash_string (Cryptokit.Hash.md5 ()) body |> Base64.encode_string
+  Cryptokit.hash_string (Cryptokit.Hash.md5 ()) body
+  |> Cryptokit.transform_string (Cryptokit.Base64.encode_compact ())
